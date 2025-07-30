@@ -32,7 +32,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-slate-900">
       <Sidebar />
-      <div className="ml-64 min-h-screen">
+      <div className="ml-16 min-h-screen transition-all duration-300">
         <Switch>
           <Route path="/dashboard">
             <TopBar title={pageTitles["/dashboard"]} />
