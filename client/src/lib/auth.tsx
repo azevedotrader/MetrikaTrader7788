@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Store user in localStorage for persistence
       localStorage.setItem('user', JSON.stringify(userWithInitials));
+      localStorage.setItem('user-id', userData.id);
     } catch (error: any) {
       throw new Error(error.message || "Erro ao fazer login");
     }
@@ -70,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('user-id');
   };
 
   // Load user from localStorage on app start
@@ -79,9 +81,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
+        
+        // Ensure user-id is also in localStorage
+        if (parsedUser.id && !localStorage.getItem('user-id')) {
+          localStorage.setItem('user-id', parsedUser.id);
+        }
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem('user');
+        localStorage.removeItem('user-id');
       }
     }
   }, []);
