@@ -383,6 +383,22 @@ export default function Dashboard() {
         </div>
         
         <div className="flex gap-2">
+          {/* Consolidated Data Button */}
+          <Button 
+            className="gradient-purple-blue hover:opacity-90 transition-opacity"
+            onClick={() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+              toast({
+                title: "Dados Consolidados",
+                description: "Dados de todas as corretoras foram unidos e somados com sucesso."
+              });
+            }}
+          >
+            <Building className="w-4 h-4 mr-2" />
+            📊 Consolidar Todas as Corretoras
+          </Button>
+
           {/* Gate.io API Configuration */}
           <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'gate.io'} onOpenChange={(open) => {
             setIsConfigDialogOpen(open);
@@ -856,25 +872,166 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="consolidated" className="space-y-4">
+        <TabsContent value="consolidated" className="space-y-6">
+          {/* Resumo Consolidado */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <MetricCard
+              title="💰 Resultado Total Consolidado"
+              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
+              icon={DollarSign}
+              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
+              subtitle="Soma de todas as corretoras"
+            />
+            
+            <MetricCard
+              title="📊 Total de Trades"
+              value={metrics.totalTrades}
+              icon={BarChart3}
+              subtitle="Gate.io + Tickmill + Clear"
+            />
+            
+            <MetricCard
+              title="🎯 Taxa de Acerto Geral"
+              value={`${metrics.taxaAcerto.toFixed(1)}%`}
+              icon={Target}
+              color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
+              subtitle="Média ponderada"
+            />
+            
+            <MetricCard
+              title="⚖️ R/R Médio Consolidado"
+              value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
+              icon={TrendingUp}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              subtitle="Risco/Retorno geral"
+            />
+          </div>
+
+          {/* Performance por Corretora */}
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-white">Dados Consolidados</CardTitle>
-              <CardDescription>Visão unificada de todas as corretoras</CardDescription>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Building className="h-5 w-5 text-purple-400" />
+                📈 Performance por Corretora
+              </CardTitle>
+              <CardDescription>Comparativo de resultados entre as corretoras</CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="space-y-4">
+                {Object.entries(brokerInfo).map(([broker, info]) => {
+                  const trades = (tradesByBroker as any)[broker] || [];
+                  const stats = calculateBrokerStats(trades);
+                  const IconComponent = info.icon;
+                  
+                  return (
+                    <div key={broker} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600">
+                      <div className="flex items-center space-x-4">
+                        <div className={`p-2 rounded-lg ${info.color}`}>
+                          <IconComponent className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">{info.name}</div>
+                          <div className="text-slate-400 text-sm">{info.description}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-6 text-center">
+                        <div>
+                          <div className="text-lg font-bold text-white">{stats.totalTrades}</div>
+                          <div className="text-xs text-slate-400">Trades</div>
+                        </div>
+                        <div>
+                          <div className={`text-lg font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-slate-400">Resultado</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                          <div className="text-xs text-slate-400">Win Rate</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Distribuição por Mercado */}
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-purple-400" />
+                🌍 Distribuição por Mercado
+              </CardTitle>
+              <CardDescription>Análise consolidada dos diferentes mercados</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {['crypto', 'forex', 'b3'].map((mercado) => {
+                  const tradesMercado = trades.filter(trade => trade.mercado === mercado);
+                  const totalMercado = tradesMercado.reduce((sum, trade) => sum + parseFloat(trade.resultado || "0"), 0);
+                  const countMercado = tradesMercado.length;
+                  const winRateMercado = countMercado > 0 ? 
+                    (tradesMercado.filter(trade => parseFloat(trade.resultado || "0") > 0).length / countMercado) * 100 : 0;
+                  
+                  const mercadoInfo = {
+                    crypto: { name: 'Crypto', emoji: '🪙', color: 'text-orange-400' },
+                    forex: { name: 'Forex', emoji: '💱', color: 'text-blue-400' },
+                    b3: { name: 'B3', emoji: '📈', color: 'text-green-400' }
+                  };
+                  
+                  const info = mercadoInfo[mercado as keyof typeof mercadoInfo];
+                  
+                  return (
+                    <div key={mercado} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{info.emoji}</span>
+                        <div>
+                          <div className="text-white font-medium">{info.name}</div>
+                          <div className="text-slate-400 text-sm">{countMercado} trades</div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-6">
+                        <div className="text-center">
+                          <div className={`text-lg font-bold ${totalMercado >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {totalMercado >= 0 ? '+' : ''}R$ {totalMercado.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-slate-400">Resultado</div>
+                        </div>
+                        <div className="text-center">
+                          <div className={`text-lg font-bold ${info.color}`}>
+                            {winRateMercado.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-slate-400">Win Rate</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Botão de Atualização */}
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardContent className="pt-6">
               <Button 
-                className="w-full"
+                className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
                 onClick={() => {
-                  queryClient.invalidateQueries({ queryKey: ['/api/trades/consolidated'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+                  queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
                   toast({
-                    title: "Dados consolidados",
-                    description: "Dados de todas as corretoras foram consolidados com sucesso."
+                    title: "Dados Atualizados",
+                    description: "Dados consolidados de todas as corretoras foram atualizados com sucesso."
                   });
                 }}
               >
-                <Building className="w-4 h-4 mr-2" />
-                Consolidar Dados de Todas as Corretoras
+                <Sync className="w-4 h-4 mr-2" />
+                🔄 Atualizar Dados Consolidados
               </Button>
             </CardContent>
           </Card>
