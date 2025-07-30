@@ -8,9 +8,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, DollarSign, Target, TrendingUp, TrendingDown } from "lucide-react";
+import { CalendarIcon, DollarSign, Target, TrendingUp, TrendingDown, Upload, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 
 const setupOptions = [
   "Breakout", "Pullback", "Reversão", "Tendência", "Support/Resistance",
@@ -30,6 +33,9 @@ const emocaoOptions = [
 export default function NovoTrade() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedBroker, setSelectedBroker] = useState<string>("");
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   const form = useForm<InsertTrade>({
     resolver: zodResolver(insertTradeSchema),
@@ -49,7 +55,7 @@ export default function NovoTrade() {
       emocao: "neutro",
       precoEntrada: "",
       precoSaida: "",
-      corretora: "",
+      corretora: "gate.io",
       status: "fechado"
     },
   });
@@ -90,25 +96,82 @@ export default function NovoTrade() {
     },
   });
 
+  // CSV upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: ({ file, broker }: { file: File; broker: string }) => {
+      const formData = new FormData();
+      formData.append('csvFile', file);
+      formData.append('broker', broker);
+      
+      return fetch('/api/trades/upload-csv', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'user-id': localStorage.getItem('user-id') || ''
+        }
+      }).then(res => res.json());
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
+      setIsUploadDialogOpen(false);
+      setCsvFile(null);
+      setSelectedBroker("");
+      
+      toast({
+        title: "Importação concluída",
+        description: `${data.tradesImported} trades importados com sucesso.`
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro na importação",
+        description: error.message || "Erro ao importar arquivo CSV",
+        variant: "destructive"
+      });
+    }
+  });
+
   const onSubmit = (data: InsertTrade) => {
     createTradeMutation.mutate(data);
+  };
+
+  const handleUpload = () => {
+    if (!csvFile || !selectedBroker) {
+      toast({
+        title: "Dados incompletos",
+        description: "Selecione um arquivo e uma corretora",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    uploadMutation.mutate({ file: csvFile, broker: selectedBroker });
   };
 
   return (
     <div className="space-y-6 pb-8">
       <div>
         <h1 className="text-3xl font-bold text-white">Novo Trade</h1>
-        <p className="text-slate-400 mt-2">Registre os detalhes da sua operação</p>
+        <p className="text-slate-400 mt-2">Registre os detalhes da sua operação ou importe via CSV</p>
       </div>
 
-      <Card className="bg-slate-900/50 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-purple-400" />
-            Dados da Operação
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Tabs defaultValue="manual" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="manual">Manual</TabsTrigger>
+          <TabsTrigger value="csv">Importar CSV</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="manual">
+          <Card className="bg-slate-900/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-purple-400" />
+                Dados da Operação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Linha 1 - Data/Hora, Ativo, Mercado */}
@@ -496,7 +559,91 @@ export default function NovoTrade() {
             </form>
           </Form>
         </CardContent>
-      </Card>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="csv">
+          <Card className="bg-slate-900/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Upload className="h-5 w-5 text-purple-400" />
+                Importar Trades via CSV
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-slate-300">Selecione a Corretora</label>
+                  <Select value={selectedBroker} onValueChange={setSelectedBroker}>
+                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                      <SelectValue placeholder="Escolha a corretora do arquivo CSV" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-600">
+                      <SelectItem value="tickmill">🏦 Tickmill (Forex)</SelectItem>
+                      <SelectItem value="clear">📈 Clear (B3)</SelectItem>
+                      <SelectItem value="gate.io">🪙 Gate.io (Crypto)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-slate-300">Arquivo CSV</label>
+                  <Input
+                    type="file"
+                    accept=".csv"
+                    onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+                    className="bg-slate-800 border-slate-600 text-white file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4"
+                  />
+                  <p className="text-sm text-slate-400 mt-2">
+                    Selecione um arquivo CSV exportado da sua corretora
+                  </p>
+                </div>
+
+                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-purple-400" />
+                    Formato do CSV por Corretora
+                  </h4>
+                  <div className="space-y-2 text-sm text-slate-400">
+                    <p><strong className="text-white">Tickmill:</strong> Data, Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take Profit, Resultado</p>
+                    <p><strong className="text-white">Clear:</strong> Data, Código, Operação, Quantidade, Preço, Total, Resultado</p>
+                    <p><strong className="text-white">Gate.io:</strong> Time, Symbol, Side, Amount, Price, Fee, Total, PnL</p>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleUpload} 
+                  className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
+                  disabled={uploadMutation.isPending || !csvFile || !selectedBroker}
+                >
+                  {uploadMutation.isPending ? (
+                    <>
+                      <Upload className="w-4 h-4 mr-2 animate-spin" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Importar Trades
+                    </>
+                  )}
+                </Button>
+
+                {csvFile && (
+                  <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-600">
+                    <p className="text-sm text-slate-300">
+                      <strong>Arquivo selecionado:</strong> {csvFile.name}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Tamanho: {(csvFile.size / 1024).toFixed(2)} KB
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

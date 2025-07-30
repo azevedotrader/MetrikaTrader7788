@@ -249,10 +249,7 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", badge, sub
 export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedBroker, setSelectedBroker] = useState<string>("");
-  const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
-  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   const form = useForm<BrokerConfigForm>({
     resolver: zodResolver(brokerConfigSchema),
@@ -310,42 +307,7 @@ export default function Dashboard() {
     }
   });
 
-  // CSV upload mutation
-  const uploadMutation = useMutation({
-    mutationFn: ({ file, broker }: { file: File; broker: string }) => {
-      const formData = new FormData();
-      formData.append('csvFile', file);
-      formData.append('broker', broker);
-      
-      return fetch('/api/trades/upload-csv', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'user-id': localStorage.getItem('user-id') || ''
-        }
-      }).then(res => res.json());
-    },
-    onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
-      setIsUploadDialogOpen(false);
-      setCsvFile(null);
-      setSelectedBroker("");
-      
-      toast({
-        title: "Importação concluída",
-        description: `${data.tradesImported} trades importados com sucesso.`
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro na importação",
-        description: error.message || "Erro ao importar arquivo CSV",
-        variant: "destructive"
-      });
-    }
-  });
+
 
   // Gate.io sync mutation
   const syncMutation = useMutation({
@@ -378,18 +340,7 @@ export default function Dashboard() {
     configMutation.mutate(data);
   };
 
-  const handleUpload = () => {
-    if (!csvFile || !selectedBroker) {
-      toast({
-        title: "Dados incompletos",
-        description: "Selecione um arquivo e uma corretora",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    uploadMutation.mutate({ file: csvFile, broker: selectedBroker });
-  };
+
 
   const calculateBrokerStats = (trades: any[]): BrokerStats => {
     if (!trades || trades.length === 0) {
@@ -502,51 +453,7 @@ export default function Dashboard() {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Upload className="w-4 h-4 mr-2" />
-                Importar CSV
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Importar Trades via CSV</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Corretora</label>
-                  <Select value={selectedBroker} onValueChange={setSelectedBroker}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a corretora" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tickmill">Tickmill (Forex)</SelectItem>
-                      <SelectItem value="clear">Clear (B3)</SelectItem>
-                      <SelectItem value="gate.io">Gate.io (Crypto)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Arquivo CSV</label>
-                  <Input
-                    type="file"
-                    accept=".csv"
-                    onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                  />
-                </div>
-
-                <Button 
-                  onClick={handleUpload} 
-                  className="w-full"
-                  disabled={uploadMutation.isPending || !csvFile || !selectedBroker}
-                >
-                  {uploadMutation.isPending ? "Importando..." : "Importar Trades"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
