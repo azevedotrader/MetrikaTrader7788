@@ -327,13 +327,38 @@ export default function Dashboard() {
       
       toast({
         title: "Sincronização Gate.io",
-        description: data.message
+        description: `${data.message} - ${data.tradesImported} trades importados`
       });
     },
     onError: (error: any) => {
       toast({
         title: "Erro na sincronização",
         description: error.message || "Erro ao sincronizar com Gate.io",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Gate.io test connection mutation
+  const testConnectionMutation = useMutation({
+    mutationFn: () => 
+      fetch('/api/test/gate-io', {
+        method: 'POST',
+        headers: {
+          'user-id': localStorage.getItem('user-id') || ''
+        }
+      }).then(res => res.json()),
+    onSuccess: (data: any) => {
+      toast({
+        title: data.connected ? "Conexão Estabelecida" : "Erro de Conexão",
+        description: data.message,
+        variant: data.connected ? "default" : "destructive"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro no teste",
+        description: error.message || "Erro ao testar conexão com Gate.io",
         variant: "destructive"
       });
     }
@@ -472,9 +497,39 @@ export default function Dashboard() {
                     )}
                   />
                   
+                  {getBrokerConfig('gate.io') && (
+                    <div className="space-y-3">
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          ✅ API configurada e ativa. Última sincronização: {getBrokerConfig('gate.io')?.lastSync ? new Date(getBrokerConfig('gate.io').lastSync).toLocaleString() : 'Nunca'}
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="flex-1" 
+                          onClick={() => testConnectionMutation.mutate()}
+                          disabled={testConnectionMutation.isPending}
+                        >
+                          {testConnectionMutation.isPending ? "Testando..." : "Testar Conexão"}
+                        </Button>
+                        <Button 
+                          type="button" 
+                          className="flex-1 bg-green-600 hover:bg-green-700" 
+                          onClick={() => syncMutation.mutate()}
+                          disabled={syncMutation.isPending}
+                        >
+                          {syncMutation.isPending ? "Sincronizando..." : "Sincronizar Trades"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <p className="text-sm text-blue-700 dark:text-blue-300">
-                      ℹ️ Com a API configurada, seus trades serão sincronizados automaticamente da Gate.io
+                      ℹ️ Configure suas credenciais da Gate.io para sincronização automática dos trades
                     </p>
                   </div>
                   

@@ -6,6 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
+import { createGateIOService } from "./gateio-service";
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -381,19 +382,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const config = await storage.getBrokerApiConfig(userId, 'gate.io');
-      if (!config || !config.isActive) {
+      if (!config || !config.isActive || !config.apiKey || !config.apiSecret) {
         return res.status(400).json({ message: "Configuração da API Gate.io não encontrada ou inativa" });
       }
 
-      // TODO: Implement Gate.io API integration
-      // For now, return a placeholder response
+      // Criar serviço Gate.io
+      const gateService = createGateIOService({
+        apiKey: config.apiKey,
+        apiSecret: config.apiSecret
+      });
+
+      // Testar conexão primeiro
+      const isConnected = await gateService.testConnection();
+      if (!isConnected) {
+        return res.status(400).json({ message: "Erro ao conectar com a API Gate.io. Verifique suas credenciais." });
+      }
+
+      // Obter par de moedas do corpo da requisição (opcional)
+      const { currencyPair } = req.body;
+
+      // Sincronizar trades
+      const syncResult = await gateService.syncTrades(userId, currencyPair);
+
+      // Atualizar timestamp da última sincronização
+      await storage.createOrUpdateBrokerApiConfig({
+        ...config,
+        lastSync: new Date(),
+        userId
+      });
+
       res.json({
-        message: "Sincronização com Gate.io será implementada em breve",
-        tradesImported: 0
+        message: "Sincronização concluída",
+        tradesImported: syncResult.imported,
+        tradesSkipped: syncResult.skipped,
+        errors: syncResult.errors
       });
     } catch (error) {
       console.error("Gate.io sync error:", error);
       res.status(500).json({ message: "Erro na sincronização com Gate.io" });
+    }
+  });
+
+  // Test Gate.io API connection
+  app.post("/api/test/gate-io", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const config = await storage.getBrokerApiConfig(userId, 'gate.io');
+      if (!config || !config.apiKey || !config.apiSecret) {
+        return res.status(400).json({ message: "Configuração da API Gate.io não encontrada" });
+      }
+
+      const gateService = createGateIOService({
+        apiKey: config.apiKey,
+        apiSecret: config.apiSecret
+      });
+
+      const isConnected = await gateService.testConnection();
+      const balance = isConnected ? await gateService.getAccountBalance() : null;
+
+      res.json({
+        connected: isConnected,
+        message: isConnected ? "Conexão com Gate.io estabelecida com sucesso" : "Erro ao conectar com Gate.io",
+        balanceCount: balance ? balance.length : 0
+      });
+    } catch (error) {
+      console.error("Gate.io test error:", error);
+      res.status(500).json({ message: "Erro ao testar conexão com Gate.io" });
+    }
+  });
+
+  // Get Gate.io currency pairs
+  app.get("/api/gate-io/currency-pairs", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const config = await storage.getBrokerApiConfig(userId, 'gate.io');
+      if (!config || !config.apiKey || !config.apiSecret) {
+        return res.status(400).json({ message: "Configuração da API Gate.io não encontrada" });
+      }
+
+      const gateService = createGateIOService({
+        apiKey: config.apiKey,
+        apiSecret: config.apiSecret
+      });
+
+      const pairs = await gateService.getCurrencyPairs();
+      
+      // Filtrar apenas pares ativos e populares
+      const activePairs = pairs
+        .filter(pair => pair.trade_status === 'tradable')
+        .slice(0, 100) // Limitar a 100 pares mais relevantes
+        .map(pair => ({
+          id: pair.id,
+          base: pair.base,
+          quote: pair.quote,
+          fee: pair.fee,
+          min_base_amount: pair.min_base_amount,
+          min_quote_amount: pair.min_quote_amount
+        }));
+
+      res.json(activePairs);
+    } catch (error) {
+      console.error("Get Gate.io currency pairs error:", error);
+      res.status(500).json({ message: "Erro ao buscar pares de moedas da Gate.io" });
     }
   });
 
