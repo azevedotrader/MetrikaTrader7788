@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,7 +30,8 @@ import {
   RefreshCw as Sync, 
   Settings, 
   FileText,
-  Activity
+  Activity,
+  Plus
 } from "lucide-react";
 import { type Trade } from "@shared/schema";
 
@@ -250,6 +251,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
+  const [selectedBrokerForConfig, setSelectedBrokerForConfig] = useState<string>('');
 
   const form = useForm<BrokerConfigForm>({
     resolver: zodResolver(brokerConfigSchema),
@@ -381,42 +383,32 @@ export default function Dashboard() {
         </div>
         
         <div className="flex gap-2">
-          <Dialog open={isConfigDialogOpen} onOpenChange={setIsConfigDialogOpen}>
+          {/* Gate.io API Configuration */}
+          <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'gate.io'} onOpenChange={(open) => {
+            setIsConfigDialogOpen(open);
+            if (!open) setSelectedBrokerForConfig('');
+          }}>
             <DialogTrigger asChild>
-              <Button>
+              <Button 
+                className="bg-orange-600 hover:bg-orange-700"
+                onClick={() => {
+                  setSelectedBrokerForConfig('gate.io');
+                  form.setValue('broker', 'gate.io');
+                }}
+              >
                 <Settings className="w-4 h-4 mr-2" />
-                Configurar API
+                🪙 Gate.io API
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Configurar API da Corretora</DialogTitle>
+                <DialogTitle>Configurar API - Gate.io</DialogTitle>
+                <DialogDescription>
+                  Configure suas credenciais da Gate.io para sincronização automática dos trades
+                </DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onConfigSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="broker"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Corretora</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a corretora" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="gate.io">Gate.io (Crypto)</SelectItem>
-                            <SelectItem value="tickmill">Tickmill (Forex)</SelectItem>
-                            <SelectItem value="clear">Clear (B3)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
                   <FormField
                     control={form.control}
                     name="apiKey"
@@ -424,7 +416,7 @@ export default function Dashboard() {
                       <FormItem>
                         <FormLabel>API Key</FormLabel>
                         <FormControl>
-                          <Input {...field} type="password" placeholder="Sua API Key" />
+                          <Input {...field} type="password" placeholder="Sua Gate.io API Key" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -438,22 +430,122 @@ export default function Dashboard() {
                       <FormItem>
                         <FormLabel>API Secret</FormLabel>
                         <FormControl>
-                          <Input {...field} type="password" placeholder="Seu API Secret" />
+                          <Input {...field} type="password" placeholder="Seu Gate.io API Secret" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   
-                  <Button type="submit" className="w-full" disabled={configMutation.isPending}>
-                    {configMutation.isPending ? "Salvando..." : "Salvar Configuração"}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      ℹ️ Com a API configurada, seus trades serão sincronizados automaticamente da Gate.io
+                    </p>
+                  </div>
+                  
+                  <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700" disabled={configMutation.isPending}>
+                    {configMutation.isPending ? "Salvando..." : "Salvar e Ativar API"}
                   </Button>
                 </form>
               </Form>
             </DialogContent>
           </Dialog>
 
+          {/* Tickmill Manual Setup */}
+          <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'tickmill'} onOpenChange={(open) => {
+            setIsConfigDialogOpen(open);
+            if (!open) setSelectedBrokerForConfig('');
+          }}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+                onClick={() => {
+                  setSelectedBrokerForConfig('tickmill');
+                }}
+              >
+                <Building className="w-4 h-4 mr-2" />
+                🏦 Tickmill
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Tickmill - Trading Manual</DialogTitle>
+                <DialogDescription>
+                  Para Tickmill, você pode registrar trades manualmente ou importar via CSV
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2">📊 Como usar o Tickmill:</h4>
+                  <ul className="text-sm text-slate-400 space-y-1">
+                    <li>• Registre trades manualmente na seção "Novo Trade"</li>
+                    <li>• Importe histórico via CSV exportado do MT4/MT5</li>
+                    <li>• Todos os dados ficam armazenados no banco de dados</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Trade
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importar CSV
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
+          {/* Clear Manual Setup */}
+          <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'clear'} onOpenChange={(open) => {
+            setIsConfigDialogOpen(open);
+            if (!open) setSelectedBrokerForConfig('');
+          }}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white"
+                onClick={() => {
+                  setSelectedBrokerForConfig('clear');
+                }}
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                📈 Clear
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Clear - Trading Manual</DialogTitle>
+                <DialogDescription>
+                  Para Clear, você pode registrar trades manualmente ou importar via CSV
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2">📊 Como usar o Clear:</h4>
+                  <ul className="text-sm text-slate-400 space-y-1">
+                    <li>• Registre trades manualmente na seção "Novo Trade"</li>
+                    <li>• Importe histórico via CSV do Clear ou ProfitChart</li>
+                    <li>• Todos os dados ficam armazenados no banco de dados</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Trade
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importar CSV
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
