@@ -252,6 +252,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   const [selectedBrokerForConfig, setSelectedBrokerForConfig] = useState<string>('');
+  const [selectedBrokerFilter, setSelectedBrokerFilter] = useState<string | null>(null);
 
   const form = useForm<BrokerConfigForm>({
     resolver: zodResolver(brokerConfigSchema),
@@ -372,31 +373,42 @@ export default function Dashboard() {
     );
   }
 
-  const metrics = calculateMetrics(trades);
+  // Filter trades based on selected broker
+  const filteredTrades = selectedBrokerFilter 
+    ? trades.filter(trade => trade.corretora === selectedBrokerFilter)
+    : trades;
+
+  const metrics = calculateMetrics(filteredTrades);
 
   return (
     <div className="space-y-6 pb-8">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 mt-2">Resumo completo da sua performance de trading</p>
+          <p className="text-slate-400 mt-2">
+            {selectedBrokerFilter 
+              ? `Mostrando dados da ${selectedBrokerFilter === 'gate.io' ? 'Gate.io' : selectedBrokerFilter === 'tickmill' ? 'Tickmill' : 'Clear'}`
+              : 'Dados consolidados de todas as corretoras'
+            }
+          </p>
         </div>
         
         <div className="flex gap-2">
           {/* Consolidated Data Button */}
           <Button 
-            className="gradient-purple-blue hover:opacity-90 transition-opacity"
+            className={`gradient-purple-blue hover:opacity-90 transition-opacity ${
+              selectedBrokerFilter === null ? 'ring-2 ring-purple-400' : ''
+            }`}
             onClick={() => {
-              queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
-              queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+              setSelectedBrokerFilter(null);
               toast({
                 title: "Dados Consolidados",
-                description: "Dados de todas as corretoras foram unidos e somados com sucesso."
+                description: "Mostrando dados de todas as corretoras somados."
               });
             }}
           >
             <Building className="w-4 h-4 mr-2" />
-            📊 Consolidar Todas as Corretoras
+            📊 Consolidar Todas
           </Button>
 
           {/* Gate.io API Configuration */}
@@ -406,14 +418,21 @@ export default function Dashboard() {
           }}>
             <DialogTrigger asChild>
               <Button 
-                className="bg-orange-600 hover:bg-orange-700"
+                className={`bg-orange-600 hover:bg-orange-700 ${
+                  selectedBrokerFilter === 'gate.io' ? 'ring-2 ring-orange-400' : ''
+                }`}
                 onClick={() => {
+                  setSelectedBrokerFilter('gate.io');
                   setSelectedBrokerForConfig('gate.io');
                   form.setValue('broker', 'gate.io');
+                  toast({
+                    title: "Gate.io Selecionado",
+                    description: "Dashboard mostrando apenas dados da Gate.io."
+                  });
                 }}
               >
                 <Settings className="w-4 h-4 mr-2" />
-                🪙 Gate.io API
+                🪙 Gate.io
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -475,9 +494,16 @@ export default function Dashboard() {
             <DialogTrigger asChild>
               <Button 
                 variant="outline"
-                className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+                className={`border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white ${
+                  selectedBrokerFilter === 'tickmill' ? 'ring-2 ring-blue-400 bg-blue-600 text-white' : ''
+                }`}
                 onClick={() => {
+                  setSelectedBrokerFilter('tickmill');
                   setSelectedBrokerForConfig('tickmill');
+                  toast({
+                    title: "Tickmill Selecionado",
+                    description: "Dashboard mostrando apenas dados da Tickmill."
+                  });
                 }}
               >
                 <Building className="w-4 h-4 mr-2" />
@@ -523,9 +549,16 @@ export default function Dashboard() {
             <DialogTrigger asChild>
               <Button 
                 variant="outline"
-                className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white"
+                className={`border-green-600 text-green-400 hover:bg-green-600 hover:text-white ${
+                  selectedBrokerFilter === 'clear' ? 'ring-2 ring-green-400 bg-green-600 text-white' : ''
+                }`}
                 onClick={() => {
+                  setSelectedBrokerFilter('clear');
                   setSelectedBrokerForConfig('clear');
+                  toast({
+                    title: "Clear Selecionado",
+                    description: "Dashboard mostrando apenas dados da Clear."
+                  });
                 }}
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
@@ -717,7 +750,7 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {trades.length === 0 ? (
+          {filteredTrades.length === 0 ? (
             <p className="text-slate-400 text-center py-8">
               Nenhum trade registrado ainda. 
               <br />
@@ -725,7 +758,7 @@ export default function Dashboard() {
             </p>
           ) : (
             <div className="space-y-3">
-              {trades.slice(-5).reverse().map((trade) => (
+              {filteredTrades.slice(-5).reverse().map((trade) => (
                 <div key={trade.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
