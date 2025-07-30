@@ -1,10 +1,16 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { apiRequest } from "./queryClient";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  initials: string;
+  capitalInicial?: string;
+  metaMensal?: string;
+  perfilRisco?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  initials?: string;
 }
 
 interface AuthContextType {
@@ -19,20 +25,66 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
+  // Get initials from user name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   const login = async (email: string, password: string) => {
-    // Simulate login - in real app this would be an API call
-    const mockUser: User = {
-      id: "1",
-      name: "João Pedro Silva",
-      email: email,
-      initials: "JP"
-    };
-    setUser(mockUser);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao fazer login");
+      }
+      
+      const userData = await response.json();
+      
+      // Add initials to user data
+      const userWithInitials = {
+        ...userData,
+        initials: getInitials(userData.name)
+      };
+      
+      setUser(userWithInitials);
+      
+      // Store user in localStorage for persistence
+      localStorage.setItem('user', JSON.stringify(userWithInitials));
+    } catch (error: any) {
+      throw new Error(error.message || "Erro ao fazer login");
+    }
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
   };
+
+  // Load user from localStorage on app start
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error("Error parsing stored user:", error);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ 

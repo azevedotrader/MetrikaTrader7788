@@ -3,9 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, ChartBar, Link2, TrendingUp } from "lucide-react";
 import { LoginModal } from "@/components/ui/login-modal";
+import { RegisterModal } from "@/components/ui/register-modal";
 
 export default function Landing() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+
+  const handleSwitchToRegister = () => {
+    setShowLogin(false);
+    setShowRegister(true);
+  };
+
+  const handleSwitchToLogin = () => {
+    setShowRegister(false);
+    setShowLogin(true);
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">
@@ -39,7 +51,7 @@ export default function Landing() {
                 Entrar
               </Button>
               <Button 
-                onClick={() => setShowLogin(true)}
+                onClick={() => setShowRegister(true)}
                 className="gradient-purple-blue hover:opacity-90 transition-opacity"
               >
                 Começar Agora
@@ -69,7 +81,7 @@ export default function Landing() {
               </p>
               <Button 
                 size="lg"
-                onClick={() => setShowLogin(true)}
+                onClick={() => setShowRegister(true)}
                 className="gradient-purple-blue hover:opacity-90 transition-opacity transform hover:scale-105"
               >
                 Começar Agora
@@ -267,7 +279,7 @@ export default function Landing() {
           </p>
           <Button 
             size="lg"
-            onClick={() => setShowLogin(true)}
+            onClick={() => setShowRegister(true)}
             className="gradient-purple-blue hover:opacity-90 transition-opacity transform hover:scale-105"
           >
             Começar Análise Gratuita
@@ -275,7 +287,16 @@ export default function Landing() {
         </div>
       </section>
 
-      <LoginModal open={showLogin} onOpenChange={setShowLogin} />
+      <LoginModal 
+        open={showLogin} 
+        onOpenChange={setShowLogin} 
+        onSwitchToRegister={handleSwitchToRegister}
+      />
+      <RegisterModal 
+        open={showRegister} 
+        onOpenChange={setShowRegister}
+        onSwitchToLogin={handleSwitchToLogin}
+      />
     </div>
   );
 }

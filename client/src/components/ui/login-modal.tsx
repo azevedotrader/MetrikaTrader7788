@@ -10,18 +10,32 @@ import { useAuth } from "@/lib/auth";
 interface LoginModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSwitchToRegister: () => void;
 }
 
-export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
-    onOpenChange(false);
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      await login(email, password);
+      onOpenChange(false);
+      setEmail("");
+      setPassword("");
+    } catch (err: any) {
+      setError(err.message || "Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,6 +54,12 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          {error && (
+            <div className="text-red-400 text-sm text-center bg-red-500/10 p-3 rounded">
+              {error}
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label htmlFor="email" className="text-slate-300">Email</Label>
             <Input
@@ -49,6 +69,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              required
             />
           </div>
           
@@ -61,6 +82,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              required
             />
           </div>
 
@@ -80,15 +102,23 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             </Button>
           </div>
 
-          <Button type="submit" className="w-full gradient-purple-blue hover:opacity-90 transition-opacity">
-            Entrar
+          <Button 
+            type="submit" 
+            className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
+            disabled={isLoading}
+          >
+            {isLoading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
 
         <div className="text-center mt-6">
           <p className="text-slate-400">
             Não tem conta?{" "}
-            <Button variant="link" className="text-purple-400 hover:text-purple-300 p-0">
+            <Button 
+              variant="link" 
+              className="text-purple-400 hover:text-purple-300 p-0"
+              onClick={onSwitchToRegister}
+            >
               Criar conta gratuita
             </Button>
           </p>
