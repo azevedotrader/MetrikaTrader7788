@@ -253,6 +253,7 @@ export default function Dashboard() {
   const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
   const [selectedBrokerForConfig, setSelectedBrokerForConfig] = useState<string>('');
   const [selectedBrokerFilter, setSelectedBrokerFilter] = useState<string | null>(null);
+  const [gateAccountInfo, setGateAccountInfo] = useState<any>(null);
 
   const form = useForm<BrokerConfigForm>({
     resolver: zodResolver(brokerConfigSchema),
@@ -349,11 +350,21 @@ export default function Dashboard() {
         }
       }).then(res => res.json()),
     onSuccess: (data: any) => {
-      toast({
-        title: data.connected ? "Conexão Estabelecida" : "Erro de Conexão",
-        description: data.message,
-        variant: data.connected ? "default" : "destructive"
-      });
+      if (data.connected && data.accountInfo) {
+        setGateAccountInfo(data);
+        toast({
+          title: "✅ Conta Gate.io Autenticada",
+          description: `Conta conectada com sucesso! Email: ${data.accountInfo.email || 'N/A'} | Nível: ${data.accountInfo.level || 0} | Saldos: ${data.balanceCount || 0} moedas`,
+          variant: "default"
+        });
+      } else {
+        setGateAccountInfo(null);
+        toast({
+          title: data.connected ? "Conexão Estabelecida" : "Erro de Conexão",
+          description: data.message,
+          variant: data.connected ? "default" : "destructive"
+        });
+      }
     },
     onError: (error: any) => {
       toast({
@@ -524,6 +535,53 @@ export default function Dashboard() {
                           {syncMutation.isPending ? "Sincronizando..." : "Sincronizar Trades"}
                         </Button>
                       </div>
+                      
+                      {/* Informações da conta autenticada */}
+                      {gateAccountInfo && gateAccountInfo.connected && gateAccountInfo.accountInfo && (
+                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                          <h4 className="text-purple-800 dark:text-purple-300 font-medium mb-3 flex items-center">
+                            🔐 Conta Gate.io Autenticada
+                          </h4>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Email:</span>
+                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                                {gateAccountInfo.accountInfo.email}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Nível:</span>
+                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                                {gateAccountInfo.accountInfo.level}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Status:</span>
+                              <p className="text-green-600 dark:text-green-400 font-medium">
+                                {gateAccountInfo.accountInfo.state}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Saldos:</span>
+                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                                {gateAccountInfo.balanceCount} moedas
+                              </p>
+                            </div>
+                          </div>
+                          {gateAccountInfo.balances && gateAccountInfo.balances.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-700">
+                              <span className="text-slate-600 dark:text-slate-400 text-xs">Principais saldos:</span>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {gateAccountInfo.balances.slice(0, 3).map((balance: any, index: number) => (
+                                  <span key={index} className="text-xs bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded">
+                                    {balance.currency}: {parseFloat(balance.available || 0).toFixed(4)}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                   

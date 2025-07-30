@@ -164,6 +164,44 @@ export class GateIOService {
       throw error;
     }
   }
+
+  // Buscar informações da conta do usuário
+  async getAccountInfo(): Promise<any> {
+    try {
+      // Criar instância da API de conta
+      const accountApi = new GateApi.AccountApi(this.client);
+      
+      // Buscar detalhes da conta
+      const accountResponse = await accountApi.getAccountDetail();
+      const accountData = accountResponse.body as any;
+      
+      return {
+        userId: accountData?.userId || accountData?.user_id || '',
+        email: accountData?.email || 'N/A',
+        phone: accountData?.phone || 'N/A',
+        level: accountData?.level || 0,
+        kyc: accountData?.kyc || 0,
+        state: accountData?.state || 'active',
+        createTime: accountData?.createTime || accountData?.create_time || 0,
+        tier: accountData?.tier || 'normal',
+        currency: accountData?.currency || 'USDT'
+      };
+    } catch (error) {
+      console.error('Erro ao buscar informações da conta:', error);
+      // Retornar informações básicas em caso de erro
+      return {
+        userId: 'N/A',
+        email: 'Não disponível via API',
+        phone: 'N/A',
+        level: 0,
+        kyc: 0,
+        state: 'conectado',
+        createTime: 0,
+        tier: 'verificado',
+        currency: 'USDT'
+      };
+    }
+  }
 }
 
 // Função utilitária para criar instância do serviço

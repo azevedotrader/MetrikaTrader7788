@@ -445,12 +445,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const isConnected = await gateService.testConnection();
-      const balance = isConnected ? await gateService.getAccountBalance() : null;
+      let accountInfo = null;
+      let balance = null;
+
+      if (isConnected) {
+        try {
+          accountInfo = await gateService.getAccountInfo();
+          balance = await gateService.getAccountBalance();
+        } catch (error) {
+          console.error('Erro ao buscar dados da conta:', error);
+        }
+      }
 
       res.json({
         connected: isConnected,
         message: isConnected ? "Conexão com Gate.io estabelecida com sucesso" : "Erro ao conectar com Gate.io",
-        balanceCount: balance ? balance.length : 0
+        accountInfo: accountInfo,
+        balanceCount: balance ? balance.length : 0,
+        balances: balance?.slice(0, 5) // Mostrar apenas os primeiros 5 saldos
       });
     } catch (error) {
       console.error("Gate.io test error:", error);
