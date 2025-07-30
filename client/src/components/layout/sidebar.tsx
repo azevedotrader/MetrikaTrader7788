@@ -16,7 +16,6 @@ import { useState } from "react";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Novo Trade", href: "/novo-trade", icon: PlusCircle },
-  { name: "Corretoras", href: "/corretoras", icon: BarChart3 },
   { name: "Análises", href: "/analises", icon: BarChart },
   { name: "Diário do Trader", href: "/diario", icon: Book },
   { name: "Perfil", href: "/perfil", icon: User },

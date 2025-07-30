@@ -9,7 +9,6 @@ import { TopBar } from "@/components/layout/top-bar";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
-import Corretoras from "@/pages/corretoras";
 import Analises from "@/pages/analises";
 import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
@@ -18,7 +17,6 @@ import NotFound from "@/pages/not-found";
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/novo-trade": "Novo Trade",
-  "/corretoras": "Corretoras",
   "/analises": "Análises",
   "/diario": "Diário do Trader",
   "/perfil": "Perfil"
@@ -43,10 +41,6 @@ function AppContent() {
           <Route path="/novo-trade">
             <TopBar title={pageTitles["/novo-trade"]} />
             <NovoTrade />
-          </Route>
-          <Route path="/corretoras">
-            <TopBar title={pageTitles["/corretoras"]} />
-            <Corretoras />
           </Route>
           <Route path="/analises">
             <TopBar title={pageTitles["/analises"]} />
