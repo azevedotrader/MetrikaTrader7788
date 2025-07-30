@@ -204,6 +204,14 @@ export default function TesteGateIO() {
             <li>Copie a API Key e API Secret geradas</li>
             <li>Cole aqui para testar a conexão</li>
           </ol>
+          
+          <div className="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-600">
+            <p className="text-yellow-300 text-sm">
+              <strong>⚠️ Importante:</strong> Certifique-se de que suas credenciais estão corretas. 
+              Se você está usando credenciais de teste ou demo, elas podem não funcionar com a API de produção.
+              Use apenas credenciais reais da sua conta Gate.io verificada.
+            </p>
+          </div>
         </div>
       </div>
     </div>

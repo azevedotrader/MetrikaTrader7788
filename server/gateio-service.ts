@@ -24,22 +24,22 @@ export class GateIOService {
     this.spotApi = new GateApi.SpotApi(this.client);
   }
 
-  // Gerar assinatura HMAC-SHA512 para autenticação direta
+  // Gerar assinatura HMAC-SHA512 seguindo exatamente a especificação Gate.io
   private generateSignature(method: string, url: string, queryString: string = '', payload: string = ''): { headers: Record<string, string>, timestamp: string } {
-    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const timestamp = Math.floor(Date.now() / 1000);
     
-    // Hash do payload usando SHA512
-    const hashedPayload = crypto.createHash('sha512').update(payload, 'utf8').digest('hex');
+    // Hash do payload usando SHA512 (hash simples, não HMAC)
+    const hashedPayload = crypto.createHash('sha512').update(payload || '', 'utf8').digest('hex');
     
-    // String para assinatura: METHOD + "\n" + URL + "\n" + QUERY + "\n" + HASHED_PAYLOAD + "\n" + TIMESTAMP
-    const signatureString = `${method}\n${url}\n${queryString}\n${hashedPayload}\n${timestamp}`;
+    // String para assinatura seguindo formato exato: METHOD\nURL\nQUERY_STRING\nHASHED_PAYLOAD\nTIMESTAMP
+    const signatureString = `${method.toUpperCase()}\n${url}\n${queryString}\n${hashedPayload}\n${timestamp}`;
     
     // Gerar assinatura HMAC-SHA512
     const signature = crypto.createHmac('sha512', this.apiSecret).update(signatureString, 'utf8').digest('hex');
     
     // Debug logging
     console.log('Gate.io Authentication Debug:');
-    console.log('- Method:', method);
+    console.log('- Method:', method.toUpperCase());
     console.log('- URL:', url);
     console.log('- Query String:', queryString || '(empty)');
     console.log('- Payload:', payload || '(empty)');
@@ -47,44 +47,69 @@ export class GateIOService {
     console.log('- Timestamp:', timestamp);
     console.log('- Signature String:', JSON.stringify(signatureString));
     console.log('- API Key (first 8 chars):', this.apiKey.substring(0, 8) + '...');
+    console.log('- API Secret (first 8 chars):', this.apiSecret.substring(0, 8) + '...');
     console.log('- Generated Signature:', signature);
     
     return {
       headers: {
         'KEY': this.apiKey,
-        'Timestamp': timestamp,
+        'Timestamp': timestamp.toString(),
         'SIGN': signature,
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      timestamp
+      timestamp: timestamp.toString()
     };
   }
 
   // Fazer requisição HTTP direta com autenticação customizada
   private async makeAuthenticatedRequest(method: string, endpoint: string, queryParams: Record<string, any> = {}, body: any = null): Promise<any> {
     const url = `/api/v4${endpoint}`;
-    const queryString = new URLSearchParams(queryParams).toString();
+    
+    // Limpar query params vazios
+    const cleanedQueryParams: Record<string, string> = {};
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined && value !== null && value !== '') {
+        cleanedQueryParams[key] = String(value);
+      }
+    }
+    
+    const queryString = Object.keys(cleanedQueryParams).length > 0 
+      ? new URLSearchParams(cleanedQueryParams).toString() 
+      : '';
+    
     const payload = body ? JSON.stringify(body) : '';
     
-    const { headers } = this.generateSignature(method, url, queryString, payload);
+    const { headers } = this.generateSignature(method.toUpperCase(), url, queryString, payload);
     
     const fullUrl = `${this.baseUrl}${url}${queryString ? `?${queryString}` : ''}`;
     
     const fetchOptions: RequestInit = {
-      method,
+      method: method.toUpperCase(),
       headers,
     };
     
-    if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    if (payload && (method.toUpperCase() === 'POST' || method.toUpperCase() === 'PUT' || method.toUpperCase() === 'PATCH')) {
       fetchOptions.body = payload;
     }
+    
+    console.log('Making request to:', fullUrl);
+    console.log('Request headers:', headers);
     
     const response = await fetch(fullUrl, fetchOptions);
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido' }));
-      throw new Error(`Gate.io API Error ${response.status}: ${errorData.message || response.statusText}`);
+      const errorText = await response.text();
+      let errorData;
+      
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { message: errorText || 'Erro desconhecido' };
+      }
+      
+      console.log('Error response:', response.status, errorData);
+      throw new Error(`Gate.io API Error ${response.status}: ${errorData.message || errorData.label || response.statusText}`);
     }
     
     return await response.json();
