@@ -258,6 +258,9 @@ export default function Dashboard() {
   const form = useForm<BrokerConfigForm>({
     resolver: zodResolver(brokerConfigSchema),
     defaultValues: {
+      broker: 'gate.io',
+      apiKey: '',
+      apiSecret: '',
       isActive: true
     }
   });
@@ -375,8 +378,52 @@ export default function Dashboard() {
     }
   });
 
-  const onConfigSubmit = (data: BrokerConfigForm) => {
-    configMutation.mutate(data);
+  const onConfigSubmit = async (data: BrokerConfigForm) => {
+    // Se for Gate.io, primeiro valida as credenciais
+    if (data.broker === 'gate.io') {
+      try {
+        // Primeiro salva temporariamente as credenciais para teste
+        const testResponse = await fetch('/api/test/gate-io', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'user-id': localStorage.getItem('user-id') || ''
+          },
+          body: JSON.stringify({
+            apiKey: data.apiKey,
+            apiSecret: data.apiSecret
+          })
+        });
+        
+        const testResult = await testResponse.json();
+        
+        if (testResult.connected && testResult.accountInfo) {
+          // Se autenticação foi bem-sucedida, salva as credenciais
+          setGateAccountInfo(testResult);
+          configMutation.mutate(data);
+          toast({
+            title: "✅ Gate.io Autenticada e Salva",
+            description: `Credenciais validadas e salvas! Email: ${testResult.accountInfo.email}`
+          });
+        } else {
+          // Se falhou na autenticação, mostra erro
+          toast({
+            title: "❌ Credenciais Inválidas",
+            description: testResult.message || "API Key ou Secret incorretos. Verifique suas credenciais.",
+            variant: "destructive"
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: "❌ Erro de Validação",
+          description: "Erro ao validar credenciais Gate.io. Tente novamente.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      // Para outras corretoras, salva diretamente
+      configMutation.mutate(data);
+    }
   };
 
 
@@ -450,7 +497,10 @@ export default function Dashboard() {
           {/* Gate.io API Configuration */}
           <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'gate.io'} onOpenChange={(open) => {
             setIsConfigDialogOpen(open);
-            if (!open) setSelectedBrokerForConfig('');
+            if (!open) {
+              setSelectedBrokerForConfig('');
+              setGateAccountInfo(null);
+            }
           }}>
             <DialogTrigger asChild>
               <Button 

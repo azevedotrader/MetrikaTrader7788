@@ -434,14 +434,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
 
-      const config = await storage.getBrokerApiConfig(userId, 'gate.io');
-      if (!config || !config.apiKey || !config.apiSecret) {
-        return res.status(400).json({ message: "Configuração da API Gate.io não encontrada" });
+      // Verificar se credenciais temporárias foram fornecidas no corpo da requisição
+      const { apiKey: tempApiKey, apiSecret: tempApiSecret } = req.body;
+      
+      let apiKey: string;
+      let apiSecret: string;
+
+      if (tempApiKey && tempApiSecret) {
+        // Usar credenciais temporárias para validação
+        apiKey = tempApiKey;
+        apiSecret = tempApiSecret;
+      } else {
+        // Usar credenciais salvas no banco
+        const config = await storage.getBrokerApiConfig(userId, 'gate.io');
+        if (!config || !config.apiKey || !config.apiSecret) {
+          return res.status(400).json({ message: "Configuração da API Gate.io não encontrada" });
+        }
+        apiKey = config.apiKey;
+        apiSecret = config.apiSecret;
       }
 
       const gateService = createGateIOService({
-        apiKey: config.apiKey,
-        apiSecret: config.apiSecret
+        apiKey,
+        apiSecret
       });
 
       const isConnected = await gateService.testConnection();
