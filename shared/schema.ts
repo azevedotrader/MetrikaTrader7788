@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, decimal, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, decimal, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -33,10 +33,38 @@ export const trades = pgTable("trades", {
   emocao: text("emocao"), // "confiante", "ansioso", "impulsivo", etc.
   precoEntrada: decimal("preco_entrada", { precision: 12, scale: 4 }),
   precoSaida: decimal("preco_saida", { precision: 12, scale: 4 }),
-  corretora: text("corretora"), // "tickmill", "clear", "gate.io"
+  corretora: text("corretora").notNull(), // "tickmill", "clear", "gate.io"
   status: text("status").default("fechado"), // "aberto", "fechado"
+  origem: text("origem").default("manual"), // "manual", "csv", "api"
+  externalId: text("external_id"), // ID da API externa
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tabela para configurações de API das corretoras
+export const brokerApiConfigs = pgTable("broker_api_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  broker: text("broker").notNull(), // "gate.io", "tickmill", "clear"
+  apiKey: text("api_key"),
+  apiSecret: text("api_secret"),
+  isActive: boolean("is_active").default(false),
+  lastSync: timestamp("last_sync"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tabela para histórico de importações CSV
+export const csvImports = pgTable("csv_imports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  broker: text("broker").notNull(),
+  fileName: text("file_name").notNull(),
+  tradesImported: integer("trades_imported").notNull(),
+  tradesSkipped: integer("trades_skipped").default(0),
+  status: text("status").default("completed"), // "processing", "completed", "failed"
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -72,13 +100,34 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   comentario: z.string().optional(),
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
-  corretora: z.string().optional(),
+  corretora: z.enum(["tickmill", "clear", "gate.io"], { message: "Corretora deve ser tickmill, clear ou gate.io" }),
   emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro"], { 
     message: "Emoção deve ser uma das opções disponíveis" 
   }).optional(),
+});
+
+// Schema para configuração de API
+export const insertBrokerApiConfigSchema = createInsertSchema(brokerApiConfigs).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  broker: z.enum(["gate.io", "tickmill", "clear"], { message: "Corretora deve ser gate.io, tickmill ou clear" }),
+  apiKey: z.string().min(1, "API Key é obrigatória"),
+  apiSecret: z.string().min(1, "API Secret é obrigatório"),
+});
+
+// Schema para importação CSV
+export const csvImportSchema = z.object({
+  broker: z.enum(["tickmill", "clear", "gate.io"], { message: "Corretora deve ser tickmill, clear ou gate.io" }),
+  file: z.any(), // File object
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertTrade = z.infer<typeof insertTradeSchema>;
 export type Trade = typeof trades.$inferSelect;
+export type BrokerApiConfig = typeof brokerApiConfigs.$inferSelect;
+export type InsertBrokerApiConfig = z.infer<typeof insertBrokerApiConfigSchema>;
+export type CsvImport = typeof csvImports.$inferSelect;
