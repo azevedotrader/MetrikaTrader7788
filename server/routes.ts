@@ -406,7 +406,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Atualizar timestamp da última sincronização
       await storage.createOrUpdateBrokerApiConfig({
-        ...config,
+        broker: config.broker as "gate.io" | "tickmill" | "clear",
+        apiKey: config.apiKey!,
+        apiSecret: config.apiSecret!,
+        isActive: config.isActive,
         lastSync: new Date(),
         userId
       });

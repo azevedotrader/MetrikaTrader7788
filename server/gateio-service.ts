@@ -34,7 +34,7 @@ export class GateIOService {
   // Buscar saldo da conta
   async getAccountBalance(): Promise<any[]> {
     try {
-      const response = await this.spotApi.listSpotAccounts();
+      const response = await this.spotApi.listSpotAccounts({});
       return response.body || [];
     } catch (error) {
       console.error('Erro ao buscar saldo da Gate.io:', error);
@@ -122,7 +122,8 @@ export class GateIOService {
           const internalTrade = this.convertGateTradeToInternal(gateTrade, userId);
           newTrades.push(internalTrade);
         } catch (error) {
-          errors.push(`Erro ao processar trade ${gateTrade.id}: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+          errors.push(`Erro ao processar trade ${gateTrade.id}: ${errorMessage}`);
           skipped++;
         }
       }
@@ -136,7 +137,8 @@ export class GateIOService {
       return { imported, skipped, errors };
     } catch (error) {
       console.error('Erro na sincronização:', error);
-      errors.push(`Erro geral na sincronização: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      errors.push(`Erro geral na sincronização: ${errorMessage}`);
       return { imported, skipped, errors };
     }
   }
@@ -144,7 +146,7 @@ export class GateIOService {
   // Testar conexão com a API
   async testConnection(): Promise<boolean> {
     try {
-      await this.spotApi.listSpotAccounts();
+      await this.spotApi.listSpotAccounts({});
       return true;
     } catch (error) {
       console.error('Erro ao testar conexão Gate.io:', error);
