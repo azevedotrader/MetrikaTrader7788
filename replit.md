@@ -4,6 +4,8 @@
 
 This is a comprehensive trading analytics platform called "Métrika" built as a full-stack web application. The platform allows traders to track their performance, analyze trades, maintain a trading journal, and visualize their progress through various metrics and charts.
 
+**Current Status (Jan 30, 2025):** Sistema completo de cadastro de trades e dashboard implementado com todas as métricas solicitadas. Banco PostgreSQL configurado e funcionando com autenticação completa.
+
 ## User Preferences
 
 ```

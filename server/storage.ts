@@ -37,9 +37,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createTrade(insertTrade: InsertTrade & { userId: string }): Promise<Trade> {
+    const tradeData = {
+      ...insertTrade,
+      dataHora: new Date(insertTrade.dataHora)
+    };
+    
     const [trade] = await db
       .insert(trades)
-      .values(insertTrade)
+      .values(tradeData)
       .returning();
     return trade;
   }
