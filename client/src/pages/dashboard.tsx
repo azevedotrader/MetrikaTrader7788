@@ -763,44 +763,15 @@ export default function Dashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="insights">Insights Detalhados</TabsTrigger>
           <TabsTrigger value="brokers">Corretoras</TabsTrigger>
           <TabsTrigger value="imports">Importações</TabsTrigger>
           <TabsTrigger value="consolidated">Consolidado</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-
-      {/* Métricas principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="✅ Rentabilidade Total"
-          value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
-          icon={DollarSign}
-          color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
-        />
-        
-        <MetricCard
-          title="🧮 Total de Trades"
-          value={metrics.totalTrades}
-          icon={BarChart3}
-        />
-        
-        <MetricCard
-          title="🎯 Taxa de Acerto"
-          value={`${metrics.taxaAcerto.toFixed(1)}%`}
-          icon={Target}
-          color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
-        />
-        
-        <MetricCard
-          title="🔁 R/R Médio"
-          value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
-          icon={TrendingUp}
-          color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
-        />
-      </div>
 
       {/* Rentabilidade por período */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -952,6 +923,186 @@ export default function Dashboard() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="insights" className="space-y-6">
+          {/* Métricas principais detalhadas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <MetricCard
+              title="✅ Rentabilidade Total"
+              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
+              icon={DollarSign}
+              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
+            />
+            
+            <MetricCard
+              title="🧮 Total de Trades"
+              value={metrics.totalTrades}
+              icon={BarChart3}
+            />
+            
+            <MetricCard
+              title="🎯 Taxa de Acerto"
+              value={`${metrics.taxaAcerto.toFixed(1)}%`}
+              icon={Target}
+              color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
+            />
+            
+            <MetricCard
+              title="🔁 R/R Médio"
+              value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
+              icon={TrendingUp}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+            />
+          </div>
+
+          {/* Análises mais detalhadas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Distribuição de Resultados */}
+            <Card className="bg-slate-900/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-purple-400" />
+                  📊 Distribuição de Resultados
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Trades Lucrativos</span>
+                    <span className="text-green-400 font-semibold">
+                      {filteredTrades.filter(t => parseFloat(t.resultado || "0") > 0).length} 
+                      ({filteredTrades.length > 0 ? ((filteredTrades.filter(t => parseFloat(t.resultado || "0") > 0).length / filteredTrades.length) * 100).toFixed(1) : 0}%)
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Trades no Prejuízo</span>
+                    <span className="text-red-400 font-semibold">
+                      {filteredTrades.filter(t => parseFloat(t.resultado || "0") < 0).length}
+                      ({filteredTrades.length > 0 ? ((filteredTrades.filter(t => parseFloat(t.resultado || "0") < 0).length / filteredTrades.length) * 100).toFixed(1) : 0}%)
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Trades no Empate</span>
+                    <span className="text-slate-400 font-semibold">
+                      {filteredTrades.filter(t => parseFloat(t.resultado || "0") === 0).length}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Análise de Volume */}
+            <Card className="bg-slate-900/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-purple-400" />
+                  💰 Análise de Volume
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Capital Total Investido</span>
+                    <span className="text-blue-400 font-semibold">
+                      R$ {filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Ticket Médio</span>
+                    <span className="text-purple-400 font-semibold">
+                      R$ {filteredTrades.length > 0 ? (filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0) / filteredTrades.length).toFixed(2) : "0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">ROI Total</span>
+                    <span className={`font-semibold ${
+                      metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0) > 0 ? 
+                        ((metrics.rentabilidadeTotal / filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0)) * 100).toFixed(2) : "0.00"}%
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Análise Temporal Detalhada */}
+          <Card className="bg-slate-900/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-purple-400" />
+                📅 Performance Temporal Detalhada
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-slate-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {(() => {
+                      const hoje = new Date();
+                      const tradesHoje = filteredTrades.filter(t => {
+                        const tradeDate = new Date(t.dataHora);
+                        return tradeDate.toDateString() === hoje.toDateString();
+                      });
+                      return tradesHoje.length;
+                    })()}
+                  </div>
+                  <div className="text-xs text-slate-400 mb-2">Trades Hoje</div>
+                  <div className={`text-sm font-semibold ${
+                    (() => {
+                      const hoje = new Date();
+                      const resultadoHoje = filteredTrades.filter(t => {
+                        const tradeDate = new Date(t.dataHora);
+                        return tradeDate.toDateString() === hoje.toDateString();
+                      }).reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+                      return resultadoHoje >= 0 ? 'text-green-400' : 'text-red-400';
+                    })()
+                  }`}>
+                    R$ {(() => {
+                      const hoje = new Date();
+                      const resultadoHoje = filteredTrades.filter(t => {
+                        const tradeDate = new Date(t.dataHora);
+                        return tradeDate.toDateString() === hoje.toDateString();
+                      }).reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+                      return resultadoHoje.toFixed(2);
+                    })()}
+                  </div>
+                </div>
+
+                <div className="text-center p-4 bg-slate-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {metrics.rentabilidadeSemana.toFixed(2)}
+                  </div>
+                  <div className="text-xs text-slate-400 mb-2">Esta Semana</div>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    R$ {metrics.rentabilidadeSemana.toFixed(2)}
+                  </div>
+                </div>
+
+                <div className="text-center p-4 bg-slate-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {metrics.rentabilidadeMes.toFixed(2)}
+                  </div>
+                  <div className="text-xs text-slate-400 mb-2">Este Mês</div>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    R$ {metrics.rentabilidadeMes.toFixed(2)}
+                  </div>
+                </div>
+
+                <div className="text-center p-4 bg-slate-800/30 rounded-lg">
+                  <div className="text-2xl font-bold text-white mb-1">
+                    {metrics.rentabilidadeAno.toFixed(2)}
+                  </div>
+                  <div className="text-xs text-slate-400 mb-2">Este Ano</div>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    R$ {metrics.rentabilidadeAno.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="brokers" className="space-y-6">
