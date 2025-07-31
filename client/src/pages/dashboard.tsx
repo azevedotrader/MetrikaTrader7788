@@ -534,6 +534,221 @@ export default function Dashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Main Metrics Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <MetricCard
+              title="💰 Rentabilidade Total"
+              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
+              icon={DollarSign}
+              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
+              subtitle="Resultado geral"
+            />
+            
+            <MetricCard
+              title="📊 Total de Trades"
+              value={metrics.totalTrades}
+              icon={BarChart3}
+              subtitle="Operações realizadas"
+            />
+            
+            <MetricCard
+              title="🎯 Taxa de Acerto"
+              value={`${metrics.taxaAcerto.toFixed(1)}%`}
+              icon={Target}
+              color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
+              subtitle="Precisão das operações"
+            />
+            
+            <MetricCard
+              title="🔁 R/R Médio"
+              value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
+              icon={TrendingUp}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              subtitle="Risco vs Retorno"
+            />
+          </div>
+
+          {/* Performance Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm">Melhor Trade</p>
+                    <p className="text-2xl font-bold text-green-400">
+                      R$ {metrics.melhorTrade.toFixed(2)}
+                    </p>
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-green-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm">Pior Trade</p>
+                    <p className="text-2xl font-bold text-red-400">
+                      R$ {metrics.piorTrade.toFixed(2)}
+                    </p>
+                  </div>
+                  <Activity className="h-8 w-8 text-red-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm">Setup Top</p>
+                    <p className="text-lg font-bold text-purple-400">
+                      {metrics.setupMaisLucrativo.setup || 'N/A'}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      R$ {metrics.setupMaisLucrativo.total.toFixed(2)}
+                    </p>
+                  </div>
+                  <BarChart3 className="h-8 w-8 text-purple-400" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm">Emoção Frequente</p>
+                    <p className="text-lg font-bold text-blue-400 flex items-center gap-1">
+                      {emojiEmocoes[metrics.emocaoMaisRecorrente.emocao as keyof typeof emojiEmocoes] || '😐'} 
+                      {metrics.emocaoMaisRecorrente.emocao || 'neutro'}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {metrics.emocaoMaisRecorrente.count} vezes
+                    </p>
+                  </div>
+                  <Calendar className="h-8 w-8 text-blue-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Performance por Período */}
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-purple-400" />
+                📅 Performance por Período
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  <div className="text-3xl font-bold text-white mb-2">
+                    R$ {metrics.rentabilidadeSemana.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-slate-400 mb-1">Esta Semana</div>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {metrics.rentabilidadeSemana >= 0 ? '+' : ''}{metrics.rentabilidadeSemana.toFixed(2)}
+                  </div>
+                </div>
+
+                <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  <div className="text-3xl font-bold text-white mb-2">
+                    R$ {metrics.rentabilidadeMes.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-slate-400 mb-1">Este Mês</div>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {metrics.rentabilidadeMes >= 0 ? '+' : ''}{metrics.rentabilidadeMes.toFixed(2)}
+                  </div>
+                </div>
+
+                <div className="text-center p-4 bg-slate-700/30 rounded-lg">
+                  <div className="text-3xl font-bold text-white mb-2">
+                    R$ {metrics.rentabilidadeAno.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-slate-400 mb-1">Este Ano</div>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {metrics.rentabilidadeAno >= 0 ? '+' : ''}{metrics.rentabilidadeAno.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Capital e ROI Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-400" />
+                  💰 Gestão de Capital
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Capital Total Utilizado</span>
+                    <span className="text-green-400 font-semibold text-lg">
+                      R$ {filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">Ticket Médio por Trade</span>
+                    <span className="text-blue-400 font-semibold">
+                      R$ {filteredTrades.length > 0 ? (filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0) / filteredTrades.length).toFixed(2) : "0.00"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-300">ROI Total</span>
+                    <span className={`font-semibold text-lg ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      {(() => {
+                        const capitalTotal = filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0);
+                        return capitalTotal > 0 ? ((metrics.rentabilidadeTotal / capitalTotal) * 100).toFixed(2) : "0.00";
+                      })()}%
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-purple-400" />
+                  📈 Distribuição por Corretora
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {Object.entries(brokerInfo).map(([broker, info]) => {
+                    const brokerTrades = filteredTrades.filter((t: Trade) => t.corretora === broker);
+                    const brokerResult = brokerTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.resultado || "0"), 0);
+                    const percentage = filteredTrades.length > 0 ? (brokerTrades.length / filteredTrades.length) * 100 : 0;
+                    
+                    return (
+                      <div key={broker} className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${info.color}`}></div>
+                          <span className="text-slate-300">{info.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className={`font-semibold ${brokerResult >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            R$ {brokerResult.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {brokerTrades.length} trades ({percentage.toFixed(1)}%)
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Trading Calendar */}
           <TradingCalendar trades={filteredTrades} />
         </TabsContent>
