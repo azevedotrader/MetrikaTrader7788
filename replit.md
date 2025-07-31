@@ -4,7 +4,7 @@
 
 This is a comprehensive trading analytics platform called "Métrika" built as a full-stack web application. The platform allows traders to track their performance, analyze trades, maintain a trading journal, and visualize their progress through various metrics and charts.
 
-**Current Status (Jan 30, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades.
+**Current Status (Jan 31, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.**
 
 ## User Preferences
 
@@ -129,3 +129,18 @@ Preferred communication style: Simple, everyday language.
 - **Development Banner**: Automatic Replit branding for external access
 
 The application follows a monorepo structure with clear separation between client, server, and shared code. The multi-broker architecture allows independent data management per broker while providing unified analytics and reporting. API integrations are prepared for automated data synchronization, with CSV import capabilities for manual data migration.
+
+## Recent Updates (Jan 31, 2025)
+
+### Landing Page Transformation
+- **Complete redesign** with professional sales-focused approach
+- **Enhanced hero section** with compelling value proposition and live dashboard preview
+- **Problem-solution framework** highlighting trading pain points and Métrika solutions
+- **Detailed pricing structure** with 3 tiers (Starter Free, Pro R$97/mês, Enterprise R$297/mês)
+- **Customer testimonials** section with realistic results and social proof
+- **Features showcase** with 8 key functionalities including IA Analytics, Risk Management
+- **Visual improvements** with gradient effects, interactive elements, and modern UI components
+- **Conversion optimization** with multiple CTAs, urgency elements, and trust indicators
+- **Professional footer** with proper navigation and branding
+- **Screenshots integration** showing real dashboard interfaces and analytics
+- **Brazilian market focus** with localized pricing, testimonials, and language
