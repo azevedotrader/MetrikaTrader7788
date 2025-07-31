@@ -34,6 +34,7 @@ import {
   Plus
 } from "lucide-react";
 import { type Trade } from "@shared/schema";
+import { TradingCalendar } from "@/components/ui/trading-calendar";
 
 const brokerConfigSchema = z.object({
   broker: z.enum(["gate.io", "tickmill", "clear"]),
@@ -867,6 +868,9 @@ export default function Dashboard() {
           subtitle={`${metrics.emocaoMaisRecorrente.count} trades`}
         />
       </div>
+
+      {/* Trading Calendar */}
+      <TradingCalendar trades={filteredTrades} className="w-full" />
 
       {/* Lucro por dia da semana */}
       <Card className="bg-slate-900/50 border-slate-700">

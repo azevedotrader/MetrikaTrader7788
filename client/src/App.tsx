@@ -12,6 +12,7 @@ import NovoTrade from "@/pages/novo-trade";
 import Analises from "@/pages/analises";
 import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
+import Calendario from "@/pages/calendario";
 import TesteGateIO from "@/pages/teste-gateio";
 import NotFound from "@/pages/not-found";
 
@@ -20,6 +21,7 @@ const pageTitles: Record<string, string> = {
   "/novo-trade": "Novo Trade",
   "/analises": "Análises",
   "/diario": "Diário do Trader",
+  "/calendario": "Calendário de Trading",
   "/perfil": "Perfil",
   "/teste-gateio": "Teste Gate.io API"
 };
@@ -59,6 +61,10 @@ function AppContent() {
                   <Route path="/diario">
                     <TopBar title={pageTitles["/diario"]} />
                     <Diario />
+                  </Route>
+                  <Route path="/calendario">
+                    <TopBar title={pageTitles["/calendario"]} />
+                    <Calendario />
                   </Route>
                   <Route path="/perfil">
                     <TopBar title={pageTitles["/perfil"]} />

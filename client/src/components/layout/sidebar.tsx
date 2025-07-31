@@ -7,6 +7,7 @@ import {
   PlusCircle, 
   BarChart, 
   Book, 
+  Calendar,
   User,
   LogOut
 } from "lucide-react";
@@ -17,6 +18,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Novo Trade", href: "/novo-trade", icon: PlusCircle },
   { name: "Análises", href: "/analises", icon: BarChart },
+  { name: "Calendário", href: "/calendario", icon: Calendar },
   { name: "Diário do Trader", href: "/diario", icon: Book },
   { name: "Perfil", href: "/perfil", icon: User },
 ];
