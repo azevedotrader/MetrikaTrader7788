@@ -6,7 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
-import { createGateIOService } from "./gateio-service";
+// Removed Gate.io service import - now only CSV imports
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -36,7 +36,7 @@ function processCsvRow(row: any, broker: string, userId: string): any | null {
 
     // Map fields based on broker-specific CSV format
     switch (broker) {
-      case 'tickmill':
+      case 'forex':
         trade = {
           ...trade,
           dataHora: row['Date'] || row['Data'] || '',
@@ -52,7 +52,7 @@ function processCsvRow(row: any, broker: string, userId: string): any | null {
         };
         break;
 
-      case 'clear':
+      case 'b3':
         trade = {
           ...trade,
           dataHora: row['Data'] || row['Date'] || '',
@@ -67,7 +67,7 @@ function processCsvRow(row: any, broker: string, userId: string): any | null {
         };
         break;
 
-      case 'gate.io':
+      case 'crypto':
         trade = {
           ...trade,
           dataHora: row['Time'] || row['Data'] || '',
@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { broker } = req.body;
-      if (!broker || !['tickmill', 'clear', 'gate.io'].includes(broker)) {
+      if (!broker || !['forex', 'b3', 'crypto'].includes(broker)) {
         return res.status(400).json({ message: "Corretora inválida ou não especificada" });
       }
 
@@ -373,157 +373,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sync trades from Gate.io API
-  app.post("/api/sync/gate-io", async (req, res) => {
-    try {
-      const userId = req.headers['user-id'] as string;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
+  // Removed Gate.io API integration - now only CSV imports
 
-      const config = await storage.getBrokerApiConfig(userId, 'gate.io');
-      if (!config || !config.isActive || !config.apiKey || !config.apiSecret) {
-        return res.status(400).json({ message: "Configuração da API Gate.io não encontrada ou inativa" });
-      }
+  // Removed Gate.io API testing - now only CSV imports
 
-      // Criar serviço Gate.io
-      const gateService = createGateIOService({
-        apiKey: config.apiKey,
-        apiSecret: config.apiSecret
-      });
-
-      // Testar conexão primeiro
-      const isConnected = await gateService.testConnection();
-      if (!isConnected) {
-        return res.status(400).json({ message: "Erro ao conectar com a API Gate.io. Verifique suas credenciais." });
-      }
-
-      // Obter par de moedas do corpo da requisição (opcional)
-      const { currencyPair } = req.body;
-
-      // Sincronizar trades
-      const syncResult = await gateService.syncTrades(userId, currencyPair);
-
-      // Atualizar timestamp da última sincronização
-      await storage.createOrUpdateBrokerApiConfig({
-        broker: config.broker as "gate.io" | "tickmill" | "clear",
-        apiKey: config.apiKey!,
-        apiSecret: config.apiSecret!,
-        isActive: config.isActive,
-        lastSync: new Date(),
-        userId
-      });
-
-      res.json({
-        message: "Sincronização concluída",
-        tradesImported: syncResult.imported,
-        tradesSkipped: syncResult.skipped,
-        errors: syncResult.errors
-      });
-    } catch (error) {
-      console.error("Gate.io sync error:", error);
-      res.status(500).json({ message: "Erro na sincronização com Gate.io" });
-    }
-  });
-
-  // Test Gate.io API connection
-  app.post("/api/test/gate-io", async (req, res) => {
-    try {
-      const userId = req.headers['user-id'] as string;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
-
-      // Verificar se credenciais temporárias foram fornecidas no corpo da requisição
-      const { apiKey: tempApiKey, apiSecret: tempApiSecret } = req.body;
-      
-      let apiKey: string;
-      let apiSecret: string;
-
-      if (tempApiKey && tempApiSecret) {
-        // Usar credenciais temporárias para validação
-        apiKey = tempApiKey;
-        apiSecret = tempApiSecret;
-      } else {
-        // Usar credenciais salvas no banco
-        const config = await storage.getBrokerApiConfig(userId, 'gate.io');
-        if (!config || !config.apiKey || !config.apiSecret) {
-          return res.status(400).json({ message: "Configuração da API Gate.io não encontrada" });
-        }
-        apiKey = config.apiKey;
-        apiSecret = config.apiSecret;
-      }
-
-      const gateService = createGateIOService({
-        apiKey,
-        apiSecret
-      });
-
-      const isConnected = await gateService.testConnection();
-      let accountInfo = null;
-      let balance = null;
-
-      if (isConnected) {
-        try {
-          accountInfo = await gateService.getAccountInfo();
-          balance = await gateService.getAccountBalance();
-        } catch (error) {
-          console.error('Erro ao buscar dados da conta:', error);
-        }
-      }
-
-      res.json({
-        connected: isConnected,
-        message: isConnected ? "Conexão com Gate.io estabelecida com sucesso" : "Erro ao conectar com Gate.io",
-        accountInfo: accountInfo,
-        balanceCount: balance ? balance.length : 0,
-        balances: balance?.slice(0, 5) // Mostrar apenas os primeiros 5 saldos
-      });
-    } catch (error) {
-      console.error("Gate.io test error:", error);
-      res.status(500).json({ message: "Erro ao testar conexão com Gate.io" });
-    }
-  });
-
-  // Get Gate.io currency pairs
-  app.get("/api/gate-io/currency-pairs", async (req, res) => {
-    try {
-      const userId = req.headers['user-id'] as string;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
-
-      const config = await storage.getBrokerApiConfig(userId, 'gate.io');
-      if (!config || !config.apiKey || !config.apiSecret) {
-        return res.status(400).json({ message: "Configuração da API Gate.io não encontrada" });
-      }
-
-      const gateService = createGateIOService({
-        apiKey: config.apiKey,
-        apiSecret: config.apiSecret
-      });
-
-      const pairs = await gateService.getCurrencyPairs();
-      
-      // Filtrar apenas pares ativos e populares
-      const activePairs = pairs
-        .filter(pair => pair.trade_status === 'tradable')
-        .slice(0, 100) // Limitar a 100 pares mais relevantes
-        .map(pair => ({
-          id: pair.id,
-          base: pair.base,
-          quote: pair.quote,
-          fee: pair.fee,
-          min_base_amount: pair.min_base_amount,
-          min_quote_amount: pair.min_quote_amount
-        }));
-
-      res.json(activePairs);
-    } catch (error) {
-      console.error("Get Gate.io currency pairs error:", error);
-      res.status(500).json({ message: "Erro ao buscar pares de moedas da Gate.io" });
-    }
-  });
+  // Removed Gate.io currency pairs endpoint - now only CSV imports
 
   const httpServer = createServer(app);
   return httpServer;

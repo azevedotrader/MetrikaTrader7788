@@ -1,21 +1,34 @@
 import { useState, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   TrendingUp, 
+  TrendingDown, 
   Target,
   Calendar,
   DollarSign,
   BarChart3,
+  Timer,
+  Brain,
+  Trophy,
+  AlertTriangle,
   Building, 
   Upload, 
   Download, 
   RefreshCw as Sync, 
+  Settings, 
   FileText,
   Activity,
   Plus,
@@ -24,8 +37,10 @@ import {
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
-import { format, startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
+import { format, startOfDay, startOfWeek, startOfMonth, startOfYear, addDays, addWeeks, addMonths, addYears, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+// Removido: não precisamos mais de configuração de API
 
 interface BrokerStats {
   totalTrades: number;
@@ -303,68 +318,53 @@ function calculateMetrics(trades: Trade[]): TradeMetrics {
   const piorTrade = Math.min(...resultados);
 
   // Taxa de acerto
-  const tradesLucrativos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
-  const taxaAcerto = (tradesLucrativos.length / trades.length) * 100;
+  const tradesPositivos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
+  const taxaAcerto = (tradesPositivos.length / trades.length) * 100;
 
-  // R/R médio
-  const lucros = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
-  const perdas = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
-  
-  const lucroMedio = lucros.length > 0 
-    ? lucros.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0) / lucros.length 
-    : 0;
-  const perdaMedia = perdas.length > 0 
-    ? Math.abs(perdas.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0) / perdas.length)
-    : 0;
-  
-  const riscoRetornoMedio = perdaMedia > 0 ? lucroMedio / perdaMedia : 0;
+  // Risco/Retorno médio
+  const riscoRetornoMedio = trades.reduce((acc, trade) => {
+    const risco = parseFloat(trade.risco || "2");
+    const retorno = Math.abs(parseFloat(trade.resultado || "0"));
+    return acc + (retorno / risco);
+  }, 0) / trades.length;
 
   // Setup mais lucrativo
-  const setupLucros = trades.reduce((acc, trade) => {
-    const setup = trade.setup || 'Não definido';
+  const setupLucros: { [key: string]: number } = {};
+  trades.forEach(trade => {
+    const setup = trade.setup || "Outros";
     const resultado = parseFloat(trade.resultado || "0");
-    if (!acc[setup]) acc[setup] = 0;
-    acc[setup] += resultado;
-    return acc;
-  }, {} as Record<string, number>);
+    setupLucros[setup] = (setupLucros[setup] || 0) + resultado;
+  });
 
-  const setupMaisLucrativo = Object.entries(setupLucros).reduce((best, [setup, total]) => {
-    if (total > best.total) {
-      return { setup, total, percent: (total / rentabilidadeTotal) * 100 };
-    }
-    return best;
+  const setupMaisLucrativo = Object.entries(setupLucros).reduce((max, [setup, total]) => {
+    return total > max.total ? { setup, total, percent: (total / rentabilidadeTotal) * 100 } : max;
   }, { setup: "", total: 0, percent: 0 });
 
   // Emoção mais recorrente
-  const emocoesCount = trades.reduce((acc, trade) => {
-    const emocao = trade.emocao || 'neutro';
-    acc[emocao] = (acc[emocao] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const emocoesCount: { [key: string]: number } = {};
+  trades.forEach(trade => {
+    const emocao = trade.emocao || "neutro";
+    emocoesCount[emocao] = (emocoesCount[emocao] || 0) + 1;
+  });
 
-  const emocaoMaisRecorrente = Object.entries(emocoesCount).reduce((most, [emocao, count]) => {
-    if (count > most.count) {
-      return { emocao, count };
-    }
-    return most;
+  const emocaoMaisRecorrente = Object.entries(emocoesCount).reduce((max, [emocao, count]) => {
+    return count > max.count ? { emocao, count } : max;
   }, { emocao: "", count: 0 });
 
   // Lucro por dia da semana
   const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-  const lucroPorDia = trades.reduce((acc, trade) => {
+  const lucroPorDia: { [key: number]: number } = {};
+  
+  trades.forEach(trade => {
     const dia = new Date(trade.dataHora).getDay();
     const resultado = parseFloat(trade.resultado || "0");
-    acc[dia] += resultado;
-    return acc;
-  }, new Array(7).fill(0));
+    lucroPorDia[dia] = (lucroPorDia[dia] || 0) + resultado;
+  });
 
   const lucroPorDiaSemana = diasSemana.map((dia, index) => ({
     dia,
-    valor: lucroPorDia[index]
+    valor: lucroPorDia[index] || 0
   }));
-
-  // Tempo médio de trade (placeholder)
-  const tempoMedioTrade = 0;
 
   return {
     totalTrades: trades.length,
@@ -376,53 +376,41 @@ function calculateMetrics(trades: Trade[]): TradeMetrics {
     piorTrade,
     taxaAcerto,
     riscoRetornoMedio,
-    tempoMedioTrade,
+    tempoMedioTrade: 0, // Calcular baseado em dados futuros
     setupMaisLucrativo,
     emocaoMaisRecorrente,
     lucroPorDiaSemana
   };
 }
 
-function calculateBrokerStats(trades: Trade[]): BrokerStats {
-  if (!trades.length) {
-    return { totalTrades: 0, totalProfit: 0, winRate: 0 };
-  }
-
-  const totalTrades = trades.length;
-  const totalProfit = trades.reduce((sum, trade) => sum + parseFloat(trade.resultado || "0"), 0);
-  const winningTrades = trades.filter(trade => parseFloat(trade.resultado || "0") > 0).length;
-  const winRate = (winningTrades / totalTrades) * 100;
-
-  return { totalTrades, totalProfit, winRate };
-}
-
-interface MetricCardProps {
+function MetricCard({ title, value, icon: Icon, color = "text-white", badge, subtitle }: {
   title: string;
   value: string | number;
-  icon: any;
+  icon: React.ElementType;
   color?: string;
+  badge?: string;
   subtitle?: string;
-}
-
-function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }: MetricCardProps) {
+}) {
   return (
-    <Card className="bg-slate-800/50 border-slate-700">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-slate-400">
-            {title}
-          </CardTitle>
-          <Icon className="h-4 w-4 text-slate-400" />
-        </div>
+    <Card className="bg-slate-900/50 border-slate-700">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-slate-300">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-purple-400" />
       </CardHeader>
       <CardContent>
         <div className={`text-2xl font-bold ${color}`}>
-          {value}
+          {typeof value === 'number' ? 
+            (title.includes('R$') || title.includes('Resultado') ? 
+              `R$ ${value.toFixed(2)}` : 
+              value.toFixed(1)
+            ) : value
+          }
         </div>
-        {subtitle && (
-          <p className="text-xs text-slate-500 mt-1">
-            {subtitle}
-          </p>
+        {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+        {badge && (
+          <Badge variant="secondary" className="mt-2">
+            {badge}
+          </Badge>
         )}
       </CardContent>
     </Card>
@@ -432,29 +420,207 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }
 export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isConfigDialogOpen, setIsConfigDialogOpen] = useState(false);
+  const [selectedBrokerForConfig, setSelectedBrokerForConfig] = useState<string>('');
   const [selectedBrokerFilter, setSelectedBrokerFilter] = useState<string | null>(null);
+  const [gateAccountInfo, setGateAccountInfo] = useState<any>(null);
 
-  // Fetch trades data
-  const { data: trades = [], isLoading } = useQuery({
-    queryKey: ['/api/trades']
+  const form = useForm<BrokerConfigForm>({
+    resolver: zodResolver(brokerConfigSchema),
+    defaultValues: {
+      broker: 'gate.io',
+      apiKey: '',
+      apiSecret: '',
+      isActive: true
+    }
   });
 
-  // Fetch trades by broker for broker analysis
-  const { data: tradesByBroker = {} } = useQuery({
-    queryKey: ['/api/trades/by-broker']
+  // Fetch all trades
+  const { data: trades = [], isLoading } = useQuery<Trade[]>({
+    queryKey: ["/api/trades"],
   });
 
-  // Fetch CSV imports
-  const { data: csvImports = [] } = useQuery({
-    queryKey: ['/api/csv-imports']
+  // Fetch broker configurations
+  const { data: brokerConfigs = [], isLoading: configsLoading } = useQuery({
+    queryKey: ['/api/broker-configs'],
   });
+
+  // Fetch trades by broker
+  const { data: tradesByBroker = {}, isLoading: tradesLoading } = useQuery({
+    queryKey: ['/api/trades/by-broker'],
+  });
+
+  // Fetch CSV import history
+  const { data: csvImports = [], isLoading: importsLoading } = useQuery({
+    queryKey: ['/api/csv-imports'],
+  });
+
+  // Create/update broker config mutation
+  const configMutation = useMutation({
+    mutationFn: (data: BrokerConfigForm) => 
+      fetch('/api/broker-configs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-id': localStorage.getItem('user-id') || ''
+        },
+        body: JSON.stringify(data)
+      }).then(res => res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/broker-configs'] });
+      setIsConfigDialogOpen(false);
+      form.reset();
+      toast({
+        title: "Configuração salva",
+        description: "Configuração da corretora foi salva com sucesso."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao salvar configuração",
+        variant: "destructive"
+      });
+    }
+  });
+
+
+
+  // Gate.io sync mutation
+  const syncMutation = useMutation({
+    mutationFn: () => 
+      fetch('/api/sync/gate-io', {
+        method: 'POST',
+        headers: {
+          'user-id': localStorage.getItem('user-id') || ''
+        }
+      }).then(res => res.json()),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+      
+      toast({
+        title: "Sincronização Gate.io",
+        description: `${data.message} - ${data.tradesImported} trades importados`
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro na sincronização",
+        description: error.message || "Erro ao sincronizar com Gate.io",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Gate.io test connection mutation
+  const testConnectionMutation = useMutation({
+    mutationFn: () => 
+      fetch('/api/test/gate-io', {
+        method: 'POST',
+        headers: {
+          'user-id': localStorage.getItem('user-id') || ''
+        }
+      }).then(res => res.json()),
+    onSuccess: (data: any) => {
+      if (data.connected && data.accountInfo) {
+        setGateAccountInfo(data);
+        toast({
+          title: "✅ Conta Gate.io Autenticada",
+          description: `Conta conectada com sucesso! Email: ${data.accountInfo.email || 'N/A'} | Nível: ${data.accountInfo.level || 0} | Saldos: ${data.balanceCount || 0} moedas`,
+          variant: "default"
+        });
+      } else {
+        setGateAccountInfo(null);
+        toast({
+          title: data.connected ? "Conexão Estabelecida" : "Erro de Conexão",
+          description: data.message,
+          variant: data.connected ? "default" : "destructive"
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro no teste",
+        description: error.message || "Erro ao testar conexão com Gate.io",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const onConfigSubmit = async (data: BrokerConfigForm) => {
+    // Se for Gate.io, primeiro valida as credenciais
+    if (data.broker === 'gate.io') {
+      try {
+        // Primeiro salva temporariamente as credenciais para teste
+        const testResponse = await fetch('/api/test/gate-io', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'user-id': localStorage.getItem('user-id') || ''
+          },
+          body: JSON.stringify({
+            apiKey: data.apiKey,
+            apiSecret: data.apiSecret
+          })
+        });
+        
+        const testResult = await testResponse.json();
+        
+        if (testResult.connected && testResult.accountInfo) {
+          // Se autenticação foi bem-sucedida, salva as credenciais
+          setGateAccountInfo(testResult);
+          configMutation.mutate(data);
+          toast({
+            title: "✅ Gate.io Autenticada e Salva",
+            description: `Credenciais validadas e salvas! Email: ${testResult.accountInfo.email}`
+          });
+        } else {
+          // Se falhou na autenticação, mostra erro
+          toast({
+            title: "❌ Credenciais Inválidas",
+            description: testResult.message || "API Key ou Secret incorretos. Verifique suas credenciais.",
+            variant: "destructive"
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: "❌ Erro de Validação",
+          description: "Erro ao validar credenciais Gate.io. Tente novamente.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      // Para outras corretoras, salva diretamente
+      configMutation.mutate(data);
+    }
+  };
+
+
+
+  const calculateBrokerStats = (trades: any[]): BrokerStats => {
+    if (!trades || trades.length === 0) {
+      return { totalTrades: 0, totalProfit: 0, winRate: 0 };
+    }
+
+    const totalTrades = trades.length;
+    const totalProfit = trades.reduce((sum: number, trade: any) => sum + (parseFloat(trade.resultado) || 0), 0);
+    const winningTrades = trades.filter((trade: any) => (parseFloat(trade.resultado) || 0) > 0).length;
+    const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
+
+    return { totalTrades, totalProfit, winRate };
+  };
+
+  const getBrokerConfig = (broker: string) => {
+    return (brokerConfigs as any[]).find((config: any) => config.broker === broker);
+  };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Carregando dados...</p>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <p className="text-slate-400 mt-2">Carregando suas métricas...</p>
         </div>
       </div>
     );
@@ -462,7 +628,7 @@ export default function Dashboard() {
 
   // Filter trades based on selected broker
   const filteredTrades = selectedBrokerFilter 
-    ? trades.filter((trade: Trade) => trade.corretora === selectedBrokerFilter)
+    ? trades.filter(trade => trade.corretora === selectedBrokerFilter)
     : trades;
 
   const metrics = calculateMetrics(filteredTrades);
@@ -474,7 +640,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-white">Dashboard</h1>
           <p className="text-slate-400 mt-2">
             {selectedBrokerFilter 
-              ? `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`
+              ? `Mostrando dados da ${selectedBrokerFilter === 'gate.io' ? 'Gate.io' : selectedBrokerFilter === 'tickmill' ? 'Tickmill' : 'Clear'}`
               : 'Dados consolidados de todas as corretoras'
             }
           </p>
@@ -498,58 +664,448 @@ export default function Dashboard() {
             📊 Consolidar Todas
           </Button>
 
-          {/* Broker Filter Buttons */}
-          {Object.entries(brokerInfo).map(([broker, info]) => {
-            const IconComponent = info.icon;
-            return (
+          {/* Gate.io API Configuration */}
+          <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'gate.io'} onOpenChange={(open) => {
+            setIsConfigDialogOpen(open);
+            if (!open) {
+              setSelectedBrokerForConfig('');
+              setGateAccountInfo(null);
+            }
+          }}>
+            <DialogTrigger asChild>
               <Button 
-                key={broker}
-                variant="outline"
-                className={`${info.color.replace('bg-', 'border-').replace('500', '600')} text-white hover:${info.color} ${
-                  selectedBrokerFilter === broker ? `ring-2 ring-purple-400 ${info.color}` : ''
+                className={`bg-orange-600 hover:bg-orange-700 ${
+                  selectedBrokerFilter === 'gate.io' ? 'ring-2 ring-orange-400' : ''
                 }`}
                 onClick={() => {
-                  setSelectedBrokerFilter(broker);
+                  setSelectedBrokerFilter('gate.io');
+                  setSelectedBrokerForConfig('gate.io');
+                  form.setValue('broker', 'gate.io');
                   toast({
-                    title: `${info.name} Selecionado`,
-                    description: `Dashboard mostrando apenas dados da ${info.name}.`
+                    title: "Gate.io Selecionado",
+                    description: "Dashboard mostrando apenas dados da Gate.io."
                   });
                 }}
               >
-                <IconComponent className="w-4 h-4 mr-2" />
-                {broker === 'crypto' ? '🪙' : broker === 'forex' ? '💱' : '📈'} {info.name}
+                <Settings className="w-4 h-4 mr-2" />
+                🪙 Gate.io
               </Button>
-            );
-          })}
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Configurar API - Gate.io</DialogTitle>
+                <DialogDescription>
+                  Configure suas credenciais da Gate.io para sincronização automática dos trades
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onConfigSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="apiKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>API Key</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" placeholder="Sua Gate.io API Key" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="apiSecret"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>API Secret</FormLabel>
+                        <FormControl>
+                          <Input {...field} type="password" placeholder="Seu Gate.io API Secret" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {getBrokerConfig('gate.io') && (
+                    <div className="space-y-3">
+                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          ✅ API configurada e ativa. Última sincronização: {getBrokerConfig('gate.io')?.lastSync ? new Date(getBrokerConfig('gate.io').lastSync).toLocaleString() : 'Nunca'}
+                        </p>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          className="flex-1" 
+                          onClick={() => testConnectionMutation.mutate()}
+                          disabled={testConnectionMutation.isPending}
+                        >
+                          {testConnectionMutation.isPending ? "Testando..." : "Testar Conexão"}
+                        </Button>
+                        <Button 
+                          type="button" 
+                          className="flex-1 bg-green-600 hover:bg-green-700" 
+                          onClick={() => syncMutation.mutate()}
+                          disabled={syncMutation.isPending}
+                        >
+                          {syncMutation.isPending ? "Sincronizando..." : "Sincronizar Trades"}
+                        </Button>
+                      </div>
+                      
+                      {/* Informações da conta autenticada */}
+                      {gateAccountInfo && gateAccountInfo.connected && gateAccountInfo.accountInfo && (
+                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                          <h4 className="text-purple-800 dark:text-purple-300 font-medium mb-3 flex items-center">
+                            🔐 Conta Gate.io Autenticada
+                          </h4>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Email:</span>
+                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                                {gateAccountInfo.accountInfo.email}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Nível:</span>
+                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                                {gateAccountInfo.accountInfo.level}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Status:</span>
+                              <p className="text-green-600 dark:text-green-400 font-medium">
+                                {gateAccountInfo.accountInfo.state}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-slate-600 dark:text-slate-400">Saldos:</span>
+                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                                {gateAccountInfo.balanceCount} moedas
+                              </p>
+                            </div>
+                          </div>
+                          {gateAccountInfo.balances && gateAccountInfo.balances.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-purple-200 dark:border-purple-700">
+                              <span className="text-slate-600 dark:text-slate-400 text-xs">Principais saldos:</span>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {gateAccountInfo.balances.slice(0, 3).map((balance: any, index: number) => (
+                                  <span key={index} className="text-xs bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-200 px-2 py-1 rounded">
+                                    {balance.currency}: {parseFloat(balance.available || 0).toFixed(4)}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      ℹ️ Configure suas credenciais da Gate.io para sincronização automática dos trades
+                    </p>
+                  </div>
+                  
+                  <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700" disabled={configMutation.isPending}>
+                    {configMutation.isPending ? "Salvando..." : "Salvar e Ativar API"}
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+
+          {/* Tickmill Manual Setup */}
+          <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'tickmill'} onOpenChange={(open) => {
+            setIsConfigDialogOpen(open);
+            if (!open) setSelectedBrokerForConfig('');
+          }}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className={`border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white ${
+                  selectedBrokerFilter === 'tickmill' ? 'ring-2 ring-blue-400 bg-blue-600 text-white' : ''
+                }`}
+                onClick={() => {
+                  setSelectedBrokerFilter('tickmill');
+                  setSelectedBrokerForConfig('tickmill');
+                  toast({
+                    title: "Tickmill Selecionado",
+                    description: "Dashboard mostrando apenas dados da Tickmill."
+                  });
+                }}
+              >
+                <Building className="w-4 h-4 mr-2" />
+                🏦 Tickmill
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Tickmill - Trading Manual</DialogTitle>
+                <DialogDescription>
+                  Para Tickmill, você pode registrar trades manualmente ou importar via CSV
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2">📊 Como usar o Tickmill:</h4>
+                  <ul className="text-sm text-slate-400 space-y-1">
+                    <li>• Registre trades manualmente na seção "Novo Trade"</li>
+                    <li>• Importe histórico via CSV exportado do MT4/MT5</li>
+                    <li>• Todos os dados ficam armazenados no banco de dados</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Trade
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importar CSV
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Clear Manual Setup */}
+          <Dialog open={isConfigDialogOpen && selectedBrokerForConfig === 'clear'} onOpenChange={(open) => {
+            setIsConfigDialogOpen(open);
+            if (!open) setSelectedBrokerForConfig('');
+          }}>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className={`border-green-600 text-green-400 hover:bg-green-600 hover:text-white ${
+                  selectedBrokerFilter === 'clear' ? 'ring-2 ring-green-400 bg-green-600 text-white' : ''
+                }`}
+                onClick={() => {
+                  setSelectedBrokerFilter('clear');
+                  setSelectedBrokerForConfig('clear');
+                  toast({
+                    title: "Clear Selecionado",
+                    description: "Dashboard mostrando apenas dados da Clear."
+                  });
+                }}
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                📈 Clear
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Clear - Trading Manual</DialogTitle>
+                <DialogDescription>
+                  Para Clear, você pode registrar trades manualmente ou importar via CSV
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-2">📊 Como usar o Clear:</h4>
+                  <ul className="text-sm text-slate-400 space-y-1">
+                    <li>• Registre trades manualmente na seção "Novo Trade"</li>
+                    <li>• Importe histórico via CSV do Clear ou ProfitChart</li>
+                    <li>• Todos os dados ficam armazenados no banco de dados</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Trade
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => window.location.href = '/novo-trade'}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Importar CSV
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-slate-700">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-slate-700">Visão Geral</TabsTrigger>
-          <TabsTrigger value="insights" className="data-[state=active]:bg-slate-700">Insights Detalhados</TabsTrigger>
-          <TabsTrigger value="brokers" className="data-[state=active]:bg-slate-700">Gestão</TabsTrigger>
-          <TabsTrigger value="imports" className="data-[state=active]:bg-slate-700">Importações</TabsTrigger>
-          <TabsTrigger value="consolidated" className="data-[state=active]:bg-slate-700">Consolidado</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="insights">Insights Detalhados</TabsTrigger>
+          <TabsTrigger value="brokers">Corretoras</TabsTrigger>
+          <TabsTrigger value="imports">Importações</TabsTrigger>
+          <TabsTrigger value="consolidated">Consolidado</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Trading Calendar */}
-          <TradingCalendar trades={filteredTrades} />
+
+      {/* Rentabilidade por período */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricCard
+          title="📈 Rentabilidade (Semana)"
+          value={`R$ ${metrics.rentabilidadeSemana.toFixed(2)}`}
+          icon={Calendar}
+          color={metrics.rentabilidadeSemana >= 0 ? "text-green-400" : "text-red-400"}
+        />
+        
+        <MetricCard
+          title="📈 Rentabilidade (Mês)"
+          value={`R$ ${metrics.rentabilidadeMes.toFixed(2)}`}
+          icon={Calendar}
+          color={metrics.rentabilidadeMes >= 0 ? "text-green-400" : "text-red-400"}
+        />
+        
+        <MetricCard
+          title="📈 Rentabilidade (Ano)"
+          value={`R$ ${metrics.rentabilidadeAno.toFixed(2)}`}
+          icon={Calendar}
+          color={metrics.rentabilidadeAno >= 0 ? "text-green-400" : "text-red-400"}
+        />
+      </div>
+
+      {/* Melhores e piores trades */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <MetricCard
+          title="💥 Melhor Trade"
+          value={`R$ ${metrics.melhorTrade.toFixed(2)}`}
+          icon={Trophy}
+          color="text-green-400"
+          subtitle="Maior lucro em uma operação"
+        />
+        
+        <MetricCard
+          title="💥 Pior Trade"
+          value={`R$ ${metrics.piorTrade.toFixed(2)}`}
+          icon={AlertTriangle}
+          color="text-red-400"
+          subtitle="Maior prejuízo em uma operação"
+        />
+      </div>
+
+      {/* Setup e Emoção */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <MetricCard
+          title="🔍 Setup Mais Lucrativo"
+          value={metrics.setupMaisLucrativo.setup || "Nenhum"}
+          icon={Target}
+          color="text-purple-400"
+          subtitle={metrics.setupMaisLucrativo.total > 0 ? 
+            `R$ ${metrics.setupMaisLucrativo.total.toFixed(2)} (${metrics.setupMaisLucrativo.percent.toFixed(1)}%)` : 
+            "Nenhum trade registrado"
+          }
+        />
+        
+        <MetricCard
+          title="🧠 Emoção Mais Recorrente"
+          value={`${emojiEmocoes[metrics.emocaoMaisRecorrente.emocao as keyof typeof emojiEmocoes] || '😐'} ${
+            metrics.emocaoMaisRecorrente.emocao || 'Neutro'
+          }`}
+          icon={Brain}
+          color="text-blue-400"
+          subtitle={`${metrics.emocaoMaisRecorrente.count} trades`}
+        />
+      </div>
+
+      {/* Trading Calendar */}
+      <TradingCalendar trades={filteredTrades} className="w-full" />
+
+      {/* Lucro por dia da semana */}
+      <Card className="bg-slate-900/50 border-slate-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-purple-400" />
+            📊 Lucro/Prejuízo por Dia da Semana
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {metrics.lucroPorDiaSemana.map(({ dia, valor }) => (
+              <div key={dia} className="flex items-center justify-between">
+                <span className="text-slate-300 font-medium">{dia}</span>
+                <div className="flex items-center gap-2">
+                  <div className={`w-32 h-6 bg-slate-800 rounded-full overflow-hidden`}>
+                    <div 
+                      className={`h-full transition-all duration-300 ${
+                        valor >= 0 ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                      style={{ 
+                        width: `${Math.min(Math.abs(valor) / Math.max(...metrics.lucroPorDiaSemana.map(d => Math.abs(d.valor))) * 100, 100)}%` 
+                      }}
+                    />
+                  </div>
+                  <span className={`text-sm font-medium min-w-[80px] text-right ${
+                    valor >= 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    R$ {valor.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Trades recentes */}
+      <Card className="bg-slate-900/50 border-slate-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Timer className="h-5 w-5 text-purple-400" />
+            Últimos Trades
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredTrades.length === 0 ? (
+            <p className="text-slate-400 text-center py-8">
+              Nenhum trade registrado ainda. 
+              <br />
+              <span className="text-purple-400">Comece registrando seu primeiro trade!</span>
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {filteredTrades.slice(-5).reverse().map((trade) => (
+                <div key={trade.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${
+                      parseFloat(trade.resultado || "0") >= 0 ? 'bg-green-400' : 'bg-red-400'
+                    }`} />
+                    <div>
+                      <p className="text-white font-medium">{trade.ativo}</p>
+                      <p className="text-slate-400 text-sm">
+                        {trade.setup} • {new Date(trade.dataHora).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-medium ${
+                      parseFloat(trade.resultado || "0") >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      R$ {parseFloat(trade.resultado || "0").toFixed(2)}
+                    </p>
+                    <p className="text-slate-400 text-sm">{trade.mercado}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
-          {/* Main Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Métricas principais detalhadas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <MetricCard
-              title="💰 Rentabilidade Total"
+              title="✅ Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
               color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
             />
             
             <MetricCard
-              title="📊 Total de Trades"
+              title="🧮 Total de Trades"
               value={metrics.totalTrades}
               icon={BarChart3}
             />
@@ -595,13 +1151,13 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Capital Total Investido</span>
                     <span className="text-blue-400 font-semibold">
-                      R$ {filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0).toFixed(2)}
+                      R$ {filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Ticket Médio</span>
                     <span className="text-purple-400 font-semibold">
-                      R$ {filteredTrades.length > 0 ? (filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0) / filteredTrades.length).toFixed(2) : "0.00"}
+                      R$ {filteredTrades.length > 0 ? (filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0) / filteredTrades.length).toFixed(2) : "0.00"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -609,8 +1165,8 @@ export default function Dashboard() {
                     <span className={`font-semibold ${
                       metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
-                      {filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0) > 0 ? 
-                        ((metrics.rentabilidadeTotal / filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0)) * 100).toFixed(2) : "0.00"}%
+                      {filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0) > 0 ? 
+                        ((metrics.rentabilidadeTotal / filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0)) * 100).toFixed(2) : "0.00"}%
                     </span>
                   </div>
                 </div>
@@ -632,7 +1188,7 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-white mb-1">
                     {(() => {
                       const hoje = new Date();
-                      const tradesHoje = filteredTrades.filter((t: Trade) => {
+                      const tradesHoje = filteredTrades.filter(t => {
                         const tradeDate = new Date(t.dataHora);
                         return tradeDate.toDateString() === hoje.toDateString();
                       });
@@ -643,19 +1199,19 @@ export default function Dashboard() {
                   <div className={`text-sm font-semibold ${
                     (() => {
                       const hoje = new Date();
-                      const resultadoHoje = filteredTrades.filter((t: Trade) => {
+                      const resultadoHoje = filteredTrades.filter(t => {
                         const tradeDate = new Date(t.dataHora);
                         return tradeDate.toDateString() === hoje.toDateString();
-                      }).reduce((sum: number, t: Trade) => sum + parseFloat(t.resultado || "0"), 0);
+                      }).reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
                       return resultadoHoje >= 0 ? 'text-green-400' : 'text-red-400';
                     })()
                   }`}>
                     R$ {(() => {
                       const hoje = new Date();
-                      const resultadoHoje = filteredTrades.filter((t: Trade) => {
+                      const resultadoHoje = filteredTrades.filter(t => {
                         const tradeDate = new Date(t.dataHora);
                         return tradeDate.toDateString() === hoje.toDateString();
-                      }).reduce((sum: number, t: Trade) => sum + parseFloat(t.resultado || "0"), 0);
+                      }).reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
                       return resultadoHoje.toFixed(2);
                     })()}
                   </div>
@@ -698,6 +1254,7 @@ export default function Dashboard() {
         <TabsContent value="brokers" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.entries(brokerInfo).map(([broker, info]) => {
+              const config = getBrokerConfig(broker);
               const trades = (tradesByBroker as any)[broker] || [];
               const stats = calculateBrokerStats(trades);
               const IconComponent = info.icon;
@@ -715,7 +1272,14 @@ export default function Dashboard() {
                           <CardDescription>{info.description}</CardDescription>
                         </div>
                       </div>
-                      <Badge variant="secondary">{info.type}</Badge>
+                      <div className="flex items-center space-x-2">
+                        {config?.isActive && (
+                          <Badge variant="default" className="bg-green-500">
+                            Ativo
+                          </Badge>
+                        )}
+                        <Badge variant="secondary">{info.type}</Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   
@@ -740,6 +1304,17 @@ export default function Dashboard() {
                     <Separator className="bg-slate-700" />
 
                     <div className="flex justify-between items-center">
+                      {broker === 'gate.io' && config?.isActive && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => syncMutation.mutate()}
+                          disabled={syncMutation.isPending}
+                        >
+                          <Sync className="w-4 h-4 mr-1" />
+                          {syncMutation.isPending ? "Sync..." : "Sincronizar"}
+                        </Button>
+                      )}
+                      
                       <div className="flex space-x-1">
                         <Button variant="outline" size="sm">
                           <FileText className="w-4 h-4" />
@@ -809,7 +1384,7 @@ export default function Dashboard() {
               title="📊 Total de Trades"
               value={metrics.totalTrades}
               icon={BarChart3}
-              subtitle="Crypto + Forex + B3"
+              subtitle="Gate.io + Tickmill + Clear"
             />
             
             <MetricCard
@@ -892,11 +1467,11 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 {['crypto', 'forex', 'b3'].map((mercado) => {
-                  const tradesMercado = trades.filter((trade: Trade) => trade.mercado === mercado);
-                  const totalMercado = tradesMercado.reduce((sum: number, trade: Trade) => sum + parseFloat(trade.resultado || "0"), 0);
+                  const tradesMercado = trades.filter(trade => trade.mercado === mercado);
+                  const totalMercado = tradesMercado.reduce((sum, trade) => sum + parseFloat(trade.resultado || "0"), 0);
                   const countMercado = tradesMercado.length;
                   const winRateMercado = countMercado > 0 ? 
-                    (tradesMercado.filter((trade: Trade) => parseFloat(trade.resultado || "0") > 0).length / countMercado) * 100 : 0;
+                    (tradesMercado.filter(trade => parseFloat(trade.resultado || "0") > 0).length / countMercado) * 100 : 0;
                   
                   const mercadoInfo = {
                     crypto: { name: 'Crypto', emoji: '🪙', color: 'text-orange-400' },

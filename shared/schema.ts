@@ -33,7 +33,7 @@ export const trades = pgTable("trades", {
   emocao: text("emocao"), // "confiante", "ansioso", "impulsivo", etc.
   precoEntrada: decimal("preco_entrada", { precision: 12, scale: 4 }),
   precoSaida: decimal("preco_saida", { precision: 12, scale: 4 }),
-  corretora: text("corretora").notNull(), // "tickmill", "clear", "gate.io"
+  corretora: text("corretora").notNull(), // "crypto", "forex", "b3"
   status: text("status").default("fechado"), // "aberto", "fechado"
   origem: text("origem").default("manual"), // "manual", "csv", "api"
   externalId: text("external_id"), // ID da API externa
@@ -45,7 +45,7 @@ export const trades = pgTable("trades", {
 export const brokerApiConfigs = pgTable("broker_api_configs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
-  broker: text("broker").notNull(), // "gate.io", "tickmill", "clear"
+  broker: text("broker").notNull(), // "crypto", "forex", "b3"
   apiKey: text("api_key"),
   apiSecret: text("api_secret"),
   isActive: boolean("is_active").default(false),
@@ -100,7 +100,7 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   comentario: z.string().optional(),
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
-  corretora: z.enum(["tickmill", "clear", "gate.io"], { message: "Corretora deve ser tickmill, clear ou gate.io" }),
+  corretora: z.enum(["crypto", "forex", "b3"], { message: "Corretora deve ser crypto, forex ou b3" }),
   emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro"], { 
     message: "Emoção deve ser uma das opções disponíveis" 
   }).optional(),
@@ -113,14 +113,14 @@ export const insertBrokerApiConfigSchema = createInsertSchema(brokerApiConfigs).
   createdAt: true,
   updatedAt: true,
 }).extend({
-  broker: z.enum(["gate.io", "tickmill", "clear"], { message: "Corretora deve ser gate.io, tickmill ou clear" }),
+  broker: z.enum(["crypto", "forex", "b3"], { message: "Corretora deve ser crypto, forex ou b3" }),
   apiKey: z.string().min(1, "API Key é obrigatória"),
   apiSecret: z.string().min(1, "API Secret é obrigatório"),
 });
 
 // Schema para importação CSV
 export const csvImportSchema = z.object({
-  broker: z.enum(["tickmill", "clear", "gate.io"], { message: "Corretora deve ser tickmill, clear ou gate.io" }),
+  broker: z.enum(["crypto", "forex", "b3"], { message: "Corretora deve ser crypto, forex ou b3" }),
   file: z.any(), // File object
 });
 
