@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,10 +31,14 @@ import {
   Settings, 
   FileText,
   Activity,
-  Plus
+  Plus,
+  LineChart
 } from "lucide-react";
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
+import { format, startOfDay, startOfWeek, startOfMonth, startOfYear, addDays, addWeeks, addMonths, addYears, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const brokerConfigSchema = z.object({
   broker: z.enum(["gate.io", "tickmill", "clear"]),
@@ -100,6 +104,178 @@ const emojiEmocoes = {
   'frustrado': '😤',
   'neutro': '😐'
 };
+
+// Componente do gráfico de rentabilidade ao longo do tempo
+function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
+  const [timeFilter, setTimeFilter] = useState<'dia' | 'semana' | 'mes' | 'ano'>('mes');
+
+  const chartData = useMemo(() => {
+    if (!trades.length) return [];
+
+    // Ordenar trades por data
+    const sortedTrades = [...trades].sort((a, b) => 
+      new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime()
+    );
+
+    // Função para agrupar dados baseado no filtro
+    const groupDataByPeriod = () => {
+      const groups = new Map();
+      let cumulativeProfit = 0;
+
+      sortedTrades.forEach(trade => {
+        const tradeDate = new Date(trade.dataHora);
+        const profit = parseFloat(trade.resultado || "0");
+        cumulativeProfit += profit;
+
+        let periodKey: string;
+        let periodLabel: string;
+
+        switch (timeFilter) {
+          case 'dia':
+            periodKey = format(startOfDay(tradeDate), 'yyyy-MM-dd');
+            periodLabel = format(tradeDate, 'dd/MM', { locale: ptBR });
+            break;
+          case 'semana':
+            periodKey = format(startOfWeek(tradeDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+            periodLabel = format(startOfWeek(tradeDate, { weekStartsOn: 1 }), 'dd/MM', { locale: ptBR });
+            break;
+          case 'mes':
+            periodKey = format(startOfMonth(tradeDate), 'yyyy-MM');
+            periodLabel = format(tradeDate, 'MMM/yy', { locale: ptBR });
+            break;
+          case 'ano':
+            periodKey = format(startOfYear(tradeDate), 'yyyy');
+            periodLabel = format(tradeDate, 'yyyy', { locale: ptBR });
+            break;
+        }
+
+        if (!groups.has(periodKey)) {
+          groups.set(periodKey, {
+            period: periodLabel,
+            date: periodKey,
+            profit: 0,
+            cumulativeProfit: 0,
+            trades: 0
+          });
+        }
+
+        const group = groups.get(periodKey);
+        group.profit += profit;
+        group.cumulativeProfit = cumulativeProfit;
+        group.trades += 1;
+      });
+
+      return Array.from(groups.values()).sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+    };
+
+    return groupDataByPeriod();
+  }, [trades, timeFilter]);
+
+  const formatTooltipValue = (value: number, name: string) => {
+    if (name === 'cumulativeProfit') {
+      return [`R$ ${value.toFixed(2)}`, 'Rentabilidade Acumulada'];
+    }
+    return [`R$ ${value.toFixed(2)}`, 'Resultado do Período'];
+  };
+
+  return (
+    <div className="w-full">
+      <CardContent className="p-6">
+        {/* Filtros de Tempo */}
+        <div className="flex justify-end gap-2 mb-4">
+          {[
+            { key: 'dia', label: 'Dia' },
+            { key: 'semana', label: 'Semana' },
+            { key: 'mes', label: 'Mês' },
+            { key: 'ano', label: 'Ano' }
+          ].map(filter => (
+            <Button
+              key={filter.key}
+              variant={timeFilter === filter.key ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTimeFilter(filter.key as any)}
+              className={timeFilter === filter.key ? 
+                "bg-purple-600 hover:bg-purple-700" : 
+                "border-slate-600 text-slate-300 hover:bg-slate-800"
+              }
+            >
+              {filter.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Gráfico */}
+        <div className="h-80 w-full">
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsLineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  dataKey="period" 
+                  stroke="#9CA3AF"
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke="#9CA3AF"
+                  fontSize={12}
+                  tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1E293B',
+                    border: '1px solid #475569',
+                    borderRadius: '8px',
+                    color: '#F1F5F9'
+                  }}
+                  formatter={formatTooltipValue}
+                  labelStyle={{ color: '#CBD5E1' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="cumulativeProfit"
+                  stroke="#8B5CF6"
+                  strokeWidth={3}
+                  dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#8B5CF6', strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="profit"
+                  stroke="#10B981"
+                  strokeWidth={2}
+                  dot={{ fill: '#10B981', strokeWidth: 2, r: 3 }}
+                  strokeDasharray="5 5"
+                />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-slate-400">
+              <div className="text-center">
+                <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>Nenhum dado para exibir</p>
+                <p className="text-sm">Registre alguns trades para ver o gráfico</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Legenda */}
+        <div className="flex justify-center gap-6 mt-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-purple-500"></div>
+            <span className="text-slate-300">Rentabilidade Acumulada</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-green-500 border-dashed"></div>
+            <span className="text-slate-300">Resultado do Período</span>
+          </div>
+        </div>
+      </CardContent>
+    </div>
+  );
+}
 
 function calculateMetrics(trades: Trade[]): TradeMetrics {
   if (!trades.length) {
@@ -956,40 +1132,17 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Análises mais detalhadas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Distribuição de Resultados */}
-            <Card className="bg-slate-900/50 border-slate-700">
+          {/* Gráfico de Rentabilidade e Análise de Volume */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Gráfico de Rentabilidade ao Longo do Tempo */}
+            <Card className="bg-slate-900/50 border-slate-700 lg:col-span-1">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-purple-400" />
-                  📊 Distribuição de Resultados
+                  <LineChart className="h-5 w-5 text-purple-400" />
+                  📈 Rentabilidade ao Longo do Tempo
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Trades Lucrativos</span>
-                    <span className="text-green-400 font-semibold">
-                      {filteredTrades.filter(t => parseFloat(t.resultado || "0") > 0).length} 
-                      ({filteredTrades.length > 0 ? ((filteredTrades.filter(t => parseFloat(t.resultado || "0") > 0).length / filteredTrades.length) * 100).toFixed(1) : 0}%)
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Trades no Prejuízo</span>
-                    <span className="text-red-400 font-semibold">
-                      {filteredTrades.filter(t => parseFloat(t.resultado || "0") < 0).length}
-                      ({filteredTrades.length > 0 ? ((filteredTrades.filter(t => parseFloat(t.resultado || "0") < 0).length / filteredTrades.length) * 100).toFixed(1) : 0}%)
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Trades no Empate</span>
-                    <span className="text-slate-400 font-semibold">
-                      {filteredTrades.filter(t => parseFloat(t.resultado || "0") === 0).length}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
+              <ProfitabilityTimeChart trades={filteredTrades} />
             </Card>
 
             {/* Análise de Volume */}
