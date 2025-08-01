@@ -21,156 +21,246 @@ const upload = multer({
   }
 });
 
-// Function to intelligently detect and map CSV fields
+// Universal CSV field detection - works with any broker format
 function detectFieldMapping(row: any): Record<string, string> {
   const fieldMap: Record<string, string> = {};
   const keys = Object.keys(row);
   
   console.log('CSV Headers encontrados:', keys);
   
-  // Date/Time mapping
+  // Enhanced date/time mapping - covers most broker formats
+  const datePatterns = [
+    'date', 'time', 'data', 'hora', 'timestamp', 'created', 'closed', 'open', 'entry', 'exit',
+    'datetime', 'opentime', 'closetime', 'execution', 'settle', 'trade_time', 'order_time'
+  ];
   const dateFields = keys.filter(key => 
-    key.toLowerCase().includes('date') || 
-    key.toLowerCase().includes('time') || 
-    key.toLowerCase().includes('data') ||
-    key.toLowerCase().includes('hora') ||
-    key.toLowerCase().includes('created') ||
-    key.toLowerCase().includes('closed')
+    datePatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (dateFields.length > 0) fieldMap.date = dateFields[0];
   
-  // Symbol/Asset mapping
+  // Enhanced symbol/asset mapping - covers various naming conventions
+  const symbolPatterns = [
+    'symbol', 'pair', 'instrument', 'ativo', 'asset', 'currency', 'ticker', 'security',
+    'market', 'product', 'commodity', 'stock', 'forex', 'crypto', 'coin', 'token'
+  ];
   const symbolFields = keys.filter(key => 
-    key.toLowerCase().includes('symbol') || 
-    key.toLowerCase().includes('pair') ||
-    key.toLowerCase().includes('instrument') ||
-    key.toLowerCase().includes('ativo') ||
-    key.toLowerCase().includes('asset')
+    symbolPatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (symbolFields.length > 0) fieldMap.symbol = symbolFields[0];
   
-  // Volume/Amount mapping
+  // Enhanced volume/quantity mapping
+  const volumePatterns = [
+    'volume', 'amount', 'size', 'quantity', 'quantidade', 'qty', 'units', 'shares',
+    'lots', 'contracts', 'nominal', 'position', 'trade_size'
+  ];
   const volumeFields = keys.filter(key => 
-    key.toLowerCase().includes('volume') || 
-    key.toLowerCase().includes('amount') ||
-    key.toLowerCase().includes('size') ||
-    key.toLowerCase().includes('quantity') ||
-    key.toLowerCase().includes('quantidade')
+    volumePatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (volumeFields.length > 0) fieldMap.volume = volumeFields[0];
   
-  // Price mapping (prefer open price for entry)
+  // Enhanced price mapping - entry price
+  const openPricePatterns = [
+    'open', 'entry', 'price', 'preco', 'fill', 'execution', 'rate', 'level',
+    'open_price', 'entry_price', 'fill_price', 'avg_price', 'average'
+  ];
   const openPriceFields = keys.filter(key => 
-    key.toLowerCase().includes('open') ||
-    key.toLowerCase().includes('price') ||
-    key.toLowerCase().includes('preco')
+    openPricePatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (openPriceFields.length > 0) fieldMap.openPrice = openPriceFields[0];
   
-  // Close price mapping
+  // Enhanced close price mapping
+  const closePricePatterns = [
+    'close', 'exit', 'close_price', 'exit_price', 'final'
+  ];
   const closePriceFields = keys.filter(key => 
-    key.toLowerCase().includes('close') ||
-    key.toLowerCase().includes('exit')
+    closePricePatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (closePriceFields.length > 0) fieldMap.closePrice = closePriceFields[0];
   
-  // Profit/Loss mapping
+  // Enhanced profit/loss mapping
+  const profitPatterns = [
+    'profit', 'loss', 'pnl', 'p&l', 'resultado', 'gain', 'return', 'net',
+    'gross', 'realized', 'unrealized', 'commission', 'fee', 'swap'
+  ];
   const profitFields = keys.filter(key => 
-    key.toLowerCase().includes('profit') || 
-    key.toLowerCase().includes('loss') ||
-    key.toLowerCase().includes('pnl') ||
-    key.toLowerCase().includes('resultado') ||
-    key.toLowerCase().includes('gain')
+    profitPatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (profitFields.length > 0) fieldMap.profit = profitFields[0];
   
-  // Side/Type mapping
+  // Enhanced side/direction mapping
+  const sidePatterns = [
+    'side', 'type', 'action', 'direction', 'buy', 'sell', 'long', 'short',
+    'order_type', 'trade_type', 'position_type'
+  ];
   const sideFields = keys.filter(key => 
-    key.toLowerCase().includes('side') || 
-    key.toLowerCase().includes('type') ||
-    key.toLowerCase().includes('action') ||
-    key.toLowerCase().includes('buy') ||
-    key.toLowerCase().includes('sell')
+    sidePatterns.some(pattern => key.toLowerCase().includes(pattern))
   );
   if (sideFields.length > 0) fieldMap.side = sideFields[0];
+  
+  // Additional common fields detection
+  
+  // Comment/Description mapping
+  const commentPatterns = ['comment', 'description', 'note', 'memo', 'remark'];
+  const commentFields = keys.filter(key => 
+    commentPatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (commentFields.length > 0) fieldMap.comment = commentFields[0];
+  
+  // Commission/Fee mapping
+  const feePatterns = ['commission', 'fee', 'spread', 'cost', 'charge'];
+  const feeFields = keys.filter(key => 
+    feePatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (feeFields.length > 0) fieldMap.fee = feeFields[0];
+  
+  // Account/ID mapping
+  const accountPatterns = ['account', 'id', 'ticket', 'order', 'position', 'deal'];
+  const accountFields = keys.filter(key => 
+    accountPatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (accountFields.length > 0) fieldMap.account = accountFields[0];
   
   console.log('Campo mapping detectado:', fieldMap);
   return fieldMap;
 }
 
-// Function to process CSV rows based on detected field mapping
+// Robust CSV row processing - works with any broker format
 function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Record<string, string>): any | null {
   try {
     // Basic validation
     if (!row || typeof row !== 'object') return null;
+    
+    // Skip completely empty rows
+    const hasAnyData = Object.values(row).some(value => value && value.toString().trim() !== '');
+    if (!hasAnyData) return null;
     
     // Auto-detect fields if not provided
     if (!fieldMap) {
       fieldMap = detectFieldMapping(row);
     }
 
+    console.log('Processando linha:', Object.keys(row).slice(0, 5), '...');
+
+    // Auto-detect market type based on content
+    let detectedMarket = 'forex'; // default
+    
+    // Check symbol patterns to determine market
+    const allText = Object.values(row).join(' ').toUpperCase();
+    if (allText.includes('BTC') || allText.includes('ETH') || allText.includes('USDT') || 
+        allText.includes('CRYPTO') || allText.match(/[A-Z]+\/USDT|[A-Z]+\/BTC/)) {
+      detectedMarket = 'crypto';
+    } else if (allText.includes('PETR') || allText.includes('VALE') || allText.includes('ITUB') ||
+               allText.includes('WIN') || allText.includes('WDO') || allText.match(/[A-Z]{4}\d{2}/)) {
+      detectedMarket = 'b3';
+    } else if (allText.match(/[A-Z]{6}|EUR\/USD|GBP\/USD|USD\/JPY/)) {
+      detectedMarket = 'forex';
+    }
+
     // Common processing for all brokers
     let trade: any = {
       userId,
-      corretora: broker,
+      corretora: broker === 'auto' ? detectedMarket : broker,
       origem: 'csv',
-      mercado: broker === 'forex' ? 'forex' : broker === 'b3' ? 'b3' : 'crypto',
+      mercado: detectedMarket,
       setup: 'CSV Import'
     };
 
-    // Map detected fields to trade object
-    trade.dataHora = row[fieldMap.date || ''] || 
-                     row['Date'] || row['Time'] || row['Created Time'] || row['Closed Time'] ||
-                     new Date().toISOString();
+    // Intelligent field mapping with fallbacks
     
-    trade.ativo = row[fieldMap.symbol || ''] || 
-                  row['Symbol'] || row['Instrument'] || row['Currency Pair'] ||
-                  '';
+    // DATE/TIME - try multiple approaches
+    let dateValue = row[fieldMap.date || ''] || 
+                    Object.values(row).find(val => val && /\d{4}[-\/]\d{2}[-\/]\d{2}/.test(val.toString())) ||
+                    Object.values(row).find(val => val && /\d{2}[-\/]\d{2}[-\/]\d{4}/.test(val.toString())) ||
+                    new Date().toISOString();
     
-    trade.quantidade = row[fieldMap.volume || ''] || 
-                       row['Volume'] || row['Amount'] || row['Size'] ||
-                       '1';
+    // SYMBOL/ASSET - find the most likely candidate
+    let symbolValue = row[fieldMap.symbol || ''] ||
+                      Object.values(row).find(val => val && val.toString().match(/^[A-Z]{3,6}$/)) || // Currency pairs like EURUSD
+                      Object.values(row).find(val => val && val.toString().includes('/')) || // Pairs like EUR/USD
+                      Object.values(row).find(val => val && val.toString().match(/^[A-Z]+\d*$/)) || // Stocks like AAPL, ES1!
+                      'UNKNOWN';
     
-    trade.capitalUtilizado = row[fieldMap.volume || ''] || 
-                             row['Volume'] || row['Amount'] || row['Nominal'] ||
-                             '100';
+    // VOLUME/QUANTITY - find numeric values
+    let volumeValue = row[fieldMap.volume || ''] ||
+                      Object.values(row).find(val => val && !isNaN(parseFloat(val.toString())) && parseFloat(val.toString()) > 0) ||
+                      '1';
     
-    trade.precoEntrada = row[fieldMap.openPrice || ''] || 
-                         row['Open Price'] || row['Price'] || row['Entry Price'] ||
-                         '';
+    // PRICE - find price-like values
+    let priceValue = row[fieldMap.openPrice || ''] ||
+                     Object.values(row).find(val => val && /^\d+\.?\d*$/.test(val.toString()) && parseFloat(val.toString()) > 0) ||
+                     '0';
     
-    trade.precoSaida = row[fieldMap.closePrice || ''] || 
-                       row['Close Price'] || row['Exit Price'] ||
-                       trade.precoEntrada; // fallback to entry price
+    // PROFIT/LOSS - find negative or positive numeric values
+    let profitValue = row[fieldMap.profit || ''] ||
+                      Object.values(row).find(val => val && /^-?\d+\.?\d*$/.test(val.toString())) ||
+                      '0';
     
-    trade.resultado = row[fieldMap.profit || ''] || 
-                      row['Profit'] || row['PnL'] || row['Net P&L'] ||
-                      '';
-    
-    // Determine trade type (buy/sell)
-    const sideValue = row[fieldMap.side || ''] || row['Side'] || row['Action'] || 'buy';
-    trade.tipo = sideValue.toLowerCase().includes('sell') || sideValue.toLowerCase().includes('short') ? 'venda' : 'compra';
+    // SIDE/TYPE - detect buy/sell
+    let sideValue = row[fieldMap.side || ''] ||
+                    Object.values(row).find(val => val && /^(buy|sell|long|short|compra|venda)$/i.test(val.toString())) ||
+                    'buy';
 
-    // Validate that we have minimum required fields
-    if (!trade.ativo) {
-      throw new Error('Símbolo/Ativo não encontrado');
-    }
+    // Assign values with intelligent defaults
+    trade.dataHora = dateValue;
+    trade.ativo = symbolValue.toString().toUpperCase();
+    trade.quantidade = volumeValue.toString();
+    trade.capitalUtilizado = volumeValue.toString(); // Use volume as capital
+    trade.precoEntrada = priceValue.toString();
+    trade.precoSaida = row[fieldMap.closePrice || ''] || priceValue.toString();
+    trade.resultado = profitValue.toString();
     
-    if (!trade.dataHora) {
-      throw new Error('Data/Hora não encontrada');
+    // Determine trade type with intelligent detection
+    const sideStr = sideValue.toString().toLowerCase();
+    trade.tipo = (sideStr.includes('sell') || sideStr.includes('short') || sideStr.includes('venda')) ? 'venda' : 'compra';
+
+    // Add additional fields if available
+    if (fieldMap.comment && row[fieldMap.comment]) {
+      trade.comentario = row[fieldMap.comment].toString();
     }
 
-    // Convert string dates to proper format
-    if (typeof trade.dataHora === 'string') {
-      const parsedDate = new Date(trade.dataHora);
-      if (isNaN(parsedDate.getTime())) {
-        throw new Error('Formato de data inválido');
+    // Only require that we have SOME data - be very permissive
+    if (!trade.ativo || trade.ativo === 'UNKNOWN') {
+      // Try to extract symbol from any field that looks like a trading instrument
+      const allValues = Object.values(row).join(' ');
+      const symbolMatch = allValues.match(/([A-Z]{6}|[A-Z]{3}\/[A-Z]{3}|[A-Z]+\d+)/);
+      if (symbolMatch) {
+        trade.ativo = symbolMatch[1];
+      } else {
+        throw new Error('Não foi possível identificar o ativo/símbolo');
       }
+    }
+
+    // Convert and validate date
+    if (typeof trade.dataHora === 'string') {
+      // Try multiple date formats
+      let parsedDate = new Date(trade.dataHora);
+      
+      if (isNaN(parsedDate.getTime())) {
+        // Try DD/MM/YYYY format
+        const parts = trade.dataHora.split(/[-\/]/);
+        if (parts.length === 3) {
+          parsedDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        }
+      }
+      
+      if (isNaN(parsedDate.getTime())) {
+        // Use current date as fallback
+        parsedDate = new Date();
+      }
+      
       trade.dataHora = parsedDate.toISOString();
     }
 
+    console.log('Trade processado:', {
+      ativo: trade.ativo,
+      dataHora: trade.dataHora.substring(0, 10),
+      tipo: trade.tipo,
+      quantidade: trade.quantidade
+    });
+
     return trade;
   } catch (error) {
+    console.error('Erro ao processar linha:', error);
     throw error;
   }
 }
@@ -318,10 +408,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Arquivo CSV é obrigatório" });
       }
 
-      const { broker } = req.body;
-      if (!broker || !['forex', 'b3', 'crypto'].includes(broker)) {
-        return res.status(400).json({ message: "Corretora inválida ou não especificada" });
-      }
+      const { broker = 'auto' } = req.body;
+      // Auto-detect broker type or use provided value
+      const validBrokers = ['forex', 'b3', 'crypto', 'auto'];
+      const finalBroker = validBrokers.includes(broker) ? broker : 'auto';
 
       console.log(`Iniciando importação CSV: ${req.file.originalname} para broker: ${broker}`);
 

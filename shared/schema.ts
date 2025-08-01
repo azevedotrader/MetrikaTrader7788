@@ -100,7 +100,7 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   comentario: z.string().optional(),
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
-  corretora: z.enum(["crypto", "forex", "b3"], { message: "Corretora deve ser crypto, forex ou b3" }),
+  corretora: z.enum(["crypto", "forex", "b3", "auto"], { message: "Corretora deve ser crypto, forex, b3 ou auto" }),
   emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro"], { 
     message: "Emoção deve ser uma das opções disponíveis" 
   }).optional(),
@@ -113,14 +113,14 @@ export const insertBrokerApiConfigSchema = createInsertSchema(brokerApiConfigs).
   createdAt: true,
   updatedAt: true,
 }).extend({
-  broker: z.enum(["crypto", "forex", "b3"], { message: "Corretora deve ser crypto, forex ou b3" }),
+  broker: z.enum(["crypto", "forex", "b3", "auto"], { message: "Corretora deve ser crypto, forex, b3 ou auto" }),
   apiKey: z.string().min(1, "API Key é obrigatória"),
   apiSecret: z.string().min(1, "API Secret é obrigatório"),
 });
 
 // Schema para importação CSV
 export const csvImportSchema = z.object({
-  broker: z.enum(["crypto", "forex", "b3"], { message: "Corretora deve ser crypto, forex ou b3" }),
+  broker: z.enum(["crypto", "forex", "b3", "auto"], { message: "Corretora deve ser crypto, forex, b3 ou auto" }),
   file: z.any(), // File object
 });
 
