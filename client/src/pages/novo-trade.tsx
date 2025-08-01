@@ -55,20 +55,25 @@ export default function NovoTrade() {
       emocao: "neutro",
       precoEntrada: "",
       precoSaida: "",
-      corretora: "gate.io",
+      corretora: "crypto",
       status: "fechado"
     },
   });
 
   const createTradeMutation = useMutation({
     mutationFn: async (data: InsertTrade) => {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      // Get user from localStorage correctly
+      const userId = localStorage.getItem('user-id');
+      if (!userId) {
+        throw new Error("Usuário não autenticado");
+      }
+      
       const response = await fetch("/api/trades", {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
-          "user-id": user.id || '',
+          "user-id": userId,
         },
       });
 
@@ -99,6 +104,11 @@ export default function NovoTrade() {
   // CSV upload mutation
   const uploadMutation = useMutation({
     mutationFn: ({ file, broker }: { file: File; broker: string }) => {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) {
+        throw new Error("Usuário não autenticado");
+      }
+      
       const formData = new FormData();
       formData.append('csvFile', file);
       formData.append('broker', broker);
@@ -107,9 +117,15 @@ export default function NovoTrade() {
         method: 'POST',
         body: formData,
         headers: {
-          'user-id': localStorage.getItem('user-id') || ''
+          'user-id': userId
         }
-      }).then(res => res.json());
+      }).then(async res => {
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || "Erro ao importar CSV");
+        }
+        return res.json();
+      });
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
@@ -308,10 +324,9 @@ export default function NovoTrade() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-slate-800 border-slate-600">
-                          <SelectItem value="tickmill">Tickmill (Forex)</SelectItem>
-                          <SelectItem value="clear">Clear (B3)</SelectItem>
-                          <SelectItem value="gate.io">Gate.io (Crypto)</SelectItem>
-                          <SelectItem value="outros">Outros</SelectItem>
+                          <SelectItem value="forex">Tickmill (Forex)</SelectItem>
+                          <SelectItem value="b3">Clear (B3)</SelectItem>
+                          <SelectItem value="crypto">Gate.io (Crypto)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -579,9 +594,9 @@ export default function NovoTrade() {
                       <SelectValue placeholder="Escolha a corretora do arquivo CSV" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-600">
-                      <SelectItem value="tickmill">🏦 Tickmill (Forex)</SelectItem>
-                      <SelectItem value="clear">📈 Clear (B3)</SelectItem>
-                      <SelectItem value="gate.io">🪙 Gate.io (Crypto)</SelectItem>
+                      <SelectItem value="forex">🏦 Tickmill (Forex)</SelectItem>
+                      <SelectItem value="b3">📈 Clear (B3)</SelectItem>
+                      <SelectItem value="crypto">🪙 Gate.io (Crypto)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
