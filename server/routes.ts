@@ -124,6 +124,55 @@ function detectFieldMapping(row: any): Record<string, string> {
   return fieldMap;
 }
 
+// Function to validate and clean trade data before database insertion
+function validateAndCleanTrade(trade: any): any {
+  // Clean numeric fields to ensure they're valid for database
+  const numericFields = ['quantidade', 'capitalUtilizado', 'precoEntrada', 'precoSaida', 'resultado', 'stop', 'alvo', 'risco'];
+  
+  numericFields.forEach(field => {
+    if (trade[field] !== undefined && trade[field] !== null) {
+      let value = trade[field].toString();
+      
+      // Remove non-numeric characters except dots and minus signs
+      value = value.replace(/[^\d.-]/g, '');
+      
+      // Handle empty strings
+      if (value === '' || value === '-' || value === '.') {
+        if (field === 'quantidade' || field === 'capitalUtilizado') {
+          value = '1'; // Default for required fields
+        } else {
+          value = null; // Optional fields can be null
+        }
+      } else {
+        // Validate that it's a proper number
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) {
+          if (field === 'quantidade' || field === 'capitalUtilizado') {
+            value = '1';
+          } else {
+            value = null;
+          }
+        } else {
+          value = numValue.toString();
+        }
+      }
+      
+      trade[field] = value;
+    }
+  });
+  
+  // Ensure required fields have valid values
+  if (!trade.quantidade || trade.quantidade === null || parseFloat(trade.quantidade) <= 0) {
+    trade.quantidade = '1';
+  }
+  
+  if (!trade.capitalUtilizado || trade.capitalUtilizado === null || parseFloat(trade.capitalUtilizado) <= 0) {
+    trade.capitalUtilizado = trade.quantidade || '1';
+  }
+  
+  return trade;
+}
+
 // Robust CSV row processing - works with any broker format
 function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Record<string, string>): any | null {
   try {
@@ -180,34 +229,67 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
                       Object.values(row).find(val => val && val.toString().match(/^[A-Z]+\d*$/)) || // Stocks like AAPL, ES1!
                       'UNKNOWN';
     
-    // VOLUME/QUANTITY - find numeric values
+    // VOLUME/QUANTITY - find numeric values and clean them
     let volumeValue = row[fieldMap.volume || ''] ||
                       Object.values(row).find(val => val && !isNaN(parseFloat(val.toString())) && parseFloat(val.toString()) > 0) ||
                       '1';
     
-    // PRICE - find price-like values
+    // Clean volume value - extract only numbers
+    volumeValue = volumeValue.toString().replace(/[^\d.-]/g, '') || '1';
+    if (isNaN(parseFloat(volumeValue)) || parseFloat(volumeValue) <= 0) {
+      volumeValue = '1';
+    }
+    
+    // PRICE - find price-like values and clean them
     let priceValue = row[fieldMap.openPrice || ''] ||
-                     Object.values(row).find(val => val && /^\d+\.?\d*$/.test(val.toString()) && parseFloat(val.toString()) > 0) ||
+                     Object.values(row).find(val => val && /\d+\.?\d*/.test(val.toString())) ||
                      '0';
     
-    // PROFIT/LOSS - find negative or positive numeric values
+    // Clean price value - extract only numbers and decimal points
+    priceValue = priceValue.toString().replace(/[^\d.-]/g, '') || '0';
+    if (isNaN(parseFloat(priceValue))) {
+      priceValue = '0';
+    }
+    
+    // PROFIT/LOSS - find negative or positive numeric values and clean them
     let profitValue = row[fieldMap.profit || ''] ||
                       Object.values(row).find(val => val && /^-?\d+\.?\d*$/.test(val.toString())) ||
                       '0';
+    
+    // Clean profit value
+    profitValue = profitValue.toString().replace(/[^\d.-]/g, '') || '0';
+    if (isNaN(parseFloat(profitValue))) {
+      profitValue = '0';
+    }
     
     // SIDE/TYPE - detect buy/sell
     let sideValue = row[fieldMap.side || ''] ||
                     Object.values(row).find(val => val && /^(buy|sell|long|short|compra|venda)$/i.test(val.toString())) ||
                     'buy';
 
-    // Assign values with intelligent defaults
+    // Clean close price if available
+    let closePriceValue = row[fieldMap.closePrice || ''] || priceValue;
+    closePriceValue = closePriceValue.toString().replace(/[^\d.-]/g, '') || priceValue;
+    if (isNaN(parseFloat(closePriceValue))) {
+      closePriceValue = priceValue;
+    }
+
+    // Assign values with intelligent defaults and ensure all numeric fields are clean
     trade.dataHora = dateValue;
-    trade.ativo = symbolValue.toString().toUpperCase();
-    trade.quantidade = volumeValue.toString();
-    trade.capitalUtilizado = volumeValue.toString(); // Use volume as capital
-    trade.precoEntrada = priceValue.toString();
-    trade.precoSaida = row[fieldMap.closePrice || ''] || priceValue.toString();
-    trade.resultado = profitValue.toString();
+    trade.ativo = symbolValue.toString().toUpperCase().replace(/[^\w\/]/g, ''); // Clean symbol
+    trade.quantidade = volumeValue;
+    trade.capitalUtilizado = volumeValue; // Use volume as capital
+    trade.precoEntrada = priceValue;
+    trade.precoSaida = closePriceValue;
+    trade.resultado = profitValue;
+    
+    // Additional cleaning for optional numeric fields
+    if (row[fieldMap.fee]) {
+      let feeValue = row[fieldMap.fee].toString().replace(/[^\d.-]/g, '') || '0';
+      if (!isNaN(parseFloat(feeValue))) {
+        trade.stop = feeValue; // Store fee in stop field for now
+      }
+    }
     
     // Determine trade type with intelligent detection
     const sideStr = sideValue.toString().toLowerCase();
@@ -251,11 +333,16 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
       trade.dataHora = parsedDate.toISOString();
     }
 
+    // Final validation and cleaning before returning
+    trade = validateAndCleanTrade(trade);
+
     console.log('Trade processado:', {
       ativo: trade.ativo,
       dataHora: trade.dataHora.substring(0, 10),
       tipo: trade.tipo,
-      quantidade: trade.quantidade
+      quantidade: trade.quantidade,
+      capitalUtilizado: trade.capitalUtilizado,
+      precoEntrada: trade.precoEntrada
     });
 
     return trade;
