@@ -130,45 +130,68 @@ function validateAndCleanTrade(trade: any): any {
   const numericFields = ['quantidade', 'capitalUtilizado', 'precoEntrada', 'precoSaida', 'resultado', 'stop', 'alvo', 'risco'];
   
   numericFields.forEach(field => {
-    if (trade[field] !== undefined && trade[field] !== null) {
-      let value = trade[field].toString();
-      
-      // Remove non-numeric characters except dots and minus signs
-      value = value.replace(/[^\d.-]/g, '');
-      
-      // Handle empty strings
-      if (value === '' || value === '-' || value === '.') {
-        if (field === 'quantidade' || field === 'capitalUtilizado') {
-          value = '1'; // Default for required fields
-        } else {
-          value = null; // Optional fields can be null
-        }
+    let value = trade[field];
+    
+    // Handle undefined, null, or empty string cases
+    if (value === undefined || value === null || value === '') {
+      if (field === 'quantidade' || field === 'capitalUtilizado') {
+        trade[field] = '1'; // Default for required fields
       } else {
-        // Validate that it's a proper number
-        const numValue = parseFloat(value);
-        if (isNaN(numValue)) {
-          if (field === 'quantidade' || field === 'capitalUtilizado') {
-            value = '1';
-          } else {
-            value = null;
-          }
-        } else {
-          value = numValue.toString();
-        }
+        trade[field] = null; // Optional fields can be null - remove from object
+        delete trade[field];
       }
-      
-      trade[field] = value;
+      return;
+    }
+    
+    // Convert to string and clean
+    value = value.toString();
+    
+    // Remove non-numeric characters except dots and minus signs
+    value = value.replace(/[^\d.-]/g, '');
+    
+    // Handle edge cases after cleaning
+    if (value === '' || value === '-' || value === '.' || value === '-.') {
+      if (field === 'quantidade' || field === 'capitalUtilizado') {
+        trade[field] = '1';
+      } else {
+        delete trade[field]; // Remove optional empty fields
+      }
+      return;
+    }
+    
+    // Validate that it's a proper number
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) {
+      if (field === 'quantidade' || field === 'capitalUtilizado') {
+        trade[field] = '1';
+      } else {
+        delete trade[field]; // Remove invalid optional fields
+      }
+    } else {
+      // Ensure positive values for quantity and capital
+      if ((field === 'quantidade' || field === 'capitalUtilizado') && numValue <= 0) {
+        trade[field] = '1';
+      } else {
+        trade[field] = numValue.toString();
+      }
     }
   });
   
-  // Ensure required fields have valid values
-  if (!trade.quantidade || trade.quantidade === null || parseFloat(trade.quantidade) <= 0) {
+  // Final validation for required fields
+  if (!trade.quantidade || parseFloat(trade.quantidade) <= 0) {
     trade.quantidade = '1';
   }
   
-  if (!trade.capitalUtilizado || trade.capitalUtilizado === null || parseFloat(trade.capitalUtilizado) <= 0) {
-    trade.capitalUtilizado = trade.quantidade || '1';
+  if (!trade.capitalUtilizado || parseFloat(trade.capitalUtilizado) <= 0) {
+    trade.capitalUtilizado = trade.quantidade;
   }
+  
+  console.log('Dados limpos para o banco:', {
+    quantidade: trade.quantidade,
+    capitalUtilizado: trade.capitalUtilizado,
+    precoEntrada: trade.precoEntrada || 'null',
+    resultado: trade.resultado || 'null'
+  });
   
   return trade;
 }
@@ -469,7 +492,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const validatedData = insertTradeSchema.parse(req.body);
-      const trade = await storage.createTrade({ ...validatedData, userId });
+      
+      // Apply the same data cleaning that we use for CSV imports
+      const cleanedData = validateAndCleanTrade({ ...validatedData, userId });
+      
+      console.log('Trade manual sendo criado:', {
+        ativo: cleanedData.ativo,
+        quantidade: cleanedData.quantidade,
+        capitalUtilizado: cleanedData.capitalUtilizado,
+        precoEntrada: cleanedData.precoEntrada
+      });
+      
+      const trade = await storage.createTrade(cleanedData);
       res.status(201).json(trade);
     } catch (error) {
       console.error("Create trade error:", error);
