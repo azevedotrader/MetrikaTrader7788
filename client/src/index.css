@@ -24,11 +24,14 @@
   --ring: hsl(263, 70%, 63%);
   --radius: 0.75rem;
   
-  /* Custom colors for trading app */
+  /* Custom colors for trading app - Nova paleta verde-esmeralda e azul-índigo */
   --profit: hsl(142, 76%, 36%);
   --loss: hsl(0, 84%, 60%);
-  --purple-gradient-start: hsl(263, 70%, 63%);
-  --purple-gradient-end: hsl(217, 91%, 60%);
+  --emerald-gradient-start: hsl(158, 64%, 52%);
+  --emerald-gradient-end: hsl(220, 91%, 60%);
+  --gold-accent: hsl(45, 93%, 58%);
+  --teal-accent: hsl(172, 66%, 50%);
+  --indigo-deep: hsl(231, 48%, 48%);
   --slate-900: hsl(222, 84%, 4.9%);
   --slate-800: hsl(215, 25%, 10%);
   --slate-700: hsl(215, 25%, 15%);
@@ -70,15 +73,72 @@
 }
 
 @layer utilities {
-  .gradient-purple-blue {
-    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+  .gradient-emerald-blue {
+    background: linear-gradient(135deg, var(--emerald-gradient-start), var(--emerald-gradient-end));
   }
   
   .gradient-text {
-    background: linear-gradient(135deg, var(--purple-gradient-start), var(--purple-gradient-end));
+    background: linear-gradient(135deg, var(--emerald-gradient-start), var(--emerald-gradient-end));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .gradient-gold {
+    background: linear-gradient(135deg, var(--gold-accent), var(--emerald-gradient-start));
+  }
+
+  .gradient-teal {
+    background: linear-gradient(135deg, var(--teal-accent), var(--indigo-deep));
+  }
+
+  .text-emerald-400 {
+    color: hsl(158, 64%, 52%);
+  }
+
+  .text-gold-400 {
+    color: var(--gold-accent);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(1deg); }
+    66% { transform: translateY(-5px) rotate(-1deg); }
+  }
+
+  @keyframes glow {
+    from { 
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+      filter: brightness(1);
+    }
+    to { 
+      box-shadow: 0 0 30px rgba(52, 211, 153, 0.6);
+      filter: brightness(1.1);
+    }
+  }
+
+  /* Fontes modernas */
+  .font-display {
+    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .font-body {
+    font-family: 'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-weight: 400;
   }
 
   .bg-slate-900 {
