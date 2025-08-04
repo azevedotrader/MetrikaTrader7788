@@ -13,7 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { AITradeAnalysis } from "@/components/ui/ai-trade-analysis";
 
 const setupOptions = [
   "Breakout", "Pullback", "Reversão", "Tendência", "Support/Resistance",
@@ -36,6 +37,8 @@ export default function NovoTrade() {
   const [selectedBroker, setSelectedBroker] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
+  const [currentTradeData, setCurrentTradeData] = useState<any>(null);
 
   const form = useForm<InsertTrade>({
     resolver: zodResolver(insertTradeSchema),
@@ -433,11 +436,52 @@ export default function NovoTrade() {
                 >
                   Limpar
                 </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const formData = form.getValues();
+                    if (formData.ativo && formData.mercado && formData.setup && formData.tipo) {
+                      setCurrentTradeData({
+                        ativo: formData.ativo,
+                        mercado: formData.mercado,
+                        setup: formData.setup,
+                        tipo: formData.tipo,
+                        alvo: parseFloat(formData.alvo || "0"),
+                        stop: parseFloat(formData.stop || "0"),
+                        emocao: formData.emocao,
+                        comentario: formData.comentario
+                      });
+                      setShowAIAnalysis(true);
+                    } else {
+                      toast({
+                        title: "Campos obrigatórios",
+                        description: "Preencha pelo menos: Ativo, Mercado, Setup e Tipo para análise.",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                  className="border-purple-600 text-purple-300 hover:bg-purple-900/20"
+                >
+                  🤖 Analisar com IA
+                </Button>
               </div>
             </form>
           </Form>
         </CardContent>
           </Card>
+          
+          {/* AI Analysis Component */}
+          {showAIAnalysis && currentTradeData && (
+            <div className="mt-6">
+              <AITradeAnalysis 
+                tradeData={currentTradeData}
+                onAnalysisComplete={(analysis) => {
+                  console.log('Análise concluída:', analysis);
+                }}
+              />
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="csv">

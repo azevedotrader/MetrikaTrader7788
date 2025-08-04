@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
+import { AIChat } from "@/components/ui/ai-chat";
+import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
+import { useState } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
@@ -28,6 +31,8 @@ const pageTitles: Record<string, string> = {
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatMinimized, setIsChatMinimized] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -77,6 +82,15 @@ function AppContent() {
                   <Route component={NotFound} />
                 </Switch>
               </div>
+              
+              {/* AI Components */}
+              <AIChat 
+                isOpen={isChatOpen} 
+                onToggle={() => setIsChatOpen(!isChatOpen)}
+                isMinimized={isChatMinimized}
+                onMinimize={() => setIsChatMinimized(!isChatMinimized)}
+              />
+              <AISuggestionsPopup />
             </>
           )}
         </Route>

@@ -6,6 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import csv from "csv-parser";
 import { Readable } from "stream";
+import { aiService } from "./ai-service";
 // Removed Gate.io service import - now only CSV imports
 
 // Configure multer for file uploads
@@ -751,6 +752,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Removed Gate.io API testing - now only CSV imports
 
   // Removed Gate.io currency pairs endpoint - now only CSV imports
+
+  // AI Routes
+  app.post('/api/ai/chat', async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: 'Mensagem é obrigatória' });
+      }
+
+      // Get user context for personalized responses
+      const userId = req.headers['user-id'] as string;
+      let userContext = undefined;
+      
+      if (userId) {
+        const user = await storage.getUser(userId);
+        const trades = await storage.getTrades(userId);
+        
+        if (user) {
+          userContext = {
+            perfilRisco: user.perfilRisco,
+            capitalInicial: user.capitalInicial,
+            metaMensal: user.metaMensal,
+            tradesCount: trades.length
+          };
+        }
+      }
+
+      const reply = await aiService.chatWithTrader(message, userContext);
+      res.json({ reply });
+    } catch (error) {
+      console.error('Erro no chat AI:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/ai/advice', async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      
+      if (!userId) {
+        return res.json([]);
+      }
+
+      const userProfile = await storage.getUser(userId);
+      const trades = await storage.getTrades(userId);
+      
+      if (!userProfile) {
+        return res.json([]);
+      }
+
+      const recentTrades = trades.slice(-10); // Últimos 10 trades
+
+      const advice = await aiService.generateTradingAdvice(userProfile, recentTrades);
+      res.json(advice);
+    } catch (error) {
+      console.error('Erro ao gerar conselhos AI:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/ai/analyze-trade', async (req, res) => {
+    try {
+      const tradeData = req.body;
+      
+      if (!tradeData.ativo || !tradeData.mercado) {
+        return res.status(400).json({ error: 'Dados do trade incompletos' });
+      }
+
+      const analysis = await aiService.analyzeUserTrade(tradeData);
+      res.json(analysis);
+    } catch (error) {
+      console.error('Erro na análise de trade:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.get('/api/ai/market-insight/:asset', async (req, res) => {
+    try {
+      const { asset } = req.params;
+      
+      if (!asset) {
+        return res.status(400).json({ error: 'Ativo é obrigatório' });
+      }
+
+      const insight = await aiService.generateMarketInsight(asset);
+      res.json(insight);
+    } catch (error) {
+      console.error('Erro no insight de mercado:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
+  app.post('/api/ai/analyze-performance', async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const trades = await storage.getTrades(userId);
+      
+      if (trades.length === 0) {
+        return res.json({
+          summary: 'Nenhum trade encontrado para análise.',
+          insights: ['Comece registrando seus trades para receber análises.'],
+          recommendations: ['Use o formulário para adicionar seu primeiro trade.']
+        });
+      }
+
+      const analysis = await aiService.analyzeTradingPerformance(trades);
+      res.json(analysis);
+    } catch (error) {
+      console.error('Erro na análise de performance:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
