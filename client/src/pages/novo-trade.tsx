@@ -262,8 +262,8 @@ export default function NovoTrade() {
                 />
               </div>
 
-              {/* Linha 2 - Setup, Tipo, Corretora */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Linha 2 - Setup, Tipo */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="setup"
@@ -314,29 +314,6 @@ export default function NovoTrade() {
                               Venda
                             </span>
                           </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="corretora"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Corretora</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                            <SelectValue placeholder="Selecione a corretora" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-slate-800 border-slate-600">
-                          <SelectItem value="forex">Tickmill (Forex)</SelectItem>
-                          <SelectItem value="b3">Clear (B3)</SelectItem>
-                          <SelectItem value="crypto">Gate.io (Crypto)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
