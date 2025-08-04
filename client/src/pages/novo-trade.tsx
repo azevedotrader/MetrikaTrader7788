@@ -182,7 +182,6 @@ export default function NovoTrade() {
         <h1 className="text-3xl font-bold text-white">Novo Trade</h1>
         <p className="text-slate-400 mt-2">Registre os detalhes da sua operação ou importe via CSV</p>
       </div>
-
       <Tabs defaultValue="manual" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="manual">Manual</TabsTrigger>
@@ -329,7 +328,7 @@ export default function NovoTrade() {
                   name="alvo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Alvo (valor de ganho)</FormLabel>
+                      <FormLabel className="text-slate-300">Take Profit (valor de ganho)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
