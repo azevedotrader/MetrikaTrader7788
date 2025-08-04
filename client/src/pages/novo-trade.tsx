@@ -44,17 +44,17 @@ export default function NovoTrade() {
       ativo: "",
       mercado: "crypto",
       setup: "",
-      capitalUtilizado: "",
-      quantidade: "",
+      capitalUtilizado: "1", // Default value for backend compatibility
+      quantidade: "1", // Default value for backend compatibility  
       tipo: "compra",
-      stop: "",
-      alvo: "",
-      resultado: "",
-      risco: "",
+      stop: "", // Stop Loss (valor de perda)
+      alvo: "", // Take Profit
+      resultado: "", // Result
+      risco: "0",
       comentario: "",
       emocao: "neutro",
-      precoEntrada: "",
-      precoSaida: "",
+      precoEntrada: "0",
+      precoSaida: "0",
       corretora: "crypto",
       status: "fechado"
     },
@@ -150,7 +150,17 @@ export default function NovoTrade() {
   });
 
   const onSubmit = (data: InsertTrade) => {
-    createTradeMutation.mutate(data);
+    // Ensure required backend fields have values
+    const processedData = {
+      ...data,
+      capitalUtilizado: data.capitalUtilizado || "1", // Backend requires this
+      quantidade: data.quantidade || "1", // Backend requires this
+      precoEntrada: data.precoEntrada || "0", // Backend compatibility
+      precoSaida: data.precoSaida || "0", // Backend compatibility
+      risco: data.risco || "0", // Backend compatibility
+    };
+    
+    createTradeMutation.mutate(processedData);
   };
 
   const handleUpload = () => {
@@ -335,14 +345,14 @@ export default function NovoTrade() {
                 />
               </div>
 
-              {/* Linha 3 - Valores monetários */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Linha 3 - Valores Simplificados */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
-                  name="capitalUtilizado"
+                  name="alvo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Capital Utilizado *</FormLabel>
+                      <FormLabel className="text-slate-300">Take Profit</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -362,121 +372,21 @@ export default function NovoTrade() {
 
                 <FormField
                   control={form.control}
-                  name="quantidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Quantidade *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.0001"
-                          placeholder="0.0000"
-                          className="bg-slate-800 border-slate-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="stop"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Stop Loss</FormLabel>
+                      <FormLabel className="text-slate-300">Stop Loss (valor de perda)</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="0.0001"
-                          placeholder="0.0000"
-                          className="bg-slate-800 border-slate-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="alvo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Take Profit</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.0001"
-                          placeholder="0.0000"
-                          className="bg-slate-800 border-slate-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Linha 4 - Preços e Resultado */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <FormField
-                  control={form.control}
-                  name="precoEntrada"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Preço Entrada</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.0001"
-                          placeholder="0.0000"
-                          className="bg-slate-800 border-slate-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="precoSaida"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Preço Saída</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.0001"
-                          placeholder="0.0000"
-                          className="bg-slate-800 border-slate-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="risco"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Risco (%)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="2.00"
-                          className="bg-slate-800 border-slate-600 text-white"
-                          {...field}
-                        />
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            className="bg-slate-800 border-slate-600 text-white pl-10"
+                            {...field}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
