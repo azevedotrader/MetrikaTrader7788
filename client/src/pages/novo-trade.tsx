@@ -352,7 +352,7 @@ export default function NovoTrade() {
                   name="alvo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Take Profit</FormLabel>
+                      <FormLabel className="text-slate-300">Alvo (valor de ganho)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -375,7 +375,7 @@ export default function NovoTrade() {
                   name="stop"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Stop Loss (valor de perda)</FormLabel>
+                      <FormLabel className="text-slate-300">Stop (valor de perda)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
