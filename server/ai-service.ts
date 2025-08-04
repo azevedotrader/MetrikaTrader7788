@@ -289,6 +289,69 @@ export class AITradingService {
       };
     }
   }
+
+  async generateCsvBasedTips(trades: any[], csvImports: any[]): Promise<any[]> {
+    try {
+      // Analisar padrões dos trades importados via CSV
+      const csvTrades = trades.filter(trade => trade.origem === 'csv');
+      
+      if (csvTrades.length === 0) {
+        return [];
+      }
+
+      const prompt = `
+        Analise estes trades importados via CSV e informações de importação:
+        
+        TRADES: ${JSON.stringify(csvTrades.slice(-20), null, 2)}
+        IMPORTAÇÕES: ${JSON.stringify(csvImports, null, 2)}
+        
+        Com base nestes dados REAIS do usuário, gere dicas inteligentes e personalizadas.
+        
+        Responda em JSON com array de dicas:
+        {
+          "tips": [
+            {
+              "id": "tip_1",
+              "title": "Título da Dica",
+              "message": "Mensagem personalizada baseada nos dados",
+              "type": "warning|success|info",
+              "priority": "high|medium|low",
+              "action": "Ação sugerida específica",
+              "basedOn": "Padrão específico identificado nos dados"
+            }
+          ]
+        }
+        
+        Foque em:
+        - Padrões de horários de entrada
+        - Ativos mais operados
+        - Performance por corretora
+        - Gestão de risco observada
+        - Tendências temporais
+        
+        Máximo 3 dicas por análise.
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { 
+            role: "system", 
+            content: "Você é um analista de trading experiente. Analise dados reais de CSV e forneça dicas personalizadas e acionáveis em português brasileiro." 
+          },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || '{"tips":[]}');
+      return result.tips || [];
+    } catch (error) {
+      console.error('Erro na geração de dicas baseadas em CSV:', error);
+      return [];
+    }
+  }
 }
 
 export const aiService = new AITradingService();

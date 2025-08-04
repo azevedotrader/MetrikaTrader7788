@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { AIChat } from "@/components/ui/ai-chat";
 import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
+import { CsvTipsPopup } from "@/components/ui/csv-tips-popup";
 import { useState } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -91,6 +92,7 @@ function AppContent() {
                 onMinimize={() => setIsChatMinimized(!isChatMinimized)}
               />
               <AISuggestionsPopup />
+              <CsvTipsPopup />
             </>
           )}
         </Route>

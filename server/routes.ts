@@ -871,6 +871,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analisar CSV e gerar dicas automáticas
+  app.post('/api/ai/analyze-csv-tips', async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const trades = await storage.getTrades(userId);
+      const csvImports = await storage.getCsvImports(userId);
+      
+      if (trades.length === 0) {
+        return res.json({ tips: [] });
+      }
+
+      // Analisar trades recentes (últimos 30 dias)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const recentTrades = trades.filter(trade => 
+        new Date(trade.dataHora) > thirtyDaysAgo
+      );
+
+      const tips = await aiService.generateCsvBasedTips(recentTrades, csvImports);
+      res.json({ tips });
+    } catch (error) {
+      console.error('Erro na análise de CSV para dicas:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
