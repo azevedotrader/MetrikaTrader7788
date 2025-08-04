@@ -323,7 +323,7 @@ export default function NovoTrade() {
               </div>
 
               {/* Linha 3 - Valores Simplificados */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="alvo"
@@ -353,29 +353,6 @@ export default function NovoTrade() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-slate-300">Stop (valor de perda)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            className="bg-slate-800 border-slate-600 text-white pl-10"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="resultado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-slate-300">Resultado</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
