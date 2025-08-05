@@ -306,18 +306,37 @@ function calculateMetrics(trades: Trade[]): TradeMetrics {
   const tradesLucrativos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
   const taxaAcerto = (tradesLucrativos.length / trades.length) * 100;
 
-  // R/R médio
-  const lucros = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
-  const perdas = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
+  // R/R médio baseado nos valores de Take e Stop dos trades
+  const tradesComTakeStop = trades.filter(trade => 
+    trade.alvo && trade.stop && 
+    parseFloat(trade.alvo) > 0 && parseFloat(trade.stop) > 0
+  );
   
-  const lucroMedio = lucros.length > 0 
-    ? lucros.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0) / lucros.length 
-    : 0;
-  const perdaMedia = perdas.length > 0 
-    ? Math.abs(perdas.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0) / perdas.length)
-    : 0;
+  let riscoRetornoMedio = 0;
   
-  const riscoRetornoMedio = perdaMedia > 0 ? lucroMedio / perdaMedia : 0;
+  if (tradesComTakeStop.length > 0) {
+    const totalRRR = tradesComTakeStop.reduce((acc, trade) => {
+      const takeValue = parseFloat(trade.alvo!);
+      const stopValue = parseFloat(trade.stop!);
+      const rrr = takeValue / stopValue;
+      return acc + rrr;
+    }, 0);
+    
+    riscoRetornoMedio = totalRRR / tradesComTakeStop.length;
+  } else {
+    // Fallback: calcular baseado em lucro/perda média se não houver dados de Take/Stop
+    const lucros = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
+    const perdas = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
+    
+    const lucroMedio = lucros.length > 0 
+      ? lucros.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0) / lucros.length 
+      : 0;
+    const perdaMedia = perdas.length > 0 
+      ? Math.abs(perdas.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0) / perdas.length)
+      : 0;
+    
+    riscoRetornoMedio = perdaMedia > 0 ? lucroMedio / perdaMedia : 0;
+  }
 
   // Setup mais lucrativo
   const setupLucros = trades.reduce((acc, trade) => {
