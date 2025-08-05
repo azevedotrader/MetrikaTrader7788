@@ -347,6 +347,28 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
       '0',
       50000
     );
+
+    // STOP LOSS - find stop loss values for R/R calculation
+    let stopLossValue = safeParseNumeric(
+      row[fieldMap.stopLoss || ''] ||
+      Object.values(row).find(val => {
+        const str = val?.toString() || '';
+        const num = parseFloat(str.replace(/[^\d.-]/g, ''));
+        return !isNaN(num) && Math.abs(num) <= 50000 && !str.includes('/');
+      }),
+      '0',
+      50000
+    );
+
+    // Calculate Risk/Reward Ratio if we have profit and stop loss
+    let riskRewardRatio = '0';
+    if (parseFloat(profitValue) !== 0 && parseFloat(stopLossValue) !== 0) {
+      const profit = Math.abs(parseFloat(profitValue));
+      const stopLoss = Math.abs(parseFloat(stopLossValue));
+      if (stopLoss > 0) {
+        riskRewardRatio = (profit / stopLoss).toFixed(2);
+      }
+    }
     
     // SIDE/TYPE - detect buy/sell
     let sideValue = row[fieldMap.side || ''] ||
@@ -361,6 +383,8 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     trade.precoEntrada = priceValue;
     trade.precoSaida = closePriceValue;
     trade.resultado = profitValue;
+    trade.stop = stopLossValue; // Store stop loss
+    trade.comentario = `R/R: ${riskRewardRatio}`; // Store R/R in comments
     
     // Additional cleaning for optional numeric fields
     if (row[fieldMap.fee]) {
@@ -536,6 +560,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get consolidated trades error:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Get calendar trading data with R/R calculations
+  app.get("/api/trades/calendar", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const allTrades = await storage.getAllTrades(userId);
+      
+      // Group trades by date and calculate daily statistics
+      const calendarData = allTrades.reduce((acc: any, trade) => {
+        const date = new Date(trade.dataHora).toISOString().split('T')[0];
+        
+        if (!acc[date]) {
+          acc[date] = {
+            date,
+            trades: [],
+            totalPnL: 0,
+            totalTrades: 0,
+            winningTrades: 0,
+            avgRR: 0
+          };
+        }
+        
+        const pnl = parseFloat(trade.resultado) || 0;
+        const rrMatch = trade.comentario?.match(/R\/R:\s*(\d+\.?\d*)/);
+        const rr = rrMatch ? parseFloat(rrMatch[1]) : 0;
+        
+        acc[date].trades.push({
+          ...trade,
+          rr: rr
+        });
+        acc[date].totalPnL += pnl;
+        acc[date].totalTrades += 1;
+        if (pnl > 0) acc[date].winningTrades += 1;
+        
+        return acc;
+      }, {});
+      
+      // Calculate averages and format data
+      const formattedData = Object.values(calendarData).map((day: any) => {
+        const totalRR = day.trades.reduce((sum: number, trade: any) => sum + trade.rr, 0);
+        return {
+          ...day,
+          avgRR: day.totalTrades > 0 ? (totalRR / day.totalTrades).toFixed(2) : '0.00',
+          winRate: day.totalTrades > 0 ? (day.winningTrades / day.totalTrades * 100).toFixed(1) : '0.0'
+        };
+      });
+      
+      res.json(formattedData);
+    } catch (error) {
+      console.error("Error fetching calendar data:", error);
+      res.status(500).json({ message: "Erro ao buscar dados do calendário" });
     }
   });
 

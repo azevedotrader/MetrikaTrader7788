@@ -5,6 +5,7 @@ import { Calendar, BarChart3, TrendingUp } from "lucide-react";
 
 export default function CalendarioPage() {
   const { data: trades = [] } = useQuery({ queryKey: ['/api/trades'] });
+  const { data: calendarData = [] } = useQuery<any[]>({ queryKey: ['/api/trades/calendar'] });
 
   return (
     <div className="space-y-6 pb-8">
@@ -62,7 +63,7 @@ export default function CalendarioPage() {
       </Card>
 
       {/* Calendário Principal */}
-      <TradingCalendar trades={trades} />
+      <TradingCalendar trades={trades} calendarData={calendarData as any[]} />
 
       {/* Dicas de Análise */}
       <Card className="bg-slate-900/50 border-slate-700">

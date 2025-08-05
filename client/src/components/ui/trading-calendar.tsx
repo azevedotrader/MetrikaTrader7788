@@ -21,10 +21,11 @@ interface WeekSummary {
 
 interface TradingCalendarProps {
   trades?: any[];
+  calendarData?: any[];
   className?: string;
 }
 
-export function TradingCalendar({ trades = [], className }: TradingCalendarProps) {
+export function TradingCalendar({ trades = [], calendarData = [], className }: TradingCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   // Dias da semana
@@ -54,26 +55,27 @@ export function TradingCalendar({ trades = [], className }: TradingCalendarProps
   const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 = domingo
   const daysInMonth = lastDayOfMonth.getDate();
 
-  // Processar trades reais ou gerar dados mock se não houver trades
+  // Processar trades reais para o calendário
   const generateTradeData = (): TradeDay[] => {
+    const tradesByDay = new Map<number, { pnl: number; trades: number; winningTrades: number }>();
+    
     if (trades && trades.length > 0) {
-      // Processar trades reais
-      const tradesByDay = new Map<number, { pnl: number; trades: number }>();
-      
       trades.forEach((trade: any) => {
         const tradeDate = new Date(trade.dataHora || trade.data || Date.now());
         if (tradeDate.getMonth() === month && tradeDate.getFullYear() === year) {
           const day = tradeDate.getDate();
           const pnl = parseFloat(trade.resultado) || 0;
+          const isWinning = pnl > 0;
           
           if (tradesByDay.has(day)) {
             const existing = tradesByDay.get(day)!;
             tradesByDay.set(day, {
               pnl: existing.pnl + pnl,
-              trades: existing.trades + 1
+              trades: existing.trades + 1,
+              winningTrades: existing.winningTrades + (isWinning ? 1 : 0)
             });
           } else {
-            tradesByDay.set(day, { pnl, trades: 1 });
+            tradesByDay.set(day, { pnl, trades: 1, winningTrades: isWinning ? 1 : 0 });
           }
         }
       });
