@@ -6,9 +6,12 @@ import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
 import fs from "fs";
+import { Readable } from "stream";
 
-// Configure multer for file uploads
-const upload = multer({ dest: 'uploads/' });
+// Configure multer for file uploads - use disk storage for better compatibility
+const upload = multer({ 
+  dest: 'uploads/'
+});
 
 // Validation helper
 function validateAndCleanTrade(trade: any): InsertTrade {
@@ -37,6 +40,149 @@ function validateAndCleanTrade(trade: any): InsertTrade {
     stop: safeParseNumeric(trade.stop, '0'),
     comentario: trade.comentario || ''
   };
+}
+
+// Enhanced field detection for CSV imports
+function detectFieldMapping(row: any): Record<string, string> {
+  const fieldMap: Record<string, string> = {};
+  const keys = Object.keys(row);
+  
+  // Date/time mapping
+  const datePatterns = ['date', 'time', 'data', 'hora', 'timestamp', 'created', 'closed', 'datetime'];
+  const dateFields = keys.filter(key => 
+    datePatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (dateFields.length > 0) fieldMap.date = dateFields[0];
+  
+  // Symbol/asset mapping
+  const symbolPatterns = ['symbol', 'pair', 'instrument', 'ativo', 'asset', 'currency', 'ticker'];
+  const symbolFields = keys.filter(key => 
+    symbolPatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (symbolFields.length > 0) fieldMap.symbol = symbolFields[0];
+  
+  // Volume/quantity mapping
+  const volumePatterns = ['volume', 'amount', 'size', 'quantity', 'quantidade', 'qty'];
+  const volumeFields = keys.filter(key => 
+    volumePatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (volumeFields.length > 0) fieldMap.volume = volumeFields[0];
+  
+  // Price mapping
+  const openPricePatterns = ['open', 'entry', 'price', 'preco', 'fill'];
+  const openPriceFields = keys.filter(key => 
+    openPricePatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (openPriceFields.length > 0) fieldMap.openPrice = openPriceFields[0];
+  
+  // Profit/loss mapping
+  const profitPatterns = ['profit', 'loss', 'pnl', 'resultado', 'gain', 'return'];
+  const profitFields = keys.filter(key => 
+    profitPatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (profitFields.length > 0) fieldMap.profit = profitFields[0];
+  
+  // Side/direction mapping
+  const sidePatterns = ['side', 'type', 'action', 'direction', 'buy', 'sell'];
+  const sideFields = keys.filter(key => 
+    sidePatterns.some(pattern => key.toLowerCase().includes(pattern))
+  );
+  if (sideFields.length > 0) fieldMap.side = sideFields[0];
+  
+  return fieldMap;
+}
+
+// Smart CSV row processing
+function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Record<string, string>): InsertTrade | null {
+  try {
+    if (!row || typeof row !== 'object') return null;
+    
+    const hasAnyData = Object.values(row).some(value => value && value.toString().trim() !== '');
+    if (!hasAnyData) return null;
+    
+    // Extract data using field mapping or smart detection
+    const values = Object.values(row);
+    const keys = Object.keys(row);
+    
+    // Date detection
+    let dateValue = fieldMap?.date ? row[fieldMap.date] : 
+      values.find(val => /\d{4}[-\/]\d{2}[-\/]\d{2}|\d{2}[-\/]\d{2}[-\/]\d{4}/.test(val?.toString() || ''));
+    
+    let tradeDate = new Date();
+    if (dateValue) {
+      const dateStr = dateValue.toString();
+      if (/\d{2}[-\/]\d{2}[-\/]\d{4}/.test(dateStr)) {
+        const parts = dateStr.split(/[-\/]/);
+        tradeDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+      } else if (/\d{4}[-\/]\d{2}[-\/]\d{2}/.test(dateStr)) {
+        tradeDate = new Date(dateStr);
+      }
+    }
+    
+    if (isNaN(tradeDate.getTime())) {
+      tradeDate = new Date();
+    }
+    
+    // Symbol detection
+    let symbol = fieldMap?.symbol ? row[fieldMap.symbol] : 
+      values.find(val => /^[A-Z]{3,6}$|^[A-Z]+\d*$/.test(val?.toString() || '')) || 'UNKNOWN';
+    
+    // Type detection
+    let type = fieldMap?.side ? row[fieldMap.side] : 
+      values.find(val => /^(buy|sell|compra|venda)$/i.test(val?.toString() || '')) || 'buy';
+    
+    // Quantity detection
+    let quantity = fieldMap?.volume ? parseFloat(row[fieldMap.volume]) : 
+      parseFloat(values.find(val => {
+        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+        return !isNaN(num) && num > 0 && num <= 10000;
+      })?.toString() || '1') || 1;
+    
+    // Price detection
+    let openPrice = fieldMap?.openPrice ? parseFloat(row[fieldMap.openPrice]) : 
+      parseFloat(values.find(val => {
+        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+        return !isNaN(num) && num > 0 && num <= 100000;
+      })?.toString() || '1') || 1;
+    
+    // Profit detection
+    let profit = fieldMap?.profit ? parseFloat(row[fieldMap.profit]) : 
+      parseFloat(values.find(val => {
+        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+        return !isNaN(num) && Math.abs(num) <= 50000;
+      })?.toString() || '0') || 0;
+    
+    // Market detection
+    let market = 'b3';
+    if (/USD|EUR|GBP|JPY/.test(symbol.toString())) {
+      market = 'forex';
+    } else if (/BTC|ETH|USDT/.test(symbol.toString())) {
+      market = 'crypto';
+    }
+    
+    const trade = {
+      userId,
+      corretora: market as 'crypto' | 'forex' | 'b3',
+      origem: 'csv',
+      mercado: market as 'crypto' | 'forex' | 'b3',
+      setup: 'CSV Import',
+      dataHora: tradeDate.toISOString(),
+      ativo: symbol.toString().toUpperCase(),
+      tipo: type.toString().toLowerCase().includes('sell') || type.toString().toLowerCase().includes('venda') ? 'venda' : 'compra',
+      quantidade: quantity.toString(),
+      capitalUtilizado: (quantity * openPrice).toString(),
+      precoEntrada: openPrice.toString(),
+      precoSaida: openPrice.toString(),
+      resultado: profit.toString(),
+      stop: '0',
+      comentario: 'CSV Import'
+    } as InsertTrade;
+    
+    return validateAndCleanTrade(trade);
+  } catch (error) {
+    console.error('Error processing CSV row:', error);
+    return null;
+  }
 }
 
 // CSV parsing function for trades
@@ -430,6 +576,157 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting trade:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // CSV Upload endpoint (used by frontend)
+  app.post("/api/trades/upload-csv", upload.single('csvFile'), async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "Arquivo CSV é obrigatório" });
+      }
+
+      const { broker = 'auto' } = req.body;
+      const validBrokers = ['forex', 'b3', 'crypto', 'auto'];
+      const finalBroker = validBrokers.includes(broker) ? broker : 'auto';
+
+      console.log(`Iniciando importação CSV: ${req.file.originalname} para broker: ${broker}`);
+
+      const results: any[] = [];
+      const errors: string[] = [];
+      
+      // Parse CSV from file
+      const stream = fs.createReadStream(req.file.path);
+      
+      await new Promise((resolve, reject) => {
+        stream
+          .pipe(csv())
+          .on('data', (data) => results.push(data))
+          .on('end', resolve)
+          .on('error', reject);
+      });
+
+      console.log(`CSV parsed: ${results.length} rows encontradas`);
+
+      // Detect field mapping from first row
+      let fieldMap: Record<string, string> = {};
+      if (results.length > 0) {
+        fieldMap = detectFieldMapping(results[0]);
+      }
+
+      // Process and validate trades
+      const validTrades: InsertTrade[] = [];
+      
+      for (let i = 0; i < results.length; i++) {
+        try {
+          const row = results[i];
+          
+          // Skip empty rows
+          const hasData = Object.values(row).some(value => value && value.toString().trim() !== '');
+          if (!hasData) {
+            continue;
+          }
+
+          const trade = processCsvRow(row, finalBroker, userId, fieldMap);
+          if (trade) {
+            validTrades.push(trade);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+          console.error(`Erro na linha ${i + 2}:`, errorMessage);
+          errors.push(`Linha ${i + 2}: ${errorMessage}`);
+        }
+      }
+
+      console.log(`Trades válidos processados: ${validTrades.length}`);
+
+      // Save valid trades
+      let savedTrades: any[] = [];
+      if (validTrades.length > 0) {
+        try {
+          savedTrades = await storage.createBulkTrades(validTrades);
+          console.log(`Trades salvos no banco: ${savedTrades.length}`);
+        } catch (dbError) {
+          console.error('Erro ao salvar trades:', dbError);
+          errors.push('Erro ao salvar trades no banco de dados');
+        }
+      }
+
+      // Log import
+      try {
+        await storage.createCsvImport({
+          userId,
+          broker: finalBroker,
+          fileName: req.file.originalname,
+          tradesImported: savedTrades.length,
+          tradesSkipped: results.length - savedTrades.length,
+          status: savedTrades.length > 0 ? 'completed' : 'failed',
+          errorMessage: errors.length > 0 ? errors.slice(0, 10).join('; ') : null
+        });
+      } catch (importError) {
+        console.error('Error logging import:', importError);
+      }
+
+      // Clean up uploaded file
+      if (req.file && req.file.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Error cleaning up file:', cleanupError);
+        }
+      }
+
+      res.json({
+        message: `Importação concluída: ${savedTrades.length} trades importados`,
+        tradesImported: savedTrades.length,
+        tradesSkipped: results.length - savedTrades.length,
+        totalRows: results.length,
+        errors: errors.slice(0, 5),
+        fieldMapping: fieldMap
+      });
+
+    } catch (error) {
+      console.error("CSV upload error:", error);
+      res.status(500).json({ message: "Erro ao processar arquivo CSV" });
+    }
+  });
+
+  // CSV Imports history
+  app.get("/api/csv-imports", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string || "1";
+      const imports = await storage.getCsvImports(userId);
+      res.json(imports);
+    } catch (error) {
+      console.error("Error fetching CSV imports:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Trades by broker endpoint
+  app.get("/api/trades/by-broker", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string || "1";
+      const tradesByBroker = await storage.getTradesByBroker("");
+      res.json(tradesByBroker);
+    } catch (error) {
+      console.error("Error fetching trades by broker:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // AI advice endpoint (placeholder)
+  app.get("/api/ai/advice", async (req, res) => {
+    try {
+      res.json({ advice: "Continue operando com disciplina e seguindo seu plano de trading." });
+    } catch (error) {
+      console.error("Error fetching AI advice:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
