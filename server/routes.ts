@@ -16,8 +16,11 @@ const upload = multer({
 // Validation helper
 function validateAndCleanTrade(trade: any): InsertTrade {
   const safeParseNumeric = (value: any, defaultValue: string = '0'): string => {
-    if (!value) return defaultValue;
-    const cleanValue = value.toString().replace(/[^\d.-]/g, '');
+    if (!value && value !== 0) return defaultValue;
+    // Preserve negative values and handle Brazilian decimal format
+    const cleanValue = value.toString()
+      .replace(/[^\d.,-]/g, '') // Keep minus, dots, commas
+      .replace(',', '.'); // Convert comma to dot
     if (!cleanValue || cleanValue === '-' || cleanValue === '.') return defaultValue;
     const numValue = parseFloat(cleanValue);
     return isNaN(numValue) ? defaultValue : numValue.toString();
@@ -92,7 +95,7 @@ function detectFieldMapping(row: any): Record<string, string> {
   return fieldMap;
 }
 
-// Smart CSV row processing
+// Enhanced B3 CSV processing with proper field parsing
 function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Record<string, string>): InsertTrade | null {
   try {
     if (!row || typeof row !== 'object') return null;
@@ -100,13 +103,106 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     const hasAnyData = Object.values(row).some(value => value && value.toString().trim() !== '');
     if (!hasAnyData) return null;
     
-    // Extract data using field mapping or smart detection
-    const values = Object.values(row);
+    // Skip header and account info rows
+    const firstValue = Object.values(row)[0]?.toString() || '';
+    if (firstValue.includes('Conta:') || firstValue.includes('Titular:') || firstValue.includes('Data ') || firstValue.includes('Ativo')) {
+      return null;
+    }
+    
+    console.log('Processando linha CSV:', row);
+    
+    // B3 CSV structure detection - check for B3 specific patterns
     const keys = Object.keys(row);
+    const values = Object.values(row);
+    const firstKey = keys[0] || '';
+    const hasAccountInfo = firstKey.includes('Conta:') || values.some(v => v?.toString().includes('WINM25') || v?.toString().includes('WINQ25'));
+    const isB3Format = hasAccountInfo || keys.some(key => key.includes('Ativo') || key.includes('Abertura') || key.includes('Fechamento'));
+    
+    if (isB3Format) {
+      console.log('Detectado formato B3, processando...', Object.keys(row));
+      
+      // B3 format processing - handle the actual CSV structure from the logs
+      // The CSV appears to use the first column for asset names and numbered columns
+      const ativo = row[keys[0]] || 'UNKNOWN'; // First column has asset names
+      const abertura = row['_1'] || row[keys[1]] || ''; // Second column is date/time
+      const fechamento = row['_2'] || row[keys[2]] || '';
+      const lado = row['_6'] || row[keys[6]] || 'C'; // Column 7 is side (C/V)
+      const qtdCompra = row['_4'] || row[keys[4]] || '0'; // Column 5 is buy quantity
+      const qtdVenda = row['_5'] || row[keys[5]] || '0'; // Column 6 is sell quantity
+      const precoCompra = row['_7'] || row[keys[7]] || '0'; // Column 8 is buy price
+      const precoVenda = row['_8'] || row[keys[8]] || '0'; // Column 9 is sell price
+      const resOperacao = row['_13'] || row[keys[13]] || '0'; // Column 14 is result (Res. Operação)
+      
+      // Parse date from abertura
+      let tradeDate = new Date();
+      if (abertura) {
+        const dateMatch = abertura.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (dateMatch) {
+          tradeDate = new Date(`${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`);
+        }
+      }
+      
+      if (isNaN(tradeDate.getTime())) {
+        tradeDate = new Date();
+      }
+      
+      // Clean and parse numeric values
+      const cleanNumber = (value: string): number => {
+        if (!value) return 0;
+        // Preserve negative sign and handle Brazilian decimal format
+        const cleaned = value.toString()
+          .replace(/[^\d.,-]/g, '') // Remove non-numeric except dots, commas, minus
+          .replace(',', '.'); // Convert comma to dot for decimal
+        
+        return parseFloat(cleaned) || 0;
+      };
+      
+      const quantidade = lado === 'C' ? cleanNumber(qtdCompra) : cleanNumber(qtdVenda);
+      const precoEntrada = lado === 'C' ? cleanNumber(precoCompra) : cleanNumber(precoVenda);
+      const precoSaida = lado === 'C' ? cleanNumber(precoVenda) : cleanNumber(precoCompra);
+      const resultado = cleanNumber(resOperacao);
+      
+      if (quantidade <= 0 || !ativo || ativo === 'UNKNOWN') {
+        console.log('Linha rejeitada: dados insuficientes');
+        return null;
+      }
+      
+      const trade = {
+        userId,
+        corretora: 'b3' as const,
+        origem: 'csv' as const,
+        mercado: 'b3' as const,
+        setup: 'CSV Import',
+        dataHora: tradeDate.toISOString(),
+        ativo: ativo.toString().toUpperCase(),
+        tipo: lado === 'C' ? 'compra' : 'venda',
+        quantidade: quantidade.toString(),
+        capitalUtilizado: (quantidade * precoEntrada).toString(),
+        precoEntrada: precoEntrada.toString(),
+        precoSaida: precoSaida.toString(),
+        resultado: resultado.toString(),
+        stop: '0',
+        comentario: `CSV Import - ${ativo}`
+      } as InsertTrade;
+      
+      console.log('Trade B3 criado:', {
+        ativo: trade.ativo,
+        data: trade.dataHora,
+        tipo: trade.tipo,
+        quantidade: trade.quantidade,
+        resultado: trade.resultado,
+        resOperacaoOriginal: resOperacao,
+        resultadoLimpo: resultado
+      });
+      
+      return validateAndCleanTrade(trade);
+    }
+    
+    // Fallback to generic processing for other formats
+    const rowValues = Object.values(row);
     
     // Date detection
-    let dateValue = fieldMap?.date ? row[fieldMap.date] : 
-      values.find(val => /\d{4}[-\/]\d{2}[-\/]\d{2}|\d{2}[-\/]\d{2}[-\/]\d{4}/.test(val?.toString() || ''));
+    let dateValue = rowValues.find(val => /\d{4}[-\/]\d{2}[-\/]\d{2}|\d{2}[-\/]\d{2}[-\/]\d{4}/.test(val?.toString() || ''));
     
     let tradeDate = new Date();
     if (dateValue) {
@@ -124,33 +220,28 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     }
     
     // Symbol detection
-    let symbol = fieldMap?.symbol ? row[fieldMap.symbol] : 
-      values.find(val => /^[A-Z]{3,6}$|^[A-Z]+\d*$/.test(val?.toString() || '')) || 'UNKNOWN';
+    let symbol = rowValues.find(val => /^[A-Z]{3,6}$|^[A-Z]+\d*$/.test(val?.toString() || '')) || 'UNKNOWN';
     
     // Type detection
-    let type = fieldMap?.side ? row[fieldMap.side] : 
-      values.find(val => /^(buy|sell|compra|venda)$/i.test(val?.toString() || '')) || 'buy';
+    let type = rowValues.find(val => /^(buy|sell|compra|venda|C|V)$/i.test(val?.toString() || '')) || 'buy';
     
     // Quantity detection
-    let quantity = fieldMap?.volume ? parseFloat(row[fieldMap.volume]) : 
-      parseFloat(values.find(val => {
-        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
-        return !isNaN(num) && num > 0 && num <= 10000;
-      })?.toString() || '1') || 1;
+    let quantity = parseFloat(rowValues.find(val => {
+      const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+      return !isNaN(num) && num > 0 && num <= 10000;
+    })?.toString() || '1') || 1;
     
     // Price detection
-    let openPrice = fieldMap?.openPrice ? parseFloat(row[fieldMap.openPrice]) : 
-      parseFloat(values.find(val => {
-        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
-        return !isNaN(num) && num > 0 && num <= 100000;
-      })?.toString() || '1') || 1;
+    let openPrice = parseFloat(rowValues.find(val => {
+      const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+      return !isNaN(num) && num > 0 && num <= 100000;
+    })?.toString() || '1') || 1;
     
     // Profit detection
-    let profit = fieldMap?.profit ? parseFloat(row[fieldMap.profit]) : 
-      parseFloat(values.find(val => {
-        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
-        return !isNaN(num) && Math.abs(num) <= 50000;
-      })?.toString() || '0') || 0;
+    let profit = parseFloat(rowValues.find(val => {
+      const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+      return !isNaN(num) && Math.abs(num) <= 50000;
+    })?.toString() || '0') || 0;
     
     // Market detection
     let market = 'b3';
@@ -168,7 +259,7 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
       setup: 'CSV Import',
       dataHora: tradeDate.toISOString(),
       ativo: symbol.toString().toUpperCase(),
-      tipo: type.toString().toLowerCase().includes('sell') || type.toString().toLowerCase().includes('venda') ? 'venda' : 'compra',
+      tipo: type.toString().toLowerCase().includes('sell') || type.toString().toLowerCase().includes('venda') || type === 'V' ? 'venda' : 'compra',
       quantidade: quantity.toString(),
       capitalUtilizado: (quantity * openPrice).toString(),
       precoEntrada: openPrice.toString(),
@@ -601,12 +692,13 @@ export async function registerRoutes(app: Express): Promise<void> {
       const results: any[] = [];
       const errors: string[] = [];
       
-      // Parse CSV from file
-      const stream = fs.createReadStream(req.file.path);
+      // Parse CSV from file with proper encoding handling
+      const csvContent = fs.readFileSync(req.file.path, 'latin1');
+      const stream = Readable.from(csvContent);
       
       await new Promise((resolve, reject) => {
         stream
-          .pipe(csv())
+          .pipe(csv({ separator: ';' })) // B3 uses semicolon separator
           .on('data', (data) => results.push(data))
           .on('end', resolve)
           .on('error', reject);
@@ -713,10 +805,107 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get("/api/trades/by-broker", async (req, res) => {
     try {
       const userId = req.headers['user-id'] as string || "1";
-      const tradesByBroker = await storage.getTradesByBroker("");
+      const tradesByBroker = await storage.getTradesByBroker();
       res.json(tradesByBroker);
     } catch (error) {
       console.error("Error fetching trades by broker:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Trading analytics endpoint with proper calculations
+  app.get("/api/analytics", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string || "1";
+      const trades = await storage.getAllTrades(userId);
+      
+      if (trades.length === 0) {
+        return res.json({
+          totalTrades: 0,
+          totalProfit: 0,
+          winRate: 0,
+          avgWin: 0,
+          avgLoss: 0,
+          payoffRatio: 0,
+          worstTrade: 0,
+          bestTrade: 0,
+          tradesByDate: {}
+        });
+      }
+      
+      // Parse results as numbers
+      const results = trades.map(trade => {
+        const result = parseFloat(trade.resultado || '0');
+        return {
+          ...trade,
+          resultadoNum: result,
+          date: new Date(trade.dataHora).toISOString().split('T')[0]
+        };
+      });
+      
+      // Separate wins and losses
+      const winningTrades = results.filter(t => t.resultadoNum > 0);
+      const losingTrades = results.filter(t => t.resultadoNum < 0);
+      
+      // Calculate metrics
+      const totalProfit = results.reduce((sum, trade) => sum + trade.resultadoNum, 0);
+      const winRate = trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
+      
+      const avgWin = winningTrades.length > 0 
+        ? winningTrades.reduce((sum, trade) => sum + trade.resultadoNum, 0) / winningTrades.length 
+        : 0;
+      
+      const avgLoss = losingTrades.length > 0 
+        ? Math.abs(losingTrades.reduce((sum, trade) => sum + trade.resultadoNum, 0) / losingTrades.length)
+        : 0;
+      
+      const payoffRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
+      
+      const worstTrade = results.length > 0 
+        ? Math.min(...results.map(t => t.resultadoNum)) 
+        : 0;
+      
+      const bestTrade = results.length > 0 
+        ? Math.max(...results.map(t => t.resultadoNum)) 
+        : 0;
+      
+      // Group trades by date
+      const tradesByDate = results.reduce((acc, trade) => {
+        const date = trade.date;
+        if (!acc[date]) {
+          acc[date] = {
+            trades: 0,
+            profit: 0,
+            wins: 0,
+            losses: 0
+          };
+        }
+        acc[date].trades++;
+        acc[date].profit += trade.resultadoNum;
+        if (trade.resultadoNum > 0) {
+          acc[date].wins++;
+        } else if (trade.resultadoNum < 0) {
+          acc[date].losses++;
+        }
+        return acc;
+      }, {} as Record<string, any>);
+      
+      res.json({
+        totalTrades: trades.length,
+        totalProfit: Math.round(totalProfit * 100) / 100,
+        winRate: Math.round(winRate * 100) / 100,
+        avgWin: Math.round(avgWin * 100) / 100,
+        avgLoss: Math.round(avgLoss * 100) / 100,
+        payoffRatio: Math.round(payoffRatio * 100) / 100,
+        worstTrade: Math.round(worstTrade * 100) / 100,
+        bestTrade: Math.round(bestTrade * 100) / 100,
+        winningTrades: winningTrades.length,
+        losingTrades: losingTrades.length,
+        tradesByDate
+      });
+      
+    } catch (error) {
+      console.error("Error calculating analytics:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
