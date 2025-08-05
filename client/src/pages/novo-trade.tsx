@@ -495,15 +495,15 @@ export default function NovoTrade() {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-slate-300">Selecione a Corretora</label>
+                  <label className="block text-sm font-medium mb-2 text-slate-300">Selecione o Mercado</label>
                   <Select value={selectedBroker} onValueChange={setSelectedBroker}>
                     <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
-                      <SelectValue placeholder="Escolha a corretora do arquivo CSV" />
+                      <SelectValue placeholder="Crypto, B3 ou Forex" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-600">
-                      <SelectItem value="forex">🏦 Tickmill (Forex)</SelectItem>
-                      <SelectItem value="b3">📈 Clear (B3)</SelectItem>
-                      <SelectItem value="crypto">🪙 Gate.io (Crypto)</SelectItem>
+                      <SelectItem value="crypto">🪙 Crypto</SelectItem>
+                      <SelectItem value="b3">📈 B3</SelectItem>
+                      <SelectItem value="forex">🏦 Forex</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -517,19 +517,19 @@ export default function NovoTrade() {
                     className="bg-slate-800 border-slate-600 text-white file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4"
                   />
                   <p className="text-sm text-slate-400 mt-2">
-                    Selecione um arquivo CSV exportado da sua corretora
+                    Selecione um arquivo CSV exportado do seu mercado
                   </p>
                 </div>
 
                 <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
                   <h4 className="text-white font-medium mb-2 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-purple-400" />
-                    Formato do CSV por Corretora
+                    Formato do CSV por Mercado
                   </h4>
                   <div className="space-y-2 text-sm text-slate-400">
-                    <p><strong className="text-white">Tickmill:</strong> Data, Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take Profit, Resultado</p>
-                    <p><strong className="text-white">Clear:</strong> Data, Código, Operação, Quantidade, Preço, Total, Resultado</p>
-                    <p><strong className="text-white">Gate.io:</strong> Time, Symbol, Side, Amount, Price, Fee, Total, PnL</p>
+                    <p><strong className="text-white">Forex:</strong> Data, Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take Profit, Resultado</p>
+                    <p><strong className="text-white">B3:</strong> Data, Código, Operação, Quantidade, Preço, Total, Resultado</p>
+                    <p><strong className="text-white">Crypto:</strong> Time, Symbol, Side, Amount, Price, Fee, Total, PnL</p>
                   </div>
                 </div>
 
