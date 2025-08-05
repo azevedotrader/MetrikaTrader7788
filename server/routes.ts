@@ -227,9 +227,16 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     // Basic validation
     if (!row || typeof row !== 'object') return null;
     
-    // Skip completely empty rows
+    // Skip completely empty rows or problematic rows
     const hasAnyData = Object.values(row).some(value => value && value.toString().trim() !== '');
     if (!hasAnyData) return null;
+    
+    // Skip rows that look like headers or account info
+    const rowText = Object.values(row).join(' ').toLowerCase();
+    if (rowText.includes('conta:') || rowText.includes('field') || rowText.includes('campo') || 
+        rowText.includes('header') || rowText.includes('_1') || rowText.includes('_2')) {
+      return null;
+    }
     
     // Auto-detect fields if not provided
     if (!fieldMap) {
@@ -277,50 +284,74 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
                       Object.values(row).find(val => val && val.toString().match(/^[A-Z]+\d*$/)) || // Stocks like AAPL, ES1!
                       'UNKNOWN';
     
-    // VOLUME/QUANTITY - find numeric values and clean them
-    let volumeValue = row[fieldMap.volume || ''] ||
-                      Object.values(row).find(val => val && !isNaN(parseFloat(val.toString())) && parseFloat(val.toString()) > 0) ||
-                      '1';
+    // Helper function to safely parse numeric values with range validation
+    const safeParseNumeric = (value: any, defaultValue: string = '0', maxValue: number = 1000000): string => {
+      if (!value) return defaultValue;
+      
+      let cleanValue = value.toString().replace(/[^\d.-]/g, '');
+      if (!cleanValue || cleanValue === '-' || cleanValue === '.') return defaultValue;
+      
+      const numValue = parseFloat(cleanValue);
+      if (isNaN(numValue)) return defaultValue;
+      
+      // Validate range to prevent overflow
+      if (Math.abs(numValue) > maxValue) return defaultValue;
+      
+      return numValue.toString();
+    };
+
+    // VOLUME/QUANTITY - find reasonable numeric values
+    let volumeValue = safeParseNumeric(
+      row[fieldMap.volume || ''] || 
+      Object.values(row).find(val => {
+        const num = parseFloat(val?.toString()?.replace(/[^\d.-]/g, '') || '0');
+        return !isNaN(num) && num > 0 && num <= 1000000; // Reasonable volume range
+      }),
+      '1',
+      1000000
+    );
     
-    // Clean volume value - extract only numbers
-    volumeValue = volumeValue.toString().replace(/[^\d.-]/g, '') || '1';
-    if (isNaN(parseFloat(volumeValue)) || parseFloat(volumeValue) <= 0) {
-      volumeValue = '1';
-    }
+    // PRICE - find reasonable price values (not dates or huge numbers)
+    let priceValue = safeParseNumeric(
+      row[fieldMap.openPrice || ''] ||
+      Object.values(row).find(val => {
+        const str = val?.toString() || '';
+        const num = parseFloat(str.replace(/[^\d.-]/g, ''));
+        // Exclude dates and extreme values
+        return !isNaN(num) && num >= 0 && num <= 100000 && !str.includes('/') && str.length < 15;
+      }),
+      '0',
+      100000
+    );
     
-    // PRICE - find price-like values and clean them
-    let priceValue = row[fieldMap.openPrice || ''] ||
-                     Object.values(row).find(val => val && /\d+\.?\d*/.test(val.toString())) ||
-                     '0';
+    // CLOSE PRICE - similar to open price
+    let closePriceValue = safeParseNumeric(
+      row[fieldMap.closePrice || ''] ||
+      Object.values(row).find(val => {
+        const str = val?.toString() || '';
+        const num = parseFloat(str.replace(/[^\d.-]/g, ''));
+        return !isNaN(num) && num >= 0 && num <= 100000 && !str.includes('/') && str.length < 15;
+      }),
+      priceValue, // Default to open price
+      100000
+    );
     
-    // Clean price value - extract only numbers and decimal points
-    priceValue = priceValue.toString().replace(/[^\d.-]/g, '') || '0';
-    if (isNaN(parseFloat(priceValue))) {
-      priceValue = '0';
-    }
-    
-    // PROFIT/LOSS - find negative or positive numeric values and clean them
-    let profitValue = row[fieldMap.profit || ''] ||
-                      Object.values(row).find(val => val && /^-?\d+\.?\d*$/.test(val.toString())) ||
-                      '0';
-    
-    // Clean profit value
-    profitValue = profitValue.toString().replace(/[^\d.-]/g, '') || '0';
-    if (isNaN(parseFloat(profitValue))) {
-      profitValue = '0';
-    }
+    // PROFIT/LOSS - find reasonable profit values
+    let profitValue = safeParseNumeric(
+      row[fieldMap.profit || ''] ||
+      Object.values(row).find(val => {
+        const str = val?.toString() || '';
+        const num = parseFloat(str.replace(/[^\d.-]/g, ''));
+        return !isNaN(num) && Math.abs(num) <= 50000 && !str.includes('/'); // Reasonable profit range
+      }),
+      '0',
+      50000
+    );
     
     // SIDE/TYPE - detect buy/sell
     let sideValue = row[fieldMap.side || ''] ||
                     Object.values(row).find(val => val && /^(buy|sell|long|short|compra|venda)$/i.test(val.toString())) ||
                     'buy';
-
-    // Clean close price if available
-    let closePriceValue = row[fieldMap.closePrice || ''] || priceValue;
-    closePriceValue = closePriceValue.toString().replace(/[^\d.-]/g, '') || priceValue;
-    if (isNaN(parseFloat(closePriceValue))) {
-      closePriceValue = priceValue;
-    }
 
     // Assign values with intelligent defaults and ensure all numeric fields are clean
     trade.dataHora = dateValue;
