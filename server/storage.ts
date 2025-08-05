@@ -86,7 +86,10 @@ export class DatabaseStorage implements IStorage {
   async createTrade(insertTrade: InsertTrade & { userId: string }): Promise<Trade> {
     const tradeData = {
       ...insertTrade,
-      dataHora: new Date(insertTrade.dataHora)
+      dataHora: new Date(insertTrade.dataHora),
+      // Ensure required fields have default values
+      capitalUtilizado: insertTrade.capitalUtilizado || "0",
+      quantidade: insertTrade.quantidade || "1"
     };
     
     const [trade] = await db
@@ -99,7 +102,10 @@ export class DatabaseStorage implements IStorage {
   async createBulkTrades(tradesData: (InsertTrade & { userId: string })[]): Promise<Trade[]> {
     const processedTrades = tradesData.map(trade => ({
       ...trade,
-      dataHora: new Date(trade.dataHora)
+      dataHora: new Date(trade.dataHora),
+      // Ensure required fields have default values
+      capitalUtilizado: trade.capitalUtilizado || "0",
+      quantidade: trade.quantidade || "1"
     }));
     
     return await db
