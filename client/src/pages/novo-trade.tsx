@@ -3,12 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertTradeSchema, type InsertTrade } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, DollarSign, Target, TrendingUp, TrendingDown, Upload, FileText } from "lucide-react";
+import { CalendarIcon, DollarSign, Target, TrendingUp, TrendingDown, Upload, FileText, Calculator } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
@@ -39,6 +39,84 @@ export default function NovoTrade() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   const [currentTradeData, setCurrentTradeData] = useState<any>(null);
+  
+  // Take/Stop form state
+  const [takeValue, setTakeValue] = useState("");
+  const [stopValue, setStopValue] = useState("");
+  const [tradeResult, setTradeResult] = useState<"take" | "loss" | "">("");
+  const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
+  const [finalResult, setFinalResult] = useState<number | null>(null);
+
+  // Calculate Risk/Reward Ratio and Final Result
+  const calculateRiskReward = (take: string, stop: string, result: "take" | "loss" | "") => {
+    const takeNum = parseFloat(take);
+    const stopNum = parseFloat(stop);
+    
+    if (takeNum > 0 && stopNum > 0) {
+      const rrr = takeNum / stopNum;
+      setRiskRewardRatio(rrr);
+      
+      if (result === "take") {
+        setFinalResult(takeNum);
+      } else if (result === "loss") {
+        setFinalResult(-stopNum);
+      } else {
+        setFinalResult(null);
+      }
+    } else {
+      setRiskRewardRatio(null);
+      setFinalResult(null);
+    }
+  };
+
+  // Handle Take/Stop form submission
+  const handleTakeStopSubmit = () => {
+    if (!takeValue || !stopValue || !tradeResult) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Preencha Take, Stop e selecione o resultado",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const resultValue = tradeResult === "take" ? takeValue : `-${stopValue}`;
+    
+    // Create trade with calculated values
+    const tradeData: InsertTrade = {
+      dataHora: new Date().toISOString().slice(0, 16),
+      ativo: "TAKE/STOP",
+      mercado: "crypto",
+      setup: "Take/Stop",
+      capitalUtilizado: "1",
+      quantidade: "1",
+      tipo: "compra",
+      stop: stopValue,
+      alvo: takeValue,
+      resultado: resultValue,
+      risco: "0",
+      comentario: `RRR: 1:${riskRewardRatio?.toFixed(2)} | Resultado: ${tradeResult === "take" ? "✅ Take" : "❌ Loss"}`,
+      emocao: "neutro",
+      precoEntrada: "0",
+      precoSaida: "0",
+      corretora: "crypto",
+      status: "fechado"
+    };
+
+    createTradeMutation.mutate(tradeData);
+    
+    // Reset form
+    setTakeValue("");
+    setStopValue("");
+    setTradeResult("");
+    setRiskRewardRatio(null);
+    setFinalResult(null);
+  };
+
+  // Auto-calculate when values change
+  useEffect(() => {
+    calculateRiskReward(takeValue, stopValue, tradeResult);
+  }, [takeValue, stopValue, tradeResult]);
 
   const form = useForm<InsertTrade>({
     resolver: zodResolver(insertTradeSchema),
@@ -186,8 +264,9 @@ export default function NovoTrade() {
         <p className="text-slate-400 mt-2">Registre os detalhes da sua operação ou importe via CSV</p>
       </div>
       <Tabs defaultValue="manual" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="manual">Manual</TabsTrigger>
+          <TabsTrigger value="take-stop">Take/Stop</TabsTrigger>
           <TabsTrigger value="csv">Importar CSV</TabsTrigger>
         </TabsList>
 
@@ -482,6 +561,161 @@ export default function NovoTrade() {
               />
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="take-stop">
+          <Card className="bg-slate-900/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Target className="h-5 w-5 text-purple-400" />
+                🎯 Gestão Take/Stop
+              </CardTitle>
+              <CardDescription className="text-slate-400">
+                Calcule automaticamente sua razão risco/retorno e registre o resultado da operação
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Inputs Take/Stop */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-slate-300">Take Profit (Valor de Ganho) *</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="1000.00"
+                        value={takeValue}
+                        onChange={(e) => setTakeValue(e.target.value)}
+                        className="bg-slate-800 border-slate-600 text-white pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-slate-300">Stop Loss (Valor de Perda) *</label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="200.00"
+                        value={stopValue}
+                        onChange={(e) => setStopValue(e.target.value)}
+                        className="bg-slate-800 border-slate-600 text-white pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-slate-300">Resultado da Operação *</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        type="button"
+                        variant={tradeResult === "take" ? "default" : "outline"}
+                        onClick={() => setTradeResult("take")}
+                        className={`${
+                          tradeResult === "take" 
+                            ? "bg-green-600 hover:bg-green-700 text-white" 
+                            : "border-slate-600 text-slate-300 hover:bg-green-600/20"
+                        }`}
+                      >
+                        ✅ Take
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={tradeResult === "loss" ? "default" : "outline"}
+                        onClick={() => setTradeResult("loss")}
+                        className={`${
+                          tradeResult === "loss" 
+                            ? "bg-red-600 hover:bg-red-700 text-white" 
+                            : "border-slate-600 text-slate-300 hover:bg-red-600/20"
+                        }`}
+                      >
+                        ❌ Loss
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Calculations Display */}
+                <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-600">
+                  <h4 className="text-white font-medium mb-4 flex items-center gap-2">
+                    <Calculator className="w-5 h-5 text-purple-400" />
+                    Cálculos Automáticos
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Razão Risco/Retorno:</span>
+                      <span className="text-purple-400 font-semibold text-lg">
+                        {riskRewardRatio ? `1:${riskRewardRatio.toFixed(2)}` : "--"}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-300">Resultado Financeiro:</span>
+                      <span className={`font-semibold text-lg ${
+                        finalResult === null ? 'text-slate-400' :
+                        finalResult >= 0 ? 'text-green-400' : 'text-red-400'
+                      }`}>
+                        {finalResult === null ? "--" : 
+                         finalResult >= 0 ? `+R$ ${finalResult.toFixed(2)}` : `R$ ${finalResult.toFixed(2)}`}
+                      </span>
+                    </div>
+
+                    {riskRewardRatio && (
+                      <div className="mt-4 p-3 bg-slate-700/50 rounded border">
+                        <div className="text-xs text-slate-400 mb-1">Análise RRR:</div>
+                        <div className={`text-sm font-medium ${
+                          riskRewardRatio >= 3 ? 'text-green-400' :
+                          riskRewardRatio >= 2 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>
+                          {riskRewardRatio >= 3 ? "🟢 Excelente (≥3:1)" :
+                           riskRewardRatio >= 2 ? "🟡 Bom (≥2:1)" : "🔴 Arriscado (<2:1)"}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleTakeStopSubmit}
+                  disabled={createTradeMutation.isPending || !takeValue || !stopValue || !tradeResult}
+                  className="gradient-purple-blue hover:opacity-90 transition-opacity"
+                >
+                  {createTradeMutation.isPending ? "Salvando..." : "💾 Registrar Take/Stop"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setTakeValue("");
+                    setStopValue("");
+                    setTradeResult("");
+                    setRiskRewardRatio(null);
+                    setFinalResult(null);
+                  }}
+                  className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                >
+                  🔄 Limpar
+                </Button>
+              </div>
+
+              <div className="bg-slate-800/30 p-4 rounded-lg border border-slate-600">
+                <h5 className="text-white font-medium mb-2">💡 Como usar:</h5>
+                <div className="text-sm text-slate-400 space-y-1">
+                  <p>1. Insira o valor do <strong>Take Profit</strong> (quanto você ganharia)</p>
+                  <p>2. Insira o valor do <strong>Stop Loss</strong> (quanto você perderia)</p>
+                  <p>3. Selecione se a operação foi <strong>✅ Take</strong> ou <strong>❌ Loss</strong></p>
+                  <p>4. O sistema calcula automaticamente a RRR e o resultado financeiro</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="csv">

@@ -677,43 +677,41 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Capital e ROI Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-purple-400" />
-                  📈 Distribuição por Corretora
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(brokerInfo).map(([broker, info]) => {
-                    const brokerTrades = filteredTrades.filter((t: Trade) => t.corretora === broker);
-                    const brokerResult = brokerTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.resultado || "0"), 0);
-                    const percentage = filteredTrades.length > 0 ? (brokerTrades.length / filteredTrades.length) * 100 : 0;
-                    
-                    return (
-                      <div key={broker} className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-3 h-3 rounded-full ${info.color}`}></div>
-                          <span className="text-slate-300">{info.name}</span>
+          {/* Distribuição por Mercado */}
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-purple-400" />
+                📈 Distribuição por Mercado
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {Object.entries(brokerInfo).map(([broker, info]) => {
+                  const brokerTrades = filteredTrades.filter((t: Trade) => t.corretora === broker);
+                  const brokerResult = brokerTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.resultado || "0"), 0);
+                  const percentage = filteredTrades.length > 0 ? (brokerTrades.length / filteredTrades.length) * 100 : 0;
+                  
+                  return (
+                    <div key={broker} className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-3 h-3 rounded-full ${info.color}`}></div>
+                        <span className="text-slate-300">{info.name}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className={`font-semibold ${brokerResult >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          R$ {brokerResult.toFixed(2)}
                         </div>
-                        <div className="text-right">
-                          <div className={`font-semibold ${brokerResult >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            R$ {brokerResult.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {brokerTrades.length} trades ({percentage.toFixed(1)}%)
-                          </div>
+                        <div className="text-xs text-slate-500">
+                          {brokerTrades.length} trades ({percentage.toFixed(1)}%)
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Trading Calendar */}
           <TradingCalendar trades={filteredTrades} />
