@@ -678,41 +678,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Capital e ROI Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-green-400" />
-                  💰 Gestão de Capital
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Capital Total Utilizado</span>
-                    <span className="text-green-400 font-semibold text-lg">
-                      R$ {filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">Ticket Médio por Trade</span>
-                    <span className="text-blue-400 font-semibold">
-                      R$ {filteredTrades.length > 0 ? (filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0) / filteredTrades.length).toFixed(2) : "0.00"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-300">ROI Total</span>
-                    <span className={`font-semibold text-lg ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {(() => {
-                        const capitalTotal = filteredTrades.reduce((sum: number, t: Trade) => sum + parseFloat(t.capitalUtilizado || "0"), 0);
-                        return capitalTotal > 0 ? ((metrics.rentabilidadeTotal / capitalTotal) * 100).toFixed(2) : "0.00";
-                      })()}%
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
             <Card className="bg-slate-800/50 border-slate-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
