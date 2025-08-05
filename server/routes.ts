@@ -21,10 +21,10 @@ function validateAndCleanTrade(trade: any): InsertTrade {
   };
 
   return {
-    userId: trade.userId || 1,
-    corretora: trade.corretora || 'Clear',
+    userId: trade.userId || "1",
+    corretora: trade.corretora || 'crypto',
     origem: trade.origem || 'manual',
-    mercado: trade.mercado || 'B3',
+    mercado: trade.mercado || 'b3',
     setup: trade.setup || 'Manual',
     dataHora: trade.dataHora || new Date().toISOString(),
     ativo: trade.ativo || 'UNKNOWN',
@@ -130,10 +130,10 @@ function parseTradeFromCSVRow(row: any, fieldMap: any): InsertTrade | null {
     }
 
     const trade = {
-      userId: 1,
-      corretora: detectedMarket === 'Forex' ? 'Tickmill' : detectedMarket === 'Crypto' ? 'Gate.io' : 'Clear',
+      userId: "1",
+      corretora: detectedMarket === 'Forex' ? 'forex' : detectedMarket === 'Crypto' ? 'crypto' : 'b3',
       origem: 'csv',
-      mercado: detectedMarket,
+      mercado: detectedMarket.toLowerCase() as 'crypto' | 'forex' | 'b3',
       setup: 'CSV Import',
       dataHora: tradeDate.toISOString(),
       ativo: symbolStr.toUpperCase(),
@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Get all trades
   app.get("/api/trades", async (req, res) => {
     try {
-      const trades = await storage.getTrades();
+      const trades = await storage.getAllTrades();
       res.json(trades);
     } catch (error) {
       console.error("Error fetching trades:", error);
@@ -247,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Get calendar data
   app.get("/api/calendar", async (req, res) => {
     try {
-      const trades = await storage.getTrades();
+      const trades = await storage.getAllTrades();
       
       // Group trades by date
       const calendarData = trades.reduce((acc: any, trade) => {
@@ -267,7 +267,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         acc[date].trades.push(trade);
         acc[date].totalTrades++;
         
-        const resultado = parseFloat(trade.resultado);
+        const resultado = parseFloat(trade.resultado || "0");
         if (resultado > 0) {
           acc[date].profit += resultado;
         } else {
@@ -275,7 +275,8 @@ export async function registerRoutes(app: Express): Promise<void> {
         }
         
         // Calculate average R/R from comments
-        const rrMatch = trade.comentario.match(/R\/R:\s*1:(\d+(?:\.\d+)?)/);
+        const comentario = trade.comentario || "";
+        const rrMatch = comentario.match(/R\/R:\s*1:(\d+(?:\.\d+)?)/);
         if (rrMatch) {
           const rr = parseFloat(rrMatch[1]);
           acc[date].avgRR = (acc[date].avgRR + rr) / 2;
@@ -296,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     try {
       const validatedData = insertTradeSchema.parse({
         ...req.body,
-        userId: 1, // Mock user ID
+        userId: "1", // Mock user ID
         origem: 'manual'
       });
 
@@ -337,8 +338,10 @@ export async function registerRoutes(app: Express): Promise<void> {
             try {
               const trade = parseTradeFromCSVRow(row, fieldMap);
               if (trade) {
-                // Override broker
-                trade.corretora = corretora;
+                // Override broker - ensure it's a valid enum value
+                if (['crypto', 'forex', 'b3'].includes(corretora)) {
+                  trade.corretora = corretora as 'crypto' | 'forex' | 'b3';
+                }
                 trades.push(trade);
               }
             } catch (error) {
@@ -405,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       const { id } = req.params;
       const validatedData = insertTradeSchema.partial().parse(req.body);
 
-      const trade = await storage.updateTrade(parseInt(id), validatedData);
+      const trade = await storage.updateTrade(id, validatedData);
       res.json(trade);
     } catch (error) {
       console.error("Error updating trade:", error);
@@ -423,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.delete("/api/trades/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteTrade(parseInt(id));
+      await storage.deleteTrade(id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting trade:", error);

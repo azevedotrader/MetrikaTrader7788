@@ -82,10 +82,10 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const insertTradeSchema = createInsertSchema(trades).omit({
   id: true,
-  userId: true,
   createdAt: true,
   updatedAt: true,
 }).extend({
+  userId: z.string().optional(), // Make optional for external use
   dataHora: z.string().min(1, "Data e hora são obrigatórias"),
   ativo: z.string().min(1, "Ativo é obrigatório"),
   mercado: z.enum(["crypto", "forex", "b3"], { message: "Mercado deve ser crypto, forex ou b3" }),
