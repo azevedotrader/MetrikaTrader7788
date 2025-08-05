@@ -187,10 +187,34 @@ function validateAndCleanTrade(trade: any): any {
     trade.capitalUtilizado = trade.quantidade;
   }
   
+  // Calcular resultado automaticamente se não estiver definido mas tiver preços
+  if ((!trade.resultado || parseFloat(trade.resultado) === 0) && 
+      trade.precoEntrada && trade.precoSaida && 
+      parseFloat(trade.precoEntrada) > 0 && parseFloat(trade.precoSaida) > 0) {
+    
+    const precoEntrada = parseFloat(trade.precoEntrada);
+    const precoSaida = parseFloat(trade.precoSaida);
+    const quantidade = parseFloat(trade.quantidade || '1');
+    
+    let resultado = 0;
+    
+    // Calcular resultado baseado no tipo de trade
+    if (trade.tipo === 'compra') {
+      // Compra: lucro quando preço de saída > preço de entrada
+      resultado = (precoSaida - precoEntrada) * quantidade;
+    } else {
+      // Venda: lucro quando preço de entrada > preço de saída
+      resultado = (precoEntrada - precoSaida) * quantidade;
+    }
+    
+    trade.resultado = resultado.toString();
+  }
+
   console.log('Dados limpos para o banco:', {
     quantidade: trade.quantidade,
     capitalUtilizado: trade.capitalUtilizado,
     precoEntrada: trade.precoEntrada || 'null',
+    precoSaida: trade.precoSaida || 'null',
     resultado: trade.resultado || 'null'
   });
   
