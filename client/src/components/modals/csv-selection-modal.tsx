@@ -185,21 +185,13 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                               )}
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="text-sm">
                               <div>
                                 <span className="text-slate-400">Trades importados:</span>
                                 <span className="ml-2 text-green-400 font-medium">
                                   {csvImport.tradesImported}
                                 </span>
                               </div>
-                              {csvImport.tradesSkipped > 0 && (
-                                <div>
-                                  <span className="text-slate-400">Trades ignorados:</span>
-                                  <span className="ml-2 text-yellow-400 font-medium">
-                                    {csvImport.tradesSkipped}
-                                  </span>
-                                </div>
-                              )}
                             </div>
 
                             <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
