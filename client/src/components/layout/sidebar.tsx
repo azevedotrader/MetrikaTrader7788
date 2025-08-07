@@ -51,8 +51,8 @@ export function Sidebar() {
         });
       } else {
         toast({
-          title: "📊 Análise Finalizada",
-          description: "Não foram encontrados padrões específicos nos dados CSV atuais."
+          title: "🤖 Análise IA Finalizada",
+          description: "Importe mais dados CSV ou adicione trades para receber dicas personalizadas."
         });
       }
     },

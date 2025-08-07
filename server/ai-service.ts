@@ -292,65 +292,128 @@ export class AITradingService {
 
   async generateCsvBasedTips(trades: any[], csvImports: any[]): Promise<any[]> {
     try {
-      // Analisar padrões dos trades importados via CSV
+      // Analisar todos os trades, priorizando os de CSV mas incluindo todos
       const csvTrades = trades.filter(trade => trade.origem === 'csv');
+      const allTrades = trades.length > 0 ? trades : [];
       
-      if (csvTrades.length === 0) {
+      if (allTrades.length === 0) {
         return [];
       }
 
+      // Criar análise estatística dos dados
+      const analysis = {
+        totalTrades: allTrades.length,
+        csvTrades: csvTrades.length,
+        winRate: allTrades.filter(t => parseFloat(t.resultado) > 0).length / allTrades.length,
+        avgProfit: allTrades.reduce((sum, t) => sum + parseFloat(t.resultado), 0) / allTrades.length,
+        brokers: [...new Set(allTrades.map(t => t.corretora))],
+        assets: [...new Set(allTrades.map(t => t.ativo))],
+        setups: [...new Set(allTrades.map(t => t.setup))],
+        recentTrades: allTrades.slice(-5)
+      };
+
       const prompt = `
-        Analise estes trades importados via CSV e informações de importação:
+        Analise estes dados de trading de um usuário brasileiro e forneça 2-3 dicas inteligentes:
         
-        TRADES: ${JSON.stringify(csvTrades.slice(-20), null, 2)}
-        IMPORTAÇÕES: ${JSON.stringify(csvImports, null, 2)}
+        ESTATÍSTICAS:
+        - Total de trades: ${analysis.totalTrades}
+        - Trades de CSV: ${analysis.csvTrades}
+        - Taxa de acerto: ${(analysis.winRate * 100).toFixed(1)}%
+        - Resultado médio: R$ ${analysis.avgProfit.toFixed(2)}
+        - Corretoras: ${analysis.brokers.join(', ')}
+        - Principais ativos: ${analysis.assets.slice(0, 5).join(', ')}
+        - Setups utilizados: ${analysis.setups.join(', ')}
         
-        Com base nestes dados REAIS do usuário, gere dicas inteligentes e personalizadas.
+        TRADES RECENTES:
+        ${JSON.stringify(analysis.recentTrades, null, 2)}
         
-        Responda em JSON com array de dicas:
+        IMPORTAÇÕES CSV:
+        ${JSON.stringify(csvImports, null, 2)}
+        
+        Como especialista em trading, forneça dicas personalizadas baseadas nos PADRÕES REAIS do usuário.
+        
+        Responda APENAS com JSON válido:
         {
           "tips": [
             {
               "id": "tip_1",
-              "title": "Título da Dica",
-              "message": "Mensagem personalizada baseada nos dados",
-              "type": "warning|success|info",
-              "priority": "high|medium|low",
-              "action": "Ação sugerida específica",
-              "basedOn": "Padrão específico identificado nos dados"
+              "title": "Título Específico",
+              "message": "Dica detalhada baseada nos dados analisados",
+              "type": "warning",
+              "priority": "high",
+              "action": "Ação específica sugerida",
+              "basedOn": "Padrão identificado nos dados"
             }
           ]
         }
         
-        Foque em:
-        - Padrões de horários de entrada
-        - Ativos mais operados
-        - Performance por corretora
-        - Gestão de risco observada
-        - Tendências temporais
+        Foque em padrões como:
+        - Performance por setup/corretora
+        - Gestão de risco (stop-loss)
+        - Horários de melhor performance
+        - Diversificação de ativos
+        - Consistência de resultados
         
-        Máximo 3 dicas por análise.
+        Máximo 3 dicas específicas e acionáveis.
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: "gpt-4o",
         messages: [
           { 
             role: "system", 
-            content: "Você é um analista de trading experiente. Analise dados reais de CSV e forneça dicas personalizadas e acionáveis em português brasileiro." 
+            content: "Você é um mentor de trading experiente no mercado brasileiro. Analise dados reais e forneça conselhos práticos e específicos em português brasileiro. Responda sempre em JSON válido." 
           },
           { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 1500
+        max_tokens: 1200,
+        temperature: 0.7
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{"tips":[]}');
-      return result.tips || [];
+      const content = response.choices[0].message.content;
+      
+      if (!content) {
+        return this.generateFallbackTips(analysis);
+      }
+
+      const result = JSON.parse(content);
+      
+      return result.tips || this.generateFallbackTips(analysis);
     } catch (error) {
       console.error('Erro na geração de dicas baseadas em CSV:', error);
-      return [];
+      return this.generateFallbackTips({ totalTrades: trades.length, winRate: 0.5 });
     }
+  }
+
+  private generateFallbackTips(analysis: any): any[] {
+    const tips = [];
+    
+    if (analysis.winRate < 0.6) {
+      tips.push({
+        id: "improve_winrate",
+        title: "Melhore sua Taxa de Acerto",
+        message: `Com ${(analysis.winRate * 100).toFixed(1)}% de acerto, considere revisar seus critérios de entrada. Analise os trades perdedores para identificar padrões.`,
+        type: "warning",
+        priority: "high",
+        action: "Revise seus setups e critérios de entrada",
+        basedOn: "Taxa de acerto abaixo de 60%"
+      });
+    }
+    
+    if (analysis.totalTrades > 0) {
+      tips.push({
+        id: "keep_journal",
+        title: "Mantenha um Diário Detalhado",
+        message: "Continue registrando seus trades. Use o diário para anotar o contexto emocional e de mercado de cada operação.",
+        type: "info",
+        priority: "medium",
+        action: "Use a seção 'Diário do Trader' regularmente",
+        basedOn: "Presença de dados históricos"
+      });
+    }
+    
+    return tips;
   }
 }
 

@@ -983,6 +983,43 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // AI CSV Analysis endpoint
+  app.post('/api/ai/analyze-csv-tips', async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const trades = await storage.getTrades(userId);
+      const csvImports = await storage.getCsvImports(userId);
+      
+      if (trades.length === 0) {
+        return res.json({ 
+          tips: [{
+            id: "no_data",
+            title: "Sem Dados para Análise",
+            message: "Importe dados CSV ou adicione trades para receber análises personalizadas da IA.",
+            type: "info",
+            priority: "medium",
+            action: "Importe um arquivo CSV ou adicione trades manualmente",
+            basedOn: "Falta de dados históricos"
+          }]
+        });
+      }
+
+      // Usar todos os trades disponíveis para análise
+      const { aiService } = await import('./ai-service');
+      const tips = await aiService.generateCsvBasedTips(trades, csvImports);
+      
+      res.json({ tips });
+    } catch (error) {
+      console.error('Erro na análise de CSV para dicas:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  });
+
   // ADMIN AUTHENTICATION ROUTES
   
   // Admin login
