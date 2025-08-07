@@ -4,7 +4,7 @@
 
 This is a comprehensive trading analytics platform called "Métrika" built as a full-stack web application. The platform allows traders to track their performance, analyze trades, maintain a trading journal, and visualize their progress through various metrics and charts.
 
-**Current Status (Jan 31, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.**
+**Current Status (Aug 7, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.**
 
 ## User Preferences
 
@@ -144,3 +144,13 @@ The application follows a monorepo structure with clear separation between clien
 - **Professional footer** with proper navigation and branding
 - **Screenshots integration** showing real dashboard interfaces and analytics
 - **Brazilian market focus** with localized pricing, testimonials, and language
+
+## Recent Updates (Aug 7, 2025)
+
+### UI/UX Improvements
+- **Sidebar Integration**: Moved "Analisar CSV com IA" button from floating popup to sidebar menu
+- **Improved Navigation**: Button now appears below main navigation with consistent styling
+- **Better UX**: Integrated toast notifications for analysis feedback instead of popup modal
+- **Order Optimization**: Reordered broker filter buttons (Forex → B3 → Crypto) as requested
+- **Reduced Clutter**: Removed floating button to create cleaner interface
+- **Accessibility**: Added proper loading states and tooltips for collapsed sidebar

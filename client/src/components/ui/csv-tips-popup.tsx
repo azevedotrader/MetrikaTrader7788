@@ -116,20 +116,9 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
     }
   };
 
+  // Botão movido para sidebar - não mostrar o botão flutuante
   if (!isVisible && !csvTipsMutation.isPending) {
-    return (
-      <div className="fixed bottom-20 right-4 z-40">
-        <Button
-          onClick={handleAnalyzeCsv}
-          className="bg-purple-600 hover:bg-purple-700 text-white shadow-lg"
-          size="sm"
-          data-testid="analyze-csv-button"
-        >
-          <FileSpreadsheet className="h-4 w-4 mr-2" />
-          Analisar CSV com IA
-        </Button>
-      </div>
-    );
+    return null;
   }
 
   if (csvTipsMutation.isPending) {

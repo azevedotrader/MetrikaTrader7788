@@ -9,10 +9,13 @@ import {
   Book, 
   Calendar,
   User,
-  LogOut
+  LogOut,
+  FileSpreadsheet
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -26,6 +29,49 @@ export function Sidebar() {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
+  const { toast } = useToast();
+
+  const csvAnalysisMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/ai/analyze-csv-tips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-id': 'current-user'
+        }
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.tips && data.tips.length > 0) {
+        const highPriorityTip = data.tips.find((tip: any) => tip.priority === 'high') || data.tips[0];
+        toast({
+          title: "✨ Análise CSV Concluída",
+          description: `${highPriorityTip.title}: ${highPriorityTip.message.substring(0, 80)}...`
+        });
+      } else {
+        toast({
+          title: "📊 Análise Finalizada",
+          description: "Não foram encontrados padrões específicos nos dados CSV atuais."
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Erro na Análise",
+        description: "Não foi possível analisar os dados CSV. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleAnalyzeCsv = () => {
+    csvAnalysisMutation.mutate();
+    toast({
+      title: "🤖 Iniciando Análise",
+      description: "Nossa IA está analisando seus dados CSV..."
+    });
+  };
 
   return (
     <div 
@@ -83,6 +129,34 @@ export function Sidebar() {
               </li>
             ))}
           </ul>
+
+          {/* Análise CSV com IA */}
+          <div className="px-2 py-3 border-t border-slate-700/50">
+            <Button
+              onClick={handleAnalyzeCsv}
+              disabled={csvAnalysisMutation.isPending}
+              className={cn(
+                "w-full text-slate-300 hover:bg-purple-700 hover:text-white transition-all duration-200 bg-purple-600/20 border border-purple-600/30",
+                isExpanded ? "justify-start px-3" : "justify-center px-0"
+              )}
+              title={!isExpanded ? "Analisar CSV com IA" : undefined}
+              data-testid="analyze-csv-sidebar-button"
+            >
+              <FileSpreadsheet className={cn(
+                "w-5 h-5 flex-shrink-0",
+                csvAnalysisMutation.isPending && "animate-spin",
+                isExpanded && "mr-3"
+              )} />
+              <span 
+                className={cn(
+                  "transition-all duration-300 whitespace-nowrap",
+                  isExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
+                )}
+              >
+                {csvAnalysisMutation.isPending ? "Analisando..." : "Analisar CSV com IA"}
+              </span>
+            </Button>
+          </div>
         </nav>
 
         {/* User Profile */}
