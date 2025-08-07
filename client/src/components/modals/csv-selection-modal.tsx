@@ -8,6 +8,7 @@ import { FileSpreadsheet, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AiAnalysisResultsModal } from "./ai-analysis-results-modal";
 
 interface CsvImport {
   id: string;
@@ -24,8 +25,23 @@ interface CsvSelectionModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+interface AiTip {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  priority: string;
+  action: string;
+  basedOn: string;
+  impact?: string;
+  metrics?: string;
+}
+
 export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps) {
   const [selectedCsvId, setSelectedCsvId] = useState<string | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<AiTip[]>([]);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState<string>('');
   const { toast } = useToast();
 
   const { data: csvImports = [], isLoading } = useQuery<CsvImport[]>({
@@ -48,29 +64,15 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
     },
     onSuccess: (data) => {
       if (data.tips && data.tips.length > 0) {
-        // Mostrar análise mais completa
-        const tips = data.tips;
-        const highPriorityTips = tips.filter((tip: any) => tip.priority === 'high');
-        const totalTips = tips.length;
+        // Abrir modal com análise completa
+        setAnalysisResults(data.tips);
+        setShowAnalysisModal(true);
         
         toast({
-          title: `✨ Análise Profunda Concluída (${totalTips} insights)`,
-          description: `Análise completa gerada! ${highPriorityTips.length} dicas críticas identificadas. Verifique o dashboard para ver todos os insights detalhados.`,
-          duration: 8000
+          title: `✨ Análise Profunda Concluída`,
+          description: `${data.tips.length} insights detalhados gerados! Visualize a análise completa na tela.`,
+          duration: 5000
         });
-        
-        // Mostrar dicas individuais se houver poucas
-        if (totalTips <= 3) {
-          tips.forEach((tip: any, index: number) => {
-            setTimeout(() => {
-              toast({
-                title: `💡 ${tip.title}`,
-                description: tip.message.substring(0, 120) + (tip.message.length > 120 ? '...' : ''),
-                duration: 6000
-              });
-            }, (index + 1) * 2000);
-          });
-        }
       } else {
         toast({
           title: "🤖 Análise IA Finalizada",
@@ -98,10 +100,16 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
       return;
     }
 
+    // Guardar nome do arquivo selecionado
+    const selectedCsv = csvImports.find(csv => csv.id === selectedCsvId);
+    if (selectedCsv) {
+      setSelectedFileName(selectedCsv.fileName);
+    }
+
     csvAnalysisMutation.mutate(selectedCsvId);
     toast({
-      title: "🤖 Iniciando Análise",
-      description: "Nossa IA está analisando o CSV selecionado..."
+      title: "🤖 Iniciando Análise Profunda",
+      description: "Nossa IA está analisando detalhadamente seus trades..."
     });
   };
 
@@ -124,118 +132,127 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-slate-900 border-slate-700">
-        <DialogHeader>
-          <DialogTitle className="text-white flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5" />
-            Selecionar CSV para Análise IA
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5" />
+              Selecionar CSV para Análise IA
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div>
-              <span className="ml-2 text-slate-400">Carregando CSVs...</span>
-            </div>
-          ) : csvImports.length === 0 ? (
-            <div className="text-center py-8">
-              <FileSpreadsheet className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-              <p className="text-slate-400">Nenhum CSV importado encontrado.</p>
-              <p className="text-sm text-slate-500 mt-2">
-                Importe um arquivo CSV primeiro para usar a análise IA.
-              </p>
-            </div>
-          ) : (
-            <>
-              <ScrollArea className="max-h-96">
-                <div className="space-y-3">
-                  {csvImports.map((csvImport) => (
-                    <div
-                      key={csvImport.id}
-                      className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                        selectedCsvId === csvImport.id
-                          ? 'border-purple-500 bg-purple-500/10'
-                          : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
-                      }`}
-                      onClick={() => setSelectedCsvId(csvImport.id)}
-                      data-testid={`csv-item-${csvImport.id}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-white font-medium">{csvImport.fileName}</h3>
-                            <Badge className={getBrokerColor(csvImport.broker)}>
-                              {getBrokerLabel(csvImport.broker)}
-                            </Badge>
-                            {csvImport.status === 'completed' ? (
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <AlertCircle className="w-4 h-4 text-yellow-500" />
-                            )}
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-slate-400">Trades importados:</span>
-                              <span className="ml-2 text-green-400 font-medium">
-                                {csvImport.tradesImported}
-                              </span>
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+                <span className="ml-2 text-slate-400">Carregando CSVs...</span>
+              </div>
+            ) : csvImports.length === 0 ? (
+              <div className="text-center py-8">
+                <FileSpreadsheet className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                <p className="text-slate-400">Nenhum CSV importado encontrado.</p>
+                <p className="text-sm text-slate-500 mt-2">
+                  Importe um arquivo CSV primeiro para usar a análise IA.
+                </p>
+              </div>
+            ) : (
+              <>
+                <ScrollArea className="max-h-96">
+                  <div className="space-y-3">
+                    {csvImports.map((csvImport) => (
+                      <div
+                        key={csvImport.id}
+                        className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                          selectedCsvId === csvImport.id
+                            ? 'border-purple-500 bg-purple-500/10'
+                            : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
+                        }`}
+                        onClick={() => setSelectedCsvId(csvImport.id)}
+                        data-testid={`csv-item-${csvImport.id}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-white font-medium">{csvImport.fileName}</h3>
+                              <Badge className={getBrokerColor(csvImport.broker)}>
+                                {getBrokerLabel(csvImport.broker)}
+                              </Badge>
+                              {csvImport.status === 'completed' ? (
+                                <CheckCircle className="w-4 h-4 text-green-500" />
+                              ) : (
+                                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                              )}
                             </div>
-                            {csvImport.tradesSkipped > 0 && (
+                            
+                            <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
-                                <span className="text-slate-400">Trades ignorados:</span>
-                                <span className="ml-2 text-yellow-400 font-medium">
-                                  {csvImport.tradesSkipped}
+                                <span className="text-slate-400">Trades importados:</span>
+                                <span className="ml-2 text-green-400 font-medium">
+                                  {csvImport.tradesImported}
                                 </span>
                               </div>
-                            )}
-                          </div>
+                              {csvImport.tradesSkipped > 0 && (
+                                <div>
+                                  <span className="text-slate-400">Trades ignorados:</span>
+                                  <span className="ml-2 text-yellow-400 font-medium">
+                                    {csvImport.tradesSkipped}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
 
-                          <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
-                            <Clock className="w-3 h-3" />
-                            {format(new Date(csvImport.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            <div className="flex items-center gap-1 mt-2 text-xs text-slate-500">
+                              <Clock className="w-3 h-3" />
+                              {format(new Date(csvImport.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                    ))}
+                  </div>
+                </ScrollArea>
 
-              <div className="flex gap-3 pt-4 border-t border-slate-700">
-                <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
-                  data-testid="cancel-csv-selection"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={!selectedCsvId || csvAnalysisMutation.isPending}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
-                  data-testid="analyze-selected-csv"
-                >
-                  {csvAnalysisMutation.isPending ? (
-                    <>
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                      Analisando...
-                    </>
-                  ) : (
-                    <>
-                      <FileSpreadsheet className="w-4 h-4 mr-2" />
-                      Analisar CSV
-                    </>
-                  )}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+                <div className="flex gap-3 pt-4 border-t border-slate-700">
+                  <Button
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                    data-testid="cancel-csv-selection"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={!selectedCsvId || csvAnalysisMutation.isPending}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                    data-testid="analyze-selected-csv"
+                  >
+                    {csvAnalysisMutation.isPending ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                        Analisando...
+                      </>
+                    ) : (
+                      <>
+                        <FileSpreadsheet className="w-4 h-4 mr-2" />
+                        Analisar CSV
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <AiAnalysisResultsModal
+        open={showAnalysisModal}
+        onOpenChange={setShowAnalysisModal}
+        tips={analysisResults}
+        csvFileName={selectedFileName}
+      />
+    </>
   );
 }

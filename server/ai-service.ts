@@ -316,52 +316,66 @@ export class AITradingService {
       const psychologicalAnalysis = this.analyzePsychologicalPatterns(allTrades);
 
       const promptText = `
-        Como especialista em trading quantitativo, analise PROFUNDAMENTE estes dados reais de um trader brasileiro.
+        Você é um analista quantitativo de trading experiente. Analise PROFUNDAMENTE os dados reais deste trader brasileiro e forneça insights ACIONÁVEIS e ESPECÍFICOS para melhorar sua performance.
         
-        === ANÁLISE TEMPORAL ===
+        === ANÁLISE TEMPORAL DETALHADA ===
         ${JSON.stringify(temporalAnalysis, null, 2)}
         
-        === ANÁLISE DE PERFORMANCE ===
+        === PERFORMANCE E CONSISTÊNCIA ===
         ${JSON.stringify(performanceAnalysis, null, 2)}
         
-        === ANÁLISE DE ATIVOS E SETUPS ===
+        === ATIVOS E ESTRATÉGIAS ===
         ${JSON.stringify(assetSetupAnalysis, null, 2)}
         
-        === ANÁLISE DE RISCO ===
+        === GESTÃO DE RISCO ===
         ${JSON.stringify(riskAnalysis, null, 2)}
         
-        === ANÁLISE PSICOLÓGICA ===
+        === COMPORTAMENTO E PSICOLOGIA ===
         ${JSON.stringify(psychologicalAnalysis, null, 2)}
         
-        === DADOS DOS TRADES ===
-        Total de operações: ${allTrades.length}
-        Período analisado: ${this.getDateRange(allTrades)}
+        === RESUMO DOS DADOS ===
+        - Total de operações analisadas: ${allTrades.length}
+        - Período: ${this.getDateRange(allTrades)}
+        - CSV analisado: ${csvImports.map(c => c.fileName).join(', ')}
         
-        INSTRUÇÕES PARA ANÁLISE:
-        1. Identifique PADRÕES ESPECÍFICOS nos dados temporais (dias, horários, meses)
-        2. Analise a CONSISTÊNCIA e VARIABILIDADE dos resultados
-        3. Identifique PONTOS FORTES e VULNERABILIDADES na estratégia
-        4. Sugira melhorias ESPECÍFICAS baseadas nos dados reais
-        5. Considere aspectos de GESTÃO DE RISCO e PSICOLOGIA
+        MISSÃO: Como consultor de trading, analise os PADRÕES REAIS deste trader e forneça orientações CONCRETAS para:
         
-        Responda APENAS com JSON válido:
+        1. MELHORAR A PERFORMANCE:
+           - Identifique os melhores e piores dias/horários
+           - Analise quais ativos/setups funcionam melhor
+           - Detecte inconsistências na execução
+        
+        2. OTIMIZAR A GESTÃO DE RISCO:
+           - Avalie o uso de stop-loss
+           - Analise drawdowns e recuperação
+           - Identifique overtrading ou revenge trading
+        
+        3. CORRIGIR COMPORTAMENTOS:
+           - Detecte padrões emocionais prejudiciais
+           - Sugira mudanças na rotina de trading
+           - Proponha melhorias na disciplina
+        
+        IMPORTANTE: Seja ESPECÍFICO com os dados! Use números reais, percentuais, valores. NÃO dê conselhos genéricos.
+        
+        Responda EXCLUSIVAMENTE em JSON válido:
         {
           "tips": [
             {
-              "id": "unique_tip_id",
-              "title": "Título Específico e Impactante",
-              "message": "Análise detalhada de 100-150 palavras com dados específicos e insights profundos",
-              "type": "warning|suggestion|critical|opportunity",
+              "id": "insight_001",
+              "title": "Título claro e direto (ex: 'Evite Operar nas Segundas-feiras')",
+              "message": "Análise DETALHADA de 150-250 palavras explicando o problema identificado, por que é importante e como impacta os resultados. Use dados específicos do trader.",
+              "type": "critical|warning|opportunity|suggestion",
               "priority": "high|medium|low",
-              "action": "Ação específica e detalhada para implementar",
-              "basedOn": "Padrão específico identificado nos dados com números",
-              "impact": "Impacto esperado desta mudança",
-              "metrics": "Métricas específicas do usuário que justificam esta dica"
+              "action": "Ação CONCRETA e ESPECÍFICA que o trader deve implementar. Seja prático: quando, como, o que fazer exatamente.",
+              "basedOn": "Dados ESPECÍFICOS que justificam esta recomendação (ex: 'Segundas: -2.450 resultado, 25% winrate vs Quintas: +3.200, 65% winrate')",
+              "impact": "Resultado ESPERADO desta mudança com estimativas quantitativas quando possível",
+              "metrics": "Métricas EXATAS do trader que justificam a dica (valores, percentuais, quantidades)"
             }
           ]
         }
         
-        FORNEÇA 4-6 DICAS PROFUNDAS E ESPECÍFICAS, não genéricas. Use os dados reais!
+        GERE 5-7 DICAS PROFUNDAS, cada uma focada em um aspecto diferente (temporal, ativos, risco, psicológico, etc.).
+        Seja BRUTAL na análise - aponte problemas reais e dê soluções práticas!
       `;
 
       const response = await openai.chat.completions.create({
@@ -374,8 +388,8 @@ export class AITradingService {
           { role: "user", content: promptText }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 2000,
-        temperature: 0.4
+        max_tokens: 3000,
+        temperature: 0.3
       });
 
       const content = response.choices[0].message.content;
