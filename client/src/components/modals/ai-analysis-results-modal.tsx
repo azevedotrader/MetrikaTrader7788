@@ -80,7 +80,7 @@ export function AiAnalysisResultsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] bg-slate-900 border-slate-700">
+      <DialogContent className="max-w-5xl max-h-[95vh] bg-slate-900 border-slate-700 overflow-hidden">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
             <DialogTitle className="text-2xl font-bold text-white flex items-center gap-3">
@@ -103,7 +103,7 @@ export function AiAnalysisResultsModal({
           </Button>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 flex flex-col h-full">
           {/* Resumo Geral */}
           <div className="bg-slate-800/50 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-white mb-2">
@@ -129,13 +129,14 @@ export function AiAnalysisResultsModal({
             </div>
           </div>
 
-          {/* Lista de Dicas */}
-          <ScrollArea className="max-h-[500px]">
-            <div className="space-y-4">
-              {sortedTips.map((tip, index) => (
+          {/* Lista de Dicas com Scroll */}
+          <div className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full max-h-[60vh] pr-4">
+              <div className="space-y-4 pr-2">
+                {sortedTips.map((tip, index) => (
                 <div
                   key={tip.id}
-                  className="bg-slate-800/50 rounded-lg p-6 border border-slate-700 hover:border-slate-600 transition-colors"
+                  className="bg-slate-800/50 rounded-lg p-6 border border-slate-700 hover:border-slate-600 transition-colors mb-4"
                   data-testid={`ai-tip-${tip.id}`}
                 >
                   {/* Header da Dica */}
@@ -175,7 +176,7 @@ export function AiAnalysisResultsModal({
                       <h5 className="text-sm font-semibold text-purple-300 mb-2">
                         🔍 Análise Detalhada
                       </h5>
-                      <p className="text-slate-300 leading-relaxed">
+                      <p className="text-slate-300 leading-relaxed whitespace-pre-wrap break-words">
                         {tip.message}
                       </p>
                     </div>
@@ -187,7 +188,7 @@ export function AiAnalysisResultsModal({
                       <h5 className="text-sm font-semibold text-blue-300 mb-2">
                         📈 Baseado nos Dados
                       </h5>
-                      <p className="text-slate-400 text-sm">
+                      <p className="text-slate-400 text-sm whitespace-pre-wrap break-words">
                         {tip.basedOn}
                       </p>
                       {tip.metrics && (
@@ -204,7 +205,7 @@ export function AiAnalysisResultsModal({
                       <h5 className="text-sm font-semibold text-green-300 mb-2">
                         🎯 Ação Recomendada
                       </h5>
-                      <p className="text-slate-300 text-sm">
+                      <p className="text-slate-300 text-sm whitespace-pre-wrap break-words">
                         {tip.action}
                       </p>
                     </div>
@@ -217,7 +218,7 @@ export function AiAnalysisResultsModal({
                           <h5 className="text-sm font-semibold text-yellow-300 mb-2">
                             ⚡ Impacto Esperado
                           </h5>
-                          <p className="text-slate-400 text-sm">
+                          <p className="text-slate-400 text-sm whitespace-pre-wrap break-words">
                             {tip.impact}
                           </p>
                         </div>
@@ -225,12 +226,13 @@ export function AiAnalysisResultsModal({
                     )}
                   </div>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
 
           {/* Rodapé com Ações */}
-          <div className="flex gap-3 pt-4 border-t border-slate-700">
+          <div className="flex gap-3 pt-4 border-t border-slate-700 flex-shrink-0">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
