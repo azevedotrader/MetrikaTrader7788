@@ -129,29 +129,7 @@ export default function Perfil() {
                 </Select>
               </div>
 
-              {/* Markets */}
-              <div className="space-y-2">
-                <Label className="text-slate-300">Mercados de Atuação</Label>
-                <div className="space-y-3">
-                  {[
-                    { key: "acoes", label: "Ações (B3)" },
-                    { key: "miniIndice", label: "Mini Índice" },
-                    { key: "forex", label: "Forex" },
-                    { key: "cripto", label: "Criptomoedas" }
-                  ].map((market) => (
-                    <div key={market.key} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={market.key}
-                        checked={formData.mercados[market.key as keyof typeof formData.mercados]}
-                        onCheckedChange={(checked) => handleMarketChange(market.key, !!checked)}
-                      />
-                      <Label htmlFor={market.key} className="text-white">
-                        {market.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              
 
               <Button 
                 type="submit" 
