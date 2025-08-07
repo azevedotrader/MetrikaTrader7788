@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { 
   Users, 
   DollarSign, 
@@ -34,8 +35,34 @@ import {
   UserCheck,
   UserX,
   Eye,
-  Settings
+  Settings,
+  LogOut
 } from "lucide-react";
+
+// Admin-specific API request function
+async function adminApiRequest(url: string, method: string = 'GET', data?: any) {
+  const token = localStorage.getItem('adminToken');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  const response = await fetch(url, {
+    method,
+    headers,
+    body: data ? JSON.stringify(data) : undefined,
+  });
+  
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`${response.status}: ${text}`);
+  }
+  
+  return await response.json();
+}
 
 // Schemas para formulários
 const updateUserSchema = z.object({
@@ -68,18 +95,53 @@ export default function AdminPage() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAdminAuthenticated, adminUser, adminLogout, isLoading } = useAdminAuth();
+  const [, setLocation] = useLocation();
 
-  // Queries
+  // Redirect to admin login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAdminAuthenticated) {
+      setLocation('/admin/login');
+    }
+  }, [isAdminAuthenticated, isLoading, setLocation]);
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white">Verificando autenticação...</div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAdminAuthenticated) {
+    return null;
+  }
+
+  const handleLogout = () => {
+    adminLogout();
+    toast({ title: "Logout realizado com sucesso" });
+    setLocation('/admin/login');
+  };
+
+  // Admin queries with authentication
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["/api/admin/users"],
+    queryFn: () => adminApiRequest("/api/admin/users"),
+    enabled: isAdminAuthenticated,
   });
 
   const { data: plans, isLoading: plansLoading } = useQuery({
     queryKey: ["/api/admin/plans"],
+    queryFn: () => adminApiRequest("/api/admin/plans"),
+    enabled: isAdminAuthenticated,
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/admin/stats"],
+    queryFn: () => adminApiRequest("/api/admin/stats"),
+    enabled: isAdminAuthenticated,
   });
 
   // Forms
@@ -110,10 +172,10 @@ export default function AdminPage() {
     },
   });
 
-  // Mutations
+  // Mutations with admin authentication
   const updateUserMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      apiRequest(`/api/admin/users/${id}`, "PUT", data),
+      adminApiRequest(`/api/admin/users/${id}`, "PUT", data),
     onSuccess: () => {
       toast({ title: "Usuário atualizado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -131,7 +193,7 @@ export default function AdminPage() {
 
   const deleteUserMutation = useMutation({
     mutationFn: (id: string) =>
-      apiRequest(`/api/admin/users/${id}`, "DELETE"),
+      adminApiRequest(`/api/admin/users/${id}`, "DELETE"),
     onSuccess: () => {
       toast({ title: "Usuário deletado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -147,7 +209,7 @@ export default function AdminPage() {
 
   const createPlanMutation = useMutation({
     mutationFn: (data: any) =>
-      apiRequest("/api/admin/plans", "POST", data),
+      adminApiRequest("/api/admin/plans", "POST", data),
     onSuccess: () => {
       toast({ title: "Plano criado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
@@ -165,7 +227,7 @@ export default function AdminPage() {
 
   const updatePlanMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      apiRequest(`/api/admin/plans/${id}`, "PUT", data),
+      adminApiRequest(`/api/admin/plans/${id}`, "PUT", data),
     onSuccess: () => {
       toast({ title: "Plano atualizado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
@@ -183,7 +245,7 @@ export default function AdminPage() {
 
   const deletePlanMutation = useMutation({
     mutationFn: (id: string) =>
-      apiRequest(`/api/admin/plans/${id}`, "DELETE"),
+      adminApiRequest(`/api/admin/plans/${id}`, "DELETE"),
     onSuccess: () => {
       toast({ title: "Plano deletado com sucesso!" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
@@ -266,8 +328,22 @@ export default function AdminPage() {
           <p className="text-gray-600 mt-2">
             Gerencie usuários, planos e visualize estatísticas da plataforma
           </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Logado como: {adminUser?.name || adminUser?.email}
+          </p>
         </div>
-        <Shield className="h-12 w-12 text-purple-600" />
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+            data-testid="button-admin-logout"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+          <Shield className="h-12 w-12 text-purple-600" />
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

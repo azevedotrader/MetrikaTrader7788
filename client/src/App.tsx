@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { AIChat } from "@/components/ui/ai-chat";
@@ -19,6 +20,7 @@ import Perfil from "@/pages/perfil";
 import Calendario from "@/pages/calendario";
 import TesteGateIO from "@/pages/teste-gateio";
 import AdminPage from "@/pages/admin";
+import AdminLogin from "@/pages/admin-login";
 import NotFound from "@/pages/not-found";
 
 const pageTitles: Record<string, string> = {
@@ -43,6 +45,15 @@ function AppContent() {
         {/* Public test page - accessible without authentication */}
         <Route path="/teste-gateio">
           <TesteGateIO />
+        </Route>
+        
+        {/* Admin routes - separate from regular app */}
+        <Route path="/admin/login">
+          <AdminLogin />
+        </Route>
+        
+        <Route path="/admin">
+          <AdminPage />
         </Route>
         
         {/* Protected routes */}
@@ -78,10 +89,7 @@ function AppContent() {
                     <TopBar title={pageTitles["/perfil"]} />
                     <Perfil />
                   </Route>
-                  <Route path="/admin">
-                    <TopBar title={pageTitles["/admin"]} />
-                    <AdminPage />
-                  </Route>
+                  {/* Admin route moved to standalone section */}
                   <Route path="/">
                     <TopBar title={pageTitles["/dashboard"]} />
                     <Dashboard />
@@ -112,8 +120,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <Toaster />
-          <AppContent />
+          <AdminAuthProvider>
+            <Toaster />
+            <AppContent />
+          </AdminAuthProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

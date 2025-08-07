@@ -7,6 +7,16 @@ import multer from "multer";
 import csv from "csv-parser";
 import fs from "fs";
 import { Readable } from "stream";
+import jwt from "jsonwebtoken";
+
+// Admin credentials (in production, this should be in environment variables)
+const ADMIN_CREDENTIALS = {
+  email: 'admin@metrika.com',
+  password: 'admin123',
+  name: 'Administrador Métrika'
+};
+
+const JWT_SECRET = process.env.JWT_SECRET || 'metrika_admin_secret_key_2025';
 
 // Configure multer for file uploads - use disk storage for better compatibility
 const upload = multer({ 
@@ -920,16 +930,88 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // ADMIN ROUTES
+  // ADMIN AUTHENTICATION ROUTES
   
-  // Middleware para verificar se é admin
+  // Admin login
+  app.post("/api/admin/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        const token = jwt.sign(
+          { 
+            email: ADMIN_CREDENTIALS.email, 
+            name: ADMIN_CREDENTIALS.name, 
+            role: 'admin' 
+          },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        res.json({
+          token,
+          admin: {
+            email: ADMIN_CREDENTIALS.email,
+            name: ADMIN_CREDENTIALS.name,
+            role: 'admin'
+          }
+        });
+      } else {
+        res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+    } catch (error) {
+      console.error('Admin login error:', error);
+      res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+  });
+  
+  // Admin token verification
+  app.get("/api/admin/auth/verify", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Token requerido' });
+      }
+      
+      const token = authHeader.substring(7);
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      
+      if (decoded.role === 'admin') {
+        res.json({
+          email: decoded.email,
+          name: decoded.name,
+          role: decoded.role
+        });
+      } else {
+        res.status(403).json({ message: 'Acesso negado' });
+      }
+    } catch (error) {
+      res.status(401).json({ message: 'Token inválido' });
+    }
+  });
+  
+  // ADMIN PROTECTED ROUTES
+  
+  // Admin authentication middleware
   const requireAdmin = (req: any, res: any, next: any) => {
-    const userId = req.headers['user-id'] as string || "1";
-    // Por enquanto, vamos assumir que o user-id = "1" é admin
-    if (userId === "1") {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token de acesso requerido' });
+    }
+    
+    const token = authHeader.substring(7);
+    
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      if (decoded.role !== 'admin') {
+        return res.status(403).json({ message: 'Acesso negado. Privilégios de administrador requeridos.' });
+      }
+      req.admin = decoded;
       next();
-    } else {
-      res.status(403).json({ message: "Acesso negado: apenas administradores" });
+    } catch (error) {
+      return res.status(401).json({ message: 'Token inválido' });
     }
   };
 
