@@ -3,16 +3,24 @@ import {
   trades, 
   brokerApiConfigs, 
   csvImports,
+  subscriptionPlans,
+  subscriptions,
+  platformStats,
   type User, 
   type InsertUser, 
   type Trade, 
   type InsertTrade,
   type BrokerApiConfig,
   type InsertBrokerApiConfig,
-  type CsvImport
+  type CsvImport,
+  type SubscriptionPlan,
+  type Subscription,
+  type PlatformStats,
+  type UpdateUserByAdmin,
+  type InsertSubscriptionPlan,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, count, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -37,6 +45,25 @@ export interface IStorage {
   // CSV import operations
   getCsvImports(userId: string): Promise<CsvImport[]>;
   createCsvImport(csvImport: Omit<CsvImport, 'id' | 'createdAt'>): Promise<CsvImport>;
+  
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  updateUserByAdmin(id: string, updates: UpdateUserByAdmin): Promise<User>;
+  deleteUser(id: string): Promise<void>;
+  
+  // Subscription plan operations
+  getAllPlans(): Promise<SubscriptionPlan[]>;
+  createPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
+  updatePlan(id: string, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan>;
+  deletePlan(id: string): Promise<void>;
+  
+  // Platform statistics
+  getPlatformStats(): Promise<PlatformStats | undefined>;
+  updatePlatformStats(stats: Omit<PlatformStats, 'id' | 'createdAt'>): Promise<PlatformStats>;
+  
+  // User subscriptions
+  getUserSubscription(userId: string): Promise<Subscription | undefined>;
+  createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt'>): Promise<Subscription>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -174,6 +201,99 @@ export class DatabaseStorage implements IStorage {
       .values(csvImport)
       .returning();
     return created;
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUserByAdmin(id: string, updates: UpdateUserByAdmin): Promise<User> {
+    const updateData: any = { ...updates };
+    if (updates.planExpiresAt) {
+      updateData.planExpiresAt = new Date(updates.planExpiresAt);
+    }
+    updateData.updatedAt = new Date();
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error('User not found');
+    }
+    
+    return updatedUser;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  // Subscription plan operations
+  async getAllPlans(): Promise<SubscriptionPlan[]> {
+    return await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.price);
+  }
+
+  async createPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const [newPlan] = await db.insert(subscriptionPlans).values(plan).returning();
+    return newPlan;
+  }
+
+  async updatePlan(id: string, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan> {
+    const [updatedPlan] = await db
+      .update(subscriptionPlans)
+      .set({ ...plan, updatedAt: new Date() })
+      .where(eq(subscriptionPlans.id, id))
+      .returning();
+    
+    if (!updatedPlan) {
+      throw new Error('Plan not found');
+    }
+    
+    return updatedPlan;
+  }
+
+  async deletePlan(id: string): Promise<void> {
+    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+  }
+
+  // Platform statistics
+  async getPlatformStats(): Promise<PlatformStats | undefined> {
+    const [stats] = await db
+      .select()
+      .from(platformStats)
+      .orderBy(desc(platformStats.date))
+      .limit(1);
+    
+    return stats || undefined;
+  }
+
+  async updatePlatformStats(stats: Omit<PlatformStats, 'id' | 'createdAt'>): Promise<PlatformStats> {
+    const [newStats] = await db.insert(platformStats).values(stats).returning();
+    return newStats;
+  }
+
+  // User subscriptions
+  async getUserSubscription(userId: string): Promise<Subscription | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(and(
+        eq(subscriptions.userId, userId),
+        eq(subscriptions.status, 'active')
+      ))
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(1);
+    
+    return subscription || undefined;
+  }
+
+  async createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt'>): Promise<Subscription> {
+    const [newSubscription] = await db.insert(subscriptions).values(subscription).returning();
+    return newSubscription;
   }
 }
 

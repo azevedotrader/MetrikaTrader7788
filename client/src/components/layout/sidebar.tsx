@@ -9,7 +9,8 @@ import {
   Book, 
   Calendar,
   User,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useState } from "react";
@@ -21,6 +22,7 @@ const navigation = [
   { name: "Calendário", href: "/calendario", icon: Calendar },
   { name: "Diário do Trader", href: "/diario", icon: Book },
   { name: "Perfil", href: "/perfil", icon: User },
+  { name: "Admin", href: "/admin", icon: Shield },
 ];
 
 export function Sidebar() {

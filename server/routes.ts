@@ -1,7 +1,7 @@
 import { Express } from "express";
-import { Server } from "http";
+import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema } from "@shared/schema";
 import { storage } from "./storage";
 import multer from "multer";
 import csv from "csv-parser";
@@ -920,5 +920,164 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Routes registered successfully
+  // ADMIN ROUTES
+  
+  // Middleware para verificar se é admin
+  const requireAdmin = (req: any, res: any, next: any) => {
+    const userId = req.headers['user-id'] as string || "1";
+    // Por enquanto, vamos assumir que o user-id = "1" é admin
+    if (userId === "1") {
+      next();
+    } else {
+      res.status(403).json({ message: "Acesso negado: apenas administradores" });
+    }
+  };
+
+  // GET /api/admin/users - Listar todos os usuários
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // PUT /api/admin/users/:id - Atualizar usuário
+  app.put("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const updates = updateUserByAdminSchema.parse(req.body);
+      
+      const updatedUser = await storage.updateUserByAdmin(userId, updates);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Erro ao atualizar usuário" 
+      });
+    }
+  });
+
+  // DELETE /api/admin/users/:id - Deletar usuário
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = req.params.id;
+      await storage.deleteUser(userId);
+      res.json({ message: "Usuário deletado com sucesso" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Erro ao deletar usuário" });
+    }
+  });
+
+  // GET /api/admin/plans - Listar todos os planos
+  app.get("/api/admin/plans", requireAdmin, async (req, res) => {
+    try {
+      const plans = await storage.getAllPlans();
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // POST /api/admin/plans - Criar novo plano
+  app.post("/api/admin/plans", requireAdmin, async (req, res) => {
+    try {
+      const planData = insertSubscriptionPlanSchema.parse(req.body);
+      const newPlan = await storage.createPlan(planData);
+      res.status(201).json(newPlan);
+    } catch (error) {
+      console.error("Error creating plan:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Erro ao criar plano" 
+      });
+    }
+  });
+
+  // PUT /api/admin/plans/:id - Atualizar plano
+  app.put("/api/admin/plans/:id", requireAdmin, async (req, res) => {
+    try {
+      const planId = req.params.id;
+      const updates = insertSubscriptionPlanSchema.partial().parse(req.body);
+      
+      const updatedPlan = await storage.updatePlan(planId, updates);
+      res.json(updatedPlan);
+    } catch (error) {
+      console.error("Error updating plan:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Erro ao atualizar plano" 
+      });
+    }
+  });
+
+  // DELETE /api/admin/plans/:id - Deletar plano
+  app.delete("/api/admin/plans/:id", requireAdmin, async (req, res) => {
+    try {
+      const planId = req.params.id;
+      await storage.deletePlan(planId);
+      res.json({ message: "Plano deletado com sucesso" });
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      res.status(500).json({ message: "Erro ao deletar plano" });
+    }
+  });
+
+  // GET /api/admin/stats - Estatísticas da plataforma
+  app.get("/api/admin/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getPlatformStats();
+      
+      // Se não há stats, calcular em tempo real
+      if (!stats) {
+        const allUsers = await storage.getAllUsers();
+        const allTrades = await storage.getAllTrades();
+        
+        const totalUsers = allUsers.length;
+        const activeUsers = allUsers.filter(u => u.isActive).length;
+        const freeUsers = allUsers.filter(u => u.planType === 'free').length;
+        const premiumUsers = allUsers.filter(u => u.planType === 'premium').length;
+        const vipUsers = allUsers.filter(u => u.planType === 'vip').length;
+        
+        // Calcular receita mensal (exemplo baseado nos planos)
+        const monthlyRevenue = (premiumUsers * 97) + (vipUsers * 297);
+        
+        const calculatedStats = {
+          date: new Date(),
+          totalUsers,
+          activeUsers,
+          newUsers: 0, // Seria calculado baseado em registros do mês
+          totalTrades: allTrades.length,
+          monthlyRevenue,
+          freeUsers,
+          premiumUsers,
+          vipUsers,
+        };
+        
+        res.json(calculatedStats);
+      } else {
+        res.json(stats);
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // POST /api/admin/stats - Atualizar estatísticas
+  app.post("/api/admin/stats", requireAdmin, async (req, res) => {
+    try {
+      const statsData = req.body;
+      const updatedStats = await storage.updatePlatformStats(statsData);
+      res.json(updatedStats);
+    } catch (error) {
+      console.error("Error updating stats:", error);
+      res.status(500).json({ message: "Erro ao atualizar estatísticas" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
 }

@@ -8,9 +8,15 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  phone: varchar("phone"),
   capitalInicial: decimal("capital_inicial", { precision: 12, scale: 2 }).default("0"),
   metaMensal: decimal("meta_mensal", { precision: 5, scale: 2 }).default("5"),
   perfilRisco: text("perfil_risco").default("moderado"),
+  planType: text("plan_type").default("free"), // "free", "premium", "vip"
+  planExpiresAt: timestamp("plan_expires_at"),
+  isActive: boolean("is_active").default(true),
+  role: text("role").default("user"), // "user", "admin"
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -64,6 +70,53 @@ export const csvImports = pgTable("csv_imports", {
   tradesSkipped: integer("trades_skipped").default(0),
   status: text("status").default("completed"), // "processing", "completed", "failed"
   errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tabela para planos de assinatura
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(), // "Free", "Premium", "VIP"
+  type: text("type").notNull().unique(), // "free", "premium", "vip"
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").default("BRL"),
+  billingCycle: text("billing_cycle").default("monthly"), // "monthly", "yearly"
+  features: text("features").array(), // Array de features disponíveis
+  maxTrades: integer("max_trades"), // Limite de trades por mês (null = ilimitado)
+  maxCsvImports: integer("max_csv_imports"), // Limite de importações CSV por mês
+  hasApiAccess: boolean("has_api_access").default(false),
+  hasAdvancedAnalytics: boolean("has_advanced_analytics").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tabela para histórico de pagamentos/assinaturas
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  planId: varchar("plan_id").notNull().references(() => subscriptionPlans.id),
+  status: text("status").notNull(), // "active", "cancelled", "expired", "pending"
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: text("payment_method"), // "pix", "credit_card", "bank_slip"
+  transactionId: text("transaction_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tabela para estatísticas da plataforma
+export const platformStats = pgTable("platform_stats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  date: timestamp("date").notNull(),
+  totalUsers: integer("total_users").notNull(),
+  activeUsers: integer("active_users").notNull(),
+  newUsers: integer("new_users").notNull(),
+  totalTrades: integer("total_trades").notNull(),
+  monthlyRevenue: decimal("monthly_revenue", { precision: 12, scale: 2 }).notNull(),
+  freeUsers: integer("free_users").notNull(),
+  premiumUsers: integer("premium_users").notNull(),
+  vipUsers: integer("vip_users").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -132,3 +185,27 @@ export type Trade = typeof trades.$inferSelect;
 export type BrokerApiConfig = typeof brokerApiConfigs.$inferSelect;
 export type InsertBrokerApiConfig = z.infer<typeof insertBrokerApiConfigSchema>;
 export type CsvImport = typeof csvImports.$inferSelect;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type PlatformStats = typeof platformStats.$inferSelect;
+
+// Schema para criação de plano
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Schema para atualização de usuário pelo admin
+export const updateUserByAdminSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+  password: z.string().min(6).optional(),
+  phone: z.string().optional(),
+  planType: z.enum(["free", "premium", "vip"]).optional(),
+  isActive: z.boolean().optional(),
+  planExpiresAt: z.string().optional(),
+});
+
+export type UpdateUserByAdmin = z.infer<typeof updateUserByAdminSchema>;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;

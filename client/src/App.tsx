@@ -18,6 +18,7 @@ import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
 import Calendario from "@/pages/calendario";
 import TesteGateIO from "@/pages/teste-gateio";
+import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 const pageTitles: Record<string, string> = {
@@ -27,6 +28,7 @@ const pageTitles: Record<string, string> = {
   "/diario": "Diário do Trader",
   "/calendario": "Calendário de Trading",
   "/perfil": "Perfil",
+  "/admin": "Painel Administrativo",
   "/teste-gateio": "Teste Gate.io API"
 };
 
@@ -75,6 +77,10 @@ function AppContent() {
                   <Route path="/perfil">
                     <TopBar title={pageTitles["/perfil"]} />
                     <Perfil />
+                  </Route>
+                  <Route path="/admin">
+                    <TopBar title={pageTitles["/admin"]} />
+                    <AdminPage />
                   </Route>
                   <Route path="/">
                     <TopBar title={pageTitles["/dashboard"]} />
