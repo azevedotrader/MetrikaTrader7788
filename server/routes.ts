@@ -805,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get("/api/trades/by-broker", async (req, res) => {
     try {
       const userId = req.headers['user-id'] as string || "1";
-      const tradesByBroker = await storage.getTradesByBroker();
+      const tradesByBroker = await storage.getAllTrades();
       res.json(tradesByBroker);
     } catch (error) {
       console.error("Error fetching trades by broker:", error);
@@ -817,7 +817,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get("/api/analytics", async (req, res) => {
     try {
       const userId = req.headers['user-id'] as string || "1";
-      const trades = await storage.getAllTrades(userId);
+      const trades = await storage.getAllTrades();
       
       if (trades.length === 0) {
         return res.json({
@@ -1079,5 +1079,4 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   const httpServer = createServer(app);
-  return httpServer;
 }
