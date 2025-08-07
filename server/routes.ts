@@ -113,9 +113,12 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     const hasAnyData = Object.values(row).some(value => value && value.toString().trim() !== '');
     if (!hasAnyData) return null;
     
-    // Skip header and account info rows
+    // Skip only clear header rows (not data rows)
     const firstValue = Object.values(row)[0]?.toString() || '';
-    if (firstValue.includes('Conta:') || firstValue.includes('Titular:') || firstValue.includes('Data ') || firstValue.includes('Ativo')) {
+    // Only skip obvious header rows, not data rows
+    if (firstValue.startsWith('Conta:') || firstValue.startsWith('Titular:') || 
+        firstValue.startsWith('Data de') || firstValue === 'Ativo' || 
+        firstValue.includes('Relatório') || firstValue.includes('Período')) {
       return null;
     }
     
@@ -125,7 +128,12 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     const keys = Object.keys(row);
     const values = Object.values(row);
     const firstKey = keys[0] || '';
-    const hasAccountInfo = firstKey.includes('Conta:') || values.some(v => v?.toString().includes('WINM25') || v?.toString().includes('WINQ25'));
+    // Check if first value contains asset symbols (WINM25, WINQ25, etc.)
+    const hasAssetSymbol = values.some(v => {
+      const str = v?.toString() || '';
+      return /^(WIN[A-Z]?\d{2}|PETR\d|VALE\d|ITUB\d|[A-Z]{4}\d{2})$/.test(str);
+    });
+    const hasAccountInfo = firstKey.includes('Conta:') || hasAssetSymbol;
     const isB3Format = hasAccountInfo || keys.some(key => key.includes('Ativo') || key.includes('Abertura') || key.includes('Fechamento'));
     
     if (isB3Format) {
@@ -143,6 +151,15 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
       const precoVenda = row['_8'] || row[keys[8]] || '0'; // Column 9 is sell price
       const resOperacao = row['_13'] || row[keys[13]] || '0'; // Column 14 is result (Res. Operação)
       
+      console.log('Dados extraídos da linha:', {
+        ativo,
+        abertura,
+        lado,
+        qtdCompra,
+        qtdVenda,
+        resOperacao
+      });
+      
       // Parse date from abertura
       let tradeDate = new Date();
       if (abertura) {
@@ -156,15 +173,23 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
         tradeDate = new Date();
       }
       
-      // Clean and parse numeric values
+      // Clean and parse numeric values (Brazilian format: 1.234.567,89)
       const cleanNumber = (value: string): number => {
         if (!value) return 0;
-        // Preserve negative sign and handle Brazilian decimal format
-        const cleaned = value.toString()
-          .replace(/[^\d.,-]/g, '') // Remove non-numeric except dots, commas, minus
+        const str = value.toString().trim();
+        
+        // Handle Brazilian format: remove dots (thousands) and convert comma to dot (decimal)
+        // Examples: "1.500,00" -> "1500.00", "-630,00" -> "-630.00"
+        let cleaned = str
+          .replace(/[^\d.,-]/g, '') // Keep only digits, dots, commas, minus
+          .replace(/(\d)\.(\d{3})/g, '$1$2') // Remove dots used as thousands separators
           .replace(',', '.'); // Convert comma to dot for decimal
         
-        return parseFloat(cleaned) || 0;
+        const result = parseFloat(cleaned) || 0;
+        if (str !== '0' && str !== '') {
+          console.log(`cleanNumber('${value}') -> '${cleaned}' -> ${result}`);
+        }
+        return result;
       };
       
       const quantidade = lado === 'C' ? cleanNumber(qtdCompra) : cleanNumber(qtdVenda);
@@ -172,10 +197,22 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
       const precoSaida = lado === 'C' ? cleanNumber(precoVenda) : cleanNumber(precoCompra);
       const resultado = cleanNumber(resOperacao);
       
-      if (quantidade <= 0 || !ativo || ativo === 'UNKNOWN') {
-        console.log('Linha rejeitada: dados insuficientes');
+      console.log('Validação dos dados:', {
+        quantidade,
+        ativo,
+        precoEntrada,
+        resultado,
+        isValidQuantity: quantidade > 0,
+        isValidAsset: ativo && ativo !== 'UNKNOWN' && !ativo.includes('Conta:') && !ativo.includes('Total')
+      });
+      
+      // Be more permissive with data validation
+      if (quantidade <= 0 || !ativo || ativo === 'UNKNOWN' || ativo.includes('Conta:') || ativo.includes('Total')) {
+        console.log('❌ Linha rejeitada: dados insuficientes');
         return null;
       }
+      
+      console.log('✅ Linha aceita para processamento');
       
       const trade = {
         userId,
