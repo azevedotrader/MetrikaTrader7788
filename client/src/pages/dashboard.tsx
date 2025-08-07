@@ -37,13 +37,6 @@ interface BrokerStats {
 }
 
 const brokerInfo = {
-  "crypto": {
-    name: "Crypto",
-    type: "Criptomoedas",
-    color: "bg-purple-500",
-    icon: Activity,
-    description: "Trading de criptomoedas com importação CSV"
-  },
   "forex": {
     name: "Forex",
     type: "Câmbio",
@@ -57,6 +50,13 @@ const brokerInfo = {
     color: "bg-green-500",
     icon: BarChart3,
     description: "Ações brasileiras B3 com importação CSV"
+  },
+  "crypto": {
+    name: "Crypto",
+    type: "Criptomoedas",
+    color: "bg-purple-500",
+    icon: Activity,
+    description: "Trading de criptomoedas com importação CSV"
   }
 };
 
