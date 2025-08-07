@@ -300,61 +300,68 @@ export class AITradingService {
         return [];
       }
 
-      // Criar análise estatística dos dados
-      const analysis = {
-        totalTrades: allTrades.length,
-        csvTrades: csvTrades.length,
-        winRate: allTrades.filter(t => parseFloat(t.resultado) > 0).length / allTrades.length,
-        avgProfit: allTrades.reduce((sum, t) => sum + parseFloat(t.resultado), 0) / allTrades.length,
-        brokers: [...new Set(allTrades.map(t => t.corretora))],
-        assets: [...new Set(allTrades.map(t => t.ativo))],
-        setups: [...new Set(allTrades.map(t => t.setup))],
-        recentTrades: allTrades.slice(-5)
-      };
+      // ANÁLISE TEMPORAL PROFUNDA
+      const temporalAnalysis = this.analyzeTemporalPatterns(allTrades);
+      
+      // ANÁLISE DE PERFORMANCE DETALHADA
+      const performanceAnalysis = this.analyzeDetailedPerformance(allTrades);
+      
+      // ANÁLISE DE ATIVOS E SETUPS
+      const assetSetupAnalysis = this.analyzeAssetsAndSetups(allTrades);
+      
+      // ANÁLISE DE RISCO E DRAWDOWN
+      const riskAnalysis = this.analyzeRiskAndDrawdown(allTrades);
+      
+      // ANÁLISE PSICOLÓGICA E SEQUÊNCIAS
+      const psychologicalAnalysis = this.analyzePsychologicalPatterns(allTrades);
 
-      const prompt = `
-        Analise estes dados de trading de um usuário brasileiro e forneça 2-3 dicas inteligentes:
+      const promptText = `
+        Como especialista em trading quantitativo, analise PROFUNDAMENTE estes dados reais de um trader brasileiro.
         
-        ESTATÍSTICAS:
-        - Total de trades: ${analysis.totalTrades}
-        - Trades de CSV: ${analysis.csvTrades}
-        - Taxa de acerto: ${(analysis.winRate * 100).toFixed(1)}%
-        - Resultado médio: R$ ${analysis.avgProfit.toFixed(2)}
-        - Corretoras: ${analysis.brokers.join(', ')}
-        - Principais ativos: ${analysis.assets.slice(0, 5).join(', ')}
-        - Setups utilizados: ${analysis.setups.join(', ')}
+        === ANÁLISE TEMPORAL ===
+        ${JSON.stringify(temporalAnalysis, null, 2)}
         
-        TRADES RECENTES:
-        ${JSON.stringify(analysis.recentTrades, null, 2)}
+        === ANÁLISE DE PERFORMANCE ===
+        ${JSON.stringify(performanceAnalysis, null, 2)}
         
-        IMPORTAÇÕES CSV:
-        ${JSON.stringify(csvImports, null, 2)}
+        === ANÁLISE DE ATIVOS E SETUPS ===
+        ${JSON.stringify(assetSetupAnalysis, null, 2)}
         
-        Como especialista em trading, forneça dicas personalizadas baseadas nos PADRÕES REAIS do usuário.
+        === ANÁLISE DE RISCO ===
+        ${JSON.stringify(riskAnalysis, null, 2)}
+        
+        === ANÁLISE PSICOLÓGICA ===
+        ${JSON.stringify(psychologicalAnalysis, null, 2)}
+        
+        === DADOS DOS TRADES ===
+        Total de operações: ${allTrades.length}
+        Período analisado: ${this.getDateRange(allTrades)}
+        
+        INSTRUÇÕES PARA ANÁLISE:
+        1. Identifique PADRÕES ESPECÍFICOS nos dados temporais (dias, horários, meses)
+        2. Analise a CONSISTÊNCIA e VARIABILIDADE dos resultados
+        3. Identifique PONTOS FORTES e VULNERABILIDADES na estratégia
+        4. Sugira melhorias ESPECÍFICAS baseadas nos dados reais
+        5. Considere aspectos de GESTÃO DE RISCO e PSICOLOGIA
         
         Responda APENAS com JSON válido:
         {
           "tips": [
             {
-              "id": "tip_1",
-              "title": "Título Específico",
-              "message": "Dica detalhada baseada nos dados analisados",
-              "type": "warning",
-              "priority": "high",
-              "action": "Ação específica sugerida",
-              "basedOn": "Padrão identificado nos dados"
+              "id": "unique_tip_id",
+              "title": "Título Específico e Impactante",
+              "message": "Análise detalhada de 100-150 palavras com dados específicos e insights profundos",
+              "type": "warning|suggestion|critical|opportunity",
+              "priority": "high|medium|low",
+              "action": "Ação específica e detalhada para implementar",
+              "basedOn": "Padrão específico identificado nos dados com números",
+              "impact": "Impacto esperado desta mudança",
+              "metrics": "Métricas específicas do usuário que justificam esta dica"
             }
           ]
         }
         
-        Foque em padrões como:
-        - Performance por setup/corretora
-        - Gestão de risco (stop-loss)
-        - Horários de melhor performance
-        - Diversificação de ativos
-        - Consistência de resultados
-        
-        Máximo 3 dicas específicas e acionáveis.
+        FORNEÇA 4-6 DICAS PROFUNDAS E ESPECÍFICAS, não genéricas. Use os dados reais!
       `;
 
       const response = await openai.chat.completions.create({
@@ -362,24 +369,24 @@ export class AITradingService {
         messages: [
           { 
             role: "system", 
-            content: "Você é um mentor de trading experiente no mercado brasileiro. Analise dados reais e forneça conselhos práticos e específicos em português brasileiro. Responda sempre em JSON válido." 
+            content: "Você é um analista quantitativo e mentor de trading com 15+ anos de experiência no mercado brasileiro. Especialista em análise de dados históricos, padrões comportamentais e otimização de estratégias. Forneça análises PROFUNDAS e ESPECÍFICAS baseadas em dados reais, não conselhos genéricos. Use português brasileiro e seja direto nos insights." 
           },
-          { role: "user", content: prompt }
+          { role: "user", content: promptText }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 1200,
-        temperature: 0.7
+        max_tokens: 2000,
+        temperature: 0.4
       });
 
       const content = response.choices[0].message.content;
       
       if (!content) {
-        return this.generateFallbackTips(analysis);
+        return this.generateFallbackTips(performanceAnalysis);
       }
 
       const result = JSON.parse(content);
       
-      return result.tips || this.generateFallbackTips(analysis);
+      return result.tips || this.generateFallbackTips(performanceAnalysis);
     } catch (error) {
       console.error('Erro na geração de dicas baseadas em CSV:', error);
       return this.generateFallbackTips({ totalTrades: trades.length, winRate: 0.5 });
@@ -414,6 +421,372 @@ export class AITradingService {
     }
     
     return tips;
+  }
+
+  // Métodos de análise profunda
+  private analyzeTemporalPatterns(trades: any[]) {
+    const dayOfWeekStats = this.groupAndAnalyze(trades, (trade) => {
+      const date = new Date(trade.dataHora);
+      const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+      return days[date.getDay()];
+    });
+
+    const hourStats = this.groupAndAnalyze(trades, (trade) => {
+      const hour = new Date(trade.dataHora).getHours();
+      return `${hour}h`;
+    });
+
+    const monthStats = this.groupAndAnalyze(trades, (trade) => {
+      const date = new Date(trade.dataHora);
+      const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      return months[date.getMonth()];
+    });
+
+    return {
+      dayOfWeek: dayOfWeekStats,
+      hourly: hourStats,
+      monthly: monthStats,
+      bestDay: this.getBestPerformer(dayOfWeekStats),
+      worstDay: this.getWorstPerformer(dayOfWeekStats),
+      bestHour: this.getBestPerformer(hourStats),
+      worstHour: this.getWorstPerformer(hourStats)
+    };
+  }
+
+  private analyzeDetailedPerformance(trades: any[]) {
+    const profits = trades.map(t => parseFloat(t.resultado)).filter(r => r > 0);
+    const losses = trades.map(t => parseFloat(t.resultado)).filter(r => r < 0);
+    const allResults = trades.map(t => parseFloat(t.resultado));
+    
+    const winRate = profits.length / trades.length;
+    const avgWin = profits.length > 0 ? profits.reduce((a, b) => a + b, 0) / profits.length : 0;
+    const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0;
+    const profitFactor = avgLoss > 0 ? (avgWin * profits.length) / (avgLoss * losses.length) : 0;
+    
+    // Análise de consistência
+    const monthlyResults = this.groupTradesByMonth(trades);
+    const monthlyProfits = Object.values(monthlyResults).map((month: any) => 
+      month.reduce((sum: number, trade: any) => sum + parseFloat(trade.resultado), 0)
+    );
+    
+    return {
+      totalTrades: trades.length,
+      winRate: winRate,
+      avgWin: avgWin,
+      avgLoss: avgLoss,
+      profitFactor: profitFactor,
+      largestWin: Math.max(...profits),
+      largestLoss: Math.min(...losses),
+      totalProfit: allResults.reduce((a, b) => a + b, 0),
+      consistency: this.calculateConsistency(monthlyProfits),
+      monthlyResults: monthlyResults,
+      sharpeRatio: this.calculateSharpeRatio(allResults)
+    };
+  }
+
+  private analyzeAssetsAndSetups(trades: any[]) {
+    const assetStats = this.groupAndAnalyze(trades, (trade) => trade.ativo);
+    const setupStats = this.groupAndAnalyze(trades, (trade) => trade.setup);
+    const brokerStats = this.groupAndAnalyze(trades, (trade) => trade.corretora);
+    
+    return {
+      assets: assetStats,
+      setups: setupStats,
+      brokers: brokerStats,
+      bestAsset: this.getBestPerformer(assetStats),
+      worstAsset: this.getWorstPerformer(assetStats),
+      bestSetup: this.getBestPerformer(setupStats),
+      worstSetup: this.getWorstPerformer(setupStats),
+      diversification: {
+        assetsCount: Object.keys(assetStats).length,
+        setupsCount: Object.keys(setupStats).length,
+        concentration: this.calculateConcentration(assetStats)
+      }
+    };
+  }
+
+  private analyzeRiskAndDrawdown(trades: any[]) {
+    const sortedTrades = trades.sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime());
+    const cumulativeResults = [];
+    let runningSum = 0;
+    
+    sortedTrades.forEach(trade => {
+      runningSum += parseFloat(trade.resultado);
+      cumulativeResults.push(runningSum);
+    });
+    
+    const drawdowns = this.calculateDrawdowns(cumulativeResults);
+    const maxDrawdown = Math.min(...drawdowns);
+    
+    // Análise de stop loss
+    const tradesWithStop = trades.filter(t => t.stop && parseFloat(t.stop) > 0);
+    const stopUsageRate = tradesWithStop.length / trades.length;
+    
+    return {
+      maxDrawdown: maxDrawdown,
+      avgDrawdown: drawdowns.reduce((a, b) => a + b, 0) / drawdowns.length,
+      stopLossUsage: stopUsageRate,
+      riskRewardRatio: this.calculateRiskRewardRatio(trades),
+      volatility: this.calculateVolatility(trades.map(t => parseFloat(t.resultado))),
+      consecutiveLosses: this.getMaxConsecutiveLosses(trades),
+      recoveryTime: this.calculateRecoveryTime(cumulativeResults, drawdowns)
+    };
+  }
+
+  private analyzePsychologicalPatterns(trades: any[]) {
+    const emotionStats: any = {};
+    const emotionTrades = trades.filter(t => t.emocao);
+    
+    emotionTrades.forEach(trade => {
+      const emotion = trade.emocao;
+      if (!emotionStats[emotion]) {
+        emotionStats[emotion] = { count: 0, totalResult: 0, results: [] };
+      }
+      emotionStats[emotion].count++;
+      emotionStats[emotion].totalResult += parseFloat(trade.resultado);
+      emotionStats[emotion].results.push(parseFloat(trade.resultado));
+    });
+    
+    // Análise de sequências
+    const sequences = this.analyzeWinLossSequences(trades);
+    
+    return {
+      emotionalTrading: emotionStats,
+      sequences: sequences,
+      overtrading: this.detectOvertrading(trades),
+      revengeTrading: this.detectRevengeTrading(trades),
+      emotionalControl: this.calculateEmotionalControl(emotionStats)
+    };
+  }
+
+  private getDateRange(trades: any[]) {
+    if (trades.length === 0) return 'Sem dados';
+    const dates = trades.map(t => new Date(t.dataHora)).sort((a, b) => a.getTime() - b.getTime());
+    const start = dates[0].toLocaleDateString('pt-BR');
+    const end = dates[dates.length - 1].toLocaleDateString('pt-BR');
+    return `${start} a ${end}`;
+  }
+
+  // Métodos auxiliares
+  private groupAndAnalyze(trades: any[], groupBy: (trade: any) => string) {
+    const groups: any = {};
+    trades.forEach(trade => {
+      const key = groupBy(trade);
+      if (!groups[key]) {
+        groups[key] = { count: 0, totalResult: 0, wins: 0, losses: 0, results: [] };
+      }
+      groups[key].count++;
+      const result = parseFloat(trade.resultado);
+      groups[key].totalResult += result;
+      groups[key].results.push(result);
+      if (result > 0) groups[key].wins++;
+      else if (result < 0) groups[key].losses++;
+    });
+    
+    // Calcular métricas para cada grupo
+    Object.keys(groups).forEach(key => {
+      const group = groups[key];
+      group.avgResult = group.totalResult / group.count;
+      group.winRate = group.wins / group.count;
+      group.profitability = group.totalResult;
+    });
+    
+    return groups;
+  }
+
+  private getBestPerformer(stats: any) {
+    return Object.keys(stats).reduce((best, current) => 
+      stats[current].profitability > stats[best].profitability ? current : best
+    );
+  }
+
+  private getWorstPerformer(stats: any) {
+    return Object.keys(stats).reduce((worst, current) => 
+      stats[current].profitability < stats[worst].profitability ? current : worst
+    );
+  }
+
+  private groupTradesByMonth(trades: any[]) {
+    const months: any = {};
+    trades.forEach(trade => {
+      const date = new Date(trade.dataHora);
+      const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      if (!months[monthKey]) months[monthKey] = [];
+      months[monthKey].push(trade);
+    });
+    return months;
+  }
+
+  private calculateConsistency(monthlyProfits: number[]) {
+    if (monthlyProfits.length < 2) return 0;
+    const mean = monthlyProfits.reduce((a, b) => a + b, 0) / monthlyProfits.length;
+    const variance = monthlyProfits.reduce((sum, profit) => sum + Math.pow(profit - mean, 2), 0) / monthlyProfits.length;
+    return Math.sqrt(variance); // Desvio padrão (menor = mais consistente)
+  }
+
+  private calculateSharpeRatio(results: number[]) {
+    const mean = results.reduce((a, b) => a + b, 0) / results.length;
+    const variance = results.reduce((sum, result) => sum + Math.pow(result - mean, 2), 0) / results.length;
+    const stdDev = Math.sqrt(variance);
+    return stdDev > 0 ? mean / stdDev : 0;
+  }
+
+  private calculateConcentration(assetStats: any) {
+    const total = Object.values(assetStats).reduce((sum: number, asset: any) => sum + asset.count, 0);
+    const concentrations = Object.values(assetStats).map((asset: any) => Math.pow(asset.count / total, 2));
+    return concentrations.reduce((a: number, b: number) => a + b, 0); // Índice Herfindahl
+  }
+
+  private calculateDrawdowns(cumulativeResults: number[]) {
+    const drawdowns = [];
+    let peak = cumulativeResults[0];
+    
+    cumulativeResults.forEach(result => {
+      if (result > peak) peak = result;
+      drawdowns.push(result - peak);
+    });
+    
+    return drawdowns;
+  }
+
+  private calculateRiskRewardRatio(trades: any[]) {
+    const wins = trades.filter(t => parseFloat(t.resultado) > 0).map(t => parseFloat(t.resultado));
+    const losses = trades.filter(t => parseFloat(t.resultado) < 0).map(t => Math.abs(parseFloat(t.resultado)));
+    
+    if (wins.length === 0 || losses.length === 0) return 0;
+    
+    const avgWin = wins.reduce((a, b) => a + b, 0) / wins.length;
+    const avgLoss = losses.reduce((a, b) => a + b, 0) / losses.length;
+    
+    return avgLoss > 0 ? avgWin / avgLoss : 0;
+  }
+
+  private calculateVolatility(results: number[]) {
+    const mean = results.reduce((a, b) => a + b, 0) / results.length;
+    const variance = results.reduce((sum, result) => sum + Math.pow(result - mean, 2), 0) / results.length;
+    return Math.sqrt(variance);
+  }
+
+  private getMaxConsecutiveLosses(trades: any[]) {
+    let maxLosses = 0;
+    let currentLosses = 0;
+    
+    trades.forEach(trade => {
+      if (parseFloat(trade.resultado) < 0) {
+        currentLosses++;
+        maxLosses = Math.max(maxLosses, currentLosses);
+      } else {
+        currentLosses = 0;
+      }
+    });
+    
+    return maxLosses;
+  }
+
+  private calculateRecoveryTime(cumulativeResults: number[], drawdowns: number[]) {
+    // Tempo médio para recuperar de drawdowns
+    return drawdowns.filter(d => d < 0).length; // Simplificado
+  }
+
+  private analyzeWinLossSequences(trades: any[]) {
+    const sequences = { wins: [] as number[], losses: [] as number[] };
+    let currentWinStreak = 0;
+    let currentLossStreak = 0;
+    
+    trades.forEach(trade => {
+      const result = parseFloat(trade.resultado);
+      if (result > 0) {
+        if (currentLossStreak > 0) {
+          sequences.losses.push(currentLossStreak);
+          currentLossStreak = 0;
+        }
+        currentWinStreak++;
+      } else if (result < 0) {
+        if (currentWinStreak > 0) {
+          sequences.wins.push(currentWinStreak);
+          currentWinStreak = 0;
+        }
+        currentLossStreak++;
+      }
+    });
+    
+    return {
+      maxWinStreak: Math.max(...sequences.wins, 0),
+      maxLossStreak: Math.max(...sequences.losses, 0),
+      avgWinStreak: sequences.wins.length > 0 ? sequences.wins.reduce((a, b) => a + b, 0) / sequences.wins.length : 0,
+      avgLossStreak: sequences.losses.length > 0 ? sequences.losses.reduce((a, b) => a + b, 0) / sequences.losses.length : 0
+    };
+  }
+
+  private detectOvertrading(trades: any[]) {
+    // Detectar dias com muitos trades
+    const dailyTrades: any = {};
+    trades.forEach(trade => {
+      const date = new Date(trade.dataHora).toDateString();
+      dailyTrades[date] = (dailyTrades[date] || 0) + 1;
+    });
+    
+    const tradeCounts = Object.values(dailyTrades) as number[];
+    const avgDailyTrades = tradeCounts.reduce((a, b) => a + b, 0) / tradeCounts.length;
+    const maxDailyTrades = Math.max(...tradeCounts);
+    
+    return {
+      avgDailyTrades,
+      maxDailyTrades,
+      overtradingDays: tradeCounts.filter(count => count > avgDailyTrades * 2).length
+    };
+  }
+
+  private detectRevengeTrading(trades: any[]) {
+    // Detectar padrões de revenge trading
+    let revengePatterns = 0;
+    
+    for (let i = 1; i < trades.length; i++) {
+      const prevTrade = trades[i - 1];
+      const currentTrade = trades[i];
+      
+      // Se trade anterior foi perda e o atual foi feito logo depois com maior volume
+      if (parseFloat(prevTrade.resultado) < 0 && 
+          parseFloat(currentTrade.quantidade) > parseFloat(prevTrade.quantidade) * 1.5) {
+        const timeDiff = new Date(currentTrade.dataHora).getTime() - new Date(prevTrade.dataHora).getTime();
+        if (timeDiff < 3600000) { // Menos de 1 hora
+          revengePatterns++;
+        }
+      }
+    }
+    
+    return {
+      suspectedRevengeTrades: revengePatterns,
+      revengeRate: revengePatterns / trades.length
+    };
+  }
+
+  private calculateEmotionalControl(emotionStats: any) {
+    const emotions = Object.keys(emotionStats);
+    if (emotions.length === 0) return { score: 0, analysis: 'Sem dados emocionais' };
+    
+    const negativeEmotions = ['ansioso', 'impulsivo', 'eufórico', 'frustrado'];
+    const positiveEmotions = ['confiante', 'calmo', 'neutro'];
+    
+    let negativeTradeResults = 0;
+    let positiveTradeResults = 0;
+    
+    emotions.forEach(emotion => {
+      const avgResult = emotionStats[emotion].totalResult / emotionStats[emotion].count;
+      if (negativeEmotions.includes(emotion)) {
+        negativeTradeResults += avgResult;
+      } else if (positiveEmotions.includes(emotion)) {
+        positiveTradeResults += avgResult;
+      }
+    });
+    
+    return {
+      emotionalImpact: positiveTradeResults - negativeTradeResults,
+      dominantEmotion: emotions.reduce((a, b) => 
+        emotionStats[a].count > emotionStats[b].count ? a : b
+      ),
+      emotionalDiversity: emotions.length
+    };
   }
 }
 

@@ -48,11 +48,29 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
     },
     onSuccess: (data) => {
       if (data.tips && data.tips.length > 0) {
-        const highPriorityTip = data.tips.find((tip: any) => tip.priority === 'high') || data.tips[0];
+        // Mostrar análise mais completa
+        const tips = data.tips;
+        const highPriorityTips = tips.filter((tip: any) => tip.priority === 'high');
+        const totalTips = tips.length;
+        
         toast({
-          title: "✨ Análise CSV Concluída",
-          description: `${highPriorityTip.title}: ${highPriorityTip.message.substring(0, 80)}...`
+          title: `✨ Análise Profunda Concluída (${totalTips} insights)`,
+          description: `Análise completa gerada! ${highPriorityTips.length} dicas críticas identificadas. Verifique o dashboard para ver todos os insights detalhados.`,
+          duration: 8000
         });
+        
+        // Mostrar dicas individuais se houver poucas
+        if (totalTips <= 3) {
+          tips.forEach((tip: any, index: number) => {
+            setTimeout(() => {
+              toast({
+                title: `💡 ${tip.title}`,
+                description: tip.message.substring(0, 120) + (tip.message.length > 120 ? '...' : ''),
+                duration: 6000
+              });
+            }, (index + 1) * 2000);
+          });
+        }
       } else {
         toast({
           title: "🤖 Análise IA Finalizada",
