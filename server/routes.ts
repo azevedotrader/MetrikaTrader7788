@@ -987,29 +987,71 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post('/api/ai/analyze-csv-tips', async (req, res) => {
     try {
       const userId = req.headers['user-id'] as string;
+      const { csvId } = req.body;
       
       if (!userId) {
         return res.status(401).json({ error: 'Usuário não autenticado' });
       }
 
-      const trades = await storage.getTrades(userId);
-      const csvImports = await storage.getCsvImports(userId);
+      let trades;
+      let csvImports;
+
+      if (csvId) {
+        // Analisar CSV específico
+        csvImports = await storage.getCsvImports(userId);
+        const selectedCsv = csvImports.find(csv => csv.id === csvId);
+        
+        if (!selectedCsv) {
+          return res.status(404).json({ error: 'CSV não encontrado' });
+        }
+
+        // Buscar apenas trades relacionados a este CSV específico
+        // Assumindo que temos uma forma de filtrar trades por origem/csv
+        const allTrades = await storage.getTrades(userId);
+        trades = allTrades.filter(trade => {
+          if (trade.origem !== 'csv' || trade.corretora !== selectedCsv.broker) {
+            return false;
+          }
+          
+          // Verificar se as datas existem antes de fazer a comparação
+          if (!trade.createdAt || !selectedCsv.createdAt) {
+            return false;
+          }
+
+          // Filtrar por data aproximada da importação (trades criados próximo à data do CSV)
+          const tradeTime = new Date(trade.createdAt).getTime();
+          const csvTime = new Date(selectedCsv.createdAt).getTime();
+          
+          return tradeTime >= csvTime - 60000 && // 1 minuto antes
+                 tradeTime <= csvTime + 300000;   // 5 minutos depois
+        });
+
+        csvImports = [selectedCsv]; // Usar apenas o CSV selecionado
+      } else {
+        // Comportamento original - analisar todos os dados
+        trades = await storage.getTrades(userId);
+        csvImports = await storage.getCsvImports(userId);
+      }
       
       if (trades.length === 0) {
         return res.json({ 
           tips: [{
             id: "no_data",
             title: "Sem Dados para Análise",
-            message: "Importe dados CSV ou adicione trades para receber análises personalizadas da IA.",
+            message: csvId 
+              ? "Este CSV não possui trades válidos para análise." 
+              : "Importe dados CSV ou adicione trades para receber análises personalizadas da IA.",
             type: "info",
             priority: "medium",
-            action: "Importe um arquivo CSV ou adicione trades manualmente",
-            basedOn: "Falta de dados históricos"
+            action: csvId 
+              ? "Verifique se o CSV foi importado corretamente" 
+              : "Importe um arquivo CSV ou adicione trades manualmente",
+            basedOn: csvId ? "CSV específico sem dados válidos" : "Falta de dados históricos"
           }]
         });
       }
 
-      // Usar todos os trades disponíveis para análise
+      // Analisar trades (do CSV específico ou todos)
       const { aiService } = await import('./ai-service');
       const tips = await aiService.generateCsvBasedTips(trades, csvImports);
       
