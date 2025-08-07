@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   TrendingUp, 
   Target,
@@ -19,7 +21,8 @@ import {
   FileText,
   Activity,
   Plus,
-  LineChart
+  LineChart,
+  Trash2
 } from "lucide-react";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { type Trade } from "@shared/schema";
@@ -454,7 +457,7 @@ export default function Dashboard() {
   const [selectedBrokerFilter, setSelectedBrokerFilter] = useState<string | null>(null);
 
   // Fetch trades data
-  const { data: trades = [], isLoading } = useQuery({
+  const { data: trades = [], isLoading } = useQuery<Trade[]>({
     queryKey: ['/api/trades']
   });
 
@@ -466,6 +469,29 @@ export default function Dashboard() {
   // Fetch CSV imports
   const { data: csvImports = [] } = useQuery({
     queryKey: ['/api/csv-imports']
+  });
+
+  // Reset dashboard mutation
+  const resetDashboardMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest('DELETE', '/api/trades/reset-all');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
+      toast({
+        title: "Dashboard Resetada",
+        description: "Todos os trades foram deletados. Você pode começar do zero agora."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao resetar",
+        description: "Não foi possível resetar a dashboard: " + error.message,
+        variant: "destructive"
+      });
+    }
   });
 
   if (isLoading) {
@@ -1135,9 +1161,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Botão de Atualização */}
+          {/* Ações da Dashboard */}
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="pt-6">
+            <CardContent className="pt-6 space-y-3">
               <Button 
                 className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
                 onClick={() => {
@@ -1153,6 +1179,40 @@ export default function Dashboard() {
                 <Sync className="w-4 h-4 mr-2" />
                 🔄 Atualizar Dados Consolidados
               </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    className="w-full bg-red-600 hover:bg-red-700"
+                    data-testid="button-reset-dashboard"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    🗑️ Resetar Dashboard
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-slate-800 border-slate-700">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-white">⚠️ Resetar Dashboard</AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-300">
+                      Esta ação irá <strong>deletar TODOS os seus trades</strong> e dados de trading permanentemente. 
+                      Você começará do zero. Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600">
+                      Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction 
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      onClick={() => resetDashboardMutation.mutate()}
+                      data-testid="button-confirm-reset"
+                    >
+                      Sim, resetar tudo
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </TabsContent>

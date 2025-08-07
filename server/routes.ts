@@ -718,6 +718,22 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Reset all trades (delete all)
+  app.delete("/api/trades/reset-all", async (req, res) => {
+    try {
+      const userId = req.headers['user-id'] as string;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      await storage.deleteAllTrades(userId);
+      res.json({ message: "Todos os trades foram deletados com sucesso" });
+    } catch (error) {
+      console.error("Error resetting all trades:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // CSV Upload endpoint (used by frontend)
   app.post("/api/trades/upload-csv", upload.single('csvFile'), async (req, res) => {
     try {

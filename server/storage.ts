@@ -36,6 +36,7 @@ export interface IStorage {
   createBulkTrades(trades: InsertTrade[]): Promise<Trade[]>;
   updateTrade(id: string, updates: Partial<InsertTrade>): Promise<Trade>;
   deleteTrade(id: string): Promise<void>;
+  deleteAllTrades(userId: string): Promise<void>;
   
   // Broker API config operations
   getBrokerApiConfig(userId: string, broker: string): Promise<BrokerApiConfig | undefined>;
@@ -157,6 +158,10 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTrade(id: string): Promise<void> {
     await db.delete(trades).where(eq(trades.id, id));
+  }
+
+  async deleteAllTrades(userId: string): Promise<void> {
+    await db.delete(trades).where(eq(trades.userId, userId));
   }
 
   // Broker API config operations
