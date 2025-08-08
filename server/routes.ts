@@ -8,6 +8,7 @@ import csv from "csv-parser";
 import fs from "fs";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
+import { lerCSVInteligente, analisarFormatoCSV } from "./csv-reader";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -53,6 +54,228 @@ function validateAndCleanTrade(trade: any): InsertTrade {
     stop: safeParseNumeric(trade.stop, '0'),
     comentario: trade.comentario || ''
   };
+}
+
+// Intelligent CSV row processing function
+function processIntelligentCsvRow(row: any, broker: string, userId: string): InsertTrade | null {
+  try {
+    console.log('🔍 Processando linha inteligente:', row);
+
+    // Smart date detection with multiple formats
+    let dateValue = findBestMatch(row, [
+      // Common date patterns
+      /\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4}[\s\d:\-]*/, // DD/MM/YYYY with optional time
+      /\d{4}[\/\-\.]\d{2}[\/\-\.]\d{2}[\s\d:\-]*/, // YYYY-MM-DD with optional time
+      /\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}[\s\d:\-]*/ // Flexible date formats
+    ]) || new Date().toISOString();
+
+    // Parse date intelligently
+    let tradeDate = new Date();
+    if (typeof dateValue === 'string' || typeof dateValue === 'number') {
+      const dateStr = String(dateValue).trim();
+      
+      if (/\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4}/.test(dateStr)) {
+        // DD/MM/YYYY format
+        const match = dateStr.match(/(\d{2})[\/\-\.](\d{2})[\/\-\.](\d{4})/);
+        if (match) {
+          const [, day, month, year] = match;
+          tradeDate = new Date(`${year}-${month}-${day}`);
+        }
+      } else if (/\d{4}[\/\-\.]\d{2}[\/\-\.]\d{2}/.test(dateStr)) {
+        // YYYY-MM-DD format
+        tradeDate = new Date(dateStr.split(' ')[0]); // Remove time part if present
+      }
+    }
+
+    if (isNaN(tradeDate.getTime())) {
+      tradeDate = new Date();
+    }
+
+    // Smart symbol detection
+    const symbol = findBestMatch(row, [
+      /^[A-Z]{3,8}(\d{2,4})?$/, // WDOQ25, BTCUSDT, EURUSD, etc.
+      /^[A-Z]+[\/\-][A-Z]+$/, // BTC/USDT, EUR/USD, etc.
+      /^[A-Z]{2,6}$/ // Simple symbols
+    ]) || 'UNKNOWN';
+
+    // Smart type detection (buy/sell)
+    const typeValue = findBestMatch(row, [
+      /^(C|COMPRA|BUY|LONG)$/i,
+      /^(V|VENDA|SELL|SHORT)$/i
+    ]) || 'C';
+    
+    const tradeType = /^(V|VENDA|SELL|SHORT)$/i.test(String(typeValue)) ? 'venda' : 'compra';
+
+    // Smart quantity detection
+    const quantity = findBestNumeric(row, {
+      range: [0.001, 1000000],
+      preferSmaller: true, // Quantities are usually smaller numbers
+      excludePrice: true
+    }) || 1;
+
+    // Smart price detection
+    const entryPrice = findBestNumeric(row, {
+      range: [0.01, 1000000],
+      preferLarger: true, // Prices are usually larger numbers
+      excludeQuantity: true
+    }) || 1;
+
+    const exitPrice = findBestNumeric(row, {
+      range: [0.01, 1000000],
+      preferLarger: true,
+      excludeFirst: true // Skip the first price found (likely entry price)
+    }) || entryPrice;
+
+    // Smart result/profit detection
+    const result = findBestNumeric(row, {
+      range: [-50000, 50000],
+      allowNegative: true,
+      preferResultLike: true
+    }) || 0;
+
+    // Smart stop loss detection
+    const stopLoss = findBestNumeric(row, {
+      range: [-10000, 10000],
+      allowNegative: true,
+      preferSmaller: true
+    }) || 0;
+
+    // Detect market based on symbol
+    let market: 'crypto' | 'forex' | 'b3' = 'b3';
+    const symbolStr = String(symbol).toUpperCase();
+    
+    if (/USDT|BTC|ETH|BNB|ADA|DOT|MATIC/.test(symbolStr)) {
+      market = 'crypto';
+    } else if (/USD|EUR|GBP|JPY|CAD|AUD|CHF|NZD/.test(symbolStr)) {
+      market = 'forex';
+    } else if (/WIN|WDO|IND|DOL|BGI|ISP|ICF/.test(symbolStr)) {
+      market = 'b3';
+    }
+
+    // Override market with broker if specified
+    if (broker !== 'auto') {
+      market = broker as 'crypto' | 'forex' | 'b3';
+    }
+
+    const trade: InsertTrade = {
+      userId,
+      corretora: market,
+      origem: 'csv',
+      mercado: market,
+      setup: 'Import Inteligente',
+      dataHora: tradeDate.toISOString(),
+      ativo: symbolStr,
+      tipo: tradeType,
+      quantidade: String(quantity),
+      capitalUtilizado: String(quantity * entryPrice),
+      precoEntrada: String(entryPrice),
+      precoSaida: String(exitPrice),
+      resultado: String(result),
+      stop: String(stopLoss),
+      comentario: `Importação inteligente - ${market.toUpperCase()}`
+    };
+
+    console.log('✅ Trade inteligente processado:', {
+      ativo: trade.ativo,
+      tipo: trade.tipo,
+      quantidade: trade.quantidade,
+      resultado: trade.resultado
+    });
+
+    return validateAndCleanTrade(trade);
+
+  } catch (error) {
+    console.error('❌ Erro no processamento inteligente:', error);
+    return null;
+  }
+}
+
+// Helper function to find best matching value using patterns
+function findBestMatch(row: any, patterns: RegExp[]): any {
+  const values = Object.values(row);
+  
+  for (const pattern of patterns) {
+    const match = values.find(val => {
+      if (val === null || val === undefined) return false;
+      return pattern.test(String(val));
+    });
+    
+    if (match) return match;
+  }
+  
+  return null;
+}
+
+// Helper function to find best numeric value with constraints
+function findBestNumeric(row: any, options: {
+  range?: [number, number];
+  preferSmaller?: boolean;
+  preferLarger?: boolean;
+  allowNegative?: boolean;
+  excludePrice?: boolean;
+  excludeQuantity?: boolean;
+  excludeFirst?: boolean;
+  preferResultLike?: boolean;
+}): number | null {
+  const values = Object.values(row);
+  let candidates: number[] = [];
+  let excludeCount = options.excludeFirst ? 1 : 0;
+  
+  for (let i = 0; i < values.length; i++) {
+    const val = values[i];
+    if (val === null || val === undefined) continue;
+    
+    let numValue: number;
+    
+    if (typeof val === 'number') {
+      numValue = val;
+    } else {
+      const cleanStr = String(val).replace(/[^\d.,-]/g, '');
+      if (!cleanStr) continue;
+      
+      // Handle Brazilian number format (comma as decimal separator)
+      const normalizedStr = cleanStr.includes(',') && !cleanStr.includes('.') 
+        ? cleanStr.replace(',', '.') 
+        : cleanStr.replace(/,/g, '');
+      
+      numValue = parseFloat(normalizedStr);
+    }
+    
+    if (isNaN(numValue)) continue;
+    
+    // Apply constraints
+    if (!options.allowNegative && numValue < 0) continue;
+    
+    if (options.range) {
+      const [min, max] = options.range;
+      if (numValue < min || numValue > max) continue;
+    }
+    
+    // Skip first N matches if requested
+    if (excludeCount > 0) {
+      excludeCount--;
+      continue;
+    }
+    
+    candidates.push(numValue);
+  }
+  
+  if (candidates.length === 0) return null;
+  
+  // Apply preferences
+  if (options.preferResultLike) {
+    // Prefer values that look like profit/loss (could be negative, reasonable range)
+    const resultLike = candidates.filter(val => Math.abs(val) <= 10000);
+    if (resultLike.length > 0) candidates = resultLike;
+  }
+  
+  if (options.preferSmaller) {
+    return Math.min(...candidates);
+  } else if (options.preferLarger) {
+    return Math.max(...candidates);
+  }
+  
+  return candidates[0];
 }
 
 // Enhanced field detection for CSV imports
@@ -734,7 +957,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // CSV Upload endpoint (used by frontend)
+  // CSV Upload endpoint with intelligent parsing
   app.post("/api/trades/upload-csv", upload.single('csvFile'), async (req, res) => {
     try {
       const userId = req.headers['user-id'] as string;
@@ -750,101 +973,116 @@ export async function registerRoutes(app: Express): Promise<void> {
       const validBrokers = ['forex', 'b3', 'crypto', 'auto'];
       const finalBroker = validBrokers.includes(broker) ? broker : 'auto';
 
-      console.log(`Iniciando importação CSV: ${req.file.originalname} para broker: ${broker}`);
+      console.log(`🚀 Iniciando importação INTELIGENTE: ${req.file.originalname} para broker: ${broker}`);
 
-      const results: any[] = [];
-      const errors: string[] = [];
-      
-      // Parse CSV from file with proper encoding handling
-      const csvContent = fs.readFileSync(req.file.path, 'latin1');
-      const stream = Readable.from(csvContent);
-      
-      await new Promise((resolve, reject) => {
-        stream
-          .pipe(csv({ separator: ';' })) // B3 uses semicolon separator
-          .on('data', (data) => results.push(data))
-          .on('end', resolve)
-          .on('error', reject);
-      });
-
-      console.log(`CSV parsed: ${results.length} rows encontradas`);
-
-      // Detect field mapping from first row
-      let fieldMap: Record<string, string> = {};
-      if (results.length > 0) {
-        fieldMap = detectFieldMapping(results[0]);
-      }
-
-      // Process and validate trades
-      const validTrades: InsertTrade[] = [];
-      
-      for (let i = 0; i < results.length; i++) {
-        try {
-          const row = results[i];
-          
-          // Skip empty rows
-          const hasData = Object.values(row).some(value => value && value.toString().trim() !== '');
-          if (!hasData) {
-            continue;
-          }
-
-          const trade = processCsvRow(row, finalBroker, userId, fieldMap);
-          if (trade) {
-            validTrades.push(trade);
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-          console.error(`Erro na linha ${i + 2}:`, errorMessage);
-          errors.push(`Linha ${i + 2}: ${errorMessage}`);
-        }
-      }
-
-      console.log(`Trades válidos processados: ${validTrades.length}`);
-
-      // Save valid trades
-      let savedTrades: any[] = [];
-      if (validTrades.length > 0) {
-        try {
-          savedTrades = await storage.createBulkTrades(validTrades);
-          console.log(`Trades salvos no banco: ${savedTrades.length}`);
-        } catch (dbError) {
-          console.error('Erro ao salvar trades:', dbError);
-          errors.push('Erro ao salvar trades no banco de dados');
-        }
-      }
-
-      // Log import
       try {
-        await storage.createCsvImport({
-          userId,
-          broker: finalBroker,
-          fileName: req.file.originalname,
-          tradesImported: savedTrades.length,
-          tradesSkipped: results.length - savedTrades.length,
-          status: savedTrades.length > 0 ? 'completed' : 'failed',
-          errorMessage: errors.length > 0 ? errors.slice(0, 10).join('; ') : null
-        });
-      } catch (importError) {
-        console.error('Error logging import:', importError);
-      }
-
-      // Clean up uploaded file
-      if (req.file && req.file.path) {
-        try {
+        // Use intelligent CSV reader
+        const csvData = await lerCSVInteligente(req.file.path);
+        
+        if (!csvData || csvData.length === 0) {
+          // Clean up uploaded file
           fs.unlinkSync(req.file.path);
-        } catch (cleanupError) {
-          console.error('Error cleaning up file:', cleanupError);
+          return res.status(400).json({ 
+            message: "Arquivo CSV está vazio ou não foi possível processar" 
+          });
         }
-      }
 
-      res.json({
-        message: `Importação concluída: ${savedTrades.length} trades importados`,
-        tradesImported: savedTrades.length,
-        tradesSkipped: results.length - savedTrades.length,
-        totalRows: results.length,
-        errors: errors.slice(0, 5),
-        fieldMapping: fieldMap
-      });
+        console.log(`📊 CSV inteligente processado: ${csvData.length} linhas encontradas`);
+
+        // Process and validate trades using intelligent data
+        const validTrades: InsertTrade[] = [];
+        const errors: string[] = [];
+        
+        for (let i = 0; i < csvData.length; i++) {
+          try {
+            const row = csvData[i];
+            
+            // Skip completely empty rows
+            const hasData = Object.values(row).some(value => 
+              value !== null && value !== undefined && 
+              String(value).trim() !== ''
+            );
+            
+            if (!hasData) {
+              continue;
+            }
+
+            // Process with intelligent field detection
+            const trade = processIntelligentCsvRow(row, finalBroker, userId);
+            if (trade) {
+              validTrades.push(trade);
+            }
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            console.error(`❌ Erro na linha ${i + 2}:`, errorMessage);
+            errors.push(`Linha ${i + 2}: ${errorMessage}`);
+          }
+        }
+
+        console.log(`✅ Trades válidos processados: ${validTrades.length}`);
+
+        // Save valid trades
+        let savedTrades: any[] = [];
+        if (validTrades.length > 0) {
+          try {
+            savedTrades = await storage.createBulkTrades(validTrades);
+            console.log(`💾 Trades salvos no banco: ${savedTrades.length}`);
+          } catch (dbError) {
+            console.error('❌ Erro ao salvar trades:', dbError);
+            errors.push('Erro ao salvar trades no banco de dados');
+          }
+        }
+
+        // Log import
+        try {
+          await storage.createCsvImport({
+            userId,
+            broker: finalBroker,
+            fileName: req.file.originalname,
+            tradesImported: savedTrades.length,
+            tradesSkipped: csvData.length - savedTrades.length,
+            status: savedTrades.length > 0 ? 'completed' : 'failed',
+            errorMessage: errors.length > 0 ? errors.slice(0, 10).join('; ') : null
+          });
+        } catch (importError) {
+          console.error('Error logging import:', importError);
+        }
+
+        // Clean up uploaded file
+        if (req.file && req.file.path) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (cleanupError) {
+            console.error('Error cleaning up file:', cleanupError);
+          }
+        }
+
+        res.json({
+          message: `Importação inteligente concluída: ${savedTrades.length} trades importados`,
+          tradesImported: savedTrades.length,
+          tradesSkipped: csvData.length - savedTrades.length,
+          totalRows: csvData.length,
+          errors: errors.slice(0, 5),
+          encoding: 'Detectado automaticamente',
+          delimiter: 'Detectado automaticamente'
+        });
+
+      } catch (csvError) {
+        console.error('❌ Erro no processamento CSV:', csvError);
+        
+        // Clean up uploaded file on error
+        if (req.file && req.file.path) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (cleanupError) {
+            console.error('Error cleaning up file:', cleanupError);
+          }
+        }
+        
+        res.status(500).json({ 
+          message: "Erro ao processar arquivo CSV: " + (csvError instanceof Error ? csvError.message : 'Erro desconhecido')
+        });
+      }
 
     } catch (error) {
       console.error("CSV upload error:", error);
