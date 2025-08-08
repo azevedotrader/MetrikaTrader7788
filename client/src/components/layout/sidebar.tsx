@@ -10,7 +10,8 @@ import {
   Calendar,
   User,
   LogOut,
-  FileSpreadsheet
+  FileSpreadsheet,
+  TrendingUp
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useState } from "react";
@@ -19,6 +20,7 @@ import { CsvSelectionModal } from "@/components/modals/csv-selection-modal";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Novo Trade", href: "/novo-trade", icon: PlusCircle },
+  { name: "Gráficos", href: "/graficos", icon: TrendingUp },
   { name: "Calendário", href: "/calendario", icon: Calendar },
   { name: "Diário do Trader", href: "/diario", icon: Book },
   { name: "Perfil", href: "/perfil", icon: User },

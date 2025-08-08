@@ -14,6 +14,7 @@ import { useState } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
+import Graficos from "@/pages/graficos";
 import Analises from "@/pages/analises";
 import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
@@ -26,6 +27,7 @@ import NotFound from "@/pages/not-found";
 const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/novo-trade": "Novo Trade",
+  "/graficos": "Gráficos em Tempo Real",
   "/analises": "Análises",
   "/diario": "Diário do Trader",
   "/calendario": "Calendário de Trading",
@@ -72,6 +74,10 @@ function AppContent() {
                   <Route path="/novo-trade">
                     <TopBar title={pageTitles["/novo-trade"]} />
                     <NovoTrade />
+                  </Route>
+                  <Route path="/graficos">
+                    <TopBar title={pageTitles["/graficos"]} />
+                    <Graficos />
                   </Route>
                   <Route path="/analises">
                     <TopBar title={pageTitles["/analises"]} />

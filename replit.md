@@ -4,7 +4,7 @@
 
 This is a comprehensive trading analytics platform called "Métrika" built as a full-stack web application. The platform allows traders to track their performance, analyze trades, maintain a trading journal, and visualize their progress through various metrics and charts.
 
-**Current Status (Aug 7, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.**
+**Current Status (Aug 8, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.** **✅ Nova aba "Gráficos" implementada com integração TradingView em tempo real para análise técnica avançada.**
 
 ## User Preferences
 
@@ -55,6 +55,7 @@ Preferred communication style: Simple, everyday language.
 ### Trading Features
 - **Dashboard**: Overview of trading performance with key metrics
 - **Trade Entry**: Form-based trade recording with validation per broker
+- **Real-time Charts**: ✅ TradingView integration with live market data, technical analysis tools, and multi-market support (Forex, Crypto, B3)
 - **Brokers Management**: Complete broker separation and management system
   - **Tickmill (Forex)**: CSV import and manual entry
   - **Clear (B3)**: CSV import and manual entry  
@@ -145,9 +146,18 @@ The application follows a monorepo structure with clear separation between clien
 - **Screenshots integration** showing real dashboard interfaces and analytics
 - **Brazilian market focus** with localized pricing, testimonials, and language
 
-## Recent Updates (Aug 7, 2025)
+## Recent Updates (Aug 8, 2025)
 
-### UI/UX Improvements
+### New TradingView Integration
+- **Real-time Charts**: Complete TradingView widget integration with professional charting capabilities
+- **Multi-market Support**: Forex (EUR/BRL, USD/BRL, etc.), Crypto (BTC/USDT, ETH/USDT, etc.), B3 (WIN, WDO, PETR4, etc.)
+- **Advanced Technical Analysis**: Built-in indicators (MA, RSI, MACD), multiple timeframes, and customizable settings
+- **Dark Theme Optimization**: Charts perfectly integrated with Métrika's dark theme and color scheme
+- **Interactive Controls**: Dynamic symbol selection, timeframe switching, and market filtering
+- **Quick Access Buttons**: Fast switching between popular trading pairs across different markets
+- **Professional UI**: Consistent styling with existing platform design and responsive layout
+
+### UI/UX Improvements (Aug 7, 2025)
 - **Sidebar Integration**: Moved "Analisar CSV com IA" button from floating popup to sidebar menu
 - **Improved Navigation**: Button now appears below main navigation with consistent styling
 - **Better UX**: Integrated toast notifications for analysis feedback instead of popup modal
