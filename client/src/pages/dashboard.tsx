@@ -24,7 +24,7 @@ import {
   LineChart,
   Trash2
 } from "lucide-react";
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { format, startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
@@ -254,6 +254,117 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
           </div>
         </div>
       </CardContent>
+    </div>
+  );
+}
+
+// Performance Period Chart Component
+function PerformancePeriodChart({ metrics }: { metrics: any }) {
+  const chartData = [
+    {
+      period: 'Semana',
+      label: 'Esta Semana',
+      value: metrics.rentabilidadeSemana,
+      x: 1
+    },
+    {
+      period: 'Mês',
+      label: 'Este Mês', 
+      value: metrics.rentabilidadeMes,
+      x: 2
+    },
+    {
+      period: 'Ano',
+      label: 'Este Ano',
+      value: metrics.rentabilidadeAno,
+      x: 3
+    }
+  ];
+
+  const maxValue = Math.max(...chartData.map(d => Math.abs(d.value)));
+  const yAxisDomain = maxValue > 0 ? [-maxValue * 1.2, maxValue * 1.2] : [-100, 100];
+
+  return (
+    <div className="w-full">
+      <ResponsiveContainer width="100%" height={380}>
+        <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+          <defs>
+            <linearGradient id="performanceGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.6}/>
+              <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1}/>
+            </linearGradient>
+            <linearGradient id="lossGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.6}/>
+              <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.4} />
+          <XAxis 
+            dataKey="period"
+            stroke="#9CA3AF"
+            fontSize={14}
+            fontWeight={600}
+            tick={{ fill: '#e2e8f0' }}
+            axisLine={{ stroke: '#64748b', strokeWidth: 2 }}
+          />
+          <YAxis 
+            stroke="#9CA3AF"
+            fontSize={12}
+            tick={{ fill: '#cbd5e1' }}
+            tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
+            domain={yAxisDomain}
+            axisLine={{ stroke: '#64748b', strokeWidth: 2 }}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: '#1e293b',
+              border: '1px solid #475569',
+              borderRadius: '12px',
+              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+              padding: '12px'
+            }}
+            labelStyle={{ color: '#e2e8f0', fontWeight: 'bold' }}
+            formatter={(value: any) => [
+              `R$ ${parseFloat(value).toFixed(2)}`,
+              'Rentabilidade'
+            ]}
+          />
+          <Area 
+            type="monotone" 
+            dataKey="value" 
+            stroke="#8B5CF6"
+            strokeWidth={3}
+            fill="url(#performanceGradient)"
+            dot={{ 
+              fill: '#8B5CF6', 
+              strokeWidth: 3, 
+              r: 8,
+              stroke: '#1e293b'
+            }}
+            activeDot={{ 
+              r: 10, 
+              stroke: '#8B5CF6', 
+              strokeWidth: 3, 
+              fill: '#1e293b' 
+            }}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+      
+      {/* Performance Summary Below Chart */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {chartData.map((item) => (
+          <div key={item.period} className="text-center p-4 bg-slate-700/30 rounded-lg border border-slate-600 hover:bg-slate-700/50 transition-colors">
+            <div className="text-sm text-slate-400 mb-2">{item.label}</div>
+            <div className={`text-2xl font-bold mb-1 ${item.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              R$ {item.value.toFixed(2)}
+            </div>
+            <div className={`text-sm font-semibold ${item.value >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {item.value >= 0 ? '+' : ''}{item.value.toFixed(2)}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -679,46 +790,16 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Performance por Período */}
+          {/* Performance por Período - Gráfico Visual */}
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-purple-400" />
-                📅 Performance por Período
+                📈 Performance por Período
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                  <div className="text-3xl font-bold text-white mb-2">
-                    R$ {metrics.rentabilidadeSemana.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-slate-400 mb-1">Esta Semana</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {metrics.rentabilidadeSemana >= 0 ? '+' : ''}{metrics.rentabilidadeSemana.toFixed(2)}
-                  </div>
-                </div>
-
-                <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                  <div className="text-3xl font-bold text-white mb-2">
-                    R$ {metrics.rentabilidadeMes.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-slate-400 mb-1">Este Mês</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {metrics.rentabilidadeMes >= 0 ? '+' : ''}{metrics.rentabilidadeMes.toFixed(2)}
-                  </div>
-                </div>
-
-                <div className="text-center p-4 bg-slate-700/30 rounded-lg">
-                  <div className="text-3xl font-bold text-white mb-2">
-                    R$ {metrics.rentabilidadeAno.toFixed(2)}
-                  </div>
-                  <div className="text-sm text-slate-400 mb-1">Este Ano</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {metrics.rentabilidadeAno >= 0 ? '+' : ''}{metrics.rentabilidadeAno.toFixed(2)}
-                  </div>
-                </div>
-              </div>
+              <PerformancePeriodChart metrics={metrics} />
             </CardContent>
           </Card>
 
