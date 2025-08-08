@@ -8,7 +8,7 @@ import csv from "csv-parser";
 import fs from "fs";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
-import { lerCSVInteligente, analisarFormatoCSV } from "./csv-reader";
+import { lerCSVSimples } from "./simple-csv-reader";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -56,10 +56,180 @@ function validateAndCleanTrade(trade: any): InsertTrade {
   };
 }
 
+// Specific B3 CSV parser for Clear format
+function parseB3ClearCsvRow(row: any, userId: string): InsertTrade | null {
+  try {
+    console.log('🎯 Processando linha B3 Clear:', row);
+    
+    // B3 Clear CSV format analysis based on logs
+    // Sample: 'WINQ25;01/07/2025 17:04:30;01/07/2025 17:08:55;4min25s;1;1;V;141.745'
+    const values = Object.values(row);
+    const firstValue = String(values[0] || '');
+    
+    // Parse the main data from the first field
+    const parts = firstValue.split(';');
+    
+    if (parts.length < 8) {
+      console.log('❌ Formato B3 inválido - poucos campos:', parts.length);
+      return null;
+    }
+    
+    const [
+      symbol,           // WINQ25
+      entryDateTime,    // 01/07/2025 17:04:30
+      exitDateTime,     // 01/07/2025 17:08:55
+      duration,         // 4min25s
+      quantity1,        // 1
+      quantity2,        // 1
+      direction,        // V (Venda) or C (Compra)
+      entryPrice        // 141.745
+    ] = parts;
+    
+    // Parse additional fields from __parsed_extra if available
+    const extraFields = row.__parsed_extra || [];
+    const exitPriceStr = extraFields[1] ? String(extraFields[1]).replace(/00;/g, '') : entryPrice;
+    const resultStr = extraFields[extraFields.length - 2] || '0'; // Usually second to last field
+    
+    // Clean and parse values
+    const cleanResult = String(resultStr).replace(/00;?/g, '').replace(/[^\d.,-]/g, '');
+    const profit = parseFloat(cleanResult.replace(',', '.')) || 0;
+    
+    // Parse entry date
+    let tradeDate = new Date();
+    if (entryDateTime && /\d{2}\/\d{2}\/\d{4}/.test(entryDateTime)) {
+      const [datePart] = entryDateTime.split(' ');
+      const [day, month, year] = datePart.split('/');
+      tradeDate = new Date(`${year}-${month}-${day}`);
+    }
+    
+    // Determine trade type
+    const tradeType = direction === 'V' ? 'venda' : 'compra';
+    
+    // Clean and parse numeric values
+    const cleanSymbol = String(symbol).trim().toUpperCase();
+    const qty = Math.abs(parseInt(quantity1) || 1);
+    const entryPx = Math.abs(parseFloat(String(entryPrice).replace(',', '.'))) || 0;
+    const exitPx = Math.abs(parseFloat(String(exitPriceStr).replace(',', '.'))) || entryPx;
+    
+    const trade: InsertTrade = {
+      userId,
+      corretora: 'b3',
+      origem: 'csv',
+      mercado: 'b3', 
+      setup: 'Import B3 Clear',
+      dataHora: tradeDate.toISOString(),
+      ativo: cleanSymbol,
+      tipo: tradeType,
+      quantidade: String(qty),
+      capitalUtilizado: String(qty * entryPx),
+      precoEntrada: String(entryPx),
+      precoSaida: String(exitPx),
+      resultado: String(profit),
+      stop: '0',
+      comentario: `Import B3 Clear - ${cleanSymbol} ${direction} - ${duration}`
+    };
+
+    console.log('✅ Trade B3 Clear processado:', {
+      ativo: trade.ativo,
+      tipo: trade.tipo,
+      quantidade: trade.quantidade,
+      entrada: trade.precoEntrada,
+      saida: trade.precoSaida,
+      resultado: trade.resultado
+    });
+
+    return validateAndCleanTrade(trade);
+    
+  } catch (error) {
+    console.error('❌ Erro no parser B3 Clear:', error);
+    return null;
+  }
+}
+
+// Helper function to parse structured B3 data with proper columns
+function parseStructuredB3Row(row: any, userId: string): InsertTrade {
+  const safeParseNumeric = (value: any, defaultValue: string = '0'): string => {
+    if (!value && value !== 0) return defaultValue;
+    const cleanValue = value.toString()
+      .replace(/[^\d.,-]/g, '')
+      .replace(',', '.');
+    if (!cleanValue || cleanValue === '-' || cleanValue === '.') return defaultValue;
+    const numValue = parseFloat(cleanValue);
+    return isNaN(numValue) ? defaultValue : numValue.toString();
+  };
+
+  // Extract values from structured columns
+  const ativo = String(row.Ativo || row.ativo || 'UNKNOWN');
+  const direcao = String(row.Direcao || row.direcao || '').toUpperCase();
+  const quantidade = safeParseNumeric(row.Qtd1 || row.quantidade || 1, '1');
+  const precoEntrada = safeParseNumeric(row.PrecoEntrada || row.precoEntrada);
+  const precoSaida = safeParseNumeric(row.PrecoSaida || row.precoSaida);
+  
+  // Get profit/loss directly from column
+  let resultado = row.ProfitLoss || row.Resultado || row.resultado || row.profitLoss;
+  if (resultado === undefined || resultado === null) {
+    // Calculate if not provided
+    const entrada = parseFloat(precoEntrada);
+    const saida = parseFloat(precoSaida);
+    if (!isNaN(entrada) && !isNaN(saida)) {
+      const qtd = parseFloat(quantidade);
+      if (direcao === 'C') { // Compra
+        resultado = (saida - entrada) * qtd;
+      } else { // Venda
+        resultado = (entrada - saida) * qtd;
+      }
+    }
+  }
+
+  const resultadoFinal = safeParseNumeric(resultado);
+
+  console.log(`📊 B3 Estruturado: ${ativo} ${direcao} ${quantidade}x - R$${resultadoFinal}`);
+
+  return {
+    userId,
+    corretora: 'b3',
+    origem: 'csv',
+    mercado: 'b3',
+    setup: 'Importado',
+    dataHora: new Date().toISOString(),
+    ativo,
+    tipo: direcao === 'C' ? 'compra' : 'venda',
+    quantidade,
+    capitalUtilizado: Math.abs(parseFloat(precoEntrada) * parseFloat(quantidade)).toString(),
+    precoEntrada,
+    precoSaida,
+    resultado: resultadoFinal,
+    observacoes: `Importado via CSV estruturado - Duração: ${row.Duracao || 'N/A'}`
+  };
+}
+
 // Intelligent CSV row processing function
 function processIntelligentCsvRow(row: any, broker: string, userId: string): InsertTrade | null {
   try {
     console.log('🔍 Processando linha inteligente:', row);
+
+    // Check if this looks like a B3 Clear format
+    const allValues = Object.values(row).map(v => String(v)).join(' ');
+    const firstValue = String(Object.values(row)[0] || '');
+    
+    console.log('🔍 Detectando formato B3, primeiro valor:', firstValue.substring(0, 50));
+    console.log('🔍 Todos os valores combinados:', allValues.substring(0, 100));
+    
+    // Check for structured B3 data with proper columns
+    const hasProperColumns = row.Ativo || row.ativo || row.ProfitLoss || row.Resultado || row.resultado;
+    const isB3Symbol = /WIN|WDO|BGI|DOL|IND/i.test(String(row.Ativo || row.ativo || firstValue));
+    
+    if (hasProperColumns && isB3Symbol) {
+      console.log('🎯 Detectado formato B3 estruturado, usando parser direto');
+      return parseStructuredB3Row(row, userId);
+    }
+    
+    // More robust B3 detection for unstructured data
+    if ((firstValue.includes(';') && /WIN|WDO|BGI|DOL|IND/i.test(firstValue)) ||
+        (allValues.includes(';') && /WIN|WDO|BGI|DOL|IND/i.test(allValues))) {
+      console.log('🎯 Detectado formato B3 Clear, usando parser específico');
+      return parseB3ClearCsvRow(row, userId);
+    }
 
     // Smart date detection with multiple formats
     let dateValue = findBestMatch(row, [
@@ -950,7 +1120,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (!userId || userId === '') {
         console.log("🔍 Nenhum user-id fornecido, buscando todos os usuarios com dados...");
         const allTrades = await storage.getAllTrades();
-        const userIds = [...new Set(allTrades.map(trade => trade.userId))];
+        const userIds = Array.from(new Set(allTrades.map(trade => trade.userId)));
         
         if (userIds.length === 0) {
           return res.json({ 
@@ -1043,8 +1213,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`🚀 Iniciando importação INTELIGENTE: ${req.file.originalname} para broker: ${broker}`);
 
       try {
-        // Use intelligent CSV reader
-        const csvData = await lerCSVInteligente(req.file.path);
+        // Use simple CSV reader
+        const csvData = await lerCSVSimples(req.file.path);
         
         if (!csvData || csvData.length === 0) {
           // Clean up uploaded file

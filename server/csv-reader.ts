@@ -25,14 +25,20 @@ export async function lerCSVInteligente(caminho: string): Promise<any[]> {
     console.log(`📁 Lendo CSV: ${caminho}`);
     console.log(`🔍 Encoding detectado: ${encoding}`);
     
-    // 4. Converter para UTF-8
+    // 4. Converter para UTF-8 - usando buffer.toString para maior compatibilidade
     let csvContent: string;
     try {
-      csvContent = iconv.decode(buffer, encoding as string);
+      // Tentar diferentes encodings
+      if (encoding && encoding.toLowerCase().includes('utf')) {
+        csvContent = buffer.toString('utf8');
+      } else if (encoding && encoding.toLowerCase().includes('latin')) {
+        csvContent = buffer.toString('latin1');
+      } else {
+        csvContent = buffer.toString('utf8');
+      }
     } catch (encodingError) {
-      // Fallback para UTF-8 se não conseguir decodificar
-      console.warn(`⚠️ Erro ao decodificar com ${encoding}, usando UTF-8`);
-      csvContent = iconv.decode(buffer, 'utf8');
+      // Fallback final
+      csvContent = buffer.toString('utf8');
     }
 
     // 5. Detectar quebras de linha e normalizar
