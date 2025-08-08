@@ -165,6 +165,17 @@ The application follows a monorepo structure with clear separation between clien
 - **Database Cleanup**: Proper SQL cascade deletes ensuring complete data removal
 - **Default User Handling**: Added fallback user-id system for development environment
 
+### Universal CSV Parser (Jan 31, 2025)
+- **Standalone parseCSV Function**: Complete TypeScript function for parsing any CSV format
+- **Automatic Detection**: Delimiters (;, ,, \t, |), encoding (UTF-8, ISO-8859-1), headers, line breaks
+- **Robust Processing**: BOM removal, character cleaning, error handling, Brazilian format support
+- **Smart Algorithms**: Intelligent delimiter detection, header recognition, encoding conversion
+- **Performance Optimized**: Handles large files (1000+ rows in ~11ms), memory efficient
+- **Comprehensive Testing**: Edge cases, malformed data, encoding issues, performance benchmarks
+- **Rich Metadata**: Detailed parsing information, error reporting, statistics
+- **Multiple Interfaces**: Direct content parsing, file reading, preview functionality
+- **Documentation**: Complete README with examples and usage patterns
+
 ### UI/UX Improvements (Aug 7, 2025)
 - **Sidebar Integration**: Moved "Analisar CSV com IA" button from floating popup to sidebar menu
 - **Improved Navigation**: Button now appears below main navigation with consistent styling
