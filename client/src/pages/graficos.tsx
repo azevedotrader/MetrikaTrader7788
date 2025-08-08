@@ -2,48 +2,185 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, BarChart3, Activity } from "lucide-react";
+import { TrendingUp, BarChart3, Activity, AlertTriangle } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// Simple TradingView iframe component
-function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
-  // Create a direct TradingView chart URL
-  const createChartUrl = () => {
-    const baseUrl = 'https://br.tradingview.com/chart/';
-    const params = new URLSearchParams({
-      symbol: symbol,
-      interval: interval,
-      utm_source: 'replit.com',
-      utm_medium: 'widget',
-      utm_campaign: 'chart',
-      utm_term: symbol
-    });
+// Alternative chart component when TradingView is unavailable
+function AlternativeChart({ symbol, interval }: { symbol: string; interval: string }) {
+  // Generate sample data for demonstration
+  const generateSampleData = () => {
+    const data = [];
+    const basePrice = symbol.includes('BTC') ? 45000 : 
+                     symbol.includes('EUR') ? 5.8 : 
+                     symbol.includes('WIN') ? 128000 : 100;
     
-    return `${baseUrl}?${params.toString()}`;
+    for (let i = 0; i < 100; i++) {
+      const price = basePrice + (Math.random() - 0.5) * basePrice * 0.02;
+      data.push({
+        time: new Date(Date.now() - (100 - i) * 15 * 60 * 1000).toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        price: parseFloat(price.toFixed(symbol.includes('BTC') ? 2 : 4)),
+        volume: Math.random() * 1000000
+      });
+    }
+    return data;
   };
 
+  const [chartData] = useState(() => generateSampleData());
+
   return (
-    <div className="relative w-full h-full bg-slate-900 rounded-lg overflow-hidden">
-      <iframe
-        src={createChartUrl()}
-        className="w-full h-full border-0"
-        style={{ 
-          minHeight: '600px',
-          backgroundColor: '#0f172a'
-        }}
-        title={`Gráfico ${symbol} - ${interval}`}
-        allow="clipboard-write"
-      />
-      
-      {/* Overlay message */}
-      <div className="absolute top-4 left-4 bg-slate-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-600">
-        <p className="text-sm text-slate-300">
-          📈 <strong>{symbol}</strong> - {interval} min
-        </p>
-        <p className="text-xs text-slate-400 mt-1">
-          TradingView em tempo real
-        </p>
+    <div className="w-full h-full bg-slate-900 rounded-lg p-4">
+      {/* Header with connection issue notice */}
+      <div className="flex items-center gap-2 mb-4 p-3 bg-amber-900/20 border border-amber-600 rounded-lg">
+        <AlertTriangle className="w-5 h-5 text-amber-400" />
+        <div>
+          <p className="text-sm text-amber-300">
+            <strong>TradingView temporariamente indisponível</strong>
+          </p>
+          <p className="text-xs text-amber-400/70">
+            Exibindo gráfico alternativo para demonstração
+          </p>
+        </div>
+      </div>
+
+      {/* Chart */}
+      <div style={{ height: '500px' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <XAxis 
+              dataKey="time" 
+              stroke="#94a3b8"
+              fontSize={12}
+            />
+            <YAxis 
+              stroke="#94a3b8"
+              fontSize={12}
+              domain={['dataMin - 50', 'dataMax + 50']}
+            />
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: '#1e293b',
+                border: '1px solid #475569',
+                borderRadius: '8px',
+                color: '#e2e8f0'
+              }}
+              labelStyle={{ color: '#94a3b8' }}
+            />
+            <Line 
+              type="monotone" 
+              dataKey="price" 
+              stroke="#22c55e" 
+              strokeWidth={2}
+              dot={false}
+              name="Preço"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Symbol info */}
+      <div className="mt-4 flex justify-between items-center text-sm text-slate-400">
+        <span>📈 {symbol}</span>
+        <span>Intervalo: {interval} min</span>
       </div>
     </div>
+  );
+}
+
+// TradingView widget with fallback
+function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
+  const [useFallback, setUseFallback] = useState(false);
+  const widgetId = `tv-widget-${symbol.replace(/[^a-zA-Z0-9]/g, '')}-${interval}`;
+  
+  useEffect(() => {
+    const container = document.getElementById(widgetId);
+    if (!container) return;
+
+    // Clear container
+    container.innerHTML = '';
+
+    // Try to load TradingView
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    script.async = true;
+    
+    script.onerror = () => {
+      console.log('TradingView script failed to load, using fallback');
+      setUseFallback(true);
+    };
+
+    script.onload = () => {
+      // Create widget configuration
+      const widgetHTML = `
+        <div class="tradingview-widget-container" style="height:100%;width:100%">
+          <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+          <div class="tradingview-widget-copyright" style="height: 32px;">
+            <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
+              <span style="font-size: 12px; color: #2962FF;">
+                Track all markets on TradingView
+              </span>
+            </a>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = widgetHTML;
+
+      // Add widget script
+      const configScript = document.createElement('script');
+      configScript.innerHTML = JSON.stringify({
+        autosize: true,
+        symbol: symbol,
+        interval: interval,
+        timezone: "America/Sao_Paulo",
+        theme: "dark",
+        style: "1",
+        locale: "pt_BR",
+        enable_publishing: false,
+        allow_symbol_change: true,
+        calendar: false,
+        support_host: "https://www.tradingview.com"
+      });
+
+      const widgetContainer = container.querySelector('.tradingview-widget-container__widget');
+      if (widgetContainer) {
+        widgetContainer.appendChild(configScript);
+      }
+    };
+
+    container.appendChild(script);
+
+    // Fallback timeout
+    setTimeout(() => {
+      if (container.innerHTML === '') {
+        setUseFallback(true);
+      }
+    }, 5000);
+
+    return () => {
+      if (container) {
+        container.innerHTML = '';
+      }
+    };
+  }, [symbol, interval, widgetId]);
+
+  if (useFallback) {
+    return <AlternativeChart symbol={symbol} interval={interval} />;
+  }
+
+  return (
+    <div 
+      id={widgetId}
+      className="w-full h-full bg-slate-900 rounded-lg"
+      style={{ 
+        height: '600px',
+        backgroundColor: '#0f172a'
+      }}
+    />
   );
 }
 
