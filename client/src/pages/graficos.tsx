@@ -1,14 +1,50 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, BarChart3, Activity } from "lucide-react";
 
-// TradingView Widget Declaration
-declare global {
-  interface Window {
-    TradingView: any;
-  }
+// Simple TradingView iframe component
+function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
+  // Create a direct TradingView chart URL
+  const createChartUrl = () => {
+    const baseUrl = 'https://br.tradingview.com/chart/';
+    const params = new URLSearchParams({
+      symbol: symbol,
+      interval: interval,
+      utm_source: 'replit.com',
+      utm_medium: 'widget',
+      utm_campaign: 'chart',
+      utm_term: symbol
+    });
+    
+    return `${baseUrl}?${params.toString()}`;
+  };
+
+  return (
+    <div className="relative w-full h-full bg-slate-900 rounded-lg overflow-hidden">
+      <iframe
+        src={createChartUrl()}
+        className="w-full h-full border-0"
+        style={{ 
+          minHeight: '600px',
+          backgroundColor: '#0f172a'
+        }}
+        title={`Gráfico ${symbol} - ${interval}`}
+        allow="clipboard-write"
+      />
+      
+      {/* Overlay message */}
+      <div className="absolute top-4 left-4 bg-slate-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-slate-600">
+        <p className="text-sm text-slate-300">
+          📈 <strong>{symbol}</strong> - {interval} min
+        </p>
+        <p className="text-xs text-slate-400 mt-1">
+          TradingView em tempo real
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // Pre-configured symbols for different markets
@@ -51,104 +87,12 @@ export default function Graficos() {
   const [selectedMarket, setSelectedMarket] = useState<string>("forex");
   const [selectedSymbol, setSelectedSymbol] = useState<string>("FX_IDC:EURBRL");
   const [selectedInterval, setSelectedInterval] = useState<string>("15");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const widgetRef = useRef<any>(null);
+  const [widgetKey, setWidgetKey] = useState<number>(0);
 
-  // Load TradingView script
+  // Force widget refresh when symbol or interval changes
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.async = true;
-    script.onload = () => {
-      initializeWidget();
-    };
-    
-    if (!document.querySelector('script[src="https://s3.tradingview.com/tv.js"]')) {
-      document.body.appendChild(script);
-    } else if (window.TradingView) {
-      initializeWidget();
-    }
-
-    return () => {
-      if (widgetRef.current) {
-        try {
-          widgetRef.current.remove();
-        } catch (error) {
-          console.log("Widget cleanup error:", error);
-        }
-      }
-    };
-  }, []);
-
-  // Update widget when symbol or interval changes
-  useEffect(() => {
-    if (window.TradingView && containerRef.current) {
-      initializeWidget();
-    }
+    setWidgetKey(prev => prev + 1);
   }, [selectedSymbol, selectedInterval]);
-
-  const initializeWidget = () => {
-    if (!window.TradingView || !containerRef.current) return;
-
-    // Clear previous widget
-    if (widgetRef.current) {
-      try {
-        widgetRef.current.remove();
-      } catch (error) {
-        console.log("Previous widget cleanup error:", error);
-      }
-    }
-
-    // Clear container
-    containerRef.current.innerHTML = '';
-
-    try {
-      widgetRef.current = new window.TradingView.widget({
-        width: "100%",
-        height: 600,
-        symbol: selectedSymbol,
-        interval: selectedInterval,
-        timezone: "America/Sao_Paulo",
-        theme: "dark",
-        style: "1",
-        locale: "pt_BR",
-        toolbar_bg: "#1e293b",
-        enable_publishing: false,
-        hide_top_toolbar: false,
-        hide_legend: false,
-        save_image: false,
-        container_id: containerRef.current,
-        studies: [
-          "MASimple@tv-basicstudies",
-          "RSI@tv-basicstudies",
-          "MACD@tv-basicstudies"
-        ],
-        overrides: {
-          "paneProperties.background": "#0f172a",
-          "paneProperties.vertGridProperties.color": "#334155",
-          "paneProperties.horzGridProperties.color": "#334155",
-          "symbolWatermarkProperties.transparency": 90,
-          "scalesProperties.textColor": "#cbd5e1",
-          "mainSeriesProperties.candleStyle.wickUpColor": "#22c55e",
-          "mainSeriesProperties.candleStyle.wickDownColor": "#ef4444",
-          "mainSeriesProperties.candleStyle.upColor": "#22c55e",
-          "mainSeriesProperties.candleStyle.downColor": "#ef4444",
-          "mainSeriesProperties.candleStyle.borderUpColor": "#22c55e",
-          "mainSeriesProperties.candleStyle.borderDownColor": "#ef4444"
-        },
-        disabled_features: [
-          "use_localstorage_for_settings",
-          "volume_force_overlay",
-          "create_volume_indicator_by_default"
-        ],
-        enabled_features: [
-          "study_templates"
-        ]
-      });
-    } catch (error) {
-      console.error("Error initializing TradingView widget:", error);
-    }
-  };
 
   const handleMarketChange = (market: string) => {
     setSelectedMarket(market);
@@ -281,26 +225,12 @@ export default function Graficos() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="relative">
-            <div 
-              ref={containerRef}
-              className="w-full"
-              style={{ 
-                height: '600px',
-                backgroundColor: '#0f172a',
-                borderRadius: '0 0 8px 8px'
-              }}
+          <div className="relative rounded-b-lg overflow-hidden" style={{ height: '600px' }}>
+            <TradingViewWidget 
+              key={widgetKey}
+              symbol={selectedSymbol} 
+              interval={selectedInterval} 
             />
-            
-            {/* Loading indicator */}
-            {!window.TradingView && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 rounded-lg">
-                <div className="text-center">
-                  <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-slate-300">Carregando TradingView...</p>
-                </div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
