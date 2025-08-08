@@ -12,7 +12,14 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const userId = localStorage.getItem('user-id') || '';
+  let userId = localStorage.getItem('user-id');
+  
+  // Se não há user-id, criar um padrão para o desenvolvimento
+  if (!userId || userId === '') {
+    userId = 'default-user';
+    localStorage.setItem('user-id', userId);
+  }
+  
   const headers: Record<string, string> = {
     'user-id': userId,
   };
@@ -38,7 +45,14 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const userId = localStorage.getItem('user-id') || '';
+    let userId = localStorage.getItem('user-id');
+    
+    // Se não há user-id, criar um padrão para o desenvolvimento
+    if (!userId || userId === '') {
+      userId = 'default-user';
+      localStorage.setItem('user-id', userId);
+    }
+    
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
       headers: {

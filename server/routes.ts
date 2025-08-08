@@ -944,34 +944,69 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Reset all data (complete dashboard reset)
   app.delete("/api/trades/reset-all", async (req, res) => {
     try {
-      const userId = req.headers['user-id'] as string;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
+      let userId = req.headers['user-id'] as string;
+      
+      // Se não há userId no header, buscar todos os trades existentes para identificar userIds
+      if (!userId || userId === '') {
+        console.log("🔍 Nenhum user-id fornecido, buscando todos os usuarios com dados...");
+        const allTrades = await storage.getAllTrades();
+        const userIds = [...new Set(allTrades.map(trade => trade.userId))];
+        
+        if (userIds.length === 0) {
+          return res.json({ 
+            message: "Nenhum dado encontrado para resetar.",
+            details: {
+              tradesDeleted: false,
+              csvImportsDeleted: false,
+              apiConfigsDeleted: false
+            }
+          });
+        }
+        
+        console.log(`🗑️ Iniciando reset completo para todos os usuários: ${userIds.join(', ')}`);
+        
+        // Reset para todos os usuários encontrados
+        for (const uid of userIds) {
+          await storage.deleteAllTrades(uid);
+          try {
+            await storage.deleteAllCsvImports(uid);
+          } catch (csvError) {
+            console.warn(`⚠️ Erro ao deletar importações CSV para usuário ${uid}:`, csvError);
+          }
+          try {
+            await storage.deleteAllBrokerConfigs(uid);
+          } catch (apiError) {
+            console.warn(`⚠️ Erro ao deletar configurações de API para usuário ${uid}:`, apiError);
+          }
+        }
+        
+        console.log("🎉 Reset completo finalizado para todos os usuários");
+        
+      } else {
+        console.log(`🗑️ Iniciando reset completo para usuário específico: ${userId}`);
+
+        // 1. Delete all trades
+        await storage.deleteAllTrades(userId);
+        console.log("✅ Trades deletados");
+
+        // 2. Delete all CSV import history
+        try {
+          await storage.deleteAllCsvImports(userId);
+          console.log("✅ Histórico de importações CSV deletado");
+        } catch (csvError) {
+          console.warn("⚠️ Erro ao deletar importações CSV:", csvError);
+        }
+
+        // 3. Delete all broker API configurations
+        try {
+          await storage.deleteAllBrokerConfigs(userId);
+          console.log("✅ Configurações de API das corretoras deletadas");
+        } catch (apiError) {
+          console.warn("⚠️ Erro ao deletar configurações de API:", apiError);
+        }
+
+        console.log("🎉 Reset completo finalizado com sucesso");
       }
-
-      console.log(`🗑️ Iniciando reset completo para usuário: ${userId}`);
-
-      // 1. Delete all trades
-      await storage.deleteAllTrades(userId);
-      console.log("✅ Trades deletados");
-
-      // 2. Delete all CSV import history
-      try {
-        await storage.deleteAllCsvImports(userId);
-        console.log("✅ Histórico de importações CSV deletado");
-      } catch (csvError) {
-        console.warn("⚠️ Erro ao deletar importações CSV:", csvError);
-      }
-
-      // 3. Delete all broker API configurations
-      try {
-        await storage.deleteAllBrokerConfigs(userId);
-        console.log("✅ Configurações de API das corretoras deletadas");
-      } catch (apiError) {
-        console.warn("⚠️ Erro ao deletar configurações de API:", apiError);
-      }
-
-      console.log("🎉 Reset completo finalizado com sucesso");
 
       res.json({ 
         message: "Dashboard completamente resetada! Todos os trades, importações e configurações foram deletados.",

@@ -4,7 +4,7 @@
 
 This is a comprehensive trading analytics platform called "Métrika" built as a full-stack web application. The platform allows traders to track their performance, analyze trades, maintain a trading journal, and visualize their progress through various metrics and charts.
 
-**Current Status (Aug 8, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.** **✅ Nova aba "Gráficos" implementada com integração TradingView em tempo real para análise técnica avançada.**
+**Current Status (Aug 8, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.** **✅ Nova aba "Gráficos" implementada com integração TradingView em tempo real para análise técnica avançada.** **✅ Botão "Resetar Dashboard" agora funciona completamente, limpando todos os dados: trades, importações CSV e configurações de API.**
 
 ## User Preferences
 
@@ -156,6 +156,14 @@ The application follows a monorepo structure with clear separation between clien
 - **Interactive Controls**: Dynamic symbol selection, timeframe switching, and market filtering
 - **Quick Access Buttons**: Fast switching between popular trading pairs across different markets
 - **Professional UI**: Consistent styling with existing platform design and responsive layout
+
+### Reset Dashboard Functionality (Aug 8, 2025)
+- **Complete Reset**: Fixed reset button to delete ALL user data, not just trades
+- **Multi-table Cleanup**: Now deletes trades, CSV import history, and broker API configurations
+- **Smart User Detection**: Handles cases where user-id is not properly set in localStorage
+- **Enhanced UI**: Updated confirmation dialog to clearly explain what will be deleted
+- **Database Cleanup**: Proper SQL cascade deletes ensuring complete data removal
+- **Default User Handling**: Added fallback user-id system for development environment
 
 ### UI/UX Improvements (Aug 7, 2025)
 - **Sidebar Integration**: Moved "Analisar CSV com IA" button from floating popup to sidebar menu
