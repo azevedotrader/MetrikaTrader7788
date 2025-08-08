@@ -42,10 +42,12 @@ export interface IStorage {
   getBrokerApiConfig(userId: string, broker: string): Promise<BrokerApiConfig | undefined>;
   getAllBrokerApiConfigs(userId: string): Promise<BrokerApiConfig[]>;
   createOrUpdateBrokerApiConfig(config: InsertBrokerApiConfig & { userId: string }): Promise<BrokerApiConfig>;
+  deleteAllBrokerConfigs(userId: string): Promise<void>;
   
   // CSV import operations
   getCsvImports(userId: string): Promise<CsvImport[]>;
   createCsvImport(csvImport: Omit<CsvImport, 'id' | 'createdAt'>): Promise<CsvImport>;
+  deleteAllCsvImports(userId: string): Promise<void>;
   
   // Admin operations
   getAllUsers(): Promise<User[]>;
@@ -206,6 +208,14 @@ export class DatabaseStorage implements IStorage {
       .values(csvImport)
       .returning();
     return created;
+  }
+
+  async deleteAllCsvImports(userId: string): Promise<void> {
+    await db.delete(csvImports).where(eq(csvImports.userId, userId));
+  }
+
+  async deleteAllBrokerConfigs(userId: string): Promise<void> {
+    await db.delete(brokerApiConfigs).where(eq(brokerApiConfigs.userId, userId));
   }
 
   // Admin operations

@@ -592,8 +592,8 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
       queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
       toast({
-        title: "Dashboard Resetada",
-        description: "Todos os trades foram deletados. Você pode começar do zero agora."
+        title: "Dashboard Completamente Resetada",
+        description: "Todos os dados foram deletados: trades, importações CSV e configurações de API. Você pode começar do zero agora."
       });
     },
     onError: (error: any) => {
@@ -1274,10 +1274,14 @@ export default function Dashboard() {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="bg-slate-800 border-slate-700">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-white">⚠️ Resetar Dashboard</AlertDialogTitle>
+                    <AlertDialogTitle className="text-white">⚠️ Resetar Dashboard Completamente</AlertDialogTitle>
                     <AlertDialogDescription className="text-slate-300">
-                      Esta ação irá <strong>deletar TODOS os seus trades</strong> e dados de trading permanentemente. 
-                      Você começará do zero. Esta ação não pode ser desfeita.
+                      Esta ação irá <strong>deletar TODOS os dados permanentemente</strong>:<br/>
+                      • Todos os trades de todas as corretoras<br/>
+                      • Histórico completo de importações CSV<br/>
+                      • Todas as configurações de API das corretoras<br/>
+                      <br/>
+                      Você começará completamente do zero. <strong>Esta ação não pode ser desfeita</strong>.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

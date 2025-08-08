@@ -941,7 +941,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Reset all trades (delete all)
+  // Reset all data (complete dashboard reset)
   app.delete("/api/trades/reset-all", async (req, res) => {
     try {
       const userId = req.headers['user-id'] as string;
@@ -949,11 +949,43 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
 
+      console.log(`🗑️ Iniciando reset completo para usuário: ${userId}`);
+
+      // 1. Delete all trades
       await storage.deleteAllTrades(userId);
-      res.json({ message: "Todos os trades foram deletados com sucesso" });
+      console.log("✅ Trades deletados");
+
+      // 2. Delete all CSV import history
+      try {
+        await storage.deleteAllCsvImports(userId);
+        console.log("✅ Histórico de importações CSV deletado");
+      } catch (csvError) {
+        console.warn("⚠️ Erro ao deletar importações CSV:", csvError);
+      }
+
+      // 3. Delete all broker API configurations
+      try {
+        await storage.deleteAllBrokerConfigs(userId);
+        console.log("✅ Configurações de API das corretoras deletadas");
+      } catch (apiError) {
+        console.warn("⚠️ Erro ao deletar configurações de API:", apiError);
+      }
+
+      console.log("🎉 Reset completo finalizado com sucesso");
+
+      res.json({ 
+        message: "Dashboard completamente resetada! Todos os trades, importações e configurações foram deletados.",
+        details: {
+          tradesDeleted: true,
+          csvImportsDeleted: true,
+          apiConfigsDeleted: true
+        }
+      });
     } catch (error) {
-      console.error("Error resetting all trades:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      console.error("❌ Erro no reset completo:", error);
+      res.status(500).json({ 
+        message: "Erro interno no reset: " + (error instanceof Error ? error.message : 'Erro desconhecido')
+      });
     }
   });
 
