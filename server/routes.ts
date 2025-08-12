@@ -3,6 +3,7 @@ import { Server, createServer } from "http";
 import { z } from "zod";
 import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema } from "@shared/schema";
 import { storage } from "./storage";
+import { AuthenticatedRequest } from "./types";
 import multer from "multer";
 import csv from "csv-parser";
 import fs from "fs";
@@ -1068,6 +1069,9 @@ export async function registerRoutes(app: Express): Promise<void> {
           .pipe(csv())
           .on('data', (row) => {
             try {
+              if (!userId) {
+                throw new Error("UserId é obrigatório");
+              }
               const trade = parseTradeFromCSVRow(row, fieldMap, userId);
               if (trade) {
                 // Override broker - ensure it's a valid enum value
@@ -1297,6 +1301,9 @@ export async function registerRoutes(app: Express): Promise<void> {
             }
 
             // Process with intelligent field detection
+            if (!userId) {
+              throw new Error("UserId é obrigatório");
+            }
             const trade = processIntelligentCsvRow(row, finalBroker, userId);
             if (trade) {
               validTrades.push(trade);
@@ -1324,6 +1331,9 @@ export async function registerRoutes(app: Express): Promise<void> {
 
         // Log import
         try {
+          if (!userId) {
+            throw new Error("UserId é obrigatório");
+          }
           await storage.createCsvImport({
             userId,
             broker: finalBroker,

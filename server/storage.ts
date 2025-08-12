@@ -131,8 +131,9 @@ export class DatabaseStorage implements IStorage {
       throw new Error("userId é obrigatório para isolamento de dados");
     }
     
-    const tradeData = {
+    const tradeData: any = {
       ...insertTrade,
+      userId: insertTrade.userId, // Ensure userId is string
       dataHora: new Date(insertTrade.dataHora),
       // Ensure required fields have default values
       capitalUtilizado: insertTrade.capitalUtilizado || "0",
@@ -148,13 +149,14 @@ export class DatabaseStorage implements IStorage {
 
   async createBulkTrades(tradesData: InsertTrade[]): Promise<Trade[]> {
     // Validação de userId em lote - todos os trades devem ter o mesmo userId
-    const userIds = [...new Set(tradesData.map(t => t.userId).filter(Boolean))];
+    const userIds = Array.from(new Set(tradesData.map(t => t.userId).filter(Boolean)));
     if (userIds.length !== 1) {
       throw new Error("Todos os trades devem ter o mesmo userId válido para isolamento");
     }
     
     const processedTrades = tradesData.map(trade => ({
       ...trade,
+      userId: trade.userId!,
       dataHora: new Date(trade.dataHora),
       // Ensure required fields have default values
       capitalUtilizado: trade.capitalUtilizado || "0",
@@ -175,9 +177,11 @@ export class DatabaseStorage implements IStorage {
     }
     updateData.updatedAt = new Date();
     
-    let whereCondition = eq(trades.id, id);
+    let whereCondition;
     if (updates.userId) {
       whereCondition = and(eq(trades.id, id), eq(trades.userId, updates.userId));
+    } else {
+      whereCondition = eq(trades.id, id);
     }
     
     const [trade] = await db
@@ -195,9 +199,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteTrade(id: string, userId?: string): Promise<void> {
     // Isolamento: se userId for fornecido, usar para garantir que apenas o usuário correto pode deletar
-    let whereCondition = eq(trades.id, id);
+    let whereCondition;
     if (userId) {
       whereCondition = and(eq(trades.id, id), eq(trades.userId, userId));
+    } else {
+      whereCondition = eq(trades.id, id);
     }
     
     const result = await db.delete(trades).where(whereCondition).returning();
