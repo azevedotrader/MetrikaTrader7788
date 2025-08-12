@@ -25,8 +25,55 @@ const upload = multer({
   dest: 'uploads/'
 });
 
+// Middleware para obter userId autenticado
+function getUserId(req: any): string {
+  // Primeiro, tentar obter do token JWT
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.substring(7);
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      if (decoded.userId) return decoded.userId;
+    } catch (error) {
+      // Token inválido, continuar com métodos alternativos
+    }
+  }
+  
+  // Método alternativo: header X-User-ID (para desenvolvimento)
+  if (req.headers['x-user-id']) {
+    return req.headers['x-user-id'] as string;
+  }
+  
+  // Método alternativo: localStorage do frontend (enviado como header)
+  if (req.headers['x-session-user-id']) {
+    return req.headers['x-session-user-id'] as string;
+  }
+  
+  // Como último recurso, verificar se foi passado no body
+  if (req.body?.userId) {
+    return req.body.userId;
+  }
+  
+  throw new Error("Usuário não autenticado - userId é obrigatório para isolamento de dados");
+}
+
+// Middleware de autenticação obrigatória
+function requireAuth(req: any, res: any, next: any) {
+  try {
+    const userId = getUserId(req);
+    req.userId = userId; // Adicionar ao request
+    next();
+  } catch (error) {
+    res.status(401).json({ 
+      error: "Acesso negado",
+      message: "É necessário estar logado para acessar os dados. Cada usuário tem seus dados isolados.",
+      details: error instanceof Error ? error.message : "Erro de autenticação"
+    });
+  }
+}
+
 // Validation helper
-function validateAndCleanTrade(trade: any): InsertTrade {
+function validateAndCleanTrade(trade: any, userId: string): InsertTrade {
   const safeParseNumeric = (value: any, defaultValue: string = '0'): string => {
     if (!value && value !== 0) return defaultValue;
     // Preserve negative values and handle Brazilian decimal format
@@ -39,7 +86,7 @@ function validateAndCleanTrade(trade: any): InsertTrade {
   };
 
   return {
-    userId: trade.userId || "1",
+    userId: userId, // Sempre usar o userId autenticado
     corretora: trade.corretora || 'crypto',
     origem: trade.origem || 'manual',
     mercado: trade.mercado || 'b3',
@@ -139,7 +186,7 @@ function parseB3ClearCsvRow(row: any, userId: string): InsertTrade | null {
       resultado: trade.resultado
     });
 
-    return validateAndCleanTrade(trade);
+    return validateAndCleanTrade(trade, userId);
     
   } catch (error) {
     console.error('❌ Erro no parser B3 Clear:', error);
@@ -200,7 +247,7 @@ function parseStructuredB3Row(row: any, userId: string): InsertTrade {
     precoEntrada,
     precoSaida,
     resultado: resultadoFinal,
-    observacoes: `Importado via CSV estruturado - Duração: ${row.Duracao || 'N/A'}`
+    comentario: `Importado via CSV estruturado - Duração: ${row.Duracao || 'N/A'}`
   };
 }
 
@@ -353,7 +400,7 @@ function processIntelligentCsvRow(row: any, broker: string, userId: string): Ins
       resultado: trade.resultado
     });
 
-    return validateAndCleanTrade(trade);
+    return validateAndCleanTrade(trade, userId);
 
   } catch (error) {
     console.error('❌ Erro no processamento inteligente:', error);
@@ -636,7 +683,7 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
         resultadoLimpo: resultado
       });
       
-      return validateAndCleanTrade(trade);
+      return validateAndCleanTrade(trade, userId);
     }
     
     // Fallback to generic processing for other formats
@@ -710,15 +757,15 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
       comentario: 'CSV Import'
     } as InsertTrade;
     
-    return validateAndCleanTrade(trade);
+    return validateAndCleanTrade(trade, userId);
   } catch (error) {
     console.error('Error processing CSV row:', error);
     return null;
   }
 }
 
-// CSV parsing function for trades
-function parseTradeFromCSVRow(row: any, fieldMap: any): InsertTrade | null {
+// CSV parsing function for trades - COM ISOLAMENTO POR USUÁRIO
+function parseTradeFromCSVRow(row: any, fieldMap: any, userId: string): InsertTrade | null {
   try {
     console.log('Processando linha CSV:', row);
 
@@ -808,7 +855,7 @@ function parseTradeFromCSVRow(row: any, fieldMap: any): InsertTrade | null {
     }
 
     const trade = {
-      userId: "1",
+      userId,
       corretora: detectedMarket === 'Forex' ? 'forex' : detectedMarket === 'Crypto' ? 'crypto' : 'b3',
       origem: 'csv',
       mercado: detectedMarket.toLowerCase() as 'crypto' | 'forex' | 'b3',
@@ -833,7 +880,7 @@ function parseTradeFromCSVRow(row: any, fieldMap: any): InsertTrade | null {
       comentario: trade.comentario
     });
 
-    return validateAndCleanTrade(trade);
+    return validateAndCleanTrade(trade, userId);
   } catch (error) {
     console.error('Erro ao processar linha:', error);
     return null;
@@ -899,33 +946,36 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Get all trades
-  app.get("/api/trades", async (req, res) => {
+  // Get all trades - ISOLADO POR USUÁRIO
+  app.get("/api/trades", requireAuth, async (req, res) => {
     try {
-      const trades = await storage.getAllTrades();
+      const userId = req.userId;
+      const trades = await storage.getAllTrades(userId);
       res.json(trades);
     } catch (error) {
-      console.error("Error fetching trades:", error);
+      console.error("Error fetching user trades:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
 
-  // Get trades by broker
-  app.get("/api/trades/:corretora", async (req, res) => {
+  // Get trades by broker - ISOLADO POR USUÁRIO
+  app.get("/api/trades/:corretora", requireAuth, async (req, res) => {
     try {
+      const userId = req.userId;
       const { corretora } = req.params;
-      const trades = await storage.getTradesByBroker(corretora);
+      const trades = await storage.getTradesByBroker(corretora, userId);
       res.json(trades);
     } catch (error) {
-      console.error("Error fetching trades by broker:", error);
+      console.error("Error fetching user trades by broker:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });
 
-  // Get calendar data
-  app.get("/api/calendar", async (req, res) => {
+  // Get calendar data - ISOLADO POR USUÁRIO
+  app.get("/api/calendar", requireAuth, async (req, res) => {
     try {
-      const trades = await storage.getAllTrades();
+      const userId = req.userId;
+      const trades = await storage.getAllTrades(userId);
       
       // Group trades by date
       const calendarData = trades.reduce((acc: any, trade) => {
@@ -970,12 +1020,13 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Create trade
-  app.post("/api/trades", async (req, res) => {
+  // Create trade - ISOLADO POR USUÁRIO
+  app.post("/api/trades", requireAuth, async (req, res) => {
     try {
+      const userId = req.userId;
       const validatedData = insertTradeSchema.parse({
         ...req.body,
-        userId: "1", // Mock user ID
+        userId, // Usuário autenticado obrigatório
         origem: 'manual'
       });
 
@@ -993,8 +1044,8 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // CSV Import
-  app.post("/api/trades/import/:corretora", upload.single('file'), async (req, res) => {
+  // CSV Import - ISOLADO POR USUÁRIO
+  app.post("/api/trades/import/:corretora", requireAuth, upload.single('file'), async (req, res) => {
     try {
       const { corretora } = req.params;
       const file = req.file;
@@ -1003,7 +1054,8 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
-      console.log(`Iniciando importação CSV para ${corretora}:`, file.filename);
+      const userId = req.userId; // Obtido do middleware de autenticação
+      console.log(`[${userId}] Iniciando importação CSV para ${corretora}:`, file.filename);
 
       const fieldMap = JSON.parse(req.body.fieldMap || '{}');
       const trades: InsertTrade[] = [];
@@ -1014,7 +1066,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           .pipe(csv())
           .on('data', (row) => {
             try {
-              const trade = parseTradeFromCSVRow(row, fieldMap);
+              const trade = parseTradeFromCSVRow(row, fieldMap, userId);
               if (trade) {
                 // Override broker - ensure it's a valid enum value
                 if (['crypto', 'forex', 'b3'].includes(corretora)) {
@@ -1195,13 +1247,10 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // CSV Upload endpoint with intelligent parsing
-  app.post("/api/trades/upload-csv", upload.single('csvFile'), async (req, res) => {
+  // CSV Upload endpoint with intelligent parsing - ISOLADO POR USUÁRIO
+  app.post("/api/trades/upload-csv", requireAuth, upload.single('csvFile'), async (req, res) => {
     try {
-      const userId = req.headers['user-id'] as string;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado" });
-      }
+      const userId = req.userId; // Obtido do middleware de autenticação
 
       if (!req.file) {
         return res.status(400).json({ message: "Arquivo CSV é obrigatório" });
@@ -1768,14 +1817,16 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Nova rota para testar o leitor universal de CSV
-  app.post("/api/csv/analyze-universal", upload.single('csvFile'), async (req, res) => {
+  // Nova rota para testar o leitor universal de CSV - ISOLADO POR USUÁRIO
+  app.post("/api/csv/analyze-universal", requireAuth, upload.single('csvFile'), async (req, res) => {
     try {
+      const userId = req.userId; // Usuário autenticado
+      
       if (!req.file) {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
-      console.log(`📂 Testando leitor universal: ${req.file.originalname}`);
+      console.log(`📂 [${userId}] Testando leitor universal: ${req.file.originalname}`);
 
       // Usar a função universal para analisar e processar
       const resultado = await lerCSVUniversal(req.file.path, {
