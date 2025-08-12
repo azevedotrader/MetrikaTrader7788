@@ -9,6 +9,7 @@ import fs from "fs";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
 import { lerCSVSimples } from "./simple-csv-reader";
+import { lerCSVUniversal } from "./leitor-csv-universal";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -1764,6 +1765,148 @@ export async function registerRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Error updating stats:", error);
       res.status(500).json({ message: "Erro ao atualizar estatísticas" });
+    }
+  });
+
+  // Nova rota para testar o leitor universal de CSV
+  app.post("/api/csv/analyze-universal", upload.single('csvFile'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Nenhum arquivo enviado" });
+      }
+
+      console.log(`📂 Testando leitor universal: ${req.file.originalname}`);
+
+      // Usar a função universal para analisar e processar
+      const resultado = await lerCSVUniversal(req.file.path, {
+        debug: true,
+        detectarCabecalho: true
+      });
+
+      // Limpar arquivo temporário
+      if (req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      res.json({
+        success: true,
+        message: "Análise universal concluída com sucesso",
+        analise: {
+          encoding: resultado.metadados.encoding,
+          delimitador: resultado.metadados.delimitador,
+          temCabecalho: resultado.metadados.temCabecalho,
+          totalLinhas: resultado.metadados.totalLinhas,
+          totalColunas: resultado.metadados.totalColunas,
+          tamanhoArquivo: resultado.metadados.tamanhoArquivo,
+          tempoProcessamento: resultado.metadados.tempoProcessamento,
+          erros: resultado.metadados.erros,
+          avisos: resultado.metadados.avisos
+        },
+        amostraDados: resultado.dados.slice(0, 5), // Primeiras 5 linhas como amostra
+        colunas: resultado.dados.length > 0 ? Object.keys(resultado.dados[0]) : [],
+        estatisticas: {
+          formatoBrasileiro: resultado.metadados.delimitador === ';',
+          temNumeros: resultado.dados.some(linha => 
+            Object.values(linha).some(valor => typeof valor === 'number')
+          ),
+          temDatas: resultado.dados.some(linha =>
+            Object.values(linha).some(valor => 
+              typeof valor === 'string' && /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(valor)
+            )
+          )
+        }
+      });
+
+    } catch (error) {
+      // Limpar arquivo em caso de erro
+      if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      console.error('❌ Erro na análise universal:', error);
+      
+      res.status(500).json({
+        success: false,
+        message: "Erro na análise universal do CSV",
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Rota para demonstração das capacidades do leitor universal
+  app.get("/api/csv/demo-universal", async (req, res) => {
+    try {
+      console.log('🧪 Executando demonstração do leitor universal...');
+      
+      // Criar arquivos de exemplo para demonstração
+      const exemplos = {
+        'brasileiro.csv': 'Nome;Preço;Data;Resultado\nPETR4;25,50;01/01/2025;156,75\nVALE3;62,30;02/01/2025;-25,10',
+        'internacional.csv': 'Symbol,Price,Date,Result\nAAPL,150.25,2025-01-01,25.50\nTSLA,205.75,2025-01-02,-10.25',
+        'complexo.csv': '"Ativo Complexo"|"Preço de Entrada"|"Resultado"\n"PETR4 - Petrobras"|"R$ 25,50"|"R$ 60,00"\n"VALE3 - Vale"|"R$ 62,30"|"-R$ 50,00"'
+      };
+
+      const resultados = [];
+
+      for (const [nome, conteudo] of Object.entries(exemplos)) {
+        const caminhoArquivo = `uploads/demo_${nome}`;
+        
+        try {
+          // Criar arquivo temporário
+          fs.writeFileSync(caminhoArquivo, conteudo, 'utf8');
+          
+          // Processar com leitor universal
+          const resultado = await lerCSVUniversal(caminhoArquivo, { debug: false });
+          
+          resultados.push({
+            arquivo: nome,
+            sucesso: true,
+            metadados: resultado.metadados,
+            amostra: resultado.dados.slice(0, 2),
+            observacao: `Detectou automaticamente: ${resultado.metadados.encoding} + '${resultado.metadados.delimitador}'`
+          });
+          
+          // Limpar arquivo temporário
+          fs.unlinkSync(caminhoArquivo);
+          
+        } catch (erro) {
+          resultados.push({
+            arquivo: nome,
+            sucesso: false,
+            erro: erro instanceof Error ? erro.message : 'Erro desconhecido'
+          });
+          
+          // Tentar limpar arquivo em caso de erro
+          if (fs.existsSync(caminhoArquivo)) {
+            fs.unlinkSync(caminhoArquivo);
+          }
+        }
+      }
+
+      res.json({
+        message: "Demonstração do leitor universal concluída",
+        exemplos: resultados,
+        capacidades: {
+          encodings: ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'ASCII'],
+          delimitadores: [';', ',', '|', '\\t', ':', ' ', '-', '*'],
+          recursos: [
+            'Detecção automática de encoding',
+            'Detecção automática de delimitador',
+            'Detecção de cabeçalho inteligente',
+            'Conversão de números brasileiros',
+            'Tratamento de aspas e caracteres especiais',
+            'Mensagens de erro com sugestões',
+            'Limpeza automática de dados'
+          ]
+        },
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('❌ Erro na demonstração:', error);
+      res.status(500).json({
+        message: "Erro na demonstração",
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
     }
   });
 
