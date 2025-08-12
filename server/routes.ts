@@ -201,6 +201,47 @@ function parseB3ClearCsvRow(row: any, userId: string): InsertTrade | null {
   }
 }
 
+// Helper function to parse date from CSV row
+function parseDateFromRow(row: any): string {
+  const dateFields = ['Data', 'data', 'Date', 'DateTime', 'Timestamp', 'Time', 'Hora'];
+  let dateValue = null;
+  
+  for (const field of dateFields) {
+    if (row[field]) {
+      dateValue = row[field];
+      break;
+    }
+  }
+  
+  if (dateValue) {
+    const dateStr = String(dateValue).trim();
+    console.log(`📅 Parsing date from CSV: "${dateStr}"`);
+    
+    if (/\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4}/.test(dateStr)) {
+      // DD/MM/YYYY format (Brazilian)
+      const match = dateStr.match(/(\d{2})[\/\-\.](\d{2})[\/\-\.](\d{4})/);
+      if (match) {
+        const [, day, month, year] = match;
+        const parsedDate = new Date(`${year}-${month}-${day}`);
+        if (!isNaN(parsedDate.getTime())) {
+          console.log(`📅 Parsed Brazilian date: ${day}/${month}/${year} -> ${parsedDate.toISOString()}`);
+          return parsedDate.toISOString();
+        }
+      }
+    } else if (/\d{4}[\/\-\.]\d{2}[\/\-\.]\d{2}/.test(dateStr)) {
+      // YYYY-MM-DD format
+      const parsedDate = new Date(dateStr.split(' ')[0]);
+      if (!isNaN(parsedDate.getTime())) {
+        console.log(`📅 Parsed ISO date: ${dateStr} -> ${parsedDate.toISOString()}`);
+        return parsedDate.toISOString();
+      }
+    }
+  }
+  
+  console.log('⚠️ No valid date found, using current date');
+  return new Date().toISOString();
+}
+
 // Helper function to parse structured B3 data with proper columns
 function parseStructuredB3Row(row: any, userId: string): InsertTrade {
   const safeParseNumeric = (value: any, defaultValue: string = '0'): string => {
@@ -246,7 +287,7 @@ function parseStructuredB3Row(row: any, userId: string): InsertTrade {
     origem: 'csv',
     mercado: 'b3',
     setup: 'Importado',
-    dataHora: new Date().toISOString(),
+    dataHora: parseDateFromRow(row),
     ativo,
     tipo: direcao === 'C' ? 'compra' : 'venda',
     quantidade,
@@ -388,7 +429,7 @@ function processIntelligentCsvRow(row: any, broker: string, userId: string): Ins
       origem: 'csv',
       mercado: market,
       setup: 'Import Inteligente',
-      dataHora: tradeDate.toISOString(),
+      dataHora: parseDateFromRow(row),
       ativo: symbolStr,
       tipo: tradeType,
       quantidade: String(quantity),

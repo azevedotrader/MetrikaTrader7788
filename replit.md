@@ -199,3 +199,11 @@ The application follows a monorepo structure with clear separation between clien
 - **Testing Confirmed**: Successfully imported trades from multiple CSV formats (comma and semicolon delimited)
 - **Intelligence Preserved**: Auto-detection of delimiters, broker formats, and smart trade parsing still functional
 - **Performance**: Papa Parse provides fast, reliable CSV processing without encoding issues
+
+### Date Parsing Fix (Aug 12, 2025)
+- **Issue Identified**: All CSV imports were saving trades with current timestamp instead of preserving original CSV dates
+- **Root Cause**: `parseStructuredB3Row` function was using `new Date().toISOString()` instead of parsing CSV date fields
+- **Solution Implemented**: Created `parseDateFromRow()` helper function with intelligent Brazilian date format support (DD/MM/YYYY)
+- **Date Formats Supported**: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, YYYY-MM-DD with automatic detection
+- **Testing Verified**: Trades now correctly preserve original dates from CSV (e.g., 25/12/2023 → 2023-12-25T00:00:00.000Z)
+- **Both Parsers Fixed**: Applied date parsing to both structured B3 parser and intelligent CSV processor
