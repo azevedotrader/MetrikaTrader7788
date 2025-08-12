@@ -397,7 +397,9 @@ function processIntelligentCsvRow(row: any, broker: string, userId: string): Ins
       ativo: trade.ativo,
       tipo: trade.tipo,
       quantidade: trade.quantidade,
-      resultado: trade.resultado
+      resultado: trade.resultado,
+      originalQuantity: quantity,
+      originalResult: result
     });
 
     return validateAndCleanTrade(trade, userId);
@@ -1390,13 +1392,20 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Trades by broker endpoint
-  app.get("/api/trades/by-broker", async (req, res) => {
+  // Get trades by broker - ISOLADO POR USUÁRIO  
+  app.get("/api/trades/by-broker", requireAuth, async (req, res) => {
     try {
-      const userId = req.headers['user-id'] as string || "1";
-      const tradesByBroker = await storage.getAllTrades();
+      const userId = req.userId;
+      const broker = req.query.broker as string;
+      
+      if (!broker) {
+        return res.status(400).json({ message: "Parâmetro broker é obrigatório" });
+      }
+      
+      const tradesByBroker = await storage.getTradesByBroker(broker, userId);
       res.json(tradesByBroker);
     } catch (error) {
-      console.error("Error fetching trades by broker:", error);
+      console.error("Error fetching user trades by broker:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

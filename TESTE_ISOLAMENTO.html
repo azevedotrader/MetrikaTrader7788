@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Sistema Isolamento - Métrika</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .user-panel { border: 2px solid #333; border-radius: 8px; padding: 15px; }
+        .user-a { border-color: #2196F3; background: #E3F2FD; }
+        .user-b { border-color: #4CAF50; background: #E8F5E8; }
+        button { padding: 10px 15px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-user-a { background: #2196F3; color: white; }
+        .btn-user-b { background: #4CAF50; color: white; }
+        .results { margin-top: 15px; padding: 10px; background: white; border-radius: 4px; min-height: 200px; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; text-align: center; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Teste Sistema de Isolamento - Métrika</h1>
+    <p><strong>Este teste demonstra que cada usuário vê apenas seus próprios dados</strong></p>
+    
+    <div class="container">
+        <!-- Painel Usuário A -->
+        <div class="user-panel user-a">
+            <h2>👤 Usuário A (usuario-teste-a)</h2>
+            
+            <button class="btn-user-a" onclick="buscarTrades('usuario-teste-a', 'resultsA')">
+                📊 Buscar Meus Trades
+            </button>
+            
+            <button class="btn-user-a" onclick="criarTrade('usuario-teste-a', 'resultsA')">
+                ➕ Criar Trade de Teste
+            </button>
+            
+            <div class="upload-area">
+                <input type="file" id="csvA" accept=".csv" />
+                <button class="btn-user-a" onclick="uploadCSV('usuario-teste-a', 'csvA', 'resultsA')">
+                    📁 Upload CSV
+                </button>
+            </div>
+            
+            <button class="btn-user-a" onclick="resetDados('usuario-teste-a', 'resultsA')">
+                🗑️ Resetar Meus Dados
+            </button>
+            
+            <div id="resultsA" class="results">
+                <p>Clique nos botões acima para testar...</p>
+            </div>
+        </div>
+        
+        <!-- Painel Usuário B -->
+        <div class="user-panel user-b">
+            <h2>👤 Usuário B (usuario-teste-b)</h2>
+            
+            <button class="btn-user-b" onclick="buscarTrades('usuario-teste-b', 'resultsB')">
+                📊 Buscar Meus Trades
+            </button>
+            
+            <button class="btn-user-b" onclick="criarTrade('usuario-teste-b', 'resultsB')">
+                ➕ Criar Trade de Teste
+            </button>
+            
+            <div class="upload-area">
+                <input type="file" id="csvB" accept=".csv" />
+                <button class="btn-user-b" onclick="uploadCSV('usuario-teste-b', 'csvB', 'resultsB')">
+                    📁 Upload CSV
+                </button>
+            </div>
+            
+            <button class="btn-user-b" onclick="resetDados('usuario-teste-b', 'resultsB')">
+                🗑️ Resetar Meus Dados
+            </button>
+            
+            <div id="resultsB" class="results">
+                <p>Clique nos botões acima para testar...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <h3>🧪 Testes de Isolamento</h3>
+        <button onclick="testeIsolamento()" style="background: #FF9800; color: white; padding: 15px 20px; font-size: 16px;">
+            🔍 Executar Teste Completo de Isolamento
+        </button>
+        <div id="testResults" style="margin-top: 15px;"></div>
+    </div>
+
+    <script>
+        // Função para fazer requisições com userId
+        async function apiRequest(endpoint, userId, options = {}) {
+            const headers = {
+                'X-User-ID': userId,
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            const response = await fetch(endpoint, {
+                ...options,
+                headers
+            });
+            
+            if (!response.ok) {
+                throw new Error(`${response.status}: ${await response.text()}`);
+            }
+            
+            return response.json();
+        }
+        
+        // Buscar trades do usuário
+        async function buscarTrades(userId, resultDiv) {
+            const div = document.getElementById(resultDiv);
+            try {
+                div.innerHTML = '<p>🔄 Buscando trades...</p>';
+                
+                const trades = await apiRequest('/api/trades', userId);
+                
+                div.innerHTML = `
+                    <div class="success">✅ ${trades.length} trades encontrados</div>
+                    <details>
+                        <summary>Ver trades</summary>
+                        <pre>${JSON.stringify(trades, null, 2)}</pre>
+                    </details>
+                `;
+            } catch (error) {
+                div.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+        
+        // Criar trade de teste
+        async function criarTrade(userId, resultDiv) {
+            const div = document.getElementById(resultDiv);
+            try {
+                div.innerHTML = '<p>🔄 Criando trade...</p>';
+                
+                const trade = {
+                    corretora: 'b3',
+                    ativo: `TESTE-${userId.slice(-1)}`,
+                    tipo: 'compra',
+                    quantidade: '10',
+                    precoEntrada: '100.50',
+                    precoSaida: '105.25',
+                    resultado: '47.50',
+                    setup: 'Teste Isolamento',
+                    comentario: `Trade criado pelo ${userId}`
+                };
+                
+                const result = await apiRequest('/api/trades', userId, {
+                    method: 'POST',
+                    body: JSON.stringify(trade)
+                });
+                
+                div.innerHTML = `
+                    <div class="success">✅ Trade criado com sucesso!</div>
+                    <p><strong>ID:</strong> ${result.id}</p>
+                    <p><strong>Ativo:</strong> ${result.ativo}</p>
+                    <p><strong>Resultado:</strong> R$ ${result.resultado}</p>
+                `;
+            } catch (error) {
+                div.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+        
+        // Upload de CSV
+        async function uploadCSV(userId, inputId, resultDiv) {
+            const div = document.getElementById(resultDiv);
+            const fileInput = document.getElementById(inputId);
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                div.innerHTML = '<div class="error">❌ Selecione um arquivo CSV</div>';
+                return;
+            }
+            
+            try {
+                div.innerHTML = '<p>🔄 Enviando CSV...</p>';
+                
+                const formData = new FormData();
+                formData.append('csvFile', file);
+                
+                const response = await fetch('/api/trades/upload-csv', {
+                    method: 'POST',
+                    headers: {
+                        'X-User-ID': userId
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`${response.status}: ${await response.text()}`);
+                }
+                
+                const result = await response.json();
+                
+                div.innerHTML = `
+                    <div class="success">✅ ${result.message}</div>
+                    <p><strong>Processados:</strong> ${result.processedCount}</p>
+                    <p><strong>Salvos:</strong> ${result.savedCount}</p>
+                `;
+            } catch (error) {
+                div.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+        
+        // Resetar dados do usuário
+        async function resetDados(userId, resultDiv) {
+            const div = document.getElementById(resultDiv);
+            
+            if (!confirm(`Tem certeza que deseja resetar todos os dados do ${userId}?`)) {
+                return;
+            }
+            
+            try {
+                div.innerHTML = '<p>🔄 Resetando dados...</p>';
+                
+                const result = await apiRequest('/api/trades/reset', userId, {
+                    method: 'DELETE'
+                });
+                
+                div.innerHTML = `
+                    <div class="success">✅ ${result.message}</div>
+                `;
+            } catch (error) {
+                div.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            }
+        }
+        
+        // Teste completo de isolamento
+        async function testeIsolamento() {
+            const div = document.getElementById('testResults');
+            div.innerHTML = '<h4>🔄 Executando testes de isolamento...</h4>';
+            
+            try {
+                // 1. Criar trade para usuário A
+                await criarTrade('usuario-teste-a', 'temp');
+                
+                // 2. Criar trade para usuário B
+                await criarTrade('usuario-teste-b', 'temp');
+                
+                // 3. Verificar isolamento
+                const tradesA = await apiRequest('/api/trades', 'usuario-teste-a');
+                const tradesB = await apiRequest('/api/trades', 'usuario-teste-b');
+                
+                // 4. Verificar se não há sobreposição
+                const idsA = tradesA.map(t => t.id);
+                const idsB = tradesB.map(t => t.id);
+                const overlap = idsA.filter(id => idsB.includes(id));
+                
+                let resultado = '<h4>📋 Resultado do Teste:</h4>';
+                resultado += `<p>👤 Usuário A tem ${tradesA.length} trades</p>`;
+                resultado += `<p>👤 Usuário B tem ${tradesB.length} trades</p>`;
+                
+                if (overlap.length === 0) {
+                    resultado += '<div class="success">✅ ISOLAMENTO FUNCIONANDO PERFEITAMENTE!</div>';
+                    resultado += '<p>Nenhum trade foi compartilhado entre usuários.</p>';
+                } else {
+                    resultado += '<div class="error">❌ VAZAMENTO DE DADOS DETECTADO!</div>';
+                    resultado += `<p>IDs compartilhados: ${overlap.join(', ')}</p>`;
+                }
+                
+                div.innerHTML = resultado;
+                
+            } catch (error) {
+                div.innerHTML = `<div class="error">❌ Erro no teste: ${error.message}</div>`;
+            }
+        }
+        
+        // Teste sem autenticação
+        async function testeSemAuth() {
+            try {
+                const response = await fetch('/api/trades');
+                const result = await response.text();
+                console.log('Resposta sem autenticação:', result);
+            } catch (error) {
+                console.log('Erro esperado sem autenticação:', error.message);
+            }
+        }
+        
+        // Executar teste ao carregar a página
+        window.onload = () => {
+            console.log('🚀 Sistema de teste carregado. Execute os testes usando os botões.');
+            testeSemAuth();
+        };
+    </script>
+</body>
+</html>
