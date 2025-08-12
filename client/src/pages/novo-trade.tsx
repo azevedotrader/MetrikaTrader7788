@@ -155,7 +155,7 @@ export default function NovoTrade() {
         method: 'POST',
         body: formData,
         headers: {
-          'user-id': userId
+          'x-user-id': userId
         }
       }).then(async res => {
         if (!res.ok) {

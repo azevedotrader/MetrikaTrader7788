@@ -4,7 +4,7 @@
 
 This is a comprehensive trading analytics platform called "Métrika" built as a full-stack web application. The platform allows traders to track their performance, analyze trades, maintain a trading journal, and visualize their progress through various metrics and charts.
 
-**Current Status (Aug 8, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.** **✅ Nova aba "Gráficos" implementada com integração TradingView em tempo real para análise técnica avançada.** **✅ Botão "Resetar Dashboard" agora funciona completamente, limpando todos os dados: trades, importações CSV e configurações de API.**
+**Current Status (Aug 12, 2025):** ✅ Sistema totalmente funcional e depurado. Erros de TypeScript corrigidos, aplicação rodando sem problemas na porta 5000. Sistema completo de análise de trading implementado com separação por corretoras, importação CSV, integração API Gate.io funcional e consolidação de dados. Menu sidebar retrátil com hover implementado. API Gate.io totalmente integrada com sincronização automática de trades. **✅ Landing page profissional e persuasiva completamente renovada com foco em conversão de vendas.** **✅ Botão "Analisar CSV com IA" movido para sidebar com funcionalidade integrada.** **✅ Nova aba "Gráficos" implementada com integração TradingView em tempo real para análise técnica avançada.** **✅ Botão "Resetar Dashboard" agora funciona completamente, limpando todos os dados: trades, importações CSV e configurações de API.** **✅ Problema de autenticação CSV resolvido - headers de autenticação corrigidos.**
 
 ## User Preferences
 
@@ -183,3 +183,11 @@ The application follows a monorepo structure with clear separation between clien
 - **Order Optimization**: Reordered broker filter buttons (Forex → B3 → Crypto) as requested
 - **Reduced Clutter**: Removed floating button to create cleaner interface
 - **Accessibility**: Added proper loading states and tooltips for collapsed sidebar
+
+### Database & Authentication Fixes (Aug 12, 2025)
+- **Database Setup**: Created and configured PostgreSQL database with proper environment variables
+- **Authentication Fix**: Resolved CSV upload authentication issues by correcting header handling
+- **TypeScript Cleanup**: Fixed all remaining TypeScript errors in authentication middleware
+- **Schema Migration**: Successfully pushed database schema using Drizzle
+- **Header Alignment**: Frontend now uses `x-user-id` header to match Replit's automatic user identification
+- **Error Resolution**: Fixed foreign key constraints and authentication flow for all endpoints

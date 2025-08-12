@@ -34,15 +34,22 @@ function getUserId(req: any): string {
     try {
       const token = authHeader.substring(7);
       const decoded = jwt.verify(token, JWT_SECRET) as any;
-      if (decoded.userId) return decoded.userId;
+      if (decoded.userId) {
+        return decoded.userId;
+      }
     } catch (error) {
       // Token inválido, continuar com métodos alternativos
     }
   }
   
-  // Método alternativo: header X-User-ID (para desenvolvimento)
+  // Método alternativo: header X-User-ID (Replit automaticamente define para usuário logado)
   if (req.headers['x-user-id']) {
     return req.headers['x-user-id'] as string;
+  }
+  
+  // Método alternativo: header user-id (enviado pelo frontend)
+  if (req.headers['user-id']) {
+    return req.headers['user-id'] as string;
   }
   
   // Método alternativo: localStorage do frontend (enviado como header)
