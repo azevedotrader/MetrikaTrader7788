@@ -21,7 +21,7 @@ export async function apiRequest(
   }
   
   const headers: Record<string, string> = {
-    'user-id': userId,
+    'X-User-ID': userId,
   };
   
   if (data) {
@@ -56,7 +56,7 @@ export const getQueryFn: <T>(options: {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
       headers: {
-        "user-id": userId,
+        "X-User-ID": userId,
       },
     });
 

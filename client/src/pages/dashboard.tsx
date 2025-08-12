@@ -565,6 +565,9 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }
 export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Get current user ID for isolation info
+  const currentUserId = localStorage.getItem('user-id') || 'default-user';
   const [selectedBrokerFilter, setSelectedBrokerFilter] = useState<string | null>(null);
 
   // Fetch trades data
