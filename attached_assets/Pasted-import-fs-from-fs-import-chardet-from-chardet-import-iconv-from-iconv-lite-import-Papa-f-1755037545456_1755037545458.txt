@@ -1,0 +1,86 @@
+import fs from 'fs';
+import chardet from 'chardet';
+import iconv from 'iconv-lite';
+import Papa from 'papaparse';
+
+/**
+ * Lê qualquer CSV e retorna dados padronizados
+ * @param {string} filePath - Caminho do arquivo CSV
+ * @returns {Promise<{encoding: string, delimiter: string, headers: string[], rows: object[]}>}
+ */
+export async function readCsvUniversal(filePath) {
+  // 1. Detectar encoding
+  const encoding = chardet.detectFileSync(filePath) || 'utf-8';
+
+  // 2. Ler e converter para UTF-8
+  const buffer = fs.readFileSync(filePath);
+  const content = iconv.decode(buffer, encoding);
+
+  // 3. Possíveis separadores para testar
+  const delimiters = [',', ';', '\t', '|', ':', '-', '*', '~'];
+
+  let bestResult = null;
+
+  for (const delim of delimiters) {
+    const result = Papa.parse(content, {
+      delimiter: delim,
+      skipEmptyLines: true,
+    });
+
+    const columnCount = result.data.length > 0 ? result.data[0].length : 0;
+
+    if (!bestResult || columnCount > bestResult.columns) {
+      bestResult = { columns: columnCount, data: result.data, delimiter: delim };
+    }
+  }
+
+  if (!bestResult || !bestResult.data.length) {
+    throw new Error('Não foi possível detectar delimitador ou ler dados do CSV.');
+  }
+
+  // 4. Detectar cabeçalho automaticamente
+  const firstRow = bestResult.data[0];
+  const hasHeader = firstRow.every(cell => typeof cell === 'string' && cell.trim() !== '') &&
+                    new Set(firstRow).size === firstRow.length;
+
+  let headers;
+  let rows;
+
+  if (hasHeader) {
+    headers = firstRow;
+    rows = bestResult.data.slice(1).map(row => {
+      return headers.reduce((obj, key, i) => {
+        obj[key] = row[i] ?? null;
+        return obj;
+      }, {});
+    });
+  } else {
+    headers = firstRow.map((_, i) => `col_${i + 1}`);
+    rows = bestResult.data.map(row => {
+      return headers.reduce((obj, key, i) => {
+        obj[key] = row[i] ?? null;
+        return obj;
+      }, {});
+    });
+  }
+
+  return {
+    encoding,
+    delimiter: bestResult.delimiter,
+    headers,
+    rows
+  };
+}
+
+// Exemplo de uso
+(async () => {
+  try {
+    const result = await readCsvUniversal('Douglas de Sousa (1).csv');
+    console.log('Encoding detectado:', result.encoding);
+    console.log('Delimitador detectado:', JSON.stringify(result.delimiter));
+    console.log('Cabeçalhos:', result.headers);
+    console.log('Primeiras linhas:', result.rows.slice(0, 5));
+  } catch (err) {
+    console.error('Erro ao ler CSV:', err.message);
+  }
+})();
