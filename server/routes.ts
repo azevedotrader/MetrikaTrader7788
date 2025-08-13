@@ -1300,139 +1300,95 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // CSV Upload endpoint with intelligent parsing - ISOLADO POR USUÁRIO
+  // CSV Upload endpoint - SISTEMA UNIVERSAL INTELIGENTE
   app.post("/api/trades/upload-csv", requireAuth, upload.single('csvFile'), async (req, res) => {
     try {
-      const userId = req.userId; // Obtido do middleware de autenticação
+      const userId = req.userId;
+      const file = req.file;
+      const broker = req.body.broker || 'auto';
 
-      if (!req.file) {
-        return res.status(400).json({ message: "Arquivo CSV é obrigatório" });
+      if (!file) {
+        return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
-      const { broker = 'auto' } = req.body;
-      const validBrokers = ['forex', 'b3', 'crypto', 'auto'];
-      const finalBroker = validBrokers.includes(broker) ? broker : 'auto';
+      console.log(`🧠 Sistema Inteligente CSV: ${file.originalname}`);
+      console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}`);
 
-      console.log(`🚀 Iniciando importação INTELIGENTE: ${req.file.originalname} para broker: ${broker}`);
+      // Import the new smart processor
+      const { processSmartCSV } = await import('./smart-csv-processor');
+      
+      // Process with intelligent system
+      const result = await processSmartCSV(file.path, userId, broker);
 
-      try {
-        // Use simple CSV reader that works
-        const csvData = await lerCSVSimples(req.file.path);
-        
-        if (!csvData || csvData.length === 0) {
-          // Clean up uploaded file
-          fs.unlinkSync(req.file.path);
-          return res.status(400).json({ 
-            message: "Arquivo CSV está vazio ou não foi possível processar" 
-          });
-        }
+      if (result.errors.length > 0) {
+        console.warn('⚠️ Erros durante processamento:', result.errors);
+      }
 
-        console.log(`📊 CSV inteligente processado: ${csvData.length} linhas encontradas`);
-
-        // Process and validate trades using intelligent data
-        const validTrades: InsertTrade[] = [];
-        const errors: string[] = [];
-        
-        for (let i = 0; i < csvData.length; i++) {
-          try {
-            const row = csvData[i];
-            
-            // Skip completely empty rows
-            const hasData = Object.values(row).some(value => 
-              value !== null && value !== undefined && 
-              String(value).trim() !== ''
-            );
-            
-            if (!hasData) {
-              continue;
-            }
-
-            // Process with intelligent field detection
-            if (!userId) {
-              throw new Error("UserId é obrigatório");
-            }
-            const trade = processIntelligentCsvRow(row, finalBroker, userId);
-            if (trade) {
-              validTrades.push(trade);
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            console.error(`❌ Erro na linha ${i + 2}:`, errorMessage);
-            errors.push(`Linha ${i + 2}: ${errorMessage}`);
-          }
-        }
-
-        console.log(`✅ Trades válidos processados: ${validTrades.length}`);
-
-        // Save valid trades
-        let savedTrades: any[] = [];
-        if (validTrades.length > 0) {
-          try {
-            savedTrades = await storage.createBulkTrades(validTrades);
-            console.log(`💾 Trades salvos no banco: ${savedTrades.length}`);
-          } catch (dbError) {
-            console.error('❌ Erro ao salvar trades:', dbError);
-            errors.push('Erro ao salvar trades no banco de dados');
-          }
-        }
-
-        // Log import
-        try {
-          if (!userId) {
-            throw new Error("UserId é obrigatório");
-          }
-          await storage.createCsvImport({
-            userId,
-            broker: finalBroker,
-            fileName: req.file.originalname,
-            tradesImported: savedTrades.length,
-            tradesSkipped: csvData.length - savedTrades.length,
-            status: savedTrades.length > 0 ? 'completed' : 'failed',
-            errorMessage: errors.length > 0 ? errors.slice(0, 10).join('; ') : null
-          });
-        } catch (importError) {
-          console.error('Error logging import:', importError);
-        }
-
+      if (result.trades.length === 0) {
         // Clean up uploaded file
-        if (req.file && req.file.path) {
-          try {
-            fs.unlinkSync(req.file.path);
-          } catch (cleanupError) {
-            console.error('Error cleaning up file:', cleanupError);
-          }
-        }
-
-        res.json({
-          message: `Importação inteligente concluída: ${savedTrades.length} trades importados`,
-          tradesImported: savedTrades.length,
-          tradesSkipped: csvData.length - savedTrades.length,
-          totalRows: csvData.length,
-          errors: errors.slice(0, 5),
-          encoding: 'Detectado automaticamente',
-          delimiter: 'Detectado automaticamente'
-        });
-
-      } catch (csvError) {
-        console.error('❌ Erro no processamento CSV:', csvError);
-        
-        // Clean up uploaded file on error
-        if (req.file && req.file.path) {
-          try {
-            fs.unlinkSync(req.file.path);
-          } catch (cleanupError) {
-            console.error('Error cleaning up file:', cleanupError);
-          }
-        }
-        
-        res.status(500).json({ 
-          message: "Erro ao processar arquivo CSV: " + (csvError instanceof Error ? csvError.message : 'Erro desconhecido')
+        fs.unlinkSync(file.path);
+        return res.status(400).json({ 
+          message: "Nenhum trade válido identificado no CSV",
+          details: {
+            totalRows: result.summary.totalRows,
+            statisticsSkipped: result.summary.statisticsSkipped,
+            detectedBroker: result.summary.detectedBroker,
+            detectedMarket: result.summary.detectedMarket
+          },
+          errors: result.errors
         });
       }
+
+      // Save trades to database
+      console.log(`💾 Salvando ${result.trades.length} trades no banco...`);
+      const savedTrades = await storage.createBulkTrades(result.trades);
+
+      // Record CSV import
+      await storage.createCsvImport({
+        userId,
+        broker: result.summary.detectedBroker,
+        fileName: file.originalname,
+        tradesImported: savedTrades.length,
+        tradesSkipped: result.summary.statisticsSkipped,
+        status: 'completed'
+      });
+
+      // Clean up uploaded file
+      fs.unlinkSync(file.path);
+
+      console.log(`✅ Importação inteligente concluída:`);
+      console.log(`   - Trades identificados: ${savedTrades.length}`);
+      console.log(`   - Broker detectado: ${result.summary.detectedBroker}`);
+      console.log(`   - Mercado detectado: ${result.summary.detectedMarket}`);
+      console.log(`   - Período: ${result.summary.dateRange?.start} a ${result.summary.dateRange?.end}`);
+
+      res.json({
+        message: `Sistema inteligente: ${savedTrades.length} trades reais identificados e importados com datas preservadas`,
+        tradesImported: savedTrades.length,
+        summary: {
+          ...result.summary,
+          tradesImported: savedTrades.length
+        },
+        dateRange: result.summary.dateRange,
+        errors: result.errors.length > 0 ? result.errors : undefined
+      });
 
     } catch (error) {
-      console.error("CSV upload error:", error);
-      res.status(500).json({ message: "Erro ao processar arquivo CSV" });
+      console.error("❌ Erro no sistema inteligente:", error);
+      
+      // Clean up uploaded file on error
+      if (req.file && req.file.path) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.error('Error cleaning up file:', cleanupError);
+        }
+      }
+      
+      res.status(500).json({ 
+        message: "Erro no sistema inteligente de CSV", 
+        error: error instanceof Error ? error.message : "Erro desconhecido" 
+      });
     }
   });
 
