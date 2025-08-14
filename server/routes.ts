@@ -1297,8 +1297,38 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (result.trades.length === 0) {
         // Clean up uploaded file
         fs.unlinkSync(file.path);
+        
+        // Verificar se é arquivo de estatísticas
+        const hasStatisticsData = result.errors.some(error => 
+          error.includes('ARQUIVO DE ESTATÍSTICAS DETECTADO')
+        );
+        
+        if (hasStatisticsData) {
+          return res.status(400).json({ 
+            message: "📊 Arquivo de Performance Detectado - Formato Incorreto",
+            type: "statistics_file", 
+            explanation: "Este arquivo contém dados de resumo/estatísticas, não trades individuais.",
+            solution: {
+              title: "Como corrigir:",
+              steps: [
+                "1. Acesse sua corretora (Clear, Rico, XP, etc.)",
+                "2. Vá para 'Histórico de Operações' ou 'Book de Ofertas'", 
+                "3. Exporte o histórico de TRADES INDIVIDUAIS (não o relatório de performance)",
+                "4. O arquivo deve conter uma linha para cada operação realizada"
+              ]
+            },
+            expectedFormat: {
+              description: "Cada linha = 1 trade com dados como:",
+              columns: ["Ativo", "Data/Hora", "Compra/Venda", "Preço", "Quantidade", "Resultado"],
+              example: "WINQ25 | 01/07/2025 17:04 | V | 141.745 | 1 | -70.00"
+            },
+            errors: result.errors.filter(e => !e.includes('ARQUIVO DE ESTATÍSTICAS'))
+          });
+        }
+        
         return res.status(400).json({ 
           message: "Nenhum trade válido identificado no CSV",
+          type: "no_trades_found",
           details: {
             totalRows: result.summary.totalRows,
             statisticsSkipped: result.summary.statisticsSkipped,

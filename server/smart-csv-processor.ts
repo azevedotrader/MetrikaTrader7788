@@ -168,6 +168,37 @@ export async function processSmartCSV(
       };
     }
 
+    // 7. Verificar se é arquivo de estatísticas e dar feedback adequado
+    if (result.trades.length === 0) {
+      const hasStatisticsData = parseResult.data.some(row => 
+        Object.values(row).some(val => 
+          typeof val === 'string' && (
+            val.includes('lucro') || val.includes('prejuízo') || 
+            val.includes('operações') || val.includes('percentual') ||
+            val.includes('patrimônio') || val.includes('drawdown') ||
+            val.includes('retorno') || val.includes('saldo') ||
+            val.includes('fator de lucro') || val.includes('média') ||
+            val.includes('declínio') || val.includes('sequência')
+          )
+        )
+      );
+
+      if (hasStatisticsData) {
+        result.errors.push('❌ ARQUIVO DE ESTATÍSTICAS DETECTADO');
+        result.errors.push('Este arquivo contém dados de performance/resumo, não trades individuais.');
+        result.errors.push('📋 FORMATO ESPERADO: CSV com trades individuais contendo:');
+        result.errors.push('• Símbolo do ativo (ex: WINQ25, PETR4, BTCUSDT)');
+        result.errors.push('• Data/hora de entrada e saída');
+        result.errors.push('• Preços de entrada e saída');
+        result.errors.push('• Resultado da operação (lucro/prejuízo)');
+        result.errors.push('• Quantidade operada');
+        result.errors.push('💡 DICA: Exporte o histórico de trades individuais da sua corretora, não o relatório de performance.');
+      } else {
+        result.errors.push('Nenhum trade válido identificado no arquivo');
+        result.errors.push('Verifique se o arquivo contém dados de trades individuais com símbolos reconhecíveis');
+      }
+    }
+
     console.log(`✅ Processamento concluído:`);
     console.log(`   - Trades encontrados: ${result.summary.tradesFound}`);
     console.log(`   - Linhas ignoradas: ${result.summary.statisticsSkipped}`);
