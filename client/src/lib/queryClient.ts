@@ -12,16 +12,17 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  let userId = localStorage.getItem('user-id');
+  // Obter o userId do localStorage
+  const userId = localStorage.getItem('user-id');
   
-  // Se não há user-id, criar um padrão para o desenvolvimento
-  if (!userId || userId === '') {
-    userId = 'default-user';
-    localStorage.setItem('user-id', userId);
+  // ISOLAMENTO CRÍTICO: Rejeitar requisições sem userId válido
+  if (!userId || userId === '' || userId === 'null') {
+    throw new Error('Usuário não autenticado - faça login para acessar os dados');
   }
   
   const headers: Record<string, string> = {
-    'X-User-ID': userId,
+    'user-id': userId, // Header usado pelo servidor
+    'X-User-ID': userId, // Header alternativo
   };
   
   if (data) {
@@ -45,18 +46,22 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    let userId = localStorage.getItem('user-id');
+    // Obter o userId do localStorage
+    const userId = localStorage.getItem('user-id');
     
-    // Se não há user-id, criar um padrão para o desenvolvimento
-    if (!userId || userId === '') {
-      userId = 'default-user';
-      localStorage.setItem('user-id', userId);
+    // ISOLAMENTO CRÍTICO: Rejeitar queries sem userId válido
+    if (!userId || userId === '' || userId === 'null') {
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
+      throw new Error('Usuário não autenticado - faça login para acessar os dados');
     }
     
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
       headers: {
-        "X-User-ID": userId,
+        "user-id": userId, // Header usado pelo servidor
+        "X-User-ID": userId, // Header alternativo
       },
     });
 

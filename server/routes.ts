@@ -64,16 +64,23 @@ function getUserId(req: any): string {
   throw new Error("Usuário não autenticado - userId é obrigatório para isolamento de dados");
 }
 
-// Middleware de autenticação obrigatória
+// Middleware de autenticação obrigatória - ISOLAMENTO TOTAL
 function requireAuth(req: any, res: any, next: any) {
   try {
     const userId = getUserId(req);
+    
+    if (!userId || userId.trim() === '') {
+      throw new Error("UserId vazio ou inválido");
+    }
+    
     req.userId = userId; // Adicionar ao request
+    console.log(`🔐 Usuário autenticado: ${userId} para ${req.method} ${req.path}`);
     next();
   } catch (error) {
+    console.warn(`🚫 Acesso negado para ${req.method} ${req.path}:`, error instanceof Error ? error.message : error);
     res.status(401).json({ 
       error: "Acesso negado",
-      message: "É necessário estar logado para acessar os dados. Cada usuário tem seus dados isolados.",
+      message: "Autenticação obrigatória - cada usuário só pode acessar seus próprios dados",
       details: error instanceof Error ? error.message : "Erro de autenticação"
     });
   }
@@ -1205,11 +1212,12 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Delete trade
-  app.delete("/api/trades/:id", async (req, res) => {
+  // Delete trade - ISOLADO POR USUÁRIO
+  app.delete("/api/trades/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteTrade(id);
+      const userId = req.userId;
+      await storage.deleteTrade(id, userId);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting trade:", error);
@@ -1217,72 +1225,34 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Reset all data (complete dashboard reset)
-  app.delete("/api/trades/reset-all", async (req, res) => {
+  // Reset all data (complete dashboard reset) - ISOLADO POR USUÁRIO
+  app.delete("/api/trades/reset-all", requireAuth, async (req, res) => {
     try {
-      let userId = req.headers['user-id'] as string;
+      const userId = req.userId;
       
-      // Se não há userId no header, buscar todos os trades existentes para identificar userIds
-      if (!userId || userId === '') {
-        console.log("🔍 Nenhum user-id fornecido, buscando todos os usuarios com dados...");
-        const allTrades = await storage.getAllTrades();
-        const userIds = Array.from(new Set(allTrades.map(trade => trade.userId)));
-        
-        if (userIds.length === 0) {
-          return res.json({ 
-            message: "Nenhum dado encontrado para resetar.",
-            details: {
-              tradesDeleted: false,
-              csvImportsDeleted: false,
-              apiConfigsDeleted: false
-            }
-          });
-        }
-        
-        console.log(`🗑️ Iniciando reset completo para todos os usuários: ${userIds.join(', ')}`);
-        
-        // Reset para todos os usuários encontrados
-        for (const uid of userIds) {
-          await storage.deleteAllTrades(uid);
-          try {
-            await storage.deleteAllCsvImports(uid);
-          } catch (csvError) {
-            console.warn(`⚠️ Erro ao deletar importações CSV para usuário ${uid}:`, csvError);
-          }
-          try {
-            await storage.deleteAllBrokerConfigs(uid);
-          } catch (apiError) {
-            console.warn(`⚠️ Erro ao deletar configurações de API para usuário ${uid}:`, apiError);
-          }
-        }
-        
-        console.log("🎉 Reset completo finalizado para todos os usuários");
-        
-      } else {
-        console.log(`🗑️ Iniciando reset completo para usuário específico: ${userId}`);
+      console.log(`🗑️ Iniciando reset completo para usuário específico: ${userId}`);
 
-        // 1. Delete all trades
-        await storage.deleteAllTrades(userId);
-        console.log("✅ Trades deletados");
+      // 1. Delete all trades
+      await storage.deleteAllTrades(userId);
+      console.log("✅ Trades deletados");
 
-        // 2. Delete all CSV import history
-        try {
-          await storage.deleteAllCsvImports(userId);
-          console.log("✅ Histórico de importações CSV deletado");
-        } catch (csvError) {
-          console.warn("⚠️ Erro ao deletar importações CSV:", csvError);
-        }
-
-        // 3. Delete all broker API configurations
-        try {
-          await storage.deleteAllBrokerConfigs(userId);
-          console.log("✅ Configurações de API das corretoras deletadas");
-        } catch (apiError) {
-          console.warn("⚠️ Erro ao deletar configurações de API:", apiError);
-        }
-
-        console.log("🎉 Reset completo finalizado com sucesso");
+      // 2. Delete all CSV import history
+      try {
+        await storage.deleteAllCsvImports(userId);
+        console.log("✅ Histórico de importações CSV deletado");
+      } catch (csvError) {
+        console.warn("⚠️ Erro ao deletar importações CSV:", csvError);
       }
+
+      // 3. Delete all broker API configurations
+      try {
+        await storage.deleteAllBrokerConfigs(userId);
+        console.log("✅ Configurações de API das corretoras deletadas");
+      } catch (apiError) {
+        console.warn("⚠️ Erro ao deletar configurações de API:", apiError);
+      }
+
+      console.log("🎉 Reset completo finalizado com sucesso");
 
       res.json({ 
         message: "Dashboard completamente resetada! Todos os trades, importações e configurações foram deletados.",
@@ -1392,10 +1362,10 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // CSV Imports history
-  app.get("/api/csv-imports", async (req, res) => {
+  // CSV Imports history - ISOLADO POR USUÁRIO
+  app.get("/api/csv-imports", requireAuth, async (req, res) => {
     try {
-      const userId = req.headers['user-id'] as string || "1";
+      const userId = req.userId; // ISOLAMENTO OBRIGATÓRIO
       const imports = await storage.getCsvImports(userId);
       res.json(imports);
     } catch (error) {
@@ -1423,11 +1393,11 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Trading analytics endpoint with proper calculations
-  app.get("/api/analytics", async (req, res) => {
+  // Trading analytics endpoint with proper calculations - ISOLADO POR USUÁRIO
+  app.get("/api/analytics", requireAuth, async (req, res) => {
     try {
-      const userId = req.headers['user-id'] as string || "1";
-      const trades = await storage.getAllTrades();
+      const userId = req.userId;
+      const trades = await storage.getAllTrades(userId); // ISOLAMENTO OBRIGATÓRIO
       
       if (trades.length === 0) {
         return res.json({
@@ -1520,8 +1490,8 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // AI advice endpoint (placeholder)
-  app.get("/api/ai/advice", async (req, res) => {
+  // AI advice endpoint - ISOLADO POR USUÁRIO
+  app.get("/api/ai/advice", requireAuth, async (req, res) => {
     try {
       res.json({ advice: "Continue operando com disciplina e seguindo seu plano de trading." });
     } catch (error) {
@@ -1530,10 +1500,10 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // AI CSV Analysis endpoint
-  app.post('/api/ai/analyze-csv-tips', async (req, res) => {
+  // AI CSV Analysis endpoint - ISOLADO POR USUÁRIO
+  app.post('/api/ai/analyze-csv-tips', requireAuth, async (req, res) => {
     try {
-      const userId = req.headers['user-id'] as string;
+      const userId = req.userId;
       const { csvId } = req.body;
       
       if (!userId) {
