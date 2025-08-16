@@ -22,13 +22,13 @@ const setupOptions = [
 ];
 
 const emocaoOptions = [
-  { value: "confiante", label: "😎 Confiante", icon: "😎" },
-  { value: "ansioso", label: "😰 Ansioso", icon: "😰" },
-  { value: "impulsivo", label: "🔥 Impulsivo", icon: "🔥" },
-  { value: "calmo", label: "😌 Calmo", icon: "😌" },
-  { value: "eufórico", label: "🤩 Eufórico", icon: "🤩" },
-  { value: "frustrado", label: "😤 Frustrado", icon: "😤" },
-  { value: "neutro", label: "😐 Neutro", icon: "😐" }
+  { value: "confiante", label: "● Confiante", icon: "●" },
+  { value: "ansioso", label: "▲ Ansioso", icon: "▲" },
+  { value: "impulsivo", label: "♦ Impulsivo", icon: "♦" },
+  { value: "calmo", label: "◆ Calmo", icon: "◆" },
+  { value: "eufórico", label: "★ Eufórico", icon: "★" },
+  { value: "frustrado", label: "■ Frustrado", icon: "■" },
+  { value: "neutro", label: "○ Neutro", icon: "○" }
 ];
 
 export default function NovoTrade() {
@@ -36,6 +36,8 @@ export default function NovoTrade() {
   const queryClient = useQueryClient();
   const [selectedBroker, setSelectedBroker] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvName, setCsvName] = useState<string>("");
+  const [csvDescription, setCsvDescription] = useState<string>("");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   const [currentTradeData, setCurrentTradeData] = useState<any>(null);
@@ -141,7 +143,7 @@ export default function NovoTrade() {
 
   // CSV upload mutation
   const uploadMutation = useMutation({
-    mutationFn: ({ file, broker }: { file: File; broker: string }) => {
+    mutationFn: ({ file, broker, name, description }: { file: File; broker: string; name: string; description: string }) => {
       const userId = localStorage.getItem('user-id');
       if (!userId) {
         throw new Error("Usuário não autenticado");
@@ -150,6 +152,8 @@ export default function NovoTrade() {
       const formData = new FormData();
       formData.append('csvFile', file);
       formData.append('broker', broker);
+      formData.append('csvName', name || file.name);
+      formData.append('csvDescription', description || 'Importação sem descrição');
       
       return fetch('/api/trades/upload-csv', {
         method: 'POST',
@@ -172,6 +176,8 @@ export default function NovoTrade() {
       setIsUploadDialogOpen(false);
       setCsvFile(null);
       setSelectedBroker("");
+      setCsvName("");
+      setCsvDescription("");
       
       toast({
         title: "Importação concluída",
@@ -204,7 +210,7 @@ export default function NovoTrade() {
       // Add RRR info to comment
       if (takeNum > 0 && stopNum > 0) {
         const rrr = (takeNum / stopNum).toFixed(2);
-        const rrrInfo = `RRR: 1:${rrr} | Resultado: ${tradeResult === "take" ? "✅ Take" : "❌ Loss"}`;
+        const rrrInfo = `RRR: 1:${rrr} | Resultado: ${tradeResult === "take" ? "◉ Take" : "○ Loss"}`;
         data.comentario = data.comentario ? `${data.comentario}\n\n${rrrInfo}` : rrrInfo;
       }
     }
@@ -238,14 +244,19 @@ export default function NovoTrade() {
       return;
     }
     
-    uploadMutation.mutate({ file: csvFile, broker: selectedBroker });
+    uploadMutation.mutate({ 
+      file: csvFile, 
+      broker: selectedBroker,
+      name: csvName,
+      description: csvDescription
+    });
   };
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
       <div>
         <h1 className="text-2xl lg:text-3xl font-bold text-white">Novo Trade</h1>
-        <p className="text-slate-400 mt-2 text-sm lg:text-base">Registre os detalhes da sua operação ou importe via CSV</p>
+        <p className="text-charcoal-400 mt-2 text-sm lg:text-base">Registre os detalhes da sua operação ou importe via CSV</p>
       </div>
       <Tabs defaultValue="manual" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
@@ -254,10 +265,10 @@ export default function NovoTrade() {
         </TabsList>
 
         <TabsContent value="manual">
-          <Card className="bg-slate-900/50 border-slate-700">
+          <Card className="bg-graphite/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-purple-400" />
+                <TrendingUp className="h-5 w-5 text-neutral-400" />
                 Dados da Operação
               </CardTitle>
             </CardHeader>
@@ -271,11 +282,11 @@ export default function NovoTrade() {
                   name="dataHora"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Data e Hora *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Data e Hora *</FormLabel>
                       <FormControl>
                         <Input
                           type="datetime-local"
-                          className="bg-slate-800 border-slate-600 text-white"
+                          className="bg-charcoal-800 border-charcoal-600 text-white"
                           {...field}
                         />
                       </FormControl>
@@ -289,11 +300,11 @@ export default function NovoTrade() {
                   name="ativo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Ativo *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Ativo *</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Ex: BTCUSDT, EURUSD, PETR4"
-                          className="bg-slate-800 border-slate-600 text-white"
+                          className="bg-charcoal-800 border-charcoal-600 text-white"
                           {...field}
                         />
                       </FormControl>
@@ -307,17 +318,17 @@ export default function NovoTrade() {
                   name="mercado"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Mercado *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Mercado *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                             <SelectValue placeholder="Selecione o mercado" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-slate-800 border-slate-600">
-                          <SelectItem value="crypto">🪙 Crypto</SelectItem>
-                          <SelectItem value="forex">💱 Forex</SelectItem>
-                          <SelectItem value="b3">📈 B3</SelectItem>
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                          <SelectItem value="crypto">₿ Crypto</SelectItem>
+                          <SelectItem value="forex">$ Forex</SelectItem>
+                          <SelectItem value="b3">▲ B3</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -333,14 +344,14 @@ export default function NovoTrade() {
                   name="setup"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Setup *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Setup *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                             <SelectValue placeholder="Selecione o setup" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
                           {setupOptions.map((setup) => (
                             <SelectItem key={setup} value={setup}>
                               {setup}
@@ -358,14 +369,14 @@ export default function NovoTrade() {
                   name="tipo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Tipo *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Tipo *</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                             <SelectValue placeholder="Compra ou Venda" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
                           <SelectItem value="compra">
                             <span className="flex items-center gap-2">
                               <TrendingUp className="h-4 w-4 text-green-400" />
@@ -393,15 +404,15 @@ export default function NovoTrade() {
                   name="alvo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Take Profit (valor de ganho) *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Take Profit (valor de ganho) *</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
                           <Input
                             type="number"
                             step="0.01"
                             placeholder="1000.00"
-                            className="bg-slate-800 border-slate-600 text-white pl-10"
+                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
                             {...field}
                           />
                         </div>
@@ -416,15 +427,15 @@ export default function NovoTrade() {
                   name="stop"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Stop Loss (valor de perda) *</FormLabel>
+                      <FormLabel className="text-charcoal-300">Stop Loss (valor de perda) *</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
                           <Input
                             type="number"
                             step="0.01"
                             placeholder="200.00"
-                            className="bg-slate-800 border-slate-600 text-white pl-10"
+                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
                             {...field}
                           />
                         </div>
@@ -438,7 +449,7 @@ export default function NovoTrade() {
               {/* Resultado da Operação e Cálculos */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-3 text-slate-300">Resultado da Operação *</label>
+                  <label className="block text-sm font-medium mb-3 text-charcoal-300">Resultado da Operação *</label>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
                       type="button"
@@ -447,10 +458,10 @@ export default function NovoTrade() {
                       className={`${
                         tradeResult === "take" 
                           ? "bg-green-600 hover:bg-green-700 text-white" 
-                          : "border-slate-600 text-slate-300 hover:bg-green-600/20"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-green-600/20"
                       }`}
                     >
-                      ✅ Take
+                      ◉ Take
                     </Button>
                     <Button
                       type="button"
@@ -459,34 +470,34 @@ export default function NovoTrade() {
                       className={`${
                         tradeResult === "loss" 
                           ? "bg-red-600 hover:bg-red-700 text-white" 
-                          : "border-slate-600 text-slate-300 hover:bg-red-600/20"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-red-600/20"
                       }`}
                     >
-                      ❌ Loss
+                      ○ Loss
                     </Button>
                   </div>
                 </div>
 
                 {/* Calculations Display */}
                 {(riskRewardRatio || finalResult !== null) && (
-                  <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                  <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
                     <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                      <Calculator className="w-4 h-4 text-purple-400" />
+                      <Calculator className="w-4 h-4 text-neutral-400" />
                       Cálculos Automáticos
                     </h4>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center">
-                        <div className="text-slate-300 text-sm mb-1">Razão Risco/Retorno</div>
-                        <div className="text-purple-400 font-semibold text-lg">
+                        <div className="text-charcoal-300 text-sm mb-1">Razão Risco/Retorno</div>
+                        <div className="text-neutral-400 font-semibold text-lg">
                           {riskRewardRatio ? `1:${riskRewardRatio.toFixed(2)}` : "--"}
                         </div>
                       </div>
                       
                       <div className="text-center">
-                        <div className="text-slate-300 text-sm mb-1">Resultado Financeiro</div>
+                        <div className="text-charcoal-300 text-sm mb-1">Resultado Financeiro</div>
                         <div className={`font-semibold text-lg ${
-                          finalResult === null ? 'text-slate-400' :
+                          finalResult === null ? 'text-charcoal-400' :
                           finalResult >= 0 ? 'text-green-400' : 'text-red-400'
                         }`}>
                           {finalResult === null ? "--" : 
@@ -496,13 +507,13 @@ export default function NovoTrade() {
                     </div>
 
                     {riskRewardRatio && (
-                      <div className="mt-3 p-2 bg-slate-700/50 rounded text-center">
+                      <div className="mt-3 p-2 bg-charcoal-700/50 rounded text-center">
                         <div className={`text-sm font-medium ${
                           riskRewardRatio >= 3 ? 'text-green-400' :
                           riskRewardRatio >= 2 ? 'text-yellow-400' : 'text-red-400'
                         }`}>
-                          {riskRewardRatio >= 3 ? "🟢 Excelente (≥3:1)" :
-                           riskRewardRatio >= 2 ? "🟡 Bom (≥2:1)" : "🔴 Arriscado (<2:1)"}
+                          {riskRewardRatio >= 3 ? "● Excelente (≥3:1)" :
+                           riskRewardRatio >= 2 ? "▲ Bom (≥2:1)" : "■ Arriscado (<2:1)"}
                         </div>
                       </div>
                     )}
@@ -517,14 +528,14 @@ export default function NovoTrade() {
                   name="emocao"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Emoção Percebida</FormLabel>
+                      <FormLabel className="text-charcoal-300">Emoção Percebida</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                             <SelectValue placeholder="Como você se sentiu?" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
                           {emocaoOptions.map((emocao) => (
                             <SelectItem key={emocao.value} value={emocao.value}>
                               {emocao.label}
@@ -544,11 +555,11 @@ export default function NovoTrade() {
                 name="comentario"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-slate-300">Comentário sobre o Trade</FormLabel>
+                    <FormLabel className="text-charcoal-300">Comentário sobre o Trade</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descreva seu raciocínio, observações sobre o mercado, lições aprendidas..."
-                        className="bg-slate-800 border-slate-600 text-white min-h-[100px]"
+                        className="bg-charcoal-800 border-charcoal-600 text-white min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
@@ -569,7 +580,7 @@ export default function NovoTrade() {
                   type="button"
                   variant="outline"
                   onClick={() => form.reset()}
-                  className="border-slate-600 text-slate-300 hover:bg-slate-800"
+                  className="border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
                 >
                   Limpar
                 </Button>
@@ -624,22 +635,22 @@ export default function NovoTrade() {
 
 
         <TabsContent value="csv">
-          <Card className="bg-slate-900/50 border-slate-700">
+          <Card className="bg-graphite/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Upload className="h-5 w-5 text-purple-400" />
+                <Upload className="h-5 w-5 text-neutral-400" />
                 Importar Trades via CSV
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-slate-300">Selecione o Mercado</label>
+                  <label className="block text-sm font-medium mb-2 text-charcoal-300">Selecione o Mercado</label>
                   <Select value={selectedBroker} onValueChange={setSelectedBroker}>
-                    <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                    <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                       <SelectValue placeholder="Crypto, B3 ou Forex" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-600">
+                    <SelectContent className="bg-charcoal-800 border-charcoal-600">
                       <SelectItem value="crypto">🪙 Crypto</SelectItem>
                       <SelectItem value="b3">📈 B3</SelectItem>
                       <SelectItem value="forex">🏦 Forex</SelectItem>
@@ -648,24 +659,24 @@ export default function NovoTrade() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-slate-300">Arquivo CSV</label>
+                  <label className="block text-sm font-medium mb-2 text-charcoal-300">Arquivo CSV</label>
                   <Input
                     type="file"
                     accept=".csv"
                     onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                    className="bg-slate-800 border-slate-600 text-white file:bg-slate-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4"
+                    className="bg-charcoal-800 border-charcoal-600 text-white file:bg-charcoal-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4"
                   />
-                  <p className="text-sm text-slate-400 mt-2">
+                  <p className="text-sm text-charcoal-400 mt-2">
                     Selecione um arquivo CSV exportado do seu mercado
                   </p>
                 </div>
 
-                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+                <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
                   <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-purple-400" />
+                    <FileText className="w-4 h-4 text-neutral-400" />
                     Formato do CSV por Mercado
                   </h4>
-                  <div className="space-y-2 text-sm text-slate-400">
+                  <div className="space-y-2 text-sm text-charcoal-400">
                     <p><strong className="text-white">Forex:</strong> Data, Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take Profit, Resultado</p>
                     <p><strong className="text-white">B3:</strong> Data, Código, Operação, Quantidade, Preço, Total, Resultado</p>
                     <p><strong className="text-white">Crypto:</strong> Time, Symbol, Side, Amount, Price, Fee, Total, PnL</p>
@@ -691,11 +702,11 @@ export default function NovoTrade() {
                 </Button>
 
                 {csvFile && (
-                  <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-600">
-                    <p className="text-sm text-slate-300">
+                  <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600">
+                    <p className="text-sm text-charcoal-300">
                       <strong>Arquivo selecionado:</strong> {csvFile.name}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-charcoal-400 mt-1">
                       Tamanho: {(csvFile.size / 1024).toFixed(2)} KB
                     </p>
                   </div>

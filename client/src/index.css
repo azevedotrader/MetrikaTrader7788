@@ -32,63 +32,66 @@
 }
 
 :root {
-  --background: hsl(222, 84%, 4.9%);
+  --background: var(--charcoal-900);
   --foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217, 32.6%, 17.5%);
-  --muted-foreground: hsl(215, 20.2%, 65.1%);
-  --popover: hsl(222, 84%, 4.9%);
+  --muted: var(--charcoal-700);
+  --muted-foreground: var(--charcoal-400);
+  --popover: var(--charcoal-800);
   --popover-foreground: hsl(210, 40%, 98%);
-  --card: hsl(222, 84%, 4.9%);
+  --card: var(--graphite-dark);
   --card-foreground: hsl(210, 40%, 98%);
-  --border: hsl(217, 32.6%, 17.5%);
-  --input: hsl(217, 32.6%, 17.5%);
-  --primary: hsl(263, 70%, 63%);
+  --border: var(--charcoal-600);
+  --input: var(--charcoal-700);
+  --primary: var(--neutral-primary);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(217, 32.6%, 17.5%);
+  --secondary: var(--charcoal-700);
   --secondary-foreground: hsl(210, 40%, 98%);
-  --accent: hsl(217, 32.6%, 17.5%);
+  --accent: var(--charcoal-600);
   --accent-foreground: hsl(210, 40%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive: var(--loss);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(263, 70%, 63%);
-  --radius: 0.75rem;
+  --ring: var(--neutral-primary);
+  --radius: 0.5rem;
   
-  /* Custom colors for trading app - Nova paleta verde-esmeralda e azul-índigo */
-  --profit: hsl(142, 76%, 36%);
-  --loss: hsl(0, 84%, 60%);
-  --emerald-gradient-start: hsl(158, 64%, 52%);
-  --emerald-gradient-end: hsl(220, 91%, 60%);
-  --gold-accent: hsl(45, 93%, 58%);
-  --teal-accent: hsl(172, 66%, 50%);
-  --indigo-deep: hsl(231, 48%, 48%);
-  --slate-900: hsl(222, 84%, 4.9%);
-  --slate-800: hsl(215, 25%, 10%);
-  --slate-700: hsl(215, 25%, 15%);
-  --slate-600: hsl(215, 20%, 25%);
-  --slate-400: hsl(215, 20%, 65%);
-  --slate-300: hsl(215, 25%, 75%);
+  /* Professional Trading Colors - Neutral Gray Theme (FX Replay Style) */
+  --profit: hsl(120, 100%, 40%);
+  --loss: hsl(0, 100%, 50%);
+  --neutral-primary: hsl(210, 10%, 40%);
+  --neutral-secondary: hsl(210, 10%, 30%);
+  --graphite-dark: hsl(215, 15%, 12%);
+  --graphite-medium: hsl(215, 12%, 16%);
+  --graphite-light: hsl(215, 10%, 22%);
+  --charcoal-900: hsl(220, 13%, 8%);
+  --charcoal-800: hsl(218, 11%, 10%);
+  --charcoal-700: hsl(216, 10%, 14%);
+  --charcoal-600: hsl(214, 8%, 20%);
+  --charcoal-500: hsl(212, 7%, 30%);
+  --charcoal-400: hsl(210, 6%, 50%);
+  --charcoal-300: hsl(208, 5%, 70%);
+  --accent-blue: hsl(210, 100%, 56%);
+  --accent-gold: hsl(43, 100%, 58%);
 }
 
 .dark {
-  --background: hsl(222, 84%, 4.9%);
+  --background: var(--charcoal-900);
   --foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217, 32.6%, 17.5%);
-  --muted-foreground: hsl(215, 20.2%, 65.1%);
-  --popover: hsl(222, 84%, 4.9%);
+  --muted: var(--charcoal-700);
+  --muted-foreground: var(--charcoal-400);
+  --popover: var(--charcoal-800);
   --popover-foreground: hsl(210, 40%, 98%);
-  --card: hsl(222, 84%, 4.9%);
+  --card: var(--graphite-dark);
   --card-foreground: hsl(210, 40%, 98%);
-  --border: hsl(217, 32.6%, 17.5%);
-  --input: hsl(217, 32.6%, 17.5%);
-  --primary: hsl(263, 70%, 63%);
+  --border: var(--charcoal-600);
+  --input: var(--charcoal-700);
+  --primary: var(--neutral-primary);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(217, 32.6%, 17.5%);
+  --secondary: var(--charcoal-700);
   --secondary-foreground: hsl(210, 40%, 98%);
-  --accent: hsl(217, 32.6%, 17.5%);
+  --accent: var(--charcoal-600);
   --accent-foreground: hsl(210, 40%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive: var(--loss);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(263, 70%, 63%);
+  --ring: var(--neutral-primary);
 }
 
 @layer base {
@@ -102,31 +105,35 @@
 }
 
 @layer utilities {
-  .gradient-emerald-blue {
-    background: linear-gradient(135deg, var(--emerald-gradient-start), var(--emerald-gradient-end));
+  .gradient-neutral {
+    background: linear-gradient(135deg, var(--neutral-primary), var(--neutral-secondary));
   }
   
   .gradient-text {
-    background: linear-gradient(135deg, var(--emerald-gradient-start), var(--emerald-gradient-end));
+    background: linear-gradient(135deg, var(--neutral-primary), var(--accent-blue));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .gradient-gold {
-    background: linear-gradient(135deg, var(--gold-accent), var(--emerald-gradient-start));
+  .gradient-graphite {
+    background: linear-gradient(135deg, var(--graphite-medium), var(--graphite-light));
   }
 
-  .gradient-teal {
-    background: linear-gradient(135deg, var(--teal-accent), var(--indigo-deep));
+  .gradient-charcoal {
+    background: linear-gradient(135deg, var(--charcoal-700), var(--charcoal-600));
   }
 
-  .text-emerald-400 {
-    color: hsl(158, 64%, 52%);
+  .text-neutral-400 {
+    color: var(--charcoal-400);
   }
 
-  .text-gold-400 {
-    color: var(--gold-accent);
+  .text-accent-gold {
+    color: var(--accent-gold);
+  }
+
+  .text-accent-blue {
+    color: var(--accent-blue);
   }
 
   .animate-float {
@@ -149,11 +156,11 @@
 
   @keyframes glow {
     from { 
-      box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+      box-shadow: 0 0 20px rgba(52, 150, 235, 0.3);
       filter: brightness(1);
     }
     to { 
-      box-shadow: 0 0 30px rgba(52, 211, 153, 0.6);
+      box-shadow: 0 0 30px rgba(52, 150, 235, 0.6);
       filter: brightness(1.1);
     }
   }
@@ -170,31 +177,39 @@
     font-weight: 400;
   }
 
-  .bg-slate-900 {
-    background-color: var(--slate-900);
+  .bg-graphite {
+    background-color: var(--graphite-dark);
   }
   
-  .bg-slate-800 {
-    background-color: var(--slate-800);
+  .bg-graphite-medium {
+    background-color: var(--graphite-medium);
   }
   
-  .bg-slate-700 {
-    background-color: var(--slate-700);
+  .bg-charcoal-900 {
+    background-color: var(--charcoal-900);
   }
   
-  .border-slate-700 {
-    border-color: var(--slate-700);
+  .bg-charcoal-800 {
+    background-color: var(--charcoal-800);
   }
   
-  .border-slate-600 {
-    border-color: var(--slate-600);
+  .bg-charcoal-700 {
+    background-color: var(--charcoal-700);
   }
   
-  .text-slate-400 {
-    color: var(--slate-400);
+  .border-charcoal-700 {
+    border-color: var(--charcoal-700);
   }
   
-  .text-slate-300 {
-    color: var(--slate-300);
+  .border-charcoal-600 {
+    border-color: var(--charcoal-600);
+  }
+  
+  .text-charcoal-400 {
+    color: var(--charcoal-400);
+  }
+  
+  .text-charcoal-300 {
+    color: var(--charcoal-300);
   }
 }

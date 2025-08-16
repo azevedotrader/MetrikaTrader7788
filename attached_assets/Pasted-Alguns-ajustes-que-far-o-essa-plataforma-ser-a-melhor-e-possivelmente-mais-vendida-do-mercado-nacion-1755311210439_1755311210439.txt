@@ -1,0 +1,16 @@
+Alguns ajustes que farão essa plataforma ser a melhor e possivelmente mais vendida do mercado nacional e depois mundial. (com caixa a gente vai contratando ainda mais gente pra trabalhar conosco e ir trazendo algumas melhorias)
+
+- Colocar gráfico de dashboard com curva de capital na pagina principal com opção pra filtrar diário semanal e mensal
+- 
+- Retirada de emojis nos blocks e troca por símbolo deixando mais profissional e padronizado com a mesma cor do texto
+- 
+- Correção dos csvs trazendo precisão nos dados, datas e métricas gerais
+- 
+- Colocar cores neutras (tipo blocos cinza grafite e fundos pretos como no fx replay)
+- 
+- Incluir a opção de renomear os cvs upados podendo colocar do que se trata cada um e poder selecionar qual quer visualizar (seria interessante poder selecionar na própria área principal (e ao invés de deixar 4 botões (consolidar todos, b3, cripto e forex) substuir por uma janela que abre opções pra selecionar, assim vai economizar espaço deixando mais limpo e profissional e ainda poderá selecionar os csv upados, e entao ao invés da gente deixar escrito b3, cripto forex e tudo mais a própria pessoa vai ter renomeado e poderá selecionar. Seria interessante colocar como se fosse uma caixinha pra selecionar qual ela quer que apareça as informações, podendo selecionar todas caixinhas e csvs se quiser ver junto.
+- 
+- aba com Integração ao tradingview pra poder analisar direto por la 
+- 
+- Tentar replicar algumas ferramentas do fx replay em uma aba de backtest, podendo fazer revisões partir do trading View e operar simulado podendo possivelmente vir a integrar a batalha de trading interno, um sistema voltado a poder desafiar amigos em uma lobby fechada ou entrar na lobby publica com outros membros, selecionando o período de tempo da batalha tambem. Alguns campeonatos serão feitos pela própria moderação (METRIK.AI) tendo prêmios e bônus exclusivos para as colocações gerando mais engajamento entre o publico e fidelidade a plataforma. ( podendo ate mesmo fazer alguns campeonatos fechados para assinantes de plano mais Vip fechado e premiações mais caras e melhores, e para os assinantes mais básicos premiações mais básicas tambem, e deixar explicito essa diferença para gerar desejo pelo plano mais caro.
+-

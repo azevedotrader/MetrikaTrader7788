@@ -76,18 +76,18 @@ interface TradeMetrics {
   lucroPorDiaSemana: Array<{ dia: string; valor: number }>;
 }
 
-const emojiEmocoes = {
-  'confiante': '😎',
-  'ansioso': '😰',
-  'impulsivo': '🔥',
-  'calmo': '😌',
-  'eufórico': '🤩',
-  'frustrado': '😤',
-  'neutro': '😐'
+const simbolosEmocoes = {
+  'confiante': '●',
+  'ansioso': '▲',
+  'impulsivo': '♦',
+  'calmo': '◆',
+  'eufórico': '★',
+  'frustrado': '■',
+  'neutro': '○'
 };
 
-// Componente do gráfico de rentabilidade ao longo do tempo
-function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
+// Capital Curve Chart - Professional Trading Analytics
+function CapitalCurveChart({ trades }: { trades: Trade[] }) {
   const [timeFilter, setTimeFilter] = useState<'dia' | 'semana' | 'mes' | 'ano'>('mes');
 
   const chartData = useMemo(() => {
@@ -178,8 +178,8 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
               size="sm"
               onClick={() => setTimeFilter(filter.key as any)}
               className={timeFilter === filter.key ? 
-                "bg-purple-600 hover:bg-purple-700" : 
-                "border-slate-600 text-slate-300 hover:bg-slate-800"
+                "bg-neutral-primary hover:bg-neutral-secondary" : 
+                "border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
               }
             >
               {filter.label}
@@ -232,7 +232,7 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
               </RechartsLineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full text-slate-400">
+            <div className="flex items-center justify-center h-full text-charcoal-400">
               <div className="text-center">
                 <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Nenhum dado para exibir</p>
@@ -355,7 +355,7 @@ function PerformancePeriodChart({ metrics }: { metrics: any }) {
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         {chartData.map((item) => (
           <div key={item.period} className="text-center p-4 bg-slate-700/30 rounded-lg border border-slate-600 hover:bg-slate-700/50 transition-colors">
-            <div className="text-sm text-slate-400 mb-2">{item.label}</div>
+            <div className="text-sm text-charcoal-400 mb-2">{item.label}</div>
             <div className={`text-2xl font-bold mb-1 ${item.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               R$ {item.value.toFixed(2)}
             </div>
@@ -539,13 +539,13 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }: MetricCardProps) {
   return (
-    <Card className="bg-slate-800/50 border-slate-700">
+    <Card className="bg-slate-800/50 border-charcoal-700">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-slate-400">
+          <CardTitle className="text-sm font-medium text-charcoal-400">
             {title}
           </CardTitle>
-          <Icon className="h-4 w-4 text-slate-400" />
+          <Icon className="h-4 w-4 text-charcoal-400" />
         </div>
       </CardHeader>
       <CardContent>
@@ -553,7 +553,7 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }
           {value}
         </div>
         {subtitle && (
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-charcoal-500 mt-1">
             {subtitle}
           </p>
         )}
@@ -613,7 +613,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Carregando dados...</p>
+          <p className="text-charcoal-400">Carregando dados...</p>
         </div>
       </div>
     );
@@ -631,7 +631,7 @@ export default function Dashboard() {
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 mt-2 text-sm lg:text-base">
+          <p className="text-charcoal-400 mt-2 text-sm lg:text-base">
             {selectedBrokerFilter 
               ? `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`
               : 'Dados consolidados de todas as corretoras'
@@ -684,7 +684,7 @@ export default function Dashboard() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-slate-700">
+        <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-charcoal-700">
           <TabsTrigger value="overview" className="data-[state=active]:bg-slate-700">Visão Geral</TabsTrigger>
           <TabsTrigger value="insights" className="data-[state=active]:bg-slate-700">Insights Detalhados</TabsTrigger>
           <TabsTrigger value="brokers" className="data-[state=active]:bg-slate-700">Gestão</TabsTrigger>
@@ -729,11 +729,11 @@ export default function Dashboard() {
 
           {/* Performance Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-slate-800/50 border-charcoal-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Melhor Trade</p>
+                    <p className="text-charcoal-400 text-sm">Melhor Trade</p>
                     <p className="text-2xl font-bold text-green-400">
                       R$ {metrics.melhorTrade.toFixed(2)}
                     </p>
@@ -743,11 +743,11 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-slate-800/50 border-charcoal-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Pior Trade</p>
+                    <p className="text-charcoal-400 text-sm">Pior Trade</p>
                     <p className="text-2xl font-bold text-red-400">
                       R$ {metrics.piorTrade.toFixed(2)}
                     </p>
@@ -757,15 +757,15 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-slate-800/50 border-charcoal-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Setup Top</p>
+                    <p className="text-charcoal-400 text-sm">Setup Top</p>
                     <p className="text-lg font-bold text-purple-400">
                       {metrics.setupMaisLucrativo.setup || 'N/A'}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-charcoal-500">
                       R$ {metrics.setupMaisLucrativo.total.toFixed(2)}
                     </p>
                   </div>
@@ -774,16 +774,16 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-slate-800/50 border-charcoal-700">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm">Emoção Frequente</p>
+                    <p className="text-charcoal-400 text-sm">Emoção Frequente</p>
                     <p className="text-lg font-bold text-blue-400 flex items-center gap-1">
-                      {emojiEmocoes[metrics.emocaoMaisRecorrente.emocao as keyof typeof emojiEmocoes] || '😐'} 
+                      {simbolosEmocoes[metrics.emocaoMaisRecorrente.emocao as keyof typeof simbolosEmocoes] || '○'} 
                       {metrics.emocaoMaisRecorrente.emocao || 'neutro'}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-charcoal-500">
                       {metrics.emocaoMaisRecorrente.count} vezes
                     </p>
                   </div>
@@ -794,7 +794,7 @@ export default function Dashboard() {
           </div>
 
           {/* Performance por Período - Gráfico Visual */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="bg-slate-800/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-purple-400" />
@@ -807,7 +807,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Distribuição por Mercado */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="bg-slate-800/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-purple-400" />
@@ -831,7 +831,7 @@ export default function Dashboard() {
                         <div className={`font-semibold ${brokerResult >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           R$ {brokerResult.toFixed(2)}
                         </div>
-                        <div className="text-xs text-slate-500">
+                        <div className="text-xs text-charcoal-500">
                           {brokerTrades.length} trades ({percentage.toFixed(1)}%)
                         </div>
                       </div>
@@ -880,21 +880,21 @@ export default function Dashboard() {
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Gráfico de Rentabilidade ao Longo do Tempo */}
-            <Card className="bg-slate-900/50 border-slate-700 lg:col-span-1">
+            <Card className="bg-charcoal-900/50 border-charcoal-700 lg:col-span-1">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <LineChart className="h-5 w-5 text-purple-400" />
-                  📈 Rentabilidade ao Longo do Tempo
+                  <LineChart className="h-5 w-5 text-neutral-400" />
+                  ▲ Curva de Capital
                 </CardTitle>
               </CardHeader>
-              <ProfitabilityTimeChart trades={filteredTrades} />
+              <CapitalCurveChart trades={filteredTrades} />
             </Card>
 
 
           </div>
 
           {/* Análise Temporal Detalhada */}
-          <Card className="bg-slate-900/50 border-slate-700">
+          <Card className="bg-charcoal-900/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-purple-400" />
@@ -914,7 +914,7 @@ export default function Dashboard() {
                       return tradesHoje.length;
                     })()}
                   </div>
-                  <div className="text-xs text-slate-400 mb-2">Trades Hoje</div>
+                  <div className="text-xs text-charcoal-400 mb-2">Trades Hoje</div>
                   <div className={`text-sm font-semibold ${
                     (() => {
                       const hoje = new Date();
@@ -940,7 +940,7 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-white mb-1">
                     {metrics.rentabilidadeSemana.toFixed(2)}
                   </div>
-                  <div className="text-xs text-slate-400 mb-2">Esta Semana</div>
+                  <div className="text-xs text-charcoal-400 mb-2">Esta Semana</div>
                   <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeSemana.toFixed(2)}
                   </div>
@@ -950,7 +950,7 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-white mb-1">
                     {metrics.rentabilidadeMes.toFixed(2)}
                   </div>
-                  <div className="text-xs text-slate-400 mb-2">Este Mês</div>
+                  <div className="text-xs text-charcoal-400 mb-2">Este Mês</div>
                   <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeMes.toFixed(2)}
                   </div>
@@ -960,7 +960,7 @@ export default function Dashboard() {
                   <div className="text-2xl font-bold text-white mb-1">
                     {metrics.rentabilidadeAno.toFixed(2)}
                   </div>
-                  <div className="text-xs text-slate-400 mb-2">Este Ano</div>
+                  <div className="text-xs text-charcoal-400 mb-2">Este Ano</div>
                   <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeAno.toFixed(2)}
                   </div>
@@ -978,7 +978,7 @@ export default function Dashboard() {
               const IconComponent = info.icon;
 
               return (
-                <Card key={broker} className="bg-slate-800/50 border-slate-700">
+                <Card key={broker} className="bg-slate-800/50 border-charcoal-700">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
@@ -998,17 +998,17 @@ export default function Dashboard() {
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
                         <div className="text-2xl font-bold text-white">{stats.totalTrades}</div>
-                        <div className="text-xs text-slate-400">Trades</div>
+                        <div className="text-xs text-charcoal-400">Trades</div>
                       </div>
                       <div>
                         <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                         </div>
-                        <div className="text-xs text-slate-400">Resultado</div>
+                        <div className="text-xs text-charcoal-400">Resultado</div>
                       </div>
                       <div>
                         <div className="text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
-                        <div className="text-xs text-slate-400">Win Rate</div>
+                        <div className="text-xs text-charcoal-400">Win Rate</div>
                       </div>
                     </div>
 
@@ -1032,14 +1032,14 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="imports" className="space-y-4">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="bg-slate-800/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white">Histórico de Importações CSV</CardTitle>
               <CardDescription>Acompanhe suas importações de dados</CardDescription>
             </CardHeader>
             <CardContent>
               {(csvImports as any[]).length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
+                <div className="text-center py-8 text-charcoal-400">
                   Nenhuma importação realizada ainda
                 </div>
               ) : (
@@ -1050,14 +1050,14 @@ export default function Dashboard() {
                         <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
                         <div>
                           <div className="font-medium text-white">{importItem.fileName}</div>
-                          <div className="text-sm text-slate-400">
+                          <div className="text-sm text-charcoal-400">
                             {brokerInfo[importItem.broker as keyof typeof brokerInfo]?.name || importItem.broker}
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-white">{importItem.tradesImported} trades</div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-charcoal-400">
                           {new Date(importItem.createdAt).toLocaleDateString('pt-BR')}
                         </div>
                       </div>
@@ -1105,7 +1105,7 @@ export default function Dashboard() {
           </div>
 
           {/* Performance por Corretora */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="bg-slate-800/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Building className="h-5 w-5 text-purple-400" />
@@ -1128,24 +1128,24 @@ export default function Dashboard() {
                         </div>
                         <div>
                           <div className="text-white font-medium">{info.name}</div>
-                          <div className="text-slate-400 text-sm">{info.description}</div>
+                          <div className="text-charcoal-400 text-sm">{info.description}</div>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-3 gap-6 text-center">
                         <div>
                           <div className="text-lg font-bold text-white">{stats.totalTrades}</div>
-                          <div className="text-xs text-slate-400">Trades</div>
+                          <div className="text-xs text-charcoal-400">Trades</div>
                         </div>
                         <div>
                           <div className={`text-lg font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                           </div>
-                          <div className="text-xs text-slate-400">Resultado</div>
+                          <div className="text-xs text-charcoal-400">Resultado</div>
                         </div>
                         <div>
                           <div className="text-lg font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
-                          <div className="text-xs text-slate-400">Win Rate</div>
+                          <div className="text-xs text-charcoal-400">Win Rate</div>
                         </div>
                       </div>
                     </div>
@@ -1156,7 +1156,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Distribuição por Mercado */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="bg-slate-800/50 border-charcoal-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-purple-400" />
@@ -1187,7 +1187,7 @@ export default function Dashboard() {
                         <span className="text-2xl">{info.emoji}</span>
                         <div>
                           <div className="text-white font-medium">{info.name}</div>
-                          <div className="text-slate-400 text-sm">{countMercado} trades</div>
+                          <div className="text-charcoal-400 text-sm">{countMercado} trades</div>
                         </div>
                       </div>
                       
@@ -1196,13 +1196,13 @@ export default function Dashboard() {
                           <div className={`text-lg font-bold ${totalMercado >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             {totalMercado >= 0 ? '+' : ''}R$ {totalMercado.toFixed(2)}
                           </div>
-                          <div className="text-xs text-slate-400">Resultado</div>
+                          <div className="text-xs text-charcoal-400">Resultado</div>
                         </div>
                         <div className="text-center">
                           <div className={`text-lg font-bold ${info.color}`}>
                             {winRateMercado.toFixed(1)}%
                           </div>
-                          <div className="text-xs text-slate-400">Win Rate</div>
+                          <div className="text-xs text-charcoal-400">Win Rate</div>
                         </div>
                       </div>
                     </div>
@@ -1213,7 +1213,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Ações da Dashboard */}
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="bg-slate-800/50 border-charcoal-700">
             <CardContent className="pt-6 space-y-3">
               <Button 
                 className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
@@ -1242,7 +1242,7 @@ export default function Dashboard() {
                     🗑️ Resetar Dashboard
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="bg-slate-800 border-slate-700">
+                <AlertDialogContent className="bg-slate-800 border-charcoal-700">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-white">⚠️ Resetar Dashboard Completamente</AlertDialogTitle>
                     <AlertDialogDescription className="text-slate-300">
