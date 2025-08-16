@@ -50,56 +50,79 @@ export async function analyzeCSVWithOpenAI(
 
     console.log(`📊 CSV carregado: ${parseResult.data.length} linhas`);
 
-    // 2. Preparar dados para ChatGPT (limitando a 100 linhas para melhor análise)
-    const sampleData = parseResult.data.slice(0, 100);
-    const csvSample = sampleData.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
+    // 2. Preparar dados para ChatGPT (otimizado para tokens)
+    // Se arquivo muito grande (>1000 linhas), usar amostra inteligente
+    let csvSample: string;
+    let linesToAnalyze = parseResult.data.length;
+    
+    if (parseResult.data.length > 1000) {
+      // Para arquivos grandes: pegar início + meio + fim para análise completa
+      const start = parseResult.data.slice(0, 300);
+      const middle = parseResult.data.slice(Math.floor(parseResult.data.length / 2) - 150, Math.floor(parseResult.data.length / 2) + 150);
+      const end = parseResult.data.slice(-300);
+      const sampleData = [...start, ...middle, ...end];
+      csvSample = sampleData.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
+      console.log(`📊 Arquivo grande (${parseResult.data.length} linhas): usando amostra inteligente de ${sampleData.length} linhas`);
+    } else {
+      // Arquivo pequeno/médio: analisar completo
+      csvSample = parseResult.data.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
+      console.log(`📊 Enviando ${parseResult.data.length} linhas completas para análise ChatGPT`);
+    }
 
-    // 3. Prompt SUPER AVANÇADO para análise estrutural completa
+    // 3. Prompt ULTRA AVANÇADO para análise perfeita de qualquer CSV
     const prompt = `
-🚀 TAREFA: ANÁLISE ESTRUTURAL COMPLETA DE CSV DE TRADING
+🎯 SISTEMA EXPERT: ANÁLISE UNIVERSAL DE CSV FINANCEIRO
 
-Você é um especialista em análise de dados financeiros. Faça uma análise estrutural COMPLETA deste CSV.
+Você é um sistema especialista em engenharia reversa de dados financeiros. Analise este CSV COMPLETO com precisão cirúrgica.
 
-📊 DADOS CSV PARA ANÁLISE:
+📊 CSV PARA ANÁLISE (${linesToAnalyze} de ${parseResult.data.length} linhas):
 ${csvSample}
 
-🏢 BROKER SUGERIDO: ${brokerHint}
+🏢 BROKER: ${brokerHint}
 
-📋 ANÁLISE ESTRUTURAL OBRIGATÓRIA:
+🔬 ANÁLISE ULTRA-DETALHADA OBRIGATÓRIA:
 
-1. 🔍 DETECÇÃO DE FORMATO:
-   - Identifique delimitadores automaticamente (, ; | tab espaços)
-   - Analise encoding (UTF-8, Latin-1, etc.)
-   - Detecte formato de data (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD)
-   - Identifique separadores decimais (, ou .)
-   - Reconheça headers/colunas
+1. 🧬 DETECÇÃO MOLECULAR DE FORMATO (EXAMINE CADA CARACTERE):
+   SEPARADORES PRIMÁRIOS: , (vírgula) ; (ponto-vírgula) | (pipe) \t (tab) 
+   SEPARADORES SECUNDÁRIOS: - (hífen) * (asterisco) / (barra) \ (contrabarra) : (dois-pontos) . (ponto) ## (hashtag dupla)
+   SEPARADORES COMPOSTOS: :: || ;; ,, -- ** /// \\\ ... (múltiplos caracteres)
+   ESPAÇOS: espaços simples, múltiplos, ou tabulação
+   DECIMAIS: Brasileiro (1.234,56) vs Internacional (1,234.56) vs Sem separador (12345)
+   DATAS: DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, DD-MM-YY, MM.DD.YYYY, DD.MM.YY, YYYYMMDD, etc
+   ASPAS: "texto", 'texto', sem aspas, aspas duplas duplas ""texto""
+   HEADERS: Linha 1, múltiplas linhas de cabeçalho, sem header, headers no meio do arquivo
 
-2. 🏛️ IDENTIFICAÇÃO DE CORRETORA:
-   - Clear (B3): formato WINQ25;01/07/2025 17:04:30;V;141.745
-   - Rico/XP: headers estruturados (Ativo, Quantidade, Preço, etc.)
-   - Inter/BTG: relatórios padronizados
-   - Crypto: pares BTC/USDT, timestamps Unix
-   - Forex: pares EUR/USD, spreads
-   - Generic: formato customizado
+2. 🎨 IDENTIFICAÇÃO INTELIGENTE DE PADRÕES:
+   CLEAR B3: WINQ25;01/07/2025 17:04:30;V;141745 (ponto e vírgula, sem decimais explícitos)
+   RICO/XP: Ativo,Data,Tipo,Qtd,Preco,Total (headers estruturados)
+   BINANCE: BTC/USDT,2024-01-01T10:30:00Z,BUY,0.001,45000.00
+   MT5: EURUSD,2024.01.01 10:30,sell,1.00000,1.0950
+   ESTATÍSTICAS: "Total Geral", "Lucro Líquido", "Win Rate", "Drawdown"
+   GENÉRICO: Qualquer formato não padrão
 
-3. 📈 ANÁLISE DE CONTEÚDO:
-   - Conte linhas totais vs linhas de dados
-   - Identifique trades vs estatísticas vs headers
-   - Reconheça padrões de símbolos (WIN, DOL, BTC, EUR/USD)
-   - Detecte colunas de preços, quantidades, datas
-   - Calcule confiança da análise (0.0 a 1.0)
+3. 🔍 ANÁLISE INTELIGENTE DE CONTEÚDO:
+   SÍMBOLOS: Reconheça WIN, DOL, IND, WDO (B3), BTC, ETH, USDT (Crypto), EURUSD, GBPJPY (Forex)
+   OPERAÇÕES: C/V, BUY/SELL, Long/Short, +/-, 1/-1, Compra/Venda
+   NÚMEROS: Detecte preços (com 2-8 casas decimais), quantidades, valores monetários
+   DATAS: Extraia timestamp completo ou apenas data
+   RESULTADOS: Lucro/prejuízo em R$, USD, pontos, pips
 
-4. 💹 EXTRAÇÃO DE TRADES:
-   Para cada trade válido encontrado:
-   - ✅ Símbolo do ativo (preservar formato original)
-   - 📅 Data/hora completa (converter para ISO 8601)
-   - 📊 Tipo: "compra" ou "venda" (C/V, BUY/SELL, +/-)
-   - 🔢 Quantidade (decimal preciso)
-   - 💰 Preço entrada (4 casas decimais)
-   - 💰 Preço saída (se disponível)
-   - 💵 Resultado final (lucro/prejuízo)
-   - 🏦 Capital utilizado (quantidade × preço)
-   - 📝 Observações adicionais
+4. 🏗️ ENGENHARIA REVERSA COMPLETA:
+   Para CADA linha que contenha dados de trade:
+   - SÍMBOLO: Extraia exato (WIN, WINQ25, BTC/USDT, EURUSD)
+   - DATA/HORA: Converta para ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
+   - DIREÇÃO: "compra" ou "venda" (normalize qualquer formato)
+   - QUANTIDADE: Valor numérico preciso (string com decimais)
+   - PREÇO ENTRADA: 4+ casas decimais
+   - PREÇO SAÍDA: Se disponível
+   - RESULTADO: Lucro/prejuízo calculado
+   - CAPITAL: quantidade × preço_entrada
+
+5. 🚨 DETECÇÃO DE CASOS ESPECIAIS:
+   ARQUIVO ESTATÍSTICAS: Se contém apenas resumos/totais sem trades individuais
+   ARQUIVO MISTO: Trades + estatísticas misturados
+   ARQUIVO VAZIO: Só headers sem dados
+   ARQUIVO CORROMPIDO: Dados inconsistentes
 
 📤 FORMATO DE RESPOSTA (JSON ESTRUTURADO):
 {
@@ -145,15 +168,16 @@ ${csvSample}
   ]
 }
 
-⚠️ REQUISITOS CRÍTICOS:
-- Seja EXTREMAMENTE preciso com números (use strings para decimais)
-- Preserve símbolos EXATOS do arquivo original
-- Converta TODAS as datas para ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
-- Identifique corretamente compra/venda (C/V, BUY/SELL, +/-, entrada/saída)
-- Calcule capital = quantidade × preço_entrada
-- Detecte automaticamente mercado: b3(WIN,DOL,ISP), crypto(BTC,ETH), forex(EUR/USD)
-- Confidence > 0.8 apenas se tiver certeza dos dados
-- Se não encontrar trades, retorne array vazio mas mantenha análise estrutural
+⚡ EXECUÇÃO PERFEITA OBRIGATÓRIA:
+- PRECISÃO CIRÚRGICA: Use strings para todos os decimais, preserve formatação original
+- SÍMBOLOS EXATOS: Mantenha formato original (WIN, WINQ25, BTC/USDT, PETR4)
+- DATAS UNIVERSAIS: Converta qualquer formato para ISO 8601 completo
+- OPERAÇÕES INTELIGENTES: Normalize qualquer indicador de compra/venda
+- CÁLCULOS PRECISOS: capital = quantidade × preço, resultado = (saída - entrada) × quantidade
+- MERCADOS AUTO-DETECT: b3(WIN,DOL,PETR), crypto(BTC,ETH,USDT), forex(EUR,GBP,USD)
+- CONFIANÇA REAL: >0.9 só se 100% certeza, >0.8 se muito provável, <0.5 se duvidoso
+- TOLERÂNCIA ZERO: Se dados inconsistentes, marque como confidence baixa
+- ANÁLISE COMPLETA: Mesmo sem trades, forneça análise estrutural detalhada
 `;
 
     console.log(`🧠 Enviando para ChatGPT... (${csvSample.length} chars)`);
@@ -173,7 +197,7 @@ ${csvSample}
       ],
       response_format: { type: "json_object" },
       temperature: 0.05, // Temperatura ultra baixa para máxima precisão
-      max_tokens: 12000 // Tokens aumentados para análise estrutural mais completa
+      max_tokens: 16000 // Máximo de tokens para análise completa sem limites
     });
 
     const aiResponse = response.choices[0]?.message?.content;

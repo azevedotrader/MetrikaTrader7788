@@ -10,15 +10,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (December 2024)
 
-### ChatGPT CSV Analysis System
-- **Status**: Funcionando corretamente - não há problema com fallbacks
-- **Comportamento Esperado**: 
-  - ChatGPT detecta arquivos de estatísticas e usa fallback apropriado
-  - Sistema híbrido: ChatGPT para análise inteligente + sistema tradicional para casos extremos
-- **Melhorias Implementadas**: 
-  - Aumentado limite de análise de 50 para 100 linhas
-  - Melhorado debugging e logs detalhados
-  - Tokens aumentados para 12k para análises mais completas
+### ChatGPT CSV Analysis System - ULTRA INTELIGENTE
+- **Status**: Sistema expert em engenharia reversa de CSV financeiro
+- **Capacidades Avançadas**: 
+  - Análise molecular de QUALQUER separador: , ; | - * / \ : . ## espaços tabs
+  - Detecção automática de formatos brasileiros e internacionais
+  - Processamento de arquivos grandes com amostra inteligente (início+meio+fim)
+  - Sistema híbrido robusto com fallback inteligente
+- **Melhorias Implementadas (Dezembro 2024)**: 
+  - Removido limite de linhas - analisa arquivos completos
+  - Prompt ultra-avançado para detecção perfeita de separadores
+  - Tokens aumentados para 16k para máxima capacidade
+  - Amostra inteligente para arquivos >1000 linhas
+  - Debugging completo com logs detalhados
 
 ## System Architecture
 
