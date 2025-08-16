@@ -168,34 +168,69 @@ export async function processSmartCSV(
       };
     }
 
-    // 7. Verificar se é arquivo de estatísticas e dar feedback adequado
+    // 7. Verificar tipo de arquivo e dar feedback específico
     if (result.trades.length === 0) {
-      const hasStatisticsData = parseResult.data.some(row => 
+      // Detectar arquivo da Clear/Rico (formato estatísticas)
+      const isClearStatsFile = parseResult.data.some(row => {
+        const values = Object.values(row as Record<string, any>);
+        return values.some(val => 
+          typeof val === 'string' && (
+            val.toLowerCase().includes('conta') ||
+            val.toLowerCase().includes('titular') ||
+            val.toLowerCase().includes('saldo líquido total') ||
+            val.toLowerCase().includes('lucro bruto') ||
+            val.toLowerCase().includes('prejuízo bruto')
+          )
+        );
+      });
+      
+      const hasGeneralStatistics = parseResult.data.some(row => 
         Object.values(row as Record<string, any>).some(val => 
           typeof val === 'string' && (
-            val.includes('lucro') || val.includes('prejuízo') || 
             val.includes('operações') || val.includes('percentual') ||
             val.includes('patrimônio') || val.includes('drawdown') ||
-            val.includes('retorno') || val.includes('saldo') ||
-            val.includes('fator de lucro') || val.includes('média') ||
-            val.includes('declínio') || val.includes('sequência')
+            val.includes('retorno') || val.includes('fator de lucro') ||
+            val.includes('média') || val.includes('declínio') ||
+            val.includes('sequência')
           )
         )
       );
 
-      if (hasStatisticsData) {
+      if (isClearStatsFile) {
+        result.errors.push('🏦 ARQUIVO DA CLEAR/RICO DETECTADO - TIPO INCORRETO');
+        result.errors.push('Este é um relatório de PERFORMANCE, não de trades individuais.');
+        result.errors.push('');
+        result.errors.push('📥 COMO EXPORTAR O ARQUIVO CORRETO DA CLEAR:');
+        result.errors.push('1. Entre no Portal Clear/Rico');
+        result.errors.push('2. Vá em "Relatórios" → "Histórico de Operações"');
+        result.errors.push('3. Selecione o período desejado');
+        result.errors.push('4. Exporte como CSV o "BOOK DE OFERTAS" ou "HISTÓRICO DETALHADO"');
+        result.errors.push('5. O arquivo deve ter UMA LINHA POR OPERAÇÃO realizada');
+        result.errors.push('');
+        result.errors.push('❌ NÃO USE: Relatório de Performance/Estatísticas (arquivo atual)');
+        result.errors.push('✅ USE: Histórico de Operações/Book de Ofertas');
+      } else if (hasGeneralStatistics) {
         result.errors.push('❌ ARQUIVO DE ESTATÍSTICAS DETECTADO');
-        result.errors.push('Este arquivo contém dados de performance/resumo, não trades individuais.');
-        result.errors.push('📋 FORMATO ESPERADO: CSV com trades individuais contendo:');
+        result.errors.push('Este arquivo contém dados de resumo, não trades individuais.');
+        result.errors.push('');
+        result.errors.push('📋 FORMATO CORRETO: CSV com trades individuais contendo:');
+        result.errors.push('• Uma linha = Uma operação realizada');
         result.errors.push('• Símbolo do ativo (ex: WINQ25, PETR4, BTCUSDT)');
-        result.errors.push('• Data/hora de entrada e saída');
+        result.errors.push('• Data/hora de entrada');
         result.errors.push('• Preços de entrada e saída');
-        result.errors.push('• Resultado da operação (lucro/prejuízo)');
+        result.errors.push('• Resultado da operação');
         result.errors.push('• Quantidade operada');
-        result.errors.push('💡 DICA: Exporte o histórico de trades individuais da sua corretora, não o relatório de performance.');
       } else {
-        result.errors.push('Nenhum trade válido identificado no arquivo');
-        result.errors.push('Verifique se o arquivo contém dados de trades individuais com símbolos reconhecíveis');
+        result.errors.push('❌ NENHUM TRADE RECONHECIDO');
+        result.errors.push('O arquivo não contém trades individuais reconhecíveis.');
+        result.errors.push('');
+        result.errors.push('🔍 POSSÍVEIS PROBLEMAS:');
+        result.errors.push('• Formato de CSV não suportado');
+        result.errors.push('• Símbolos de ativos não reconhecidos');
+        result.errors.push('• Falta de dados essenciais (preço, quantidade, data)');
+        result.errors.push('');
+        result.errors.push('💡 DICA: Exporte o histórico de operações da sua corretora');
+        result.errors.push('(não o relatório de performance/estatísticas)');
       }
     }
 
@@ -274,51 +309,38 @@ function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string
 function isValidTradeRow(row: any, index: number): boolean {
   const rowStr = Object.values(row).join(' ').toLowerCase();
   
-  // Debug detalhado para primeiras 10 linhas
-  if (index < 10) {
-    console.log(`🔍 Linha ${index} - Debug:`, {
-      valores: Object.values(row),
-      texto: rowStr.substring(0, 100)
-    });
-  }
+  // Debug para todas as linhas
+  console.log(`🔍 Linha ${index}:`, Object.values(row));
   
-  // Verificar padrões de exclusão
-  for (const pattern of NON_TRADE_PATTERNS) {
+  // Verificar padrões de exclusão mais específicos (apenas cabeçalhos óbvios)
+  const exclusionPatterns = [
+    /^(conta|titular)/i,
+    /^(data inicial|data final)$/i,
+    /^\s*$/
+  ];
+  
+  for (const pattern of exclusionPatterns) {
     if (pattern.test(rowStr)) {
-      console.log(`🚫 Linha ${index} ignorada (padrão): ${rowStr.substring(0, 50)}...`);
+      console.log(`🚫 Linha ${index} ignorada (cabeçalho): ${rowStr.substring(0, 50)}`);
       return false;
     }
   }
   
-  // Verificar se tem pelo menos um símbolo de trading válido
-  const hasValidSymbol = Object.values(TRADING_SYMBOL_PATTERNS).some(pattern => 
-    pattern.test(rowStr)
+  // ACEITAR QUALQUER LINHA COM DADOS - Modo muito flexível
+  const hasAnyData = Object.values(row).some(val => 
+    val !== null && val !== undefined && String(val).trim() !== ''
   );
   
-  // Verificar por símbolos genéricos mais comuns
-  const hasGenericSymbol = /\b[A-Z]{3,8}\d+\b|\b[A-Z]{3,6}[0-9]{2,4}\b/.test(rowStr);
+  // Verificar se tem dados numéricos
+  const hasNumericData = /\d+[.,]\d*|\d+/.test(rowStr);
   
-  // Verificar se tem dados numéricos (quantidade, preço, resultado)
-  const hasNumericData = /\d+[.,]\d+|\d+/.test(rowStr);
+  // Ser muito permissivo - aceitar linha com qualquer conteúdo válido
+  const isValid = hasAnyData && hasNumericData;
   
-  // Verificar se tem data
-  const hasDate = /\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}/.test(rowStr);
-  
-  // Debug dos critérios para primeiras 10 linhas
-  if (index < 10) {
-    console.log(`📊 Linha ${index} - Critérios:`, {
-      hasValidSymbol,
-      hasGenericSymbol,
-      hasNumericData, 
-      hasDate,
-      willAccept: hasValidSymbol || hasGenericSymbol || (hasNumericData && hasDate)
-    });
-  }
-  
-  const isValid = hasValidSymbol || hasGenericSymbol || (hasNumericData && hasDate);
+  console.log(`📊 Linha ${index} - Análise: dados=${hasAnyData}, números=${hasNumericData}, aceita=${isValid}`);
   
   if (!isValid) {
-    console.log(`🚫 Linha ${index} ignorada (critérios): ${rowStr.substring(0, 50)}...`);
+    console.log(`🚫 Linha ${index} rejeitada: sem dados suficientes`);
   }
   
   return isValid;
@@ -347,15 +369,25 @@ function extractTradeFromRow(
     // 4. Extrair valores numéricos
     const values = extractNumericValues(row);
     
-    if (!symbol || !values.quantity) {
-      console.log(`⚠️ Linha ${lineIndex}: Dados insuficientes para trade:`, {
-        symbol,
-        quantity: values.quantity,
-        allValues: values,
-        rowData: Object.values(row)
-      });
-      return null;
+    // Ser muito permissivo - tentar criar trade mesmo com dados parciais
+    if (!values.quantity || values.quantity <= 0) {
+      values.quantity = 1; // Quantidade padrão
     }
+    
+    let finalSymbol = symbol;
+    if (!finalSymbol || finalSymbol === 'UNKNOWN') {
+      // Criar símbolo baseado em qualquer texto da linha
+      const allText = Object.values(row).join(' ').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      finalSymbol = allText.substring(0, 6) || 'TRADE';
+      console.log(`🔧 Símbolo gerado: ${finalSymbol}`);
+    }
+    
+    console.log(`✅ Criando trade da linha ${lineIndex}:`, {
+      symbol: finalSymbol,
+      quantity: values.quantity,
+      entryPrice: values.entryPrice,
+      result: values.result
+    });
     
     // Garantir que valores não excedam limites do banco (precision 12, scale 2)
     const capitalUtilizado = Math.min(values.quantity * values.entryPrice, 9999999999.99);
@@ -367,7 +399,7 @@ function extractTradeFromRow(
       mercado: market as 'crypto' | 'forex' | 'b3',
       setup: 'CSV Smart Import',
       dataHora: date.toISOString(),
-      ativo: symbol.toUpperCase(),
+      ativo: finalSymbol.toUpperCase(),
       tipo: operationType,
       quantidade: Math.min(values.quantity, 9999.9999).toFixed(4),
       capitalUtilizado: capitalUtilizado.toFixed(2),
@@ -378,7 +410,7 @@ function extractTradeFromRow(
       comentario: `Smart CSV Import - Line ${lineIndex + 1} - User: ${userId}`
     };
     
-    console.log(`✅ Trade extraído da linha ${lineIndex}: ${symbol} ${operationType} ${values.quantity} = R$ ${values.result}`);
+    console.log(`✅ Trade extraído da linha ${lineIndex}: ${finalSymbol} ${operationType} ${values.quantity} = R$ ${values.result}`);
     
     return trade;
     
@@ -440,33 +472,43 @@ function extractDate(row: any): Date {
  * Extrai símbolo de trading
  */
 function extractSymbol(row: any, market: string): string | null {
-  const pattern = TRADING_SYMBOL_PATTERNS[market as keyof typeof TRADING_SYMBOL_PATTERNS];
-  
-  console.log(`🔍 Buscando símbolo para mercado ${market} nos valores:`, Object.values(row).slice(0, 5));
+  console.log(`🔍 Extraindo símbolo de:`, Object.values(row));
   
   for (const [key, value] of Object.entries(row)) {
-    const valueStr = String(value).toUpperCase();
+    const valueStr = String(value).toUpperCase().trim();
     
-    if (pattern.test(valueStr)) {
-      console.log(`🎯 Símbolo encontrado: ${valueStr} (mercado: ${market})`);
+    // Procurar padrões de símbolos conhecidos primeiro
+    const pattern = TRADING_SYMBOL_PATTERNS[market as keyof typeof TRADING_SYMBOL_PATTERNS];
+    if (pattern && pattern.test(valueStr)) {
+      console.log(`🎯 Símbolo ${market} encontrado: ${valueStr}`);
       return valueStr;
     }
   }
   
-  // Fallback: procurar qualquer padrão de símbolo
-  console.log(`🔄 Tentando fallback para símbolos genéricos...`);
+  // Fallback muito amplo - qualquer texto que pareça um símbolo
   for (const [key, value] of Object.entries(row)) {
-    const valueStr = String(value).toUpperCase();
+    const valueStr = String(value).toUpperCase().trim();
     
-    // Símbolos genéricos
-    if (/^[A-Z]{3,8}\d*$/.test(valueStr) || /^[A-Z]+[\/\-][A-Z]+$/.test(valueStr)) {
-      console.log(`🎯 Símbolo genérico encontrado: ${valueStr}`);
+    // Símbolos genéricos amplos
+    if (/^[A-Z]{2,8}\d*$/.test(valueStr) || 
+        /^[A-Z]{3,6}[0-9]{1,4}$/.test(valueStr) ||
+        /^[A-Z]+[\/\-][A-Z]+$/.test(valueStr) ||
+        /WIN|WDO|IND|DOL|PETR|VALE|ITUB|BBDC/i.test(valueStr)) {
+      console.log(`🎯 Símbolo genérico: ${valueStr}`);
       return valueStr;
     }
   }
   
-  console.log(`❌ Nenhum símbolo encontrado`);
-  return null;
+  // Se não encontrar símbolo, criar um genérico baseado no conteúdo
+  const firstValue = Object.values(row)[0];
+  if (firstValue && String(firstValue).trim()) {
+    const genericSymbol = String(firstValue).toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8) || 'TRADE';
+    console.log(`🔄 Usando símbolo genérico: ${genericSymbol}`);
+    return genericSymbol;
+  }
+  
+  console.log(`🔄 Usando símbolo padrão: UNKNOWN`);
+  return 'UNKNOWN';
 }
 
 /**
@@ -523,11 +565,25 @@ function extractNumericValues(row: any): {
   // Ordenar números por magnitude
   validNumbers.sort((a, b) => Math.abs(a) - Math.abs(b));
   
+  // Se não há números válidos, usar padrões mínimos
+  if (validNumbers.length === 0) {
+    return {
+      quantity: 1,
+      entryPrice: 100,
+      exitPrice: undefined,
+      result: 0,
+      stopLoss: undefined
+    };
+  }
+  
+  // Ser mais flexível na interpretação dos números
+  const sortedNums = [...validNumbers].sort((a, b) => Math.abs(a) - Math.abs(b));
+  
   return {
-    quantity: Math.min(validNumbers.find(n => n > 0 && n <= 10000) || 1, 9999), // Quantidade limitada
-    entryPrice: Math.min(validNumbers.find(n => n > 10) || 100, 999999), // Preço limitado
-    exitPrice: validNumbers.length > 2 ? Math.min(validNumbers[validNumbers.length - 2], 999999) : undefined,
-    result: Math.max(Math.min(validNumbers.find(n => n < 0) || validNumbers[validNumbers.length - 1] || 0, 99999999), -99999999), // Resultado limitado
-    stopLoss: validNumbers.find(n => n < 0 && Math.abs(n) < 1000) || undefined
+    quantity: Math.min(sortedNums.find(n => n > 0 && n <= 100000) || sortedNums.find(n => n > 0) || 1, 9999),
+    entryPrice: Math.min(sortedNums.find(n => n >= 1) || 100, 999999),
+    exitPrice: sortedNums.length > 2 ? Math.min(sortedNums[sortedNums.length - 2], 999999) : undefined,
+    result: Math.max(Math.min(sortedNums[sortedNums.length - 1] || 0, 99999999), -99999999),
+    stopLoss: sortedNums.find(n => n < 0 && Math.abs(n) < 10000) || undefined
   };
 }

@@ -1305,25 +1305,75 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // CSV Upload endpoint - SISTEMA UNIVERSAL INTELIGENTE
+  // CSV Upload endpoint - SISTEMA HÍBRIDO: Smart + ChatGPT
   app.post("/api/trades/upload-csv", requireAuthFlexible, upload.single('csvFile'), async (req, res) => {
     try {
       const userId = req.userId || 'default-user';
       const file = req.file;
       const broker = req.body.broker || 'auto';
+      const useGPT = req.body.useGPT === 'true' || req.body.useGPT === true;
 
       if (!file) {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
-      console.log(`🧠 Sistema Inteligente CSV: ${file.originalname}`);
-      console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}`);
+      console.log(`🤖 Sistema de Importação CSV: ${file.originalname}`);
+      console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🤖 ChatGPT: ${useGPT}`);
 
-      // Import the new smart processor
-      const { processSmartCSV } = await import('./smart-csv-processor');
+      let result;
       
-      // Process with intelligent system
-      const result = await processSmartCSV(file.path, userId, broker);
+      if (useGPT) {
+        // Usar ChatGPT diretamente
+        console.log(`🤖 Usando ChatGPT para analisar CSV...`);
+        const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
+        const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
+        
+        result = {
+          trades: aiResult.trades,
+          summary: {
+            totalRows: aiResult.analysis.originalRows,
+            tradesFound: aiResult.analysis.tradesExtracted, 
+            statisticsSkipped: aiResult.analysis.originalRows - aiResult.analysis.tradesExtracted,
+            dateRange: null,
+            detectedBroker: aiResult.analysis.detectedBroker,
+            detectedMarket: aiResult.trades[0]?.mercado || 'b3',
+            confidence: aiResult.analysis.confidence,
+            processingMethod: 'ChatGPT',
+            csvStructure: aiResult.analysis.csvStructure
+          },
+          errors: aiResult.errors
+        };
+      } else {
+        // Tentar sistema tradicional primeiro
+        console.log(`🧠 Tentando sistema tradicional...`);
+        const { processSmartCSV } = await import('./smart-csv-processor');
+        result = await processSmartCSV(file.path, userId, broker);
+        
+        // Se falhou, tentar ChatGPT como fallback
+        if (result.trades.length === 0 && process.env.OPENAI_API_KEY) {
+          console.log(`🤖 Sistema tradicional falhou, tentando ChatGPT como fallback...`);
+          const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
+          const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
+          
+          if (aiResult.trades.length > 0) {
+            result = {
+              trades: aiResult.trades,
+              summary: {
+                totalRows: aiResult.analysis.originalRows,
+                tradesFound: aiResult.analysis.tradesExtracted,
+                statisticsSkipped: aiResult.analysis.originalRows - aiResult.analysis.tradesExtracted,
+                dateRange: null,
+                detectedBroker: aiResult.analysis.detectedBroker,
+                detectedMarket: aiResult.trades[0]?.mercado || 'b3',
+                confidence: aiResult.analysis.confidence,
+                processingMethod: 'ChatGPT (Fallback)',
+                csvStructure: aiResult.analysis.csvStructure
+              },
+              errors: result.errors.concat(['ℹ️ Sistema tradicional falhou, ChatGPT conseguiu extrair os dados!'])
+            };
+          }
+        }
+      }
 
       if (result.errors.length > 0) {
         console.warn('⚠️ Erros durante processamento:', result.errors);
@@ -1375,7 +1425,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       // Save trades to database
-      console.log(`💾 Salvando ${result.trades.length} trades no banco...`);
+      const processingMethod = result.summary?.processingMethod || 'Sistema Tradicional';
+      console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
       const savedTrades = await storage.createBulkTrades(result.trades);
 
       // Record CSV import
@@ -1399,13 +1450,17 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`   - Período: ${result.summary.dateRange?.start} a ${result.summary.dateRange?.end}`);
 
       res.json({
-        message: `Sistema inteligente: ${savedTrades.length} trades reais identificados e importados com datas preservadas`,
+        message: `🎉 ${savedTrades.length} trades importados com sucesso! (Método: ${result.summary?.processingMethod || 'Sistema Tradicional'})`,
         tradesImported: savedTrades.length,
         summary: {
           ...result.summary,
-          tradesImported: savedTrades.length
+          tradesImported: savedTrades.length,
+          processingMethod: result.summary?.processingMethod || 'Sistema Tradicional',
+          confidence: result.summary?.confidence,
+          csvStructure: result.summary?.csvStructure
         },
         dateRange: result.summary.dateRange,
+        userId: userId, // Manter isolamento
         errors: result.errors.length > 0 ? result.errors : undefined
       });
 
