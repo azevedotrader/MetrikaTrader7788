@@ -131,14 +131,30 @@ export class DatabaseStorage implements IStorage {
       throw new Error("userId é obrigatório para isolamento de dados");
     }
     
+    // Validar e limitar valores numéricos
+    const validateDecimal = (value: string | undefined, max: number, defaultValue: string = "0"): string => {
+      if (!value) return defaultValue;
+      const num = parseFloat(value);
+      if (isNaN(num)) return defaultValue;
+      return Math.max(Math.min(num, max), -max).toFixed(num > 1000 ? 2 : 4);
+    };
+    
     const tradeData: any = {
       ...insertTrade,
       userId: insertTrade.userId, // Ensure userId is string
       dataHora: new Date(insertTrade.dataHora),
-      // Ensure required fields have default values
-      capitalUtilizado: insertTrade.capitalUtilizado || "0",
-      quantidade: insertTrade.quantidade || "1"
+      // Limitar valores para evitar erros de precisão
+      capitalUtilizado: validateDecimal(insertTrade.capitalUtilizado, 9999999999.99, "0"),
+      quantidade: validateDecimal(insertTrade.quantidade, 9999.9999, "1"),
+      resultado: validateDecimal(insertTrade.resultado, 9999999999.99, "0"),
+      precoEntrada: validateDecimal(insertTrade.precoEntrada, 99999999.9999, "0"),
+      precoSaida: validateDecimal(insertTrade.precoSaida, 99999999.9999, "0"),
+      stop: validateDecimal(insertTrade.stop, 99999999.9999, "0"),
+      alvo: validateDecimal(insertTrade.alvo, 99999999.9999, "0"),
+      risco: validateDecimal(insertTrade.risco, 99.99, "0")
     };
+    
+    console.log(`💾 [${insertTrade.userId}] Criando trade individual: ${insertTrade.ativo}`);
     
     const [trade] = await db
       .insert(trades)
@@ -154,14 +170,32 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Todos os trades devem ter o mesmo userId válido para isolamento");
     }
     
-    const processedTrades = tradesData.map(trade => ({
-      ...trade,
-      userId: trade.userId!,
-      dataHora: new Date(trade.dataHora),
-      // Ensure required fields have default values
-      capitalUtilizado: trade.capitalUtilizado || "0",
-      quantidade: trade.quantidade || "1"
-    }));
+    const processedTrades = tradesData.map(trade => {
+      // Validar e limitar valores numéricos para evitar erros de precisão no banco
+      const validateDecimal = (value: string | undefined, max: number, defaultValue: string = "0"): string => {
+        if (!value) return defaultValue;
+        const num = parseFloat(value);
+        if (isNaN(num)) return defaultValue;
+        return Math.max(Math.min(num, max), -max).toFixed(num > 1000 ? 2 : 4);
+      };
+      
+      return {
+        ...trade,
+        userId: trade.userId!,
+        dataHora: new Date(trade.dataHora),
+        // Limitar valores para decimal(12,2) - máximo: 9.999.999.999,99
+        capitalUtilizado: validateDecimal(trade.capitalUtilizado, 9999999999.99, "0"),
+        quantidade: validateDecimal(trade.quantidade, 9999.9999, "1"),
+        resultado: validateDecimal(trade.resultado, 9999999999.99, "0"),
+        precoEntrada: validateDecimal(trade.precoEntrada, 99999999.9999, "0"),
+        precoSaida: validateDecimal(trade.precoSaida, 99999999.9999, "0"),
+        stop: validateDecimal(trade.stop, 99999999.9999, "0"),
+        alvo: validateDecimal(trade.alvo, 99999999.9999, "0"),
+        risco: validateDecimal(trade.risco, 99.99, "0")
+      };
+    });
+    
+    console.log(`💾 [${userIds[0]}] Inserindo ${processedTrades.length} trades no banco com isolamento`);
     
     return await db
       .insert(trades)

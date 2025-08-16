@@ -171,7 +171,7 @@ export async function processSmartCSV(
     // 7. Verificar se é arquivo de estatísticas e dar feedback adequado
     if (result.trades.length === 0) {
       const hasStatisticsData = parseResult.data.some(row => 
-        Object.values(row).some(val => 
+        Object.values(row as Record<string, any>).some(val => 
           typeof val === 'string' && (
             val.includes('lucro') || val.includes('prejuízo') || 
             val.includes('operações') || val.includes('percentual') ||
@@ -330,6 +330,9 @@ function extractTradeFromRow(
       return null;
     }
     
+    // Garantir que valores não excedam limites do banco (precision 12, scale 2)
+    const capitalUtilizado = Math.min(values.quantity * values.entryPrice, 9999999999.99);
+    
     const trade: InsertTrade = {
       userId,
       corretora: broker as 'crypto' | 'forex' | 'b3',
@@ -339,13 +342,13 @@ function extractTradeFromRow(
       dataHora: date.toISOString(),
       ativo: symbol.toUpperCase(),
       tipo: operationType,
-      quantidade: values.quantity.toString(),
-      capitalUtilizado: (values.quantity * values.entryPrice).toString(),
-      precoEntrada: values.entryPrice.toString(),
-      precoSaida: values.exitPrice ? values.exitPrice.toString() : values.entryPrice.toString(),
-      resultado: values.result.toString(),
-      stop: values.stopLoss ? values.stopLoss.toString() : '0',
-      comentario: `Smart CSV Import - Line ${lineIndex + 1}`
+      quantidade: Math.min(values.quantity, 9999.9999).toFixed(4),
+      capitalUtilizado: capitalUtilizado.toFixed(2),
+      precoEntrada: Math.min(values.entryPrice, 99999999.9999).toFixed(4),
+      precoSaida: values.exitPrice ? Math.min(values.exitPrice, 99999999.9999).toFixed(4) : Math.min(values.entryPrice, 99999999.9999).toFixed(4),
+      resultado: Math.max(Math.min(values.result, 9999999999.99), -9999999999.99).toFixed(2),
+      stop: values.stopLoss ? Math.min(values.stopLoss, 99999999.9999).toFixed(4) : '0',
+      comentario: `Smart CSV Import - Line ${lineIndex + 1} - User: ${userId}`
     };
     
     console.log(`✅ Trade extraído da linha ${lineIndex}: ${symbol} ${operationType} ${values.quantity} = R$ ${values.result}`);
@@ -478,19 +481,22 @@ function extractNumericValues(row: any): {
       .replace(',', '.'); // Converte vírgula decimal
     
     const num = parseFloat(cleanStr);
-    if (!isNaN(num) && isFinite(num)) {
+    if (!isNaN(num) && isFinite(num) && Math.abs(num) < 10000000000) { // Limitar para evitar overflow no DB
       numbers.push(num);
     }
   }
   
+  // Filtrar números válidos para trading
+  const validNumbers = numbers.filter(n => Math.abs(n) < 10000000000);
+  
   // Ordenar números por magnitude
-  numbers.sort((a, b) => Math.abs(a) - Math.abs(b));
+  validNumbers.sort((a, b) => Math.abs(a) - Math.abs(b));
   
   return {
-    quantity: numbers.find(n => n > 0 && n <= 10000) || 1, // Quantidade geralmente é menor
-    entryPrice: numbers.find(n => n > 10) || 100, // Preços são maiores
-    exitPrice: numbers.length > 2 ? numbers[numbers.length - 2] : undefined,
-    result: numbers.find(n => n < 0) || numbers[numbers.length - 1] || 0, // Resultado pode ser negativo
-    stopLoss: numbers.find(n => n < 0 && Math.abs(n) < 1000) || undefined
+    quantity: Math.min(validNumbers.find(n => n > 0 && n <= 10000) || 1, 9999), // Quantidade limitada
+    entryPrice: Math.min(validNumbers.find(n => n > 10) || 100, 999999), // Preço limitado
+    exitPrice: validNumbers.length > 2 ? Math.min(validNumbers[validNumbers.length - 2], 999999) : undefined,
+    result: Math.max(Math.min(validNumbers.find(n => n < 0) || validNumbers[validNumbers.length - 1] || 0, 99999999), -99999999), // Resultado limitado
+    stopLoss: validNumbers.find(n => n < 0 && Math.abs(n) < 1000) || undefined
   };
 }
