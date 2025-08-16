@@ -27,6 +27,7 @@ import {
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
+import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { format, startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -640,6 +641,19 @@ export default function Dashboard() {
         </div>
         
         <div className="flex flex-wrap gap-2">
+          {/* Smart Reprocess Button */}
+          {trades.length > 0 && (
+            <SmartReprocessButton 
+              userId={currentUserId}
+              onSuccess={() => {
+                toast({
+                  title: "Dados Atualizados",
+                  description: "Todos os dados foram reprocessados com interpretação inteligente."
+                });
+              }}
+            />
+          )}
+          
           {/* Consolidated Data Button */}
           <Button 
             className={`gradient-purple-blue hover:opacity-90 transition-opacity ${

@@ -12,6 +12,7 @@
 import Papa from 'papaparse';
 import { InsertTrade } from '@shared/schema';
 import fs from 'fs';
+import { interpretStatisticsAsTradesWithCorrectValues } from './smart-statistics-interpreter';
 
 export interface SmartCSVResult {
   trades: InsertTrade[];
@@ -183,12 +184,36 @@ export async function processSmartCSV(
     const statisticsPercentage = (statisticsRowCount / result.summary.totalRows) * 100;
     console.log(`📊 Análise de conteúdo: ${statisticsRowCount}/${result.summary.totalRows} linhas são estatísticas (${statisticsPercentage.toFixed(1)}%)`);
     
-    // MODO FLEXÍVEL: Mesmo se arquivo é de estatísticas, tentar extrair dados interpretáveis
+    // MODO INTELIGENTE: Se arquivo é de estatísticas, usar interpretador especializado
     if (statisticsPercentage > 80) {
       console.log(`📊 Arquivo predominantemente estatísticas (${statisticsPercentage.toFixed(1)}%)`);
-      console.log(`🔄 Modo Flexível: Tentando interpretar dados como trades mesmo sendo estatísticas`);
-      result.errors.push('⚠️ Dados de estatísticas sendo interpretados como trades (modo flexível)');
-      // CONTINUAR processamento ao invés de retornar
+      console.log(`🧠 Usando interpretador inteligente de estatísticas...`);
+      
+      const statisticsTrades = interpretStatisticsAsTradesWithCorrectValues(
+        parseResult.data,
+        userId,
+        brokerHint
+      );
+      
+      if (statisticsTrades.length > 0) {
+        result.trades = statisticsTrades;
+        result.summary.tradesFound = statisticsTrades.length;
+        result.summary.statisticsSkipped = parseResult.data.length - statisticsTrades.length;
+        result.errors.push('✅ Estatísticas interpretadas inteligentemente como métricas de trading');
+        
+        // Calcular range de datas
+        const dates = statisticsTrades.map(t => new Date(t.dataHora));
+        if (dates.length > 0) {
+          result.summary.dateRange = {
+            start: new Date(Math.min(...dates.map(d => d.getTime()))).toISOString().split('T')[0],
+            end: new Date(Math.max(...dates.map(d => d.getTime()))).toISOString().split('T')[0]
+          };
+        }
+        
+        return result; // Retornar com dados interpretados
+      }
+      
+      result.errors.push('⚠️ Interpretador de estatísticas não conseguiu extrair dados válidos');
     }
 
     // 6. Processar cada linha
