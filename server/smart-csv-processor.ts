@@ -54,7 +54,7 @@ const NON_TRADE_PATTERNS = [
  * Padrões para identificar símbolos de trading válidos
  */
 const TRADING_SYMBOL_PATTERNS = {
-  b3: /^(WIN|WDO|IND|DOL|BGI|ISP|ICF|SFI|CCM|OZ1|OZ2|OZ3|PETR[34]|VALE[35]|ITUB[34]|BBDC[34])[A-Z0-9]*$/i,
+  b3: /^(WIN|WDO|IND|DOL|BGI|ISP|ICF|SFI|CCM|OZ1|OZ2|OZ3|PETR[34]?|VALE[35]?|ITUB[34]?|BBDC[34]?|ABEV|BBAS|BEEF|BPAC|BRDT|BRKM|CCRO|CMIG|CPFE|CSAN|CSNA|ELET|EMBR|ENBR|EQTL|FLRY|GGBR|GOAU|HAPV|HYPE|IGTI|ITSA|JBSS|KLBN|LAME|LREN|MGLU|MRFG|MRVE|MULT|NTCO|PCAR|QUAL|RADL|RAIL|RENT|SANB|SBSP|SUZB|TAEE|TIMS|TOTS|UGPA|USIM|VIVT|VVAR|WEGE|YDUQ)[A-Z0-9]*$/i,
   crypto: /^(BTC|ETH|BNB|ADA|SOL|DOT|MATIC|LINK|UNI|AAVE|ATOM|XRP|LTC|BCH|EOS|TRX|XLM|XMR|DASH|ZEC|ETC)[\/\-]?(USDT|BUSD|BRL|USD)?$/i,
   forex: /^(EUR|GBP|USD|JPY|CAD|AUD|CHF|NZD|SEK|NOK|DKK|PLN|CZK|HUF|TRY|ZAR|MXN|BRL)[\/\-]?(USD|EUR|GBP|JPY|CAD|AUD|CHF|BRL)$/i
 };
@@ -274,6 +274,14 @@ function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string
 function isValidTradeRow(row: any, index: number): boolean {
   const rowStr = Object.values(row).join(' ').toLowerCase();
   
+  // Debug detalhado para primeiras 10 linhas
+  if (index < 10) {
+    console.log(`🔍 Linha ${index} - Debug:`, {
+      valores: Object.values(row),
+      texto: rowStr.substring(0, 100)
+    });
+  }
+  
   // Verificar padrões de exclusão
   for (const pattern of NON_TRADE_PATTERNS) {
     if (pattern.test(rowStr)) {
@@ -287,13 +295,27 @@ function isValidTradeRow(row: any, index: number): boolean {
     pattern.test(rowStr)
   );
   
+  // Verificar por símbolos genéricos mais comuns
+  const hasGenericSymbol = /\b[A-Z]{3,8}\d+\b|\b[A-Z]{3,6}[0-9]{2,4}\b/.test(rowStr);
+  
   // Verificar se tem dados numéricos (quantidade, preço, resultado)
   const hasNumericData = /\d+[.,]\d+|\d+/.test(rowStr);
   
   // Verificar se tem data
   const hasDate = /\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}/.test(rowStr);
   
-  const isValid = hasValidSymbol || (hasNumericData && hasDate);
+  // Debug dos critérios para primeiras 10 linhas
+  if (index < 10) {
+    console.log(`📊 Linha ${index} - Critérios:`, {
+      hasValidSymbol,
+      hasGenericSymbol,
+      hasNumericData, 
+      hasDate,
+      willAccept: hasValidSymbol || hasGenericSymbol || (hasNumericData && hasDate)
+    });
+  }
+  
+  const isValid = hasValidSymbol || hasGenericSymbol || (hasNumericData && hasDate);
   
   if (!isValid) {
     console.log(`🚫 Linha ${index} ignorada (critérios): ${rowStr.substring(0, 50)}...`);
@@ -326,7 +348,12 @@ function extractTradeFromRow(
     const values = extractNumericValues(row);
     
     if (!symbol || !values.quantity) {
-      console.log(`⚠️ Linha ${lineIndex}: Dados insuficientes para trade`);
+      console.log(`⚠️ Linha ${lineIndex}: Dados insuficientes para trade:`, {
+        symbol,
+        quantity: values.quantity,
+        allValues: values,
+        rowData: Object.values(row)
+      });
       return null;
     }
     
@@ -415,6 +442,8 @@ function extractDate(row: any): Date {
 function extractSymbol(row: any, market: string): string | null {
   const pattern = TRADING_SYMBOL_PATTERNS[market as keyof typeof TRADING_SYMBOL_PATTERNS];
   
+  console.log(`🔍 Buscando símbolo para mercado ${market} nos valores:`, Object.values(row).slice(0, 5));
+  
   for (const [key, value] of Object.entries(row)) {
     const valueStr = String(value).toUpperCase();
     
@@ -425,6 +454,7 @@ function extractSymbol(row: any, market: string): string | null {
   }
   
   // Fallback: procurar qualquer padrão de símbolo
+  console.log(`🔄 Tentando fallback para símbolos genéricos...`);
   for (const [key, value] of Object.entries(row)) {
     const valueStr = String(value).toUpperCase();
     
@@ -435,6 +465,7 @@ function extractSymbol(row: any, market: string): string | null {
     }
   }
   
+  console.log(`❌ Nenhum símbolo encontrado`);
   return null;
 }
 
