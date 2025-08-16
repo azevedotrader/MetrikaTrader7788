@@ -8,6 +8,18 @@ Métrika is a comprehensive, full-stack web application designed for traders to 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (December 2024)
+
+### ChatGPT CSV Analysis System
+- **Status**: Funcionando corretamente - não há problema com fallbacks
+- **Comportamento Esperado**: 
+  - ChatGPT detecta arquivos de estatísticas e usa fallback apropriado
+  - Sistema híbrido: ChatGPT para análise inteligente + sistema tradicional para casos extremos
+- **Melhorias Implementadas**: 
+  - Aumentado limite de análise de 50 para 100 linhas
+  - Melhorado debugging e logs detalhados
+  - Tokens aumentados para 12k para análises mais completas
+
 ## System Architecture
 
 ### Frontend

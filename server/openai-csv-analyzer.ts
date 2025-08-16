@@ -50,8 +50,8 @@ export async function analyzeCSVWithOpenAI(
 
     console.log(`📊 CSV carregado: ${parseResult.data.length} linhas`);
 
-    // 2. Preparar dados para ChatGPT (limitando a 50 linhas para não exceder token limit)
-    const sampleData = parseResult.data.slice(0, 50);
+    // 2. Preparar dados para ChatGPT (limitando a 100 linhas para melhor análise)
+    const sampleData = parseResult.data.slice(0, 100);
     const csvSample = sampleData.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
 
     // 3. Prompt SUPER AVANÇADO para análise estrutural completa
@@ -173,7 +173,7 @@ ${csvSample}
       ],
       response_format: { type: "json_object" },
       temperature: 0.05, // Temperatura ultra baixa para máxima precisão
-      max_tokens: 8000 // Tokens aumentados para análise estrutural completa
+      max_tokens: 12000 // Tokens aumentados para análise estrutural mais completa
     });
 
     const aiResponse = response.choices[0]?.message?.content;
@@ -181,14 +181,22 @@ ${csvSample}
       throw new Error('Resposta vazia do ChatGPT');
     }
 
-    console.log(`🤖 ChatGPT respondeu: ${aiResponse.substring(0, 200)}...`);
+    console.log(`🤖 ChatGPT respondeu (${aiResponse.length} chars): ${aiResponse.substring(0, 300)}...`);
 
     // 5. Parsear resposta JSON
     let analysis: any;
     try {
       analysis = JSON.parse(aiResponse);
+      console.log(`🔍 Análise ChatGPT detectada:`, {
+        fileType: analysis.fileType,
+        detectedBroker: analysis.detectedBroker,
+        confidence: analysis.confidence,
+        totalTrades: analysis.trades?.length || 0,
+        csvStructure: analysis.csvStructure?.substring(0, 100) + '...'
+      });
     } catch (parseError) {
       console.error('❌ Erro ao parsear JSON do ChatGPT:', parseError);
+      console.error('🔍 Resposta completa que falhou:', aiResponse);
       throw new Error('Resposta do ChatGPT não é JSON válido');
     }
 
@@ -197,6 +205,7 @@ ${csvSample}
     const errors: string[] = [];
 
     if (analysis.fileType === 'statistics') {
+      console.log(`📊 ChatGPT detectou arquivo de estatísticas. Confiança: ${analysis.confidence}, Broker: ${analysis.detectedBroker}`);
       return {
         trades: [],
         analysis: {
@@ -207,7 +216,11 @@ ${csvSample}
           detectedBroker: analysis.detectedBroker || 'generic',
           csvStructure: analysis.csvStructure || 'Arquivo de estatísticas/resumos'
         },
-        errors: ['❌ ARQUIVO DE ESTATÍSTICAS DETECTADO PELO ChatGPT', 'Este arquivo contém resumos/totalizações, não trades individuais.']
+        errors: [
+          '❌ ARQUIVO DE ESTATÍSTICAS DETECTADO PELO ChatGPT', 
+          'Este arquivo contém resumos/totalizações, não trades individuais.',
+          `🎯 Detalhes ChatGPT: fileType=${analysis.fileType}, broker=${analysis.detectedBroker}, confidence=${analysis.confidence}`
+        ]
       };
     }
 
@@ -268,6 +281,7 @@ ${csvSample}
 
   } catch (error) {
     console.error('❌ Erro na análise ChatGPT:', error);
+    console.error('🔍 Stack trace completo:', error instanceof Error ? error.stack : 'N/A');
     
     return {
       trades: [],
@@ -281,7 +295,8 @@ ${csvSample}
       },
       errors: [
         'Erro ao analisar CSV com ChatGPT:',
-        error instanceof Error ? error.message : 'Erro desconhecido'
+        error instanceof Error ? error.message : 'Erro desconhecido',
+        `🔧 Debug info: ${error instanceof Error ? error.name : 'Unknown error type'}`
       ]
     };
   }
