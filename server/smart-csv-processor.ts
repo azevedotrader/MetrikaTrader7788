@@ -175,7 +175,7 @@ export async function processSmartCSV(
     
     console.log(`🎯 Detectado - Broker: ${detectedInfo.broker}, Mercado: ${detectedInfo.market}`);
 
-    // 5. Verificar se arquivo é predominantemente estatísticas
+    // 5. Analisar conteúdo mas continuar processamento (modo flexível)
     const statisticsRowCount = parseResult.data.filter((row: any) => 
       isStatisticsRow(row, parseResult.meta.fields || [])
     ).length;
@@ -183,11 +183,12 @@ export async function processSmartCSV(
     const statisticsPercentage = (statisticsRowCount / result.summary.totalRows) * 100;
     console.log(`📊 Análise de conteúdo: ${statisticsRowCount}/${result.summary.totalRows} linhas são estatísticas (${statisticsPercentage.toFixed(1)}%)`);
     
-    // Se mais de 80% das linhas são estatísticas, provavelmente é arquivo de relatório
+    // MODO FLEXÍVEL: Mesmo se arquivo é de estatísticas, tentar extrair dados interpretáveis
     if (statisticsPercentage > 80) {
-      console.log(`🚫 Arquivo detectado como relatório de performance (${statisticsPercentage.toFixed(1)}% estatísticas)`);
-      result.errors.push('Arquivo detectado como relatório de estatísticas/performance, não trades individuais');
-      return result;
+      console.log(`📊 Arquivo predominantemente estatísticas (${statisticsPercentage.toFixed(1)}%)`);
+      console.log(`🔄 Modo Flexível: Tentando interpretar dados como trades mesmo sendo estatísticas`);
+      result.errors.push('⚠️ Dados de estatísticas sendo interpretados como trades (modo flexível)');
+      // CONTINUAR processamento ao invés de retornar
     }
 
     // 6. Processar cada linha
@@ -394,15 +395,15 @@ function isValidTradeRow(row: any, index: number): boolean {
     }
   }
   
-  // ACEITAR QUALQUER LINHA COM DADOS - Modo muito flexível
+  // MODO ULTRA-FLEXÍVEL: Aceitar QUALQUER linha com dados para interpretação
   const hasAnyData = Object.values(row).some(val => 
     val !== null && val !== undefined && String(val).trim() !== ''
   );
   
-  // Verificar se tem dados numéricos
-  const hasNumericData = /\d+[.,]\d*|\d+/.test(rowStr);
+  // Verificar se tem dados numéricos (incluindo percentuais, negativos, etc.)
+  const hasNumericData = /\d+[.,]\d*|\d+|[-+]?\d+[.,]?\d*[%]?/.test(rowStr);
   
-  // Ser muito permissivo - aceitar linha com qualquer conteúdo válido
+  // ULTRA-PERMISSIVO: Aceitar praticamente qualquer linha com conteúdo
   const isValid = hasAnyData && hasNumericData;
   
   console.log(`📊 Linha ${index} - Análise: dados=${hasAnyData}, números=${hasNumericData}, aceita=${isValid}`);

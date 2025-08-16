@@ -8,21 +8,21 @@ Métrika is a comprehensive, full-stack web application designed for traders to 
 
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes (December 2024)
+## Recent Changes (January 2025)
 
-### ChatGPT CSV Analysis System - ULTRA INTELIGENTE
-- **Status**: Sistema expert em engenharia reversa de CSV financeiro
-- **Capacidades Avançadas**: 
-  - Análise molecular de QUALQUER separador: , ; | - * / \ : . ## espaços tabs
-  - Detecção automática de formatos brasileiros e internacionais
-  - Processamento de arquivos grandes com amostra inteligente (início+meio+fim)
-  - Sistema híbrido robusto com fallback inteligente
-- **Melhorias Implementadas (Dezembro 2024)**: 
-  - Removido limite de linhas - analisa arquivos completos
-  - Prompt ultra-avançado para detecção perfeita de separadores
-  - Tokens aumentados para 16k para máxima capacidade
-  - Amostra inteligente para arquivos >1000 linhas
-  - Debugging completo com logs detalhados
+### Sistema Colaborativo ChatGPT + Tradicional - ACEITA QUALQUER FORMATO
+- **Status**: Sistema híbrido ultra-flexível para análise de qualquer tipo de CSV
+- **Nova Abordagem Colaborativa**: 
+  - ChatGPT + Sistema Tradicional trabalham juntos
+  - Se ChatGPT não encontra dados, sistema tradicional sempre tenta
+  - Modo ultra-flexível: interpreta até dados de estatísticas como trades
+  - Aceita qualquer formato, mesmo arquivos de performance/relatórios
+- **Melhorias Implementadas (Janeiro 2025)**: 
+  - Sistema colaborativo: ambos métodos sempre tentam extrair dados
+  - Modo flexível: converte estatísticas em trades quando possível
+  - Análise completa para arquivos até 800 linhas (antes 500)
+  - Prompt melhorado: foco em extrair TODOS os trades linha por linha
+  - Sistema tradicional ultra-permissivo: aceita dados não-tradicionais
 
 ## System Architecture
 

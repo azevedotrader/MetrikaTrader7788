@@ -1364,36 +1364,40 @@ export async function registerRoutes(app: Express): Promise<void> {
           errors: aiResult.errors
         };
         
-        // Verificar se ChatGPT detectou arquivo de estatísticas com alta confiança
+        // NOVA ABORDAGEM: Sistema colaborativo - sempre tentar ambos métodos
         const isStatisticsFile = result.errors.some(error => 
           error.includes('ARQUIVO DE ESTATÍSTICAS DETECTADO')
         );
-        const hasHighConfidence = (result.summary as any).confidence > 0.8;
 
-        // Se ChatGPT falhou MAS não é arquivo de estatísticas, tentar fallback
-        if (result.trades.length === 0 && !isStatisticsFile) {
-          console.log(`🔄 ChatGPT não encontrou dados, tentando sistema tradicional como fallback...`);
-          console.log(`❌ ChatGPT falhou, detalhes:`, result.errors);
+        // Se ChatGPT não encontrou trades, SEMPRE tentar sistema tradicional
+        if (result.trades.length === 0) {
+          console.log(`🤝 Sistema Colaborativo: ChatGPT não encontrou dados (${isStatisticsFile ? 'estatísticas detectadas' : 'falha'})`);
+          console.log(`🔄 Tentando sistema tradicional para extrair qualquer dado possível...`);
           const { processSmartCSV } = await import('./smart-csv-processor');
+          
+          // Sistema tradicional com modo "força bruta" - aceita qualquer formato
           const fallbackResult = await processSmartCSV(file.path, userId, broker);
           
           if (fallbackResult.trades.length > 0) {
-            console.log(`✅ Fallback bem-sucedido: ${fallbackResult.trades.length} trades extraídos pelo sistema tradicional`);
+            console.log(`✅ Sistema tradicional extraiu ${fallbackResult.trades.length} itens como trades`);
             result = {
               ...fallbackResult,
               summary: {
                 ...fallbackResult.summary,
-                processingMethod: 'Sistema Tradicional (Fallback após ChatGPT)'
+                processingMethod: isStatisticsFile ? 
+                  'Sistema Híbrido (Dados não-tradicionais interpretados como trades)' :
+                  'Sistema Tradicional (Fallback após ChatGPT)'
               },
-              errors: result.errors.concat(['ℹ️ ChatGPT falhou, sistema tradicional conseguiu extrair os dados!'])
+              errors: isStatisticsFile ? 
+                ['ℹ️ Arquivo de estatísticas convertido para trades usando interpretação flexível'] :
+                result.errors.concat(['ℹ️ ChatGPT falhou, sistema tradicional extraiu os dados'])
             };
           } else {
-            console.log(`❌ Ambos métodos falharam: ChatGPT e Sistema Tradicional`);
+            console.log(`❌ Ambos sistemas não conseguiram extrair dados válidos`);
+            if (isStatisticsFile) {
+              result.errors.push('⚠️ Sistema tentou interpretar estatísticas como trades mas não conseguiu');
+            }
           }
-        } else if (isStatisticsFile && hasHighConfidence) {
-          console.log(`🛑 ChatGPT detectou arquivo de estatísticas com alta confiança (${(result.summary as any).confidence}) - BLOQUEANDO fallback`);
-          console.log(`📊 Arquivo contém apenas dados de performance/estatísticas, não trades individuais`);
-          // Não usar fallback quando ChatGPT tem certeza de que são estatísticas
         }
       }
 
