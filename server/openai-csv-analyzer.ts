@@ -63,7 +63,7 @@ Você é um especialista em análise de dados financeiros. Faça uma análise es
 📊 DADOS CSV PARA ANÁLISE:
 ${csvSample}
 
-🏢 BROKER SUGERIDO: ${broker}
+🏢 BROKER SUGERIDO: ${brokerHint}
 
 📋 ANÁLISE ESTRUTURAL OBRIGATÓRIA:
 

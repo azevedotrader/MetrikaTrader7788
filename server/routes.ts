@@ -1338,6 +1338,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       } else {
         // Usar ChatGPT como padrão - Análise estrutural completa
         console.log(`🤖 Usando ChatGPT (PADRÃO) para análise estrutural completa...`);
+        console.log(`🔑 OpenAI API Key disponível: ${process.env.OPENAI_API_KEY ? 'Sim' : 'Não'}`);
         const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
         const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
         
@@ -1360,6 +1361,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         // Se ChatGPT falhou, tentar sistema tradicional como fallback
         if (result.trades.length === 0) {
           console.log(`🔄 ChatGPT não encontrou dados, tentando sistema tradicional como fallback...`);
+          console.log(`❌ ChatGPT falhou, detalhes:`, result.errors);
           const { processSmartCSV } = await import('./smart-csv-processor');
           const fallbackResult = await processSmartCSV(file.path, userId, broker);
           
@@ -1451,7 +1453,9 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`   - Período: ${result.summary.dateRange?.start} a ${result.summary.dateRange?.end}`);
 
       res.json({
-        message: `🎉 ${savedTrades.length} trades importados com sucesso! (Método: ${result.summary?.processingMethod || 'ChatGPT (Análise Estrutural Completa)'})`,
+        message: `🎉 ${savedTrades.length} trades importados com sucesso!`,
+        processingMethod: result.summary?.processingMethod || 'ChatGPT (Análise Estrutural Completa)',
+        methodUsed: result.summary?.processingMethod || 'ChatGPT (Análise Estrutural Completa)',
         tradesImported: savedTrades.length,
         summary: {
           ...result.summary,

@@ -181,7 +181,7 @@ export default function NovoTrade() {
       
       toast({
         title: "Importação concluída",
-        description: `${data.tradesImported} trades importados com sucesso.`
+        description: `${data.tradesImported} trades importados com sucesso.\n📊 Método: ${data.methodUsed || data.processingMethod || 'Não especificado'}`
       });
     },
     onError: (error: any) => {
