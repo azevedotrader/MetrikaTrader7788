@@ -1364,8 +1364,14 @@ export async function registerRoutes(app: Express): Promise<void> {
           errors: aiResult.errors
         };
         
-        // Se ChatGPT falhou, tentar sistema tradicional como fallback
-        if (result.trades.length === 0) {
+        // Verificar se ChatGPT detectou arquivo de estatísticas com alta confiança
+        const isStatisticsFile = result.errors.some(error => 
+          error.includes('ARQUIVO DE ESTATÍSTICAS DETECTADO')
+        );
+        const hasHighConfidence = (result.summary as any).confidence > 0.8;
+
+        // Se ChatGPT falhou MAS não é arquivo de estatísticas, tentar fallback
+        if (result.trades.length === 0 && !isStatisticsFile) {
           console.log(`🔄 ChatGPT não encontrou dados, tentando sistema tradicional como fallback...`);
           console.log(`❌ ChatGPT falhou, detalhes:`, result.errors);
           const { processSmartCSV } = await import('./smart-csv-processor');
@@ -1384,6 +1390,10 @@ export async function registerRoutes(app: Express): Promise<void> {
           } else {
             console.log(`❌ Ambos métodos falharam: ChatGPT e Sistema Tradicional`);
           }
+        } else if (isStatisticsFile && hasHighConfidence) {
+          console.log(`🛑 ChatGPT detectou arquivo de estatísticas com alta confiança (${(result.summary as any).confidence}) - BLOQUEANDO fallback`);
+          console.log(`📊 Arquivo contém apenas dados de performance/estatísticas, não trades individuais`);
+          // Não usar fallback quando ChatGPT tem certeza de que são estatísticas
         }
       }
 

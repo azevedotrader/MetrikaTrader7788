@@ -118,11 +118,17 @@ ${csvSample}
    - RESULTADO: Lucro/prejuízo calculado
    - CAPITAL: quantidade × preço_entrada
 
-5. 🚨 DETECÇÃO DE CASOS ESPECIAIS:
-   ARQUIVO ESTATÍSTICAS: Se contém apenas resumos/totais sem trades individuais
-   ARQUIVO MISTO: Trades + estatísticas misturados
+5. 🚨 DETECÇÃO CRÍTICA DE CASOS ESPECIAIS:
+   ARQUIVO ESTATÍSTICAS/PERFORMANCE: Se contém termos como:
+   - "Patrimônio Máximo", "Declínio Máximo", "Drawdown %", "Rentabilidade Total"
+   - "Melhor Trade", "Pior Trade", "R/R Médio", "Win Rate", "Lucro Líquido"
+   - "Total Geral", "Resultado Líquido", "Tempo no Mercado"
+   - "Trades Vencedores", "Trades Perdedores", "Sequência Máxima"
+   → MARQUE COMO fileType: "statistics" E NÃO EXTRAIA TRADES
+   
+   ARQUIVO MISTO: Trades reais + estatísticas misturados
    ARQUIVO VAZIO: Só headers sem dados
-   ARQUIVO CORROMPIDO: Dados inconsistentes
+   ARQUIVO CORROMPIDO: Dados inconsistentes ou ilegíveis
 
 📤 FORMATO DE RESPOSTA (JSON ESTRUTURADO):
 {
@@ -169,14 +175,16 @@ ${csvSample}
 }
 
 ⚡ EXECUÇÃO PERFEITA OBRIGATÓRIA:
+- IDENTIFICAÇÃO CRÍTICA: Se detectar termos como "Patrimônio", "Drawdown", "Rentabilidade Total", "Win Rate", "R/R Médio" → fileType: "statistics"
+- NUNCA EXTRAIR: Dados de resumo/performance como trades individuais
 - PRECISÃO CIRÚRGICA: Use strings para todos os decimais, preserve formatação original
 - SÍMBOLOS EXATOS: Mantenha formato original (WIN, WINQ25, BTC/USDT, PETR4)
 - DATAS UNIVERSAIS: Converta qualquer formato para ISO 8601 completo
 - OPERAÇÕES INTELIGENTES: Normalize qualquer indicador de compra/venda
 - CÁLCULOS PRECISOS: capital = quantidade × preço, resultado = (saída - entrada) × quantidade
 - MERCADOS AUTO-DETECT: b3(WIN,DOL,PETR), crypto(BTC,ETH,USDT), forex(EUR,GBP,USD)
-- CONFIANÇA REAL: >0.9 só se 100% certeza, >0.8 se muito provável, <0.5 se duvidoso
-- TOLERÂNCIA ZERO: Se dados inconsistentes, marque como confidence baixa
+- CONFIANÇA ALTA: >0.95 para detecção de arquivos de estatísticas
+- CONFIANÇA TRADES: >0.9 só se 100% certeza, >0.8 se muito provável
 - ANÁLISE COMPLETA: Mesmo sem trades, forneça análise estrutural detalhada
 `;
 

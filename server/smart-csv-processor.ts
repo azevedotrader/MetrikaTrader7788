@@ -27,17 +27,20 @@ export interface SmartCSVResult {
 }
 
 /**
- * Padrões para identificar linhas que NÃO são trades
+ * Padrões para identificar linhas que NÃO são trades (dados de estatísticas/resumo)
  */
 const NON_TRADE_PATTERNS = [
   // Cabeçalhos de seções
-  /^(resumo|summary|total|estatística|statistics|relatório|report)/i,
+  /^(resumo|summary|total|estatística|statistics|relatório|report|análise|analysis)/i,
   
-  // Campos de estatísticas
-  /patrimônio|capital|saldo|drawdown|retorno|percentual|necessário|máximo|mínimo|tempo no mercado/i,
+  // Campos de estatísticas específicos
+  /patrimônio|capital|saldo|drawdown|retorno|percentual|necessário|máximo|mínimo|tempo no mercado|win rate|lose rate/i,
+  /rentabilidade|lucro líquido|prejuízo|melhor trade|pior trade|média|mediana|sharpe|sortino/i,
+  /r\/r|risco|reward|expectativa|payoff|profit factor|recovery factor|calmar ratio/i,
+  /trades vencedores|trades perdedores|consecutivos|sequência|série|winning streak|losing streak/i,
   
-  // Totalizadores
-  /^(total|soma|média|average|min|max|count|qtd)/i,
+  // Totalizadores e métricas
+  /^(total|soma|média|average|min|max|count|qtd|número|quantidade total)/i,
   
   // Valores de configuração
   /configuração|config|setting|parameter|parâmetro/i,
@@ -45,9 +48,18 @@ const NON_TRADE_PATTERNS = [
   // Linhas vazias ou separadores
   /^[\s\-=_]*$/,
   
-  // Linhas que começam com números mas são métricas
+  // Padrões específicos de estatísticas financeiras
+  /^\s*(total geral|resultado líquido|performance|desempenho)/i,
+  /declínio máximo|drawdown|topo ao fundo|trade a trade/i,
+  
+  // Linhas que são claramente métricas (sem contexto de trade)
   /^\d+[\.,]\d+%\s*$/, // Apenas percentuais
-  /^\d+[\.,]\d{2}\s*(real|reais|r\$|brl|usd)\s*$/i // Apenas valores monetários sem contexto
+  /^\d+[\.,]\d{2}\s*(real|reais|r\$|brl|usd)\s*$/i, // Apenas valores monetários sem contexto
+  /^(positiv|negativ)[oa]s?\s*:/i, // Trades positivos/negativos (título)
+  
+  // Padrões que indicam resumos/estatísticas
+  /^(dias|meses|anos|período)\s+de\s+/i,
+  /^em\s+\d+\s+(dias|meses|anos)/i
 ];
 
 /**
@@ -66,6 +78,47 @@ const OPERATION_TYPE_PATTERNS = {
   buy: /^(c|compra|buy|long|entrada|open)$/i,
   sell: /^(v|venda|sell|short|saída|close)$/i
 };
+
+/**
+ * Verifica se uma linha contém dados de estatísticas em vez de trade individual
+ */
+function isStatisticsRow(row: any, fields: string[]): boolean {
+  if (!row) return true;
+  
+  // Converter linha para string para análise
+  const rowText = Object.values(row).join(' ').toLowerCase();
+  
+  // Verificar contra padrões de estatísticas
+  for (const pattern of NON_TRADE_PATTERNS) {
+    if (pattern.test(rowText)) {
+      return true;
+    }
+  }
+  
+  // Verificar se contém apenas campos de estatísticas conhecidos
+  const statisticsKeywords = [
+    'patrimônio', 'capital', 'saldo', 'drawdown', 'retorno', 'percentual',
+    'rentabilidade', 'lucro', 'prejuízo', 'melhor', 'pior', 'média',
+    'total', 'máximo', 'mínimo', 'win rate', 'r/r', 'expectativa'
+  ];
+  
+  const hasStatisticsKeywords = statisticsKeywords.some(keyword => 
+    rowText.includes(keyword)
+  );
+  
+  // Se tem palavras-chave de estatísticas e não tem símbolo de trading válido
+  if (hasStatisticsKeywords) {
+    const hasValidSymbol = Object.values(TRADING_SYMBOL_PATTERNS).some(pattern => 
+      pattern.test(rowText)
+    );
+    
+    if (!hasValidSymbol) {
+      return true; // É estatística
+    }
+  }
+  
+  return false;
+}
 
 /**
  * Função principal para processar CSV de forma inteligente
@@ -122,7 +175,22 @@ export async function processSmartCSV(
     
     console.log(`🎯 Detectado - Broker: ${detectedInfo.broker}, Mercado: ${detectedInfo.market}`);
 
-    // 5. Processar cada linha
+    // 5. Verificar se arquivo é predominantemente estatísticas
+    const statisticsRowCount = parseResult.data.filter((row: any) => 
+      isStatisticsRow(row, parseResult.meta.fields || [])
+    ).length;
+    
+    const statisticsPercentage = (statisticsRowCount / result.summary.totalRows) * 100;
+    console.log(`📊 Análise de conteúdo: ${statisticsRowCount}/${result.summary.totalRows} linhas são estatísticas (${statisticsPercentage.toFixed(1)}%)`);
+    
+    // Se mais de 80% das linhas são estatísticas, provavelmente é arquivo de relatório
+    if (statisticsPercentage > 80) {
+      console.log(`🚫 Arquivo detectado como relatório de performance (${statisticsPercentage.toFixed(1)}% estatísticas)`);
+      result.errors.push('Arquivo detectado como relatório de estatísticas/performance, não trades individuais');
+      return result;
+    }
+
+    // 6. Processar cada linha
     let dates: Date[] = [];
     
     for (let index = 0; index < parseResult.data.length; index++) {
