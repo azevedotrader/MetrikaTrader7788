@@ -27,10 +27,18 @@ Preferred communication style: Simple, everyday language.
 
 ### Database
 - **ORM**: Drizzle ORM with Zod validation
-- **Database**: PostgreSQL (Neon Database)
+- **Database**: PostgreSQL (configured and running)
 - **Migrations**: Drizzle Kit
-- **Tables**: Users, Trades (separated by broker, origin tracking), Broker API Configs, CSV Import History
-- **Multi-broker Support**: Data segregated for Tickmill, Clear, Gate.io, supporting manual, CSV, and API origins.
+- **Status**: ✅ Database created and all tables deployed successfully
+- **Tables**: 
+  - Users (complete user management with profiles, plans, authentication)
+  - Trades (multi-broker trade tracking with detailed analytics)
+  - Broker API Configs (API credentials management)
+  - CSV Imports (import history tracking)
+  - Subscription Plans (plan management system)
+  - Subscriptions (user subscription tracking)
+  - Platform Stats (analytics and metrics)
+- **Multi-broker Support**: Data segregated for Crypto, Forex, B3 markets, supporting manual, CSV, and API origins.
 
 ### Key Features
 - **Authentication**: Context-based, mock implementation for development, persistent user sessions.
