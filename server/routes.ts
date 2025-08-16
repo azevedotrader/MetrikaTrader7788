@@ -1319,20 +1319,25 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       const file = req.file;
       const broker = req.body.broker || 'auto';
-      const useGPT = req.body.useGPT === 'true' || req.body.useGPT === true;
+      const useTraditional = req.body.useTraditional === 'true' || req.body.useTraditional === true;
 
       if (!file) {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
       console.log(`🤖 Sistema de Importação CSV: ${file.originalname}`);
-      console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🤖 ChatGPT: ${useGPT}`);
+      console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🔄 Método: ${useTraditional ? 'Tradicional' : 'ChatGPT (Padrão)'}`);
 
       let result;
       
-      if (useGPT) {
-        // Usar ChatGPT diretamente
-        console.log(`🤖 Usando ChatGPT para analisar CSV...`);
+      if (useTraditional) {
+        // Usar sistema tradicional quando especificamente solicitado
+        console.log(`🕧 Usando sistema tradicional para analisar CSV...`);
+        const { processSmartCSV } = await import('./smart-csv-processor');
+        result = await processSmartCSV(file.path, userId, broker);
+      } else {
+        // Usar ChatGPT como padrão - Análise estrutural completa
+        console.log(`🤖 Usando ChatGPT (PADRÃO) para análise estrutural completa...`);
         const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
         const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
         
@@ -1340,44 +1345,32 @@ export async function registerRoutes(app: Express): Promise<void> {
           trades: aiResult.trades,
           summary: {
             totalRows: aiResult.analysis.originalRows,
-            tradesFound: aiResult.analysis.tradesExtracted, 
+            tradesFound: aiResult.analysis.tradesExtracted,
             statisticsSkipped: aiResult.analysis.originalRows - aiResult.analysis.tradesExtracted,
             dateRange: null,
             detectedBroker: aiResult.analysis.detectedBroker,
             detectedMarket: aiResult.trades[0]?.mercado || 'b3',
             confidence: aiResult.analysis.confidence,
-            processingMethod: 'ChatGPT',
+            processingMethod: 'ChatGPT (Análise Estrutural Completa)',
             csvStructure: aiResult.analysis.csvStructure
           },
           errors: aiResult.errors
         };
-      } else {
-        // Tentar sistema tradicional primeiro
-        console.log(`🧠 Tentando sistema tradicional...`);
-        const { processSmartCSV } = await import('./smart-csv-processor');
-        result = await processSmartCSV(file.path, userId, broker);
         
-        // Se falhou, tentar ChatGPT como fallback
-        if (result.trades.length === 0 && process.env.OPENAI_API_KEY) {
-          console.log(`🤖 Sistema tradicional falhou, tentando ChatGPT como fallback...`);
-          const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
-          const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
+        // Se ChatGPT falhou, tentar sistema tradicional como fallback
+        if (result.trades.length === 0) {
+          console.log(`🔄 ChatGPT não encontrou dados, tentando sistema tradicional como fallback...`);
+          const { processSmartCSV } = await import('./smart-csv-processor');
+          const fallbackResult = await processSmartCSV(file.path, userId, broker);
           
-          if (aiResult.trades.length > 0) {
+          if (fallbackResult.trades.length > 0) {
             result = {
-              trades: aiResult.trades,
+              ...fallbackResult,
               summary: {
-                totalRows: aiResult.analysis.originalRows,
-                tradesFound: aiResult.analysis.tradesExtracted,
-                statisticsSkipped: aiResult.analysis.originalRows - aiResult.analysis.tradesExtracted,
-                dateRange: null,
-                detectedBroker: aiResult.analysis.detectedBroker,
-                detectedMarket: aiResult.trades[0]?.mercado || 'b3',
-                confidence: aiResult.analysis.confidence,
-                processingMethod: 'ChatGPT (Fallback)',
-                csvStructure: aiResult.analysis.csvStructure
+                ...fallbackResult.summary,
+                processingMethod: 'Sistema Tradicional (Fallback após ChatGPT)'
               },
-              errors: result.errors.concat(['ℹ️ Sistema tradicional falhou, ChatGPT conseguiu extrair os dados!'])
+              errors: result.errors.concat(['ℹ️ ChatGPT falhou, sistema tradicional conseguiu extrair os dados!'])
             };
           }
         }
@@ -1458,7 +1451,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`   - Período: ${result.summary.dateRange?.start} a ${result.summary.dateRange?.end}`);
 
       res.json({
-        message: `🎉 ${savedTrades.length} trades importados com sucesso! (Método: ${result.summary?.processingMethod || 'Sistema Tradicional'})`,
+        message: `🎉 ${savedTrades.length} trades importados com sucesso! (Método: ${result.summary?.processingMethod || 'ChatGPT (Análise Estrutural Completa)'})`,
         tradesImported: savedTrades.length,
         summary: {
           ...result.summary,

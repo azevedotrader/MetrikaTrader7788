@@ -54,60 +54,106 @@ export async function analyzeCSVWithOpenAI(
     const sampleData = parseResult.data.slice(0, 50);
     const csvSample = sampleData.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
 
-    // 3. Prompt especializado para extração de trades
+    // 3. Prompt SUPER AVANÇADO para análise estrutural completa
     const prompt = `
-Você é um especialista em análise de dados de trading. Analise este CSV e extraia TODAS as operações (trades) realizadas.
+🚀 TAREFA: ANÁLISE ESTRUTURAL COMPLETA DE CSV DE TRADING
 
-CSV DADOS:
+Você é um especialista em análise de dados financeiros. Faça uma análise estrutural COMPLETA deste CSV.
+
+📊 DADOS CSV PARA ANÁLISE:
 ${csvSample}
 
-INSTRUÇÕES:
-1. IDENTIFIQUE se este é um arquivo de trades individuais ou estatísticas/resumos
-2. Se for arquivo de ESTATÍSTICAS (contém saldos, lucros totais, médias), responda que não há trades
-3. Se for arquivo de TRADES, extraia CADA OPERAÇÃO realizada
+🏢 BROKER SUGERIDO: ${broker}
 
-Para cada TRADE encontrado, extraia:
-- Símbolo do ativo (ação, índice futuro, cripto, etc)
-- Data da operação (formato YYYY-MM-DD)
-- Tipo: "compra" ou "venda"
-- Quantidade operada 
-- Preço de entrada
-- Preço de saída (se disponível)
-- Resultado (lucro/prejuízo)
-- Qualquer informação adicional relevante
+📋 ANÁLISE ESTRUTURAL OBRIGATÓRIA:
 
-FORMATO DE RESPOSTA (JSON):
+1. 🔍 DETECÇÃO DE FORMATO:
+   - Identifique delimitadores automaticamente (, ; | tab espaços)
+   - Analise encoding (UTF-8, Latin-1, etc.)
+   - Detecte formato de data (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD)
+   - Identifique separadores decimais (, ou .)
+   - Reconheça headers/colunas
+
+2. 🏛️ IDENTIFICAÇÃO DE CORRETORA:
+   - Clear (B3): formato WINQ25;01/07/2025 17:04:30;V;141.745
+   - Rico/XP: headers estruturados (Ativo, Quantidade, Preço, etc.)
+   - Inter/BTG: relatórios padronizados
+   - Crypto: pares BTC/USDT, timestamps Unix
+   - Forex: pares EUR/USD, spreads
+   - Generic: formato customizado
+
+3. 📈 ANÁLISE DE CONTEÚDO:
+   - Conte linhas totais vs linhas de dados
+   - Identifique trades vs estatísticas vs headers
+   - Reconheça padrões de símbolos (WIN, DOL, BTC, EUR/USD)
+   - Detecte colunas de preços, quantidades, datas
+   - Calcule confiança da análise (0.0 a 1.0)
+
+4. 💹 EXTRAÇÃO DE TRADES:
+   Para cada trade válido encontrado:
+   - ✅ Símbolo do ativo (preservar formato original)
+   - 📅 Data/hora completa (converter para ISO 8601)
+   - 📊 Tipo: "compra" ou "venda" (C/V, BUY/SELL, +/-)
+   - 🔢 Quantidade (decimal preciso)
+   - 💰 Preço entrada (4 casas decimais)
+   - 💰 Preço saída (se disponível)
+   - 💵 Resultado final (lucro/prejuízo)
+   - 🏦 Capital utilizado (quantidade × preço)
+   - 📝 Observações adicionais
+
+📤 FORMATO DE RESPOSTA (JSON ESTRUTURADO):
 {
-  "fileType": "trades" ou "statistics",
-  "detectedBroker": "clear" | "rico" | "xp" | "inter" | "btg" | "crypto" | "forex" | "generic",
-  "csvStructure": "descrição da estrutura do arquivo",
-  "confidence": 0.0 to 1.0,
+  "fileType": "trades" | "statistics" | "mixed" | "unknown",
+  "detectedBroker": "clear" | "rico" | "xp" | "inter" | "btg" | "binance" | "crypto" | "forex" | "mt5" | "generic",
+  "csvStructure": "DESCRIÇÃO DETALHADA: delimitador=X, encoding=Y, colunas=Z, formato_data=W, decimal=V",
+  "confidence": 0.95,
+  "delimiter": ";",
+  "dateFormat": "DD/MM/YYYY HH:mm:ss",
+  "decimalSeparator": "," | ".",
+  "totalRows": 150,
+  "dataRows": 120,
+  "headerRows": 2,
+  "statisticRows": 28,
+  "columnMapping": {
+    "symbol": "coluna 1 ou nome",
+    "datetime": "coluna 2 ou nome",
+    "type": "coluna 3 ou nome",
+    "quantity": "coluna 4 ou nome",
+    "price": "coluna 5 ou nome",
+    "result": "coluna 6 ou nome"
+  },
+  "marketDetected": "b3" | "crypto" | "forex" | "stocks" | "unknown",
   "trades": [
     {
       "ativo": "WINQ25",
-      "dataHora": "2024-08-15T14:30:00.000Z",
-      "tipo": "compra" ou "venda", 
+      "dataHora": "2025-01-07T17:04:30.000Z",
+      "tipo": "venda",
       "quantidade": "1.0000",
-      "precoEntrada": "120000.0000",
-      "precoSaida": "120500.0000",
-      "resultado": "500.00",
-      "capitalUtilizado": "120000.00",
+      "precoEntrada": "141745.0000",
+      "precoSaida": "141200.0000",
+      "resultado": "545.00",
+      "capitalUtilizado": "141745.00",
       "corretora": "b3",
       "mercado": "b3",
-      "setup": "Análise GPT",
+      "setup": "Scalping 5min",
       "origem": "csv-gpt",
-      "comentario": "Extraído via ChatGPT"
+      "comentario": "Trade extraído via análise ChatGPT - WIN Futuro",
+      "stop": "142000.0000",
+      "alvo": "141000.0000",
+      "risco": "2.5"
     }
   ]
 }
 
-IMPORTANTE:
-- Se não encontrar trades válidos, retorne array vazio
-- Use símbolos reais encontrados no CSV
-- Converta datas para formato ISO
-- Calcule capitalUtilizado como quantidade * precoEntrada
-- Seja preciso com números (use string para valores decimais)
-- Identifique corretamente o mercado: "b3" (ações/futuros BR), "crypto" (criptomoedas), "forex" (câmbio)
+⚠️ REQUISITOS CRÍTICOS:
+- Seja EXTREMAMENTE preciso com números (use strings para decimais)
+- Preserve símbolos EXATOS do arquivo original
+- Converta TODAS as datas para ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
+- Identifique corretamente compra/venda (C/V, BUY/SELL, +/-, entrada/saída)
+- Calcule capital = quantidade × preço_entrada
+- Detecte automaticamente mercado: b3(WIN,DOL,ISP), crypto(BTC,ETH), forex(EUR/USD)
+- Confidence > 0.8 apenas se tiver certeza dos dados
+- Se não encontrar trades, retorne array vazio mas mantenha análise estrutural
 `;
 
     console.log(`🧠 Enviando para ChatGPT... (${csvSample.length} chars)`);
@@ -126,8 +172,8 @@ IMPORTANTE:
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.1, // Baixa temperatura para mais precisão
-      max_tokens: 4000
+      temperature: 0.05, // Temperatura ultra baixa para máxima precisão
+      max_tokens: 8000 // Tokens aumentados para análise estrutural completa
     });
 
     const aiResponse = response.choices[0]?.message?.content;
@@ -204,10 +250,18 @@ IMPORTANTE:
       analysis: {
         originalRows: parseResult.data.length,
         tradesExtracted: trades.length,
-        confidence: analysis.confidence || 0.8,
+        confidence: analysis.confidence || 0.85,
         fileType: analysis.fileType || 'trades',
         detectedBroker: analysis.detectedBroker || 'generic',
-        csvStructure: analysis.csvStructure || 'Estrutura não identificada'
+        csvStructure: analysis.csvStructure || 'Análise estrutural via ChatGPT',
+        // Informações estruturais adicionais do ChatGPT
+        ...(analysis.delimiter && { delimiter: analysis.delimiter }),
+        ...(analysis.dateFormat && { dateFormat: analysis.dateFormat }),
+        ...(analysis.decimalSeparator && { decimalSeparator: analysis.decimalSeparator }),
+        ...(analysis.totalRows && { totalRows: analysis.totalRows }),
+        ...(analysis.dataRows && { dataRows: analysis.dataRows }),
+        ...(analysis.marketDetected && { marketDetected: analysis.marketDetected }),
+        ...(analysis.columnMapping && { columnMapping: analysis.columnMapping })
       },
       errors
     };
