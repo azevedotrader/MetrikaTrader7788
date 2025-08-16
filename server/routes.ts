@@ -1326,6 +1326,12 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       console.log(`🤖 Sistema de Importação CSV: ${file.originalname}`);
+      console.log(`📋 Parâmetros recebidos:`, {
+        useTraditional: req.body.useTraditional,
+        useTraditionalParsed: useTraditional,
+        broker,
+        csvName: req.body.csvName
+      });
       console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🔄 Método: ${useTraditional ? 'Tradicional' : 'ChatGPT (Padrão)'}`);
 
       let result;
@@ -1366,6 +1372,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           const fallbackResult = await processSmartCSV(file.path, userId, broker);
           
           if (fallbackResult.trades.length > 0) {
+            console.log(`✅ Fallback bem-sucedido: ${fallbackResult.trades.length} trades extraídos pelo sistema tradicional`);
             result = {
               ...fallbackResult,
               summary: {
@@ -1374,6 +1381,8 @@ export async function registerRoutes(app: Express): Promise<void> {
               },
               errors: result.errors.concat(['ℹ️ ChatGPT falhou, sistema tradicional conseguiu extrair os dados!'])
             };
+          } else {
+            console.log(`❌ Ambos métodos falharam: ChatGPT e Sistema Tradicional`);
           }
         }
       }
@@ -1428,7 +1437,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       // Save trades to database
-      const processingMethod = result.summary?.processingMethod || 'Sistema Tradicional';
+      const processingMethod = (result.summary as any)?.processingMethod || 'Sistema Tradicional';
       console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
       const savedTrades = await storage.createBulkTrades(result.trades);
 
@@ -1452,17 +1461,17 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`   - Mercado detectado: ${result.summary.detectedMarket}`);
       console.log(`   - Período: ${result.summary.dateRange?.start} a ${result.summary.dateRange?.end}`);
 
+      const finalMethod = (result.summary as any)?.processingMethod || 'ChatGPT (Análise Estrutural Completa)';
+      console.log(`📊 Método final usado: "${finalMethod}"`);
+      
       res.json({
         message: `🎉 ${savedTrades.length} trades importados com sucesso!`,
-        processingMethod: result.summary?.processingMethod || 'ChatGPT (Análise Estrutural Completa)',
-        methodUsed: result.summary?.processingMethod || 'ChatGPT (Análise Estrutural Completa)',
+        processingMethod: finalMethod,
+        methodUsed: finalMethod,
         tradesImported: savedTrades.length,
         summary: {
           ...result.summary,
-          tradesImported: savedTrades.length,
-          processingMethod: result.summary?.processingMethod || 'Sistema Tradicional',
-          confidence: result.summary?.confidence,
-          csvStructure: result.summary?.csvStructure
+          processingMethod: finalMethod
         },
         dateRange: result.summary.dateRange,
         userId: userId, // Manter isolamento
