@@ -209,3 +209,49 @@ export const updateUserByAdminSchema = z.object({
 
 export type UpdateUserByAdmin = z.infer<typeof updateUserByAdminSchema>;
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+
+// Relações do Drizzle ORM
+import { relations } from "drizzle-orm";
+
+export const usersRelations = relations(users, ({ many, one }) => ({
+  trades: many(trades),
+  brokerApiConfigs: many(brokerApiConfigs),
+  csvImports: many(csvImports),
+  subscriptions: many(subscriptions),
+}));
+
+export const tradesRelations = relations(trades, ({ one }) => ({
+  user: one(users, {
+    fields: [trades.userId],
+    references: [users.id],
+  }),
+}));
+
+export const brokerApiConfigsRelations = relations(brokerApiConfigs, ({ one }) => ({
+  user: one(users, {
+    fields: [brokerApiConfigs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const csvImportsRelations = relations(csvImports, ({ one }) => ({
+  user: one(users, {
+    fields: [csvImports.userId],
+    references: [users.id],
+  }),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+  plan: one(subscriptionPlans, {
+    fields: [subscriptions.planId],
+    references: [subscriptionPlans.id],
+  }),
+}));
+
+export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({
+  subscriptions: many(subscriptions),
+}));
