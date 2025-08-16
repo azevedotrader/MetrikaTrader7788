@@ -242,10 +242,10 @@ export default function NovoTrade() {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
       <div>
-        <h1 className="text-3xl font-bold text-white">Novo Trade</h1>
-        <p className="text-slate-400 mt-2">Registre os detalhes da sua operação ou importe via CSV</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-white">Novo Trade</h1>
+        <p className="text-slate-400 mt-2 text-sm lg:text-base">Registre os detalhes da sua operação ou importe via CSV</p>
       </div>
       <Tabs defaultValue="manual" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
@@ -265,7 +265,7 @@ export default function NovoTrade() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Linha 1 - Data/Hora, Ativo, Mercado */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
                 <FormField
                   control={form.control}
                   name="dataHora"
@@ -327,7 +327,7 @@ export default function NovoTrade() {
               </div>
 
               {/* Linha 2 - Setup, Tipo */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
                 <FormField
                   control={form.control}
                   name="setup"

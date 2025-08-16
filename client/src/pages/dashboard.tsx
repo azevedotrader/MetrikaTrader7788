@@ -627,11 +627,11 @@ export default function Dashboard() {
   const metrics = calculateMetrics(filteredTrades);
 
   return (
-    <div className="space-y-6 pb-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-slate-400 mt-2">
+          <h1 className="text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
+          <p className="text-slate-400 mt-2 text-sm lg:text-base">
             {selectedBrokerFilter 
               ? `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`
               : 'Dados consolidados de todas as corretoras'
@@ -639,7 +639,7 @@ export default function Dashboard() {
           </p>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {/* Consolidated Data Button */}
           <Button 
             className={`gradient-purple-blue hover:opacity-90 transition-opacity ${

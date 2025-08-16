@@ -10,6 +10,7 @@ import { TopBar } from "@/components/layout/top-bar";
 import { AIChat } from "@/components/ui/ai-chat";
 import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
 import { CsvTipsPopup } from "@/components/ui/csv-tips-popup";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -40,6 +41,8 @@ function AppContent() {
   const { isAuthenticated } = useAuth();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -64,40 +67,69 @@ function AppContent() {
             <Landing />
           ) : (
             <>
-              <Sidebar />
-              <div className="ml-16 min-h-screen transition-all duration-300">
+              <Sidebar 
+                isOpen={isSidebarOpen} 
+                onClose={() => setIsSidebarOpen(false)}
+              />
+              <div className={`min-h-screen transition-all duration-300 ${
+                isMobile ? 'ml-0' : 'ml-16'
+              }`}>
                 <Switch>
                   <Route path="/dashboard">
-                    <TopBar title={pageTitles["/dashboard"]} />
+                    <TopBar 
+                      title={pageTitles["/dashboard"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Dashboard />
                   </Route>
                   <Route path="/novo-trade">
-                    <TopBar title={pageTitles["/novo-trade"]} />
+                    <TopBar 
+                      title={pageTitles["/novo-trade"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <NovoTrade />
                   </Route>
                   <Route path="/graficos">
-                    <TopBar title={pageTitles["/graficos"]} />
+                    <TopBar 
+                      title={pageTitles["/graficos"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Graficos />
                   </Route>
                   <Route path="/analises">
-                    <TopBar title={pageTitles["/analises"]} />
+                    <TopBar 
+                      title={pageTitles["/analises"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Analises />
                   </Route>
                   <Route path="/diario">
-                    <TopBar title={pageTitles["/diario"]} />
+                    <TopBar 
+                      title={pageTitles["/diario"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Diario />
                   </Route>
                   <Route path="/calendario">
-                    <TopBar title={pageTitles["/calendario"]} />
+                    <TopBar 
+                      title={pageTitles["/calendario"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Calendario />
                   </Route>
                   <Route path="/perfil">
-                    <TopBar title={pageTitles["/perfil"]} />
+                    <TopBar 
+                      title={pageTitles["/perfil"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Perfil />
                   </Route>
                   {/* Admin route moved to standalone section */}
                   <Route path="/">
-                    <TopBar title={pageTitles["/dashboard"]} />
+                    <TopBar 
+                      title={pageTitles["/dashboard"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
                     <Dashboard />
                   </Route>
                   <Route component={NotFound} />
