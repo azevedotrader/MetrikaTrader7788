@@ -50,23 +50,23 @@ export async function analyzeCSVWithOpenAI(
 
     console.log(`📊 CSV carregado: ${parseResult.data.length} linhas`);
 
-    // 2. Preparar dados para ChatGPT (otimizado para tokens)
-    // Se arquivo muito grande (>1000 linhas), usar amostra inteligente
+    // 2. Estratégia inteligente: processar TUDO até 800 linhas, depois usar amostra
     let csvSample: string;
-    let linesToAnalyze = parseResult.data.length;
+    let isFullAnalysis = parseResult.data.length <= 800;
     
-    if (parseResult.data.length > 1000) {
-      // Para arquivos grandes: pegar início + meio + fim para análise completa
-      const start = parseResult.data.slice(0, 300);
-      const middle = parseResult.data.slice(Math.floor(parseResult.data.length / 2) - 150, Math.floor(parseResult.data.length / 2) + 150);
-      const end = parseResult.data.slice(-300);
+    if (isFullAnalysis) {
+      // Análise completa para arquivos pequenos/médios (até 800 linhas)
+      csvSample = parseResult.data.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
+      console.log(`📊 ANÁLISE COMPLETA: Enviando TODAS as ${parseResult.data.length} linhas para ChatGPT`);
+    } else {
+      // Para arquivos muito grandes (>800 linhas): usar amostra inteligente
+      const start = parseResult.data.slice(0, 250);
+      const middle = parseResult.data.slice(Math.floor(parseResult.data.length / 2) - 125, Math.floor(parseResult.data.length / 2) + 125);
+      const end = parseResult.data.slice(-250);
       const sampleData = [...start, ...middle, ...end];
       csvSample = sampleData.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
-      console.log(`📊 Arquivo grande (${parseResult.data.length} linhas): usando amostra inteligente de ${sampleData.length} linhas`);
-    } else {
-      // Arquivo pequeno/médio: analisar completo
-      csvSample = parseResult.data.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
-      console.log(`📊 Enviando ${parseResult.data.length} linhas completas para análise ChatGPT`);
+      console.log(`📊 Arquivo muito grande (${parseResult.data.length} linhas): usando amostra de ${sampleData.length} linhas`);
+      console.log(`⚠️ Para análise completa de arquivos grandes, use o sistema tradicional`);
     }
 
     // 3. Prompt ULTRA AVANÇADO para análise perfeita de qualquer CSV
@@ -75,7 +75,11 @@ export async function analyzeCSVWithOpenAI(
 
 Você é um sistema especialista em engenharia reversa de dados financeiros. Analise este CSV COMPLETO com precisão cirúrgica.
 
-📊 CSV PARA ANÁLISE (${linesToAnalyze} de ${parseResult.data.length} linhas):
+📊 CSV PARA ANÁLISE:
+${isFullAnalysis ? 
+  `📋 ARQUIVO COMPLETO (${parseResult.data.length} linhas) - EXTRAIA TODOS OS TRADES:` :
+  `⚠️ ARQUIVO GRANDE: ${parseResult.data.length} linhas total
+📋 AMOSTRA REPRESENTATIVA para análise de estrutura:`}
 ${csvSample}
 
 🏢 BROKER: ${brokerHint}
@@ -107,16 +111,25 @@ ${csvSample}
    DATAS: Extraia timestamp completo ou apenas data
    RESULTADOS: Lucro/prejuízo em R$, USD, pontos, pips
 
-4. 🏗️ ENGENHARIA REVERSA COMPLETA:
-   Para CADA linha que contenha dados de trade:
-   - SÍMBOLO: Extraia exato (WIN, WINQ25, BTC/USDT, EURUSD)
+4. 🏗️ ENGENHARIA REVERSA COMPLETA - EXTRAIR TODOS OS TRADES:
+   🚨 REGRA CRÍTICA: EXAMINE LINHA POR LINHA - NÃO PULE NENHUMA
+   
+   Para identificar um trade, procure por linhas que contenham:
+   ✓ Símbolo financeiro (WIN, PETR4, BTC, EUR, etc.) E
+   ✓ Algum tipo de operação (C/V, BUY/SELL, +/-, 1/-1) E  
+   ✓ Valores numéricos (preço, quantidade, resultado)
+   
+   Para CADA linha de trade encontrada, extraia:
+   - SÍMBOLO: Exato como aparece (WIN, WINQ25, BTC/USDT, EURUSD)
    - DATA/HORA: Converta para ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ)
-   - DIREÇÃO: "compra" ou "venda" (normalize qualquer formato)
-   - QUANTIDADE: Valor numérico preciso (string com decimais)
-   - PREÇO ENTRADA: 4+ casas decimais
-   - PREÇO SAÍDA: Se disponível
-   - RESULTADO: Lucro/prejuízo calculado
+   - DIREÇÃO: "compra" ou "venda" (normalize C→compra, V→venda, BUY→compra, SELL→venda)
+   - QUANTIDADE: Valor numérico como string com decimais
+   - PREÇO ENTRADA: Com 4+ casas decimais
+   - PREÇO SAÍDA: Se disponível na linha
+   - RESULTADO: Lucro/prejuízo (calcule se não estiver explícito)
    - CAPITAL: quantidade × preço_entrada
+   
+   🎯 OBJETIVO: Se o CSV tem 100 linhas de trades reais, extraia TODOS os 100!
 
 5. 🚨 DETECÇÃO CRÍTICA DE CASOS ESPECIAIS:
    ARQUIVO ESTATÍSTICAS/PERFORMANCE: Se contém termos como:
@@ -175,17 +188,34 @@ ${csvSample}
 }
 
 ⚡ EXECUÇÃO PERFEITA OBRIGATÓRIA:
-- IDENTIFICAÇÃO CRÍTICA: Se detectar termos como "Patrimônio", "Drawdown", "Rentabilidade Total", "Win Rate", "R/R Médio" → fileType: "statistics"
-- NUNCA EXTRAIR: Dados de resumo/performance como trades individuais
-- PRECISÃO CIRÚRGICA: Use strings para todos os decimais, preserve formatação original
-- SÍMBOLOS EXATOS: Mantenha formato original (WIN, WINQ25, BTC/USDT, PETR4)
-- DATAS UNIVERSAIS: Converta qualquer formato para ISO 8601 completo
-- OPERAÇÕES INTELIGENTES: Normalize qualquer indicador de compra/venda
-- CÁLCULOS PRECISOS: capital = quantidade × preço, resultado = (saída - entrada) × quantidade
-- MERCADOS AUTO-DETECT: b3(WIN,DOL,PETR), crypto(BTC,ETH,USDT), forex(EUR,GBP,USD)
-- CONFIANÇA ALTA: >0.95 para detecção de arquivos de estatísticas
-- CONFIANÇA TRADES: >0.9 só se 100% certeza, >0.8 se muito provável
-- ANÁLISE COMPLETA: Mesmo sem trades, forneça análise estrutural detalhada
+- 🔥 EXTRAIR TUDO: Examine CADA linha individualmente, não faça suposições ou pule dados
+- 🚨 IDENTIFICAÇÃO CRÍTICA: Se detectar termos como "Patrimônio", "Drawdown", "Rentabilidade Total" → fileType: "statistics"
+- ❌ NUNCA EXTRAIR: Dados de resumo/performance como trades individuais
+- 📊 CONTAR CORRETO: Se CSV tem 50 trades reais, extraia TODOS os 50 (não apenas 2-3)
+- 🎯 LINHA POR LINHA: Analise uma por uma, procurando por símbolos + operações + valores
+- 💎 PRECISÃO CIRÚRGICA: Use strings para todos os decimais, preserve formatação
+- 🏷️ SÍMBOLOS EXATOS: Mantenha formato original (WIN, WINQ25, BTC/USDT, PETR4)
+- 📅 DATAS UNIVERSAIS: Converta qualquer formato para ISO 8601 completo
+- ⚖️ OPERAÇÕES INTELIGENTES: C→compra, V→venda, BUY→compra, SELL→venda
+- 🧮 CÁLCULOS PRECISOS: capital = quantidade × preço, resultado = (saída - entrada) × quantidade
+- 🌍 MERCADOS AUTO-DETECT: b3(WIN,DOL,PETR), crypto(BTC,ETH,USDT), forex(EUR,GBP,USD)
+- 📈 CONFIANÇA ALTA: >0.95 para detecção de arquivos de estatísticas, >0.9 para trades válidos
+- 📋 ANÁLISE COMPLETA: Mesmo sem trades, forneça análise estrutural detalhada
+
+🎯 LEMBRE-SE: Seu trabalho é encontrar TODOS os trades, não apenas alguns exemplos!
+
+📝 EXEMPLO PRÁTICO DE ANÁLISE COMPLETA:
+Se receber um CSV com estas linhas:
+WINQ25;01/07/2025 17:04;V;141745;1;545
+PETR4;01/07/2025 15:30;C;28.50;100;-150
+VALE3;01/07/2025 16:45;V;65.20;50;230
+
+Deve extrair EXATAMENTE 3 trades - um para cada linha válida!
+NÃO extraia apenas 1 ou 2 como "exemplo" - extraia TODOS os 3 trades completos.
+
+🔢 VERIFICAÇÃO OBRIGATÓRIA:
+Antes de finalizar, conte quantas linhas de dados de trade você encontrou
+e certifique-se de que seu array "trades" contém EXATAMENTE esse número!
 `;
 
     console.log(`🧠 Enviando para ChatGPT... (${csvSample.length} chars)`);
