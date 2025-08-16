@@ -87,3 +87,11 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Função para limpar cache e garantir isolamento total de dados
+export function clearUserDataCache() {
+  console.log('🧹 Limpando cache para garantir isolamento de dados');
+  queryClient.clear();
+  queryClient.resetQueries();
+  queryClient.invalidateQueries();
+}

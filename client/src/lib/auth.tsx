@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { apiRequest } from "./queryClient";
+import { apiRequest, clearUserDataCache } from "./queryClient";
 
 interface User {
   id: string;
@@ -63,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Store user in localStorage for persistence
       localStorage.setItem('user', JSON.stringify(userWithInitials));
       localStorage.setItem('user-id', userData.id);
+      
+      // Limpar cache anterior para garantir isolamento
+      clearUserDataCache();
     } catch (error: any) {
       throw new Error(error.message || "Erro ao fazer login");
     }
@@ -72,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('user-id');
+    // Limpar todo o cache para garantir isolamento total
+    clearUserDataCache();
   };
 
   // Load user from localStorage on app start

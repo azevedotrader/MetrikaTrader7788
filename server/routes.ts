@@ -103,9 +103,8 @@ function requireAuthFlexible(req: any, res: any, next: any) {
     
     // If still no userId, provide a default for testing
     if (!userId || userId.trim() === '') {
-      // For development, use a default user ID
-      userId = 'default-user';
-      console.warn(`⚠️  No userId found, using default: ${userId}`);
+      // NUNCA usar usuário padrão - isolamento obrigatório
+      throw new Error('Usuário não autenticado - userId é obrigatório para isolamento de dados');
     }
     
     req.userId = userId;
@@ -1137,7 +1136,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // CSV Import - ISOLADO POR USUÁRIO
-  app.post("/api/trades/import/:corretora", requireAuthFlexible, upload.single('file'), async (req, res) => {
+  app.post("/api/trades/import/:corretora", requireAuth, upload.single('file'), async (req, res) => {
     try {
       const { corretora } = req.params;
       const file = req.file;
@@ -1146,7 +1145,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
       }
 
-      const userId = req.userId || 'default-user'; // Obtido do middleware de autenticação
+      const userId = req.userId; // OBRIGATÓRIO - obtido do middleware de autenticação
       console.log(`[${userId}] Iniciando importação CSV para ${corretora}:`, file.filename);
 
       const fieldMap = JSON.parse(req.body.fieldMap || '{}');
@@ -1251,7 +1250,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.delete("/api/trades/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.userId || 'default-user';
+      const userId = req.userId; // OBRIGATÓRIO para isolamento
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
       await storage.deleteTrade(id, userId);
       res.status(204).send();
     } catch (error) {
@@ -1263,7 +1265,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Reset all data (complete dashboard reset) - ISOLADO POR USUÁRIO
   app.delete("/api/trades/reset-all", requireAuth, async (req, res) => {
     try {
-      const userId = req.userId || 'default-user';
+      const userId = req.userId; // OBRIGATÓRIO para isolamento
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
       
       console.log(`🗑️ Iniciando reset completo para usuário específico: ${userId}`);
 
@@ -1306,9 +1311,12 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // CSV Upload endpoint - SISTEMA HÍBRIDO: Smart + ChatGPT
-  app.post("/api/trades/upload-csv", requireAuthFlexible, upload.single('csvFile'), async (req, res) => {
+  app.post("/api/trades/upload-csv", requireAuth, upload.single('csvFile'), async (req, res) => {
     try {
-      const userId = req.userId || 'default-user';
+      const userId = req.userId; // OBRIGATÓRIO para isolamento
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
       const file = req.file;
       const broker = req.body.broker || 'auto';
       const useGPT = req.body.useGPT === 'true' || req.body.useGPT === true;
@@ -1486,7 +1494,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   // CSV Imports history - ISOLADO POR USUÁRIO
   app.get("/api/csv-imports", requireAuth, async (req, res) => {
     try {
-      const userId = req.userId || 'default-user'; // ISOLAMENTO OBRIGATÓRIO
+      const userId = req.userId; // ISOLAMENTO OBRIGATÓRIO
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
       const imports = await storage.getCsvImports(userId);
       res.json(imports);
     } catch (error) {
@@ -1931,9 +1942,12 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Nova rota para testar o leitor universal de CSV - ISOLADO POR USUÁRIO
-  app.post("/api/csv/analyze-universal", requireAuthFlexible, upload.single('csvFile'), async (req, res) => {
+  app.post("/api/csv/analyze-universal", requireAuth, upload.single('csvFile'), async (req, res) => {
     try {
-      const userId = req.userId || 'default-user'; // Usuário autenticado
+      const userId = req.userId; // Usuário autenticado OBRIGATÓRIO
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
       
       if (!req.file) {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
