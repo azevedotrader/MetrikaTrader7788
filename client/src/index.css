@@ -33,64 +33,64 @@
 
 :root {
   --background: var(--charcoal-900);
-  --foreground: hsl(210, 40%, 98%);
+  --foreground: hsl(0, 0%, 98%);
   --muted: var(--charcoal-700);
   --muted-foreground: var(--charcoal-400);
   --popover: var(--charcoal-800);
-  --popover-foreground: hsl(210, 40%, 98%);
+  --popover-foreground: hsl(0, 0%, 98%);
   --card: var(--graphite-dark);
-  --card-foreground: hsl(210, 40%, 98%);
+  --card-foreground: hsl(0, 0%, 98%);
   --border: var(--charcoal-600);
   --input: var(--charcoal-700);
   --primary: var(--neutral-primary);
-  --primary-foreground: hsl(210, 40%, 98%);
+  --primary-foreground: hsl(0, 0%, 98%);
   --secondary: var(--charcoal-700);
-  --secondary-foreground: hsl(210, 40%, 98%);
+  --secondary-foreground: hsl(0, 0%, 98%);
   --accent: var(--charcoal-600);
-  --accent-foreground: hsl(210, 40%, 98%);
+  --accent-foreground: hsl(0, 0%, 98%);
   --destructive: var(--loss);
-  --destructive-foreground: hsl(210, 40%, 98%);
+  --destructive-foreground: hsl(0, 0%, 98%);
   --ring: var(--neutral-primary);
   --radius: 0.5rem;
   
   /* Professional Trading Colors - Neutral Gray Theme (FX Replay Style) */
   --profit: hsl(120, 100%, 40%);
   --loss: hsl(0, 100%, 50%);
-  --neutral-primary: hsl(210, 10%, 40%);
-  --neutral-secondary: hsl(210, 10%, 30%);
-  --graphite-dark: hsl(215, 15%, 12%);
-  --graphite-medium: hsl(215, 12%, 16%);
-  --graphite-light: hsl(215, 10%, 22%);
-  --charcoal-900: hsl(220, 13%, 8%);
-  --charcoal-800: hsl(218, 11%, 10%);
-  --charcoal-700: hsl(216, 10%, 14%);
-  --charcoal-600: hsl(214, 8%, 20%);
-  --charcoal-500: hsl(212, 7%, 30%);
-  --charcoal-400: hsl(210, 6%, 50%);
-  --charcoal-300: hsl(208, 5%, 70%);
+  --neutral-primary: hsl(0, 0%, 35%);
+  --neutral-secondary: hsl(0, 0%, 25%);
+  --graphite-dark: hsl(0, 0%, 6%);
+  --graphite-medium: hsl(0, 0%, 8%);
+  --graphite-light: hsl(0, 0%, 12%);
+  --charcoal-900: hsl(0, 0%, 4%);
+  --charcoal-800: hsl(0, 0%, 7%);
+  --charcoal-700: hsl(0, 0%, 10%);
+  --charcoal-600: hsl(0, 0%, 15%);
+  --charcoal-500: hsl(0, 0%, 25%);
+  --charcoal-400: hsl(0, 0%, 45%);
+  --charcoal-300: hsl(0, 0%, 65%);
   --accent-blue: hsl(210, 100%, 56%);
   --accent-gold: hsl(43, 100%, 58%);
 }
 
 .dark {
   --background: var(--charcoal-900);
-  --foreground: hsl(210, 40%, 98%);
+  --foreground: hsl(0, 0%, 98%);
   --muted: var(--charcoal-700);
   --muted-foreground: var(--charcoal-400);
   --popover: var(--charcoal-800);
-  --popover-foreground: hsl(210, 40%, 98%);
+  --popover-foreground: hsl(0, 0%, 98%);
   --card: var(--graphite-dark);
-  --card-foreground: hsl(210, 40%, 98%);
+  --card-foreground: hsl(0, 0%, 98%);
   --border: var(--charcoal-600);
   --input: var(--charcoal-700);
   --primary: var(--neutral-primary);
-  --primary-foreground: hsl(210, 40%, 98%);
+  --primary-foreground: hsl(0, 0%, 98%);
   --secondary: var(--charcoal-700);
-  --secondary-foreground: hsl(210, 40%, 98%);
+  --secondary-foreground: hsl(0, 0%, 98%);
   --accent: var(--charcoal-600);
-  --accent-foreground: hsl(210, 40%, 98%);
+  --accent-foreground: hsl(0, 0%, 98%);
   --destructive: var(--loss);
-  --destructive-foreground: hsl(210, 40%, 98%);
+  --destructive-foreground: hsl(0, 0%, 98%);
   --ring: var(--neutral-primary);
 }
 
