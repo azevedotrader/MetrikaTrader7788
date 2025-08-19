@@ -182,13 +182,13 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
 
     return (
       <div className={cn(
-        "h-16 p-1 border-r border-b border-slate-700 relative group hover:bg-slate-800/50 transition-colors",
-        isToday && "bg-blue-500/10 border-blue-500/30"
+        "h-16 p-1 border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors",
+        isToday && "bg-zinc-800/50 border-zinc-600"
       )}>
         <div className="flex flex-col h-full">
           <div className={cn(
             "text-sm font-medium mb-1",
-            isToday ? "text-blue-400" : "text-slate-300"
+            isToday ? "text-white" : "text-zinc-300"
           )}>
             {dayNumber}
           </div>
@@ -201,7 +201,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               )}>
                 {isProfit ? '+' : ''}R$ {Math.abs(tradeDay.pnl).toLocaleString('pt-BR')}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-zinc-400">
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? 's' : ''}
               </div>
             </div>
@@ -223,15 +223,15 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
     const isProfit = week.pnl > 0;
     
     return (
-      <div className="bg-slate-800/50 border-l border-slate-700 p-3 min-h-[64px] flex flex-col justify-center">
-        <div className="text-xs text-slate-400 mb-1">Semana {week.weekNumber}</div>
+      <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[64px] flex flex-col justify-center">
+        <div className="text-xs text-zinc-400 mb-1">Semana {week.weekNumber}</div>
         <div className={cn(
           "font-bold text-sm mb-1",
           isProfit ? "text-green-400" : "text-red-400"
         )}>
           {isProfit ? '+' : ''}R$ {Math.abs(week.pnl).toLocaleString('pt-BR')}
         </div>
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-zinc-400">
           {week.days} dia{week.days !== 1 ? 's' : ''}
         </div>
       </div>
@@ -239,7 +239,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
   };
 
   return (
-    <Card className={cn("bg-slate-900 border-slate-700", className)}>
+    <Card className={cn("bg-zinc-900 border-zinc-700", className)}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-white flex items-center gap-2">
@@ -251,7 +251,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               variant="ghost"
               size="sm"
               onClick={() => navigateMonth('prev')}
-              className="text-slate-400 hover:text-white"
+              className="text-zinc-400 hover:text-white"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -262,7 +262,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               variant="ghost"
               size="sm"
               onClick={() => navigateMonth('next')}
-              className="text-slate-400 hover:text-white"
+              className="text-zinc-400 hover:text-white"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -271,14 +271,14 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
       </CardHeader>
       
       <CardContent className="p-0">
-        <div className="grid grid-cols-8 bg-slate-800">
+        <div className="grid grid-cols-8 bg-zinc-800">
           {/* Cabeçalhos dos dias da semana */}
           {weekDays.map(day => (
-            <div key={day} className="p-3 text-center text-sm font-medium text-slate-300 border-r border-slate-700">
+            <div key={day} className="p-3 text-center text-sm font-medium text-zinc-300 border-r border-zinc-700">
               {day}
             </div>
           ))}
-          <div className="p-3 text-center text-sm font-medium text-slate-300">
+          <div className="p-3 text-center text-sm font-medium text-zinc-300">
             Resumo
           </div>
           
@@ -310,7 +310,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
                 week.push(
                   <div key={`week-${weekIndex}`}>
                     {currentWeekSummary ? renderWeekSummary(currentWeekSummary) : 
-                     <div className="bg-slate-800/50 border-l border-slate-700 p-3 min-h-[64px]"></div>}
+                     <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[64px]"></div>}
                   </div>
                 );
                 
@@ -334,7 +334,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               week.push(
                 <div key={`week-${weekIndex}`}>
                   {currentWeekSummary ? renderWeekSummary(currentWeekSummary) : 
-                   <div className="bg-slate-800/50 border-l border-slate-700 p-3 min-h-[64px]"></div>}
+                   <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[64px]"></div>}
                 </div>
               );
               calendar.push(...week);
@@ -345,19 +345,19 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
         </div>
 
         {/* Resumo mensal */}
-        <div className="p-4 border-t border-slate-700 bg-slate-800/30">
+        <div className="p-4 border-t border-zinc-700 bg-zinc-800/30">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-white">
                 {tradeDays.length}
               </div>
-              <div className="text-sm text-slate-400">Dias de Trading</div>
+              <div className="text-sm text-zinc-400">Dias de Trading</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-white">
                 {tradeDays.reduce((sum, day) => sum + day.trades, 0)}
               </div>
-              <div className="text-sm text-slate-400">Total de Trades</div>
+              <div className="text-sm text-zinc-400">Total de Trades</div>
             </div>
             <div className="text-center">
               <div className={cn(
@@ -367,13 +367,13 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
                 {tradeDays.reduce((sum, day) => sum + day.pnl, 0) > 0 ? '+' : ''}
                 R$ {Math.abs(tradeDays.reduce((sum, day) => sum + day.pnl, 0)).toLocaleString('pt-BR')}
               </div>
-              <div className="text-sm text-slate-400">P&L Total</div>
+              <div className="text-sm text-zinc-400">P&L Total</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">
+              <div className="text-2xl font-bold text-white">
                 {Math.round((tradeDays.filter(day => day.pnl > 0).length / tradeDays.length) * 100) || 0}%
               </div>
-              <div className="text-sm text-slate-400">Taxa de Acerto</div>
+              <div className="text-sm text-zinc-400">Taxa de Acerto</div>
             </div>
           </div>
         </div>

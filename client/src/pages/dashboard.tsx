@@ -55,7 +55,7 @@ const brokerInfo = {
   "crypto": {
     name: "Crypto",
     type: "Criptomoedas",
-    color: "bg-purple-500",
+    color: "bg-green-500",
     icon: Activity,
     description: "Trading de criptomoedas com importação CSV"
   }
@@ -217,10 +217,10 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
                 <Line
                   type="monotone"
                   dataKey="cumulativeProfit"
-                  stroke="#8B5CF6"
+                  stroke="#22c55e"
                   strokeWidth={3}
-                  dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#8B5CF6', strokeWidth: 2 }}
+                  dot={{ fill: '#22c55e', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#22c55e', strokeWidth: 2 }}
                 />
                 <Line
                   type="monotone"
@@ -246,7 +246,7 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
         {/* Legenda */}
         <div className="flex justify-center gap-6 mt-4 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-purple-500"></div>
+            <div className="w-3 h-0.5 bg-green-500"></div>
             <span className="text-slate-300">Rentabilidade Acumulada</span>
           </div>
           <div className="flex items-center gap-2">
@@ -333,18 +333,18 @@ function PerformancePeriodChart({ metrics }: { metrics: any }) {
           <Area 
             type="monotone" 
             dataKey="value" 
-            stroke="#8B5CF6"
+            stroke="#22c55e"
             strokeWidth={3}
             fill="url(#performanceGradient)"
             dot={{ 
-              fill: '#8B5CF6', 
+              fill: '#22c55e', 
               strokeWidth: 3, 
               r: 8,
               stroke: '#1e293b'
             }}
             activeDot={{ 
               r: 10, 
-              stroke: '#8B5CF6', 
+              stroke: '#22c55e', 
               strokeWidth: 3, 
               fill: '#1e293b' 
             }}
@@ -729,7 +729,7 @@ export default function Dashboard() {
               title="Taxa de Acerto"
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
-              color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
+              color="text-white"
               subtitle="Precisão das operações"
             />
             
@@ -737,7 +737,7 @@ export default function Dashboard() {
               title="R/R Médio"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              color="text-white"
               subtitle="Risco vs Retorno"
             />
           </div>
@@ -777,14 +777,14 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-zinc-400 text-sm">Setup Top</p>
-                    <p className="text-lg font-bold text-purple-400">
+                    <p className="text-lg font-bold text-green-400">
                       {metrics.setupMaisLucrativo.setup || 'N/A'}
                     </p>
                     <p className="text-sm text-zinc-500">
                       R$ {metrics.setupMaisLucrativo.total.toFixed(2)}
                     </p>
                   </div>
-                  <BarChart3 className="h-8 w-8 text-purple-400" />
+                  <BarChart3 className="h-8 w-8 text-green-400" />
                 </div>
               </CardContent>
             </Card>
@@ -794,7 +794,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-zinc-400 text-sm">Emoção Frequente</p>
-                    <p className="text-lg font-bold text-blue-400 flex items-center gap-1">
+                    <p className="text-lg font-bold text-white flex items-center gap-1">
                       {simbolosEmocoes[metrics.emocaoMaisRecorrente.emocao as keyof typeof simbolosEmocoes] || '○'} 
                       {metrics.emocaoMaisRecorrente.emocao || 'neutro'}
                     </p>
@@ -802,7 +802,7 @@ export default function Dashboard() {
                       {metrics.emocaoMaisRecorrente.count} vezes
                     </p>
                   </div>
-                  <Calendar className="h-8 w-8 text-blue-400" />
+                  <Calendar className="h-8 w-8 text-white" />
                 </div>
               </CardContent>
             </Card>
@@ -812,7 +812,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-purple-400" />
+                <Calendar className="h-5 w-5 text-green-400" />
                 Performance por Período
               </CardTitle>
             </CardHeader>
@@ -825,7 +825,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-400" />
+                <BarChart3 className="h-5 w-5 text-green-400" />
                 Distribuição por Mercado
               </CardTitle>
             </CardHeader>
@@ -889,7 +889,7 @@ export default function Dashboard() {
               title="R/R Médio"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-white"}
             />
           </div>
 
@@ -913,7 +913,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-purple-400" />
+                <Calendar className="h-5 w-5 text-green-400" />
                 Performance Temporal Detalhada
               </CardTitle>
             </CardHeader>
@@ -1116,7 +1116,7 @@ export default function Dashboard() {
               title="R/R Médio Consolidado"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-white"}
               subtitle="Risco/Retorno geral"
             />
           </div>
@@ -1125,7 +1125,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Building className="h-5 w-5 text-purple-400" />
+                <Building className="h-5 w-5 text-green-400" />
                 Performance por Corretora
               </CardTitle>
               <CardDescription>Comparativo de resultados entre as corretoras</CardDescription>
@@ -1176,7 +1176,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-400" />
+                <BarChart3 className="h-5 w-5 text-green-400" />
                 Distribuição por Mercado
               </CardTitle>
               <CardDescription>Análise consolidada dos diferentes mercados</CardDescription>
@@ -1191,7 +1191,7 @@ export default function Dashboard() {
                     (tradesMercado.filter((trade: Trade) => parseFloat(trade.resultado || "0") > 0).length / countMercado) * 100 : 0;
                   
                   const mercadoInfo = {
-                    crypto: { name: 'Crypto', color: 'text-orange-400' },
+                    crypto: { name: 'Crypto', color: 'text-white' },
                     forex: { name: 'Forex', color: 'text-blue-400' },
                     b3: { name: 'B3', color: 'text-green-400' }
                   };
