@@ -66,6 +66,7 @@ export const csvImports = pgTable("csv_imports", {
   userId: varchar("user_id").notNull().references(() => users.id),
   broker: text("broker").notNull(),
   fileName: text("file_name").notNull(),
+  displayName: text("display_name"), // Nome personalizado para o CSV
   tradesImported: integer("trades_imported").notNull(),
   tradesSkipped: integer("trades_skipped").default(0),
   status: text("status").default("completed"), // "processing", "completed", "failed"
@@ -178,6 +179,11 @@ export const csvImportSchema = z.object({
   file: z.any(), // File object
 });
 
+// Schema para atualizar nome do CSV
+export const updateCsvImportSchema = z.object({
+  displayName: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertTrade = z.infer<typeof insertTradeSchema>;
@@ -209,6 +215,7 @@ export const updateUserByAdminSchema = z.object({
 
 export type UpdateUserByAdmin = z.infer<typeof updateUserByAdminSchema>;
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type UpdateCsvImport = z.infer<typeof updateCsvImportSchema>;
 
 // Relações do Drizzle ORM
 import { relations } from "drizzle-orm";

@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -1460,6 +1460,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         userId,
         broker: result.summary.detectedBroker,
         fileName: file.originalname,
+        displayName: null, // Será definido pelo usuário se desejar
         tradesImported: savedTrades.length,
         tradesSkipped: result.summary.statisticsSkipped,
         status: 'completed',
@@ -1522,6 +1523,41 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.json(imports);
     } catch (error) {
       console.error("Error fetching CSV imports:", error);
+      res.status(500).json({ error: "Erro ao buscar importações" });
+    }
+  });
+
+  // Renomear CSV import - ISOLADO POR USUÁRIO
+  app.patch("/api/csv-imports/:id/rename", requireAuth, async (req, res) => {
+    try {
+      const userId = req.userId; // ISOLAMENTO OBRIGATÓRIO
+      const csvId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const validation = updateCsvImportSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos', 
+          details: validation.error.errors 
+        });
+      }
+
+      const { displayName } = validation.data;
+      const updated = await storage.updateCsvImportName(userId, csvId, displayName);
+      
+      if (!updated) {
+        return res.status(404).json({ error: 'CSV não encontrado' });
+      }
+
+      res.json({ 
+        message: 'Nome atualizado com sucesso',
+        csvImport: updated
+      });
+    } catch (error) {
+      console.error("Error renaming CSV import:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
     }
   });

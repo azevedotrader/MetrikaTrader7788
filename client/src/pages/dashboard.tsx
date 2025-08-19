@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -22,7 +27,10 @@ import {
   Activity,
   Plus,
   LineChart,
-  Trash2
+  Trash2,
+  Edit3,
+  Filter,
+  CheckSquare
 } from "lucide-react";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { type Trade } from "@shared/schema";
@@ -569,7 +577,13 @@ export default function Dashboard() {
   
   // Get current user ID for isolation info
   const currentUserId = localStorage.getItem('user-id') || 'default-user';
+  
+  // Estados para o sistema de filtros avançados
   const [selectedBrokerFilter, setSelectedBrokerFilter] = useState<string | null>(null);
+  const [selectedCsvIds, setSelectedCsvIds] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<'all' | 'broker' | 'csv'>('all');
+  const [editingCsv, setEditingCsv] = useState<{id: string; currentName: string} | null>(null);
+  const [newCsvName, setNewCsvName] = useState('');
 
   // Fetch trades data
   const { data: trades = [], isLoading } = useQuery<Trade[]>({
@@ -585,6 +599,53 @@ export default function Dashboard() {
   const { data: csvImports = [] } = useQuery({
     queryKey: ['/api/csv-imports']
   });
+
+  // Mutation para renomear CSV
+  const renameCsvMutation = useMutation({
+    mutationFn: async ({ csvId, displayName }: { csvId: string; displayName: string }) => {
+      return apiRequest('PATCH', `/api/csv-imports/${csvId}/rename`, { displayName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
+      setEditingCsv(null);
+      setNewCsvName('');
+      toast({
+        title: "CSV renomeado com sucesso",
+        description: "O nome do arquivo foi atualizado."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao renomear",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Lógica de filtragem avançada
+  const filteredTrades = useMemo(() => {
+    let filtered = [...trades];
+    
+    if (viewMode === 'broker' && selectedBrokerFilter) {
+      filtered = filtered.filter(trade => trade.corretora === selectedBrokerFilter);
+    }
+    
+    if (viewMode === 'csv' && selectedCsvIds.length > 0) {
+      // Filtrar por trades que vieram dos CSVs selecionados
+      // Como não temos a relação direta, vamos usar a data de criação como aproximação
+      const selectedCsvs = (csvImports as any[]).filter((csv: any) => selectedCsvIds.includes(csv.id));
+      if (selectedCsvs.length > 0) {
+        const csvDates = selectedCsvs.map((csv: any) => new Date(csv.createdAt || Date.now()).toDateString());
+        filtered = filtered.filter(trade => 
+          trade.origem === 'csv' && 
+          csvDates.includes(new Date(trade.createdAt || Date.now()).toDateString())
+        );
+      }
+    }
+    
+    return filtered;
+  }, [trades, viewMode, selectedBrokerFilter, selectedCsvIds, csvImports]);
 
   // Reset dashboard mutation
   const resetDashboardMutation = useMutation({
@@ -620,12 +681,222 @@ export default function Dashboard() {
     );
   }
 
-  // Filter trades based on selected broker
-  const filteredTrades = selectedBrokerFilter 
-    ? trades.filter((trade: Trade) => trade.corretora === selectedBrokerFilter)
-    : trades;
-
+  // Calcular métricas com base nos trades filtrados
   const metrics = calculateMetrics(filteredTrades);
+
+  // Componente de Filtros Avançados
+  const AdvancedFilters = () => {
+    const handleCsvToggle = (csvId: string) => {
+      setSelectedCsvIds(prev => 
+        prev.includes(csvId) 
+          ? prev.filter(id => id !== csvId)
+          : [...prev, csvId]
+      );
+    };
+
+    const handleSelectAllCsvs = () => {
+      if (selectedCsvIds.length === (csvImports as any[]).length) {
+        setSelectedCsvIds([]);
+      } else {
+        setSelectedCsvIds((csvImports as any[]).map((csv: any) => csv.id));
+      }
+    };
+
+    const startRenaming = (csv: any) => {
+      setEditingCsv({ id: csv.id, currentName: csv.displayName || csv.fileName });
+      setNewCsvName(csv.displayName || csv.fileName);
+    };
+
+    const handleRename = () => {
+      if (editingCsv && newCsvName.trim()) {
+        renameCsvMutation.mutate({ 
+          csvId: editingCsv.id, 
+          displayName: newCsvName.trim() 
+        });
+      }
+    };
+
+    return (
+      <Card className="bg-zinc-900/90 border-zinc-800 mb-6">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-zinc-400" />
+            <CardTitle className="text-white">Filtros Avançados</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Dropdown de Visualização */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-zinc-300">Modo de Visualização</Label>
+              <Select value={viewMode} onValueChange={(value: 'all' | 'broker' | 'csv') => {
+                setViewMode(value);
+                if (value !== 'broker') setSelectedBrokerFilter(null);
+                if (value !== 'csv') setSelectedCsvIds([]);
+              }}>
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectValue placeholder="Selecione o modo de visualização" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectItem value="all" className="text-white hover:bg-zinc-700">
+                    Consolidar Todos os Dados
+                  </SelectItem>
+                  <SelectItem value="broker" className="text-white hover:bg-zinc-700">
+                    Filtrar por Corretora
+                  </SelectItem>
+                  <SelectItem value="csv" className="text-white hover:bg-zinc-700">
+                    Filtrar por CSVs Importados
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {/* Dropdown de Corretoras */}
+              {viewMode === 'broker' && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-zinc-300">Corretora</Label>
+                  <Select value={selectedBrokerFilter || ''} onValueChange={setSelectedBrokerFilter}>
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectValue placeholder="Selecione uma corretora" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                      <SelectItem value="b3" className="text-white hover:bg-zinc-700">
+                        B3 - Ações Brasileiras
+                      </SelectItem>
+                      <SelectItem value="crypto" className="text-white hover:bg-zinc-700">
+                        Crypto - Criptomoedas
+                      </SelectItem>
+                      <SelectItem value="forex" className="text-white hover:bg-zinc-700">
+                        Forex - Câmbio
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            {/* Seletor de CSVs */}
+            {viewMode === 'csv' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-zinc-300">CSVs Importados</Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleSelectAllCsvs}
+                    className="text-zinc-400 hover:text-white text-xs"
+                  >
+                    <CheckSquare className="w-4 h-4 mr-1" />
+                    {selectedCsvIds.length === (csvImports as any[]).length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                  </Button>
+                </div>
+                
+                {(csvImports as any[]).length === 0 ? (
+                  <div className="text-center py-6 text-zinc-500">
+                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p>Nenhum CSV importado ainda</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {(csvImports as any[]).map((csv: any) => (
+                      <div key={csv.id} className="flex items-center space-x-3 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:bg-zinc-700/50 transition-colors">
+                        <Checkbox 
+                          checked={selectedCsvIds.includes(csv.id)}
+                          onCheckedChange={() => handleCsvToggle(csv.id)}
+                          className="border-zinc-600"
+                        />
+                        <div className="flex-1 min-w-0">
+                          {editingCsv?.id === csv.id ? (
+                            <div className="flex items-center space-x-2">
+                              <Input 
+                                value={newCsvName}
+                                onChange={(e) => setNewCsvName(e.target.value)}
+                                className="bg-zinc-700 border-zinc-600 text-white text-sm"
+                                placeholder="Nome do CSV"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleRename();
+                                  if (e.key === 'Escape') setEditingCsv(null);
+                                }}
+                                autoFocus
+                              />
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={handleRename}
+                                disabled={renameCsvMutation.isPending}
+                                className="text-green-400 hover:text-green-300"
+                              >
+                                ✓
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => setEditingCsv(null)}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                ✗
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-white font-medium text-sm truncate">
+                                  {csv.displayName || csv.fileName}
+                                </p>
+                                <p className="text-zinc-400 text-xs">
+                                  {csv.tradesImported} trades • {format(new Date(csv.createdAt || Date.now()), 'dd/MM/yyyy', { locale: ptBR })}
+                                </p>
+                              </div>
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => startRenaming(csv)}
+                                className="text-zinc-400 hover:text-white ml-2"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {selectedCsvIds.length > 0 && (
+                  <div className="mt-3 p-3 bg-green-900/20 border border-green-700/50 rounded-lg">
+                    <p className="text-green-400 text-sm font-medium">
+                      ✓ {selectedCsvIds.length} CSV{selectedCsvIds.length > 1 ? 's' : ''} selecionado{selectedCsvIds.length > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Resumo dos Filtros Ativos */}
+          <div className="mt-4 pt-4 border-t border-zinc-700">
+            <div className="flex flex-wrap gap-2">
+              {viewMode === 'all' && (
+                <Badge variant="secondary" className="bg-zinc-700 text-zinc-200">
+                  Todos os dados
+                </Badge>
+              )}
+              {viewMode === 'broker' && selectedBrokerFilter && (
+                <Badge variant="secondary" className="bg-blue-900/50 text-blue-200 border-blue-700">
+                  {brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}
+                </Badge>
+              )}
+              {viewMode === 'csv' && selectedCsvIds.length > 0 && (
+                <Badge variant="secondary" className="bg-purple-900/50 text-purple-200 border-purple-700">
+                  {selectedCsvIds.length} CSV{selectedCsvIds.length > 1 ? 's' : ''}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
@@ -633,10 +904,10 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
           <p className="text-zinc-400 mt-2 text-sm lg:text-base">
-            {selectedBrokerFilter 
-              ? `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`
-              : 'Dados consolidados de todas as corretoras'
-            }
+            {viewMode === 'all' && 'Dados consolidados de todas as corretoras'}
+            {viewMode === 'broker' && selectedBrokerFilter && `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`}
+            {viewMode === 'csv' && selectedCsvIds.length > 0 && `Filtrando por ${selectedCsvIds.length} CSV${selectedCsvIds.length > 1 ? 's' : ''} selecionado${selectedCsvIds.length > 1 ? 's' : ''}`}
+            {viewMode === 'csv' && selectedCsvIds.length === 0 && 'Selecione CSVs para visualizar'}
           </p>
         </div>
         
@@ -653,49 +924,11 @@ export default function Dashboard() {
               }}
             />
           )}
-          
-          {/* Consolidated Data Button */}
-          <Button 
-            className={`gradient-purple-blue hover:opacity-90 transition-opacity ${
-              selectedBrokerFilter === null ? 'ring-2 ring-purple-400' : ''
-            }`}
-            onClick={() => {
-              setSelectedBrokerFilter(null);
-              toast({
-                title: "Dados Consolidados",
-                description: "Mostrando dados de todas as corretoras somados."
-              });
-            }}
-          >
-            <Building className="w-4 h-4 mr-2" />
-            Consolidar Todas
-          </Button>
-
-          {/* Broker Filter Buttons */}
-          {Object.entries(brokerInfo).map(([broker, info]) => {
-            const IconComponent = info.icon;
-            return (
-              <Button 
-                key={broker}
-                variant="outline"
-                className={`${info.color.replace('bg-', 'border-').replace('500', '600')} text-white hover:${info.color} ${
-                  selectedBrokerFilter === broker ? `ring-2 ring-purple-400 ${info.color}` : ''
-                }`}
-                onClick={() => {
-                  setSelectedBrokerFilter(broker);
-                  toast({
-                    title: `${info.name} Selecionado`,
-                    description: `Dashboard mostrando apenas dados da ${info.name}.`
-                  });
-                }}
-              >
-                <IconComponent className="w-4 h-4 mr-2" />
-                {info.name}
-              </Button>
-            );
-          })}
         </div>
       </div>
+
+      {/* Componente de Filtros Avançados */}
+      <AdvancedFilters />
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-zinc-800">

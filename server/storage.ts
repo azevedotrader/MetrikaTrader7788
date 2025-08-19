@@ -298,6 +298,15 @@ export class DatabaseStorage implements IStorage {
     await db.delete(csvImports).where(eq(csvImports.userId, userId));
   }
 
+  async updateCsvImportName(userId: string, csvId: string, displayName: string): Promise<CsvImport | null> {
+    const [updated] = await db
+      .update(csvImports)
+      .set({ displayName })
+      .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)))
+      .returning();
+    return updated || null;
+  }
+
   async deleteAllBrokerConfigs(userId: string): Promise<void> {
     await db.delete(brokerApiConfigs).where(eq(brokerApiConfigs.userId, userId));
   }
