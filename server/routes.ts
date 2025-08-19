@@ -1543,7 +1543,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`🔄 Reprocessando importação ${csvImportId} com interpretador inteligente...`);
 
       // Remover trades do usuário atual
-      const userTrades = await storage.getUserTrades(userId);
+      const userTrades = await storage.getTrades(userId);
       const deletedCount = userTrades.length;
       
       // Delete each trade individually (workaround for missing bulk delete)
