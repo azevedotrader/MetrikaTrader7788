@@ -11,7 +11,7 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
   const isMobile = useIsMobile();
   
   return (
-    <header className="bg-slate-800 border-b border-slate-700 px-4 lg:px-6 py-4">
+    <header className="bg-zinc-900/90 border-b border-zinc-800 px-4 lg:px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Mobile menu button */}
@@ -19,7 +19,7 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-slate-400 hover:text-white lg:hidden"
+              className="text-zinc-400 hover:text-white lg:hidden"
               onClick={onMenuClick}
             >
               <Menu className="w-5 h-5" />
@@ -29,10 +29,10 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
         </div>
         
         <div className="flex items-center space-x-2 lg:space-x-4">
-          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
             <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
           </Button>
-          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
             <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
           </Button>
         </div>

@@ -79,7 +79,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       
       <div 
         className={cn(
-          "fixed inset-y-0 left-0 bg-slate-800 border-r border-slate-700 transition-all duration-300 ease-in-out z-50",
+          "fixed inset-y-0 left-0 bg-zinc-900/90 border-r border-zinc-800 transition-all duration-300 ease-in-out z-50",
           isMobile 
             ? cn("w-64 transform", isOpen ? "translate-x-0" : "-translate-x-full")
             : cn(isExpanded ? "w-64" : "w-16")
@@ -89,10 +89,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo and Close Button */}
-          <div className="p-4 border-b border-slate-700">
+          <div className="p-4 border-b border-zinc-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 gradient-purple-blue rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
                   <BarChart3 className="w-5 h-5 text-white" />
                 </div>
                 <span 
@@ -111,7 +111,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="text-slate-400 hover:text-white lg:hidden"
+                  className="text-zinc-400 hover:text-white lg:hidden"
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -128,8 +128,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-200",
-                        location === item.href && "bg-slate-700 text-white",
+                        "w-full text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all duration-200",
+                        location === item.href && "bg-zinc-800 text-white",
                         sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                       )}
                       title={!sidebarExpanded ? item.name : undefined}
@@ -151,11 +151,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             </ul>
 
             {/* Análise CSV com IA */}
-            <div className="px-2 py-3 border-t border-slate-700/50">
+            <div className="px-2 py-3 border-t border-zinc-800/50">
               <Button
                 onClick={handleAnalyzeCsv}
                 className={cn(
-                  "w-full text-slate-300 hover:bg-purple-700 hover:text-white transition-all duration-200 bg-purple-600/20 border border-purple-600/30",
+                  "w-full text-zinc-300 hover:bg-green-700 hover:text-white transition-all duration-200 bg-green-600/20 border border-green-600/30",
                   sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                 )}
                 title={!sidebarExpanded ? "Analisar CSV com IA" : undefined}
@@ -178,9 +178,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </nav>
 
           {/* User Profile */}
-          <div className="p-2 border-t border-slate-700">
+          <div className="p-2 border-t border-zinc-800">
             <div className={cn("flex items-center transition-all duration-300", sidebarExpanded ? "space-x-3 px-2" : "justify-center")}>
-              <div className="w-10 h-10 gradient-purple-blue rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-medium text-sm">{user?.name?.charAt(0) || 'U'}</span>
               </div>
               <div 
@@ -190,7 +190,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 )}
               >
                 <p className="text-sm font-medium text-white whitespace-nowrap">{user?.name}</p>
-                <p className="text-xs text-slate-400 whitespace-nowrap">Trader Pro</p>
+                <p className="text-xs text-zinc-400 whitespace-nowrap">Trader Pro</p>
               </div>
               <Button
                 variant="ghost"
@@ -202,7 +202,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   }
                 }}
                 className={cn(
-                  "text-slate-400 hover:text-white transition-all duration-300 flex-shrink-0",
+                  "text-zinc-400 hover:text-white transition-all duration-300 flex-shrink-0",
                   sidebarExpanded ? "opacity-100" : "opacity-0 w-0 p-0"
                 )}
                 title="Sair"

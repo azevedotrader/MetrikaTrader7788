@@ -45,7 +45,7 @@ function AppContent() {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-background">
       <Switch>
         {/* Public test page - accessible without authentication */}
         <Route path="/teste-gateio">
