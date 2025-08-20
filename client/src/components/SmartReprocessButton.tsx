@@ -25,6 +25,7 @@ export function SmartReprocessButton({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'user-id': userId
         },
         body: JSON.stringify({
           csvImportId: csvImportId || 'latest'
