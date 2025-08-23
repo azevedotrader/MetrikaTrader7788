@@ -850,16 +850,10 @@ export default function Dashboard() {
     }
     
     if (viewMode === 'csv' && selectedCsvIds.length > 0) {
-      // Filtrar por trades que vieram dos CSVs selecionados
-      // Como não temos a relação direta, vamos usar a data de criação como aproximação
-      const selectedCsvs = (csvImports as any[]).filter((csv: any) => selectedCsvIds.includes(csv.id));
-      if (selectedCsvs.length > 0) {
-        const csvDates = selectedCsvs.map((csv: any) => new Date(csv.createdAt || Date.now()).toDateString());
-        filtered = filtered.filter(trade => 
-          trade.origem === 'csv' && 
-          csvDates.includes(new Date(trade.createdAt || Date.now()).toDateString())
-        );
-      }
+      // Filtrar por trades que vieram dos CSVs selecionados usando csvImportId
+      filtered = filtered.filter(trade => 
+        trade.csvImportId && selectedCsvIds.includes(trade.csvImportId)
+      );
     }
     
     return filtered;
