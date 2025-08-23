@@ -448,10 +448,10 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       ) : (
         <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 550 : 380}>
           <AreaChart data={chartData} margin={{ 
-            top: 10, 
+            top: window.innerWidth < 768 ? 0 : 10, 
             right: window.innerWidth < 768 ? 0 : 30, 
             left: window.innerWidth < 768 ? -5 : 50, 
-            bottom: window.innerWidth < 768 ? 30 : 60 
+            bottom: window.innerWidth < 768 ? 25 : 60 
           }}>
             <defs>
               <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
