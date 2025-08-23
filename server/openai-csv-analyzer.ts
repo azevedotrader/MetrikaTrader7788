@@ -50,61 +50,55 @@ export async function analyzeCSVWithOpenAI(
 
     console.log(`📊 CSV carregado: ${parseResult.data.length} linhas`);
 
-    // 2. Estratégia otimizada: análise completa até 150 linhas, amostra até 300
+    // 2. Estratégia ultra-rápida: análise completa até 100 linhas, amostra até 200
     let csvSample: string;
-    let isFullAnalysis = parseResult.data.length <= 150;
+    let isFullAnalysis = parseResult.data.length <= 100;
     
     if (isFullAnalysis) {
-      // Análise completa para arquivos pequenos (até 150 linhas)
+      // Análise completa para arquivos pequenos (até 100 linhas) - RÁPIDO
       csvSample = parseResult.data.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
-      console.log(`📊 ANÁLISE RÁPIDA: ${parseResult.data.length} linhas`);
-    } else if (parseResult.data.length <= 300) {
-      // Amostra rápida para arquivos médios
-      const start = parseResult.data.slice(0, 50);
-      const middle = parseResult.data.slice(Math.floor(parseResult.data.length / 2) - 25, Math.floor(parseResult.data.length / 2) + 25);
-      const end = parseResult.data.slice(-50);
+      console.log(`📊 ANÁLISE ULTRA-RÁPIDA: ${parseResult.data.length} linhas`);
+    } else if (parseResult.data.length <= 200) {
+      // Amostra mínima para arquivos médios - MUITO RÁPIDO
+      const start = parseResult.data.slice(0, 30);
+      const middle = parseResult.data.slice(Math.floor(parseResult.data.length / 2) - 15, Math.floor(parseResult.data.length / 2) + 15);
+      const end = parseResult.data.slice(-30);
       const sampleData = [...start, ...middle, ...end];
       csvSample = sampleData.map((row: any) => Array.isArray(row) ? row.join(',') : row).join('\n');
-      console.log(`📊 AMOSTRA RÁPIDA: ${sampleData.length}/${parseResult.data.length} linhas`);
+      console.log(`📊 AMOSTRA ULTRA-RÁPIDA: ${sampleData.length}/${parseResult.data.length} linhas`);
     } else {
-      // Para arquivos muito grandes: usar sistema tradicional
-      console.log(`⚡ Arquivo grande (${parseResult.data.length} linhas): redirecionando para sistema tradicional`);
+      // Para arquivos maiores: usar sistema tradicional imediatamente
+      console.log(`⚡ Arquivo médio/grande (${parseResult.data.length} linhas): redirecionando para sistema tradicional`);
       throw new Error('FALLBACK_TO_TRADITIONAL');
     }
 
-    // 3. Prompt otimizado para análise rápida
-    const prompt = `Analise este CSV de trading rapidamente:
+    // 3. Prompt ultra-compacto para análise ultra-rápida
+    const prompt = `ANÁLISE ULTRA-RÁPIDA - CSV trading:
 
 ${csvSample}
 
-BROKER: ${brokerHint}
+Broker: ${brokerHint}
 
-Extraia todos os trades válidos:
-[{
-  "ativo": "WIN",
-  "dataHora": "2025-01-01T10:30:00.000Z",
-  "tipo": "compra",
-  "quantidade": 1,
-  "precoEntrada": 123000,
-  "resultado": 500
-}]
-
-Response as JSON with structure:
+Extraia trades RAPIDAMENTE - JSON:
 {
   "fileType": "trades",
   "confidence": 0.95,
-  "trades": [...array of trades...]
+  "trades": [{"ativo":"WIN","dataHora":"2025-01-01T10:30:00.000Z","tipo":"compra","quantidade":1,"precoEntrada":123000,"resultado":500}]
 }`;
 
     console.log(`🧠 Enviando para ChatGPT... (${csvSample.length} chars)`);
 
-    // 4. Chamar OpenAI
-    const response = await openai.chat.completions.create({
+    // 4. Chamar OpenAI com TIMEOUT RÍGIDO de 5 segundos
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('CHATGPT_TIMEOUT_5S')), 5000); // 5 segundos máximo
+    });
+
+    const openaiPromise = openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system",
-          content: "Você é um especialista em análise de dados financeiros e trading. Responda sempre em formato JSON válido."
+          content: "Você é um especialista em análise de dados financeiros e trading. Responda RAPIDAMENTE em formato JSON válido."
         },
         {
           role: "user",
@@ -113,8 +107,10 @@ Response as JSON with structure:
       ],
       response_format: { type: "json_object" },
       temperature: 0.05, // Temperatura ultra baixa para máxima precisão
-      max_tokens: 16000 // Máximo de tokens para análise completa sem limites
+      max_tokens: 4000 // Ultra-reduzido para máxima velocidade
     });
+
+    const response = await Promise.race([openaiPromise, timeoutPromise]) as any;
 
     const aiResponse = response.choices[0]?.message?.content;
     if (!aiResponse) {

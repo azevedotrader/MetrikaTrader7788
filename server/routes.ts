@@ -1428,7 +1428,11 @@ export async function registerRoutes(app: Express): Promise<void> {
           });
         }
         const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
+        console.log(`🤖 Usando ChatGPT (PADRÃO) - timeout 5s para análise estrutural completa...`);
+        const startTime = Date.now();
         const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
+        const timeElapsed = Date.now() - startTime;
+        console.log(`⚡ ChatGPT concluído em ${timeElapsed}ms`);
         
         result = {
           trades: aiResult.trades,
