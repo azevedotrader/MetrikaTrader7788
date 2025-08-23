@@ -27,12 +27,14 @@ interface TradingCalendarProps {
   trades?: any[];
   calendarData?: any[];
   className?: string;
+  onDateClick?: (date: Date, entry?: DiaryEntry) => void;
 }
 
 export function TradingCalendar({
   trades = [],
   calendarData = [],
   className,
+  onDateClick,
 }: TradingCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -58,14 +60,19 @@ export function TradingCalendar({
       isSameDay(new Date(entry.date), date)
     );
     
-    if (existingEntry) {
-      setSelectedDiaryEntry(existingEntry);
+    if (onDateClick) {
+      onDateClick(date, existingEntry);
     } else {
-      setSelectedDiaryEntry(undefined);
+      // Fallback para funcionalidade interna se não há callback externo
+      if (existingEntry) {
+        setSelectedDiaryEntry(existingEntry);
+      } else {
+        setSelectedDiaryEntry(undefined);
+      }
+      
+      setSelectedDate(date);
+      setIsDiaryModalOpen(true);
     }
-    
-    setSelectedDate(date);
-    setIsDiaryModalOpen(true);
   };
 
   const handleDiaryModalSuccess = () => {

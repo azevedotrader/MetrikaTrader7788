@@ -49,28 +49,38 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     try {
       if (entry) {
         // Atualizar entrada existente
-        await fetch(`/api/diary/${entry.id}`, {
+        const response = await fetch(`/api/diary/${entry.id}`, {
           method: "PUT",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("authToken") || ""}`,
             "x-user-id": localStorage.getItem("userId") || ""
           },
           body: JSON.stringify(data),
         });
+        
+        if (!response.ok) {
+          throw new Error("Erro ao atualizar entrada");
+        }
         toast({
           title: "Entrada atualizada!",
           description: "Sua entrada do diário foi atualizada com sucesso.",
         });
       } else {
         // Criar nova entrada
-        await fetch("/api/diary", {
+        const response = await fetch("/api/diary", {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("authToken") || ""}`,
             "x-user-id": localStorage.getItem("userId") || ""
           },
           body: JSON.stringify(data),
         });
+        
+        if (!response.ok) {
+          throw new Error("Erro ao criar entrada");
+        }
         toast({
           title: "Entrada criada!",
           description: "Sua entrada do diário foi criada com sucesso.",
@@ -100,12 +110,17 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
     setIsLoading(true);
     try {
-      await fetch(`/api/diary/${entry.id}`, {
+      const response = await fetch(`/api/diary/${entry.id}`, {
         method: "DELETE",
         headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken") || ""}`,
           "x-user-id": localStorage.getItem("userId") || ""
         }
       });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao deletar entrada");
+      }
       toast({
         title: "Entrada deletada!",
         description: "Sua entrada do diário foi deletada com sucesso.",
