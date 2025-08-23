@@ -95,23 +95,26 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
     return (
       <Button
         onClick={onToggle}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full gradient-purple-blue shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-12 w-12 md:h-14 md:w-14 rounded-full gradient-purple-blue shadow-lg hover:shadow-xl transition-all duration-300 z-50"
         data-testid="button-open-ai-chat"
       >
-        <MessageCircle className="h-6 w-6 text-white" />
+        <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
       </Button>
     );
   }
 
   return (
-    <Card className={`fixed bottom-6 right-6 bg-slate-900/95 border-slate-700 shadow-2xl z-50 transition-all duration-300 ${
-      isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'
+    <Card className={`fixed bg-slate-900/95 border-slate-700 shadow-2xl z-50 transition-all duration-300 ${
+      isMinimized 
+        ? 'bottom-4 right-4 md:bottom-6 md:right-6 w-72 md:w-80 h-14 md:h-16' 
+        : 'bottom-4 right-4 left-4 md:bottom-6 md:right-6 md:left-auto w-auto md:w-96 h-[70vh] md:h-[500px] max-h-[600px]'
     }`}>
-      <CardHeader className="p-4 border-b border-slate-700">
+      <CardHeader className="p-3 md:p-4 border-b border-slate-700">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-white">
-            <Bot className="h-5 w-5 text-purple-400" />
-            Assistente IA
+          <CardTitle className="flex items-center gap-2 text-white text-sm md:text-base">
+            <Bot className="h-4 w-4 md:h-5 md:w-5 text-purple-400" />
+            <span className="hidden sm:inline">Assistente IA</span>
+            <span className="sm:hidden">IA</span>
             {chatMutation.isPending && (
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             )}
@@ -140,45 +143,45 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
       </CardHeader>
 
       {!isMinimized && (
-        <CardContent className="p-0 flex flex-col h-[calc(500px-73px)]">
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
+        <CardContent className="p-0 flex flex-col h-[calc(70vh-73px)] md:h-[calc(500px-73px)]">
+          <ScrollArea className="flex-1 p-3 md:p-4">
+            <div className="space-y-3 md:space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-2 md:gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.type === 'ai' && (
-                    <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-4 w-4 text-white" />
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                      <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg ${
                       message.type === 'user'
                         ? 'bg-purple-600 text-white'
                         : 'bg-slate-700 text-slate-100'
                     }`}
                     data-testid={`message-${message.type}-${message.id}`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p className="text-xs opacity-60 mt-1">
+                    <p className="text-xs md:text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-[10px] md:text-xs opacity-60 mt-1">
                       {message.timestamp.toLocaleTimeString()}
                     </p>
                   </div>
                   {message.type === 'user' && (
-                    <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-white" />
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
+                      <User className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
                 </div>
               ))}
               {chatMutation.isPending && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                    <Bot className="h-4 w-4 text-white" />
+                <div className="flex gap-2 md:gap-3 justify-start">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
                   </div>
-                  <div className="bg-slate-700 text-slate-100 p-3 rounded-lg">
+                  <div className="bg-slate-700 text-slate-100 p-2 md:p-3 rounded-lg">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -191,24 +194,24 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
             </div>
           </ScrollArea>
 
-          <div className="p-4 border-t border-slate-700">
+          <div className="p-3 md:p-4 border-t border-slate-700">
             <div className="flex gap-2">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite sua mensagem..."
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-800 border-slate-600 text-white text-sm md:text-base"
                 disabled={chatMutation.isPending}
                 data-testid="input-chat-message"
               />
               <Button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || chatMutation.isPending}
-                className="gradient-purple-blue hover:opacity-90"
+                className="gradient-purple-blue hover:opacity-90 px-3 md:px-4"
                 data-testid="button-send-message"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
             </div>
           </div>
