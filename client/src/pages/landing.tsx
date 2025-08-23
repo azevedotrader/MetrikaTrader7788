@@ -739,13 +739,13 @@ export default function Landing() {
               {
                 icon: Zap,
                 title: "Sync Automático",
-                description: "Conecte Gate.io, Clear, Tickmill e mais. Todos os trades importados automaticamente.",
+                description: "Importe seus trades e tenha controle sobre cada mercado com todas métricas de visualização organizada.",
                 color: "from-yellow-500 to-orange-500"
               },
               {
                 icon: Brain,
                 title: "IA Analytics",
-                description: "Algoritmos identificam seus melhores setups e horários mais lucrativos.",
+                description: "Integração com inteligência artificial para estudar as métricas da sua conta detalhada mostrando as melhores correções e ajustes para potencializar resultados.",
                 color: "from-purple-500 to-pink-500"  
               },
               {
@@ -769,7 +769,7 @@ export default function Landing() {
               {
                 icon: Clock,
                 title: "Time Analytics",
-                description: "Descubra seus horários mais lucrativos e otimize sua rotina de trading.",
+                description: "Descubra seus ativos, horários e dias mais lucrativos com uma análise de dados eficiente e organizada.",
                 color: "from-teal-500 to-green-500"
               },
               {
