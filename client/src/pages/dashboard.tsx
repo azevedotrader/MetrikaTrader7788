@@ -439,19 +439,19 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       )}
       
       {chartData.length === 0 ? (
-        <div className="h-[320px] md:h-[380px] flex items-center justify-center text-zinc-400">
+        <div className="h-[550px] md:h-[380px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
             <BarChart3 className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">Nenhum trade no período selecionado</p>
           </div>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 320 : 380}>
+        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 550 : 380}>
           <AreaChart data={chartData} margin={{ 
-            top: 15, 
-            right: window.innerWidth < 768 ? 5 : 30, 
-            left: window.innerWidth < 768 ? 15 : 50, 
-            bottom: window.innerWidth < 768 ? 35 : 60 
+            top: 10, 
+            right: window.innerWidth < 768 ? -5 : 30, 
+            left: window.innerWidth < 768 ? 5 : 50, 
+            bottom: window.innerWidth < 768 ? 30 : 60 
           }}>
             <defs>
               <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
@@ -834,7 +834,7 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }
         </div>
       </CardHeader>
       <CardContent className="pt-0 pb-2 md:pb-4">
-        <div className={`text-sm md:text-2xl font-bold ${color} truncate leading-tight`}>
+        <div className={`text-xs md:text-2xl font-bold ${color} truncate leading-tight`}>
           {value}
         </div>
         {subtitle && (
@@ -1161,10 +1161,12 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <MetricCard
               title="Rentabilidade Total"
-              value={`R$ ${window.innerWidth < 768 ? 
-                metrics.rentabilidadeTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
-                metrics.rentabilidadeTotal.toFixed(2)
-              }`}
+              value={window.innerWidth < 768 ? 
+                Math.abs(metrics.rentabilidadeTotal) >= 1000 ?
+                  `R$${(metrics.rentabilidadeTotal/1000).toFixed(1)}k` :
+                  `R$${metrics.rentabilidadeTotal.toFixed(0)}` :
+                `R$ ${metrics.rentabilidadeTotal.toFixed(2)}`
+              }
               icon={DollarSign}
               color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
               subtitle="Resultado geral"
@@ -1269,7 +1271,7 @@ export default function Dashboard() {
                 Performance por Período
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-2 md:px-6">
               <PerformancePeriodChart trades={filteredTrades} />
             </CardContent>
           </Card>
@@ -1465,18 +1467,23 @@ export default function Dashboard() {
                   
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
-                      <div>
-                        <div className="text-lg md:text-2xl font-bold text-white">{stats.totalTrades}</div>
+                      <div className="min-w-0">
+                        <div className="text-sm md:text-2xl font-bold text-white">{stats.totalTrades}</div>
                         <div className="text-xs text-zinc-400">Trades</div>
                       </div>
-                      <div>
-                        <div className={`text-lg md:text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
+                      <div className="min-w-0">
+                        <div className={`text-xs md:text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'} break-all`}>
+                          {stats.totalProfit >= 0 ? '+' : ''}R${window.innerWidth < 768 ? 
+                            Math.abs(stats.totalProfit) >= 1000 ? 
+                              `${(stats.totalProfit/1000).toFixed(1)}k` :
+                              stats.totalProfit.toFixed(0) :
+                            stats.totalProfit.toFixed(2)
+                          }
                         </div>
                         <div className="text-xs text-zinc-400">Resultado</div>
                       </div>
-                      <div>
-                        <div className="text-lg md:text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                      <div className="min-w-0">
+                        <div className="text-sm md:text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
                         <div className="text-xs text-zinc-400">Win Rate</div>
                       </div>
                     </div>
