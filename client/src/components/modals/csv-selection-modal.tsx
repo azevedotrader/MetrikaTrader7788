@@ -134,7 +134,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl bg-slate-900 border-slate-700">
+        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <FileSpreadsheet className="w-5 h-5" />
@@ -145,7 +145,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
           <div className="space-y-4">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+                <div className="animate-spin w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full"></div>
                 <span className="ml-2 text-slate-400">Carregando CSVs...</span>
               </div>
             ) : csvImports.length === 0 ? (
@@ -165,8 +165,8 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                         key={csvImport.id}
                         className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                           selectedCsvId === csvImport.id
-                            ? 'border-purple-500 bg-purple-500/10'
-                            : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
+                            ? 'border-green-500 bg-green-500/10'
+                            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                         }`}
                         onClick={() => setSelectedCsvId(csvImport.id)}
                         data-testid={`csv-item-${csvImport.id}`}
@@ -205,7 +205,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                   </div>
                 </ScrollArea>
 
-                <div className="flex gap-3 pt-4 border-t border-slate-700">
+                <div className="flex gap-3 pt-4 border-t border-zinc-700">
                   <Button
                     variant="outline"
                     onClick={() => onOpenChange(false)}
@@ -217,7 +217,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                   <Button
                     onClick={handleAnalyze}
                     disabled={!selectedCsvId || csvAnalysisMutation.isPending}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                     data-testid="analyze-selected-csv"
                   >
                     {csvAnalysisMutation.isPending ? (
