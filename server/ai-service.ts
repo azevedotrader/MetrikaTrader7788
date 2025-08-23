@@ -521,7 +521,7 @@ export class AITradingService {
 
   private analyzeRiskAndDrawdown(trades: any[]) {
     const sortedTrades = trades.sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime());
-    const cumulativeResults = [];
+    const cumulativeResults: number[] = [];
     let runningSum = 0;
     
     sortedTrades.forEach(trade => {
@@ -652,7 +652,7 @@ export class AITradingService {
   }
 
   private calculateDrawdowns(cumulativeResults: number[]) {
-    const drawdowns = [];
+    const drawdowns: number[] = [];
     let peak = cumulativeResults[0];
     
     cumulativeResults.forEach(result => {

@@ -1862,6 +1862,42 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // AI Chat endpoint
+  app.post('/api/ai/chat', async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: 'Mensagem é obrigatória' });
+      }
+
+      // Get user context for personalized responses
+      const userId = req.headers['user-id'] as string;
+      let userContext = undefined;
+      
+      if (userId) {
+        const user = await storage.getUser(userId);
+        const trades = await storage.getTrades(userId);
+        
+        if (user) {
+          userContext = {
+            perfilRisco: user.perfilRisco,
+            capitalInicial: user.capitalInicial,
+            metaMensal: user.metaMensal,
+            tradesCount: trades.length
+          };
+        }
+      }
+
+      const { aiService } = await import('./ai-service');
+      const reply = await aiService.chatWithTrader(message, userContext);
+      res.json({ reply });
+    } catch (error) {
+      console.error('Erro no chat AI:', error);
+      res.status(500).json({ error: 'Desculpe, ocorreu um erro. Tente novamente em alguns instantes.' });
+    }
+  });
+
   // ADMIN AUTHENTICATION ROUTES
   
   // Admin login
