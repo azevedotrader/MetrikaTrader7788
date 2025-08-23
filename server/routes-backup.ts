@@ -1,1 +1,0 @@
-// Backup do routes.ts antes da correção
