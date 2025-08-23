@@ -20,7 +20,7 @@ import {
   type InsertSubscriptionPlan,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, count, sql } from "drizzle-orm";
+import { eq, and, desc, count, sql, gte, lte, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -309,13 +309,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteCsvImport(userId: string, csvId: string): Promise<boolean> {
-    // Primeiro, deletar todos os trades relacionados ao CSV
+    // Primeiro, buscar o CSV import para obter informações
+    const csvImport = await db.select().from(csvImports)
+      .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)))
+      .limit(1);
+    
+    if (csvImport.length === 0) {
+      return false;
+    }
+    
+    const csvInfo = csvImport[0];
+    
+    // Deletar trades relacionados ao CSV de duas formas:
+    // 1. Trades com csvImportId correspondente (novos)
     await db.delete(trades).where(
       and(
         eq(trades.userId, userId), 
         eq(trades.csvImportId, csvId)
       )
     );
+    
+    // 2. Para compatibilidade: deletar trades antigos baseado na data e origem
+    // Deletar trades que foram importados na mesma data do CSV e são de origem 'csv'
+    const csvDate = csvInfo.createdAt;
+    if (csvDate) {
+      const startOfDay = new Date(csvDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(csvDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      await db.delete(trades).where(
+        and(
+          eq(trades.userId, userId),
+          eq(trades.origem, 'csv'),
+          gte(trades.createdAt, startOfDay),
+          lte(trades.createdAt, endOfDay),
+          isNull(trades.csvImportId) // Apenas trades sem csvImportId (antigos)
+        )
+      );
+    }
     
     // Depois, deletar o CSV import
     const result = await db
