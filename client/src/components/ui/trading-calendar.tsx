@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -98,33 +99,46 @@ export function TradingCalendar({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
 
-  // Gerar dados fictícios mais realistas de trading
-  const generateTradeData = (): TradeDay[] => {
+  // Processar dados reais dos trades
+  const processRealTradeData = (): TradeDay[] => {
     const tradeDays: TradeDay[] = [];
     
-    // Simular apenas alguns dias de trading (cerca de 60% dos dias úteis)
-    Array.from({ length: daysInMonth }, (_, i) => {
-      const day = i + 1;
-      const dayOfWeek = new Date(year, month, day).getDay();
+    // Agrupar trades por dia do mês atual
+    const monthTrades = trades.filter(trade => {
+      const tradeDate = new Date(trade.date);
+      return tradeDate.getFullYear() === year && tradeDate.getMonth() === month;
+    });
+
+    // Criar mapa de trades por dia
+    const tradesByDay = new Map<number, any[]>();
+    monthTrades.forEach(trade => {
+      const tradeDate = new Date(trade.date);
+      const day = tradeDate.getDate();
       
-      // Evitar finais de semana (0 = domingo, 6 = sábado)
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        // 60% de chance de ter trading
-        if (Math.random() > 0.4) {
-          tradeDays.push({
-            date: day,
-            pnl: (Math.random() - 0.45) * 1000, // Ligeiramente tendente a positivo
-            trades: Math.floor(Math.random() * 8) + 1,
-            winRate: Math.random() * 40 + 50,
-          });
-        }
+      if (!tradesByDay.has(day)) {
+        tradesByDay.set(day, []);
       }
+      tradesByDay.get(day)!.push(trade);
+    });
+
+    // Calcular estatísticas por dia
+    tradesByDay.forEach((dayTrades, day) => {
+      const totalPnl = dayTrades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
+      const winningTrades = dayTrades.filter(trade => (trade.pnl || 0) > 0).length;
+      const winRate = dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
+
+      tradeDays.push({
+        date: day,
+        pnl: totalPnl,
+        trades: dayTrades.length,
+        winRate: winRate,
+      });
     });
 
     return tradeDays;
   };
 
-  const tradeDays = generateTradeData();
+  const tradeDays = processRealTradeData();
 
   // Calcular resumos semanais
   const calculateWeekSummaries = (): WeekSummary[] => {
@@ -404,13 +418,13 @@ export function TradingCalendar({
             {/* Dias do calendário */}
             {Array.from({ length: Math.ceil((firstDayOfWeek + daysInMonth) / 7) }).map(
               (_, weekIndex) => (
-                <>
+                <React.Fragment key={`week-fragment-${weekIndex}`}>
                   {/* Dias da semana */}
                   {Array.from({ length: 7 }).map((_, dayIndex) => {
                     const dayNumber =
                       weekIndex * 7 + dayIndex - firstDayOfWeek + 1;
                     return (
-                      <div key={`${weekIndex}-${dayIndex}`}>
+                      <div key={`day-${weekIndex}-${dayIndex}`}>
                         {renderDayCell(
                           dayNumber > 0 && dayNumber <= daysInMonth
                             ? dayNumber
@@ -421,7 +435,7 @@ export function TradingCalendar({
                   })}
                   {/* Resumo semanal - apenas desktop */}
                   {!isMobile && weekSummaries[weekIndex] && (
-                    <div key={`week-${weekIndex}`}>
+                    <div key={`week-summary-${weekIndex}`}>
                       {renderWeekSummary(weekSummaries[weekIndex])}
                     </div>
                   )}
@@ -431,7 +445,7 @@ export function TradingCalendar({
                       className="border-l border-zinc-700 min-h-[80px]"
                     ></div>
                   )}
-                </>
+                </React.Fragment>
               ),
             )}
           </div>
