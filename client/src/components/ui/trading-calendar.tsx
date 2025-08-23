@@ -188,7 +188,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
 
     return (
       <div className={cn(
-        "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors",
+        "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden",
         isMobile ? "h-[110px] p-2" : "h-20 p-1",
         isToday && "bg-zinc-800/50 border-zinc-600",
         hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20")
@@ -203,10 +203,10 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
           </div>
           
           {hasData && tradeDay && (
-            <div className="flex-1 flex flex-col justify-center">
+            <div className="flex-1 flex flex-col justify-start">
               <div className={cn(
                 "font-bold",
-                isMobile ? "text-sm mb-1" : "text-sm",
+                isMobile ? "text-sm" : "text-sm",
                 isProfit ? "text-green-400" : "text-red-400"
               )}>
                 {isMobile ? 
@@ -218,12 +218,12 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               </div>
               <div className={cn(
                 "text-zinc-500",
-                isMobile ? "text-xs" : "text-xs"
+                isMobile ? "text-[11px] leading-tight" : "text-xs"
               )}>
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? 's' : ''}
               </div>
               {isMobile && tradeDay.winRate && (
-                <div className="text-[10px] text-zinc-600 mt-1">
+                <div className="text-[10px] text-zinc-600 leading-tight">
                   {tradeDay.winRate.toFixed(0)}% win
                 </div>
               )}
