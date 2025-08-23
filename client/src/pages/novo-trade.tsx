@@ -185,11 +185,52 @@ export default function NovoTrade() {
       });
     },
     onError: (error: any) => {
-      toast({
-        title: "Erro na importação",
-        description: error.message || "Erro ao importar arquivo CSV",
-        variant: "destructive"
-      });
+      console.log("CSV Upload Error:", error);
+      
+      // Detectar erro de validação de datas
+      if (error.message?.includes("não contém datas de trades válidas") || 
+          error.details?.reason === "MISSING_VALID_DATES") {
+        
+        const errorDetails = error.details || {};
+        let description = "❌ Arquivo CSV rejeitado:\n\n";
+        
+        if (!errorDetails.dateColumn) {
+          description += "📅 Nenhuma coluna de data encontrada.\n\n";
+          description += "Colunas obrigatórias aceitas:\n";
+          description += "• Data, Data/Hora, Date, Trade Date\n\n";
+          description += "💡 Solução: Renomeie uma coluna para 'Data' e tente novamente.";
+        } else {
+          description += `📅 Coluna "${errorDetails.dateColumn}" encontrada, mas sem datas válidas.\n\n`;
+          description += "📊 Formatos aceitos:\n";
+          description += "• dd/MM/yyyy (25/12/2024)\n";
+          description += "• dd/MM/yyyy HH:mm (25/12/2024 14:30)\n";
+          description += "• yyyy-MM-dd (2024-12-25)\n";
+          description += "• dd-MM-yyyy (25-12-2024)\n\n";
+          
+          if (errorDetails.sampleDates?.length > 0) {
+            description += `🔍 Exemplos encontrados:\n`;
+            description += errorDetails.sampleDates.slice(0, 3).map((date: string) => `• "${date}"`).join('\n');
+            description += "\n\n";
+          }
+          
+          description += "💡 Verifique o formato das datas e tente novamente.";
+        }
+        
+        toast({
+          title: "Validação de Datas Falhada",
+          description,
+          variant: "destructive",
+          duration: 8000 // Mais tempo para ler
+        });
+        
+      } else {
+        // Outros tipos de erro
+        toast({
+          title: "Erro na importação",
+          description: error.message || "Erro ao importar arquivo CSV",
+          variant: "destructive"
+        });
+      }
     }
   });
 

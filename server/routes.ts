@@ -1336,6 +1336,34 @@ export async function registerRoutes(app: Express): Promise<void> {
       });
       console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🔄 Método: ${useTraditional ? 'Tradicional' : 'ChatGPT (Padrão)'}`);
 
+      // 🗓️ VALIDAÇÃO OBRIGATÓRIA DE DATAS
+      console.log(`🗓️ Iniciando validação obrigatória de datas...`);
+      const { validateRequiredDateColumns } = await import('./csv-date-validator');
+      const dateValidation = await validateRequiredDateColumns(file.path);
+      
+      if (!dateValidation.isValid) {
+        // Limpar arquivo rejeitado
+        fs.unlinkSync(file.path);
+        
+        console.log(`❌ Arquivo rejeitado - sem datas válidas: ${file.originalname}`);
+        return res.status(400).json({ 
+          message: "Arquivo inválido: não contém datas de trades válidas",
+          error: dateValidation.error,
+          details: {
+            reason: "MISSING_VALID_DATES",
+            dateColumn: dateValidation.dateColumn,
+            validDatesCount: dateValidation.validDatesCount,
+            totalRows: dateValidation.totalRows,
+            sampleDates: dateValidation.sampleDates
+          }
+        });
+      }
+      
+      console.log(`✅ Validação de datas aprovada:`);
+      console.log(`   📅 Coluna: "${dateValidation.dateColumn}"`);
+      console.log(`   📊 Formato: "${dateValidation.dateFormat}"`);
+      console.log(`   ✅ Datas válidas: ${dateValidation.validDatesCount}/${dateValidation.totalRows}`);
+
       let result;
       
       if (useTraditional) {
