@@ -18,19 +18,42 @@ interface ClearTradeRow {
 }
 
 /**
- * Converte valor brasileiro para número
+ * Converte valor brasileiro ou decimal para número
+ * Detecta automaticamente o formato (brasileiro vs decimal)
  */
 function parseRealValue(value: string): number {
   if (!value) return 0;
   
-  // Clear usa formato brasileiro: R$ 1.234,56 ou -R$ 350,00
-  // Remover R$, pontos de milhares e trocar vírgula por ponto decimal
-  const cleaned = value.trim()
-    .replace(/R\$/g, '') // Remove símbolo de Real (global)
-    .replace(/\./g, '')  // Remove pontos de milhares
-    .replace(',', '.')   // Troca vírgula por ponto decimal
-    .replace(/\s+/g, '') // Remove todos os espaços
-    .trim();             // Remove espaços extras
+  // Remover R$ e espaços primeiro
+  let cleaned = value.trim()
+    .replace(/R\$/g, '') // Remove símbolo de Real
+    .replace(/\s+/g, '') // Remove espaços
+    .trim();
+  
+  // Detectar formato:
+  // Formato brasileiro: usa vírgula como decimal (1.234,56)
+  // Formato decimal: usa ponto como decimal (1234.56)
+  
+  const hasComma = cleaned.includes(',');
+  const hasDot = cleaned.includes('.');
+  
+  if (hasComma && hasDot) {
+    // Tem ambos: verificar qual é o separador decimal
+    const lastCommaPos = cleaned.lastIndexOf(',');
+    const lastDotPos = cleaned.lastIndexOf('.');
+    
+    if (lastCommaPos > lastDotPos) {
+      // Vírgula vem depois do ponto: formato brasileiro (1.234,56)
+      cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+    } else {
+      // Ponto vem depois da vírgula: formato americano (1,234.56)
+      cleaned = cleaned.replace(/,/g, '');
+    }
+  } else if (hasComma && !hasDot) {
+    // Só tem vírgula: assumir formato brasileiro
+    cleaned = cleaned.replace(',', '.');
+  }
+  // Se só tem ponto ou nenhum, já está no formato correto
   
   return parseFloat(cleaned) || 0;
 }
