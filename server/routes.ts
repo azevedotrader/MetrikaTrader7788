@@ -9,7 +9,7 @@ import csv from "csv-parser";
 import fs from "fs";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
-import { lerCSVSimples } from "./simple-csv-reader";
+// import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
@@ -1355,7 +1355,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       // 🗓️ VALIDAÇÃO OBRIGATÓRIA DE DATAS
       console.log(`🗓️ Iniciando validação obrigatória de datas...`);
-      const { validateRequiredDateColumns } = await import('./csv-date-validator');
+      // const { validateRequiredDateColumns } = await import('./csv-date-validator'); // Removido - integrado no csvValidator
       const dateValidation = await validateRequiredDateColumns(file.path);
       
       if (!dateValidation.isValid) {
@@ -2269,8 +2269,14 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       console.log(`📂 [${userId}] Testando leitor: ${req.file.originalname}`);
 
-      // Usar a função simples para analisar e processar
-      const dados = await lerCSVSimples(req.file.path);
+      // Usar Papa.parse diretamente para análise simples
+      const Papa = require('papaparse');
+      const csvContent = fs.readFileSync(req.file.path, 'utf-8');
+      const parseResult = Papa.parse(csvContent, {
+        header: true,
+        skipEmptyLines: true
+      });
+      const dados = parseResult.data;
 
       // Limpar arquivo temporário
       if (req.file.path && fs.existsSync(req.file.path)) {
@@ -2291,10 +2297,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         colunas: dados.length > 0 ? Object.keys(dados[0]) : [],
         estatisticas: {
           formatoBrasileiro: false,
-          temNumeros: dados.some(linha => 
+          temNumeros: dados.some((linha: any) => 
             Object.values(linha).some(valor => typeof valor === 'number')
           ),
-          temDatas: dados.some(linha =>
+          temDatas: dados.some((linha: any) =>
             Object.values(linha).some(valor => 
               typeof valor === 'string' && /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(valor)
             )
@@ -2339,8 +2345,14 @@ export async function registerRoutes(app: Express): Promise<void> {
           // Criar arquivo temporário
           fs.writeFileSync(caminhoArquivo, conteudo, 'utf8');
           
-          // Processar com leitor simples
-          const dados = await lerCSVSimples(caminhoArquivo);
+          // Processar com Papa.parse
+          const Papa = require('papaparse');
+          const csvContent = fs.readFileSync(caminhoArquivo, 'utf-8');
+          const parseResult = Papa.parse(csvContent, {
+            header: true,
+            skipEmptyLines: true
+          });
+          const dados = parseResult.data;
           
           resultados.push({
             arquivo: nome,

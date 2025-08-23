@@ -153,7 +153,27 @@ export async function processSmartCSV(
     const { detectFileEncoding } = await import('./encoding-detector');
     const encoding = detectFileEncoding(filePath);
     console.log(`📁 Usando encoding: ${encoding}`);
-    const csvContent = fs.readFileSync(filePath, { encoding: encoding as BufferEncoding });
+    let csvContent = fs.readFileSync(filePath, { encoding: encoding as BufferEncoding });
+    
+    // 1.5. Remover linhas de metadados da Clear (Conta:, Titular:, etc)
+    const lines = csvContent.split('\n');
+    let headerLineIndex = 0;
+    
+    // Procurar linha que parece ser o header real (contém Ativo, Abertura, etc)
+    for (let i = 0; i < Math.min(lines.length, 10); i++) {
+      const line = lines[i].toLowerCase();
+      if (line.includes('ativo') && line.includes('abertura') && line.includes('fechamento')) {
+        headerLineIndex = i;
+        console.log(`📋 Header real encontrado na linha ${i + 1}`);
+        break;
+      }
+    }
+    
+    // Se encontrou metadados, remover elas
+    if (headerLineIndex > 0) {
+      console.log(`🧹 Removendo ${headerLineIndex} linhas de metadados do início`);
+      csvContent = lines.slice(headerLineIndex).join('\n');
+    }
     
     // 2. Detectar delimitador automaticamente
     const delimiter = detectDelimiter(csvContent);

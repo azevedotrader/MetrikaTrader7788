@@ -23,11 +23,14 @@ interface ClearTradeRow {
 function parseRealValue(value: string): number {
   if (!value) return 0;
   
-  // Clear usa formato brasileiro: 1.234,56 ou -350,00
-  // Remover pontos de milhares e trocar vírgula por ponto decimal
+  // Clear usa formato brasileiro: R$ 1.234,56 ou -R$ 350,00
+  // Remover R$, pontos de milhares e trocar vírgula por ponto decimal
   const cleaned = value.trim()
+    .replace(/R\$/g, '') // Remove símbolo de Real (global)
     .replace(/\./g, '')  // Remove pontos de milhares
-    .replace(',', '.');  // Troca vírgula por ponto decimal
+    .replace(',', '.')   // Troca vírgula por ponto decimal
+    .replace(/\s+/g, '') // Remove todos os espaços
+    .trim();             // Remove espaços extras
   
   return parseFloat(cleaned) || 0;
 }
@@ -56,9 +59,10 @@ function parseClearDate(dateStr: string): Date {
  */
 export function isClearCSV(header: string): boolean {
   const clearHeaders = [
-    'ativo', 'abertura', 'fechamento', 'tempo operação', 'tempo operacao',
-    'qtd compra', 'qtd venda', 'lado', 'preço compra', 'preco compra',
-    'preço venda', 'preco venda', 'total', 'res. operação', 'res. operacao'
+    'ativo', 'abertura', 'fechamento', 'tempo operac', // 'tempo operação' sem acentos
+    'qtd compra', 'qtd venda', 'lado', 'preco compra', // 'preço' sem acentos  
+    'preco venda', 'total', 'res. operac', 'res. intervalo', // 'operação' sem acentos
+    'tet', 'medio' // Campos adicionais da Clear
   ];
   
   const normalizedHeader = header.toLowerCase()
@@ -67,14 +71,15 @@ export function isClearCSV(header: string): boolean {
     .replace(/[íìîï]/g, 'i')
     .replace(/[óòôõö]/g, 'o')
     .replace(/[úùûü]/g, 'u')
-    .replace(/[ç]/g, 'c');
+    .replace(/[ç]/g, 'c')
+    .replace(/ã/g, 'a');
   
-  console.log(`🔍 Verificando Clear CSV - Header: "${normalizedHeader}"`);
+  console.log(`🔍 Verificando Clear CSV - Header normalizado: "${normalizedHeader.substring(0, 100)}..."`);
   
   const matchCount = clearHeaders.filter(h => normalizedHeader.includes(h)).length;
-  const isMatch = matchCount >= 3; // Precisa ter pelo menos 3 campos típicos da Clear
+  const isMatch = matchCount >= 5; // Precisa ter pelo menos 5 campos típicos da Clear
   
-  console.log(`🏦 Clear headers encontrados: ${matchCount}/10 - É Clear? ${isMatch}`);
+  console.log(`🏦 Clear headers encontrados: ${matchCount}/${clearHeaders.length} - É Clear? ${isMatch}`);
   
   return isMatch;
 }
@@ -89,32 +94,38 @@ export function processClearTradeRow(
   
   console.log('🏦 Processando linha Clear:', Object.values(row).slice(0, 5));
   
-  // Mapear campos (headers podem variar)
+  // Mapear campos (headers podem variar, incluindo acentos)
   const ativo = findField(row, ['ativo']);
   const abertura = findField(row, ['abertura']);
   const fechamento = findField(row, ['fechamento']);
+  const data = findField(row, ['data']); // Campo de data
+  const hora = findField(row, ['hora execução', 'hora execucao', 'hora']);
   const lado = findField(row, ['lado']);
-  const qtdCompra = findField(row, ['qtd_compra', 'qtd compra', 'qtdcompra']);
-  const qtdVenda = findField(row, ['qtd_venda', 'qtd venda', 'qtdvenda']);
-  const precoCompra = findField(row, ['preco_compra', 'preço compra', 'preco compra']);
-  const precoVenda = findField(row, ['preco_venda', 'preço venda', 'preco venda']);
-  const resOperacao = findField(row, ['res. operação', 'res. operacao', 'res operacao', 'resultado']);
+  const qtdCompra = findField(row, ['qtd compra', 'qtd_compra', 'qtdcompra']);
+  const qtdVenda = findField(row, ['qtd venda', 'qtd_venda', 'qtdvenda']);
+  const quantidade = findField(row, ['qnt.', 'qnt', 'quantidade']);
+  const precoCompra = findField(row, ['preço compra', 'preco compra', 'preco_compra']);
+  const precoVenda = findField(row, ['preço venda', 'preco venda', 'preco_venda']);
+  const resOperacao = findField(row, ['res. operação', 'res. operacao', 'res operacao', 'res operação', 'resultado']);
   const total = findField(row, ['total']); // Total acumulado, não o resultado individual
   
-  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", res.operação="${resOperacao}", total="${total}", lado="${lado}"`);
+  console.log(`🏦 Clear campos: ativo="${ativo}", data="${data}", hora="${hora}", res.operação="${resOperacao}", total="${total}", lado="${lado}"`);
   
-  if (!ativo || !abertura || !resOperacao) {
-    console.log('❌ Clear: campos obrigatórios ausentes (ativo, abertura, res.operação)');
+  if (!ativo || !resOperacao) {
+    console.log('❌ Clear: campos obrigatórios ausentes (ativo, res.operação)');
     return null;
   }
   
-  // Usar a data de abertura
-  const dataHora = parseClearDate(abertura);
+  // Usar a data e hora dos campos corretos
+  const dataStr = data || '01/01/2025'; // Data padrão se não tiver
+  const horaStr = hora || '00:00:00'; // Hora padrão se não tiver
+  const dataHora = parseClearDate(`${dataStr} ${horaStr}`);
   
-  // Quantidade (usar a maior entre compra e venda)
+  // Quantidade (usar o campo Qnt. ou a maior entre compra e venda)
+  const qtdCampo = parseFloat(quantidade || '0');
   const qtdCompraNum = parseFloat(qtdCompra || '0');
   const qtdVendaNum = parseFloat(qtdVenda || '0');
-  const quantidade = Math.max(qtdCompraNum, qtdVendaNum) || 1;
+  const qtdFinal = qtdCampo || Math.max(qtdCompraNum, qtdVendaNum) || 1;
   
   // Resultado da operação em REAIS (campo Res. Operação, não Total!)
   const resultado = parseRealValue(resOperacao);
@@ -126,7 +137,7 @@ export function processClearTradeRow(
   // Tipo de operação  
   const tipo: 'compra' | 'venda' = lado?.toUpperCase() === 'C' ? 'compra' : 'venda';
   
-  console.log(`✅ Clear: ${ativo} ${tipo} ${quantidade} contratos, resultado = R$ ${resultado}`);
+  console.log(`✅ Clear: ${ativo} ${tipo} ${qtdFinal} contratos, resultado = R$ ${resultado}`);
   
   return {
     userId,
@@ -137,13 +148,13 @@ export function processClearTradeRow(
     dataHora: dataHora.toISOString(),
     ativo: ativo.toUpperCase(),
     tipo,
-    quantidade: quantidade.toString(),
+    quantidade: qtdFinal.toString(),
     precoEntrada: precoEntrada.toString(),
     precoSaida: precoSaida.toString(),
-    capitalUtilizado: (quantidade * Math.max(precoEntrada, precoSaida)).toString(),
+    capitalUtilizado: (qtdFinal * Math.max(precoEntrada, precoSaida)).toString(),
     resultado: resultado.toString(),
     emocao: 'neutro',
-    comentario: `Clear: ${tipo} ${quantidade} contratos - ${abertura}`
+    comentario: `Clear: ${tipo} ${qtdFinal} contratos - ${data || 'sem data'}`
   };
 }
 
