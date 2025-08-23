@@ -12,6 +12,7 @@ import jwt from "jsonwebtoken";
 import { lerCSVSimples } from "./simple-csv-reader";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import { validateAndParseCSV } from "./csvValidator";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -1334,6 +1335,38 @@ export async function registerRoutes(app: Express): Promise<void> {
         broker,
         csvName: req.body.csvName
       });
+
+      // NOVA VALIDAÇÃO PRÉ-PROCESSAMENTO: Verificar estrutura obrigatória
+      console.log(`🔍 Executando validação de estrutura obrigatória...`);
+      const validation = await validateAndParseCSV(file.path);
+      
+      if (!validation.valid) {
+        console.log(`❌ Validação falhou: ${validation.reason}`);
+        
+        // Clean up uploaded file
+        fs.unlinkSync(file.path);
+        
+        return res.status(400).json({
+          message: "Estrutura de CSV inválida",
+          type: "validation_failed",
+          reason: validation.reason,
+          solution: {
+            title: "CSV deve conter trades com datas obrigatórias:",
+            requirements: [
+              "✅ Coluna de Abertura: 'Abertura', 'Open Time', 'Open', 'Entry Time', 'Data Abertura', 'Opening Time'",
+              "✅ Coluna de Fechamento: 'Fechamento', 'Close Time', 'Close', 'Exit Time', 'Data Fechamento', 'Closing Time'",
+              "✅ Cada trade deve ter ambas as datas válidas e Abertura <= Fechamento",
+              "✅ Formatos de data aceitos: DD/MM/YYYY HH:mm:ss, DD/MM/YYYY, YYYY-MM-DD, MM/DD/YYYY"
+            ]
+          },
+          expectedFormat: {
+            description: "Arquivo deve conter trades individuais, não relatórios de performance",
+            example: "Ativo | Abertura | Fechamento | Quantidade | Resultado\nWINQ25 | 03/06/2025 11:57:00 | 03/06/2025 12:00:08 | 1 | -16,00"
+          }
+        });
+      }
+      
+      console.log(`✅ Validação passou: ${validation.headers?.length} colunas, ${validation.rows?.length} trades válidos`);
       console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🔄 Método: ${useTraditional ? 'Tradicional' : 'ChatGPT (Padrão)'}`);
 
       // 🗓️ VALIDAÇÃO OBRIGATÓRIA DE DATAS
