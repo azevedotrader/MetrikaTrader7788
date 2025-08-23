@@ -344,6 +344,18 @@ e certifique-se de que seu array "trades" contém EXATAMENTE esse número!
   } catch (error) {
     console.error('❌ Erro na análise ChatGPT:', error);
     console.error('🔍 Stack trace completo:', error instanceof Error ? error.stack : 'N/A');
+    console.error('🔍 API Key disponível:', process.env.OPENAI_API_KEY ? 'Sim (***' + process.env.OPENAI_API_KEY.slice(-4) + ')' : 'Não');
+    console.error('🔍 Tipo do erro:', error instanceof Error ? error.constructor.name : typeof error);
+    
+    if (error instanceof Error) {
+      if (error.message.includes('401') || error.message.includes('authentication')) {
+        console.error('🚫 Erro de autenticação OpenAI - verificar API key');
+      } else if (error.message.includes('429')) {
+        console.error('⏰ Rate limit OpenAI - tente novamente em alguns segundos');
+      } else if (error.message.includes('timeout')) {
+        console.error('⏱️ Timeout na requisição OpenAI');
+      }
+    }
     
     return {
       trades: [],

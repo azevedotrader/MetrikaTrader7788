@@ -1344,7 +1344,59 @@ export async function registerRoutes(app: Express): Promise<void> {
       } else {
         // Usar ChatGPT como padrão - Análise estrutural completa
         console.log(`🤖 Usando ChatGPT (PADRÃO) para análise estrutural completa...`);
-        console.log(`🔑 OpenAI API Key disponível: ${process.env.OPENAI_API_KEY ? 'Sim' : 'Não'}`);
+        console.log(`🔑 OpenAI API Key disponível: ${process.env.OPENAI_API_KEY ? 'Sim (***' + process.env.OPENAI_API_KEY.slice(-4) + ')' : 'Não'}`);
+        
+        // Testar conexão OpenAI antes de processar
+        try {
+          const { OpenAI } = await import('openai');
+          const testClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+          console.log('🧪 Testando conexão OpenAI...');
+          
+          // Teste simples
+          const testResponse = await testClient.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [{ role: 'user', content: 'Hello' }],
+            max_tokens: 5
+          });
+          
+          console.log('✅ OpenAI conectado com sucesso!');
+        } catch (testError) {
+          console.error('❌ Erro de conexão OpenAI:', testError);
+          console.error('🚫 Usando sistema tradicional por falha na OpenAI');
+          
+          // Forçar uso do sistema tradicional se OpenAI falhar
+          const { processSmartCSV } = await import('./smart-csv-processor');
+          result = await processSmartCSV(file.path, userId, broker);
+          result.summary.processingMethod = 'Sistema Tradicional (OpenAI indisponível)';
+          
+          // Skip ChatGPT processing and go to saving
+          const csvImport = await storage.createCsvImport({
+            userId,
+            fileName: file.originalname,
+            displayName: req.body.csvName || file.originalname,
+            filePath: file.path,
+            broker: result.summary.detectedBroker,
+            tradesImported: result.trades.length,
+            processingMethod: result.summary.processingMethod,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+
+          if (result.trades.length > 0) {
+            console.log(`💾 [${userId}] Inserindo ${result.trades.length} trades no banco com isolamento`);
+            await storage.createTrades(result.trades);
+          }
+
+          return res.json({
+            message: `🎉 ${result.trades.length} trades importados com sucesso! (Sistema tradicional usado)`,
+            tradesImported: result.trades.length,
+            broker: result.summary.detectedBroker,
+            market: result.summary.detectedMarket,
+            csvId: csvImport.id,
+            summary: result.summary,
+            errors: result.errors
+          });
+        }
         const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
         const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
         
