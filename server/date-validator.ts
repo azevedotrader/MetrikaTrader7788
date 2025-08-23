@@ -193,7 +193,7 @@ export function validateDateColumn(
           validDatesInColumn++;
           formatCounts[format] = (formatCounts[format] || 0) + 1;
           
-          console.log(`  ✅ Linha ${i + 1}: "${dateValue}" → ${format(date, 'dd/MM/yyyy HH:mm', { locale: ptBR })}`);
+          console.log(`  ✅ Linha ${i + 1}: "${dateValue}" → ${date.toLocaleDateString('pt-BR')}`);
         } else {
           console.log(`  ❌ Linha ${i + 1}: "${dateValue}" → não foi possível parsear`);
         }

@@ -1339,10 +1339,11 @@ export async function registerRoutes(app: Express): Promise<void> {
         userId,
         fileName: file.originalname,
         displayName: req.body.csvName || file.originalname,
-        filePath: file.path,
         broker: 'auto', // Will be updated after detection
         tradesImported: 0,
-        processingMethod: 'Sistema Inteligente Universal'
+        tradesSkipped: 0,
+        status: 'processing',
+        errorMessage: null
       });
 
       // Usar nosso sistema inteligente universal

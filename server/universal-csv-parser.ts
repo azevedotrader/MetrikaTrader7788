@@ -384,7 +384,6 @@ export async function parseCSVUniversal(filePath: string): Promise<ParsedCSVResu
         const result = Papa.parse<any>(content, {
           ...config,
           skipEmptyLines: true,
-          trimHeaders: true,
           transform: (value: any) => value?.trim() || ''
         });
         

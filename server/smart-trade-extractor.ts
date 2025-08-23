@@ -104,16 +104,16 @@ export function extractTradesFromUniversalCSV(
         csvImportId,
         dataHora: tradeData.dataHora,
         ativo: tradeData.ativo,
-        mercado: detectedMarket,
+        mercado: detectedMarket as 'crypto' | 'forex' | 'b3',
         setup: 'Importado CSV',
-        capitalUtilizado: Math.abs(resultado) * 10, // Estimativa baseada no resultado
-        resultado: resultado,
-        quantidade: tradeData.quantidade || 1,
+        capitalUtilizado: String(Math.abs(resultado) * 10), // Estimativa baseada no resultado
+        resultado: String(resultado),
+        quantidade: String(tradeData.quantidade || 1),
         tipo: resultado >= 0 ? 'compra' : 'venda', // Inferir tipo baseado no resultado
         comentario: `Trade importado - ${resultColumn}: ${resultado}`,
-        precoEntrada: tradeData.precoEntrada,
-        precoSaida: tradeData.precoSaida,
-        corretora: detectedBroker,
+        precoEntrada: String(tradeData.precoEntrada || 0),
+        precoSaida: String(tradeData.precoSaida || 0),
+        corretora: detectedBroker as 'crypto' | 'forex' | 'b3' | 'auto',
         origem: 'csv'
       };
       
