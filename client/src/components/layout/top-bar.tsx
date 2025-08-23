@@ -11,28 +11,28 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
   const isMobile = useIsMobile();
   
   return (
-    <header className="bg-zinc-900/90 border-b border-zinc-800 px-4 lg:px-6 py-4">
+    <header className="bg-zinc-900/90 border-b border-zinc-800 px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Mobile menu button */}
           {isMobile && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-zinc-400 hover:text-white lg:hidden"
+              className="text-zinc-400 hover:text-white lg:hidden h-9 w-9 sm:h-10 sm:w-10"
               onClick={onMenuClick}
             >
               <Menu className="w-5 h-5" />
             </Button>
           )}
-          <h1 className="text-lg lg:text-2xl font-bold text-white truncate">{title}</h1>
+          <h1 className="text-base sm:text-lg lg:text-2xl font-bold text-white truncate">{title}</h1>
         </div>
         
         <div className="flex items-center space-x-2 lg:space-x-4">
-          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white h-8 w-8 sm:h-9 sm:w-9">
             <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
           </Button>
-          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
+          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white h-8 w-8 sm:h-9 sm:w-9">
             <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
           </Button>
         </div>

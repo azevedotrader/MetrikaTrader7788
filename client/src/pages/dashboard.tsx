@@ -1103,9 +1103,9 @@ export default function Dashboard() {
           <TabsTrigger value="consolidated" className="data-[state=active]:bg-slate-700">Consolidado</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
           {/* Main Metrics Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
@@ -1140,7 +1140,7 @@ export default function Dashboard() {
           </div>
 
           {/* Performance Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -1260,7 +1260,7 @@ export default function Dashboard() {
 
         <TabsContent value="insights" className="space-y-6">
           {/* Main Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
@@ -1315,7 +1315,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
                   <div className="text-2xl font-bold text-white mb-1">
                     {(() => {
@@ -1383,8 +1383,8 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="brokers" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <TabsContent value="brokers" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {Object.entries(brokerInfo).map(([broker, info]) => {
               const trades = (tradesByBroker as any)[broker] || [];
               const stats = calculateBrokerStats(trades);
@@ -1408,19 +1408,19 @@ export default function Dashboard() {
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                       <div>
-                        <div className="text-2xl font-bold text-white">{stats.totalTrades}</div>
+                        <div className="text-lg sm:text-2xl font-bold text-white">{stats.totalTrades}</div>
                         <div className="text-xs text-zinc-400">Trades</div>
                       </div>
                       <div>
-                        <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-lg sm:text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                         </div>
                         <div className="text-xs text-zinc-400">Resultado</div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                        <div className="text-lg sm:text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
                         <div className="text-xs text-zinc-400">Win Rate</div>
                       </div>
                     </div>
@@ -1444,7 +1444,7 @@ export default function Dashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="imports" className="space-y-4">
+        <TabsContent value="imports" className="space-y-3 sm:space-y-4">
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white">Histórico de Importações CSV</CardTitle>
@@ -1475,9 +1475,9 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="consolidated" className="space-y-6">
+        <TabsContent value="consolidated" className="space-y-4 sm:space-y-6">
           {/* Resumo Consolidado */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <MetricCard
               title="Resultado Total Consolidado"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
