@@ -179,19 +179,126 @@ export async function processSmartCSV(
     
     console.log(`🎯 Detectado - Broker: ${detectedInfo.broker}, Mercado: ${detectedInfo.market}`);
 
-    // 5. Analisar conteúdo mas continuar processamento (modo flexível)
-    const statisticsRowCount = parseResult.data.filter((row: any) => 
-      isStatisticsRow(row, parseResult.meta.fields || [])
-    ).length;
+    // 5. VALIDAÇÃO POR SCHEMA COM FALLBACK
+    console.log(`\n🔍 INICIANDO VALIDAÇÃO POR SCHEMA (${result.summary.totalRows} linhas)`);
+    console.log(`${'='.repeat(60)}`);
     
-    const statisticsPercentage = (statisticsRowCount / result.summary.totalRows) * 100;
-    console.log(`📊 Análise de conteúdo: ${statisticsRowCount}/${result.summary.totalRows} linhas são estatísticas (${statisticsPercentage.toFixed(1)}%)`);
+    // Validar todas as linhas usando o schema
+    const validatedRows: { row: any; validation: ValidatedTradeRow; index: number }[] = [];
+    const invalidRows: number[] = [];
     
-    // MODO INTELIGENTE: Se arquivo é de estatísticas, usar interpretador especializado
-    if (statisticsPercentage > 80) {
-      console.log(`📊 Arquivo predominantemente estatísticas (${statisticsPercentage.toFixed(1)}%)`);
-      console.log(`🧠 Usando interpretador inteligente de estatísticas...`);
+    for (let index = 0; index < parseResult.data.length; index++) {
+      const row = parseResult.data[index];
+      console.log(`\n  Linha ${index + 1}:`);
+      const validation = validateTradeRow(row, index);
       
+      if (validation) {
+        validatedRows.push({ row, validation, index });
+        console.log(`    ✅ ACEITA - Data: ${validation.dataHora?.toISOString()}, Ativo: ${validation.ativo}`);
+      } else {
+        invalidRows.push(index);
+        console.log(`    ❌ DESCARTADA - Não atende aos critérios mínimos`);
+      }
+    }
+    
+    const validPercentage = (validatedRows.length / result.summary.totalRows) * 100;
+    
+    console.log(`\n📊 RESULTADO DA VALIDAÇÃO:`);
+    console.log(`   ✅ Linhas ACEITAS: ${validatedRows.length} (${validPercentage.toFixed(1)}%)`);
+    console.log(`   ❌ Linhas DESCARTADAS: ${invalidRows.length} (${(100 - validPercentage).toFixed(1)}%)`);
+    console.log(`${'='.repeat(60)}\n`);
+    
+    let rowsToProcess: any[] = [];
+    let dates: Date[] = [];
+    
+    // DECISÃO SOBRE QUAL MÉTODO USAR
+    if (validPercentage === 100) {
+      // 100% passaram - usar apenas schema
+      console.log(`✅ MODO SCHEMA PURO: 100% das linhas passaram, usando apenas validação por schema`);
+      
+      // Processar linhas validadas
+      for (const { row, validation, index } of validatedRows) {
+        const trade = extractTradeFromRow(
+          row, 
+          userId, 
+          detectedInfo.broker, 
+          detectedInfo.market,
+          index
+        );
+        
+        if (trade) {
+          result.trades.push(trade);
+          result.summary.tradesFound++;
+          const tradeDate = new Date(trade.dataHora);
+          if (!isNaN(tradeDate.getTime())) {
+            dates.push(tradeDate);
+          }
+        }
+      }
+      
+    } else if (validPercentage > 0 && validPercentage < 100) {
+      // Apenas algumas passaram - usar filtro textual antigo
+      console.log(`⚠️ MODO HÍBRIDO: Apenas ${validPercentage.toFixed(1)}% passaram, voltando para filtro textual`);
+      console.log(`🔄 Aplicando filtros textuais antigos...`);
+      
+      // Aplicar filtros textuais antigos
+      for (let index = 0; index < parseResult.data.length; index++) {
+        const row = parseResult.data[index];
+        const rowStr = Object.values(row).join(' ').toLowerCase();
+        
+        // Filtros textuais antigos
+        const skipPatterns = [
+          /patrimônio|capital|saldo|drawdown|retorno|percentual/i,
+          /rentabilidade|lucro líquido|prejuízo|melhor trade|pior trade/i,
+          /win rate|lose rate|expectativa|payoff|profit factor/i,
+          /total geral|resultado líquido|performance|desempenho/i,
+          /^resumo|^summary|^estatística|^statistics/i,
+          /conta|titular|saldo líquido total/i
+        ];
+        
+        let shouldSkip = false;
+        for (const pattern of skipPatterns) {
+          if (pattern.test(rowStr)) {
+            console.log(`    🚫 Linha ${index + 1} filtrada por padrão textual: ${pattern}`);
+            shouldSkip = true;
+            result.summary.statisticsSkipped++;
+            break;
+          }
+        }
+        
+        if (!shouldSkip) {
+          try {
+            const trade = extractTradeFromRow(
+              row, 
+              userId, 
+              detectedInfo.broker, 
+              detectedInfo.market,
+              index
+            );
+            
+            if (trade) {
+              result.trades.push(trade);
+              result.summary.tradesFound++;
+              const tradeDate = new Date(trade.dataHora);
+              if (!isNaN(tradeDate.getTime())) {
+                dates.push(tradeDate);
+              }
+            }
+          } catch (error: any) {
+            console.error(`❌ Erro na linha ${index + 1}:`, error);
+            result.errors.push(`Linha ${index + 1}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+          }
+        }
+      }
+      
+      console.log(`📋 Após filtros textuais: ${result.trades.length} trades extraídos`);
+      
+    } else {
+      // 0% passaram - tentar interpretador alternativo
+      console.log(`⚠️ AVISO: Nenhuma linha passou na validação por schema`);
+      console.log(`🧪 Tentando modo de interpretação alternativo...`);
+      
+      // Se nenhuma linha passou, tentar interpretador de estatísticas
       const statisticsTrades = interpretStatisticsAsTradesWithCorrectValues(
         parseResult.data,
         userId,
@@ -201,58 +308,13 @@ export async function processSmartCSV(
       if (statisticsTrades.length > 0) {
         result.trades = statisticsTrades;
         result.summary.tradesFound = statisticsTrades.length;
-        result.summary.statisticsSkipped = parseResult.data.length - statisticsTrades.length;
-        result.errors.push('✅ Estatísticas interpretadas inteligentemente como métricas de trading');
+        result.summary.statisticsSkipped = parseResult.data.length;
+        result.errors.push('ℹ️ Arquivo interpretado como estatísticas/relatório');
         
         // Calcular range de datas
-        const dates = statisticsTrades.map(t => new Date(t.dataHora));
-        if (dates.length > 0) {
-          result.summary.dateRange = {
-            start: new Date(Math.min(...dates.map(d => d.getTime()))).toISOString().split('T')[0],
-            end: new Date(Math.max(...dates.map(d => d.getTime()))).toISOString().split('T')[0]
-          };
-        }
-        
-        return result; // Retornar com dados interpretados
-      }
-      
-      result.errors.push('⚠️ Interpretador de estatísticas não conseguiu extrair dados válidos');
-    }
-
-    // 6. Processar cada linha
-    let dates: Date[] = [];
-    
-    for (let index = 0; index < parseResult.data.length; index++) {
-      const row = parseResult.data[index];
-      try {
-        // Verificar se é uma linha válida de trade
-        if (!isValidTradeRow(row, index)) {
-          result.summary.statisticsSkipped++;
-          continue;
-        }
-
-        // Extrair trade da linha
-        const trade = extractTradeFromRow(
-          row, 
-          userId, 
-          detectedInfo.broker, 
-          detectedInfo.market,
-          index
-        );
-
-        if (trade) {
-          result.trades.push(trade);
-          result.summary.tradesFound++;
-          
-          // Coletar data para range
-          const tradeDate = new Date(trade.dataHora);
-          if (!isNaN(tradeDate.getTime())) {
-            dates.push(tradeDate);
-          }
-        }
-      } catch (error: any) {
-        console.error(`❌ Erro na linha ${index}:`, error);
-        result.errors.push(`Linha ${index}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+        dates = statisticsTrades.map(t => new Date(t.dataHora));
+      } else {
+        result.errors.push('⚠️ Interpretador de estatísticas não conseguiu extrair dados válidos');
       }
     }
 
@@ -406,71 +468,96 @@ function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string
 function extractAndValidateDate(row: any): Date | null {
   const datePatterns = [
     // DD/MM/YYYY HH:MM:SS ou DD/MM/YYYY HH:MM
-    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/,
+    {
+      pattern: /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/,
+      format: 'DD/MM/YYYY HH:MM:SS',
+      parse: (match: RegExpMatchArray) => {
+        const [_, day, month, year, hour, minute, second] = match;
+        return new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          parseInt(hour),
+          parseInt(minute),
+          parseInt(second || '0')
+        );
+      }
+    },
     // DD/MM/YYYY
-    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/,
+    {
+      pattern: /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})(?!\s*\d)/,
+      format: 'DD/MM/YYYY',
+      parse: (match: RegExpMatchArray) => {
+        const [_, day, month, year] = match;
+        return new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          12, 0, 0
+        );
+      }
+    },
     // YYYY-MM-DD HH:MM:SS ou YYYY-MM-DD
-    /(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
+    {
+      pattern: /(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
+      format: 'YYYY-MM-DD [HH:MM:SS]',
+      parse: (match: RegExpMatchArray) => {
+        const [_, year, month, day, hour, minute, second] = match;
+        return new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          hour ? parseInt(hour) : 12,
+          minute ? parseInt(minute) : 0,
+          second ? parseInt(second) : 0
+        );
+      }
+    },
     // DD/MM/YY
-    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})(?!\d)/
+    {
+      pattern: /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})(?!\d)/,
+      format: 'DD/MM/YY',
+      parse: (match: RegExpMatchArray) => {
+        const [_, day, month, year] = match;
+        return new Date(
+          2000 + parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          12, 0, 0
+        );
+      }
+    }
   ];
   
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;
     const valueStr = String(value).trim();
     
-    for (const pattern of datePatterns) {
+    for (const { pattern, format, parse } of datePatterns) {
       const match = valueStr.match(pattern);
       if (match) {
-        let date: Date | null = null;
-        
-        // DD/MM/YYYY HH:MM:SS
-        if (match.length >= 6 && match[4]) {
-          const [_, day, month, year, hour, minute, second] = match;
-          date = new Date(
-            parseInt(year),
-            parseInt(month) - 1,
-            parseInt(day),
-            parseInt(hour),
-            parseInt(minute),
-            parseInt(second || '0')
-          );
-        }
-        // DD/MM/YYYY
-        else if (match[1] && match[2] && match[3] && match[3].length === 4) {
-          const day = parseInt(match[1]);
-          const month = parseInt(match[2]);
-          const year = parseInt(match[3]);
-          date = new Date(year, month - 1, day, 12, 0, 0);
-        }
-        // YYYY-MM-DD
-        else if (match[1] && match[1].length === 4) {
-          const year = parseInt(match[1]);
-          const month = parseInt(match[2]);
-          const day = parseInt(match[3]);
-          const hour = match[4] ? parseInt(match[4]) : 12;
-          const minute = match[5] ? parseInt(match[5]) : 0;
-          const second = match[6] ? parseInt(match[6]) : 0;
-          date = new Date(year, month - 1, day, hour, minute, second);
-        }
-        // DD/MM/YY
-        else if (match[1] && match[2] && match[3] && match[3].length === 2) {
-          const day = parseInt(match[1]);
-          const month = parseInt(match[2]);
-          const year = 2000 + parseInt(match[3]);
-          date = new Date(year, month - 1, day, 12, 0, 0);
-        }
-        
-        if (date && !isNaN(date.getTime())) {
-          const year = date.getFullYear();
-          if (year >= 2010 && year <= 2030) {
-            return date;
+        try {
+          const date = parse(match);
+          
+          if (date && !isNaN(date.getTime())) {
+            const year = date.getFullYear();
+            if (year >= 2010 && year <= 2030) {
+              console.log(`    📅 Data: "${valueStr}" → formato: ${format} → ${date.toISOString()}`);
+              return date;
+            } else {
+              console.log(`    📅 Data: "${valueStr}" → formato: ${format} → ano ${year} fora do range (2010-2030)`);
+            }
+          } else {
+            console.log(`    📅 Data: "${valueStr}" → formato: ${format} → data inválida`);
           }
+        } catch (e) {
+          console.log(`    📅 Data: "${valueStr}" → formato: ${format} → erro no parse: ${e}`);
         }
       }
     }
   }
   
+  console.log(`    📅 Data: nenhuma data válida encontrada na linha`);
   return null;
 }
 
@@ -481,14 +568,16 @@ function extractAndValidateSymbol(row: any): string | null {
   // Primeiro tenta encontrar símbolos conhecidos
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;
-    const valueStr = String(value).toUpperCase().trim();
+    const original = String(value);
+    const valueStr = original.toUpperCase().trim();
     
     // Procurar padrões de símbolos conhecidos
-    for (const pattern of Object.values(TRADING_SYMBOL_PATTERNS)) {
+    for (const [market, pattern] of Object.entries(TRADING_SYMBOL_PATTERNS)) {
       if (pattern.test(valueStr)) {
         // Extrair apenas o símbolo, não a linha toda
         const match = valueStr.match(pattern);
         if (match) {
+          console.log(`    🎯 Ativo: "${original}" → mercado: ${market} → símbolo: ${match[0]}`);
           return match[0];
         }
       }
@@ -498,23 +587,26 @@ function extractAndValidateSymbol(row: any): string | null {
   // Procurar por padrões genéricos de símbolos
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;
-    const valueStr = String(value).trim();
+    const original = String(value);
+    const valueStr = original.trim();
     
     // Padrões genéricos de símbolos
     const genericPatterns = [
-      /^[A-Z]{2,8}\d*$/i,
-      /^[A-Z]{3,6}[0-9]{1,4}$/i,
-      /^[A-Z]+[\/\-][A-Z]+$/i
+      { pattern: /^[A-Z]{2,8}\d*$/i, name: 'alfanumérico' },
+      { pattern: /^[A-Z]{3,6}[0-9]{1,4}$/i, name: 'ticker+números' },
+      { pattern: /^[A-Z]+[\/\-][A-Z]+$/i, name: 'par de moedas' }
     ];
     
-    for (const pattern of genericPatterns) {
+    for (const { pattern, name } of genericPatterns) {
       const match = valueStr.match(pattern);
       if (match) {
+        console.log(`    🎯 Ativo: "${original}" → padrão: ${name} → símbolo: ${match[0].toUpperCase()}`);
         return match[0].toUpperCase();
       }
     }
   }
   
+  console.log(`    🎯 Ativo: nenhum símbolo válido encontrado`);
   return null;
 }
 
@@ -522,14 +614,18 @@ function extractAndValidateSymbol(row: any): string | null {
  * Extrai e valida quantidade
  */
 function extractAndValidateQuantity(row: any): number | null {
+  console.log(`    📦 Buscando quantidade...`);
+  
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;
     
     // Procurar por campos que possam ser quantidade
     const keyLower = key.toLowerCase();
     if (keyLower.includes('quant') || keyLower.includes('qtd') || keyLower.includes('volume')) {
+      console.log(`      Campo candidato: ${key} = "${value}"`);
       const num = parseNumericValue(String(value));
       if (num !== null && num > 0 && num <= 999999) {
+        console.log(`    📦 Quantidade: campo "${key}" = ${num}`);
         return num;
       }
     }
@@ -540,9 +636,11 @@ function extractAndValidateQuantity(row: any): number | null {
   const quantities = numbers.filter(n => n > 0 && n <= 10000);
   
   if (quantities.length > 0) {
+    console.log(`    📦 Quantidade: heurística (número pequeno) = ${quantities[0]}`);
     return quantities[0];
   }
   
+  console.log(`    📦 Quantidade: não encontrada`);
   return null;
 }
 
@@ -555,6 +653,8 @@ function extractAndValidatePrices(row: any): {
   capitalUtilizado: number | null;
   resultado: number | null;
 } {
+  console.log(`    💰 Buscando preços e valores...`);
+  
   const result = {
     precoEntrada: null as number | null,
     precoSaida: null as number | null,
@@ -564,6 +664,7 @@ function extractAndValidatePrices(row: any): {
   
   // Extrair todos os números da linha
   const numbers = extractAllNumbers(row);
+  console.log(`      Números encontrados: [${numbers.join(', ')}]`);
   
   // Procurar por campos específicos
   for (const [key, value] of Object.entries(row)) {
@@ -572,14 +673,18 @@ function extractAndValidatePrices(row: any): {
     const num = parseNumericValue(String(value));
     
     if (num !== null) {
-      if (keyLower.includes('entrada') || keyLower.includes('entry') || keyLower.includes('preço') && !keyLower.includes('saida')) {
+      if (keyLower.includes('entrada') || keyLower.includes('entry') || (keyLower.includes('preço') && !keyLower.includes('saida'))) {
         result.precoEntrada = num;
+        console.log(`      Preço Entrada: campo "${key}" = ${num}`);
       } else if (keyLower.includes('saida') || keyLower.includes('exit') || keyLower.includes('saída')) {
         result.precoSaida = num;
-      } else if (keyLower.includes('capital') || keyLower.includes('volume')) {
+        console.log(`      Preço Saída: campo "${key}" = ${num}`);
+      } else if (keyLower.includes('capital') || keyLower.includes('volume') || keyLower.includes('financeiro')) {
         result.capitalUtilizado = num;
+        console.log(`      Capital: campo "${key}" = ${num}`);
       } else if (keyLower.includes('resultado') || keyLower.includes('profit') || keyLower.includes('lucro') || keyLower.includes('prejuízo')) {
         result.resultado = num;
+        console.log(`      Resultado: campo "${key}" = ${num}`);
       }
     }
   }
@@ -590,9 +695,18 @@ function extractAndValidatePrices(row: any): {
     if (validNumbers.length > 0) {
       // Assumir que números maiores são preços ou capital
       const sorted = validNumbers.sort((a, b) => Math.abs(b) - Math.abs(a));
-      if (sorted.length > 0) result.capitalUtilizado = sorted[0];
-      if (sorted.length > 1) result.precoEntrada = sorted[1];
-      if (sorted.length > 2) result.precoSaida = sorted[2];
+      if (sorted.length > 0) {
+        result.capitalUtilizado = sorted[0];
+        console.log(`      Capital: heurística (maior número) = ${sorted[0]}`);
+      }
+      if (sorted.length > 1) {
+        result.precoEntrada = sorted[1];
+        console.log(`      Preço Entrada: heurística (segundo maior) = ${sorted[1]}`);
+      }
+      if (sorted.length > 2) {
+        result.precoSaida = sorted[2];
+        console.log(`      Preço Saída: heurística (terceiro maior) = ${sorted[2]}`);
+      }
     }
   }
   
@@ -601,8 +715,11 @@ function extractAndValidatePrices(row: any): {
     const possibleResults = numbers.filter(n => Math.abs(n) < 100000);
     if (possibleResults.length > 0) {
       result.resultado = possibleResults[possibleResults.length - 1];
+      console.log(`      Resultado: heurística (último número pequeno) = ${result.resultado}`);
     }
   }
+  
+  console.log(`    💰 Preços finais: entrada=${result.precoEntrada}, saída=${result.precoSaida}, capital=${result.capitalUtilizado}, resultado=${result.resultado}`);
   
   return result;
 }
@@ -613,45 +730,75 @@ function extractAndValidatePrices(row: any): {
 function parseNumericValue(str: string): number | null {
   if (!str) return null;
   
-  // Limpar string
+  const original = str;
+  
+  // Limpar string inicial
   let cleaned = str.trim()
     .replace(/[R$\s]/gi, '') // Remove R$, espaços
     .replace(/[^\d.,\-+]/g, ''); // Mantém apenas números, vírgula, ponto, sinal
   
-  if (!cleaned) return null;
+  if (!cleaned) {
+    console.log(`    📊 Número: "${original}" → vazio → null`);
+    return null;
+  }
   
   // Detectar formato: brasileiro (1.234,56) ou americano (1,234.56)
   const lastComma = cleaned.lastIndexOf(',');
   const lastDot = cleaned.lastIndexOf('.');
   
+  let normalized = cleaned;
+  let detectedFormat = 'desconhecido';
+  
   if (lastComma > lastDot) {
     // Formato brasileiro: ponto para milhares, vírgula para decimal
-    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+    // Ex: 1.234,56 → 1234.56
+    detectedFormat = 'brasileiro';
+    normalized = cleaned.replace(/\./g, '').replace(',', '.');
   } else if (lastDot > lastComma) {
-    // Formato americano: vírgula para milhares, ponto para decimal
-    cleaned = cleaned.replace(/,/g, '');
+    // Formato americano: vírgula para milhares, ponto para decimal  
+    // Ex: 1,234.56 → 1234.56
+    detectedFormat = 'americano';
+    normalized = cleaned.replace(/,/g, '');
   } else if (lastComma === -1 && lastDot > 0) {
     // Apenas ponto, verificar se é decimal ou milhares
     const afterDot = cleaned.substring(lastDot + 1);
     if (afterDot.length === 3) {
       // Provavelmente separador de milhares
-      cleaned = cleaned.replace(/\./g, '');
+      // Ex: 1.234 → 1234
+      detectedFormat = 'milhares (ponto)';
+      normalized = cleaned.replace(/\./g, '');
+    } else {
+      // É decimal
+      // Ex: 123.45 → 123.45
+      detectedFormat = 'decimal (ponto)';
+      normalized = cleaned;
     }
-    // Se tem 1-2 dígitos após o ponto, é decimal (mantém como está)
   } else if (lastDot === -1 && lastComma > 0) {
     // Apenas vírgula, verificar se é decimal ou milhares
     const afterComma = cleaned.substring(lastComma + 1);
     if (afterComma.length === 3) {
       // Provavelmente separador de milhares
-      cleaned = cleaned.replace(/,/g, '');
+      // Ex: 1,234 → 1234
+      detectedFormat = 'milhares (vírgula)';
+      normalized = cleaned.replace(/,/g, '');
     } else {
       // É decimal
-      cleaned = cleaned.replace(',', '.');
+      // Ex: 123,45 → 123.45
+      detectedFormat = 'decimal (vírgula)';
+      normalized = cleaned.replace(',', '.');
     }
+  } else {
+    // Número simples sem separadores
+    detectedFormat = 'simples';
+    normalized = cleaned;
   }
   
-  const num = parseFloat(cleaned);
-  return isNaN(num) || !isFinite(num) ? null : num;
+  const num = parseFloat(normalized);
+  const result = isNaN(num) || !isFinite(num) ? null : num;
+  
+  console.log(`    📊 Número: "${original}" → limpo: "${cleaned}" → formato: ${detectedFormat} → normalizado: "${normalized}" → final: ${result}`);
+  
+  return result;
 }
 
 /**
