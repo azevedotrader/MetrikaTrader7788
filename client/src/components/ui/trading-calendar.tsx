@@ -56,9 +56,7 @@ export function TradingCalendar({
 
   // Funções para o diário
   const handleDateClick = (date: Date) => {
-    const existingEntry = diaryEntries.find(entry => 
-      isSameDay(new Date(entry.date), date)
-    );
+    const existingEntry = getDiaryEntryForDate(date);
     
     if (onDateClick) {
       onDateClick(date, existingEntry);
@@ -80,9 +78,13 @@ export function TradingCalendar({
   };
 
   const getDiaryEntryForDate = (date: Date) => {
-    return diaryEntries.find(entry => 
-      isSameDay(new Date(entry.date), date)
-    );
+    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    
+    return diaryEntries.find(entry => {
+      const entryDate = new Date(entry.date);
+      const entryDateString = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}-${String(entryDate.getDate()).padStart(2, '0')}`;
+      return entryDateString === targetDateString;
+    });
   };
 
   // Navegar entre meses

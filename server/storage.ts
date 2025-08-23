@@ -489,9 +489,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]> {
-    const startDate = new Date(date);
-    const endDate = new Date(date);
-    endDate.setDate(endDate.getDate() + 1);
+    // Garantir comparação correta de datas - usar apenas ano, mês e dia
+    const [year, month, day] = date.split('-');
+    const startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0, 0);
+    const endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 23, 59, 59, 999);
     
     return await db.select().from(diaryEntries)
       .where(and(
@@ -503,11 +504,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry> {
+    // Garantir que a data seja tratada corretamente (sem problemas de timezone)
+    const dateString = entry.date;
+    const [year, month, day] = dateString.split('-');
+    const correctedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    
     const [newEntry] = await db
       .insert(diaryEntries)
       .values({
         ...entry,
-        date: new Date(entry.date),
+        date: correctedDate,
         pnl: entry.pnl || "0",
         winRate: entry.winRate || "0",
       })
@@ -516,11 +522,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDiaryEntry(id: string, updates: Partial<InsertDiaryEntry>, userId: string): Promise<DiaryEntry> {
+    // Garantir que a data seja tratada corretamente (sem problemas de timezone)
+    let correctedDate;
+    if (updates.date) {
+      const dateString = updates.date;
+      const [year, month, day] = dateString.split('-');
+      correctedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
     const [updatedEntry] = await db
       .update(diaryEntries)
       .set({
         ...updates,
-        date: updates.date ? new Date(updates.date) : undefined,
+        date: correctedDate,
         updatedAt: new Date(),
       })
       .where(and(eq(diaryEntries.id, id), eq(diaryEntries.userId, userId)))

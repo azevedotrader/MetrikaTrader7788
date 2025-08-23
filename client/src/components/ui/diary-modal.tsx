@@ -29,10 +29,18 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Corrigir formatação da data para evitar problemas de timezone
+  const formatDateForInput = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const form = useForm<InsertDiaryEntry>({
     resolver: zodResolver(insertDiaryEntrySchema),
     defaultValues: {
-      date: entry?.date ? format(new Date(entry.date), "yyyy-MM-dd") : selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+      date: entry?.date ? formatDateForInput(new Date(entry.date)) : selectedDate ? formatDateForInput(selectedDate) : "",
       title: entry?.title || "",
       content: entry?.content || "",
       emotion: (entry?.emotion as "confiante" | "ansioso" | "impulsivo" | "calmo" | "eufórico" | "frustrado" | "neutro" | undefined) || undefined,
