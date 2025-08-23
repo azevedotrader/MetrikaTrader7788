@@ -70,7 +70,12 @@ export function AISuggestions({ userProfile, recentTrades = [], onClose }: AISug
   const { data: advice = [], isLoading } = useQuery({
     queryKey: ['/api/ai/advice', userProfile?.id],
     queryFn: async () => {
-      const response = await fetch('/api/ai/advice');
+      const userId = localStorage.getItem('user-id') || '';
+      const response = await fetch('/api/ai/advice', {
+        headers: {
+          'user-id': userId
+        }
+      });
       return response.json();
     },
     refetchInterval: 5 * 60 * 1000, // Atualiza a cada 5 minutos
@@ -161,7 +166,12 @@ export function AISuggestionsPopup() {
   const { data: advice = [] } = useQuery({
     queryKey: ['/api/ai/advice'],
     queryFn: async () => {
-      const response = await fetch('/api/ai/advice');
+      const userId = localStorage.getItem('user-id') || '';
+      const response = await fetch('/api/ai/advice', {
+        headers: {
+          'user-id': userId
+        }
+      });
       return response.json();
     },
     refetchInterval: 2 * 60 * 1000, // Verifica a cada 2 minutos
