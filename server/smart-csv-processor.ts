@@ -149,8 +149,11 @@ export async function processSmartCSV(
   };
 
   try {
-    // 1. Ler arquivo CSV
-    const csvContent = fs.readFileSync(filePath, 'utf-8');
+    // 1. Detectar encoding e ler arquivo CSV
+    const { detectFileEncoding } = await import('./encoding-detector');
+    const encoding = detectFileEncoding(filePath);
+    console.log(`📁 Usando encoding: ${encoding}`);
+    const csvContent = fs.readFileSync(filePath, { encoding: encoding as BufferEncoding });
     
     // 2. Detectar delimitador automaticamente
     const delimiter = detectDelimiter(csvContent);
@@ -175,11 +178,13 @@ export async function processSmartCSV(
 
     // 3.5. Verificar se é CSV da Clear (corretora brasileira)
     const headers = parseResult.meta.fields?.join(';') || '';
+    console.log(`🔍 Headers do arquivo: [${parseResult.meta.fields?.join(', ')}]`);
+    
     const isClear = isClearCSV(headers);
     
     if (isClear) {
       console.log(`🏦 CSV DA CLEAR DETECTADO - processamento especializado`);
-      const clearTrades = processClearCSV(parseResult.data, userId);
+      const clearTrades = processClearCSV(parseResult.data as Record<string, any>[], userId);
       
       result.trades = clearTrades;
       result.summary.tradesFound = clearTrades.length;

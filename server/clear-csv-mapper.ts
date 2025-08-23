@@ -51,14 +51,27 @@ function parseClearDate(dateStr: string): Date {
  */
 export function isClearCSV(header: string): boolean {
   const clearHeaders = [
-    'ativo', 'abertura', 'fechamento', 'tempo operação',
-    'qtd compra', 'qtd venda', 'lado', 'preço compra', 
-    'preço venda', 'total'
+    'ativo', 'abertura', 'fechamento', 'tempo operação', 'tempo operacao',
+    'qtd compra', 'qtd venda', 'lado', 'preço compra', 'preco compra',
+    'preço venda', 'preco venda', 'total', 'res. operação', 'res. operacao'
   ];
   
-  const normalizedHeader = header.toLowerCase();
+  const normalizedHeader = header.toLowerCase()
+    .replace(/[áàâãäå]/g, 'a')
+    .replace(/[éèêë]/g, 'e') 
+    .replace(/[íìîï]/g, 'i')
+    .replace(/[óòôõö]/g, 'o')
+    .replace(/[úùûü]/g, 'u')
+    .replace(/[ç]/g, 'c');
   
-  return clearHeaders.some(h => normalizedHeader.includes(h));
+  console.log(`🔍 Verificando Clear CSV - Header: "${normalizedHeader}"`);
+  
+  const matchCount = clearHeaders.filter(h => normalizedHeader.includes(h)).length;
+  const isMatch = matchCount >= 3; // Precisa ter pelo menos 3 campos típicos da Clear
+  
+  console.log(`🏦 Clear headers encontrados: ${matchCount}/10 - É Clear? ${isMatch}`);
+  
+  return isMatch;
 }
 
 /**
@@ -74,11 +87,13 @@ export function processClearTradeRow(
   // Mapear campos (headers podem variar)
   const ativo = findField(row, ['ativo']);
   const abertura = findField(row, ['abertura']);
-  const fechamento = findField(row, ['fechamento', 'fechamento']);
+  const fechamento = findField(row, ['fechamento']);
   const lado = findField(row, ['lado']);
-  const qtdCompra = findField(row, ['qtd_compra', 'qtd compra']);
-  const qtdVenda = findField(row, ['qtd_venda', 'qtd venda']);
+  const qtdCompra = findField(row, ['qtd_compra', 'qtd compra', 'qtdcompra']);
+  const qtdVenda = findField(row, ['qtd_venda', 'qtd venda', 'qtdvenda']);
   const total = findField(row, ['total']);
+  
+  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", total="${total}", lado="${lado}"`);
   
   if (!ativo || !abertura || !total) {
     console.log('❌ Clear: campos obrigatórios ausentes');
