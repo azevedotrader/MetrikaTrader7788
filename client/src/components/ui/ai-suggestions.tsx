@@ -38,28 +38,28 @@ const getIconForType = (type: string) => {
 const getColorForType = (type: string) => {
   switch (type) {
     case 'suggestion':
-      return 'bg-blue-600';
+      return 'bg-zinc-700';
     case 'warning':
-      return 'bg-red-600';
+      return 'bg-red-900/50';
     case 'opportunity':
-      return 'bg-green-600';
+      return 'bg-green-900/50';
     case 'analysis':
-      return 'bg-purple-600';
+      return 'bg-purple-900/50';
     default:
-      return 'bg-blue-600';
+      return 'bg-zinc-700';
   }
 };
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
     case 'high':
-      return 'bg-red-600';
+      return 'bg-red-900/50';
     case 'medium':
-      return 'bg-yellow-600';
+      return 'bg-yellow-900/50';
     case 'low':
-      return 'bg-green-600';
+      return 'bg-green-900/50';
     default:
-      return 'bg-gray-600';
+      return 'bg-zinc-700';
   }
 };
 
