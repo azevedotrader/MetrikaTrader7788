@@ -326,7 +326,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
         )}
       </CardHeader>
       
-      <CardContent className="p-0">
+      <CardContent className="p-0 pb-4">
         <div className={cn(
           "grid bg-zinc-800",
           isMobile ? "grid-cols-7" : "grid-cols-8"
