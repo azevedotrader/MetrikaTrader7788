@@ -268,7 +268,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
   };
 
   return (
-    <Card className={cn("bg-zinc-900 border-zinc-700", className)}>
+    <Card className={cn("bg-zinc-900 border-zinc-700 mb-8", className)}>
       <CardHeader className={cn(isMobile ? "pb-2" : "pb-4")}>
         <div className="flex items-center justify-between">
           <CardTitle className={cn(
