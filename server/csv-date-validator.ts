@@ -20,7 +20,7 @@ export interface DateValidationResult {
   sampleDates?: string[];
 }
 
-// Possíveis nomes de colunas de data
+// Possíveis nomes de colunas de data (expandido para ser universal)
 const DATE_COLUMN_NAMES = [
   'data',
   'data/hora', 
@@ -35,27 +35,82 @@ const DATE_COLUMN_NAMES = [
   'data_trade',
   'data trade',
   'hora',
-  'time'
+  'time',
+  'fechamento',
+  'abertura',
+  'entrada',
+  'saida',
+  'execucao',
+  'operacao',
+  'negociacao',
+  'transacao',
+  'periodo',
+  'dia',
+  'mes',
+  'ano',
+  'quando',
+  'timing',
+  'created',
+  'updated',
+  'modified',
+  'processed',
+  'executed',
+  'filled',
+  'momento',
+  'instante',
+  'tempo'
 ];
 
-// Formatos de data aceitos
+// Formatos de data aceitos (expandido para máxima compatibilidade)
 const DATE_FORMATS = [
+  // Formatos brasileiros mais comuns
   'dd/MM/yyyy',           // 25/12/2024
   'dd/MM/yyyy HH:mm',     // 25/12/2024 14:30
   'dd/MM/yyyy HH:mm:ss',  // 25/12/2024 14:30:45
+  'dd/MM/yy',             // 25/12/24
+  'dd/MM/yy HH:mm',       // 25/12/24 14:30
+  
+  // Formatos ISO
   'yyyy-MM-dd',           // 2024-12-25
   'yyyy-MM-dd HH:mm:ss',  // 2024-12-25 14:30:45
   'yyyy-MM-dd HH:mm',     // 2024-12-25 14:30
+  'yyyyMMdd',             // 20241225
+  'yyyy/MM/dd',           // 2024/12/25
+  
+  // Formatos com hífen
   'dd-MM-yyyy',           // 25-12-2024
   'dd-MM-yyyy HH:mm',     // 25-12-2024 14:30
+  'dd-MM-yyyy HH:mm:ss',  // 25-12-2024 14:30:45
+  'dd-MM-yy',             // 25-12-24
+  'MM-dd-yyyy',           // 12-25-2024
+  
+  // Formatos americanos
   'MM/dd/yyyy',           // 12/25/2024
   'MM/dd/yyyy HH:mm',     // 12/25/2024 14:30
+  'MM/dd/yyyy HH:mm:ss',  // 12/25/2024 14:30:45
+  'MM/dd/yy',             // 12/25/24
+  
+  // Formatos com ponto
   'dd.MM.yyyy',           // 25.12.2024
   'dd.MM.yyyy HH:mm',     // 25.12.2024 14:30
-  'yyyyMMdd',             // 20241225
-  'dd/MM/yy',             // 25/12/24
-  'dd-MM-yy',             // 25-12-24
-  'MM/dd/yy',             // 12/25/24
+  'dd.MM.yyyy HH:mm:ss',  // 25.12.2024 14:30:45
+  'dd.MM.yy',             // 25.12.24
+  'MM.dd.yyyy',           // 12.25.2024
+  
+  // Formatos com espaços
+  'dd MM yyyy',           // 25 12 2024
+  'yyyy MM dd',           // 2024 12 25
+  'MM dd yyyy',           // 12 25 2024
+  
+  // Formatos de timestamp
+  'yyyy-MM-dd\'T\'HH:mm:ss',    // 2024-12-25T14:30:45
+  'yyyy-MM-dd\'T\'HH:mm:ss.SSS', // 2024-12-25T14:30:45.123
+  'yyyy-MM-dd\'T\'HH:mm:ss\'Z\'', // 2024-12-25T14:30:45Z
+  
+  // Formatos exóticos que podem aparecer
+  'dd MMM yyyy',          // 25 Dec 2024
+  'MMM dd yyyy',          // Dec 25 2024
+  'yyyy MMM dd',          // 2024 Dec 25
 ];
 
 /**
@@ -95,9 +150,42 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
     console.log(`📋 Headers encontrados: ${headers.join(', ')}`);
     console.log(`📊 Total de linhas de dados: ${data.length}`);
 
-    // 2. Procurar coluna de data
+    // 2. Busca UNIVERSAL de datas - procurar em TODAS as colunas
+    console.log(`🔍 Modo universal: procurando datas em TODAS as colunas disponíveis...`);
+    
+    let bestDateColumn: string | null = null;
+    let bestValidationResult = { validDatesCount: 0, dateFormat: null };
+    
+    // Primeiro, tentar colunas com nomes suspeitos de data
     const dateColumn = findDateColumn(headers);
-    if (!dateColumn) {
+    if (dateColumn) {
+      console.log(`🎯 Coluna de data candidata encontrada: "${dateColumn}"`);
+      bestValidationResult = validateDatesInColumn(data, dateColumn);
+      if (bestValidationResult.validDatesCount > 0) {
+        bestDateColumn = dateColumn;
+      }
+    }
+    
+    // Se não encontrou datas nas colunas óbvias, PROCURAR EM TODAS as colunas
+    if (bestValidationResult.validDatesCount === 0) {
+      console.log(`🔍 Nenhuma data nas colunas óbvias. Procurando em TODAS as ${headers.length} colunas...`);
+      
+      for (const header of headers) {
+        if (header === dateColumn) continue; // Já testamos
+        
+        console.log(`   🔎 Testando coluna: "${header}"`);
+        const testResult = validateDatesInColumn(data, header);
+        
+        if (testResult.validDatesCount > bestValidationResult.validDatesCount) {
+          bestValidationResult = testResult;
+          bestDateColumn = header;
+          console.log(`     ✅ Melhor resultado até agora: ${testResult.validDatesCount} datas válidas`);
+        }
+      }
+    }
+    
+    // 3. Decisão final: só rejeitar se REALMENTE não houver datas
+    if (bestValidationResult.validDatesCount === 0) {
       const availableHeaders = headers.join(', ');
       return {
         isValid: false,
@@ -105,53 +193,38 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
         dateFormat: null,
         validDatesCount: 0,
         totalRows: data.length,
-        error: `❌ COLUNA DE DATA OBRIGATÓRIA NÃO ENCONTRADA\n\n` +
-               `O arquivo deve conter pelo menos uma coluna de datas com um destes nomes:\n` +
-               `${DATE_COLUMN_NAMES.join(', ')}\n\n` +
-               `Colunas disponíveis no arquivo: ${availableHeaders}\n\n` +
-               `💡 Dica: Renomeie uma coluna para "Data" ou "Date" e tente novamente.`
+        error: `❌ NENHUMA DATA VÁLIDA ENCONTRADA EM TODO O ARQUIVO\n\n` +
+               `O sistema procurou datas em TODAS as ${headers.length} colunas disponíveis.\n\n` +
+               `Colunas verificadas: ${availableHeaders}\n\n` +
+               `Formatos testados:\n` +
+               `• dd/MM/yyyy, dd/MM/yyyy HH:mm\n` +
+               `• yyyy-MM-dd, dd-MM-yyyy\n` +
+               `• MM/dd/yyyy, dd.MM.yyyy\n` +
+               `• E mais 10+ formatos\n\n` +
+               `💡 Verifique se o arquivo realmente contém datas de trades e tente novamente.`
       };
     }
 
-    console.log(`✅ Coluna de data encontrada: "${dateColumn}"`);
+    console.log(`✅ Datas encontradas na coluna: "${bestDateColumn}"`);
 
-    // 3. Validar datas na coluna
-    const validationResult = validateDatesInColumn(data, dateColumn);
+    // 4. Usar o melhor resultado encontrado
+    const validationResult = bestValidationResult;
     
-    if (validationResult.validDatesCount === 0) {
-      return {
-        isValid: false,
-        dateColumn,
-        dateFormat: null,
-        validDatesCount: 0,
-        totalRows: data.length,
-        error: `❌ DATAS INVÁLIDAS NA COLUNA "${dateColumn}"\n\n` +
-               `Nenhuma data válida foi encontrada na coluna de datas.\n\n` +
-               `Formatos aceitos:\n` +
-               `• dd/MM/yyyy (ex: 25/12/2024)\n` +
-               `• dd/MM/yyyy HH:mm (ex: 25/12/2024 14:30)\n` +
-               `• yyyy-MM-dd (ex: 2024-12-25)\n` +
-               `• dd-MM-yyyy (ex: 25-12-2024)\n` +
-               `• MM/dd/yyyy (ex: 12/25/2024)\n` +
-               `• dd.MM.yyyy (ex: 25.12.2024)\n\n` +
-               `💡 Verifique se as datas estão no formato correto e tente novamente.`,
-        sampleDates: data.slice(0, 5).map(row => row[dateColumn]).filter(Boolean)
-      };
-    }
+    // Esta verificação foi movida para cima, pois agora verificamos todas as colunas
 
-    // 4. Sucesso na validação
+    // 5. Sucesso na validação
     console.log(`✅ Validação de datas concluída com sucesso!`);
-    console.log(`   Coluna: "${dateColumn}"`);
+    console.log(`   Coluna: "${bestDateColumn}"`);
     console.log(`   Formato detectado: "${validationResult.dateFormat}"`);
     console.log(`   Datas válidas: ${validationResult.validDatesCount}/${data.length}`);
 
     return {
       isValid: true,
-      dateColumn,
+      dateColumn: bestDateColumn,
       dateFormat: validationResult.dateFormat,
       validDatesCount: validationResult.validDatesCount,
       totalRows: data.length,
-      sampleDates: data.slice(0, 3).map(row => row[dateColumn]).filter(Boolean)
+      sampleDates: data.slice(0, 3).map(row => row[bestDateColumn!]).filter(Boolean)
     };
 
   } catch (error) {
