@@ -1908,26 +1908,11 @@ export async function registerRoutes(app: Express): Promise<void> {
           return res.status(404).json({ error: 'CSV não encontrado' });
         }
 
-        // Buscar apenas trades relacionados a este CSV específico
-        // Assumindo que temos uma forma de filtrar trades por origem/csv
+        // Buscar apenas trades relacionados a este CSV específico usando csvImportId
         const allTrades = await storage.getTrades(userId);
-        trades = allTrades.filter(trade => {
-          if (trade.origem !== 'csv' || trade.corretora !== selectedCsv.broker) {
-            return false;
-          }
-          
-          // Verificar se as datas existem antes de fazer a comparação
-          if (!trade.createdAt || !selectedCsv.createdAt) {
-            return false;
-          }
-
-          // Filtrar por data aproximada da importação (trades criados próximo à data do CSV)
-          const tradeTime = new Date(trade.createdAt).getTime();
-          const csvTime = new Date(selectedCsv.createdAt).getTime();
-          
-          return tradeTime >= csvTime - 60000 && // 1 minuto antes
-                 tradeTime <= csvTime + 300000;   // 5 minutos depois
-        });
+        trades = allTrades.filter(trade => trade.csvImportId === csvId);
+        
+        console.log(`🔍 Análise AI do CSV ${csvId}: ${trades.length} trades encontrados`);
 
         csvImports = [selectedCsv]; // Usar apenas o CSV selecionado
       } else {
