@@ -580,10 +580,7 @@ function CSVImportItem({ importItem, brokerInfo, onRefresh }: any) {
   
   const updateNameMutation = useMutation({
     mutationFn: async ({ id, newName }: { id: string; newName: string }) => {
-      const response = await apiRequest(`/api/csv-imports/${id}/rename`, {
-        method: 'PATCH',
-        body: JSON.stringify({ displayName: newName })
-      });
+      const response = await apiRequest('PATCH', `/api/csv-imports/${id}/rename`, { displayName: newName });
       return response;
     },
     onSuccess: () => {
@@ -605,9 +602,7 @@ function CSVImportItem({ importItem, brokerInfo, onRefresh }: any) {
   
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest(`/api/csv-imports/${id}`, {
-        method: 'DELETE'
-      });
+      const response = await apiRequest('DELETE', `/api/csv-imports/${id}`);
       return response;
     },
     onSuccess: () => {
