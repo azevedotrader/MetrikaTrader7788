@@ -270,35 +270,50 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
 
 // Performance Period Chart Component
 function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year' | 'specific-month'>('month');
+  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), 'yyyy-MM'));
   
   const getChartData = () => {
     if (!trades.length) return [];
     
     const now = new Date();
     let startDate: Date;
+    let endDate: Date;
     let groupBy: 'day' | 'week' | 'month';
     
     switch (selectedPeriod) {
       case 'week':
         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        endDate = now;
         groupBy = 'day';
         break;
       case 'month':
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        endDate = now;
         groupBy = 'day';
         break;
       case 'year':
         startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        endDate = now;
         groupBy = 'month';
+        break;
+      case 'specific-month':
+        const selectedDate = new Date(selectedMonth + '-01');
+        startDate = startOfMonth(selectedDate);
+        endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+        groupBy = 'day';
         break;
       default:
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        endDate = now;
         groupBy = 'day';
     }
     
     // Filtrar trades por período
-    const filteredTrades = trades.filter(trade => new Date(trade.dataHora) >= startDate);
+    const filteredTrades = trades.filter(trade => {
+      const tradeDate = new Date(trade.dataHora);
+      return tradeDate >= startDate && tradeDate <= endDate;
+    });
     
     if (filteredTrades.length === 0) return [];
     
@@ -366,17 +381,18 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
   return (
     <div className="w-full">
       {/* Filtros de Período */}
-      <div className="flex justify-center gap-2 mb-6">
+      <div className="flex justify-center gap-2 mb-6 flex-wrap">
         {[
           { key: 'week', label: '7 Dias' },
           { key: 'month', label: '30 Dias' },
-          { key: 'year', label: '1 Ano' }
+          { key: 'year', label: '1 Ano' },
+          { key: 'specific-month', label: 'Mês Específico' }
         ].map(filter => (
           <Button
             key={filter.key}
             variant={selectedPeriod === filter.key ? "default" : "outline"}
             size="sm"
-            onClick={() => setSelectedPeriod(filter.key as 'week' | 'month' | 'year')}
+            onClick={() => setSelectedPeriod(filter.key as 'week' | 'month' | 'year' | 'specific-month')}
             className={selectedPeriod === filter.key ? 
               "bg-purple-600 hover:bg-purple-700 text-white" : 
               "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
@@ -386,6 +402,41 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
           </Button>
         ))}
       </div>
+
+      {/* Seletor de Mês Específico */}
+      {selectedPeriod === 'specific-month' && (
+        <div className="flex justify-center mb-6">
+          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-48">
+              <SelectValue placeholder="Selecione o mês" />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-800 border-zinc-700">
+              {(() => {
+                const months = [];
+                const now = new Date();
+                
+                // Criar lista dos últimos 24 meses
+                for (let i = 0; i < 24; i++) {
+                  const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                  const value = format(date, 'yyyy-MM');
+                  const label = format(date, 'MMMM yyyy', { locale: ptBR });
+                  months.push({ value, label });
+                }
+                
+                return months.map(month => (
+                  <SelectItem 
+                    key={month.value} 
+                    value={month.value}
+                    className="text-white hover:bg-zinc-700"
+                  >
+                    {month.label}
+                  </SelectItem>
+                ));
+              })()}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       
       {chartData.length === 0 ? (
         <div className="h-[380px] flex items-center justify-center text-zinc-400">
