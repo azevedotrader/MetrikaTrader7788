@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, BarChart3, TrendingUp } from "lucide-react";
 
 export default function CalendarioPage() {
-  const { data: trades = [] } = useQuery({ queryKey: ['/api/trades'] });
+  const { data: trades = [] } = useQuery({ 
+    queryKey: ['/api/trades'],
+    staleTime: 0, // Sempre buscar dados frescos
+    gcTime: 0   // Não manter cache (nova nomenclatura do React Query v5)
+  });
   const { data: calendarData = [] } = useQuery<any[]>({ queryKey: ['/api/trades/calendar'] });
 
   return (

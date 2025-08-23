@@ -105,14 +105,17 @@ export function TradingCalendar({
     
     // Agrupar trades por dia do mês atual
     const monthTrades = trades.filter(trade => {
-      const tradeDate = new Date(trade.date);
+      // Usar dataHora se disponível, senão date
+      const dateStr = trade.dataHora || trade.date;
+      const tradeDate = new Date(dateStr);
       return tradeDate.getFullYear() === year && tradeDate.getMonth() === month;
     });
 
     // Criar mapa de trades por dia
     const tradesByDay = new Map<number, any[]>();
     monthTrades.forEach(trade => {
-      const tradeDate = new Date(trade.date);
+      const dateStr = trade.dataHora || trade.date;
+      const tradeDate = new Date(dateStr);
       const day = tradeDate.getDate();
       
       if (!tradesByDay.has(day)) {
@@ -123,8 +126,8 @@ export function TradingCalendar({
 
     // Calcular estatísticas por dia
     tradesByDay.forEach((dayTrades, day) => {
-      const totalPnl = dayTrades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
-      const winningTrades = dayTrades.filter(trade => (trade.pnl || 0) > 0).length;
+      const totalPnl = dayTrades.reduce((sum, trade) => sum + (parseFloat(trade.resultado) || trade.pnl || 0), 0);
+      const winningTrades = dayTrades.filter(trade => (parseFloat(trade.resultado) || trade.pnl || 0) > 0).length;
       const winRate = dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
 
       tradeDays.push({
