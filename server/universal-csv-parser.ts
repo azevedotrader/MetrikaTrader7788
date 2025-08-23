@@ -15,6 +15,7 @@ import fs from 'fs';
 import Papa from 'papaparse';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
+import { validateDateColumn, DateValidationResult } from './date-validator';
 
 export interface ParsedCSVResult {
   data: any[];
@@ -25,6 +26,7 @@ export interface ParsedCSVResult {
   detectedEncoding: string;
   detectedQuoteChar: string;
   numberFormat: 'brazilian' | 'international';
+  dateValidation: DateValidationResult;
   keyColumns: {
     resultado?: string;      // "Res. Operação" ou similar
     total?: string;          // "Total" (saldo acumulado)
@@ -379,7 +381,7 @@ export async function parseCSVUniversal(filePath: string): Promise<ParsedCSVResu
     
     for (const config of configurations) {
       try {
-        const result = Papa.parse(content, {
+        const result = Papa.parse<any>(content, {
           ...config,
           skipEmptyLines: true,
           trimHeaders: true,
@@ -417,12 +419,26 @@ export async function parseCSVUniversal(filePath: string): Promise<ParsedCSVResu
     console.log(`\n🔢 Etapa 5: Detecção de formato numérico`);
     const numberFormat = detectNumberFormat(cleanData);
     
-    // 7. Identificar colunas chave
-    console.log(`\n🎯 Etapa 6: Identificação de colunas relevantes`);
+    // 7. VALIDAÇÃO OBRIGATÓRIA DE DATAS
+    console.log(`\n📊 Etapa 6: Validação Obrigatória de Datas`);
+    const dateValidation = validateDateColumn(cleanData, headers);
+    
+    if (!dateValidation.isValid) {
+      console.error(`❌ ARQUIVO REJEITADO: Não contém datas válidas`);
+      throw new Error(`Arquivo inválido: não contém datas de trades válidas. ${dateValidation.errors.join(' ')}`);
+    }
+    
+    console.log(`✅ DATAS VÁLIDAS ENCONTRADAS:`);
+    console.log(`   - Coluna de data: "${dateValidation.dateColumn}"`);
+    console.log(`   - Datas válidas: ${dateValidation.validDatesCount}/${dateValidation.totalRowsChecked}`);
+    console.log(`   - Formato detectado: ${dateValidation.detectedFormat}`);
+    
+    // 8. Identificar colunas chave
+    console.log(`\n🎯 Etapa 7: Identificação de colunas relevantes`);
     const keyColumns = identifyKeyColumns(headers);
     
-    // 8. Normalizar números em todas as linhas
-    console.log(`\n⚙️ Etapa 7: Normalização de números`);
+    // 9. Normalizar números em todas as linhas
+    console.log(`\n⚙️ Etapa 8: Normalização de números`);
     const normalizedData = cleanData.map((row, index) => {
       const normalizedRow: any = {};
       
@@ -447,6 +463,7 @@ export async function parseCSVUniversal(filePath: string): Promise<ParsedCSVResu
       detectedEncoding: detectFileEncoding(filePath),
       detectedQuoteChar: bestConfig.quoteChar,
       numberFormat,
+      dateValidation,
       keyColumns,
       errors
     };
@@ -465,6 +482,14 @@ export async function parseCSVUniversal(filePath: string): Promise<ParsedCSVResu
       detectedEncoding: 'utf8',
       detectedQuoteChar: '"',
       numberFormat: 'brazilian',
+      dateValidation: {
+        isValid: false,
+        dateColumn: null,
+        validDatesCount: 0,
+        totalRowsChecked: 0,
+        detectedFormat: null,
+        errors: ['Erro crítico no parsing']
+      },
       keyColumns: {},
       errors
     };

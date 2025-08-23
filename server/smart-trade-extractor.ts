@@ -9,6 +9,7 @@
 
 import { InsertTrade } from '@shared/schema';
 import { ParsedCSVResult } from './universal-csv-parser';
+import { parseDetectedDate, normalizeDateToISO } from './date-validator';
 
 /**
  * Extrai trades focando na coluna "Res. Operação" e colunas relacionadas
@@ -38,7 +39,29 @@ export function extractTradesFromUniversalCSV(
   const errors: string[] = [...parsedData.errors];
   const dates: Date[] = [];
   
-  // Verificar se temos a coluna "Res. Operação" ou similar
+  // 1. Verificar validação de datas (obrigatória)
+  if (!parsedData.dateValidation.isValid) {
+    console.log(`❌ ARQUIVO REJEITADO: Não contém datas válidas`);
+    errors.push(...parsedData.dateValidation.errors);
+    
+    return {
+      trades: [],
+      summary: {
+        totalRows: parsedData.totalRows,
+        tradesFound: 0,
+        statisticsSkipped: parsedData.skippedRows,
+        dateRange: null,
+        detectedBroker: 'unknown',
+        detectedMarket: 'unknown',
+        processingMethod: 'Rejeitado - Sem datas válidas'
+      },
+      errors
+    };
+  }
+  
+  console.log(`✅ DATAS VÁLIDAS: coluna "${parsedData.dateValidation.dateColumn}" com ${parsedData.dateValidation.validDatesCount} datas`);
+  
+  // 2. Verificar se temos a coluna "Res. Operação" ou similar
   const resultColumn = parsedData.keyColumns.resultado;
   if (!resultColumn) {
     console.log(`⚠️ Coluna "Res. Operação" não encontrada`);
@@ -188,8 +211,12 @@ function extractTradeDataFromRow(
     return null;
   }
   
-  // Extrair data
-  const dataHora = extractDateFromRow(row, parsedData.keyColumns.data) || new Date().toISOString();
+  // Extrair data usando validação obrigatória
+  const dataHora = extractDateFromRow(
+    row, 
+    parsedData.dateValidation.dateColumn, 
+    parsedData.dateValidation.detectedFormat
+  ) || new Date().toISOString();
   
   // Extrair quantidade
   const quantidade = extractQuantityFromRow(row, parsedData.keyColumns.quantidade);
@@ -242,54 +269,43 @@ function extractAssetFromRow(row: any, assetColumn?: string): string | null {
 }
 
 /**
- * Extrai data da linha
+ * Extrai data da linha usando o formato detectado
  */
-function extractDateFromRow(row: any, dateColumn?: string): string | null {
-  if (dateColumn && row[dateColumn]) {
-    try {
-      const dateValue = row[dateColumn];
-      
-      if (dateValue instanceof Date) {
-        return dateValue.toISOString();
-      }
-      
-      const dateStr = String(dateValue);
-      
-      // Tentar diferentes formatos de data brasileira
-      const brazilianFormats = [
-        /(\d{1,2})\/(\d{1,2})\/(\d{4})/,  // dd/mm/yyyy
-        /(\d{1,2})-(\d{1,2})-(\d{4})/,   // dd-mm-yyyy
-        /(\d{4})-(\d{1,2})-(\d{1,2})/,   // yyyy-mm-dd
-        /(\d{4})\/(\d{1,2})\/(\d{1,2})/  // yyyy/mm/dd
-      ];
-      
-      for (const format of brazilianFormats) {
-        const match = dateStr.match(format);
-        if (match) {
-          let [, part1, part2, part3] = match;
-          
-          // Assumir formato brasileiro dd/mm/yyyy se o primeiro número for <= 12
-          if (parseInt(part1) <= 12 && parseInt(part2) <= 31) {
-            // Formato brasileiro: dd/mm/yyyy
-            return new Date(parseInt(part3), parseInt(part2) - 1, parseInt(part1)).toISOString();
-          } else {
-            // Formato ISO: yyyy-mm-dd
-            return new Date(parseInt(part1), parseInt(part2) - 1, parseInt(part3)).toISOString();
-          }
-        }
-      }
-      
-      // Tentar parsing direto
-      const parsedDate = new Date(dateStr);
-      if (!isNaN(parsedDate.getTime())) {
-        return parsedDate.toISOString();
-      }
-    } catch (error) {
-      console.warn(`Erro ao parsear data: ${row[dateColumn]}`);
-    }
+function extractDateFromRow(
+  row: any, 
+  dateColumn: string | null, 
+  detectedFormat: string | null
+): string | null {
+  if (!dateColumn || !row[dateColumn]) {
+    return null;
   }
   
-  return null;
+  try {
+    const dateValue = row[dateColumn];
+    
+    if (dateValue instanceof Date) {
+      return normalizeDateToISO(dateValue);
+    }
+    
+    const dateStr = String(dateValue).trim();
+    if (!dateStr) {
+      return null;
+    }
+    
+    // Usar o formato detectado pela validação
+    const parsedDate = parseDetectedDate(dateStr, detectedFormat);
+    
+    if (parsedDate) {
+      return normalizeDateToISO(parsedDate);
+    }
+    
+    console.warn(`⚠️ Não foi possível parsear data: "${dateStr}"`);
+    return null;
+    
+  } catch (error) {
+    console.warn(`❌ Erro ao parsear data:`, error);
+    return null;
+  }
 }
 
 /**
