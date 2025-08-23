@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,11 +29,6 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  console.log('=== DIARY MODAL DEBUG ===');
-  console.log('Modal aberto:', isOpen);
-  console.log('Entry recebida:', entry);
-  console.log('Selected date:', selectedDate);
-
   // Corrigir formatação da data para evitar problemas de timezone
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
@@ -45,17 +40,46 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   const form = useForm<InsertDiaryEntry>({
     resolver: zodResolver(insertDiaryEntrySchema),
     defaultValues: {
-      date: entry?.date ? formatDateForInput(new Date(entry.date)) : selectedDate ? formatDateForInput(selectedDate) : "",
-      title: entry?.title || "",
-      content: entry?.content || "",
-      emotion: (entry?.emotion as "confiante" | "ansioso" | "impulsivo" | "calmo" | "eufórico" | "frustrado" | "neutro" | undefined) || undefined,
-      trades: entry?.trades || 0,
-      pnl: entry?.pnl || "0",
-      winRate: entry?.winRate || "0",
-      lessons: entry?.lessons || "",
-      improvements: entry?.improvements || "",
+      date: "",
+      title: "",
+      content: "",
+      emotion: undefined,
+      trades: 0,
+      pnl: "0",
+      winRate: "0",
+      lessons: "",
+      improvements: "",
     },
   });
+
+  // Atualizar formulário quando entry mudar
+  useEffect(() => {
+    if (entry) {
+      form.reset({
+        date: formatDateForInput(new Date(entry.date)),
+        title: entry.title || "",
+        content: entry.content || "",
+        emotion: (entry.emotion as "confiante" | "ansioso" | "impulsivo" | "calmo" | "eufórico" | "frustrado" | "neutro" | undefined) || undefined,
+        trades: entry.trades || 0,
+        pnl: entry.pnl || "0",
+        winRate: entry.winRate || "0",
+        lessons: entry.lessons || "",
+        improvements: entry.improvements || "",
+      });
+    } else if (selectedDate) {
+      form.reset({
+        date: formatDateForInput(selectedDate),
+        title: "",
+        content: "",
+        emotion: undefined,
+        trades: 0,
+        pnl: "0",
+        winRate: "0",
+        lessons: "",
+        improvements: "",
+      });
+    }
+  }, [entry, selectedDate, form]);
 
   const onSubmit = async (data: InsertDiaryEntry) => {
     setIsLoading(true);

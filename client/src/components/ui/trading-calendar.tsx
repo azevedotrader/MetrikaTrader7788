@@ -59,11 +59,6 @@ export function TradingCalendar({
   const handleDateClick = (date: Date) => {
     const existingEntry = getDiaryEntryForDate(date);
     
-    console.log('=== DIARY CLICK DEBUG ===');
-    console.log('Data clicada:', date);
-    console.log('Entrada encontrada:', existingEntry);
-    console.log('Total entradas diário:', diaryEntries.length);
-    
     // Sempre usar a funcionalidade interna do modal
     setSelectedDiaryEntry(existingEntry);
     setSelectedDate(date);
