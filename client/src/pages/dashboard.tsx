@@ -270,32 +270,89 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
 
 // Performance Period Chart Component
 function PerformancePeriodChart({ metrics }: { metrics: any }) {
-  const chartData = [
-    {
-      period: 'Semana',
-      label: 'Esta Semana',
-      value: metrics.rentabilidadeSemana,
-      x: 1
-    },
-    {
-      period: 'Mês',
-      label: 'Este Mês', 
-      value: metrics.rentabilidadeMes,
-      x: 2
-    },
-    {
-      period: 'Ano',
-      label: 'Este Ano',
-      value: metrics.rentabilidadeAno,
-      x: 3
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
+  
+  const getChartData = () => {
+    switch (selectedPeriod) {
+      case 'week':
+        return [
+          {
+            period: 'Semana',
+            label: 'Esta Semana',
+            value: metrics.rentabilidadeSemana,
+            x: 1
+          }
+        ];
+      case 'month':
+        return [
+          {
+            period: 'Mês',
+            label: 'Este Mês', 
+            value: metrics.rentabilidadeMes,
+            x: 1
+          }
+        ];
+      case 'year':
+        return [
+          {
+            period: 'Ano',
+            label: 'Este Ano',
+            value: metrics.rentabilidadeAno,
+            x: 1
+          }
+        ];
+      default:
+        return [
+          {
+            period: 'Semana',
+            label: 'Esta Semana',
+            value: metrics.rentabilidadeSemana,
+            x: 1
+          },
+          {
+            period: 'Mês',
+            label: 'Este Mês', 
+            value: metrics.rentabilidadeMes,
+            x: 2
+          },
+          {
+            period: 'Ano',
+            label: 'Este Ano',
+            value: metrics.rentabilidadeAno,
+            x: 3
+          }
+        ];
     }
-  ];
+  };
 
+  const chartData = getChartData();
   const maxValue = Math.max(...chartData.map(d => Math.abs(d.value)));
   const yAxisDomain = maxValue > 0 ? [-maxValue * 1.2, maxValue * 1.2] : [-100, 100];
 
   return (
     <div className="w-full">
+      {/* Filtros de Período */}
+      <div className="flex justify-center gap-2 mb-6">
+        {[
+          { key: 'week', label: 'Semana' },
+          { key: 'month', label: 'Mês' },
+          { key: 'year', label: 'Ano' }
+        ].map(filter => (
+          <Button
+            key={filter.key}
+            variant={selectedPeriod === filter.key ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedPeriod(filter.key as 'week' | 'month' | 'year')}
+            className={selectedPeriod === filter.key ? 
+              "bg-purple-600 hover:bg-purple-700 text-white" : 
+              "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            }
+          >
+            {filter.label}
+          </Button>
+        ))}
+      </div>
+      
       <ResponsiveContainer width="100%" height={380}>
         <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
           <defs>
@@ -362,11 +419,11 @@ function PerformancePeriodChart({ metrics }: { metrics: any }) {
       </ResponsiveContainer>
       
       {/* Performance Summary Below Chart */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-6 flex justify-center">
         {chartData.map((item) => (
-          <div key={item.period} className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:bg-slate-700/50 transition-colors">
+          <div key={item.period} className="text-center p-6 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:bg-slate-700/50 transition-colors min-w-[200px]">
             <div className="text-sm text-zinc-400 mb-2">{item.label}</div>
-            <div className={`text-2xl font-bold mb-1 ${item.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <div className={`text-3xl font-bold mb-1 ${item.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               R$ {item.value.toFixed(2)}
             </div>
             <div className={`text-sm font-semibold ${item.value >= 0 ? 'text-green-500' : 'text-red-500'}`}>
