@@ -331,10 +331,10 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       
       if (groupBy === 'day') {
         key = format(tradeDate, 'dd/MM', { locale: ptBR });
-      } else if (groupBy === 'week') {
-        key = `Sem ${format(startOfWeek(tradeDate), 'dd/MM', { locale: ptBR })}`;
-      } else {
+      } else if (groupBy === 'month') {
         key = format(tradeDate, 'MMM/yy', { locale: ptBR });
+      } else {
+        key = format(tradeDate, 'dd/MM', { locale: ptBR });
       }
       
       if (!groups.has(key)) {
@@ -381,7 +381,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
   return (
     <div className="w-full">
       {/* Filtros de Período */}
-      <div className="flex justify-center gap-2 mb-6 flex-wrap">
+      <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap">
         {[
           { key: 'week', label: '7 Dias' },
           { key: 'month', label: '30 Dias' },
@@ -393,10 +393,10 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
             variant={selectedPeriod === filter.key ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod(filter.key as 'week' | 'month' | 'year' | 'specific-month')}
-            className={selectedPeriod === filter.key ? 
+            className={`text-xs md:text-sm ${selectedPeriod === filter.key ? 
               "bg-purple-600 hover:bg-purple-700 text-white" : 
               "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-            }
+            }`}
           >
             {filter.label}
           </Button>
@@ -405,9 +405,9 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
 
       {/* Seletor de Mês Específico */}
       {selectedPeriod === 'specific-month' && (
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4 md:mb-6">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-48">
+            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-36 md:w-48 text-sm">
               <SelectValue placeholder="Selecione o mês" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -427,7 +427,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
                   <SelectItem 
                     key={month.value} 
                     value={month.value}
-                    className="text-white hover:bg-zinc-700"
+                    className="text-white hover:bg-zinc-700 text-sm"
                   >
                     {month.label}
                   </SelectItem>
@@ -439,15 +439,20 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       )}
       
       {chartData.length === 0 ? (
-        <div className="h-[380px] flex items-center justify-center text-zinc-400">
+        <div className="h-[280px] md:h-[380px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
-            <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum trade no período selecionado</p>
+            <BarChart3 className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
+            <p className="text-sm">Nenhum trade no período selecionado</p>
           </div>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={380}>
-          <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 60 }}>
+        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 280 : 380}>
+          <AreaChart data={chartData} margin={{ 
+            top: 20, 
+            right: window.innerWidth < 768 ? 10 : 30, 
+            left: window.innerWidth < 768 ? 20 : 50, 
+            bottom: window.innerWidth < 768 ? 40 : 60 
+          }}>
             <defs>
               <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
@@ -468,19 +473,22 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
             <XAxis 
               dataKey="period"
               stroke="#9CA3AF"
-              fontSize={11}
-              angle={-45}
+              fontSize={window.innerWidth < 768 ? 9 : 11}
+              angle={window.innerWidth < 768 ? -45 : -45}
               textAnchor="end"
-              height={80}
+              height={window.innerWidth < 768 ? 60 : 80}
               tick={{ fill: '#e2e8f0' }}
               axisLine={{ stroke: '#64748b', strokeWidth: 1 }}
             />
             
             <YAxis 
               stroke="#9CA3AF"
-              fontSize={12}
+              fontSize={window.innerWidth < 768 ? 10 : 12}
               tick={{ fill: '#cbd5e1' }}
-              tickFormatter={(value) => `R$ ${(value/1000).toFixed(1)}k`}
+              tickFormatter={(value) => window.innerWidth < 768 ? 
+                `${(value/1000).toFixed(1)}k` : 
+                `R$ ${(value/1000).toFixed(1)}k`
+              }
               domain={yAxisDomain}
               axisLine={{ stroke: '#64748b', strokeWidth: 1 }}
             />
@@ -795,20 +803,20 @@ interface MetricCardProps {
 function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }: MetricCardProps) {
   return (
     <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2 md:pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-zinc-400">
+          <CardTitle className="text-xs md:text-sm font-medium text-zinc-400 truncate pr-2">
             {title}
           </CardTitle>
-          <Icon className={`h-4 w-4 ${color || 'text-zinc-400'}`} />
+          <Icon className={`h-3 w-3 md:h-4 md:w-4 flex-shrink-0 ${color || 'text-zinc-400'}`} />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className={`text-2xl font-bold ${color}`}>
+      <CardContent className="pt-0">
+        <div className={`text-lg md:text-2xl font-bold ${color} truncate`}>
           {value}
         </div>
         {subtitle && (
-          <p className="text-xs text-zinc-500 mt-1">
+          <p className="text-xs text-zinc-500 mt-1 hidden md:block">
             {subtitle}
           </p>
         )}
@@ -1086,11 +1094,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+    <div className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
+      <div className="flex flex-col gap-3 md:gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-zinc-400 mt-2 text-sm lg:text-base">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">Dashboard</h1>
+          <p className="text-zinc-400 mt-1 md:mt-2 text-xs md:text-sm lg:text-base">
             {viewMode === 'all' && 'Dados consolidados de todas as corretoras'}
             {viewMode === 'broker' && selectedBrokerFilter && `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`}
             {viewMode === 'csv' && selectedCsvIds.length > 0 && `Filtrando por ${selectedCsvIds.length} CSV${selectedCsvIds.length > 1 ? 's' : ''} selecionado${selectedCsvIds.length > 1 ? 's' : ''}`}
@@ -1117,18 +1125,18 @@ export default function Dashboard() {
       {/* Componente de Filtros Avançados */}
       <AdvancedFilters />
 
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800 border-zinc-800">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-slate-700">Visão Geral</TabsTrigger>
-          <TabsTrigger value="insights" className="data-[state=active]:bg-slate-700">Insights Detalhados</TabsTrigger>
-          <TabsTrigger value="brokers" className="data-[state=active]:bg-slate-700">Gestão</TabsTrigger>
-          <TabsTrigger value="imports" className="data-[state=active]:bg-slate-700">Importações</TabsTrigger>
-          <TabsTrigger value="consolidated" className="data-[state=active]:bg-slate-700">Consolidado</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 bg-slate-800 border-zinc-800 h-auto">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2">Visão Geral</TabsTrigger>
+          <TabsTrigger value="insights" className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2">Insights</TabsTrigger>
+          <TabsTrigger value="brokers" className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2">Gestão</TabsTrigger>
+          <TabsTrigger value="imports" className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2">Importações</TabsTrigger>
+          <TabsTrigger value="consolidated" className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2 col-span-2 md:col-span-1">Consolidado</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className="space-y-4 md:space-y-6">
           {/* Main Metrics Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
             <MetricCard
               title="Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
@@ -1163,7 +1171,7 @@ export default function Dashboard() {
           </div>
 
           {/* Performance Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -1332,15 +1340,15 @@ export default function Dashboard() {
           {/* Análise Temporal Detalhada */}
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-green-400" />
+              <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
+                <Calendar className="h-4 w-4 md:h-5 md:w-5 text-green-400" />
                 Performance Temporal Detalhada
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                  <div className="text-2xl font-bold text-white mb-1">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+                <div className="text-center p-2 md:p-4 bg-zinc-800/50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-white mb-1">
                     {(() => {
                       const hoje = new Date();
                       const tradesHoje = filteredTrades.filter((t: Trade) => {
@@ -1350,8 +1358,8 @@ export default function Dashboard() {
                       return tradesHoje.length;
                     })()}
                   </div>
-                  <div className="text-xs text-zinc-400 mb-2">Trades Hoje</div>
-                  <div className={`text-sm font-semibold ${
+                  <div className="text-xs text-zinc-400 mb-1 md:mb-2">Trades Hoje</div>
+                  <div className={`text-xs md:text-sm font-semibold ${
                     (() => {
                       const hoje = new Date();
                       const resultadoHoje = filteredTrades.filter((t: Trade) => {
@@ -1372,32 +1380,32 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                  <div className="text-2xl font-bold text-white mb-1">
+                <div className="text-center p-2 md:p-4 bg-zinc-800/50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-white mb-1">
                     {metrics.rentabilidadeSemana.toFixed(2)}
                   </div>
-                  <div className="text-xs text-zinc-400 mb-2">Esta Semana</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className="text-xs text-zinc-400 mb-1 md:mb-2">Esta Semana</div>
+                  <div className={`text-xs md:text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeSemana.toFixed(2)}
                   </div>
                 </div>
 
-                <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                  <div className="text-2xl font-bold text-white mb-1">
+                <div className="text-center p-2 md:p-4 bg-zinc-800/50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-white mb-1">
                     {metrics.rentabilidadeMes.toFixed(2)}
                   </div>
-                  <div className="text-xs text-zinc-400 mb-2">Este Mês</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className="text-xs text-zinc-400 mb-1 md:mb-2">Este Mês</div>
+                  <div className={`text-xs md:text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeMes.toFixed(2)}
                   </div>
                 </div>
 
-                <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                  <div className="text-2xl font-bold text-white mb-1">
+                <div className="text-center p-2 md:p-4 bg-zinc-800/50 rounded-lg">
+                  <div className="text-lg md:text-2xl font-bold text-white mb-1">
                     {metrics.rentabilidadeAno.toFixed(2)}
                   </div>
-                  <div className="text-xs text-zinc-400 mb-2">Este Ano</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className="text-xs text-zinc-400 mb-1 md:mb-2">Este Ano</div>
+                  <div className={`text-xs md:text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeAno.toFixed(2)}
                   </div>
                 </div>
@@ -1406,8 +1414,8 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="brokers" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <TabsContent value="brokers" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {Object.entries(brokerInfo).map(([broker, info]) => {
               const trades = (tradesByBroker as any)[broker] || [];
               const stats = calculateBrokerStats(trades);
@@ -1431,19 +1439,19 @@ export default function Dashboard() {
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
                       <div>
-                        <div className="text-2xl font-bold text-white">{stats.totalTrades}</div>
+                        <div className="text-lg md:text-2xl font-bold text-white">{stats.totalTrades}</div>
                         <div className="text-xs text-zinc-400">Trades</div>
                       </div>
                       <div>
-                        <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-lg md:text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                         </div>
                         <div className="text-xs text-zinc-400">Resultado</div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                        <div className="text-lg md:text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
                         <div className="text-xs text-zinc-400">Win Rate</div>
                       </div>
                     </div>
