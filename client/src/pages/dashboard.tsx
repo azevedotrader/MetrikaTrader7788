@@ -537,14 +537,14 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       ) : (
         <ResponsiveContainer
           width="100%"
-          height={window.innerWidth < 768 ? 550 : 380}
+          height={window.innerWidth < 768 ? 500 : 550}
         >
           <AreaChart
             data={chartData}
             margin={{
               top: window.innerWidth < 768 ? 0 : 10,
-              right: window.innerWidth < 768 ? -8 : 30,
-              left: window.innerWidth < 768 ? -8 : 50,
+              right: window.innerWidth < 768 ? -8 : 50,
+              left: window.innerWidth < 768 ? -38 : 30,
               bottom: window.innerWidth < 768 ? 25 : 60,
             }}
           >
@@ -1099,9 +1099,7 @@ function MetricCard({
           {value}
         </div>
         {subtitle && (
-          <p className="text-xs text-zinc-500 mt-2 block">
-            {subtitle}
-          </p>
+          <p className="text-xs text-zinc-500 mt-2 block">{subtitle}</p>
         )}
       </CardContent>
     </Card>
@@ -1469,30 +1467,33 @@ export default function Dashboard() {
       <AdvancedFilters />
 
       <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-slate-800 border-zinc-800 h-auto">
+        <TabsList className="grid w-full grid-cols-4 bg-slate-800 border border-zinc-700 rounded-lg p-1 h-auto">
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
           >
-            Visão Geral
+            <span className="hidden sm:inline">Visão Geral</span>
+            <span className="sm:hidden">Geral</span>
           </TabsTrigger>
           <TabsTrigger
             value="insights"
-            className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
           >
             Insights
           </TabsTrigger>
           <TabsTrigger
             value="imports"
-            className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
           >
-            Importações
+            <span className="hidden sm:inline">Importações</span>
+            <span className="sm:hidden">Import</span>
           </TabsTrigger>
           <TabsTrigger
             value="consolidated"
-            className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2 col-span-2 md:col-span-1"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
           >
-            Consolidado
+            <span className="hidden sm:inline">Consolidado</span>
+            <span className="sm:hidden">Consol</span>
           </TabsTrigger>
         </TabsList>
 
@@ -2105,7 +2106,6 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-
         </TabsContent>
       </Tabs>
     </div>
