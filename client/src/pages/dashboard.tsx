@@ -449,7 +449,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
         <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 550 : 380}>
           <AreaChart data={chartData} margin={{ 
             top: window.innerWidth < 768 ? 0 : 10, 
-            right: window.innerWidth < 768 ? -8 : 30, 
+            right: window.innerWidth < 768 ? 0 : 30, 
             left: window.innerWidth < 768 ? -12 : 50, 
             bottom: window.innerWidth < 768 ? 25 : 60 
           }}>
