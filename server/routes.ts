@@ -1614,6 +1614,31 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Deletar importação CSV - ISOLADO POR USUÁRIO
+  app.delete("/api/csv-imports/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = req.userId; // ISOLAMENTO OBRIGATÓRIO
+      const csvId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const deleted = await storage.deleteCsvImport(userId, csvId);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: 'CSV não encontrado' });
+      }
+
+      res.json({ 
+        message: 'Importação CSV removida com sucesso'
+      });
+    } catch (error) {
+      console.error("Error deleting CSV import:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Reprocessar CSV com interpretador inteligente
   app.post('/api/trades/reprocess-smart', requireAuth, async (req, res) => {
     try {

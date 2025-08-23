@@ -47,6 +47,8 @@ export interface IStorage {
   // CSV import operations
   getCsvImports(userId: string): Promise<CsvImport[]>;
   createCsvImport(csvImport: Omit<CsvImport, 'id' | 'createdAt'>): Promise<CsvImport>;
+  updateCsvImportName(userId: string, csvId: string, displayName: string): Promise<CsvImport | null>;
+  deleteCsvImport(userId: string, csvId: string): Promise<boolean>;
   deleteAllCsvImports(userId: string): Promise<void>;
   
   // Admin operations
@@ -305,6 +307,14 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)))
       .returning();
     return updated || null;
+  }
+
+  async deleteCsvImport(userId: string, csvId: string): Promise<boolean> {
+    const result = await db
+      .delete(csvImports)
+      .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)));
+    
+    return (result.rowCount || 0) > 0;
   }
 
   async deleteAllBrokerConfigs(userId: string): Promise<void> {
