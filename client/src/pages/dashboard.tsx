@@ -1469,7 +1469,7 @@ export default function Dashboard() {
       <AdvancedFilters />
 
       <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 bg-slate-800 border-zinc-800 h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-slate-800 border-zinc-800 h-auto">
           <TabsTrigger
             value="overview"
             className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2"
@@ -1481,12 +1481,6 @@ export default function Dashboard() {
             className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2"
           >
             Insights
-          </TabsTrigger>
-          <TabsTrigger
-            value="brokers"
-            className="data-[state=active]:bg-slate-700 text-xs md:text-sm py-2"
-          >
-            Gestão
           </TabsTrigger>
           <TabsTrigger
             value="imports"
@@ -1843,80 +1837,6 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="brokers" className="space-y-4 md:space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            {Object.entries(brokerInfo).map(([broker, info]) => {
-              const trades = (tradesByBroker as any)[broker] || [];
-              const stats = calculateBrokerStats(trades);
-              const IconComponent = info.icon;
-
-              return (
-                <Card key={broker} className="bg-zinc-900/90 border-zinc-800">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${info.color}`}>
-                          <IconComponent className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-white">
-                            {info.name}
-                          </CardTitle>
-                          <CardDescription>{info.description}</CardDescription>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">{info.type}</Badge>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
-                      <div className="min-w-0">
-                        <div className="text-sm md:text-2xl font-bold text-white">
-                          {stats.totalTrades}
-                        </div>
-                        <div className="text-xs text-zinc-400">Trades</div>
-                      </div>
-                      <div className="min-w-0">
-                        <div
-                          className={`text-xs md:text-2xl font-bold ${stats.totalProfit >= 0 ? "text-green-400" : "text-red-400"} break-all`}
-                        >
-                          {stats.totalProfit >= 0 ? "+" : ""}R$
-                          {window.innerWidth < 768
-                            ? Math.abs(stats.totalProfit) >= 1000
-                              ? `${(stats.totalProfit / 1000).toFixed(1)}k`
-                              : stats.totalProfit.toFixed(0)
-                            : stats.totalProfit.toFixed(2)}
-                        </div>
-                        <div className="text-xs text-zinc-400">Resultado</div>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm md:text-2xl font-bold text-blue-400">
-                          {stats.winRate.toFixed(1)}%
-                        </div>
-                        <div className="text-xs text-zinc-400">Win Rate</div>
-                      </div>
-                    </div>
-
-                    <Separator className="bg-slate-700" />
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex space-x-1">
-                        <Button variant="outline" size="sm">
-                          <FileText className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         </TabsContent>
 
         <TabsContent value="imports" className="space-y-4">
