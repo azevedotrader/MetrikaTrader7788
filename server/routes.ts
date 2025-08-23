@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -10,6 +10,8 @@ import fs from "fs";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
 import { lerCSVSimples } from "./simple-csv-reader";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -1502,22 +1504,25 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
 
-      // Save trades to database
-      const processingMethod = (result.summary as any)?.processingMethod || 'Sistema Tradicional';
-      console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
-      const savedTrades = await storage.createBulkTrades(result.trades);
-
-      // Record CSV import
-      await storage.createCsvImport({
+      // Record CSV import first to get the ID
+      const csvImportRecord = await storage.createCsvImport({
         userId,
         broker: result.summary.detectedBroker,
         fileName: file.originalname,
         displayName: null, // Será definido pelo usuário se desejar
-        tradesImported: savedTrades.length,
+        tradesImported: 0, // Será atualizado depois
         tradesSkipped: result.summary.statisticsSkipped,
         status: 'completed',
         errorMessage: result.errors.length > 0 ? result.errors.join('; ') : null
       });
+
+      // Save trades to database with CSV import ID
+      const processingMethod = (result.summary as any)?.processingMethod || 'Sistema Tradicional';
+      console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
+      const savedTrades = await storage.createBulkTrades(result.trades, csvImportRecord.id);
+
+      // Update CSV import with final trade count (just update internally)
+      console.log(`📝 CSV import ${csvImportRecord.id} completed with ${savedTrades.length} trades`);
 
       // Clean up uploaded file
       fs.unlinkSync(file.path);
@@ -1614,6 +1619,31 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Deletar CSV import e trades relacionados - ISOLADO POR USUÁRIO
+  app.delete("/api/csv-imports/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = req.userId; // ISOLAMENTO OBRIGATÓRIO
+      const csvId = req.params.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
+      const deleted = await storage.deleteCsvImport(userId, csvId);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: 'CSV não encontrado' });
+      }
+
+      res.json({ 
+        message: 'CSV e trades relacionados foram excluídos com sucesso'
+      });
+    } catch (error) {
+      console.error("Error deleting CSV import:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Reprocessar CSV com interpretador inteligente
   app.post('/api/trades/reprocess-smart', requireAuth, async (req, res) => {
     try {
@@ -1676,7 +1706,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
 
-      // Salvar novos trades interpretados
+      // Salvar novos trades interpretados (sem CSV import ID pois é reprocessamento)
       const savedTrades = await storage.createBulkTrades(smartTrades);
       
       console.log(`✅ Reprocessamento inteligente concluído: ${smartTrades.length} métricas interpretadas`);

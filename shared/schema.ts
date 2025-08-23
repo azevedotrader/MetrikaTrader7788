@@ -43,6 +43,7 @@ export const trades = pgTable("trades", {
   status: text("status").default("fechado"), // "aberto", "fechado"
   origem: text("origem").default("manual"), // "manual", "csv", "api"
   externalId: text("external_id"), // ID da API externa
+  csvImportId: varchar("csv_import_id").references(() => csvImports.id), // Vinculação com CSV importado
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

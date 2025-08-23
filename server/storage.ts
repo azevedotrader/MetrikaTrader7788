@@ -163,7 +163,7 @@ export class DatabaseStorage implements IStorage {
     return trade;
   }
 
-  async createBulkTrades(tradesData: InsertTrade[]): Promise<Trade[]> {
+  async createBulkTrades(tradesData: InsertTrade[], csvImportId?: string): Promise<Trade[]> {
     // Validação de userId em lote - todos os trades devem ter o mesmo userId
     const userIds = Array.from(new Set(tradesData.map(t => t.userId).filter(Boolean)));
     if (userIds.length !== 1) {
@@ -183,6 +183,7 @@ export class DatabaseStorage implements IStorage {
         ...trade,
         userId: trade.userId!,
         dataHora: new Date(trade.dataHora),
+        csvImportId, // Adicionar o ID do CSV import
         // Limitar valores para decimal(12,2) - máximo: 9.999.999.999,99
         capitalUtilizado: validateDecimal(trade.capitalUtilizado, 9999999999.99, "0"),
         quantidade: validateDecimal(trade.quantidade, 9999.9999, "1"),
@@ -195,7 +196,7 @@ export class DatabaseStorage implements IStorage {
       };
     });
     
-    console.log(`💾 [${userIds[0]}] Inserindo ${processedTrades.length} trades no banco com isolamento`);
+    console.log(`💾 [${userIds[0]}] Inserindo ${processedTrades.length} trades no banco com isolamento${csvImportId ? ` (CSV: ${csvImportId})` : ''}`);
     
     return await db
       .insert(trades)
@@ -305,6 +306,24 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)))
       .returning();
     return updated || null;
+  }
+
+  async deleteCsvImport(userId: string, csvId: string): Promise<boolean> {
+    // Primeiro, deletar todos os trades relacionados ao CSV
+    await db.delete(trades).where(
+      and(
+        eq(trades.userId, userId), 
+        eq(trades.csvImportId, csvId)
+      )
+    );
+    
+    // Depois, deletar o CSV import
+    const result = await db
+      .delete(csvImports)
+      .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)))
+      .returning();
+    
+    return result.length > 0;
   }
 
   async deleteAllBrokerConfigs(userId: string): Promise<void> {

@@ -29,6 +29,7 @@ import {
   LineChart,
   Trash2,
   Edit3,
+  Edit2,
   Filter,
   CheckSquare
 } from "lucide-react";
@@ -618,6 +619,29 @@ export default function Dashboard() {
       toast({
         title: "Erro ao renomear",
         description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Mutation para deletar CSV
+  const deleteCsvMutation = useMutation({
+    mutationFn: async (csvId: string) => {
+      return apiRequest('DELETE', `/api/csv-imports/${csvId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
+      toast({
+        title: "CSV excluído com sucesso",
+        description: "O arquivo CSV e todos os trades relacionados foram removidos."
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir",
+        description: error.message || "Não foi possível excluir o CSV",
         variant: "destructive"
       });
     }
@@ -1298,17 +1322,90 @@ export default function Dashboard() {
                       <div className="flex items-center space-x-4">
                         <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
                         <div>
-                          <div className="font-medium text-white">{importItem.fileName}</div>
+                          {editingCsv?.id === importItem.id ? (
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={newCsvName}
+                                onChange={(e) => setNewCsvName(e.target.value)}
+                                className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm"
+                                placeholder="Nome do arquivo"
+                                data-testid={`input-csv-name-${importItem.id}`}
+                              />
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  if (newCsvName.trim()) {
+                                    renameCsvMutation.mutate({ 
+                                      csvId: importItem.id, 
+                                      displayName: newCsvName.trim() 
+                                    });
+                                  }
+                                }}
+                                disabled={renameCsvMutation.isPending}
+                                className="h-7 px-2"
+                                data-testid={`button-save-csv-${importItem.id}`}
+                              >
+                                ✓
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingCsv(null);
+                                  setNewCsvName('');
+                                }}
+                                className="h-7 px-2"
+                                data-testid={`button-cancel-csv-${importItem.id}`}
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="font-medium text-white">{importItem.displayName || importItem.fileName}</div>
+                          )}
                           <div className="text-sm text-zinc-400">
                             {brokerInfo[importItem.broker as keyof typeof brokerInfo]?.name || importItem.broker}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-white">{importItem.tradesImported} trades</div>
-                        <div className="text-xs text-zinc-400">
-                          {new Date(importItem.createdAt).toLocaleDateString('pt-BR')}
+                      <div className="flex items-center space-x-2">
+                        <div className="text-right">
+                          <div className="text-white">{importItem.tradesImported} trades</div>
+                          <div className="text-xs text-zinc-400">
+                            {new Date(importItem.createdAt).toLocaleDateString('pt-BR')}
+                          </div>
                         </div>
+                        {editingCsv?.id !== importItem.id && (
+                          <div className="flex space-x-1 ml-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingCsv({ id: importItem.id, currentName: importItem.displayName || importItem.fileName });
+                                setNewCsvName(importItem.displayName || importItem.fileName);
+                              }}
+                              className="h-7 px-2 text-zinc-400 hover:text-white"
+                              data-testid={`button-edit-csv-${importItem.id}`}
+                            >
+                              <Edit2 className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (confirm(`Tem certeza que deseja excluir "${importItem.displayName || importItem.fileName}"?\n\nEsta ação irá deletar:\n• O arquivo CSV\n• Todos os trades relacionados a este CSV\n\nEsta ação não pode ser desfeita.`)) {
+                                  deleteCsvMutation.mutate(importItem.id);
+                                }
+                              }}
+                              disabled={deleteCsvMutation.isPending}
+                              className="h-7 px-2 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300"
+                              data-testid={`button-delete-csv-${importItem.id}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
