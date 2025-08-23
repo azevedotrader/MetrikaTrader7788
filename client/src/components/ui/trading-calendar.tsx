@@ -2,8 +2,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Plus, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DiaryModal } from "@/components/ui/diary-modal";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { format, isSameDay } from "date-fns";
+import type { DiaryEntry } from "@shared/schema";
 
 interface TradeDay {
   date: number;
@@ -31,12 +35,48 @@ export function TradingCalendar({
   className,
 }: TradingCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isDiaryModalOpen, setIsDiaryModalOpen] = useState(false);
+  const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<DiaryEntry | undefined>(undefined);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const queryClient = useQueryClient();
+
+  // Buscar entradas do diário
+  const { data: diaryEntries = [] } = useQuery<DiaryEntry[]>({
+    queryKey: ["/api/diary"],
+    enabled: true,
+  });
 
   // Dias da semana - versão curta para mobile
   const weekDays = isMobile
     ? ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
     : ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+  // Funções para o diário
+  const handleDateClick = (date: Date) => {
+    const existingEntry = diaryEntries.find(entry => 
+      isSameDay(new Date(entry.date), date)
+    );
+    
+    if (existingEntry) {
+      setSelectedDiaryEntry(existingEntry);
+    } else {
+      setSelectedDiaryEntry(undefined);
+    }
+    
+    setSelectedDate(date);
+    setIsDiaryModalOpen(true);
+  };
+
+  const handleDiaryModalSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/diary"] });
+  };
+
+  const getDiaryEntryForDate = (date: Date) => {
+    return diaryEntries.find(entry => 
+      isSameDay(new Date(entry.date), date)
+    );
+  };
 
   // Navegar entre meses
   const navigateMonth = (direction: "prev" | "next") => {
@@ -213,24 +253,39 @@ export function TradingCalendar({
       new Date().getMonth() === month &&
       new Date().getFullYear() === year;
 
+    // Verificar se há entrada do diário para este dia
+    const dayDate = new Date(year, month, dayNumber);
+    const diaryEntry = getDiaryEntryForDate(dayDate);
+    const hasDiary = !!diaryEntry;
+
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden",
+          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer",
           isMobile ? "h-[110px] p-2" : "h-20 p-1",
           isToday && "bg-zinc-800/50 border-zinc-600",
           hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20"),
         )}
+        onClick={() => handleDateClick(dayDate)}
+        data-testid={`calendar-day-${dayNumber}`}
       >
         <div className="flex flex-col h-full">
-          <div
-            className={cn(
-              "font-medium",
-              isMobile ? "text-sm mb-1" : "text-sm",
-              isToday ? "text-white" : "text-zinc-400",
+          <div className="flex items-center justify-between mb-1">
+            <div
+              className={cn(
+                "font-medium",
+                isMobile ? "text-sm" : "text-sm",
+                isToday ? "text-white" : "text-zinc-400",
+              )}
+            >
+              {dayNumber}
+            </div>
+            {hasDiary && (
+              <BookOpen 
+                className="w-3 h-3 text-blue-400" 
+                data-testid={`diary-indicator-${dayNumber}`}
+              />
             )}
-          >
-            {dayNumber}
           </div>
 
           {hasData && tradeDay && (
@@ -268,6 +323,21 @@ export function TradingCalendar({
                   {tradeDay.winRate.toFixed(0)}% win
                 </div>
               )}
+            </div>
+          )}
+
+          {hasDiary && !hasData && (
+            <div className="flex-1 flex flex-col justify-center items-center">
+              <div className="text-blue-400 text-xs font-medium">
+                Diário
+              </div>
+            </div>
+          )}
+
+          {/* Indicador de hover para adicionar entrada */}
+          {!hasDiary && (
+            <div className="absolute inset-0 bg-zinc-800/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Plus className="w-4 h-4 text-zinc-300" />
             </div>
           )}
         </div>

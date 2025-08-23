@@ -122,6 +122,23 @@ export const platformStats = pgTable("platform_stats", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Tabela para entradas do diário de trading
+export const diaryEntries = pgTable("diary_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  date: timestamp("date").notNull(), // Data específica da entrada
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  emotion: text("emotion"), // emoção do dia
+  trades: integer("trades").default(0), // número de trades do dia
+  pnl: decimal("pnl", { precision: 12, scale: 2 }).default("0"), // P&L do dia
+  winRate: decimal("win_rate", { precision: 5, scale: 2 }), // taxa de acerto do dia
+  lessons: text("lessons"), // lições aprendidas
+  improvements: text("improvements"), // melhorias para próximas sessões
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   name: true,
   email: true,
@@ -214,15 +231,36 @@ export const updateUserByAdminSchema = z.object({
   planExpiresAt: z.string().optional(),
 });
 
+// Schema para entradas do diário
+export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  date: z.string().min(1, "Data é obrigatória"),
+  title: z.string().min(1, "Título é obrigatório").max(100, "Título deve ter no máximo 100 caracteres"),
+  content: z.string().min(1, "Conteúdo é obrigatório"),
+  emotion: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro"]).optional(),
+  trades: z.number().min(0, "Número de trades deve ser positivo").optional(),
+  pnl: z.string().optional(),
+  winRate: z.string().optional(),
+  lessons: z.string().optional(),
+  improvements: z.string().optional(),
+});
+
 export type UpdateUserByAdmin = z.infer<typeof updateUserByAdminSchema>;
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 export type UpdateCsvImport = z.infer<typeof updateCsvImportSchema>;
+export type InsertDiaryEntry = z.infer<typeof insertDiaryEntrySchema>;
+export type DiaryEntry = typeof diaryEntries.$inferSelect;
 
 // Relações do Drizzle ORM
 import { relations } from "drizzle-orm";
 
 export const usersRelations = relations(users, ({ many, one }) => ({
   trades: many(trades),
+  diaryEntries: many(diaryEntries),
   brokerApiConfigs: many(brokerApiConfigs),
   csvImports: many(csvImports),
   subscriptions: many(subscriptions),
@@ -262,4 +300,11 @@ export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
 
 export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }) => ({
   subscriptions: many(subscriptions),
+}));
+
+export const diaryEntriesRelations = relations(diaryEntries, ({ one }) => ({
+  user: one(users, {
+    fields: [diaryEntries.userId],
+    references: [users.id],
+  }),
 }));

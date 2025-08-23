@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -2364,6 +2364,121 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.status(500).json({
         message: "Erro na demonstração",
         error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  });
+
+  // Rotas do diário
+  app.get('/api/diary', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const entries = await storage.getDiaryEntries(userId);
+      res.json(entries);
+    } catch (error) {
+      console.error('Erro ao buscar entradas do diário:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  app.get('/api/diary/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
+      const entry = await storage.getDiaryEntry(id, userId);
+      
+      if (!entry) {
+        return res.status(404).json({ error: "Entrada do diário não encontrada" });
+      }
+      
+      res.json(entry);
+    } catch (error) {
+      console.error('Erro ao buscar entrada do diário:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  app.get('/api/diary/date/:date', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { date } = req.params;
+      const entries = await storage.getDiaryEntriesByDate(userId, date);
+      res.json(entries);
+    } catch (error) {
+      console.error('Erro ao buscar entradas do diário por data:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  app.post('/api/diary', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const validatedData = insertDiaryEntrySchema.parse(req.body);
+      
+      const entry = await storage.createDiaryEntry({
+        ...validatedData,
+        userId
+      });
+      
+      res.json(entry);
+    } catch (error) {
+      console.error('Erro ao criar entrada do diário:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Dados inválidos",
+          details: error.errors
+        });
+      }
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  app.put('/api/diary/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
+      const validatedData = insertDiaryEntrySchema.partial().parse(req.body);
+      
+      const entry = await storage.updateDiaryEntry(id, validatedData, userId);
+      res.json(entry);
+    } catch (error) {
+      console.error('Erro ao atualizar entrada do diário:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Dados inválidos",
+          details: error.errors
+        });
+      }
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  app.delete('/api/diary/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
+      
+      await storage.deleteDiaryEntry(id, userId);
+      res.json({ message: "Entrada do diário deletada com sucesso" });
+    } catch (error) {
+      console.error('Erro ao deletar entrada do diário:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
       });
     }
   });

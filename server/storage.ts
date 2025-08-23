@@ -6,6 +6,7 @@ import {
   subscriptionPlans,
   subscriptions,
   platformStats,
+  diaryEntries,
   type User, 
   type InsertUser, 
   type Trade, 
@@ -18,6 +19,8 @@ import {
   type PlatformStats,
   type UpdateUserByAdmin,
   type InsertSubscriptionPlan,
+  type DiaryEntry,
+  type InsertDiaryEntry,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, gte, lte, isNull } from "drizzle-orm";
@@ -67,6 +70,14 @@ export interface IStorage {
   // User subscriptions
   getUserSubscription(userId: string): Promise<Subscription | undefined>;
   createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt'>): Promise<Subscription>;
+  
+  // Diary operations
+  getDiaryEntries(userId: string): Promise<DiaryEntry[]>;
+  getDiaryEntry(id: string, userId: string): Promise<DiaryEntry | undefined>;
+  getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]>;
+  createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry>;
+  updateDiaryEntry(id: string, updates: Partial<InsertDiaryEntry>, userId: string): Promise<DiaryEntry>;
+  deleteDiaryEntry(id: string, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -462,6 +473,64 @@ export class DatabaseStorage implements IStorage {
   async createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt'>): Promise<Subscription> {
     const [newSubscription] = await db.insert(subscriptions).values(subscription).returning();
     return newSubscription;
+  }
+
+  // Diary operations
+  async getDiaryEntries(userId: string): Promise<DiaryEntry[]> {
+    return await db.select().from(diaryEntries)
+      .where(eq(diaryEntries.userId, userId))
+      .orderBy(desc(diaryEntries.date));
+  }
+
+  async getDiaryEntry(id: string, userId: string): Promise<DiaryEntry | undefined> {
+    const [entry] = await db.select().from(diaryEntries)
+      .where(and(eq(diaryEntries.id, id), eq(diaryEntries.userId, userId)));
+    return entry || undefined;
+  }
+
+  async getDiaryEntriesByDate(userId: string, date: string): Promise<DiaryEntry[]> {
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1);
+    
+    return await db.select().from(diaryEntries)
+      .where(and(
+        eq(diaryEntries.userId, userId),
+        gte(diaryEntries.date, startDate),
+        lte(diaryEntries.date, endDate)
+      ))
+      .orderBy(desc(diaryEntries.date));
+  }
+
+  async createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry> {
+    const [newEntry] = await db
+      .insert(diaryEntries)
+      .values({
+        ...entry,
+        date: new Date(entry.date),
+        pnl: entry.pnl || "0",
+        winRate: entry.winRate || "0",
+      })
+      .returning();
+    return newEntry;
+  }
+
+  async updateDiaryEntry(id: string, updates: Partial<InsertDiaryEntry>, userId: string): Promise<DiaryEntry> {
+    const [updatedEntry] = await db
+      .update(diaryEntries)
+      .set({
+        ...updates,
+        date: updates.date ? new Date(updates.date) : undefined,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(diaryEntries.id, id), eq(diaryEntries.userId, userId)))
+      .returning();
+    return updatedEntry;
+  }
+
+  async deleteDiaryEntry(id: string, userId: string): Promise<void> {
+    await db.delete(diaryEntries)
+      .where(and(eq(diaryEntries.id, id), eq(diaryEntries.userId, userId)));
   }
 }
 
