@@ -543,7 +543,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
             data={chartData}
             margin={{
               top: window.innerWidth < 768 ? 0 : 10,
-              right: window.innerWidth < 768 ? -8 : 50,
+              right: window.innerWidth < 768 ? 2 : 50,
               left: window.innerWidth < 768 ? -38 : 30,
               bottom: window.innerWidth < 768 ? 25 : 60,
             }}
@@ -1467,30 +1467,30 @@ export default function Dashboard() {
       <AdvancedFilters />
 
       <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-slate-800 border border-zinc-700 rounded-lg p-1 h-auto">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-slate-800 border border-zinc-700 rounded-lg p-1 gap-1 h-auto">
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
             <span className="hidden sm:inline">Visão Geral</span>
             <span className="sm:hidden">Geral</span>
           </TabsTrigger>
           <TabsTrigger
             value="insights"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
             Insights
           </TabsTrigger>
           <TabsTrigger
             value="imports"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
             <span className="hidden sm:inline">Importações</span>
             <span className="sm:hidden">Import</span>
           </TabsTrigger>
           <TabsTrigger
             value="consolidated"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-2 px-1 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
             <span className="hidden sm:inline">Consolidado</span>
             <span className="sm:hidden">Consol</span>
