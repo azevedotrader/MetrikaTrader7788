@@ -41,7 +41,7 @@ export default function NovoTrade() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   const [currentTradeData, setCurrentTradeData] = useState<any>(null);
-  const [analysisMethod, setAnalysisMethod] = useState<'ai' | 'traditional'>('ai');
+  const [analysisMethod, setAnalysisMethod] = useState<'ai' | 'traditional'>('traditional');
   
   // Take/Stop calculation state
   const [tradeResult, setTradeResult] = useState<"take" | "loss" | "">("");
