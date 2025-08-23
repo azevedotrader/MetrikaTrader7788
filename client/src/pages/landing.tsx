@@ -536,21 +536,24 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Plano Gratuito */}
+            {/* Plano Starter */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Starter</h3>
-                  <div className="text-4xl font-bold text-white mb-2">Grátis</div>
-                  <p className="text-slate-400">Para começar</p>
+                  <h3 className="text-2xl font-bold text-white mb-2">Trader Starter</h3>
+                  <div className="flex items-baseline justify-center mb-2">
+                    <span className="text-4xl font-bold text-white">R$ 29,90</span>
+                    <span className="text-slate-400 ml-2">/mês</span>
+                  </div>
+                  <p className="text-slate-400">7 dias grátis</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    "Até 100 trades por mês",
-                    "1 corretora conectada",
-                    "Relatórios básicos",
-                    "Support por email"
+                    "Acesso completo às métricas dos seus trades",
+                    "Backup seguro de todo histórico",
+                    "Anotações detalhadas para cada trade",
+                    "Filtros avançados por mercado e período"
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -564,7 +567,7 @@ export default function Landing() {
                   className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
                   onClick={() => setShowRegister(true)}
                 >
-                  Começar Grátis
+                  Teste 7 Dias Grátis
                 </Button>
               </CardContent>
             </Card>
@@ -573,27 +576,27 @@ export default function Landing() {
             <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative transform scale-110 shadow-2xl animate-glow">
               <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
                 <Badge className="gradient-emerald-blue text-white px-6 py-3 text-base font-bold">
-                  ⭐ Mais Popular
+                  🔥 Mais Vendido
                 </Badge>
               </div>
               <CardContent className="p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Pro</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">Trader Pro</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-4xl font-bold text-white">R$ 97</span>
+                    <span className="text-4xl font-bold text-white">R$ 49,90</span>
                     <span className="text-slate-400 ml-2">/mês</span>
                   </div>
-                  <p className="text-slate-300">Para traders sérios</p>
+                  <p className="text-slate-300">Anual: R$ 42/mês</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    "Trades ilimitados",
-                    "Até 5 corretoras conectadas",
-                    "Analytics avançado + IA",
-                    "API integrations",
-                    "Journal inteligente",
-                    "Support prioritário"
+                    "Tudo do Starter +",
+                    "Suporte integrado direto no app",
+                    "Análise mensal das suas métricas",
+                    "Sugestões para melhoria",
+                    "Integração TradingView",
+                    "Acompanhamento profissional"
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
@@ -612,23 +615,26 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            {/* Plano Enterprise */}
+            {/* Plano Black */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Enterprise</h3>
-                  <div className="text-4xl font-bold text-white mb-2">R$ 297</div>
-                  <p className="text-slate-400">Para profissionais</p>
+                  <h3 className="text-2xl font-bold text-white mb-2">Trader Black</h3>
+                  <div className="flex items-baseline justify-center mb-2">
+                    <span className="text-4xl font-bold text-white">R$ 97</span>
+                    <span className="text-slate-400 ml-2">/mês</span>
+                  </div>
+                  <p className="text-slate-400">Anual: R$ 80/mês</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    "Tudo do Pro +",
-                    "Corretoras ilimitadas",
-                    "White-label disponível",
-                    "API personalizada",
-                    "Suporte 24/7",
-                    "Consultoria inclusa"
+                    "IA treinada no seu histórico",
+                    "Relatórios inteligentes completos",
+                    "Suporte 24h via IA",
+                    "Análise 2x/mês com estratégias",
+                    "Gestão de risco personalizada",
+                    "Call mensal com equipe profissional"
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -642,7 +648,7 @@ export default function Landing() {
                   className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
                   onClick={() => setShowRegister(true)}
                 >
-                  Falar com Vendas
+                  Nível Máximo
                 </Button>
               </CardContent>
             </Card>
