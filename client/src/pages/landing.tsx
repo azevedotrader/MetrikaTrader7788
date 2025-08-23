@@ -574,11 +574,6 @@ export default function Landing() {
 
             {/* Plano Pro - Destaque */}
             <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative transform scale-110 shadow-2xl animate-glow">
-              <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
-                <Badge className="gradient-emerald-blue text-white px-6 py-3 text-base font-bold">
-                  🔥 Mais Vendido
-                </Badge>
-              </div>
               <CardContent className="p-8">
                 <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold text-white mb-2">Trader Pro</h3>
