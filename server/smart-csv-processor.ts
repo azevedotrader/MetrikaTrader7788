@@ -130,7 +130,8 @@ function validateTradeRow(row: any, index: number): ValidatedTradeRow | null {
 export async function processSmartCSV(
   filePath: string,
   userId: string,
-  brokerHint: string = 'auto'
+  brokerHint: string = 'auto',
+  csvImportId?: string
 ): Promise<SmartCSVResult> {
   console.log(`🧠 Iniciando processamento inteligente: ${filePath}`);
   
@@ -223,7 +224,8 @@ export async function processSmartCSV(
           userId, 
           detectedInfo.broker, 
           detectedInfo.market,
-          index
+          index,
+          csvImportId
         );
         
         if (trade) {
@@ -273,7 +275,8 @@ export async function processSmartCSV(
               userId, 
               detectedInfo.broker, 
               detectedInfo.market,
-              index
+              index,
+              csvImportId
             );
             
             if (trade) {
@@ -826,7 +829,8 @@ function extractTradeFromRow(
   userId: string, 
   broker: string, 
   market: string,
-  lineIndex: number
+  lineIndex: number,
+  csvImportId?: string
 ): InsertTrade | null {
   try {
     // 1. Extrair data
@@ -870,6 +874,7 @@ function extractTradeFromRow(
       origem: 'csv',
       mercado: market as 'crypto' | 'forex' | 'b3',
       setup: 'CSV Smart Import',
+      csvImportId,
       dataHora: date.toISOString(),
       ativo: finalSymbol.toUpperCase(),
       tipo: operationType,

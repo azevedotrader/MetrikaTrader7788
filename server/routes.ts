@@ -1334,13 +1334,26 @@ export async function registerRoutes(app: Express): Promise<void> {
       });
       console.log(`👤 Usuário: ${userId}, 🏢 Broker: ${broker}, 🔄 Método: ${useTraditional ? 'Tradicional' : 'ChatGPT (Padrão)'}`);
 
+      // Create CSV import record first to get ID for linking trades
+      const preliminaryCsvImport = await storage.createCsvImport({
+        userId,
+        fileName: file.originalname,
+        displayName: req.body.csvName || file.originalname,
+        filePath: file.path,
+        broker: 'auto', // Will be updated after detection
+        tradesImported: 0,
+        processingMethod: useTraditional ? 'Sistema Tradicional' : 'ChatGPT (Análise Estrutural Completa)',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+
       let result;
       
       if (useTraditional) {
         // Usar sistema tradicional quando especificamente solicitado
         console.log(`🕧 Usando sistema tradicional para analisar CSV...`);
         const { processSmartCSV } = await import('./smart-csv-processor');
-        result = await processSmartCSV(file.path, userId, broker);
+        result = await processSmartCSV(file.path, userId, broker, preliminaryCsvImport.id);
       } else {
         // Usar ChatGPT como padrão - Análise estrutural completa
         console.log(`🤖 Usando ChatGPT (PADRÃO) para análise estrutural completa...`);
@@ -1366,21 +1379,8 @@ export async function registerRoutes(app: Express): Promise<void> {
           
           // Forçar uso do sistema tradicional se OpenAI falhar
           const { processSmartCSV } = await import('./smart-csv-processor');
-          result = await processSmartCSV(file.path, userId, broker);
+          result = await processSmartCSV(file.path, userId, broker, preliminaryCsvImport.id);
           result.summary.processingMethod = 'Sistema Tradicional (OpenAI indisponível)';
-          
-          // Skip ChatGPT processing and go to saving
-          const csvImport = await storage.createCsvImport({
-            userId,
-            fileName: file.originalname,
-            displayName: req.body.csvName || file.originalname,
-            filePath: file.path,
-            broker: result.summary.detectedBroker,
-            tradesImported: result.trades.length,
-            processingMethod: result.summary.processingMethod,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          });
 
           if (result.trades.length > 0) {
             console.log(`💾 [${userId}] Inserindo ${result.trades.length} trades no banco com isolamento`);
@@ -1398,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           });
         }
         const { analyzeCSVWithOpenAI } = await import('./openai-csv-analyzer');
-        const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker);
+        const aiResult = await analyzeCSVWithOpenAI(file.path, userId, broker, preliminaryCsvImport.id);
         
         result = {
           trades: aiResult.trades,
@@ -1428,7 +1428,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           const { processSmartCSV } = await import('./smart-csv-processor');
           
           // Sistema tradicional com modo "força bruta" - aceita qualquer formato
-          const fallbackResult = await processSmartCSV(file.path, userId, broker);
+          const fallbackResult = await processSmartCSV(file.path, userId, broker, preliminaryCsvImport.id);
           
           if (fallbackResult.trades.length > 0) {
             console.log(`✅ Sistema tradicional extraiu ${fallbackResult.trades.length} itens como trades`);
@@ -1507,16 +1507,15 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
       const savedTrades = await storage.createBulkTrades(result.trades);
 
-      // Record CSV import
-      await storage.createCsvImport({
-        userId,
+      // Update CSV import record with final results
+      await storage.updateCsvImport(preliminaryCsvImport.id, {
         broker: result.summary.detectedBroker,
-        fileName: file.originalname,
-        displayName: null, // Será definido pelo usuário se desejar
         tradesImported: savedTrades.length,
         tradesSkipped: result.summary.statisticsSkipped,
         status: 'completed',
-        errorMessage: result.errors.length > 0 ? result.errors.join('; ') : null
+        errorMessage: result.errors.length > 0 ? result.errors.join('; ') : null,
+        processingMethod: processingMethod,
+        updatedAt: new Date().toISOString()
       });
 
       // Clean up uploaded file

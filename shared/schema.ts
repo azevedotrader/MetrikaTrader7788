@@ -42,6 +42,7 @@ export const trades = pgTable("trades", {
   corretora: text("corretora").notNull(), // "crypto", "forex", "b3"
   status: text("status").default("fechado"), // "aberto", "fechado"
   origem: text("origem").default("manual"), // "manual", "csv", "api"
+  csvImportId: varchar("csv_import_id").references(() => csvImports.id), // Relaciona trade com importação CSV
   externalId: text("external_id"), // ID da API externa
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -156,6 +157,7 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
   corretora: z.enum(["crypto", "forex", "b3", "auto"], { message: "Corretora deve ser crypto, forex, b3 ou auto" }),
+  csvImportId: z.string().optional(), // ID da importação CSV associada
   emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro"], { 
     message: "Emoção deve ser uma das opções disponíveis" 
   }).optional(),
@@ -232,6 +234,10 @@ export const tradesRelations = relations(trades, ({ one }) => ({
     fields: [trades.userId],
     references: [users.id],
   }),
+  csvImport: one(csvImports, {
+    fields: [trades.csvImportId],
+    references: [csvImports.id],
+  }),
 }));
 
 export const brokerApiConfigsRelations = relations(brokerApiConfigs, ({ one }) => ({
@@ -241,11 +247,12 @@ export const brokerApiConfigsRelations = relations(brokerApiConfigs, ({ one }) =
   }),
 }));
 
-export const csvImportsRelations = relations(csvImports, ({ one }) => ({
+export const csvImportsRelations = relations(csvImports, ({ one, many }) => ({
   user: one(users, {
     fields: [csvImports.userId],
     references: [users.id],
   }),
+  trades: many(trades),
 }));
 
 export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
