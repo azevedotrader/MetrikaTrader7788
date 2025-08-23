@@ -935,24 +935,17 @@ export default function Dashboard() {
     };
 
     return (
-      <Card className="bg-zinc-900/90 border-zinc-800 mb-6">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-zinc-400" />
-            <CardTitle className="text-white">Filtros Avançados</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card className="bg-transparent border-transparent mb-2">
+        <CardContent className="p-2">
+          <div className="max-w-xs">
             {/* Dropdown de Visualização */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-zinc-300">Modo de Visualização</Label>
+            <div className="space-y-1">
               <Select value={viewMode} onValueChange={(value: 'all' | 'broker' | 'csv') => {
                 setViewMode(value);
                 if (value !== 'broker') setSelectedBrokerFilter(null);
                 if (value !== 'csv') setSelectedCsvIds([]);
               }}>
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm">
                   <SelectValue placeholder="Selecione o modo de visualização" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -970,10 +963,9 @@ export default function Dashboard() {
               
               {/* Dropdown de Corretoras */}
               {viewMode === 'broker' && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-zinc-300">Corretora</Label>
+                <div className="space-y-1">
                   <Select value={selectedBrokerFilter || ''} onValueChange={setSelectedBrokerFilter}>
-                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm">
                       <SelectValue placeholder="Selecione uma corretora" />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -990,124 +982,56 @@ export default function Dashboard() {
                   </Select>
                 </div>
               )}
-            </div>
 
-            {/* Seletor de CSVs */}
-            {viewMode === 'csv' && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-zinc-300">CSVs Importados</Label>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={handleSelectAllCsvs}
-                    className="text-zinc-400 hover:text-white text-xs"
-                  >
-                    <CheckSquare className="w-4 h-4 mr-1" />
-                    {selectedCsvIds.length === (csvImports as any[]).length ? 'Desmarcar Todos' : 'Selecionar Todos'}
-                  </Button>
-                </div>
-                
-                {(csvImports as any[]).length === 0 ? (
-                  <div className="text-center py-6 text-zinc-500">
-                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>Nenhum CSV importado ainda</p>
+              {/* Seletor de CSVs */}
+              {viewMode === 'csv' && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleSelectAllCsvs}
+                      className="text-zinc-400 hover:text-white text-xs h-6 px-2"
+                    >
+                      <CheckSquare className="w-3 h-3 mr-1" />
+                      {selectedCsvIds.length === (csvImports as any[]).length ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                    </Button>
                   </div>
-                ) : (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {(csvImports as any[]).map((csv: any) => (
-                      <div key={csv.id} className="flex items-center space-x-3 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:bg-zinc-700/50 transition-colors">
-                        <Checkbox 
-                          checked={selectedCsvIds.includes(csv.id)}
-                          onCheckedChange={() => handleCsvToggle(csv.id)}
-                          className="border-zinc-600"
-                        />
-                        <div className="flex-1 min-w-0">
-                          {editingCsv?.id === csv.id ? (
-                            <div className="flex items-center space-x-2">
-                              <Input 
-                                value={newCsvName}
-                                onChange={(e) => setNewCsvName(e.target.value)}
-                                className="bg-zinc-700 border-zinc-600 text-white text-sm"
-                                placeholder="Nome do CSV"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleRename();
-                                  if (e.key === 'Escape') setEditingCsv(null);
-                                }}
-                                autoFocus
-                              />
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={handleRename}
-                                disabled={renameCsvMutation.isPending}
-                                className="text-green-400 hover:text-green-300"
-                              >
-                                ✓
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => setEditingCsv(null)}
-                                className="text-red-400 hover:text-red-300"
-                              >
-                                ✗
-                              </Button>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-white font-medium text-sm truncate">
-                                  {csv.displayName || csv.fileName}
-                                </p>
-                                <p className="text-zinc-400 text-xs">
-                                  {csv.tradesImported} trades • {format(new Date(csv.createdAt || Date.now()), 'dd/MM/yyyy', { locale: ptBR })}
-                                </p>
-                              </div>
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => startRenaming(csv)}
-                                className="text-zinc-400 hover:text-white ml-2"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )}
+                  
+                  {(csvImports as any[]).length === 0 ? (
+                    <div className="text-center py-2 text-zinc-500">
+                      <p className="text-xs">Nenhum CSV importado ainda</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1 max-h-40 overflow-y-auto">
+                      {(csvImports as any[]).map((csv: any) => (
+                        <div key={csv.id} className="flex items-center space-x-2 p-2 bg-zinc-800/30 rounded border border-zinc-700/50 hover:bg-zinc-700/30 transition-colors">
+                          <Checkbox 
+                            checked={selectedCsvIds.includes(csv.id)}
+                            onCheckedChange={() => handleCsvToggle(csv.id)}
+                            className="border-zinc-600 h-3 w-3"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium text-xs truncate">
+                              {csv.displayName || csv.fileName}
+                            </p>
+                            <p className="text-zinc-400 text-xs">
+                              {csv.tradesImported} trades
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {selectedCsvIds.length > 0 && (
-                  <div className="mt-3 p-3 bg-green-900/20 border border-green-700/50 rounded-lg">
-                    <p className="text-green-400 text-sm font-medium">
-                      ✓ {selectedCsvIds.length} CSV{selectedCsvIds.length > 1 ? 's' : ''} selecionado{selectedCsvIds.length > 1 ? 's' : ''}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          
-          {/* Resumo dos Filtros Ativos */}
-          <div className="mt-4 pt-4 border-t border-zinc-700">
-            <div className="flex flex-wrap gap-2">
-              {viewMode === 'all' && (
-                <Badge variant="secondary" className="bg-zinc-700 text-zinc-200">
-                  Todos os dados
-                </Badge>
-              )}
-              {viewMode === 'broker' && selectedBrokerFilter && (
-                <Badge variant="secondary" className="bg-blue-900/50 text-blue-200 border-blue-700">
-                  {brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}
-                </Badge>
-              )}
-              {viewMode === 'csv' && selectedCsvIds.length > 0 && (
-                <Badge variant="secondary" className="bg-purple-900/50 text-purple-200 border-purple-700">
-                  {selectedCsvIds.length} CSV{selectedCsvIds.length > 1 ? 's' : ''}
-                </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {selectedCsvIds.length > 0 && (
+                    <div className="mt-1 p-1 bg-green-900/20 border border-green-700/50 rounded text-center">
+                      <p className="text-green-400 text-xs font-medium">
+                        ✓ {selectedCsvIds.length} CSV{selectedCsvIds.length > 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
