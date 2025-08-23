@@ -5,6 +5,7 @@
 
 import { InsertTrade } from '@shared/schema';
 import { parseCSVUniversal } from './universal-csv-parser';
+import { parseWithSimplifiedSystem } from './simplified-csv-parser';
 import { extractTradesFromUniversalCSV } from './smart-trade-extractor';
 
 export interface SmartCSVResult {
@@ -34,9 +35,33 @@ export async function processSmartCSV(
   console.log(`🔗 CSV Import ID: ${csvImportId}`);
   
   try {
-    // 1. Usar o novo parser universal
-    console.log(`\n🔍 Etapa 1: Parsing Universal`);
-    const parsedData = await parseCSVUniversal(filePath);
+    // 1. Tentar primeiro o sistema simplificado (PapaParse + csv-parse)
+    console.log(`\n🔍 Etapa 1: Sistema Simplificado de Parsing`);
+    let parsedData;
+    
+    try {
+      const simplifiedResult = await parseWithSimplifiedSystem(filePath);
+      
+      // Converter para formato compatível
+      parsedData = {
+        data: simplifiedResult.data,
+        headers: simplifiedResult.headers,
+        totalRows: simplifiedResult.rowCount,
+        skippedRows: 0,
+        detectedDelimiter: simplifiedResult.delimiter,
+        detectedEncoding: simplifiedResult.encoding,
+        detectedQuoteChar: '"',
+        numberFormat: 'brazilian' as const,
+        dateValidation: simplifiedResult.dateValidation,
+        keyColumns: {},
+        errors: simplifiedResult.errors
+      };
+      
+      console.log(`✅ Sistema simplificado funcionou: ${simplifiedResult.method} com ${simplifiedResult.data.length} linhas`);
+    } catch (simplifiedError) {
+      console.warn(`⚠️ Sistema simplificado falhou, tentando parser universal como último recurso...`);
+      parsedData = await parseCSVUniversal(filePath);
+    }
     
     if (parsedData.errors.length > 0) {
       console.warn('⚠️ Avisos do parser:', parsedData.errors);

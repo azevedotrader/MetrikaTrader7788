@@ -98,18 +98,31 @@ function readFileWithEncoding(filePath: string): string {
  * Detecta automaticamente o delimitador mais provável
  */
 function detectDelimiter(content: string): { delimiter: string; confidence: number } {
-  const lines = content.split('\n').slice(0, 10); // Analisar primeiras 10 linhas
+  const lines = content.split('\n').slice(0, 20).filter(line => line.trim()); // Mais linhas para análise
   const results: { delimiter: string; count: number; consistency: number }[] = [];
   
+  // Detectar padrões específicos B3 primeiro
+  const sampleContent = lines.join('\n');
+  if (sampleContent.includes('WIN') || sampleContent.includes('WDO') || sampleContent.includes('BGI')) {
+    // Arquivo B3 - testar delimitadores em ordem de probabilidade
+    for (const delimiter of [';', ',', '\t', '|']) {
+      if (sampleContent.includes(delimiter)) {
+        console.log(`🎯 Arquivo B3 detectado, testando delimitador: "${delimiter}"`);
+        return { delimiter, confidence: 0.9 };
+      }
+    }
+  }
+  
   for (const delimiter of POSSIBLE_DELIMITERS) {
-    let totalFields = 0;
     let fieldCounts: number[] = [];
     
     for (const line of lines) {
-      if (line.trim()) {
+      if (line.trim() && !line.toLowerCase().includes('conta:') && !line.toLowerCase().includes('titular:')) {
         const fields = line.split(delimiter);
-        fieldCounts.push(fields.length);
-        totalFields += fields.length;
+        // Só considerar se realmente criou múltiplos campos
+        if (fields.length > 1) {
+          fieldCounts.push(fields.length);
+        }
       }
     }
     
@@ -117,7 +130,7 @@ function detectDelimiter(content: string): { delimiter: string; confidence: numb
       // Calcular consistência (variância baixa = boa consistência)
       const avg = fieldCounts.reduce((a, b) => a + b, 0) / fieldCounts.length;
       const variance = fieldCounts.reduce((acc, count) => acc + Math.pow(count - avg, 2), 0) / fieldCounts.length;
-      const consistency = 1 / (1 + variance); // Inverso da variância
+      const consistency = variance === 0 ? 1 : (1 / (1 + variance)); // Inverso da variância
       
       results.push({
         delimiter,
@@ -127,19 +140,30 @@ function detectDelimiter(content: string): { delimiter: string; confidence: numb
     }
   }
   
+  // Se não encontrou nenhum bom resultado, forçar vírgula como fallback
+  if (results.length === 0) {
+    console.warn(`⚠️ Nenhum delimitador detectado claramente, usando vírgula como fallback`);
+    return { delimiter: ',', confidence: 0.3 };
+  }
+  
   // Ordenar por consistência e número de campos
   results.sort((a, b) => {
-    if (Math.abs(a.consistency - b.consistency) < 0.1) {
-      return b.count - a.count; // Mais campos se consistência similar
-    }
-    return b.consistency - a.consistency; // Maior consistência
+    // Priorizar delimitadores que criam mais campos
+    const scoreA = a.consistency * a.count;
+    const scoreB = b.consistency * b.count;
+    return scoreB - scoreA;
   });
   
   const best = results[0];
-  const confidence = best ? best.consistency * (best.count > 1 ? 1 : 0.5) : 0;
+  let confidence = best ? best.consistency * (best.count > 1 ? 1 : 0.5) : 0;
+  
+  // Bonus para delimitadores mais comuns
+  if (best?.delimiter === ';' || best?.delimiter === ',') {
+    confidence = Math.min(confidence * 1.2, 1);
+  }
   
   console.log(`🔍 Delimitadores testados:`, results);
-  console.log(`✅ Melhor delimitador: "${best?.delimiter}" (confiança: ${(confidence * 100).toFixed(1)}%)`);
+  console.log(`✅ Melhor delimitador: "${best?.delimiter || ','}" (confiança: ${(confidence * 100).toFixed(1)}%)`);
   
   return {
     delimiter: best?.delimiter || ',',
