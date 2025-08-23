@@ -289,8 +289,9 @@ export function TradingCalendar({
             </div>
             {hasDiary && (
               <BookOpen 
-                className="w-3 h-3 text-blue-400" 
+                className="w-3 h-3 text-blue-400 opacity-70" 
                 data-testid={`diary-indicator-${dayNumber}`}
+                title="Entrada de diário disponível"
               />
             )}
           </div>
@@ -333,20 +334,11 @@ export function TradingCalendar({
             </div>
           )}
 
-          {hasDiary && !hasData && (
-            <div className="flex-1 flex flex-col justify-center items-center">
-              <div className="text-blue-400 text-xs font-medium">
-                Diário
-              </div>
-            </div>
-          )}
 
           {/* Indicador de hover para adicionar entrada */}
-          {!hasDiary && (
-            <div className="absolute inset-0 bg-zinc-800/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Plus className="w-4 h-4 text-zinc-300" />
-            </div>
-          )}
+          <div className="absolute inset-0 bg-zinc-800/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <Plus className="w-4 h-4 text-zinc-300" />
+          </div>
         </div>
       </div>
     );
