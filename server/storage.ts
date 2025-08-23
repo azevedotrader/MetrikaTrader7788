@@ -18,7 +18,6 @@ import {
   type PlatformStats,
   type UpdateUserByAdmin,
   type InsertSubscriptionPlan,
-  type InsertCsvImport,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql } from "drizzle-orm";
@@ -48,9 +47,6 @@ export interface IStorage {
   // CSV import operations
   getCsvImports(userId: string): Promise<CsvImport[]>;
   createCsvImport(csvImport: Omit<CsvImport, 'id' | 'createdAt'>): Promise<CsvImport>;
-  updateCsvImportName(userId: string, csvId: string, displayName: string): Promise<CsvImport | null>;
-  updateCsvImport(csvId: string, updateData: Partial<InsertCsvImport>): Promise<CsvImport | null>;
-  deleteCsvImport(userId: string, csvId: string): Promise<boolean>;
   deleteAllCsvImports(userId: string): Promise<void>;
   
   // Admin operations
@@ -309,40 +305,6 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)))
       .returning();
     return updated || null;
-  }
-
-  async updateCsvImport(csvId: string, updateData: Partial<InsertCsvImport>): Promise<CsvImport | null> {
-    const [updated] = await db
-      .update(csvImports)
-      .set({
-        ...updateData,
-        updatedAt: new Date().toISOString()
-      })
-      .where(eq(csvImports.id, csvId))
-      .returning();
-    
-    return updated || null;
-  }
-
-  async deleteCsvImport(userId: string, csvId: string): Promise<boolean> {
-    // Primeiro, deletar todos os trades associados a esta importação CSV
-    const relatedTrades = await db
-      .select()
-      .from(trades)
-      .where(and(eq(trades.csvImportId, csvId), eq(trades.userId, userId)));
-    
-    // Deletar trades um por um (para garantir isolamento)
-    for (const trade of relatedTrades) {
-      await db.delete(trades).where(eq(trades.id, trade.id));
-    }
-    
-    // Depois, deletar a importação CSV
-    const result = await db
-      .delete(csvImports)
-      .where(and(eq(csvImports.id, csvId), eq(csvImports.userId, userId)));
-    
-    console.log(`🗑️ CSV removido: ${csvId} (${relatedTrades.length} trades também removidos)`);
-    return (result.rowCount || 0) > 0;
   }
 
   async deleteAllBrokerConfigs(userId: string): Promise<void> {

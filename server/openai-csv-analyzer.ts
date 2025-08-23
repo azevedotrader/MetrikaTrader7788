@@ -32,8 +32,7 @@ export interface OpenAICSVResult {
 export async function analyzeCSVWithOpenAI(
   filePath: string,
   userId: string,
-  brokerHint: string = 'auto',
-  csvImportId?: string
+  brokerHint: string = 'auto'
 ): Promise<OpenAICSVResult> {
   console.log(`🤖 Iniciando análise ChatGPT para: ${filePath}`);
   
@@ -305,7 +304,6 @@ e certifique-se de que seu array "trades" contém EXATAMENTE esse número!
             mercado: (tradeData.mercado || 'b3') as 'crypto' | 'forex' | 'b3',
             setup: tradeData.setup || 'Análise GPT',
             origem: 'csv-gpt',
-            csvImportId,
             comentario: `${tradeData.comentario || 'Extraído via ChatGPT'} - User: ${userId}`,
             stop: String(tradeData.stop || '0'),
             alvo: String(tradeData.alvo || '0'),

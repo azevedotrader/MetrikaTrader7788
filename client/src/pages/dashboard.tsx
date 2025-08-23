@@ -30,8 +30,7 @@ import {
   Trash2,
   Edit3,
   Filter,
-  CheckSquare,
-  X
+  CheckSquare
 } from "lucide-react";
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { type Trade } from "@shared/schema";
@@ -572,164 +571,6 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }
   );
 }
 
-// Componente para item de importação CSV
-function CSVImportItem({ importItem, brokerInfo, onRefresh }: any) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(importItem.fileName);
-  const { toast } = useToast();
-  
-  const updateNameMutation = useMutation({
-    mutationFn: async ({ id, newName }: { id: string; newName: string }) => {
-      const response = await apiRequest('PATCH', `/api/csv-imports/${id}/rename`, { displayName: newName });
-      return response;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Nome atualizado",
-        description: "Nome do arquivo CSV foi atualizado com sucesso."
-      });
-      setIsEditing(false);
-      onRefresh();
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o nome do arquivo.",
-        variant: "destructive"
-      });
-    }
-  });
-  
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const response = await apiRequest('DELETE', `/api/csv-imports/${id}`);
-      return response;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Importação removida",
-        description: "Histórico de importação CSV foi removido com sucesso."
-      });
-      onRefresh();
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Não foi possível remover o histórico de importação.",
-        variant: "destructive"
-      });
-    }
-  });
-  
-  const handleSaveName = () => {
-    if (editedName.trim() && editedName !== importItem.fileName) {
-      updateNameMutation.mutate({ id: importItem.id, newName: editedName.trim() });
-    } else {
-      setIsEditing(false);
-    }
-  };
-  
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSaveName();
-    } else if (e.key === 'Escape') {
-      setEditedName(importItem.fileName);
-      setIsEditing(false);
-    }
-  };
-  
-  return (
-    <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg group hover:bg-slate-700/70 transition-colors">
-      <div className="flex items-center space-x-4 flex-1">
-        <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
-        <div className="flex-1">
-          {isEditing ? (
-            <input
-              type="text"
-              value={editedName}
-              onChange={(e) => setEditedName(e.target.value)}
-              onBlur={handleSaveName}
-              onKeyDown={handleKeyPress}
-              className="bg-slate-600 text-white px-2 py-1 rounded border border-slate-500 focus:border-blue-400 focus:outline-none w-full max-w-sm"
-              placeholder="Nome do arquivo"
-              autoFocus
-              data-testid={`input-edit-csv-${importItem.id}`}
-            />
-          ) : (
-            <div 
-              className="font-medium text-white cursor-pointer hover:text-blue-400 transition-colors"
-              onClick={() => setIsEditing(true)}
-              data-testid={`text-csv-name-${importItem.id}`}
-            >
-              {importItem.fileName}
-            </div>
-          )}
-          <div className="text-sm text-zinc-400">
-            {brokerInfo[importItem.broker as keyof typeof brokerInfo]?.name || importItem.broker}
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex items-center space-x-4">
-        <div className="text-right">
-          <div className="text-white">{importItem.tradesImported} trades</div>
-          <div className="text-xs text-zinc-400">
-            {new Date(importItem.createdAt).toLocaleDateString('pt-BR')}
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsEditing(true)}
-            className="h-8 w-8 p-0 text-zinc-400 hover:text-blue-400 hover:bg-slate-600"
-            disabled={isEditing}
-            data-testid={`button-edit-csv-${importItem.id}`}
-          >
-            <Edit3 className="h-4 w-4" />
-          </Button>
-          
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 text-zinc-400 hover:text-red-400 hover:bg-slate-600"
-                data-testid={`button-delete-csv-${importItem.id}`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-slate-800 border-zinc-800">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-white">Remover Importação CSV</AlertDialogTitle>
-                <AlertDialogDescription className="text-slate-300">
-                  Tem certeza que deseja remover o histórico da importação "{importItem.fileName}"?<br/>
-                  <br/>
-                  <strong>Atenção:</strong> Isso removerá apenas o histórico de importação, mas os trades já importados permanecerão no sistema.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="bg-slate-700 border-zinc-700 text-white hover:bg-slate-600">
-                  Cancelar
-                </AlertDialogCancel>
-                <AlertDialogAction 
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                  onClick={() => deleteMutation.mutate(importItem.id)}
-                  data-testid={`button-confirm-delete-csv-${importItem.id}`}
-                >
-                  Remover
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Dashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1098,9 +939,9 @@ export default function Dashboard() {
           <TabsTrigger value="consolidated" className="data-[state=active]:bg-slate-700">Consolidado</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+        <TabsContent value="overview" className="space-y-6">
           {/* Main Metrics Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <MetricCard
               title="Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
@@ -1135,7 +976,7 @@ export default function Dashboard() {
           </div>
 
           {/* Performance Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -1255,7 +1096,7 @@ export default function Dashboard() {
 
         <TabsContent value="insights" className="space-y-6">
           {/* Main Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <MetricCard
               title="Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
@@ -1310,7 +1151,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
                   <div className="text-2xl font-bold text-white mb-1">
                     {(() => {
@@ -1378,8 +1219,8 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="brokers" className="space-y-4 sm:space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <TabsContent value="brokers" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {Object.entries(brokerInfo).map(([broker, info]) => {
               const trades = (tradesByBroker as any)[broker] || [];
               const stats = calculateBrokerStats(trades);
@@ -1403,19 +1244,19 @@ export default function Dashboard() {
                   </CardHeader>
                   
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                    <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
-                        <div className="text-lg sm:text-2xl font-bold text-white">{stats.totalTrades}</div>
+                        <div className="text-2xl font-bold text-white">{stats.totalTrades}</div>
                         <div className="text-xs text-zinc-400">Trades</div>
                       </div>
                       <div>
-                        <div className={`text-lg sm:text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                           {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                         </div>
                         <div className="text-xs text-zinc-400">Resultado</div>
                       </div>
                       <div>
-                        <div className="text-lg sm:text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                        <div className="text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
                         <div className="text-xs text-zinc-400">Win Rate</div>
                       </div>
                     </div>
@@ -1439,7 +1280,7 @@ export default function Dashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="imports" className="space-y-3 sm:space-y-4">
+        <TabsContent value="imports" className="space-y-4">
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white">Histórico de Importações CSV</CardTitle>
@@ -1453,16 +1294,23 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-4">
                   {(csvImports as any[]).map((importItem: any) => (
-                    <CSVImportItem 
-                      key={importItem.id} 
-                      importItem={importItem} 
-                      brokerInfo={brokerInfo}
-                      onRefresh={() => {
-                        queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'] });
-                        queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
-                        queryClient.invalidateQueries({ queryKey: ['/api/trades/by-broker'] });
-                      }}
-                    />
+                    <div key={importItem.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                        <div>
+                          <div className="font-medium text-white">{importItem.fileName}</div>
+                          <div className="text-sm text-zinc-400">
+                            {brokerInfo[importItem.broker as keyof typeof brokerInfo]?.name || importItem.broker}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-white">{importItem.tradesImported} trades</div>
+                        <div className="text-xs text-zinc-400">
+                          {new Date(importItem.createdAt).toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -1470,9 +1318,9 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="consolidated" className="space-y-4 sm:space-y-6">
+        <TabsContent value="consolidated" className="space-y-6">
           {/* Resumo Consolidado */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <MetricCard
               title="Resultado Total Consolidado"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
