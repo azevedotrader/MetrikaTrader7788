@@ -223,7 +223,8 @@ export function processClearCSV(
 ): InsertTrade[] {
   console.log(`🏦 Processando CSV da Clear: ${rows.length} linhas`);
   
-  const trades: InsertTrade[] = [];
+  // Primeiro, processar todos os trades e coletar com valor acumulado
+  const tradesComAcumulado: Array<{trade: InsertTrade, totalAcumulado: number}> = [];
   
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -234,14 +235,51 @@ export function processClearCSV(
     try {
       const trade = processClearTradeRow(row, userId);
       if (trade) {
-        trades.push(trade);
+        const totalAcumulado = parseFloat(trade.resultado);
+        tradesComAcumulado.push({ trade, totalAcumulado });
       }
     } catch (error) {
       console.log(`❌ Erro na linha ${i}:`, error);
     }
   }
   
-  console.log(`✅ Clear: ${trades.length} trades processados`);
+  // Ordenar trades por data para garantir sequência correta
+  tradesComAcumulado.sort((a, b) => {
+    const dataA = new Date(a.trade.dataHora).getTime();
+    const dataB = new Date(b.trade.dataHora).getTime();
+    return dataA - dataB;
+  });
+  
+  // Calcular resultados individuais
+  const trades: InsertTrade[] = [];
+  let previousTotal = 0;
+  
+  for (let i = 0; i < tradesComAcumulado.length; i++) {
+    const { trade, totalAcumulado } = tradesComAcumulado[i];
+    
+    // Calcular resultado individual (diferença do acumulado)
+    let resultadoIndividual: number;
+    if (i === 0) {
+      // Primeiro trade: usar o valor total como resultado individual
+      resultadoIndividual = totalAcumulado;
+    } else {
+      // Trades subsequentes: calcular a diferença
+      resultadoIndividual = totalAcumulado - previousTotal;
+    }
+    
+    // Atualizar o trade com o resultado individual
+    trade.resultado = resultadoIndividual.toString();
+    
+    console.log(`💰 Trade ${i + 1} (${trade.ativo}): Total acumulado = R$ ${totalAcumulado.toFixed(2)}, Resultado individual = R$ ${resultadoIndividual.toFixed(2)}`);
+    
+    // Salvar o total atual para o próximo cálculo
+    previousTotal = totalAcumulado;
+    
+    trades.push(trade);
+  }
+  
+  console.log(`✅ Clear: ${trades.length} trades processados com resultados individuais calculados`);
+  console.log(`📊 Resultado total final: R$ ${previousTotal.toFixed(2)}`);
   
   return trades;
 }
