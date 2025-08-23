@@ -71,30 +71,36 @@ const DATE_FORMATS = [
  */
 function detectDelimiter(csvText: string): string {
   const delimiters = [";", ",", "\t", "|"];
-  const lines = csvText.split("\n").slice(0, 5).filter(line => line.trim());
+  const lines = csvText.split("\n").slice(0, 10).filter(line => line.trim());
   
   let bestDelimiter = ",";
-  let maxConsistency = 0;
+  let maxScore = 0;
+
+  console.log(`🔍 Analisando ${lines.length} linhas para detectar delimitador...`);
 
   for (const delimiter of delimiters) {
     const counts = lines.map(line => line.split(delimiter).length);
     
     if (counts.length === 0) continue;
     
-    // Verificar consistência: todas as linhas devem ter o mesmo número de campos
+    // Calcular estatísticas
+    const maxCount = Math.max(...counts);
+    const minCount = Math.min(...counts);
     const avgCount = counts.reduce((a, b) => a + b, 0) / counts.length;
-    const variance = counts.reduce((sum, count) => sum + Math.pow(count - avgCount, 2), 0) / counts.length;
     
-    // Preferir delimitadores com maior número de campos e menor variância
-    const consistency = avgCount / (variance + 1);
+    // Score baseado em: número médio de campos, consistência entre linhas
+    const consistency = minCount === maxCount ? 1 : (avgCount - 1) / (maxCount - minCount + 1);
+    const score = avgCount * consistency;
     
-    if (consistency > maxConsistency && avgCount > 1) {
-      maxConsistency = consistency;
+    console.log(`  ${delimiter === '\t' ? '\\t' : delimiter}: ${avgCount.toFixed(1)} campos médios, consistência: ${consistency.toFixed(2)}, score: ${score.toFixed(2)}`);
+    
+    if (score > maxScore && avgCount >= 2) {
+      maxScore = score;
       bestDelimiter = delimiter;
     }
   }
 
-  console.log(`🔍 Delimitador detectado: "${bestDelimiter}" (consistência: ${maxConsistency.toFixed(2)})`);
+  console.log(`🎯 Delimitador escolhido: "${bestDelimiter === '\t' ? '\\t' : bestDelimiter}" (score: ${maxScore.toFixed(2)})`);
   return bestDelimiter;
 }
 
@@ -125,38 +131,58 @@ function detectEncoding(filePath: string): string {
  * Localiza a linha do cabeçalho real (pode haver metadados antes)
  */
 function findHeaderRow(lines: string[], delimiter: string): number {
-  for (let i = 0; i < Math.min(lines.length, 10); i++) {
-    const fields = lines[i].split(delimiter).map(f => f.trim().toLowerCase());
+  console.log(`📋 Procurando cabeçalho em ${lines.length} linhas com delimitador "${delimiter}"`);
+  
+  for (let i = 0; i < Math.min(lines.length, 15); i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    const fields = line.split(delimiter).map(f => f.trim().toLowerCase());
+    
+    console.log(`  Linha ${i + 1}: ${fields.length} campos - "${fields.slice(0, 3).join(', ')}..."`);
     
     // Procurar por indicadores de cabeçalho de trading
     const tradingIndicators = [
       'ativo', 'symbol', 'instrumento', 'ticket', 'pair',
-      'abertura', 'open', 'entrada', 'start',
-      'fechamento', 'close', 'saida', 'end',
-      'quantidade', 'volume', 'size', 'lots',
+      'abertura', 'open', 'entrada', 'start', 'data',
+      'fechamento', 'close', 'saida', 'end', 'tempo',
+      'quantidade', 'volume', 'size', 'lots', 'qtd',
       'preco', 'price', 'valor', 'cotacao',
-      'resultado', 'profit', 'pnl', 'gain', 'loss'
+      'resultado', 'profit', 'pnl', 'gain', 'loss', 'total',
+      'lado', 'side', 'tipo', 'type', 'compra', 'venda'
     ];
     
     const matchCount = fields.filter(field => 
       tradingIndicators.some(indicator => field.includes(indicator))
     ).length;
     
-    // Se encontrou pelo menos 2 indicadores de trading, é provavelmente o cabeçalho
-    if (matchCount >= 2 && fields.length >= 3) {
-      console.log(`📋 Cabeçalho encontrado na linha ${i + 1} (${matchCount} indicadores)`);
+    console.log(`    Indicadores encontrados: ${matchCount} (${fields.filter(field => 
+      tradingIndicators.some(indicator => field.includes(indicator))
+    ).join(', ')})`);
+    
+    // Se encontrou pelo menos 3 indicadores de trading e tem pelo menos 5 campos, é o cabeçalho
+    if (matchCount >= 3 && fields.length >= 5) {
+      console.log(`✅ Cabeçalho encontrado na linha ${i + 1} (${matchCount} indicadores, ${fields.length} campos)`);
+      return i;
+    }
+    
+    // Para CSVs da Clear: se tem "ativo" e pelo menos 10 campos, é o cabeçalho
+    if (fields.includes('ativo') && fields.length >= 10) {
+      console.log(`✅ Cabeçalho Clear encontrado na linha ${i + 1} (${fields.length} campos)`);
       return i;
     }
   }
   
-  // Fallback: primeira linha com mais de 2 campos
-  for (let i = 0; i < Math.min(lines.length, 5); i++) {
-    if (lines[i].split(delimiter).length >= 3) {
-      console.log(`📋 Usando linha ${i + 1} como cabeçalho (fallback)`);
+  // Fallback: primeira linha com mais de 5 campos (provavelmente cabeçalho real)
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const fields = lines[i].split(delimiter);
+    if (fields.length >= 5) {
+      console.log(`⚠️ Usando linha ${i + 1} como cabeçalho (fallback: ${fields.length} campos)`);
       return i;
     }
   }
   
+  console.log(`⚠️ Usando linha 1 como último recurso`);
   return 0;
 }
 
@@ -309,25 +335,77 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
     const headerLine = lines[headerRowIndex];
     const headers = headerLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''));
     
-    if (headers.length < 3) {
-      return { valid: false, reason: "Cabeçalho deve ter pelo menos 3 colunas" };
+    console.log(`📋 Headers extraídos (${headers.length}): [${headers.slice(0, 5).join(', ')}...]`);
+    
+    if (headers.length < 2) {
+      return { valid: false, reason: `Cabeçalho deve ter pelo menos 2 colunas, encontradas ${headers.length}: [${headers.join(', ')}]` };
     }
     
     // 4. Identificar colunas de data obrigatórias
     const dateColumns = findDateColumns(headers);
     
+    // Modo flexível: se não encontrar colunas de data, apenas avisar mas não rejeitar
     if (!dateColumns.openColumn || !dateColumns.closeColumn) {
       const missingColumns = [];
       if (!dateColumns.openColumn) missingColumns.push('Abertura');
       if (!dateColumns.closeColumn) missingColumns.push('Fechamento');
       
-      return { 
-        valid: false, 
-        reason: `Arquivo inválido: trades sem colunas '${missingColumns.join("' e '")}' válidas. Colunas encontradas: ${headers.join(', ')}` 
+      console.log(`⚠️ Aviso: colunas de data não encontradas - ${missingColumns.join(' e ')}`);
+      
+      // Para CSVs da Clear ou outros formatos especializados, prosseguir mesmo assim
+      const hasSpecialFormat = headers.some(h => 
+        h.toLowerCase().includes('ativo') || 
+        h.toLowerCase().includes('abertura') ||
+        h.toLowerCase().includes('fechamento') ||
+        h.toLowerCase().includes('total')
+      );
+      
+      if (hasSpecialFormat) {
+        console.log(`📊 Formato especializado detectado, prosseguindo...`);
+        // Prosseguir sem validação de datas para formatos especiais
+      } else {
+        return { 
+          valid: false, 
+          reason: `Arquivo inválido: trades sem colunas '${missingColumns.join("' e '")}' válidas. Colunas encontradas: ${headers.join(', ')}` 
+        };
+      }
+    }
+    
+    // 5. Para formatos especializados, retornar válido sem validação detalhada
+    const hasSpecialFormat = headers.some(h => 
+      h.toLowerCase().includes('ativo') || 
+      h.toLowerCase().includes('abertura') ||
+      h.toLowerCase().includes('fechamento') ||
+      h.toLowerCase().includes('total')
+    );
+    
+    if (hasSpecialFormat && (!dateColumns.openColumn || !dateColumns.closeColumn)) {
+      console.log(`✅ Formato especializado validado - prosseguindo sem validação de datas`);
+      
+      // Parse apenas para extrair dados básicos
+      const parseResult = Papa.parse(csvContent, {
+        delimiter: delimiter,
+        header: false,
+        skipEmptyLines: true
+      });
+      
+      const dataRows = parseResult.data.slice(headerRowIndex + 1);
+      const normalizedRows = dataRows.map((row: any[]) => {
+        const normalizedRow: any = {};
+        for (let j = 0; j < Math.min(headers.length, row.length); j++) {
+          normalizedRow[headers[j]] = row[j];
+        }
+        return normalizedRow;
+      });
+      
+      return {
+        valid: true,
+        headers: headers,
+        rows: normalizedRows.slice(0, 5) // Retornar apenas amostra
       };
     }
     
-    // 5. Parse com PapaParse principal
+    // 6. Parse com PapaParse principal para validação completa
     let parseResult: Papa.ParseResult<any>;
     
     try {
@@ -367,7 +445,7 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
       });
     }
     
-    // 6. Processar dados parseados
+    // 7. Processar dados parseados
     const dataRows = parseResult.data.slice(headerRowIndex + 1);
     
     return new Promise((resolve) => {
