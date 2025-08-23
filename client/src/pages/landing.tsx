@@ -65,19 +65,20 @@ export default function Landing() {
                 Contato
               </a>
             </nav>
-            <div className="space-x-4">
+            <div className="flex space-x-2 sm:space-x-4">
               <Button 
                 variant="ghost" 
                 onClick={() => setShowLogin(true)}
-                className="text-slate-300 hover:text-white"
+                className="text-slate-300 hover:text-white text-sm sm:text-base px-2 sm:px-4"
               >
                 Entrar
               </Button>
               <Button 
                 onClick={() => setShowRegister(true)}
-                className="gradient-purple-blue hover:opacity-90 transition-opacity"
+                className="gradient-purple-blue hover:opacity-90 transition-opacity text-sm sm:text-base px-2 sm:px-4"
               >
-                Começar Agora
+                <span className="hidden sm:inline">Começar Agora</span>
+                <span className="sm:hidden">Começar</span>
               </Button>
             </div>
           </div>
@@ -85,7 +86,7 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-32 overflow-hidden">
+      <section className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-slate-900 to-indigo-900/40"></div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/15 via-transparent to-transparent"></div>
         
@@ -96,26 +97,27 @@ export default function Landing() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Announcement Banner */}
-          <div className="text-center mb-12">
-            <Badge className="gradient-emerald-blue text-white px-6 py-3 text-sm font-semibold animate-glow">
-              ✨ Novo: Integração com Gate.io + 3 Corretoras
+          <div className="text-center mb-8 sm:mb-12">
+            <Badge className="gradient-emerald-blue text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold animate-glow">
+              <span className="hidden sm:inline">✨ Novo: Integração com Gate.io + 3 Corretoras</span>
+              <span className="sm:hidden">✨ Novo: Integração Gate.io</span>
             </Badge>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
-              <h1 className="font-display text-6xl md:text-8xl font-bold mb-10 leading-tight">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-6 sm:mb-8 lg:mb-10 leading-tight">
                 <span className="text-white">O Fim das</span>
                 <span className="gradient-text block animate-pulse-slow">Planilhas</span>
                 <span className="text-white">de Trading</span>
               </h1>
               
-              <p className="font-body text-2xl md:text-3xl text-slate-200 mb-8 leading-relaxed">
+              <p className="font-body text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 mb-6 sm:mb-8 leading-relaxed">
                 A única plataforma que analisa seus trades automaticamente e revela 
                 <span className="text-emerald-400 font-bold"> os padrões que geram lucro</span>
               </p>
               
-              <div className="flex flex-wrap gap-4 mb-8 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8 justify-center lg:justify-start">
                 <div className="flex items-center space-x-2 text-slate-300">
                   <CheckCircle className="w-5 h-5 text-green-400" />
                   <span>Import automático de trades</span>
@@ -126,11 +128,11 @@ export default function Landing() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-6 mb-16 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12 sm:mb-16 justify-center lg:justify-start">
                 <Button 
                   size="lg"
                   onClick={() => setShowRegister(true)}
-                  className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-10 py-5 text-xl font-bold animate-glow"
+                  className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-6 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-bold animate-glow"
                 >
                   Começar Grátis
                   <ArrowRight className="w-6 h-6 ml-3" />
@@ -138,7 +140,7 @@ export default function Landing() {
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-10 py-5 text-xl font-semibold backdrop-blur-sm"
+                  className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-semibold backdrop-blur-sm"
                 >
                   Ver Demo
                 </Button>
@@ -296,7 +298,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 problem: "Planilhas Desatualizadas",
@@ -516,7 +518,7 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section id="precos" className="py-28 bg-gradient-to-br from-slate-900 via-emerald-900/15 to-slate-900 relative overflow-hidden">
+      <section id="precos" className="py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-emerald-900/15 to-slate-900 relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute top-20 left-10 w-40 h-40 gradient-emerald-blue rounded-full opacity-10 blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-32 h-32 gradient-teal rounded-full opacity-10 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
@@ -526,23 +528,23 @@ export default function Landing() {
             <Badge className="gradient-emerald-blue text-white px-6 py-3 text-base font-semibold mb-8 animate-glow">
               Planos e Preços
             </Badge>
-            <h2 className="font-display text-5xl md:text-7xl font-bold mb-8">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 sm:mb-8">
               <span className="text-white">Escolha o Plano</span>
               <span className="gradient-text block animate-pulse-slow">Perfeito para Você</span>
             </h2>
-            <p className="font-body text-2xl text-slate-200 max-w-4xl mx-auto">
+            <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200 max-w-4xl mx-auto">
               Transforme sua análise de trading hoje mesmo. Cancele quando quiser.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {/* Plano Starter */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Trader Starter</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Trader Starter</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-4xl font-bold text-white">R$ 29,90</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 29,90</span>
                     <span className="text-slate-400 ml-2">/mês</span>
                   </div>
                   <p className="text-slate-400">7 dias grátis</p>
@@ -573,12 +575,12 @@ export default function Landing() {
             </Card>
 
             {/* Plano Pro - Destaque */}
-            <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative transform scale-110 shadow-2xl animate-glow">
-              <CardContent className="p-8">
+            <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative sm:transform sm:scale-110 shadow-2xl animate-glow">
+              <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Trader Pro</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Trader Pro</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-4xl font-bold text-white">R$ 49,90</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 49,90</span>
                     <span className="text-slate-400 ml-2">/mês</span>
                   </div>
                   <p className="text-slate-300">Anual: R$ 42/mês</p>
@@ -612,11 +614,11 @@ export default function Landing() {
 
             {/* Plano Black */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">Trader Black</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Trader Black</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-4xl font-bold text-white">R$ 97</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 97</span>
                     <span className="text-slate-400 ml-2">/mês</span>
                   </div>
                   <p className="text-slate-400">Anual: R$ 80/mês</p>
@@ -660,16 +662,16 @@ export default function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-28 bg-gradient-to-br from-slate-900/80 to-emerald-900/20">
+      <section className="py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-900/80 to-emerald-900/20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <h2 className="font-display text-5xl md:text-6xl font-bold text-white mb-6">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               O Que Nossos Traders Dizem
             </h2>
-            <p className="font-body text-2xl text-slate-200">Resultados reais de quem usa o Métrika todos os dias</p>
+            <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200">Resultados reais de quem usa o Métrika todos os dias</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 name: "Carlos Rodrigues",
@@ -694,7 +696,7 @@ export default function Landing() {
               }
             ].map((testimonial, index) => (
               <Card key={index} className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-emerald-600/30 hover:border-emerald-500/50 transition-all duration-300 hover:scale-105">
-                <CardContent className="p-8">
+                <CardContent className="p-6 sm:p-8">
                   <div className="flex text-gold-400 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="w-5 h-5 fill-current" />
@@ -722,10 +724,10 @@ export default function Landing() {
       </section>
 
       {/* Features Grid Section */}
-      <section id="recursos" className="py-24 bg-gradient-to-r from-slate-800/30 to-slate-900/30">
+      <section id="recursos" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-slate-800/30 to-slate-900/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
               <span className="gradient-text">Recursos Exclusivos</span>
               <span className="text-white block">que Farão a Diferença</span>
             </h2>
@@ -734,7 +736,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {[
               {
                 icon: Zap,
@@ -800,20 +802,20 @@ export default function Landing() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-32 bg-gradient-to-br from-emerald-900/40 via-slate-900 to-indigo-900/40 border-t border-emerald-800/30 relative overflow-hidden">
+      <section className="py-20 sm:py-24 lg:py-32 bg-gradient-to-br from-emerald-900/40 via-slate-900 to-indigo-900/40 border-t border-emerald-800/30 relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute top-10 left-10 w-64 h-64 gradient-emerald-blue rounded-full opacity-10 blur-3xl animate-float"></div>
         <div className="absolute bottom-10 right-10 w-48 h-48 gradient-teal rounded-full opacity-10 blur-3xl animate-float" style={{ animationDelay: '3s' }}></div>
         
         <div className="relative max-w-6xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-emerald-600/30 rounded-3xl p-16 shadow-2xl animate-glow">
-            <h2 className="font-display text-5xl md:text-7xl font-bold mb-10 leading-tight">
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-8 sm:mb-10 leading-tight">
               <span className="text-white">Pare de Perder</span>
               <span className="gradient-text block animate-pulse-slow">Dinheiro por Falta</span>
               <span className="text-white">de Dados</span>
             </h2>
             
-            <p className="font-body text-2xl md:text-3xl text-slate-200 mb-12 max-w-4xl mx-auto">
+            <p className="font-body text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 mb-8 sm:mb-12 max-w-4xl mx-auto">
               95% dos traders falham porque não sabem o que estão fazendo errado. 
               <span className="text-emerald-400 font-bold"> Você não precisa ser parte dessa estatística.</span>
             </p>
@@ -843,7 +845,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 onClick={() => setShowRegister(true)}
-                className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-16 py-6 text-2xl font-bold animate-glow"
+                className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-8 sm:px-12 lg:px-16 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-bold animate-glow"
               >
                 Transformar Meus Resultados Agora
                 <ArrowRight className="w-7 h-7 ml-4" />
@@ -851,7 +853,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 variant="outline"
-                className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-12 py-6 text-2xl font-semibold backdrop-blur-sm"
+                className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-8 lg:px-12 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-semibold backdrop-blur-sm"
               >
                 Ver Demo Completa
               </Button>
