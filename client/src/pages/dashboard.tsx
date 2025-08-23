@@ -479,7 +479,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
             }
             className={`text-xs md:text-sm ${
               selectedPeriod === filter.key
-                ? "bg-purple-600 hover:bg-purple-700 text-white"
+                ? "bg-green-600 hover:bg-green-700 text-white"
                 : "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
             }`}
           >
