@@ -2,8 +2,8 @@
  * Validador CSV Robusto para Trading
  * ===================================
  * 
- * Sistema completo de validação que garante que CSVs contêm trades válidos
- * com datas de abertura e fechamento obrigatórias
+ * Sistema de validação estrito que EXIGE que CSVs contenham trades válidos
+ * com datas de abertura e fechamento obrigatórias na mesma linha
  */
 
 import Papa from 'papaparse';
@@ -23,13 +23,6 @@ export interface CSVValidationResult {
   rows?: any[];
 }
 
-interface DetectedFormat {
-  delimiter: string;
-  encoding: string;
-  headerRowIndex: number;
-  hasMetadata: boolean;
-}
-
 interface DateColumns {
   openColumn: string | null;
   closeColumn: string | null;
@@ -38,23 +31,31 @@ interface DateColumns {
 }
 
 /**
- * Nomes possíveis para colunas de abertura
+ * Nomes possíveis para colunas de abertura (EXATO como especificado)
  */
 const OPEN_COLUMN_NAMES = [
-  'abertura', 'open time', 'open', 'entry time', 'data abertura', 'opening time',
-  'data_abertura', 'hora_abertura', 'entrada', 'inicio', 'start', 'begin'
+  'abertura', 
+  'open time', 
+  'open', 
+  'entry time', 
+  'data abertura', 
+  'opening time'
 ];
 
 /**
- * Nomes possíveis para colunas de fechamento
+ * Nomes possíveis para colunas de fechamento (EXATO como especificado)
  */
 const CLOSE_COLUMN_NAMES = [
-  'fechamento', 'close time', 'close', 'exit time', 'data fechamento', 'closing time',
-  'data_fechamento', 'hora_fechamento', 'saida', 'fim', 'end', 'finish'
+  'fechamento', 
+  'close time', 
+  'close', 
+  'exit time', 
+  'data fechamento', 
+  'closing time'
 ];
 
 /**
- * Formatos de data aceitos (usando dayjs)
+ * Formatos de data aceitos (EXATO como especificado)
  */
 const DATE_FORMATS = [
   'DD/MM/YYYY HH:mm:ss',
@@ -76,23 +77,23 @@ function detectDelimiter(csvText: string): string {
   let bestDelimiter = ",";
   let maxScore = 0;
 
-  console.log(`🔍 Analisando ${lines.length} linhas para detectar delimitador...`);
+  console.log(`🔍 Testando delimitadores em ${lines.length} linhas...`);
 
   for (const delimiter of delimiters) {
     const counts = lines.map(line => line.split(delimiter).length);
     
     if (counts.length === 0) continue;
     
-    // Calcular estatísticas
+    // Calcular consistência
     const maxCount = Math.max(...counts);
     const minCount = Math.min(...counts);
     const avgCount = counts.reduce((a, b) => a + b, 0) / counts.length;
     
-    // Score baseado em: número médio de campos, consistência entre linhas
-    const consistency = minCount === maxCount ? 1 : (avgCount - 1) / (maxCount - minCount + 1);
+    // Score baseado em consistência entre linhas
+    const consistency = minCount === maxCount ? 1 : (minCount / maxCount);
     const score = avgCount * consistency;
     
-    console.log(`  ${delimiter === '\t' ? '\\t' : delimiter}: ${avgCount.toFixed(1)} campos médios, consistência: ${consistency.toFixed(2)}, score: ${score.toFixed(2)}`);
+    console.log(`  ${delimiter === '\t' ? '\\t' : delimiter}: ${avgCount.toFixed(1)} campos, consistência: ${(consistency * 100).toFixed(0)}%`);
     
     if (score > maxScore && avgCount >= 2) {
       maxScore = score;
@@ -100,7 +101,7 @@ function detectDelimiter(csvText: string): string {
     }
   }
 
-  console.log(`🎯 Delimitador escolhido: "${bestDelimiter === '\t' ? '\\t' : bestDelimiter}" (score: ${maxScore.toFixed(2)})`);
+  console.log(`✅ Delimitador escolhido: "${bestDelimiter === '\t' ? '\\t' : bestDelimiter}"`);
   return bestDelimiter;
 }
 
@@ -112,11 +113,14 @@ function detectEncoding(filePath: string): string {
     const buffer = fs.readFileSync(filePath, { encoding: null }).slice(0, 1024);
     const detected = chardet.detect(buffer);
     
-    // Mapear para encodings suportados
     if (typeof detected === 'string') {
       if (detected.toLowerCase().includes('utf')) return 'utf8';
-      if (detected.toLowerCase().includes('iso-8859') || detected.toLowerCase().includes('latin')) return 'latin1';
-      if (detected.toLowerCase().includes('windows') || detected.toLowerCase().includes('cp1252')) return 'latin1';
+      if (detected.toLowerCase().includes('iso-8859') || 
+          detected.toLowerCase().includes('latin') ||
+          detected.toLowerCase().includes('windows') || 
+          detected.toLowerCase().includes('cp1252')) {
+        return 'latin1';
+      }
     }
     
     console.log(`📁 Encoding detectado: ${detected} → usando utf8`);
@@ -131,7 +135,7 @@ function detectEncoding(filePath: string): string {
  * Localiza a linha do cabeçalho real (pode haver metadados antes)
  */
 function findHeaderRow(lines: string[], delimiter: string): number {
-  console.log(`📋 Procurando cabeçalho em ${lines.length} linhas com delimitador "${delimiter}"`);
+  console.log(`📋 Procurando cabeçalho real em ${lines.length} linhas...`);
   
   for (let i = 0; i < Math.min(lines.length, 15); i++) {
     const line = lines[i].trim();
@@ -139,55 +143,41 @@ function findHeaderRow(lines: string[], delimiter: string): number {
     
     const fields = line.split(delimiter).map(f => f.trim().toLowerCase());
     
-    console.log(`  Linha ${i + 1}: ${fields.length} campos - "${fields.slice(0, 3).join(', ')}..."`);
-    
-    // Procurar por indicadores de cabeçalho de trading
+    // Indicadores de cabeçalho de trading
     const tradingIndicators = [
       'ativo', 'symbol', 'instrumento', 'ticket', 'pair',
-      'abertura', 'open', 'entrada', 'start', 'data',
-      'fechamento', 'close', 'saida', 'end', 'tempo',
+      'abertura', 'open', 'entrada', 'entry', 'data',
+      'fechamento', 'close', 'saida', 'exit',
       'quantidade', 'volume', 'size', 'lots', 'qtd',
       'preco', 'price', 'valor', 'cotacao',
-      'resultado', 'profit', 'pnl', 'gain', 'loss', 'total',
-      'lado', 'side', 'tipo', 'type', 'compra', 'venda'
+      'resultado', 'profit', 'pnl', 'lucro', 'prejuizo'
     ];
     
     const matchCount = fields.filter(field => 
       tradingIndicators.some(indicator => field.includes(indicator))
     ).length;
     
-    console.log(`    Indicadores encontrados: ${matchCount} (${fields.filter(field => 
-      tradingIndicators.some(indicator => field.includes(indicator))
-    ).join(', ')})`);
-    
-    // Se encontrou pelo menos 3 indicadores de trading e tem pelo menos 5 campos, é o cabeçalho
+    // Se encontrou pelo menos 3 indicadores e tem pelo menos 5 campos
     if (matchCount >= 3 && fields.length >= 5) {
-      console.log(`✅ Cabeçalho encontrado na linha ${i + 1} (${matchCount} indicadores, ${fields.length} campos)`);
-      return i;
-    }
-    
-    // Para CSVs da Clear: se tem "ativo" e pelo menos 10 campos, é o cabeçalho
-    if (fields.includes('ativo') && fields.length >= 10) {
-      console.log(`✅ Cabeçalho Clear encontrado na linha ${i + 1} (${fields.length} campos)`);
+      console.log(`✅ Cabeçalho encontrado na linha ${i + 1}`);
       return i;
     }
   }
   
-  // Fallback: primeira linha com mais de 5 campos (provavelmente cabeçalho real)
+  // Fallback: primeira linha com mais de 5 campos
   for (let i = 0; i < Math.min(lines.length, 10); i++) {
     const fields = lines[i].split(delimiter);
     if (fields.length >= 5) {
-      console.log(`⚠️ Usando linha ${i + 1} como cabeçalho (fallback: ${fields.length} campos)`);
+      console.log(`⚠️ Usando linha ${i + 1} como cabeçalho (fallback)`);
       return i;
     }
   }
   
-  console.log(`⚠️ Usando linha 1 como último recurso`);
   return 0;
 }
 
 /**
- * Identifica colunas de abertura e fechamento
+ * Identifica colunas de abertura e fechamento (OBRIGATÓRIAS)
  */
 function findDateColumns(headers: string[]): DateColumns {
   const normalizedHeaders = headers.map(h => h.toLowerCase().trim());
@@ -200,24 +190,30 @@ function findDateColumns(headers: string[]): DateColumns {
   // Procurar coluna de abertura
   for (let i = 0; i < normalizedHeaders.length; i++) {
     const header = normalizedHeaders[i];
-    if (OPEN_COLUMN_NAMES.some(name => header.includes(name))) {
-      openColumn = headers[i];
-      openIndex = i;
-      break;
+    for (const name of OPEN_COLUMN_NAMES) {
+      if (header === name.toLowerCase() || header.includes(name.toLowerCase())) {
+        openColumn = headers[i];
+        openIndex = i;
+        break;
+      }
     }
+    if (openColumn) break;
   }
   
   // Procurar coluna de fechamento
   for (let i = 0; i < normalizedHeaders.length; i++) {
     const header = normalizedHeaders[i];
-    if (CLOSE_COLUMN_NAMES.some(name => header.includes(name))) {
-      closeColumn = headers[i];
-      closeIndex = i;
-      break;
+    for (const name of CLOSE_COLUMN_NAMES) {
+      if (header === name.toLowerCase() || header.includes(name.toLowerCase())) {
+        closeColumn = headers[i];
+        closeIndex = i;
+        break;
+      }
     }
+    if (closeColumn) break;
   }
   
-  console.log(`📅 Colunas de data: Abertura="${openColumn}" (${openIndex}), Fechamento="${closeColumn}" (${closeIndex})`);
+  console.log(`📅 Colunas de data: Abertura="${openColumn}" (índice ${openIndex}), Fechamento="${closeColumn}" (índice ${closeIndex})`);
   
   return { openColumn, closeColumn, openIndex, closeIndex };
 }
@@ -229,18 +225,17 @@ function parseTradeDate(dateStr: string): dayjs.Dayjs | null {
   if (!dateStr || typeof dateStr !== 'string') return null;
   
   const cleaned = dateStr.trim();
-  if (!cleaned) return null;
+  if (!cleaned || cleaned === '') return null;
   
+  // Tentar cada formato especificado
   for (const format of DATE_FORMATS) {
-    const parsed = dayjs(cleaned, format, true);
+    const parsed = dayjs(cleaned, format, true); // strict mode
     if (parsed.isValid()) {
       return parsed;
     }
   }
   
-  // Fallback: tentar parsing nativo do dayjs
-  const fallback = dayjs(cleaned);
-  return fallback.isValid() ? fallback : null;
+  return null;
 }
 
 /**
@@ -250,6 +245,7 @@ function parseNumber(value: string): number {
   if (!value || typeof value !== 'string') return 0;
   
   const cleaned = value.trim().replace(/[^\d.,\-+]/g, '');
+  if (!cleaned) return 0;
   
   // Detectar formato brasileiro (1.234,56) vs americano (1,234.56)
   const lastComma = cleaned.lastIndexOf(',');
@@ -267,10 +263,12 @@ function parseNumber(value: string): number {
 /**
  * Valida se uma linha representa um trade válido
  */
-function validateTradeRow(row: any[], dateColumns: DateColumns, headers: string[]): boolean {
+function validateTradeRow(row: any[], dateColumns: DateColumns): { valid: boolean; openDate?: dayjs.Dayjs; closeDate?: dayjs.Dayjs } {
   const { openIndex, closeIndex } = dateColumns;
   
-  if (openIndex === -1 || closeIndex === -1) return false;
+  if (openIndex === -1 || closeIndex === -1) {
+    return { valid: false };
+  }
   
   const openDateStr = row[openIndex];
   const closeDateStr = row[closeIndex];
@@ -279,23 +277,22 @@ function validateTradeRow(row: any[], dateColumns: DateColumns, headers: string[
   const closeDate = parseTradeDate(closeDateStr);
   
   if (!openDate || !closeDate) {
-    console.log(`❌ Datas inválidas: "${openDateStr}" → ${openDate?.isValid()}, "${closeDateStr}" → ${closeDate?.isValid()}`);
-    return false;
+    return { valid: false };
   }
   
+  // Verificar se open <= close
   if (openDate.isAfter(closeDate)) {
-    console.log(`❌ Data de abertura após fechamento: ${openDate.format()} > ${closeDate.format()}`);
-    return false;
+    return { valid: false };
   }
   
-  return true;
+  return { valid: true, openDate, closeDate };
 }
 
 /**
  * Função principal de validação e parsing
  */
 export async function validateAndParseCSV(filePathOrContent: string | File): Promise<CSVValidationResult> {
-  console.log(`🔍 Iniciando validação CSV...`);
+  console.log(`\n🔍 === INICIANDO VALIDAÇÃO CSV ESTRITA ===`);
   
   try {
     let csvContent: string;
@@ -328,84 +325,44 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
     const headerRowIndex = findHeaderRow(lines, delimiter);
     
     if (headerRowIndex >= lines.length) {
-      return { valid: false, reason: "Não foi possível localizar cabeçalho válido" };
+      return { valid: false, reason: "Não foi possível localizar cabeçalho válido no arquivo" };
     }
     
     // 3. Extrair cabeçalhos
     const headerLine = lines[headerRowIndex];
     const headers = headerLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''));
     
-    console.log(`📋 Headers extraídos (${headers.length}): [${headers.slice(0, 5).join(', ')}...]`);
+    console.log(`📋 Cabeçalhos encontrados: [${headers.join(', ')}]`);
     
     if (headers.length < 2) {
-      return { valid: false, reason: `Cabeçalho deve ter pelo menos 2 colunas, encontradas ${headers.length}: [${headers.join(', ')}]` };
-    }
-    
-    // 4. Identificar colunas de data obrigatórias
-    const dateColumns = findDateColumns(headers);
-    
-    // Modo flexível: se não encontrar colunas de data, apenas avisar mas não rejeitar
-    if (!dateColumns.openColumn || !dateColumns.closeColumn) {
-      const missingColumns = [];
-      if (!dateColumns.openColumn) missingColumns.push('Abertura');
-      if (!dateColumns.closeColumn) missingColumns.push('Fechamento');
-      
-      console.log(`⚠️ Aviso: colunas de data não encontradas - ${missingColumns.join(' e ')}`);
-      
-      // Para CSVs da Clear ou outros formatos especializados, prosseguir mesmo assim
-      const hasSpecialFormat = headers.some(h => 
-        h.toLowerCase().includes('ativo') || 
-        h.toLowerCase().includes('abertura') ||
-        h.toLowerCase().includes('fechamento') ||
-        h.toLowerCase().includes('total')
-      );
-      
-      if (hasSpecialFormat) {
-        console.log(`📊 Formato especializado detectado, prosseguindo...`);
-        // Prosseguir sem validação de datas para formatos especiais
-      } else {
-        return { 
-          valid: false, 
-          reason: `Arquivo inválido: trades sem colunas '${missingColumns.join("' e '")}' válidas. Colunas encontradas: ${headers.join(', ')}` 
-        };
-      }
-    }
-    
-    // 5. Para formatos especializados, retornar válido sem validação detalhada
-    const hasSpecialFormat = headers.some(h => 
-      h.toLowerCase().includes('ativo') || 
-      h.toLowerCase().includes('abertura') ||
-      h.toLowerCase().includes('fechamento') ||
-      h.toLowerCase().includes('total')
-    );
-    
-    if (hasSpecialFormat && (!dateColumns.openColumn || !dateColumns.closeColumn)) {
-      console.log(`✅ Formato especializado validado - prosseguindo sem validação de datas`);
-      
-      // Parse apenas para extrair dados básicos
-      const parseResult = Papa.parse(csvContent, {
-        delimiter: delimiter,
-        header: false,
-        skipEmptyLines: true
-      });
-      
-      const dataRows = parseResult.data.slice(headerRowIndex + 1);
-      const normalizedRows = (dataRows as any[]).map((row: any[]) => {
-        const normalizedRow: any = {};
-        for (let j = 0; j < Math.min(headers.length, row.length); j++) {
-          normalizedRow[headers[j]] = row[j];
-        }
-        return normalizedRow;
-      });
-      
-      return {
-        valid: true,
-        headers: headers,
-        rows: normalizedRows.slice(0, 5) // Retornar apenas amostra
+      return { 
+        valid: false, 
+        reason: `Cabeçalho inválido: deve ter pelo menos 2 colunas, encontradas apenas ${headers.length}` 
       };
     }
     
-    // 6. Parse com PapaParse principal para validação completa
+    // 4. VALIDAÇÃO OBRIGATÓRIA: Identificar colunas de data
+    const dateColumns = findDateColumns(headers);
+    
+    // REJEITAR se não tiver AMBAS as colunas de data
+    if (!dateColumns.openColumn || !dateColumns.closeColumn) {
+      const missingColumns = [];
+      if (!dateColumns.openColumn) {
+        missingColumns.push(`'Abertura' (procurei: ${OPEN_COLUMN_NAMES.join(', ')})`);
+      }
+      if (!dateColumns.closeColumn) {
+        missingColumns.push(`'Fechamento' (procurei: ${CLOSE_COLUMN_NAMES.join(', ')})`);
+      }
+      
+      return { 
+        valid: false, 
+        reason: `Arquivo inválido: trades sem colunas ${missingColumns.join(' e ')} válidas. Colunas encontradas: ${headers.join(', ')}` 
+      };
+    }
+    
+    console.log(`✅ Colunas de data obrigatórias encontradas!`);
+    
+    // 5. Parse com PapaParse
     let parseResult: Papa.ParseResult<any>;
     
     try {
@@ -418,10 +375,10 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
       });
       
       if (parseResult.errors.length > 0) {
-        console.log(`⚠️ Avisos PapaParse:`, parseResult.errors.slice(0, 3));
+        console.log(`⚠️ Avisos do parser:`, parseResult.errors.slice(0, 3));
       }
     } catch (papaError) {
-      console.log(`⚠️ PapaParse falhou, tentando csv-parse...`);
+      console.log(`⚠️ PapaParse falhou, tentando csv-parse como fallback...`);
       
       // Fallback para csv-parse
       return new Promise((resolve) => {
@@ -434,10 +391,11 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
         
         parser.on('data', (row) => rows.push(row));
         parser.on('error', (err) => {
-          resolve({ valid: false, reason: `Erro no parsing: ${err.message}` });
+          resolve({ valid: false, reason: `Erro no parsing do CSV: ${err.message}` });
         });
         parser.on('end', () => {
-          processRows(rows.slice(headerRowIndex + 1), headers, dateColumns, resolve);
+          const result = processRows(rows.slice(headerRowIndex + 1), headers, dateColumns);
+          resolve(result);
         });
         
         parser.write(csvContent);
@@ -445,83 +403,106 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
       });
     }
     
-    // 7. Processar dados parseados
+    // 6. Processar e validar dados
     const dataRows = parseResult.data.slice(headerRowIndex + 1);
-    
-    return new Promise((resolve) => {
-      processRows(dataRows, headers, dateColumns, resolve);
-    });
+    return processRows(dataRows, headers, dateColumns);
     
   } catch (error) {
     console.error(`❌ Erro na validação:`, error);
-    return { valid: false, reason: `Erro interno: ${error}` };
+    return { valid: false, reason: `Erro interno na validação: ${error}` };
   }
 }
 
 /**
- * Processa as linhas de dados e valida
+ * Processa as linhas de dados e valida ESTRITAMENTE
  */
 function processRows(
   dataRows: any[], 
   headers: string[], 
-  dateColumns: DateColumns, 
-  resolve: (result: CSVValidationResult) => void
-) {
-  console.log(`📊 Validando ${dataRows.length} linhas de dados...`);
+  dateColumns: DateColumns
+): CSVValidationResult {
+  console.log(`\n📊 Validando ${dataRows.length} linhas de dados...`);
   
   if (dataRows.length === 0) {
-    resolve({ valid: false, reason: "CSV não contém dados de trades" });
-    return;
+    return { valid: false, reason: "CSV não contém dados de trades (apenas cabeçalho)" };
   }
   
-  // 7. Validar cada linha de trade
+  // Validar CADA linha de trade
   let validTrades = 0;
+  let invalidTrades = 0;
   const normalizedRows: any[] = [];
+  const errors: string[] = [];
   
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i];
+    const lineNumber = i + 1;
     
     if (!Array.isArray(row) || row.length < headers.length) {
-      console.log(`⚠️ Linha ${i + 1}: estrutura inválida`);
+      // Linha com estrutura inválida - pular silenciosamente
       continue;
     }
     
-    // Validar datas obrigatórias
-    if (!validateTradeRow(row, dateColumns, headers)) {
-      console.log(`❌ Linha ${i + 1}: datas inválidas`);
-      resolve({ 
-        valid: false, 
-        reason: `Linha ${i + 1}: trade sem datas de 'Abertura' e 'Fechamento' válidas` 
-      });
-      return;
+    // VALIDAÇÃO ESTRITA: datas obrigatórias
+    const validation = validateTradeRow(row, dateColumns);
+    
+    if (!validation.valid) {
+      invalidTrades++;
+      const openDateStr = row[dateColumns.openIndex] || 'vazio';
+      const closeDateStr = row[dateColumns.closeIndex] || 'vazio';
+      
+      errors.push(`Linha ${lineNumber}: datas inválidas (Abertura: '${openDateStr}', Fechamento: '${closeDateStr}')`);
+      
+      // REJEITAR ARQUIVO se qualquer trade não tiver datas válidas
+      if (invalidTrades === 1) {
+        console.log(`❌ Trade inválido encontrado na linha ${lineNumber}`);
+        return { 
+          valid: false, 
+          reason: `Linha ${lineNumber}: trade sem datas de 'Abertura' e 'Fechamento' válidas. Abertura: '${openDateStr}', Fechamento: '${closeDateStr}'` 
+        };
+      }
+      continue;
     }
     
-    // Normalizar números
+    // Normalizar a linha com conversão de números
     const normalizedRow: any = {};
     for (let j = 0; j < headers.length; j++) {
       const header = headers[j];
       let value = row[j];
       
-      // Tentar converter números
-      if (typeof value === 'string' && /^[\d.,\-+\s]+$/.test(value.trim())) {
-        const numValue = parseNumber(value);
-        if (!isNaN(numValue)) {
-          value = numValue;
+      // Converter números se possível
+      if (typeof value === 'string' && value.trim() !== '') {
+        // Verificar se parece um número
+        if (/^[\d.,\-+\s]+$/.test(value.trim())) {
+          const numValue = parseNumber(value);
+          if (!isNaN(numValue)) {
+            value = numValue;
+          }
         }
       }
       
       normalizedRow[header] = value;
     }
     
+    // Adicionar datas parseadas para facilitar processamento posterior
+    normalizedRow._openDate = validation.openDate?.toISOString();
+    normalizedRow._closeDate = validation.closeDate?.toISOString();
+    
     normalizedRows.push(normalizedRow);
     validTrades++;
   }
   
-  console.log(`✅ Validação concluída: ${validTrades} trades válidos`);
+  if (validTrades === 0) {
+    return { 
+      valid: false, 
+      reason: "Nenhum trade válido encontrado. Todos os trades devem ter datas de Abertura e Fechamento válidas." 
+    };
+  }
   
-  resolve({
+  console.log(`✅ Validação concluída: ${validTrades} trades válidos de ${dataRows.length} linhas`);
+  
+  return {
     valid: true,
     headers: headers,
     rows: normalizedRows
-  });
+  };
 }
