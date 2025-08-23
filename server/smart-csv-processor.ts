@@ -725,80 +725,76 @@ function extractAndValidatePrices(row: any): {
 }
 
 /**
- * Converte string para número, lidando com formato brasileiro
+ * Parser de números BRASILEIRO PRIMEIRO - versão otimizada
  */
 function parseNumericValue(str: string): number | null {
-  if (!str) return null;
+  if (!str || typeof str !== 'string') return null;
   
   const original = str;
   
-  // Limpar string inicial
+  // Limpar string
   let cleaned = str.trim()
     .replace(/[R$\s]/gi, '') // Remove R$, espaços
-    .replace(/[^\d.,\-+]/g, ''); // Mantém apenas números, vírgula, ponto, sinal
+    .replace(/[^\d.,\-+]/g, ''); // Só números, vírgula, ponto, sinal
   
   if (!cleaned) {
     console.log(`    📊 Número: "${original}" → vazio → null`);
     return null;
   }
   
-  // Detectar formato: brasileiro (1.234,56) ou americano (1,234.56)
-  const lastComma = cleaned.lastIndexOf(',');
-  const lastDot = cleaned.lastIndexOf('.');
+  // DETECÇÃO BRASIL-FIRST
   
-  let normalized = cleaned;
-  let detectedFormat = 'desconhecido';
-  
-  if (lastComma > lastDot) {
-    // Formato brasileiro: ponto para milhares, vírgula para decimal
-    // Ex: 1.234,56 → 1234.56
-    detectedFormat = 'brasileiro';
-    normalized = cleaned.replace(/\./g, '').replace(',', '.');
-  } else if (lastDot > lastComma) {
-    // Formato americano: vírgula para milhares, ponto para decimal  
-    // Ex: 1,234.56 → 1234.56
-    detectedFormat = 'americano';
-    normalized = cleaned.replace(/,/g, '');
-  } else if (lastComma === -1 && lastDot > 0) {
-    // Apenas ponto, verificar se é decimal ou milhares
-    const afterDot = cleaned.substring(lastDot + 1);
-    if (afterDot.length === 3) {
-      // Provavelmente separador de milhares
-      // Ex: 1.234 → 1234
-      detectedFormat = 'milhares (ponto)';
-      normalized = cleaned.replace(/\./g, '');
-    } else {
-      // É decimal
-      // Ex: 123.45 → 123.45
-      detectedFormat = 'decimal (ponto)';
-      normalized = cleaned;
-    }
-  } else if (lastDot === -1 && lastComma > 0) {
-    // Apenas vírgula, verificar se é decimal ou milhares
-    const afterComma = cleaned.substring(lastComma + 1);
-    if (afterComma.length === 3) {
-      // Provavelmente separador de milhares
-      // Ex: 1,234 → 1234
-      detectedFormat = 'milhares (vírgula)';
-      normalized = cleaned.replace(/,/g, '');
-    } else {
-      // É decimal
-      // Ex: 123,45 → 123.45
-      detectedFormat = 'decimal (vírgula)';
-      normalized = cleaned.replace(',', '.');
-    }
-  } else {
-    // Número simples sem separadores
-    detectedFormat = 'simples';
-    normalized = cleaned;
+  // 1. Padrão brasileiro clássico: 1.234,56
+  if (/^\d{1,3}(\.\d{3})*(,\d{1,2})$/.test(cleaned)) {
+    const result = parseFloat(cleaned.replace(/\./g, '').replace(',', '.'));
+    console.log(`    📊 BR1: "${original}" → ${result} (padrão brasileiro 1.234,56)`);
+    return result;
   }
   
-  const num = parseFloat(normalized);
-  const result = isNaN(num) || !isFinite(num) ? null : num;
+  // 2. Decimal brasileiro simples: 123,45
+  if (/^\d+,\d{1,2}$/.test(cleaned)) {
+    const result = parseFloat(cleaned.replace(',', '.'));
+    console.log(`    📊 BR2: "${original}" → ${result} (decimal brasileiro 123,45)`);
+    return result;
+  }
   
-  console.log(`    📊 Número: "${original}" → limpo: "${cleaned}" → formato: ${detectedFormat} → normalizado: "${normalized}" → final: ${result}`);
+  // 3. Milhares brasileiro: 1.234 (sem centavos)
+  if (/^\d{1,3}(\.\d{3})+$/.test(cleaned)) {
+    const result = parseFloat(cleaned.replace(/\./g, ''));
+    console.log(`    📊 BR3: "${original}" → ${result} (milhares brasileiro 1.234)`);
+    return result;
+  }
   
-  return result;
+  // 4. Vírgula como decimal (assumir brasileiro se não há ponto)
+  if (/^\d+,\d+$/.test(cleaned) && !cleaned.includes('.')) {
+    const result = parseFloat(cleaned.replace(',', '.'));
+    console.log(`    📊 BR4: "${original}" → ${result} (vírgula decimal)`);
+    return result;
+  }
+  
+  // 5. Formato americano apenas se claramente americano
+  if (/^\d{1,3}(,\d{3})*\.\d{1,2}$/.test(cleaned)) {
+    const result = parseFloat(cleaned.replace(/,/g, ''));
+    console.log(`    📊 US: "${original}" → ${result} (americano)`);
+    return result;
+  }
+  
+  // 6. Número simples (sem separadores)
+  if (/^\d+$/.test(cleaned)) {
+    const result = parseFloat(cleaned);
+    console.log(`    📊 Simple: "${original}" → ${result} (simples)`);
+    return result;
+  }
+  
+  // 7. Números decimais simples com ponto (ex: 123.45)
+  if (/^\d+\.\d{1,2}$/.test(cleaned) && !cleaned.includes(',')) {
+    const result = parseFloat(cleaned);
+    console.log(`    📊 Decimal: "${original}" → ${result} (decimal com ponto)`);
+    return result;
+  }
+  
+  console.log(`    📊 Invalid: "${original}" → null (não reconhecido)`);
+  return null;
 }
 
 /**
