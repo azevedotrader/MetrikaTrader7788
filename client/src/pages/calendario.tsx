@@ -1,23 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
-import { DiaryModal } from "@/components/ui/diary-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, BarChart3, TrendingUp } from "lucide-react";
-import { useState } from "react";
-import type { Trade, DiaryEntry } from "@shared/schema";
 
 export default function CalendarioPage() {
-  const [isDiaryModalOpen, setIsDiaryModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<DiaryEntry | undefined>(undefined);
-  
-  const queryClient = useQueryClient();
   const { data: trades = [] } = useQuery({ queryKey: ['/api/trades'] });
   const { data: calendarData = [] } = useQuery<any[]>({ queryKey: ['/api/trades/calendar'] });
-
-  const handleDiaryModalSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ["/api/diary"] });
-  };
 
   return (
     <div className="space-y-6 pb-8">
@@ -68,12 +56,7 @@ export default function CalendarioPage() {
       {/* Calendário Principal */}
       <TradingCalendar 
         trades={trades} 
-        calendarData={(calendarData as any[]) || []} 
-        onDateClick={(date: Date, entry?: DiaryEntry) => {
-          setSelectedDate(date);
-          setSelectedDiaryEntry(entry);
-          setIsDiaryModalOpen(true);
-        }}
+        calendarData={calendarData || []}
       />
 
       {/* Dicas de Análise */}
@@ -109,14 +92,6 @@ export default function CalendarioPage() {
         </CardContent>
       </Card>
 
-      {/* Modal do Diário */}
-      <DiaryModal
-        isOpen={isDiaryModalOpen}
-        onClose={() => setIsDiaryModalOpen(false)}
-        selectedDate={selectedDate}
-        entry={selectedDiaryEntry}
-        onSuccess={handleDiaryModalSuccess}
-      />
     </div>
   );
 }
