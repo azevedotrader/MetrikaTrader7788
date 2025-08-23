@@ -608,41 +608,53 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       
       {/* Resumo abaixo do gráfico */}
       {chartData.length > 0 && (
-        <div className="mt-6 grid grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
             <div className="text-xs text-zinc-400 mb-1">Total de Lucros</div>
-            <div className="text-xl font-bold text-green-400">
-              R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            <div className="text-sm md:text-xl font-bold text-green-400 truncate">
+              R$ {window.innerWidth < 768 ? 
+                chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+              }
             </div>
             <div className="text-xs text-zinc-500 mt-1">
               {chartData.reduce((sum, d) => sum + d.positiveCount, 0)} trades
             </div>
           </div>
           
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+          <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
             <div className="text-xs text-zinc-400 mb-1">Total de Perdas</div>
-            <div className="text-xl font-bold text-red-400">
-              -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            <div className="text-sm md:text-xl font-bold text-red-400 truncate">
+              -R$ {window.innerWidth < 768 ? 
+                chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+              }
             </div>
             <div className="text-xs text-zinc-500 mt-1">
               {chartData.reduce((sum, d) => sum + d.negativeCount, 0)} trades
             </div>
           </div>
           
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+          <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
             <div className="text-xs text-zinc-400 mb-1">Resultado Período</div>
-            <div className={`text-xl font-bold ${chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            <div className={`text-sm md:text-xl font-bold truncate ${chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              R$ {window.innerWidth < 768 ? 
+                chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+              }
             </div>
             <div className="text-xs text-zinc-500 mt-1">
-              Taxa: {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(1)}% acerto
+              {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(1)}% acerto
             </div>
           </div>
           
-          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+          <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
             <div className="text-xs text-zinc-400 mb-1">Média por Dia</div>
-            <div className={`text-xl font-bold ${(chartData[chartData.length - 1]?.accumulated / chartData.length) >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
-              R$ {(chartData[chartData.length - 1]?.accumulated / chartData.length || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            <div className={`text-sm md:text-xl font-bold truncate ${(chartData[chartData.length - 1]?.accumulated / chartData.length) >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
+              R$ {window.innerWidth < 768 ? 
+                (chartData[chartData.length - 1]?.accumulated / chartData.length || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                (chartData[chartData.length - 1]?.accumulated / chartData.length || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+              }
             </div>
             <div className="text-xs text-zinc-500 mt-1">
               {chartData.length} períodos
