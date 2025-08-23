@@ -13,6 +13,7 @@ import Papa from 'papaparse';
 import { InsertTrade } from '@shared/schema';
 import fs from 'fs';
 import { interpretStatisticsAsTradesWithCorrectValues } from './smart-statistics-interpreter';
+import { isClearCSV, processClearCSV } from './clear-csv-mapper';
 
 export interface SmartCSVResult {
   trades: InsertTrade[];
@@ -172,6 +173,22 @@ export async function processSmartCSV(
     result.summary.totalRows = parseResult.data.length;
     console.log(`📊 Linhas totais encontradas: ${result.summary.totalRows}`);
 
+    // 3.5. Verificar se é CSV da Clear (corretora brasileira)
+    const headers = parseResult.meta.fields?.join(';') || '';
+    const isClear = isClearCSV(headers);
+    
+    if (isClear) {
+      console.log(`🏦 CSV DA CLEAR DETECTADO - processamento especializado`);
+      const clearTrades = processClearCSV(parseResult.data, userId);
+      
+      result.trades = clearTrades;
+      result.summary.tradesFound = clearTrades.length;
+      result.summary.detectedBroker = 'clear';
+      result.summary.detectedMarket = 'b3';
+      
+      return result;
+    }
+
     // 4. Detectar broker/mercado baseado nas colunas e dados
     const detectedInfo = detectBrokerAndMarket(parseResult.data, parseResult.meta.fields || []);
     result.summary.detectedBroker = detectedInfo.broker;
@@ -244,7 +261,7 @@ export async function processSmartCSV(
       // Aplicar filtros textuais antigos
       for (let index = 0; index < parseResult.data.length; index++) {
         const row = parseResult.data[index];
-        const rowStr = Object.values(row).join(' ').toLowerCase();
+        const rowStr = Object.values(row as Record<string, any>).join(' ').toLowerCase();
         
         // Filtros textuais antigos
         const skipPatterns = [
