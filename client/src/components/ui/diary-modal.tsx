@@ -29,6 +29,11 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  console.log('=== DIARY MODAL DEBUG ===');
+  console.log('Modal aberto:', isOpen);
+  console.log('Entry recebida:', entry);
+  console.log('Selected date:', selectedDate);
+
   // Corrigir formatação da data para evitar problemas de timezone
   const formatDateForInput = (date: Date) => {
     const year = date.getFullYear();
