@@ -76,7 +76,7 @@ export function SmartReprocessButton({
       disabled={isProcessing || reprocessMutation.isPending}
       variant="outline"
       size="sm"
-      className="gap-2"
+      className="gap-2 hidden"
       data-testid="button-smart-reprocess"
     >
       {isProcessing || reprocessMutation.isPending ? (
