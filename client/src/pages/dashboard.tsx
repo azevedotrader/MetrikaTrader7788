@@ -450,7 +450,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
           <AreaChart data={chartData} margin={{ 
             top: window.innerWidth < 768 ? 0 : 10, 
             right: window.innerWidth < 768 ? -8 : 30, 
-            left: window.innerWidth < 768 ? -8 : 50, 
+            left: window.innerWidth < 768 ? 0 : 50, 
             bottom: window.innerWidth < 768 ? 25 : 60 
           }}>
             <defs>
@@ -1283,7 +1283,7 @@ export default function Dashboard() {
                 Performance por Período
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-2 md:px-6">
+            <CardContent className="pl-0 pr-2 md:px-6">
               <PerformancePeriodChart trades={filteredTrades} />
             </CardContent>
           </Card>
