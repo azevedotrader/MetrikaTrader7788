@@ -41,6 +41,7 @@ export default function NovoTrade() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   const [currentTradeData, setCurrentTradeData] = useState<any>(null);
+  const [analysisMethod, setAnalysisMethod] = useState<'ai' | 'traditional'>('ai');
   
   // Take/Stop calculation state
   const [tradeResult, setTradeResult] = useState<"take" | "loss" | "">("");
@@ -143,7 +144,7 @@ export default function NovoTrade() {
 
   // CSV upload mutation
   const uploadMutation = useMutation({
-    mutationFn: ({ file, broker, name, description }: { file: File; broker: string; name: string; description: string }) => {
+    mutationFn: ({ file, broker, name, description, useTraditional }: { file: File; broker: string; name: string; description: string; useTraditional: boolean }) => {
       const userId = localStorage.getItem('user-id');
       if (!userId) {
         throw new Error("Usuário não autenticado");
@@ -152,6 +153,7 @@ export default function NovoTrade() {
       const formData = new FormData();
       formData.append('csvFile', file);
       formData.append('broker', broker);
+      formData.append('useTraditional', useTraditional.toString());
       formData.append('csvName', name || file.name);
       formData.append('csvDescription', description || 'Importação sem descrição');
       
@@ -180,8 +182,8 @@ export default function NovoTrade() {
       setCsvDescription("");
       
       toast({
-        title: "Importação concluída",
-        description: `${data.tradesImported} trades importados com sucesso.\n📊 Método: ${data.methodUsed || data.processingMethod || 'Não especificado'}`
+        title: "Importação concluída com sucesso!",
+        description: `🎉 ${data.tradesImported} trades importados\n📊 Método: ${data.methodUsed || data.processingMethod || (analysisMethod === 'ai' ? 'IA' : 'Tradicional')}`
       });
     },
     onError: (error: any) => {
@@ -290,7 +292,8 @@ export default function NovoTrade() {
       file: csvFile, 
       broker: selectedBroker,
       name: csvName,
-      description: csvDescription
+      description: csvDescription,
+      useTraditional: analysisMethod === 'traditional'
     });
   };
 
@@ -701,6 +704,26 @@ export default function NovoTrade() {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium mb-2 text-charcoal-300">Método de Análise</label>
+                  <Select value={analysisMethod} onValueChange={(value: 'ai' | 'traditional') => setAnalysisMethod(value)}>
+                    <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                      <SelectValue placeholder="Escolha o método de processamento" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                      <SelectItem value="ai">🤖 Análise Inteligente (IA)</SelectItem>
+                      <SelectItem value="traditional">⚡ Método Tradicional (Rápido)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="mt-2 text-xs text-charcoal-400">
+                    {analysisMethod === 'ai' ? (
+                      <p>✨ <strong>IA:</strong> Mais inteligente, interpreta qualquer formato, mas pode ser mais lento</p>
+                    ) : (
+                      <p>⚡ <strong>Tradicional:</strong> Mais rápido e consistente, ideal para formatos padrão</p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">Arquivo CSV</label>
                   <Input
                     type="file"
@@ -733,12 +756,12 @@ export default function NovoTrade() {
                   {uploadMutation.isPending ? (
                     <>
                       <Upload className="w-4 h-4 mr-2 animate-spin" />
-                      Importando...
+                      {analysisMethod === 'ai' ? 'Analisando com IA...' : 'Processando...'}
                     </>
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      Importar Trades
+                      {analysisMethod === 'ai' ? '🤖 Importar com IA' : '⚡ Importar Rápido'}
                     </>
                   )}
                 </Button>
