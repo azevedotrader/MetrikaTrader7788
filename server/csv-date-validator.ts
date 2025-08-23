@@ -129,7 +129,7 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
     // Detectar encoding automaticamente e ler arquivo
     const buffer = fs.readFileSync(filePath);
     const detectedEncoding = chardet.detect(buffer);
-    let encoding = 'utf-8';
+    let encoding: BufferEncoding = 'utf-8';
     
     if (detectedEncoding) {
       if (detectedEncoding.toLowerCase().includes('utf')) {
@@ -210,7 +210,7 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
     console.log(`🔍 Modo universal: procurando datas em TODAS as colunas disponíveis...`);
     
     let bestDateColumn: string | null = null;
-    let bestValidationResult = { validDatesCount: 0, dateFormat: null };
+    let bestValidationResult = { validDatesCount: 0, dateFormat: null as string | null };
     
     // Primeiro, tentar colunas com nomes suspeitos de data
     const dateColumn = findDateColumn(headers);
@@ -240,7 +240,55 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
       }
     }
     
-    // 3. Se só tem 1 coluna, pode ser problema de delimitador - buscar padrões de data no conteúdo bruto
+    // 3. Detectar relatórios de performance (não são trades válidos)
+    const performanceKeywords = [
+      'saldo líquido', 'saldo total', 'lucro bruto', 'prejuízo bruto',
+      'fator de lucro', 'número total de operações', 'percentual de operações',
+      'operações vencedoras', 'operações perdedoras', 'média de lucro',
+      'maior operação', 'maior sequência', 'patrimônio necessário',
+      'retorno no capital', 'drawdown', 'declínio máximo',
+      'data inicial', 'data final', 'conta', 'titular'
+    ];
+    
+    // Verificar se é um arquivo de relatório de performance
+    const contentLowerCase = csvContent.toLowerCase();
+    let performanceKeywordCount = 0;
+    
+    for (const keyword of performanceKeywords) {
+      if (contentLowerCase.includes(keyword)) {
+        performanceKeywordCount++;
+      }
+    }
+    
+    // Se encontrou muitas palavras-chave de performance, é um relatório
+    if (performanceKeywordCount >= 5) {
+      console.log(`❌ Arquivo identificado como relatório de performance (${performanceKeywordCount} palavras-chave encontradas)`);
+      console.log(`🔍 Palavras-chave detectadas: ${performanceKeywords.filter(kw => contentLowerCase.includes(kw)).join(', ')}`);
+      
+      return {
+        isValid: false,
+        dateColumn: null,
+        dateFormat: null,
+        validDatesCount: 0,
+        totalRows: data.length,
+        error: `❌ ARQUIVO DE RELATÓRIO DE PERFORMANCE DETECTADO\n\n` +
+               `Este arquivo contém apenas estatísticas gerais de performance, não trades individuais.\n\n` +
+               `📊 Dados encontrados:\n` +
+               `• Saldo líquido/total, lucro/prejuízo bruto\n` +
+               `• Número total de operações, percentuais\n` +
+               `• Drawdowns, patrimônio, etc.\n\n` +
+               `💡 Para importar trades, você precisa de um arquivo com:\n` +
+               `• Data/hora de cada trade individual\n` +
+               `• Ativo, preço, quantidade, resultado\n` +
+               `• Uma linha por operação realizada\n\n` +
+               `📁 Procure por arquivos como:\n` +
+               `• "Histórico de Operações"\n` +
+               `• "Extrato de Trades"\n` +
+               `• "Relatório de Negócios"`
+      };
+    }
+    
+    // 4. Se só tem 1 coluna, pode ser problema de delimitador - buscar padrões de data no conteúdo bruto
     if (headers.length === 1 && bestValidationResult.validDatesCount === 0) {
       console.log(`⚠️ Apenas 1 coluna detectada. Procurando padrões de data no conteúdo bruto...`);
       
@@ -277,7 +325,7 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
       }
     }
     
-    // 4. Decisão final: só rejeitar se REALMENTE não houver datas
+    // 5. Decisão final: só rejeitar se REALMENTE não houver datas
     if (bestValidationResult.validDatesCount === 0) {
       const availableHeaders = headers.join(', ');
       return {
@@ -302,12 +350,12 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
 
     console.log(`✅ Datas encontradas na coluna: "${bestDateColumn}"`);
 
-    // 4. Usar o melhor resultado encontrado
+    // 5. Usar o melhor resultado encontrado
     const validationResult = bestValidationResult;
     
     // Esta verificação foi movida para cima, pois agora verificamos todas as colunas
 
-    // 5. Sucesso na validação
+    // 6. Sucesso na validação
     console.log(`✅ Validação de datas concluída com sucesso!`);
     console.log(`   Coluna: "${bestDateColumn}"`);
     console.log(`   Formato detectado: "${validationResult.dateFormat}"`);

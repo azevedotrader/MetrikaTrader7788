@@ -189,6 +189,7 @@ export default function NovoTrade() {
       
       // Detectar erro de validação de datas
       if (error.message?.includes("não contém datas de trades válidas") || 
+          error.message?.includes("ARQUIVO DE RELATÓRIO DE PERFORMANCE DETECTADO") ||
           error.details?.reason === "MISSING_VALID_DATES") {
         
         const errorDetails = error.details || {};
