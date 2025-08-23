@@ -439,19 +439,19 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       )}
       
       {chartData.length === 0 ? (
-        <div className="h-[280px] md:h-[380px] flex items-center justify-center text-zinc-400">
+        <div className="h-[320px] md:h-[380px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
             <BarChart3 className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">Nenhum trade no período selecionado</p>
           </div>
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 280 : 380}>
+        <ResponsiveContainer width="100%" height={window.innerWidth < 768 ? 320 : 380}>
           <AreaChart data={chartData} margin={{ 
-            top: 20, 
-            right: window.innerWidth < 768 ? 10 : 30, 
-            left: window.innerWidth < 768 ? 20 : 50, 
-            bottom: window.innerWidth < 768 ? 40 : 60 
+            top: 15, 
+            right: window.innerWidth < 768 ? 5 : 30, 
+            left: window.innerWidth < 768 ? 15 : 50, 
+            bottom: window.innerWidth < 768 ? 35 : 60 
           }}>
             <defs>
               <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
@@ -473,20 +473,20 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
             <XAxis 
               dataKey="period"
               stroke="#9CA3AF"
-              fontSize={window.innerWidth < 768 ? 9 : 11}
-              angle={window.innerWidth < 768 ? -45 : -45}
+              fontSize={window.innerWidth < 768 ? 8 : 11}
+              angle={-45}
               textAnchor="end"
-              height={window.innerWidth < 768 ? 60 : 80}
+              height={window.innerWidth < 768 ? 50 : 80}
               tick={{ fill: '#e2e8f0' }}
               axisLine={{ stroke: '#64748b', strokeWidth: 1 }}
             />
             
             <YAxis 
               stroke="#9CA3AF"
-              fontSize={window.innerWidth < 768 ? 10 : 12}
+              fontSize={window.innerWidth < 768 ? 9 : 12}
               tick={{ fill: '#cbd5e1' }}
               tickFormatter={(value) => window.innerWidth < 768 ? 
-                `${(value/1000).toFixed(1)}k` : 
+                `${(value/1000).toFixed(0)}k` : 
                 `R$ ${(value/1000).toFixed(1)}k`
               }
               domain={yAxisDomain}
@@ -514,36 +514,58 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
                 if (!active || !payload || !payload.length) return null;
                 
                 const data = payload[0].payload;
+                const isMobile = window.innerWidth < 768;
+                
                 return (
-                  <div className="bg-zinc-800 border border-zinc-600 rounded-lg p-3 shadow-xl">
-                    <p className="text-white font-bold mb-2">{label}</p>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between gap-4">
-                        <span className="text-green-400">✅ Lucros:</span>
-                        <span className="text-green-400 font-semibold">R$ {data.positive.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                  <div className={`bg-zinc-800 border border-zinc-600 rounded-lg shadow-xl ${
+                    isMobile ? 'p-2 text-xs max-w-[250px]' : 'p-3 text-sm max-w-[320px]'
+                  }`}>
+                    <p className={`text-white font-bold mb-2 ${isMobile ? 'text-xs truncate' : 'text-sm'}`}>
+                      {label}
+                    </p>
+                    <div className={`space-y-1 ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-green-400 truncate">✅ Lucros:</span>
+                        <span className="text-green-400 font-semibold shrink-0">
+                          R$ {isMobile ? 
+                            data.positive.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                            data.positive.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                          }
+                        </span>
                       </div>
-                      <div className="flex justify-between gap-4">
-                        <span className="text-red-400">❌ Perdas:</span>
-                        <span className="text-red-400 font-semibold">-R$ {data.negative.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-red-400 truncate">❌ Perdas:</span>
+                        <span className="text-red-400 font-semibold shrink-0">
+                          -R$ {isMobile ? 
+                            data.negative.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                            data.negative.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                          }
+                        </span>
                       </div>
                       <div className="border-t border-zinc-600 pt-1 mt-1">
-                        <div className="flex justify-between gap-4">
-                          <span className="text-zinc-300">Total Período:</span>
-                          <span className={`font-semibold ${data.total >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            R$ {data.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <div className="flex justify-between gap-2">
+                          <span className="text-zinc-300 truncate">Total:</span>
+                          <span className={`font-semibold shrink-0 ${data.total >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            R$ {isMobile ? 
+                              data.total.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                              data.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                            }
                           </span>
                         </div>
-                        <div className="flex justify-between gap-4">
-                          <span className="text-blue-400">📊 Acumulado:</span>
-                          <span className={`font-bold ${data.accumulated >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
-                            R$ {data.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <div className="flex justify-between gap-2">
+                          <span className="text-blue-400 truncate">📊 Acumulado:</span>
+                          <span className={`font-bold shrink-0 ${data.accumulated >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                            R$ {isMobile ? 
+                              data.accumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                              data.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                            }
                           </span>
                         </div>
                       </div>
-                      <div className="border-t border-zinc-600 pt-1 mt-1 text-xs text-zinc-400">
-                        <div>Trades positivos: {data.positiveCount}</div>
-                        <div>Trades negativos: {data.negativeCount}</div>
-                        <div>Total de trades: {data.totalCount}</div>
+                      <div className={`border-t border-zinc-600 pt-1 mt-1 text-zinc-400 ${
+                        isMobile ? 'text-xs' : 'text-xs'
+                      }`}>
+                        <div>Trades: {data.totalCount} ({data.positiveCount}✅/{data.negativeCount}❌)</div>
                       </div>
                     </div>
                   </div>
@@ -802,21 +824,21 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, icon: Icon, color = "text-white", subtitle }: MetricCardProps) {
   return (
-    <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
-      <CardHeader className="pb-2 md:pb-3">
+    <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors min-w-0">
+      <CardHeader className="pb-1 md:pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xs md:text-sm font-medium text-zinc-400 truncate pr-2">
+          <CardTitle className="text-xs md:text-sm font-medium text-zinc-400 truncate pr-1">
             {title}
           </CardTitle>
           <Icon className={`h-3 w-3 md:h-4 md:w-4 flex-shrink-0 ${color || 'text-zinc-400'}`} />
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className={`text-lg md:text-2xl font-bold ${color} truncate`}>
+      <CardContent className="pt-0 pb-2 md:pb-4">
+        <div className={`text-sm md:text-2xl font-bold ${color} truncate leading-tight`}>
           {value}
         </div>
         {subtitle && (
-          <p className="text-xs text-zinc-500 mt-1 hidden md:block">
+          <p className="text-xs text-zinc-500 mt-1 hidden md:block truncate">
             {subtitle}
           </p>
         )}
@@ -1136,10 +1158,13 @@ export default function Dashboard() {
 
         <TabsContent value="overview" className="space-y-4 md:space-y-6">
           {/* Main Metrics Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <MetricCard
               title="Rentabilidade Total"
-              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
+              value={`R$ ${window.innerWidth < 768 ? 
+                metrics.rentabilidadeTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) :
+                metrics.rentabilidadeTotal.toFixed(2)
+              }`}
               icon={DollarSign}
               color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
               subtitle="Resultado geral"
