@@ -308,6 +308,16 @@ export class DatabaseStorage implements IStorage {
     return updated || null;
   }
 
+  async updateCsvImportTradesCount(csvId: string, tradesImported: number): Promise<CsvImport | null> {
+    const [updated] = await db
+      .update(csvImports)
+      .set({ tradesImported })
+      .where(eq(csvImports.id, csvId))
+      .returning();
+
+    return updated || null;
+  }
+
   async deleteCsvImport(userId: string, csvId: string): Promise<boolean> {
     // Primeiro, buscar o CSV import para obter informações
     const csvImport = await db.select().from(csvImports)

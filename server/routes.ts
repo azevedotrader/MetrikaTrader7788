@@ -1553,7 +1553,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
       const savedTrades = await storage.createBulkTrades(result.trades, csvImportRecord.id);
 
-      // Update CSV import with final trade count (just update internally)
+      // Update CSV import with final trade count
+      await storage.updateCsvImportTradesCount(csvImportRecord.id, savedTrades.length);
       console.log(`📝 CSV import ${csvImportRecord.id} completed with ${savedTrades.length} trades`);
 
       // Clean up uploaded file
