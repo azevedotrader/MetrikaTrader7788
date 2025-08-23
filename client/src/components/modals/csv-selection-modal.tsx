@@ -14,6 +14,7 @@ interface CsvImport {
   id: string;
   broker: string;
   fileName: string;
+  displayName?: string;
   tradesImported: number;
   tradesSkipped: number;
   status: string;
@@ -103,7 +104,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
     // Guardar nome do arquivo selecionado
     const selectedCsv = csvImports.find(csv => csv.id === selectedCsvId);
     if (selectedCsv) {
-      setSelectedFileName(selectedCsv.fileName);
+      setSelectedFileName(selectedCsv.displayName || selectedCsv.fileName);
     }
 
     csvAnalysisMutation.mutate(selectedCsvId);
@@ -174,7 +175,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <h3 className="text-white font-medium">{csvImport.fileName}</h3>
+                              <h3 className="text-white font-medium">{csvImport.displayName || csvImport.fileName}</h3>
                               <Badge className={getBrokerColor(csvImport.broker)}>
                                 {getBrokerLabel(csvImport.broker)}
                               </Badge>
