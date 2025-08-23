@@ -1414,24 +1414,23 @@ export async function registerRoutes(app: Express): Promise<void> {
           // Forçar uso do sistema tradicional se OpenAI falhar
           const { processSmartCSV } = await import('./smart-csv-processor');
           result = await processSmartCSV(file.path, userId, broker);
-          result.summary.processingMethod = 'Sistema Tradicional (OpenAI indisponível)';
+          // Note: processingMethod will be added to summary later
           
           // Skip ChatGPT processing and go to saving
           const csvImport = await storage.createCsvImport({
             userId,
             fileName: file.originalname,
             displayName: req.body.csvName || file.originalname,
-            filePath: file.path,
             broker: result.summary.detectedBroker,
             tradesImported: result.trades.length,
-            processingMethod: result.summary.processingMethod,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            status: "completed",
+            tradesSkipped: result.summary.statisticsSkipped || 0,
+            errorMessage: null
           });
 
           if (result.trades.length > 0) {
             console.log(`💾 [${userId}] Inserindo ${result.trades.length} trades no banco com isolamento`);
-            await storage.createTrades(result.trades);
+            await storage.createBulkTrades(result.trades);
           }
 
           return res.json({

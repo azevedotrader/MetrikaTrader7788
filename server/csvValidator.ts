@@ -390,7 +390,7 @@ export async function validateAndParseCSV(filePathOrContent: string | File): Pro
       });
       
       const dataRows = parseResult.data.slice(headerRowIndex + 1);
-      const normalizedRows = dataRows.map((row: any[]) => {
+      const normalizedRows = (dataRows as any[]).map((row: any[]) => {
         const normalizedRow: any = {};
         for (let j = 0; j < Math.min(headers.length, row.length); j++) {
           normalizedRow[headers[j]] = row[j];
