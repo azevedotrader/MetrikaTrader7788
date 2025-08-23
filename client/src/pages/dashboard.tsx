@@ -33,7 +33,7 @@ import {
   Filter,
   CheckSquare
 } from "lucide-react";
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, ComposedChart } from 'recharts';
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
@@ -269,74 +269,108 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
 }
 
 // Performance Period Chart Component
-function PerformancePeriodChart({ metrics }: { metrics: any }) {
+function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   
   const getChartData = () => {
+    if (!trades.length) return [];
+    
+    const now = new Date();
+    let startDate: Date;
+    let groupBy: 'day' | 'week' | 'month';
+    
     switch (selectedPeriod) {
       case 'week':
-        return [
-          {
-            period: 'Semana',
-            label: 'Esta Semana',
-            value: metrics.rentabilidadeSemana,
-            x: 1
-          }
-        ];
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        groupBy = 'day';
+        break;
       case 'month':
-        return [
-          {
-            period: 'Mês',
-            label: 'Este Mês', 
-            value: metrics.rentabilidadeMes,
-            x: 1
-          }
-        ];
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        groupBy = 'day';
+        break;
       case 'year':
-        return [
-          {
-            period: 'Ano',
-            label: 'Este Ano',
-            value: metrics.rentabilidadeAno,
-            x: 1
-          }
-        ];
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        groupBy = 'month';
+        break;
       default:
-        return [
-          {
-            period: 'Semana',
-            label: 'Esta Semana',
-            value: metrics.rentabilidadeSemana,
-            x: 1
-          },
-          {
-            period: 'Mês',
-            label: 'Este Mês', 
-            value: metrics.rentabilidadeMes,
-            x: 2
-          },
-          {
-            period: 'Ano',
-            label: 'Este Ano',
-            value: metrics.rentabilidadeAno,
-            x: 3
-          }
-        ];
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        groupBy = 'day';
     }
+    
+    // Filtrar trades por período
+    const filteredTrades = trades.filter(trade => new Date(trade.dataHora) >= startDate);
+    
+    if (filteredTrades.length === 0) return [];
+    
+    // Ordenar trades por data
+    const sortedTrades = [...filteredTrades].sort((a, b) => 
+      new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime()
+    );
+    
+    // Agrupar trades por período
+    const groups = new Map<string, { trades: Trade[], date: Date }>();
+    
+    sortedTrades.forEach(trade => {
+      const tradeDate = new Date(trade.dataHora);
+      let key: string;
+      
+      if (groupBy === 'day') {
+        key = format(tradeDate, 'dd/MM', { locale: ptBR });
+      } else if (groupBy === 'week') {
+        key = `Sem ${format(startOfWeek(tradeDate), 'dd/MM', { locale: ptBR })}`;
+      } else {
+        key = format(tradeDate, 'MMM/yy', { locale: ptBR });
+      }
+      
+      if (!groups.has(key)) {
+        groups.set(key, { trades: [], date: tradeDate });
+      }
+      groups.get(key)!.trades.push(trade);
+    });
+    
+    // Criar dados do gráfico com valores individuais e acumulados
+    let accumulated = 0;
+    const chartData: any[] = [];
+    
+    Array.from(groups.entries()).forEach(([period, { trades: periodTrades }]) => {
+      const positives = periodTrades.filter(t => parseFloat(t.resultado || "0") > 0);
+      const negatives = periodTrades.filter(t => parseFloat(t.resultado || "0") < 0);
+      
+      const totalPositive = positives.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+      const totalNegative = negatives.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+      const periodTotal = totalPositive + totalNegative;
+      
+      accumulated += periodTotal;
+      
+      chartData.push({
+        period,
+        positive: totalPositive,
+        negative: Math.abs(totalNegative),
+        total: periodTotal,
+        accumulated,
+        positiveCount: positives.length,
+        negativeCount: negatives.length,
+        totalCount: periodTrades.length
+      });
+    });
+    
+    return chartData;
   };
 
   const chartData = getChartData();
-  const maxValue = Math.max(...chartData.map(d => Math.abs(d.value)));
-  const yAxisDomain = maxValue > 0 ? [-maxValue * 1.2, maxValue * 1.2] : [-100, 100];
+  const maxValue = Math.max(
+    ...chartData.map(d => Math.max(d.positive, d.negative, Math.abs(d.accumulated)))
+  );
+  const yAxisDomain = maxValue > 0 ? [-maxValue * 1.1, maxValue * 1.1] : [-100, 100];
 
   return (
     <div className="w-full">
       {/* Filtros de Período */}
       <div className="flex justify-center gap-2 mb-6">
         {[
-          { key: 'week', label: 'Semana' },
-          { key: 'month', label: 'Mês' },
-          { key: 'year', label: 'Ano' }
+          { key: 'week', label: '7 Dias' },
+          { key: 'month', label: '30 Dias' },
+          { key: 'year', label: '1 Ano' }
         ].map(filter => (
           <Button
             key={filter.key}
@@ -353,85 +387,188 @@ function PerformancePeriodChart({ metrics }: { metrics: any }) {
         ))}
       </div>
       
-      <ResponsiveContainer width="100%" height={380}>
-        <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-          <defs>
-            <linearGradient id="performanceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.6}/>
-              <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1}/>
-            </linearGradient>
-            <linearGradient id="lossGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.6}/>
-              <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.4} />
-          <XAxis 
-            dataKey="period"
-            stroke="#9CA3AF"
-            fontSize={14}
-            fontWeight={600}
-            tick={{ fill: '#e2e8f0' }}
-            axisLine={{ stroke: '#64748b', strokeWidth: 2 }}
-          />
-          <YAxis 
-            stroke="#9CA3AF"
-            fontSize={12}
-            tick={{ fill: '#cbd5e1' }}
-            tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
-            domain={yAxisDomain}
-            axisLine={{ stroke: '#64748b', strokeWidth: 2 }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: '#1e293b',
-              border: '1px solid #475569',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-              padding: '12px'
-            }}
-            labelStyle={{ color: '#e2e8f0', fontWeight: 'bold' }}
-            formatter={(value: any) => [
-              `R$ ${parseFloat(value).toFixed(2)}`,
-              'Rentabilidade'
-            ]}
-          />
-          <Area 
-            type="monotone" 
-            dataKey="value" 
-            stroke="#22c55e"
-            strokeWidth={3}
-            fill="url(#performanceGradient)"
-            dot={{ 
-              fill: '#22c55e', 
-              strokeWidth: 3, 
-              r: 8,
-              stroke: '#1e293b'
-            }}
-            activeDot={{ 
-              r: 10, 
-              stroke: '#22c55e', 
-              strokeWidth: 3, 
-              fill: '#1e293b' 
-            }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      {chartData.length === 0 ? (
+        <div className="h-[380px] flex items-center justify-center text-zinc-400">
+          <div className="text-center">
+            <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>Nenhum trade no período selecionado</p>
+          </div>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={380}>
+          <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 50, bottom: 60 }}>
+            <defs>
+              <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8}/>
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0.3}/>
+              </linearGradient>
+              <linearGradient id="negativeGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.8}/>
+              </linearGradient>
+              <linearGradient id="accumulatedGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.6}/>
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+              </linearGradient>
+            </defs>
+            
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.4} />
+            
+            <XAxis 
+              dataKey="period"
+              stroke="#9CA3AF"
+              fontSize={11}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+              tick={{ fill: '#e2e8f0' }}
+              axisLine={{ stroke: '#64748b', strokeWidth: 1 }}
+            />
+            
+            <YAxis 
+              stroke="#9CA3AF"
+              fontSize={12}
+              tick={{ fill: '#cbd5e1' }}
+              tickFormatter={(value) => `R$ ${(value/1000).toFixed(1)}k`}
+              domain={yAxisDomain}
+              axisLine={{ stroke: '#64748b', strokeWidth: 1 }}
+            />
+            
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1e293b',
+                border: '1px solid #475569',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                padding: '12px'
+              }}
+              labelStyle={{ color: '#e2e8f0', fontWeight: 'bold', marginBottom: '8px' }}
+              formatter={(value: any, name: string) => {
+                const formattedValue = `R$ ${parseFloat(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                const displayName = name === 'positive' ? '✅ Lucros' : 
+                                  name === 'negative' ? '❌ Perdas' :
+                                  name === 'accumulated' ? '📊 Acumulado' : name;
+                return [formattedValue, displayName];
+              }}
+              content={(props: any) => {
+                const { active, payload, label } = props;
+                if (!active || !payload || !payload.length) return null;
+                
+                const data = payload[0].payload;
+                return (
+                  <div className="bg-zinc-800 border border-zinc-600 rounded-lg p-3 shadow-xl">
+                    <p className="text-white font-bold mb-2">{label}</p>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between gap-4">
+                        <span className="text-green-400">✅ Lucros:</span>
+                        <span className="text-green-400 font-semibold">R$ {data.positive.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-red-400">❌ Perdas:</span>
+                        <span className="text-red-400 font-semibold">-R$ {data.negative.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="border-t border-zinc-600 pt-1 mt-1">
+                        <div className="flex justify-between gap-4">
+                          <span className="text-zinc-300">Total Período:</span>
+                          <span className={`font-semibold ${data.total >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            R$ {data.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-blue-400">📊 Acumulado:</span>
+                          <span className={`font-bold ${data.accumulated >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                            R$ {data.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="border-t border-zinc-600 pt-1 mt-1 text-xs text-zinc-400">
+                        <div>Trades positivos: {data.positiveCount}</div>
+                        <div>Trades negativos: {data.negativeCount}</div>
+                        <div>Total de trades: {data.totalCount}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }}
+            />
+            
+            {/* Barras de lucros */}
+            <Area 
+              type="monotone" 
+              dataKey="positive" 
+              stackId="1"
+              stroke="#22c55e"
+              strokeWidth={2}
+              fill="url(#positiveGradient)"
+            />
+            
+            {/* Barras de perdas (negativo) */}
+            <Area 
+              type="monotone" 
+              dataKey={(data: any) => -data.negative} 
+              stackId="1"
+              stroke="#ef4444"
+              strokeWidth={2}
+              fill="url(#negativeGradient)"
+            />
+            
+            {/* Linha acumulada */}
+            <Line 
+              type="monotone" 
+              dataKey="accumulated" 
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
       
-      {/* Performance Summary Below Chart */}
-      <div className="mt-6 flex justify-center">
-        {chartData.map((item) => (
-          <div key={item.period} className="text-center p-6 bg-zinc-800/50 rounded-lg border border-zinc-700 hover:bg-slate-700/50 transition-colors min-w-[200px]">
-            <div className="text-sm text-zinc-400 mb-2">{item.label}</div>
-            <div className={`text-3xl font-bold mb-1 ${item.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              R$ {item.value.toFixed(2)}
+      {/* Resumo abaixo do gráfico */}
+      {chartData.length > 0 && (
+        <div className="mt-6 grid grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+            <div className="text-xs text-zinc-400 mb-1">Total de Lucros</div>
+            <div className="text-xl font-bold text-green-400">
+              R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <div className={`text-sm font-semibold ${item.value >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {item.value >= 0 ? '+' : ''}{item.value.toFixed(2)}
+            <div className="text-xs text-zinc-500 mt-1">
+              {chartData.reduce((sum, d) => sum + d.positiveCount, 0)} trades
             </div>
           </div>
-        ))}
-      </div>
+          
+          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+            <div className="text-xs text-zinc-400 mb-1">Total de Perdas</div>
+            <div className="text-xl font-bold text-red-400">
+              -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <div className="text-xs text-zinc-500 mt-1">
+              {chartData.reduce((sum, d) => sum + d.negativeCount, 0)} trades
+            </div>
+          </div>
+          
+          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+            <div className="text-xs text-zinc-400 mb-1">Resultado Período</div>
+            <div className={`text-xl font-bold ${chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <div className="text-xs text-zinc-500 mt-1">
+              Taxa: {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(1)}% acerto
+            </div>
+          </div>
+          
+          <div className="text-center p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+            <div className="text-xs text-zinc-400 mb-1">Média por Dia</div>
+            <div className={`text-xl font-bold ${(chartData[chartData.length - 1]?.accumulated / chartData.length) >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
+              R$ {(chartData[chartData.length - 1]?.accumulated / chartData.length || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+            <div className="text-xs text-zinc-500 mt-1">
+              {chartData.length} períodos
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1131,7 +1268,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <PerformancePeriodChart metrics={metrics} />
+              <PerformancePeriodChart trades={filteredTrades} />
             </CardContent>
           </Card>
 
