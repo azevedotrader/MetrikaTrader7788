@@ -9,6 +9,7 @@
 import Papa from 'papaparse';
 import { parse as parseDate, isValid } from 'date-fns';
 import fs from 'fs';
+import chardet from 'chardet';
 
 export interface DateValidationResult {
   isValid: boolean;
@@ -120,18 +121,73 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
   console.log(`🗓️ Iniciando validação obrigatória de datas para: ${filePath}`);
   
   try {
-    // 1. Ler o arquivo CSV
+    // 1. Ler o arquivo CSV com detecção inteligente de delimitador
     if (!fs.existsSync(filePath)) {
       throw new Error(`Arquivo não encontrado: ${filePath}`);
     }
 
-    const csvContent = fs.readFileSync(filePath, 'utf-8');
-    const parseResult = Papa.parse(csvContent, {
-      header: true,
-      skipEmptyLines: true,
-      dynamicTyping: false, // Manter como string para validação
-      transformHeader: (header: string) => header.trim().toLowerCase()
-    });
+    // Detectar encoding automaticamente e ler arquivo
+    const buffer = fs.readFileSync(filePath);
+    const detectedEncoding = chardet.detect(buffer);
+    let encoding = 'utf-8';
+    
+    if (detectedEncoding) {
+      if (detectedEncoding.toLowerCase().includes('utf')) {
+        encoding = 'utf-8';
+      } else if (detectedEncoding.toLowerCase().includes('latin') || detectedEncoding.toLowerCase().includes('iso')) {
+        encoding = 'latin1';
+      } else if (detectedEncoding.toLowerCase().includes('windows') || detectedEncoding.toLowerCase().includes('cp1252')) {
+        encoding = 'latin1';
+      }
+    }
+    
+    console.log(`🔍 Encoding detectado: ${detectedEncoding} → usando: ${encoding}`);
+    
+    let csvContent: string;
+    try {
+      csvContent = buffer.toString(encoding);
+    } catch (error) {
+      console.log('🔄 Fallback para utf-8...');
+      csvContent = buffer.toString('utf-8');
+    }
+
+    // Detectar delimitador automaticamente testando múltiplas opções
+    const delimiters = [';', ',', '\t', '|', ':'];
+    let bestParseResult: any = null;
+    let bestDelimiter = ',';
+    let maxColumns = 0;
+
+    console.log(`🔍 Testando delimitadores para detectar estrutura CSV...`);
+    
+    for (const delimiter of delimiters) {
+      try {
+        const testResult = Papa.parse(csvContent, {
+          delimiter,
+          header: true,
+          skipEmptyLines: true,
+          dynamicTyping: false,
+          transformHeader: (header: string) => header.trim().toLowerCase()
+        });
+
+        if (testResult.data && testResult.data.length > 0) {
+          const headers = Object.keys(testResult.data[0] as any);
+          const columnCount = headers.length;
+          
+          console.log(`   Delimitador '${delimiter}': ${columnCount} colunas (${headers.join(', ')})`);
+          
+          if (columnCount > maxColumns) {
+            maxColumns = columnCount;
+            bestDelimiter = delimiter;
+            bestParseResult = testResult;
+          }
+        }
+      } catch (error) {
+        console.log(`   Delimitador '${delimiter}': erro ao parsear`);
+      }
+    }
+
+    const parseResult = bestParseResult;
+    console.log(`✅ Melhor delimitador detectado: '${bestDelimiter}' com ${maxColumns} colunas`);
 
     if (!parseResult.data || parseResult.data.length === 0) {
       return {
@@ -184,7 +240,44 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
       }
     }
     
-    // 3. Decisão final: só rejeitar se REALMENTE não houver datas
+    // 3. Se só tem 1 coluna, pode ser problema de delimitador - buscar padrões de data no conteúdo bruto
+    if (headers.length === 1 && bestValidationResult.validDatesCount === 0) {
+      console.log(`⚠️ Apenas 1 coluna detectada. Procurando padrões de data no conteúdo bruto...`);
+      
+      // Buscar padrões de data diretamente no texto bruto
+      const datePatterns = [
+        /\b\d{1,2}\/\d{1,2}\/\d{4}\b/g,      // dd/MM/yyyy ou MM/dd/yyyy
+        /\b\d{4}-\d{1,2}-\d{1,2}\b/g,        // yyyy-MM-dd
+        /\b\d{1,2}-\d{1,2}-\d{4}\b/g,        // dd-MM-yyyy
+        /\b\d{1,2}\.\d{1,2}\.\d{4}\b/g,      // dd.MM.yyyy
+        /\b\d{1,2}\/\d{1,2}\/\d{2}\b/g,      // dd/MM/yy
+      ];
+      
+      let foundDatesInRawContent = 0;
+      for (const pattern of datePatterns) {
+        const matches = csvContent.match(pattern);
+        if (matches) {
+          foundDatesInRawContent += matches.length;
+          console.log(`   Padrão ${pattern.source}: ${matches.length} matches (ex: ${matches[0]})`);
+        }
+      }
+      
+      if (foundDatesInRawContent > 0) {
+        console.log(`✅ Encontradas ${foundDatesInRawContent} datas no conteúdo bruto. Arquivo provavelmente contém dados válidos.`);
+        
+        // Aceitar o arquivo mesmo sem estrutura clara de colunas
+        return {
+          isValid: true,
+          dateColumn: 'conteudo_bruto_com_datas',
+          dateFormat: 'multiplos_formatos_detectados',
+          validDatesCount: foundDatesInRawContent,
+          totalRows: data.length,
+          sampleDates: ['Datas encontradas no conteúdo bruto']
+        };
+      }
+    }
+    
+    // 4. Decisão final: só rejeitar se REALMENTE não houver datas
     if (bestValidationResult.validDatesCount === 0) {
       const availableHeaders = headers.join(', ');
       return {
@@ -196,12 +289,14 @@ export async function validateRequiredDateColumns(filePath: string): Promise<Dat
         error: `❌ NENHUMA DATA VÁLIDA ENCONTRADA EM TODO O ARQUIVO\n\n` +
                `O sistema procurou datas em TODAS as ${headers.length} colunas disponíveis.\n\n` +
                `Colunas verificadas: ${availableHeaders}\n\n` +
+               `Delimitador testado: '${bestDelimiter}'\n\n` +
                `Formatos testados:\n` +
                `• dd/MM/yyyy, dd/MM/yyyy HH:mm\n` +
                `• yyyy-MM-dd, dd-MM-yyyy\n` +
                `• MM/dd/yyyy, dd.MM.yyyy\n` +
-               `• E mais 10+ formatos\n\n` +
-               `💡 Verifique se o arquivo realmente contém datas de trades e tente novamente.`
+               `• E mais 30+ formatos\n\n` +
+               `💡 Verifique se o arquivo realmente contém datas de trades.\n` +
+               `💡 Arquivo pode ter delimitador diferente ou formato especial.`
       };
     }
 
