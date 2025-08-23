@@ -28,40 +28,35 @@ export interface SmartCSVResult {
 }
 
 /**
- * Padrões para identificar linhas que NÃO são trades (dados de estatísticas/resumo)
+ * Interface para representar uma linha validada de trade
  */
-const NON_TRADE_PATTERNS = [
-  // Cabeçalhos de seções
-  /^(resumo|summary|total|estatística|statistics|relatório|report|análise|analysis)/i,
-  
-  // Campos de estatísticas específicos
-  /patrimônio|capital|saldo|drawdown|retorno|percentual|necessário|máximo|mínimo|tempo no mercado|win rate|lose rate/i,
-  /rentabilidade|lucro líquido|prejuízo|melhor trade|pior trade|média|mediana|sharpe|sortino/i,
-  /r\/r|risco|reward|expectativa|payoff|profit factor|recovery factor|calmar ratio/i,
-  /trades vencedores|trades perdedores|consecutivos|sequência|série|winning streak|losing streak/i,
-  
-  // Totalizadores e métricas
-  /^(total|soma|média|average|min|max|count|qtd|número|quantidade total)/i,
-  
-  // Valores de configuração
-  /configuração|config|setting|parameter|parâmetro/i,
-  
-  // Linhas vazias ou separadores
-  /^[\s\-=_]*$/,
-  
-  // Padrões específicos de estatísticas financeiras
-  /^\s*(total geral|resultado líquido|performance|desempenho)/i,
-  /declínio máximo|drawdown|topo ao fundo|trade a trade/i,
-  
-  // Linhas que são claramente métricas (sem contexto de trade)
-  /^\d+[\.,]\d+%\s*$/, // Apenas percentuais
-  /^\d+[\.,]\d{2}\s*(real|reais|r\$|brl|usd)\s*$/i, // Apenas valores monetários sem contexto
-  /^(positiv|negativ)[oa]s?\s*:/i, // Trades positivos/negativos (título)
-  
-  // Padrões que indicam resumos/estatísticas
-  /^(dias|meses|anos|período)\s+de\s+/i,
-  /^em\s+\d+\s+(dias|meses|anos)/i
-];
+interface ValidatedTradeRow {
+  dataHora: Date | null;
+  ativo: string | null;
+  quantidade: number | null;
+  precoEntrada: number | null;
+  precoSaida: number | null;
+  capitalUtilizado: number | null;
+  tipo: 'compra' | 'venda' | null;
+  resultado: number | null;
+}
+
+/**
+ * Função temporária para compatibilidade - será substituída por validação por schema
+ */
+function isStatisticsRow(row: any, fields: string[]): boolean {
+  // Substituída por validação por schema
+  return false;
+}
+
+/**
+ * Função temporária para compatibilidade - será substituída por validação por schema
+ */
+function isValidTradeRow(row: any, index: number): boolean {
+  // Substituída por validateTradeRow
+  const validation = validateTradeRow(row, index);
+  return validation !== null;
+}
 
 /**
  * Padrões para identificar símbolos de trading válidos
@@ -81,44 +76,52 @@ const OPERATION_TYPE_PATTERNS = {
 };
 
 /**
- * Verifica se uma linha contém dados de estatísticas em vez de trade individual
+ * Valida uma linha baseada no schema mínimo de trade
+ * Retorna os dados extraídos se válido, null se inválido
  */
-function isStatisticsRow(row: any, fields: string[]): boolean {
-  if (!row) return true;
+function validateTradeRow(row: any, index: number): ValidatedTradeRow | null {
+  console.log(`\n🔍 Validando linha ${index}:`, Object.values(row));
   
-  // Converter linha para string para análise
-  const rowText = Object.values(row).join(' ').toLowerCase();
+  // Extrair e validar cada campo
+  const dataHora = extractAndValidateDate(row);
+  const ativo = extractAndValidateSymbol(row);
+  const quantidade = extractAndValidateQuantity(row);
+  const valores = extractAndValidatePrices(row);
+  const tipo = extractOperationType(row);
   
-  // Verificar contra padrões de estatísticas
-  for (const pattern of NON_TRADE_PATTERNS) {
-    if (pattern.test(rowText)) {
-      return true;
-    }
+  // Schema mínimo: precisa ter data válida, ativo não vazio, quantidade > 0
+  // e pelo menos um valor monetário válido
+  const hasValidDate = dataHora !== null;
+  const hasValidSymbol = ativo !== null && ativo !== '';
+  const hasValidQuantity = quantidade !== null && quantidade > 0;
+  const hasValidPrice = valores.precoEntrada !== null || 
+                       valores.precoSaida !== null || 
+                       valores.capitalUtilizado !== null;
+  
+  console.log(`  📋 Validação:`);
+  console.log(`     Data: ${hasValidDate ? '✅' : '❌'} ${dataHora ? dataHora.toISOString() : 'null'}`);
+  console.log(`     Ativo: ${hasValidSymbol ? '✅' : '❌'} ${ativo}`);
+  console.log(`     Quantidade: ${hasValidQuantity ? '✅' : '❌'} ${quantidade}`);
+  console.log(`     Preços: ${hasValidPrice ? '✅' : '❌'} entrada=${valores.precoEntrada}, saída=${valores.precoSaida}, capital=${valores.capitalUtilizado}`);
+  
+  const isValid = hasValidDate && hasValidSymbol && hasValidQuantity && hasValidPrice;
+  
+  if (isValid) {
+    console.log(`  ✅ Linha ${index} ACEITA - passa no schema de trade`);
+    return {
+      dataHora,
+      ativo,
+      quantidade,
+      precoEntrada: valores.precoEntrada,
+      precoSaida: valores.precoSaida,
+      capitalUtilizado: valores.capitalUtilizado,
+      tipo,
+      resultado: valores.resultado
+    };
+  } else {
+    console.log(`  ❌ Linha ${index} REJEITADA - não passa no schema mínimo`);
+    return null;
   }
-  
-  // Verificar se contém apenas campos de estatísticas conhecidos
-  const statisticsKeywords = [
-    'patrimônio', 'capital', 'saldo', 'drawdown', 'retorno', 'percentual',
-    'rentabilidade', 'lucro', 'prejuízo', 'melhor', 'pior', 'média',
-    'total', 'máximo', 'mínimo', 'win rate', 'r/r', 'expectativa'
-  ];
-  
-  const hasStatisticsKeywords = statisticsKeywords.some(keyword => 
-    rowText.includes(keyword)
-  );
-  
-  // Se tem palavras-chave de estatísticas e não tem símbolo de trading válido
-  if (hasStatisticsKeywords) {
-    const hasValidSymbol = Object.values(TRADING_SYMBOL_PATTERNS).some(pattern => 
-      pattern.test(rowText)
-    );
-    
-    if (!hasValidSymbol) {
-      return true; // É estatística
-    }
-  }
-  
-  return false;
 }
 
 /**
@@ -398,46 +401,274 @@ function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string
 }
 
 /**
- * Verifica se uma linha representa um trade válido
+ * Extrai e valida data da linha
  */
-function isValidTradeRow(row: any, index: number): boolean {
-  const rowStr = Object.values(row).join(' ').toLowerCase();
-  
-  // Debug para todas as linhas
-  console.log(`🔍 Linha ${index}:`, Object.values(row));
-  
-  // Verificar padrões de exclusão mais específicos (apenas cabeçalhos óbvios)
-  const exclusionPatterns = [
-    /^(conta|titular)/i,
-    /^(data inicial|data final)$/i,
-    /^\s*$/
+function extractAndValidateDate(row: any): Date | null {
+  const datePatterns = [
+    // DD/MM/YYYY HH:MM:SS ou DD/MM/YYYY HH:MM
+    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/,
+    // DD/MM/YYYY
+    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/,
+    // YYYY-MM-DD HH:MM:SS ou YYYY-MM-DD
+    /(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/,
+    // DD/MM/YY
+    /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2})(?!\d)/
   ];
   
-  for (const pattern of exclusionPatterns) {
-    if (pattern.test(rowStr)) {
-      console.log(`🚫 Linha ${index} ignorada (cabeçalho): ${rowStr.substring(0, 50)}`);
-      return false;
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
+    const valueStr = String(value).trim();
+    
+    for (const pattern of datePatterns) {
+      const match = valueStr.match(pattern);
+      if (match) {
+        let date: Date | null = null;
+        
+        // DD/MM/YYYY HH:MM:SS
+        if (match.length >= 6 && match[4]) {
+          const [_, day, month, year, hour, minute, second] = match;
+          date = new Date(
+            parseInt(year),
+            parseInt(month) - 1,
+            parseInt(day),
+            parseInt(hour),
+            parseInt(minute),
+            parseInt(second || '0')
+          );
+        }
+        // DD/MM/YYYY
+        else if (match[1] && match[2] && match[3] && match[3].length === 4) {
+          const day = parseInt(match[1]);
+          const month = parseInt(match[2]);
+          const year = parseInt(match[3]);
+          date = new Date(year, month - 1, day, 12, 0, 0);
+        }
+        // YYYY-MM-DD
+        else if (match[1] && match[1].length === 4) {
+          const year = parseInt(match[1]);
+          const month = parseInt(match[2]);
+          const day = parseInt(match[3]);
+          const hour = match[4] ? parseInt(match[4]) : 12;
+          const minute = match[5] ? parseInt(match[5]) : 0;
+          const second = match[6] ? parseInt(match[6]) : 0;
+          date = new Date(year, month - 1, day, hour, minute, second);
+        }
+        // DD/MM/YY
+        else if (match[1] && match[2] && match[3] && match[3].length === 2) {
+          const day = parseInt(match[1]);
+          const month = parseInt(match[2]);
+          const year = 2000 + parseInt(match[3]);
+          date = new Date(year, month - 1, day, 12, 0, 0);
+        }
+        
+        if (date && !isNaN(date.getTime())) {
+          const year = date.getFullYear();
+          if (year >= 2010 && year <= 2030) {
+            return date;
+          }
+        }
+      }
     }
   }
   
-  // MODO ULTRA-FLEXÍVEL: Aceitar QUALQUER linha com dados para interpretação
-  const hasAnyData = Object.values(row).some(val => 
-    val !== null && val !== undefined && String(val).trim() !== ''
-  );
-  
-  // Verificar se tem dados numéricos (incluindo percentuais, negativos, etc.)
-  const hasNumericData = /\d+[.,]\d*|\d+|[-+]?\d+[.,]?\d*[%]?/.test(rowStr);
-  
-  // ULTRA-PERMISSIVO: Aceitar praticamente qualquer linha com conteúdo
-  const isValid = hasAnyData && hasNumericData;
-  
-  console.log(`📊 Linha ${index} - Análise: dados=${hasAnyData}, números=${hasNumericData}, aceita=${isValid}`);
-  
-  if (!isValid) {
-    console.log(`🚫 Linha ${index} rejeitada: sem dados suficientes`);
+  return null;
+}
+
+/**
+ * Extrai e valida símbolo do ativo
+ */
+function extractAndValidateSymbol(row: any): string | null {
+  // Primeiro tenta encontrar símbolos conhecidos
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
+    const valueStr = String(value).toUpperCase().trim();
+    
+    // Procurar padrões de símbolos conhecidos
+    for (const pattern of Object.values(TRADING_SYMBOL_PATTERNS)) {
+      if (pattern.test(valueStr)) {
+        // Extrair apenas o símbolo, não a linha toda
+        const match = valueStr.match(pattern);
+        if (match) {
+          return match[0];
+        }
+      }
+    }
   }
   
-  return isValid;
+  // Procurar por padrões genéricos de símbolos
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
+    const valueStr = String(value).trim();
+    
+    // Padrões genéricos de símbolos
+    const genericPatterns = [
+      /^[A-Z]{2,8}\d*$/i,
+      /^[A-Z]{3,6}[0-9]{1,4}$/i,
+      /^[A-Z]+[\/\-][A-Z]+$/i
+    ];
+    
+    for (const pattern of genericPatterns) {
+      const match = valueStr.match(pattern);
+      if (match) {
+        return match[0].toUpperCase();
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Extrai e valida quantidade
+ */
+function extractAndValidateQuantity(row: any): number | null {
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
+    
+    // Procurar por campos que possam ser quantidade
+    const keyLower = key.toLowerCase();
+    if (keyLower.includes('quant') || keyLower.includes('qtd') || keyLower.includes('volume')) {
+      const num = parseNumericValue(String(value));
+      if (num !== null && num > 0 && num <= 999999) {
+        return num;
+      }
+    }
+  }
+  
+  // Se não encontrou por nome de campo, procurar números pequenos que possam ser quantidade
+  const numbers = extractAllNumbers(row);
+  const quantities = numbers.filter(n => n > 0 && n <= 10000);
+  
+  if (quantities.length > 0) {
+    return quantities[0];
+  }
+  
+  return null;
+}
+
+/**
+ * Extrai e valida preços
+ */
+function extractAndValidatePrices(row: any): {
+  precoEntrada: number | null;
+  precoSaida: number | null;
+  capitalUtilizado: number | null;
+  resultado: number | null;
+} {
+  const result = {
+    precoEntrada: null as number | null,
+    precoSaida: null as number | null,
+    capitalUtilizado: null as number | null,
+    resultado: null as number | null
+  };
+  
+  // Extrair todos os números da linha
+  const numbers = extractAllNumbers(row);
+  
+  // Procurar por campos específicos
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
+    const keyLower = key.toLowerCase();
+    const num = parseNumericValue(String(value));
+    
+    if (num !== null) {
+      if (keyLower.includes('entrada') || keyLower.includes('entry') || keyLower.includes('preço') && !keyLower.includes('saida')) {
+        result.precoEntrada = num;
+      } else if (keyLower.includes('saida') || keyLower.includes('exit') || keyLower.includes('saída')) {
+        result.precoSaida = num;
+      } else if (keyLower.includes('capital') || keyLower.includes('volume')) {
+        result.capitalUtilizado = num;
+      } else if (keyLower.includes('resultado') || keyLower.includes('profit') || keyLower.includes('lucro') || keyLower.includes('prejuízo')) {
+        result.resultado = num;
+      }
+    }
+  }
+  
+  // Se não encontrou campos específicos, usar heurística
+  if (!result.precoEntrada && !result.precoSaida && !result.capitalUtilizado) {
+    const validNumbers = numbers.filter(n => Math.abs(n) > 0.01 && Math.abs(n) < 10000000);
+    if (validNumbers.length > 0) {
+      // Assumir que números maiores são preços ou capital
+      const sorted = validNumbers.sort((a, b) => Math.abs(b) - Math.abs(a));
+      if (sorted.length > 0) result.capitalUtilizado = sorted[0];
+      if (sorted.length > 1) result.precoEntrada = sorted[1];
+      if (sorted.length > 2) result.precoSaida = sorted[2];
+    }
+  }
+  
+  // Resultado é frequentemente o último número ou um número negativo/positivo pequeno
+  if (result.resultado === null && numbers.length > 0) {
+    const possibleResults = numbers.filter(n => Math.abs(n) < 100000);
+    if (possibleResults.length > 0) {
+      result.resultado = possibleResults[possibleResults.length - 1];
+    }
+  }
+  
+  return result;
+}
+
+/**
+ * Converte string para número, lidando com formato brasileiro
+ */
+function parseNumericValue(str: string): number | null {
+  if (!str) return null;
+  
+  // Limpar string
+  let cleaned = str.trim()
+    .replace(/[R$\s]/gi, '') // Remove R$, espaços
+    .replace(/[^\d.,\-+]/g, ''); // Mantém apenas números, vírgula, ponto, sinal
+  
+  if (!cleaned) return null;
+  
+  // Detectar formato: brasileiro (1.234,56) ou americano (1,234.56)
+  const lastComma = cleaned.lastIndexOf(',');
+  const lastDot = cleaned.lastIndexOf('.');
+  
+  if (lastComma > lastDot) {
+    // Formato brasileiro: ponto para milhares, vírgula para decimal
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (lastDot > lastComma) {
+    // Formato americano: vírgula para milhares, ponto para decimal
+    cleaned = cleaned.replace(/,/g, '');
+  } else if (lastComma === -1 && lastDot > 0) {
+    // Apenas ponto, verificar se é decimal ou milhares
+    const afterDot = cleaned.substring(lastDot + 1);
+    if (afterDot.length === 3) {
+      // Provavelmente separador de milhares
+      cleaned = cleaned.replace(/\./g, '');
+    }
+    // Se tem 1-2 dígitos após o ponto, é decimal (mantém como está)
+  } else if (lastDot === -1 && lastComma > 0) {
+    // Apenas vírgula, verificar se é decimal ou milhares
+    const afterComma = cleaned.substring(lastComma + 1);
+    if (afterComma.length === 3) {
+      // Provavelmente separador de milhares
+      cleaned = cleaned.replace(/,/g, '');
+    } else {
+      // É decimal
+      cleaned = cleaned.replace(',', '.');
+    }
+  }
+  
+  const num = parseFloat(cleaned);
+  return isNaN(num) || !isFinite(num) ? null : num;
+}
+
+/**
+ * Extrai todos os números de uma linha
+ */
+function extractAllNumbers(row: any): number[] {
+  const numbers: number[] = [];
+  
+  for (const [key, value] of Object.entries(row)) {
+    if (!value) continue;
+    const num = parseNumericValue(String(value));
+    if (num !== null && isFinite(num)) {
+      numbers.push(num);
+    }
+  }
+  
+  return numbers;
 }
 
 /**
