@@ -300,82 +300,74 @@ export class AITradingService {
         return [];
       }
 
-      // ANÁLISE TEMPORAL PROFUNDA
-      const temporalAnalysis = this.analyzeTemporalPatterns(allTrades);
-      
-      // ANÁLISE DE PERFORMANCE DETALHADA
-      const performanceAnalysis = this.analyzeDetailedPerformance(allTrades);
-      
-      // ANÁLISE DE ATIVOS E SETUPS
-      const assetSetupAnalysis = this.analyzeAssetsAndSetups(allTrades);
-      
-      // ANÁLISE DE RISCO E DRAWDOWN
-      const riskAnalysis = this.analyzeRiskAndDrawdown(allTrades);
-      
-      // ANÁLISE PSICOLÓGICA E SEQUÊNCIAS
-      const psychologicalAnalysis = this.analyzePsychologicalPatterns(allTrades);
+      console.log(`🔍 Análise AI otimizada para ${allTrades.length} trades`);
 
+      // ESTRATÉGIA: Análise em múltiplas etapas para grandes volumes
+      if (allTrades.length > 100) {
+        return await this.generateAdvancedCsvAnalysis(allTrades, csvImports);
+      } else {
+        return await this.generateStandardCsvAnalysis(allTrades, csvImports);
+      }
+    } catch (error) {
+      console.error('Erro na geração de dicas baseadas em CSV:', error);
+      return this.generateEnhancedFallbackTips(trades, csvImports);
+    }
+  }
+
+  private async generateAdvancedCsvAnalysis(trades: any[], csvImports: any[]): Promise<any[]> {
+    try {
+      // ETAPA 1: Análise pré-processada mais eficiente
+      const insights = this.generateKeyInsights(trades);
+      
+      // ETAPA 2: Prompt otimizado com dados resumidos
+      const summaryData = this.createOptimizedSummary(insights, trades, csvImports);
+      
       const promptText = `
-        Você é um analista quantitativo de trading experiente. Analise PROFUNDAMENTE os dados reais deste trader brasileiro e forneça insights ACIONÁVEIS e ESPECÍFICOS para melhorar sua performance.
-        
-        === ANÁLISE TEMPORAL DETALHADA ===
-        ${JSON.stringify(temporalAnalysis, null, 2)}
-        
-        === PERFORMANCE E CONSISTÊNCIA ===
-        ${JSON.stringify(performanceAnalysis, null, 2)}
-        
-        === ATIVOS E ESTRATÉGIAS ===
-        ${JSON.stringify(assetSetupAnalysis, null, 2)}
-        
-        === GESTÃO DE RISCO ===
-        ${JSON.stringify(riskAnalysis, null, 2)}
-        
-        === COMPORTAMENTO E PSICOLOGIA ===
-        ${JSON.stringify(psychologicalAnalysis, null, 2)}
-        
-        === RESUMO DOS DADOS ===
-        - Total de operações analisadas: ${allTrades.length}
-        - Período: ${this.getDateRange(allTrades)}
-        - CSV analisado: ${csvImports.map(c => c.fileName).join(', ')}
-        
-        MISSÃO: Como consultor de trading, analise os PADRÕES REAIS deste trader e forneça orientações CONCRETAS para:
-        
-        1. MELHORAR A PERFORMANCE:
-           - Identifique os melhores e piores dias/horários
-           - Analise quais ativos/setups funcionam melhor
-           - Detecte inconsistências na execução
-        
-        2. OTIMIZAR A GESTÃO DE RISCO:
-           - Avalie o uso de stop-loss
-           - Analise drawdowns e recuperação
-           - Identifique overtrading ou revenge trading
-        
-        3. CORRIGIR COMPORTAMENTOS:
-           - Detecte padrões emocionais prejudiciais
-           - Sugira mudanças na rotina de trading
-           - Proponha melhorias na disciplina
-        
-        IMPORTANTE: Seja ESPECÍFICO com os dados! Use números reais, percentuais, valores. NÃO dê conselhos genéricos.
-        
-        Responda EXCLUSIVAMENTE em JSON válido:
+        ANÁLISE PROFISSIONAL DE TRADING - ${trades.length} OPERAÇÕES
+
+        === DADOS PRINCIPAIS ===
+        📊 Total: ${trades.length} trades | 📅 Período: ${this.getDateRange(trades)}
+        💰 Resultado Total: R$ ${insights.performance.totalProfit.toFixed(2)}
+        📈 Win Rate: ${(insights.performance.winRate * 100).toFixed(1)}%
+        🎯 Profit Factor: ${insights.performance.profitFactor.toFixed(2)}
+        💥 Max Drawdown: R$ ${insights.risk.maxDrawdown.toFixed(2)}
+
+        === INSIGHTS CRÍTICOS ===
+        🔥 MELHOR PERFORMANCE: ${insights.temporal.bestDay.name} (R$ ${insights.temporal.bestDay.avgResult.toFixed(2)}/trade)
+        ❌ PIOR PERFORMANCE: ${insights.temporal.worstDay.name} (R$ ${insights.temporal.worstDay.avgResult.toFixed(2)}/trade)
+        ⭐ ATIVO MAIS LUCRATIVO: ${insights.assets.bestAsset.name} (${insights.assets.bestAsset.winRate.toFixed(1)}% winrate)
+        💸 SETUP MAIS PROBLEMÁTICO: ${insights.assets.worstSetup.name} (${insights.assets.worstSetup.winRate.toFixed(1)}% winrate)
+
+        === PADRÕES DETECTADOS ===
+        • Horário Dourado: ${insights.temporal.bestHour} (melhor performance)
+        • Zona de Perigo: ${insights.temporal.worstHour} (pior performance)
+        • Stop Loss: Usado em ${(insights.risk.stopUsage * 100).toFixed(1)}% das operações
+        • Overtrading: ${insights.psychological.overtrading ? 'DETECTADO' : 'Controlado'}
+        • Revenge Trading: ${insights.psychological.revengeTrading ? 'DETECTADO' : 'Controlado'}
+
+        === ANÁLISE COMPORTAMENTAL ===
+        ${this.formatBehavioralInsights(insights.psychological)}
+
+        MISSÃO: Baseado nesses DADOS REAIS, forneça 6-8 insights ESPECÍFICOS e ACIONÁVEIS para transformar a performance deste trader.
+
+        Responda em JSON válido:
         {
           "tips": [
             {
               "id": "insight_001",
-              "title": "Título claro e direto (ex: 'Evite Operar nas Segundas-feiras')",
-              "message": "Análise DETALHADA de 150-250 palavras explicando o problema identificado, por que é importante e como impacta os resultados. Use dados específicos do trader.",
+              "title": "Título específico baseado nos dados (ex: 'Pare de Operar nas ${insights.temporal.worstDay.name}s')",
+              "message": "Análise detalhada de 180-300 palavras com DADOS ESPECÍFICOS do trader. Explique o problema, cite números reais, mostre o impacto financeiro e justifique cientificamente.",
               "type": "critical|warning|opportunity|suggestion",
               "priority": "high|medium|low",
-              "action": "Ação CONCRETA e ESPECÍFICA que o trader deve implementar. Seja prático: quando, como, o que fazer exatamente.",
-              "basedOn": "Dados ESPECÍFICOS que justificam esta recomendação (ex: 'Segundas: -2.450 resultado, 25% winrate vs Quintas: +3.200, 65% winrate')",
-              "impact": "Resultado ESPERADO desta mudança com estimativas quantitativas quando possível",
-              "metrics": "Métricas EXATAS do trader que justificam a dica (valores, percentuais, quantidades)"
+              "action": "Ação ULTRA-ESPECÍFICA: quando fazer, como fazer, qual critério usar. Seja extremamente prático.",
+              "basedOn": "Dados EXATOS que provam este ponto (números, percentuais, comparações)",
+              "impact": "Estimativa QUANTITATIVA do benefício desta mudança",
+              "metrics": "Métricas PRECISAS que justificam (valores absolutos, relativos, períodos)"
             }
           ]
         }
-        
-        GERE 5-7 DICAS PROFUNDAS, cada uma focada em um aspecto diferente (temporal, ativos, risco, psicológico, etc.).
-        Seja BRUTAL na análise - aponte problemas reais e dê soluções práticas!
+
+        FOQUE em problemas REAIS com soluções ESPECÍFICAS. Use os dados do trader!
       `;
 
       const response = await openai.chat.completions.create({
@@ -383,7 +375,67 @@ export class AITradingService {
         messages: [
           { 
             role: "system", 
-            content: "Você é um analista quantitativo e mentor de trading com 15+ anos de experiência no mercado brasileiro. Especialista em análise de dados históricos, padrões comportamentais e otimização de estratégias. Forneça análises PROFUNDAS e ESPECÍFICAS baseadas em dados reais, não conselhos genéricos. Use português brasileiro e seja direto nos insights." 
+            content: "Você é um analista quantitativo ELITE com 20+ anos analisando traders do mercado brasileiro. Especialista em detectar padrões ocultos, vieses comportamentais e oportunidades de otimização. SEMPRE use dados específicos do trader - números reais, não teoria genérica. Português brasileiro, análise brutal mas construtiva." 
+          },
+          { role: "user", content: promptText }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 4000,
+        temperature: 0.2
+      });
+
+      const content = response.choices[0].message.content;
+      if (!content) {
+        return this.generateEnhancedFallbackTips(trades, csvImports);
+      }
+
+      const result = JSON.parse(content);
+      return result.tips || this.generateEnhancedFallbackTips(trades, csvImports);
+
+    } catch (error) {
+      console.error('Erro na análise avançada:', error);
+      return this.generateEnhancedFallbackTips(trades, csvImports);
+    }
+  }
+
+  private async generateStandardCsvAnalysis(trades: any[], csvImports: any[]): Promise<any[]> {
+    try {
+      // Análise padrão para volumes menores
+      const insights = this.generateKeyInsights(trades);
+      
+      const promptText = `
+        ANÁLISE DETALHADA - ${trades.length} TRADES
+
+        Performance: ${(insights.performance.winRate * 100).toFixed(1)}% win rate, R$ ${insights.performance.totalProfit.toFixed(2)} total
+        Melhor dia: ${insights.temporal.bestDay.name} | Pior dia: ${insights.temporal.worstDay.name}
+        Melhor ativo: ${insights.assets.bestAsset.name} | Pior setup: ${insights.assets.worstSetup.name}
+        
+        Forneça 5-6 insights específicos em JSON com análises detalhadas e ações práticas.
+        Use os dados reais do trader para justificar cada recomendação.
+
+        {
+          "tips": [
+            {
+              "id": "string",
+              "title": "string específico",
+              "message": "análise detalhada 150+ palavras com dados",
+              "type": "critical|warning|opportunity|suggestion",
+              "priority": "high|medium|low",
+              "action": "ação específica e prática",
+              "basedOn": "dados que justificam",
+              "impact": "resultado esperado",
+              "metrics": "métricas exatas"
+            }
+          ]
+        }
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { 
+            role: "system", 
+            content: "Analista quantitativo especialista em trading brasileiro. Forneça insights específicos baseados em dados reais." 
           },
           { role: "user", content: promptText }
         ],
@@ -393,48 +445,304 @@ export class AITradingService {
       });
 
       const content = response.choices[0].message.content;
-      
       if (!content) {
-        return this.generateFallbackTips(performanceAnalysis);
+        return this.generateEnhancedFallbackTips(trades, csvImports);
       }
 
       const result = JSON.parse(content);
-      
-      return result.tips || this.generateFallbackTips(performanceAnalysis);
+      return result.tips || this.generateEnhancedFallbackTips(trades, csvImports);
+
     } catch (error) {
-      console.error('Erro na geração de dicas baseadas em CSV:', error);
-      return this.generateFallbackTips({ totalTrades: trades.length, winRate: 0.5 });
+      console.error('Erro na análise padrão:', error);
+      return this.generateEnhancedFallbackTips(trades, csvImports);
     }
   }
 
-  private generateFallbackTips(analysis: any): any[] {
+  // FUNÇÕES AUXILIARES PARA ANÁLISE OTIMIZADA
+
+  private generateKeyInsights(trades: any[]) {
+    // Análise de performance mais enxuta
+    const profits = trades.map(t => parseFloat(t.resultado)).filter(r => r > 0);
+    const losses = trades.map(t => parseFloat(t.resultado)).filter(r => r < 0);
+    const allResults = trades.map(t => parseFloat(t.resultado));
+    
+    const performance = {
+      totalTrades: trades.length,
+      winRate: profits.length / trades.length,
+      avgWin: profits.length > 0 ? profits.reduce((a, b) => a + b, 0) / profits.length : 0,
+      avgLoss: losses.length > 0 ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0,
+      totalProfit: allResults.reduce((a, b) => a + b, 0),
+      profitFactor: 0
+    };
+    
+    performance.profitFactor = performance.avgLoss > 0 ? 
+      (performance.avgWin * profits.length) / (performance.avgLoss * losses.length) : 0;
+
+    // Análise temporal simplificada
+    const dayStats = this.groupAndAnalyze(trades, (trade) => {
+      const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+      return days[new Date(trade.dataHora).getDay()];
+    });
+    
+    const hourStats = this.groupAndAnalyze(trades, (trade) => {
+      return `${new Date(trade.dataHora).getHours()}h`;
+    });
+
+    const temporal = {
+      bestDay: this.getBestPerformer(dayStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
+      worstDay: this.getWorstPerformer(dayStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
+      bestHour: (this.getBestPerformer(hourStats) || { name: 'N/A' }).name,
+      worstHour: (this.getWorstPerformer(hourStats) || { name: 'N/A' }).name
+    };
+
+    // Análise de ativos simplificada
+    const assetStats = this.groupAndAnalyze(trades, (trade) => trade.ativo);
+    const setupStats = this.groupAndAnalyze(trades, (trade) => trade.setup);
+
+    const assets = {
+      bestAsset: this.getBestPerformer(assetStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
+      worstAsset: this.getWorstPerformer(assetStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
+      bestSetup: this.getBestPerformer(setupStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
+      worstSetup: this.getWorstPerformer(setupStats) || { name: 'N/A', avgResult: 0, winRate: 0 }
+    };
+
+    // Análise de risco simplificada
+    const tradesWithStop = trades.filter(t => t.stop && parseFloat(t.stop) > 0);
+    const sortedResults = [...allResults].sort((a, b) => a - b);
+    
+    const risk = {
+      stopUsage: tradesWithStop.length / trades.length,
+      maxDrawdown: this.calculateSimpleMaxDrawdown(allResults),
+      volatility: this.calculateSimpleStandardDeviation(allResults)
+    };
+
+    // Análise psicológica simplificada
+    const psychological = {
+      overtrading: this.detectSimpleOvertrading(trades),
+      revengeTrading: this.detectSimpleRevengeTrading(trades),
+      emotionalPatterns: this.getSimpleEmotionalSummary(trades)
+    };
+
+    return { performance, temporal, assets, risk, psychological };
+  }
+
+  private createOptimizedSummary(insights: any, trades: any[], csvImports: any[]) {
+    return {
+      basicStats: {
+        totalTrades: insights.performance.totalTrades,
+        winRate: insights.performance.winRate,
+        totalProfit: insights.performance.totalProfit,
+        profitFactor: insights.performance.profitFactor
+      },
+      keyFindings: {
+        bestDay: insights.temporal.bestDay.name,
+        worstDay: insights.temporal.worstDay.name,
+        bestAsset: insights.assets.bestAsset.name,
+        worstSetup: insights.assets.worstSetup.name
+      },
+      riskProfile: {
+        maxDrawdown: insights.risk.maxDrawdown,
+        stopUsage: insights.risk.stopUsage,
+        volatility: insights.risk.volatility
+      }
+    };
+  }
+
+  private formatBehavioralInsights(psychological: any): string {
+    let insights = [];
+    
+    if (psychological.overtrading) {
+      insights.push("⚠️ OVERTRADING: Detectado excesso de operações em períodos específicos");
+    }
+    
+    if (psychological.revengeTrading) {
+      insights.push("💢 REVENGE TRADING: Padrão de vingança após perdas detectado");
+    }
+    
+    if (psychological.emotionalPatterns.length > 0) {
+      insights.push(`🧠 PADRÕES EMOCIONAIS: ${psychological.emotionalPatterns.join(', ')}`);
+    }
+    
+    return insights.length > 0 ? insights.join('\n        ') : 'Sem padrões comportamentais críticos detectados';
+  }
+
+  private generateEnhancedFallbackTips(trades: any[], csvImports: any[]): any[] {
+    const performance = this.generateKeyInsights(trades).performance;
+    
     const tips = [];
     
-    if (analysis.winRate < 0.6) {
+    if (performance.winRate < 0.6) {
       tips.push({
         id: "improve_winrate",
         title: "Melhore sua Taxa de Acerto",
-        message: `Com ${(analysis.winRate * 100).toFixed(1)}% de acerto, considere revisar seus critérios de entrada. Analise os trades perdedores para identificar padrões.`,
+        message: `Sua taxa de acerto atual de ${(performance.winRate * 100).toFixed(1)}% está abaixo do ideal. Traders consistentes mantêm taxas acima de 60%. Isso indica que seus critérios de entrada precisam ser refinados. Considere: 1) Aguardar confirmações mais sólidas antes de entrar, 2) Revisar seus indicadores técnicos, 3) Analisar os trades perdedores para identificar padrões comuns. Uma melhoria de 10% na taxa de acerto pode representar um aumento significativo na rentabilidade.`,
         type: "warning",
         priority: "high",
-        action: "Revise seus setups e critérios de entrada",
-        basedOn: "Taxa de acerto abaixo de 60%"
+        action: "Analise seus últimos 20 trades perdedores e identifique 3 padrões comuns. Ajuste seus critérios de entrada baseado nessa análise.",
+        basedOn: `Taxa de acerto de ${(performance.winRate * 100).toFixed(1)}% em ${performance.totalTrades} trades`,
+        impact: "Melhoria de 10% na taxa de acerto pode aumentar lucros em 25-40%",
+        metrics: `Win Rate: ${(performance.winRate * 100).toFixed(1)}% | Trades: ${performance.totalTrades} | Meta: >60%`
       });
     }
-    
-    if (analysis.totalTrades > 0) {
+
+    if (performance.profitFactor < 1.5) {
       tips.push({
-        id: "keep_journal",
-        title: "Mantenha um Diário Detalhado",
-        message: "Continue registrando seus trades. Use o diário para anotar o contexto emocional e de mercado de cada operação.",
-        type: "info",
-        priority: "medium",
-        action: "Use a seção 'Diário do Trader' regularmente",
-        basedOn: "Presença de dados históricos"
+        id: "improve_profit_factor",
+        title: "Otimize sua Relação Risco/Retorno",
+        message: `Seu Profit Factor de ${performance.profitFactor.toFixed(2)} indica que seus ganhos médios não compensam adequadamente suas perdas. O ideal é manter acima de 1.5. Isso pode ser melhorado através de: 1) Targets mais ambiciosos em trades com alta probabilidade, 2) Stops mais apertados quando possível, 3) Saídas parciais para garantir lucros. Foque em maximizar seus winners e minimizar seus losers.`,
+        type: "opportunity",
+        priority: "high",
+        action: "Revise suas saídas: defina targets mais ambiciosos para seus setups de maior confiança e considere saídas parciais.",
+        basedOn: `Profit Factor: ${performance.profitFactor.toFixed(2)} | Ganho médio: R$ ${performance.avgWin.toFixed(2)} | Perda média: R$ ${performance.avgLoss.toFixed(2)}`,
+        impact: "Melhoria no Profit Factor pode dobrar sua rentabilidade mensal",
+        metrics: `PF Atual: ${performance.profitFactor.toFixed(2)} | Meta: >1.5 | Trades: ${performance.totalTrades}`
       });
     }
-    
+
+    if (performance.totalProfit > 0) {
+      tips.push({
+        id: "maintain_consistency",
+        title: "Mantenha a Consistência",
+        message: `Você está lucrativo com R$ ${performance.totalProfit.toFixed(2)} em ${performance.totalTrades} trades. Isso demonstra que sua estratégia tem fundamentos sólidos. O próximo passo é focar na consistência: evite overtrading, mantenha disciplina nos stops, e documente todas as operações. Traders consistentes crescem de forma sustentável ao longo do tempo.`,
+        type: "suggestion",
+        priority: "medium",
+        action: "Continue seguindo seu plano de trading atual. Documente cada trade com o contexto emocional e de mercado.",
+        basedOn: `Resultado positivo: R$ ${performance.totalProfit.toFixed(2)} em ${performance.totalTrades} trades`,
+        impact: "Manutenção da consistência garante crescimento sustentável",
+        metrics: `Lucro Total: R$ ${performance.totalProfit.toFixed(2)} | Win Rate: ${(performance.winRate * 100).toFixed(1)}%`
+      });
+    }
+
+    // Dica específica baseada no volume de trades do CSV
+    if (csvImports.length > 0 && trades.length > 50) {
+      tips.push({
+        id: "csv_analysis_value",
+        title: "Aproveite o Histórico Importado",
+        message: `Você importou um histórico valioso de ${trades.length} trades através do CSV. Este volume de dados permite análises estatísticas profundas que podem revelar padrões ocultos em sua operação. Use esta base histórica para identificar seus melhores horários, dias da semana, ativos e setups. Dados históricos são o combustível para otimização contínua.`,
+        type: "opportunity",
+        priority: "medium",
+        action: "Analise semanalmente seus dados históricos para identificar padrões temporais e de performance por ativo.",
+        basedOn: `${trades.length} trades importados de ${csvImports.map(c => c.fileName).join(', ')}`,
+        impact: "Análise de padrões históricos pode melhorar performance em 15-25%",
+        metrics: `CSV Importado: ${trades.length} trades | Fonte: ${csvImports.length} arquivo(s)`
+      });
+    }
+
     return tips;
+  }
+
+  private generateFallbackTips(analysis: any): any[] {
+    // Versão simplificada para compatibilidade
+    return this.generateEnhancedFallbackTips([], []);
+  }
+
+  // FUNÇÕES AUXILIARES PARA CÁLCULOS
+
+  private calculateSimpleMaxDrawdown(results: number[]): number {
+    if (results.length === 0) return 0;
+    
+    let maxDrawdown = 0;
+    let peak = results[0];
+    let cumulative = 0;
+    
+    for (const result of results) {
+      cumulative += result;
+      if (cumulative > peak) {
+        peak = cumulative;
+      }
+      const drawdown = peak - cumulative;
+      if (drawdown > maxDrawdown) {
+        maxDrawdown = drawdown;
+      }
+    }
+    
+    return maxDrawdown;
+  }
+
+  private calculateSimpleStandardDeviation(results: number[]): number {
+    if (results.length <= 1) return 0;
+    
+    const mean = results.reduce((sum, val) => sum + val, 0) / results.length;
+    const variance = results.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (results.length - 1);
+    
+    return Math.sqrt(variance);
+  }
+
+  private detectSimpleOvertrading(trades: any[]): boolean {
+    if (trades.length < 10) return false;
+    
+    // Detecta se há muitas operações em um período curto
+    const tradesPerDay: { [key: string]: number } = {};
+    
+    trades.forEach(trade => {
+      const date = new Date(trade.dataHora).toDateString();
+      tradesPerDay[date] = (tradesPerDay[date] || 0) + 1;
+    });
+    
+    const dailyCounts = Object.values(tradesPerDay);
+    const avgPerDay = dailyCounts.reduce((sum, count) => sum + count, 0) / dailyCounts.length;
+    
+    // Se algum dia teve mais que 3x a média, considera overtrading
+    return dailyCounts.some(count => count > avgPerDay * 3 && count > 10);
+  }
+
+  private detectSimpleRevengeTrading(trades: any[]): boolean {
+    if (trades.length < 5) return false;
+    
+    // Ordena trades por data
+    const sortedTrades = trades.sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime());
+    
+    let revengeSequences = 0;
+    
+    for (let i = 1; i < sortedTrades.length; i++) {
+      const prevTrade = sortedTrades[i - 1];
+      const currentTrade = sortedTrades[i];
+      
+      const prevResult = parseFloat(prevTrade.resultado);
+      const currentCapital = parseFloat(currentTrade.capitalUtilizado);
+      const prevCapital = parseFloat(prevTrade.capitalUtilizado);
+      
+      // Se perdeu no trade anterior e aumentou muito o capital no próximo
+      if (prevResult < 0 && currentCapital > prevCapital * 1.5) {
+        revengeSequences++;
+      }
+    }
+    
+    // Se mais de 20% dos trades mostram padrão de vingança
+    return revengeSequences / trades.length > 0.2;
+  }
+
+  private getSimpleEmotionalSummary(trades: any[]): string[] {
+    const patterns: string[] = [];
+    
+    const emotionTrades = trades.filter(t => t.emocao);
+    if (emotionTrades.length === 0) return patterns;
+    
+    const emotionCounts: { [key: string]: { count: number, losses: number } } = {};
+    
+    emotionTrades.forEach(trade => {
+      const emotion = trade.emocao;
+      const result = parseFloat(trade.resultado);
+      
+      if (!emotionCounts[emotion]) {
+        emotionCounts[emotion] = { count: 0, losses: 0 };
+      }
+      
+      emotionCounts[emotion].count++;
+      if (result < 0) {
+        emotionCounts[emotion].losses++;
+      }
+    });
+    
+    // Identifica emoções problemáticas
+    Object.entries(emotionCounts).forEach(([emotion, stats]) => {
+      const lossRate = stats.losses / stats.count;
+      if (lossRate > 0.7 && stats.count >= 3) {
+        patterns.push(`${emotion} (${(lossRate * 100).toFixed(0)}% perdas)`);
+      }
+    });
+    
+    return patterns;
   }
 
   // Métodos de análise profunda
