@@ -49,14 +49,20 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     try {
       if (entry) {
         // Atualizar entrada existente
+        const userId = localStorage.getItem('user-id');
+        if (!userId) {
+          throw new Error('Usuário não autenticado');
+        }
+        
         const response = await fetch(`/api/diary/${entry.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("authToken") || ""}`,
-            "x-user-id": localStorage.getItem("userId") || ""
+            "user-id": userId,
+            "X-User-ID": userId
           },
           body: JSON.stringify(data),
+          credentials: "include"
         });
         
         if (!response.ok) {
@@ -68,14 +74,20 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
         });
       } else {
         // Criar nova entrada
+        const userId = localStorage.getItem('user-id');
+        if (!userId) {
+          throw new Error('Usuário não autenticado');
+        }
+        
         const response = await fetch("/api/diary", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("authToken") || ""}`,
-            "x-user-id": localStorage.getItem("userId") || ""
+            "user-id": userId,
+            "X-User-ID": userId
           },
           body: JSON.stringify(data),
+          credentials: "include"
         });
         
         if (!response.ok) {
@@ -110,12 +122,18 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
     setIsLoading(true);
     try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) {
+        throw new Error('Usuário não autenticado');
+      }
+      
       const response = await fetch(`/api/diary/${entry.id}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("authToken") || ""}`,
-          "x-user-id": localStorage.getItem("userId") || ""
-        }
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        credentials: "include"
       });
       
       if (!response.ok) {
