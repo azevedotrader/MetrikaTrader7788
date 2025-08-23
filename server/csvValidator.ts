@@ -114,16 +114,34 @@ function detectEncoding(filePath: string): string {
     const detected = chardet.detect(buffer);
     
     if (typeof detected === 'string') {
-      if (detected.toLowerCase().includes('utf')) return 'utf8';
-      if (detected.toLowerCase().includes('iso-8859') || 
-          detected.toLowerCase().includes('latin') ||
-          detected.toLowerCase().includes('windows') || 
-          detected.toLowerCase().includes('cp1252')) {
+      const detectedLower = detected.toLowerCase();
+      
+      // Para arquivos brasileiros, priorizar Latin-1/ISO-8859-1
+      if (detectedLower.includes('iso-8859') || detectedLower.includes('latin')) {
+        console.log(`📁 Encoding detectado: ${detected} → usando latin1 (arquivo brasileiro)`);
         return 'latin1';
+      }
+      if (detectedLower.includes('windows') || detectedLower.includes('cp1252')) {
+        console.log(`📁 Encoding detectado: ${detected} → usando latin1 (Windows)`);
+        return 'latin1';
+      }
+      if (detectedLower.includes('utf')) {
+        console.log(`📁 Encoding detectado: ${detected} → usando utf8`);
+        return 'utf8';
       }
     }
     
-    console.log(`📁 Encoding detectado: ${detected} → usando utf8`);
+    // Fallback: tentar detectar por caracteres brasileiros no buffer
+    const content = buffer.toString('latin1');
+    if (content.includes('ç') || content.includes('ã') || content.includes('õ') || 
+        content.includes('á') || content.includes('é') || content.includes('í') ||
+        content.includes('ó') || content.includes('ú') || content.includes('â') ||
+        content.includes('ê') || content.includes('ô') || content.includes('R$')) {
+      console.log(`📁 Caracteres brasileiros detectados → usando latin1`);
+      return 'latin1';
+    }
+    
+    console.log(`📁 Encoding detectado: ${detected} → usando utf8 (padrão)`);
     return 'utf8';
   } catch (error) {
     console.log(`⚠️ Erro na detecção de encoding, usando utf8`);
@@ -244,18 +262,32 @@ function parseTradeDate(dateStr: string): dayjs.Dayjs | null {
 function parseNumber(value: string): number {
   if (!value || typeof value !== 'string') return 0;
   
-  const cleaned = value.trim().replace(/[^\d.,\-+]/g, '');
+  let cleaned = value.trim();
   if (!cleaned) return 0;
   
-  // Detectar formato brasileiro (1.234,56) vs americano (1,234.56)
+  // Remover símbolo R$ e outros caracteres não numéricos, mas manter .,+-
+  cleaned = cleaned.replace(/[^\d.,\-+]/g, '');
+  if (!cleaned) return 0;
+  
+  // Detectar formato brasileiro vs americano
   const lastComma = cleaned.lastIndexOf(',');
   const lastDot = cleaned.lastIndexOf('.');
   
-  if (lastComma > lastDot) {
-    // Formato brasileiro: 1.234,56
-    return parseFloat(cleaned.replace(/\./g, '').replace(',', '.'));
-  } else {
-    // Formato americano: 1,234.56
+  // Se tem vírgula e ela está depois do último ponto, é formato brasileiro
+  if (lastComma > lastDot && lastComma !== -1) {
+    // Formato brasileiro: 1.234,56 ou 135.615,00
+    // Remover pontos (separadores de milhares) e trocar vírgula por ponto decimal
+    const result = cleaned.replace(/\./g, '').replace(',', '.');
+    return parseFloat(result);
+  } 
+  // Se tem apenas vírgula (sem ponto), também é formato brasileiro
+  else if (lastComma !== -1 && lastDot === -1) {
+    // Formato brasileiro simples: 1234,56
+    return parseFloat(cleaned.replace(',', '.'));
+  }
+  // Se tem apenas ponto ou ponto está depois da vírgula, é formato americano
+  else {
+    // Formato americano: 1,234.56 ou 1234.56
     return parseFloat(cleaned.replace(/,/g, ''));
   }
 }
