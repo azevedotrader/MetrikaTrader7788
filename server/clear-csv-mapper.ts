@@ -23,8 +23,13 @@ interface ClearTradeRow {
 function parseRealValue(value: string): number {
   if (!value) return 0;
   
-  // Clear usa formato: -16,00 ou 141,00
-  return parseFloat(value.replace(',', '.'));
+  // Clear usa formato brasileiro: 1.234,56 ou -350,00
+  // Remover pontos de milhares e trocar vírgula por ponto decimal
+  const cleaned = value.trim()
+    .replace(/\./g, '')  // Remove pontos de milhares
+    .replace(',', '.');  // Troca vírgula por ponto decimal
+  
+  return parseFloat(cleaned) || 0;
 }
 
 /**
@@ -91,12 +96,15 @@ export function processClearTradeRow(
   const lado = findField(row, ['lado']);
   const qtdCompra = findField(row, ['qtd_compra', 'qtd compra', 'qtdcompra']);
   const qtdVenda = findField(row, ['qtd_venda', 'qtd venda', 'qtdvenda']);
-  const total = findField(row, ['total']);
+  const precoCompra = findField(row, ['preco_compra', 'preço compra', 'preco compra']);
+  const precoVenda = findField(row, ['preco_venda', 'preço venda', 'preco venda']);
+  const resOperacao = findField(row, ['res. operação', 'res. operacao', 'res operacao', 'resultado']);
+  const total = findField(row, ['total']); // Total acumulado, não o resultado individual
   
-  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", total="${total}", lado="${lado}"`);
+  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", res.operação="${resOperacao}", total="${total}", lado="${lado}"`);
   
-  if (!ativo || !abertura || !total) {
-    console.log('❌ Clear: campos obrigatórios ausentes');
+  if (!ativo || !abertura || !resOperacao) {
+    console.log('❌ Clear: campos obrigatórios ausentes (ativo, abertura, res.operação)');
     return null;
   }
   
@@ -108,13 +116,17 @@ export function processClearTradeRow(
   const qtdVendaNum = parseFloat(qtdVenda || '0');
   const quantidade = Math.max(qtdCompraNum, qtdVendaNum) || 1;
   
-  // Resultado JÁ EM REAIS (não precisamos calcular!)
-  const resultado = parseRealValue(total);
+  // Resultado da operação em REAIS (campo Res. Operação, não Total!)
+  const resultado = parseRealValue(resOperacao);
+  
+  // Preços em pontos (precisamos converter para valor real se necessário)
+  const precoEntrada = precoCompra ? parseRealValue(precoCompra) : 0;
+  const precoSaida = precoVenda ? parseRealValue(precoVenda) : 0;
   
   // Tipo de operação  
   const tipo: 'compra' | 'venda' = lado?.toUpperCase() === 'C' ? 'compra' : 'venda';
   
-  console.log(`✅ Clear: ${ativo} ${tipo} ${quantidade} = R$ ${resultado}`);
+  console.log(`✅ Clear: ${ativo} ${tipo} ${quantidade} contratos, resultado = R$ ${resultado}`);
   
   return {
     userId,
@@ -126,12 +138,12 @@ export function processClearTradeRow(
     ativo: ativo.toUpperCase(),
     tipo,
     quantidade: quantidade.toString(),
-    precoEntrada: '0', // Não usar preços em pontos
-    precoSaida: '0',   // Não usar preços em pontos  
-    capitalUtilizado: Math.abs(resultado).toString(), // Aproximar pelo resultado
+    precoEntrada: precoEntrada.toString(),
+    precoSaida: precoSaida.toString(),
+    capitalUtilizado: (quantidade * Math.max(precoEntrada, precoSaida)).toString(),
     resultado: resultado.toString(),
     emocao: 'neutro',
-    comentario: `Clear: ${lado} ${quantidade} contratos`
+    comentario: `Clear: ${tipo} ${quantidade} contratos - ${abertura}`
   };
 }
 
