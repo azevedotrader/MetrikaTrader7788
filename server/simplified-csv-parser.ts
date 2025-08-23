@@ -86,24 +86,32 @@ export async function parseWithSimplifiedSystem(filePath: string): Promise<Simpl
 }
 
 /**
- * Parser 1: PapaParse (principal)
+ * Parser 1: PapaParse (principal) com detecção forçada de delimitador
  */
 async function tryPapaParse(content: string, encoding: string): Promise<SimplifiedParseResult> {
-  // PapaParse tem excelente detecção automática
+  // Forçar detecção manual de delimitador para ser mais preciso
+  const delimiter = detectDelimiter(content);
+  
+  console.log(`🚀 PapaParse usando delimitador: "${delimiter}"`);
+  
   const result = Papa.parse(content, {
     header: true,
+    delimiter: delimiter, // Forçar o delimitador detectado
     skipEmptyLines: true,
     transformHeader: (header: string) => header.trim(),
     transform: (value: string) => value.trim(),
     dynamicTyping: false, // Manter como string para controle manual
+    comments: false, // Não interpretar # como comentário
+    quoteChar: '"',
+    escapeChar: '"'
   });
 
   if (result.errors.length > 0) {
     console.warn('⚠️ PapaParse avisos:', result.errors.slice(0, 3).map(e => e.message));
   }
 
-  // PapaParse detecta automaticamente o delimitador
-  const delimiter = result.meta.delimiter || ',';
+  console.log(`📊 PapaParse resultado: ${result.data.length} linhas, ${result.meta.fields?.length || 0} colunas`);
+  console.log(`📝 Colunas encontradas: ${result.meta.fields?.join(', ') || 'nenhuma'}`);
 
   return {
     data: result.data,
@@ -199,39 +207,82 @@ function readFileWithEncoding(filePath: string, encoding: string): string {
 }
 
 /**
- * Detecção simples e eficaz de delimitador
+ * Detecção robusta de delimitador com foco em arquivos B3
  */
 function detectDelimiter(content: string): string {
-  const sample = content.split('\n').slice(0, 5).join('\n');
-  const delimiters = [';', ',', '\t', '|'];
+  console.log(`\n🔍 DETECTANDO DELIMITADOR`);
   
-  // Detectar padrões específicos B3 primeiro
-  if (sample.includes('WIN') || sample.includes('WDO') || sample.includes('BGI')) {
-    for (const delimiter of [';', ',', '\t']) {
-      if (sample.includes(delimiter)) {
-        console.log(`🎯 Arquivo B3 detectado, usando: "${delimiter}"`);
-        return delimiter;
-      }
-    }
+  // Pegar mais linhas para análise e pular metadados
+  const allLines = content.split('\n');
+  const dataLines = allLines.filter(line => {
+    const lower = line.toLowerCase().trim();
+    // Pular linhas de metadados comuns
+    return line.trim() && 
+           !lower.startsWith('conta:') && 
+           !lower.startsWith('titular:') &&
+           !lower.startsWith('relatório') &&
+           !lower.startsWith('período');
+  }).slice(0, 10);
+  
+  console.log(`📊 Analisando ${dataLines.length} linhas de dados (pulando metadados)`);
+  
+  if (dataLines.length === 0) {
+    console.warn('⚠️ Nenhuma linha de dados encontrada, usando vírgula como padrão');
+    return ',';
   }
   
-  let bestDelimiter = ',';
-  let bestScore = 0;
+  // Mostrar amostra do conteúdo para debug
+  console.log(`📝 Primeira linha de dados: "${dataLines[0].substring(0, 100)}..."`);
+  
+  const delimiters = [';', ',', '\t', '|', ':'];
+  const results: { delimiter: string; score: number; avgFields: number }[] = [];
   
   for (const delimiter of delimiters) {
-    const lines = sample.split('\n').filter(line => line.trim());
-    if (lines.length < 2) continue;
+    const fieldCounts = dataLines.map(line => line.split(delimiter).length);
+    const avgFields = fieldCounts.reduce((a, b) => a + b, 0) / fieldCounts.length;
     
-    const counts = lines.map(line => line.split(delimiter).length);
-    const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
-    const consistent = counts.every(c => Math.abs(c - avg) <= 1);
+    // Calcular consistência (desvio padrão baixo = boa consistência)
+    const variance = fieldCounts.reduce((acc, count) => acc + Math.pow(count - avgFields, 2), 0) / fieldCounts.length;
+    const consistency = variance === 0 ? 1 : 1 / (1 + Math.sqrt(variance));
     
-    if (consistent && avg > bestScore) {
-      bestScore = avg;
-      bestDelimiter = delimiter;
+    // Score considera tanto número de campos quanto consistência
+    const score = avgFields * consistency;
+    
+    results.push({
+      delimiter: delimiter === '\t' ? 'TAB' : delimiter,
+      score,
+      avgFields
+    });
+    
+    console.log(`   "${delimiter === '\t' ? 'TAB' : delimiter}": ${avgFields.toFixed(1)} campos, consistência: ${(consistency * 100).toFixed(1)}%, score: ${score.toFixed(2)}`);
+  }
+  
+  // Ordenar por score e pegar o melhor
+  results.sort((a, b) => b.score - a.score);
+  const best = results[0];
+  
+  let bestDelimiter = best.delimiter === 'TAB' ? '\t' : best.delimiter;
+  
+  // Dar preferência para ponto e vírgula se tiver score similar (comum em arquivos brasileiros)
+  const semicolonResult = results.find(r => r.delimiter === ';');
+  if (semicolonResult && semicolonResult.avgFields > 3 && Math.abs(semicolonResult.score - best.score) < 2) {
+    bestDelimiter = ';';
+    console.log(`🇧🇷 Preferindo ponto e vírgula (formato brasileiro)`);
+  }
+  
+  console.log(`✅ Melhor delimitador: "${bestDelimiter}" com ${best.avgFields.toFixed(1)} campos`);
+  
+  // Validação final - se ainda tiver poucos campos, pode ser que precise de detecção especial
+  if (best.avgFields < 2) {
+    console.warn(`⚠️ Poucos campos detectados (${best.avgFields.toFixed(1)}), arquivo pode ter formato especial`);
+    
+    // Tentar detectar formato B3 Clear específico (tudo em uma coluna separado por ;)
+    const firstLine = dataLines[0];
+    if (firstLine && firstLine.includes(';') && (firstLine.includes('WIN') || firstLine.includes('WDO'))) {
+      console.log(`🎯 Formato B3 Clear detectado, forçando ponto e vírgula`);
+      return ';';
     }
   }
   
-  console.log(`🔍 Delimitador detectado: "${bestDelimiter}"`);
   return bestDelimiter;
 }
