@@ -96,30 +96,37 @@ export function processClearTradeRow(
   
   // Mapear campos (headers podem variar, incluindo acentos)
   const ativo = findField(row, ['ativo']);
-  const abertura = findField(row, ['abertura']);
-  const fechamento = findField(row, ['fechamento']);
-  const data = findField(row, ['data']); // Campo de data
-  const hora = findField(row, ['hora execução', 'hora execucao', 'hora']);
+  const abertura = findField(row, ['abertura']); // Data+hora de abertura
+  const fechamento = findField(row, ['fechamento']); // Data+hora de fechamento
   const lado = findField(row, ['lado']);
   const qtdCompra = findField(row, ['qtd compra', 'qtd_compra', 'qtdcompra']);
   const qtdVenda = findField(row, ['qtd venda', 'qtd_venda', 'qtdvenda']);
   const quantidade = findField(row, ['qnt.', 'qnt', 'quantidade']);
   const precoCompra = findField(row, ['preço compra', 'preco compra', 'preco_compra']);
   const precoVenda = findField(row, ['preço venda', 'preco venda', 'preco_venda']);
-  const resOperacao = findField(row, ['res. operação', 'res. operacao', 'res operacao', 'res operação', 'resultado']);
+  
+  // Buscar o campo Res. Operação com diferentes variações
+  const resOperacao = findField(row, ['res. operação', 'res operação', 'res.operação', 'resoperação']) || 
+                      findField(row, ['resultado']);
   const total = findField(row, ['total']); // Total acumulado, não o resultado individual
   
-  console.log(`🏦 Clear campos: ativo="${ativo}", data="${data}", hora="${hora}", res.operação="${resOperacao}", total="${total}", lado="${lado}"`);
+  // Usar abertura ou fechamento para data/hora
+  const dataHoraStr = abertura || fechamento || '';
   
-  if (!ativo || !resOperacao) {
-    console.log('❌ Clear: campos obrigatórios ausentes (ativo, res.operação)');
+  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", res.operação="${resOperacao}", total="${total}", lado="${lado}"`);
+  
+  if (!ativo || (!resOperacao && !total)) {
+    console.log('❌ Clear: campos obrigatórios ausentes (ativo, resultado)');
     return null;
   }
   
-  // Usar a data e hora dos campos corretos
-  const dataStr = data || '01/01/2025'; // Data padrão se não tiver
-  const horaStr = hora || '00:00:00'; // Hora padrão se não tiver
-  const dataHora = parseClearDate(`${dataStr} ${horaStr}`);
+  // Usar a data e hora do campo abertura/fechamento
+  let dataHora: Date;
+  if (dataHoraStr && dataHoraStr.includes('/')) {
+    dataHora = parseClearDate(dataHoraStr);
+  } else {
+    dataHora = new Date(); // Data atual se não conseguir parsear
+  }
   
   // Quantidade (usar o campo Qnt. ou a maior entre compra e venda)
   const qtdCampo = parseFloat(quantidade || '0');
@@ -127,8 +134,8 @@ export function processClearTradeRow(
   const qtdVendaNum = parseFloat(qtdVenda || '0');
   const qtdFinal = qtdCampo || Math.max(qtdCompraNum, qtdVendaNum) || 1;
   
-  // Resultado da operação em REAIS (campo Res. Operação, não Total!)
-  const resultado = parseRealValue(resOperacao);
+  // Resultado da operação em REAIS (usar Res. Operação se disponível, senão Total)
+  const resultado = parseRealValue(resOperacao || total || '0');
   
   // Preços em pontos (precisamos converter para valor real se necessário)
   const precoEntrada = precoCompra ? parseRealValue(precoCompra) : 0;
@@ -154,7 +161,7 @@ export function processClearTradeRow(
     capitalUtilizado: (qtdFinal * Math.max(precoEntrada, precoSaida)).toString(),
     resultado: resultado.toString(),
     emocao: 'neutro',
-    comentario: `Clear: ${tipo} ${qtdFinal} contratos - ${data || 'sem data'}`
+    comentario: `Clear: ${tipo} ${qtdFinal} contratos - ${dataHoraStr || 'sem data'}`
   };
 }
 
@@ -162,11 +169,23 @@ export function processClearTradeRow(
  * Busca campo por vários nomes possíveis
  */
 function findField(row: Record<string, any>, fieldNames: string[]): string | null {
+  // Debug: mostrar todas as chaves disponíveis no primeiro campo procurado
+  if (fieldNames[0] === 'ativo') {
+    console.log('🔍 Chaves disponíveis:', Object.keys(row));
+  }
+  
   for (const [key, value] of Object.entries(row)) {
-    const normalizedKey = key.toLowerCase().trim();
+    const normalizedKey = key.toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' '); // Normalizar espaços múltiplos
     
-    if (fieldNames.some(name => normalizedKey.includes(name.toLowerCase()))) {
-      return String(value || '').trim();
+    for (const fieldName of fieldNames) {
+      const normalizedFieldName = fieldName.toLowerCase().trim();
+      
+      // Comparação exata ou parcial
+      if (normalizedKey === normalizedFieldName || normalizedKey.includes(normalizedFieldName)) {
+        return String(value || '').trim();
+      }
     }
   }
   return null;
