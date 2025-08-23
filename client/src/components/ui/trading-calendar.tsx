@@ -27,9 +27,12 @@ interface TradingCalendarProps {
 
 export function TradingCalendar({ trades = [], calendarData = [], className }: TradingCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   
-  // Dias da semana
-  const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  // Dias da semana - versão curta para mobile
+  const weekDays = isMobile ? 
+    ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] :
+    ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   
   // Navegar entre meses
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -84,7 +87,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
         date,
         pnl: Math.round(data.pnl),
         trades: data.trades,
-        winRate: undefined // Pode ser calculado se necessário
+        winRate: (data.winningTrades / data.trades) * 100
       }));
     }
     
@@ -167,10 +170,13 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
 
   const weekSummaries = calculateWeekSummaries();
 
-  // Renderizar célula do dia
+  // Renderizar célula do dia - versão mobile otimizada
   const renderDayCell = (dayNumber: number | null, isCurrentMonth: boolean = true) => {
     if (!dayNumber || !isCurrentMonth) {
-      return <div className="h-16 p-1"></div>;
+      return <div className={cn(
+        "p-1 border-r border-b border-zinc-700",
+        isMobile ? "h-[72px]" : "h-20"
+      )}></div>;
     }
 
     const tradeDay = tradeDays.find(td => td.date === dayNumber);
@@ -182,13 +188,16 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
 
     return (
       <div className={cn(
-        "h-16 p-1 border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors",
-        isToday && "bg-zinc-800/50 border-zinc-600"
+        "p-1 border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors",
+        isMobile ? "h-[72px]" : "h-20",
+        isToday && "bg-zinc-800/50 border-zinc-600",
+        hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20")
       )}>
         <div className="flex flex-col h-full">
           <div className={cn(
-            "text-sm font-medium mb-1",
-            isToday ? "text-white" : "text-zinc-300"
+            "font-medium",
+            isMobile ? "text-xs" : "text-sm",
+            isToday ? "text-white" : "text-zinc-400"
           )}>
             {dayNumber}
           </div>
@@ -196,34 +205,41 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
           {hasData && tradeDay && (
             <div className="flex-1 flex flex-col justify-center">
               <div className={cn(
-                "text-xs font-semibold mb-1",
+                "font-bold",
+                isMobile ? "text-xs" : "text-sm",
                 isProfit ? "text-green-400" : "text-red-400"
               )}>
-                {isProfit ? '+' : ''}R$ {Math.abs(tradeDay.pnl).toLocaleString('pt-BR')}
+                {isMobile ? 
+                  `${isProfit ? '+' : ''}${Math.abs(tradeDay.pnl) >= 1000 ? 
+                    `${(tradeDay.pnl/1000).toFixed(1)}k` : 
+                    tradeDay.pnl.toFixed(0)}` :
+                  `${isProfit ? '+' : ''}R$ ${Math.abs(tradeDay.pnl).toLocaleString('pt-BR')}`
+                }
               </div>
-              <div className="text-xs text-zinc-400">
+              <div className={cn(
+                "text-zinc-500",
+                isMobile ? "text-[10px]" : "text-xs"
+              )}>
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? 's' : ''}
               </div>
+              {!isMobile && tradeDay.winRate && (
+                <div className="text-[10px] text-zinc-600">
+                  {tradeDay.winRate.toFixed(0)}% win
+                </div>
+              )}
             </div>
-          )}
-          
-          {hasData && (
-            <div className={cn(
-              "absolute top-1 right-1 w-2 h-2 rounded-full",
-              isProfit ? "bg-green-400" : "bg-red-400"
-            )}></div>
           )}
         </div>
       </div>
     );
   };
 
-  // Renderizar resumo semanal
+  // Renderizar resumo semanal - apenas desktop
   const renderWeekSummary = (week: WeekSummary) => {
     const isProfit = week.pnl > 0;
     
     return (
-      <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[64px] flex flex-col justify-center">
+      <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[80px] flex flex-col justify-center">
         <div className="text-xs text-zinc-400 mb-1">Semana {week.weekNumber}</div>
         <div className={cn(
           "font-bold text-sm mb-1",
@@ -238,49 +254,92 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
     );
   };
 
+  // Estatísticas mensais
+  const monthlyStats = {
+    totalPnl: tradeDays.reduce((sum, day) => sum + day.pnl, 0),
+    totalTrades: tradeDays.reduce((sum, day) => sum + day.trades, 0),
+    winRate: Math.round((tradeDays.filter(day => day.pnl > 0).length / tradeDays.length) * 100) || 0,
+    tradingDays: tradeDays.length
+  };
+
   return (
     <Card className={cn("bg-zinc-900 border-zinc-700", className)}>
-      <CardHeader className="pb-4">
+      <CardHeader className={cn(isMobile ? "pb-2" : "pb-4")}>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Calendário de Trading
+          <CardTitle className={cn(
+            "text-white flex items-center gap-2",
+            isMobile ? "text-base" : "text-lg"
+          )}>
+            <Calendar className={cn(isMobile ? "w-4 h-4" : "w-5 h-5")} />
+            <span className="hidden md:inline">Calendário de Trading</span>
+            <span className="md:hidden">Trading</span>
           </CardTitle>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigateMonth('prev')}
-              className="text-zinc-400 hover:text-white"
+              className="text-zinc-400 hover:text-white p-1"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className={cn(isMobile ? "w-3 h-3" : "w-4 h-4")} />
             </Button>
-            <span className="text-white font-medium capitalize min-w-[160px] text-center">
+            <span className={cn(
+              "text-white font-medium capitalize text-center",
+              isMobile ? "min-w-[120px] text-sm" : "min-w-[160px]"
+            )}>
               {monthName}
             </span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigateMonth('next')}
-              className="text-zinc-400 hover:text-white"
+              className="text-zinc-400 hover:text-white p-1"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className={cn(isMobile ? "w-3 h-3" : "w-4 h-4")} />
             </Button>
           </div>
         </div>
+        
+        {/* Estatísticas mensais compactas - mobile */}
+        {isMobile && (
+          <div className="mt-3 pt-3 border-t border-zinc-700">
+            <div className="flex justify-between items-center text-xs">
+              <div className="text-zinc-400">
+                Estatísticas do mês:
+              </div>
+              <div className={cn(
+                "font-bold",
+                monthlyStats.totalPnl >= 0 ? "text-green-400" : "text-red-400"
+              )}>
+                {monthlyStats.totalPnl >= 0 ? '+' : ''}R$ {Math.abs(monthlyStats.totalPnl).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+              </div>
+            </div>
+            <div className="text-[10px] text-zinc-500 mt-1">
+              {monthlyStats.tradingDays} dias • {monthlyStats.totalTrades} trades • {monthlyStats.winRate}% win
+            </div>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent className="p-0">
-        <div className="grid grid-cols-8 bg-zinc-800">
+        <div className={cn(
+          "grid bg-zinc-800",
+          isMobile ? "grid-cols-7" : "grid-cols-8"
+        )}>
           {/* Cabeçalhos dos dias da semana */}
           {weekDays.map(day => (
-            <div key={day} className="p-3 text-center text-sm font-medium text-zinc-300 border-r border-zinc-700">
+            <div key={day} className={cn(
+              "text-center font-medium text-zinc-300 border-r border-b border-zinc-700",
+              isMobile ? "p-2 text-xs" : "p-3 text-sm"
+            )}>
               {day}
             </div>
           ))}
-          <div className="p-3 text-center text-sm font-medium text-zinc-300">
-            Resumo
-          </div>
+          {!isMobile && (
+            <div className="p-3 text-center text-sm font-medium text-zinc-300 border-b border-zinc-700">
+              Resumo
+            </div>
+          )}
           
           {/* Calendário principal */}
           {(() => {
@@ -306,13 +365,15 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               );
               
               if (week.length === 7) {
-                const currentWeekSummary = weekSummaries[weekIndex];
-                week.push(
-                  <div key={`week-${weekIndex}`}>
-                    {currentWeekSummary ? renderWeekSummary(currentWeekSummary) : 
-                     <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[64px]"></div>}
-                  </div>
-                );
+                if (!isMobile) {
+                  const currentWeekSummary = weekSummaries[weekIndex];
+                  week.push(
+                    <div key={`week-${weekIndex}`}>
+                      {currentWeekSummary ? renderWeekSummary(currentWeekSummary) : 
+                       <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[80px]"></div>}
+                    </div>
+                  );
+                }
                 
                 calendar.push(...week);
                 week = [];
@@ -330,13 +391,15 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
             }
             
             if (week.length > 0) {
-              const currentWeekSummary = weekSummaries[weekIndex];
-              week.push(
-                <div key={`week-${weekIndex}`}>
-                  {currentWeekSummary ? renderWeekSummary(currentWeekSummary) : 
-                   <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[64px]"></div>}
-                </div>
-              );
+              if (!isMobile) {
+                const currentWeekSummary = weekSummaries[weekIndex];
+                week.push(
+                  <div key={`week-${weekIndex}`}>
+                    {currentWeekSummary ? renderWeekSummary(currentWeekSummary) : 
+                     <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[80px]"></div>}
+                  </div>
+                );
+              }
               calendar.push(...week);
             }
             
@@ -344,39 +407,41 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
           })()}
         </div>
 
-        {/* Resumo mensal */}
-        <div className="p-4 border-t border-zinc-700 bg-zinc-800/30">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {tradeDays.length}
+        {/* Resumo mensal - desktop */}
+        {!isMobile && (
+          <div className="p-4 border-t border-zinc-700 bg-zinc-800/30">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">
+                  {monthlyStats.tradingDays}
+                </div>
+                <div className="text-sm text-zinc-400">Dias de Trading</div>
               </div>
-              <div className="text-sm text-zinc-400">Dias de Trading</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {tradeDays.reduce((sum, day) => sum + day.trades, 0)}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">
+                  {monthlyStats.totalTrades}
+                </div>
+                <div className="text-sm text-zinc-400">Total de Trades</div>
               </div>
-              <div className="text-sm text-zinc-400">Total de Trades</div>
-            </div>
-            <div className="text-center">
-              <div className={cn(
-                "text-2xl font-bold",
-                tradeDays.reduce((sum, day) => sum + day.pnl, 0) > 0 ? "text-green-400" : "text-red-400"
-              )}>
-                {tradeDays.reduce((sum, day) => sum + day.pnl, 0) > 0 ? '+' : ''}
-                R$ {Math.abs(tradeDays.reduce((sum, day) => sum + day.pnl, 0)).toLocaleString('pt-BR')}
+              <div className="text-center">
+                <div className={cn(
+                  "text-2xl font-bold",
+                  monthlyStats.totalPnl > 0 ? "text-green-400" : "text-red-400"
+                )}>
+                  {monthlyStats.totalPnl > 0 ? '+' : ''}
+                  R$ {Math.abs(monthlyStats.totalPnl).toLocaleString('pt-BR')}
+                </div>
+                <div className="text-sm text-zinc-400">P&L Total</div>
               </div>
-              <div className="text-sm text-zinc-400">P&L Total</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {Math.round((tradeDays.filter(day => day.pnl > 0).length / tradeDays.length) * 100) || 0}%
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">
+                  {monthlyStats.winRate}%
+                </div>
+                <div className="text-sm text-zinc-400">Taxa de Acerto</div>
               </div>
-              <div className="text-sm text-zinc-400">Taxa de Acerto</div>
             </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
