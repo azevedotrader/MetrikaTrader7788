@@ -45,9 +45,6 @@ export default function Perfil() {
       <div className="max-w-2xl mx-auto">
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white">
-              Perfil do Trader
-            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">

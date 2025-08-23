@@ -35,8 +35,7 @@ export default function Diario() {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Diário do Trader</h2>
+        <div className="flex items-center justify-end mb-6">
           <Button className="gradient-purple-blue hover:opacity-90 transition-opacity">
             Nova Entrada
           </Button>

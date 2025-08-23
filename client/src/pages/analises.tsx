@@ -13,7 +13,6 @@ export default function Analises() {
     <div className="p-6 space-y-6">
       {/* Filters */}
       <div>
-        <h2 className="text-2xl font-bold text-white mb-4">Análises Avançadas</h2>
         <div className="flex flex-wrap gap-4">
           <Select>
             <SelectTrigger className="w-48 bg-slate-700 border-slate-600 text-white">

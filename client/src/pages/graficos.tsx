@@ -240,11 +240,7 @@ export default function Graficos() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Gráficos em Tempo Real</h1>
-          <p className="text-slate-400">Análise técnica avançada com TradingView</p>
-        </div>
+      <div className="flex items-center justify-end">
         <div className="flex items-center space-x-2">
           <TrendingUp className="w-6 h-6 text-purple-500" />
           <BarChart3 className="w-6 h-6 text-blue-500" />

@@ -367,14 +367,6 @@ export default function NovoTrade() {
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">
-          Novo Trade
-        </h1>
-        <p className="text-charcoal-400 mt-2 text-sm lg:text-base">
-          Registre os detalhes da sua operação ou importe via CSV
-        </p>
-      </div>
       <Tabs defaultValue="manual" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="manual">Manual</TabsTrigger>

@@ -9,15 +9,6 @@ export default function CalendarioPage() {
 
   return (
     <div className="space-y-6 pb-8">
-      <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Calendar className="w-8 h-8 text-purple-400" />
-          Calendário de Trading
-        </h1>
-        <p className="text-slate-400 mt-2">
-          Acompanhe sua performance diária e identifique padrões de lucro ao longo do tempo
-        </p>
-      </div>
 
       {/* Instrucoes */}
       <Card className="bg-slate-900/50 border-slate-700">
@@ -63,7 +54,7 @@ export default function CalendarioPage() {
       </Card>
 
       {/* Calendário Principal */}
-      <TradingCalendar trades={trades} calendarData={calendarData as any[]} />
+      <TradingCalendar trades={trades} calendarData={(calendarData as any[]) || []} />
 
       {/* Dicas de Análise */}
       <Card className="bg-slate-900/50 border-slate-700">

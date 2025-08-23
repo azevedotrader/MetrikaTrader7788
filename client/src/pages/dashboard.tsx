@@ -1428,24 +1428,6 @@ export default function Dashboard() {
   return (
     <div className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
       <div className="flex flex-col gap-3 md:gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white">
-            Dashboard
-          </h1>
-          <p className="text-zinc-400 mt-1 md:mt-2 text-xs md:text-sm lg:text-base">
-            {viewMode === "all" && "Dados consolidados de todas as corretoras"}
-            {viewMode === "broker" &&
-              selectedBrokerFilter &&
-              `Mostrando dados da ${brokerInfo[selectedBrokerFilter as keyof typeof brokerInfo]?.name}`}
-            {viewMode === "csv" &&
-              selectedCsvIds.length > 0 &&
-              `Filtrando por ${selectedCsvIds.length} CSV${selectedCsvIds.length > 1 ? "s" : ""} selecionado${selectedCsvIds.length > 1 ? "s" : ""}`}
-            {viewMode === "csv" &&
-              selectedCsvIds.length === 0 &&
-              "Selecione CSVs para visualizar"}
-          </p>
-        </div>
-
         <div className="flex flex-wrap gap-2">
           {/* Smart Reprocess Button */}
           {trades.length > 0 && (
