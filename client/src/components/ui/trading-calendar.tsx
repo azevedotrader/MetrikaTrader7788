@@ -31,7 +31,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
   
   // Dias da semana - versão curta para mobile
   const weekDays = isMobile ? 
-    ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] :
+    ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] :
     ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   
   // Navegar entre meses
@@ -175,7 +175,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
     if (!dayNumber || !isCurrentMonth) {
       return <div className={cn(
         "p-1 border-r border-b border-zinc-700",
-        isMobile ? "h-[72px]" : "h-20"
+        isMobile ? "h-[110px]" : "h-20"
       )}></div>;
     }
 
@@ -188,15 +188,15 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
 
     return (
       <div className={cn(
-        "p-1 border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors",
-        isMobile ? "h-[72px]" : "h-20",
+        "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors",
+        isMobile ? "h-[110px] p-2" : "h-20 p-1",
         isToday && "bg-zinc-800/50 border-zinc-600",
         hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20")
       )}>
         <div className="flex flex-col h-full">
           <div className={cn(
             "font-medium",
-            isMobile ? "text-xs" : "text-sm",
+            isMobile ? "text-sm mb-1" : "text-sm",
             isToday ? "text-white" : "text-zinc-400"
           )}>
             {dayNumber}
@@ -206,7 +206,7 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
             <div className="flex-1 flex flex-col justify-center">
               <div className={cn(
                 "font-bold",
-                isMobile ? "text-xs" : "text-sm",
+                isMobile ? "text-sm mb-1" : "text-sm",
                 isProfit ? "text-green-400" : "text-red-400"
               )}>
                 {isMobile ? 
@@ -218,10 +218,15 @@ export function TradingCalendar({ trades = [], calendarData = [], className }: T
               </div>
               <div className={cn(
                 "text-zinc-500",
-                isMobile ? "text-[10px]" : "text-xs"
+                isMobile ? "text-xs" : "text-xs"
               )}>
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? 's' : ''}
               </div>
+              {isMobile && tradeDay.winRate && (
+                <div className="text-[10px] text-zinc-600 mt-1">
+                  {tradeDay.winRate.toFixed(0)}% win
+                </div>
+              )}
               {!isMobile && tradeDay.winRate && (
                 <div className="text-[10px] text-zinc-600">
                   {tradeDay.winRate.toFixed(0)}% win
