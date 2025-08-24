@@ -176,32 +176,20 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
 // TradingView widget real implementation
 function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
   const [widgetId] = useState(() => `tradingview_chart_${Math.random().toString(36).substr(2, 9)}`);
+  const [useFallback, setUseFallback] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
+    setIsLoading(true);
+    setUseFallback(false);
+    
     // Clean up any existing widget
     const container = document.getElementById(widgetId);
     if (container) {
       container.innerHTML = '';
     }
 
-    // Check if TradingView script is already loaded
-    if (document.getElementById("tradingview_script")) {
-      initializeWidget();
-      return;
-    }
-
-    // Load TradingView script if not already loaded
-    const script = document.createElement("script");
-    script.id = "tradingview_script";
-    script.src = "https://s3.tradingview.com/tv.js";
-    script.async = true;
-    script.onload = initializeWidget;
-    script.onerror = () => {
-      console.warn("Failed to load TradingView script, using fallback");
-      setUseFallback(true);
-    };
-    document.body.appendChild(script);
-
+    // Function to initialize widget
     function initializeWidget() {
       if (window.TradingView && window.TradingView.widget) {
         try {
@@ -229,16 +217,49 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
             ],
             show_popup_button: true,
             popup_width: "1000",
-            popup_height: "650"
+            popup_height: "650",
+            onChartReady: () => {
+              setIsLoading(false);
+            }
           });
         } catch (error) {
           console.error("Error initializing TradingView widget:", error);
           setUseFallback(true);
+          setIsLoading(false);
         }
       } else {
         console.warn("TradingView library not available, using fallback");
         setUseFallback(true);
+        setIsLoading(false);
       }
+    }
+
+    // Check if TradingView script is already loaded
+    if (window.TradingView && document.getElementById("tradingview_script")) {
+      // Script already loaded, initialize immediately
+      setTimeout(initializeWidget, 100);
+    } else {
+      // Load TradingView script
+      const script = document.createElement("script");
+      script.id = "tradingview_script";
+      script.src = "https://s3.tradingview.com/tv.js";
+      script.async = true;
+      script.onload = () => {
+        setTimeout(initializeWidget, 100);
+      };
+      script.onerror = () => {
+        console.warn("Failed to load TradingView script, using fallback");
+        setUseFallback(true);
+        setIsLoading(false);
+      };
+      
+      // Remove existing script if any
+      const existingScript = document.getElementById("tradingview_script");
+      if (existingScript) {
+        existingScript.remove();
+      }
+      
+      document.body.appendChild(script);
     }
 
     return () => {
@@ -250,15 +271,21 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
     };
   }, [symbol, interval, widgetId]);
 
-  const [useFallback, setUseFallback] = useState(false);
-
   if (useFallback) {
     return <AlternativeChart symbol={symbol} interval={interval} />;
   }
 
   return (
     <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden">
-      <div id={widgetId} className="w-full h-full" />
+      {isLoading && (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-center text-slate-400">
+            <Activity className="w-8 h-8 animate-spin mx-auto mb-2" />
+            <p>Carregando TradingView...</p>
+          </div>
+        </div>
+      )}
+      <div id={widgetId} className="w-full h-full" style={{ display: isLoading ? 'none' : 'block' }} />
     </div>
   );
 }
@@ -303,12 +330,22 @@ export default function Graficos() {
   const [selectedMarket, setSelectedMarket] = useState<string>("forex");
   const [selectedSymbol, setSelectedSymbol] = useState<string>("FX_IDC:EURBRL");
   const [selectedInterval, setSelectedInterval] = useState<string>("15");
-  const [widgetKey, setWidgetKey] = useState<number>(0);
+  const [widgetKey, setWidgetKey] = useState<number>(Date.now()); // Use timestamp for unique initial key
 
   // Force widget refresh when symbol or interval changes
   useEffect(() => {
-    setWidgetKey(prev => prev + 1);
+    setWidgetKey(Date.now());
   }, [selectedSymbol, selectedInterval]);
+
+  // Auto-load widget when component first mounts
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      setWidgetKey(Date.now());
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []); // Empty dependency array means this runs only once on mount
 
   const handleMarketChange = (market: string) => {
     setSelectedMarket(market);
@@ -430,7 +467,7 @@ export default function Graficos() {
         <CardContent className="p-0">
           <div className="relative rounded-b-lg overflow-hidden" style={{ height: '600px' }}>
             <TradingViewWidget 
-              key={widgetKey}
+              key={`${widgetKey}-${selectedSymbol}-${selectedInterval}`}
               symbol={selectedSymbol} 
               interval={selectedInterval} 
             />
