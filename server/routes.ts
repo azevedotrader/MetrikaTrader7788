@@ -9,6 +9,7 @@ import csv from "csv-parser";
 import fs from "fs";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
+import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -22,6 +23,183 @@ const ADMIN_CREDENTIALS = {
 };
 
 const JWT_SECRET = process.env.JWT_SECRET || 'metrika_admin_secret_key_2025';
+
+// Função para processar arquivos Excel da Clear
+async function processExcelFile(filePath: string, userId: string): Promise<InsertTrade[]> {
+  console.log(`📊 Processando arquivo Excel Clear: ${filePath}`);
+  
+  try {
+    const workbook = XLSX.readFile(filePath);
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+    
+    console.log(`📋 Excel: ${data.length} linhas encontradas`);
+    
+    if (data.length < 2) {
+      return [];
+    }
+    
+    const headers = data[0] as any[];
+    const trades: InsertTrade[] = [];
+    
+    // Identificar apenas operações executadas
+    const executedTrades = [];
+    
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i] as any[];
+      const status = row[6]; // Status
+      const ativo = row[7];   // Ativo
+      const tipo = row[8];    // Tipo (C/V)
+      const qtdExecutada = row[12]; // Qtd. Executada
+      const precoMedio = row[16];   // Preço Médio Exec.
+      const dataHora = row[1];      // Data e Hora
+      
+      if (status === '[TX] Fechada na Íntegra' && qtdExecutada > 0 && precoMedio > 0) {
+        executedTrades.push({
+          ativo: String(ativo || '').trim(),
+          tipo: String(tipo || '').trim(),
+          quantidade: Number(qtdExecutada) || 0,
+          preco: Number(precoMedio) || 0,
+          dataHora: Number(dataHora) || Date.now(),
+          linha: i
+        });
+      }
+    }
+    
+    console.log(`🎯 Operações executadas: ${executedTrades.length}`);
+    
+    // Agrupar em pares compra/venda para calcular P&L
+    const openPositions = new Map();
+    
+    for (const trade of executedTrades) {
+      const key = trade.ativo;
+      
+      if (!openPositions.has(key)) {
+        openPositions.set(key, []);
+      }
+      
+      const positions = openPositions.get(key);
+      
+      if (trade.tipo === 'C') { // Compra
+        positions.push({ ...trade, side: 'buy' });
+      } else { // Venda
+        // Tentar fazer match com uma compra
+        const buyIndex = positions.findIndex((p: any) => p.side === 'buy' && p.quantidade === trade.quantidade);
+        
+        if (buyIndex >= 0) {
+          const buyTrade = positions[buyIndex];
+          positions.splice(buyIndex, 1);
+          
+          // Calcular P&L para mini índice/dólar
+          let pnl = 0;
+          if (trade.ativo.includes('WIN')) {
+            // Mini índice: cada ponto = R$ 0,20
+            pnl = (trade.preco - buyTrade.preco) * trade.quantidade * 0.20;
+          } else if (trade.ativo.includes('WDO')) {
+            // Mini dólar: cada ponto = R$ 10
+            pnl = (trade.preco - buyTrade.preco) * trade.quantidade * 10;
+          } else {
+            // Outros ativos
+            pnl = (trade.preco - buyTrade.preco) * trade.quantidade;
+          }
+          
+          // Sanitizar strings para evitar caracteres nulos
+          const sanitize = (str: any): string => {
+            return String(str || '').replace(/\0/g, '').trim();
+          };
+          
+          // Converter data Excel para Date
+          let tradeDate = new Date();
+          if (buyTrade.dataHora && typeof buyTrade.dataHora === 'number') {
+            // Excel date format
+            tradeDate = new Date((buyTrade.dataHora - 25569) * 86400 * 1000);
+          }
+          
+          const newTrade: InsertTrade = {
+            userId,
+            corretora: 'b3',
+            origem: 'csv',
+            mercado: 'b3',
+            setup: sanitize('Clear Excel Import'),
+            dataHora: tradeDate.toISOString(),
+            ativo: sanitize(trade.ativo.toUpperCase()),
+            tipo: trade.tipo === 'C' ? 'compra' : 'venda',
+            quantidade: sanitize(trade.quantidade.toString()),
+            precoEntrada: sanitize(buyTrade.preco.toString()),
+            precoSaida: sanitize(trade.preco.toString()),
+            capitalUtilizado: sanitize((trade.quantidade * Math.max(buyTrade.preco, trade.preco)).toString()),
+            resultado: sanitize(pnl.toString()),
+            emocao: 'neutro',
+            comentario: sanitize(`Clear: ${buyTrade.preco} → ${trade.preco}`)
+          };
+          
+          trades.push(newTrade);
+          console.log(`✅ Trade: ${trade.ativo} = R$ ${pnl.toFixed(2)}`);
+        } else {
+          // Venda sem compra correspondente (posição iniciada com venda)
+          positions.push({ ...trade, side: 'sell' });
+        }
+      }
+    }
+    
+    // Processar vendas sem compra (short trades)
+    for (const [ativo, positions] of Array.from(openPositions)) {
+      const positionsArray = positions as any[];
+      for (let i = 0; i < positionsArray.length - 1; i++) {
+        const sell = positionsArray[i];
+        const buy = positionsArray[i + 1];
+        
+        if (sell.side === 'sell' && buy && buy.side === 'buy' && sell.quantidade === buy.quantidade) {
+          let pnl = 0;
+          if (ativo.includes('WIN')) {
+            pnl = (sell.preco - buy.preco) * sell.quantidade * 0.20;
+          } else if (ativo.includes('WDO')) {
+            pnl = (sell.preco - buy.preco) * sell.quantidade * 10;
+          } else {
+            pnl = (sell.preco - buy.preco) * sell.quantidade;
+          }
+          
+          const sanitize = (str: any): string => {
+            return String(str || '').replace(/\0/g, '').trim();
+          };
+          
+          let tradeDate = new Date();
+          if (sell.dataHora && typeof sell.dataHora === 'number') {
+            tradeDate = new Date((sell.dataHora - 25569) * 86400 * 1000);
+          }
+          
+          const newTrade: InsertTrade = {
+            userId,
+            corretora: 'b3',
+            origem: 'csv',
+            mercado: 'b3',
+            setup: sanitize('Clear Excel Import'),
+            dataHora: tradeDate.toISOString(),
+            ativo: sanitize(String(ativo).toUpperCase()),
+            tipo: 'venda',
+            quantidade: sanitize(sell.quantidade.toString()),
+            precoEntrada: sanitize(sell.preco.toString()),
+            precoSaida: sanitize(buy.preco.toString()),
+            capitalUtilizado: sanitize((sell.quantidade * Math.max(sell.preco, buy.preco)).toString()),
+            resultado: sanitize(pnl.toString()),
+            emocao: 'neutro',
+            comentario: sanitize(`Clear Short: ${sell.preco} → ${buy.preco}`)
+          };
+          
+          trades.push(newTrade);
+          console.log(`✅ Short Trade: ${ativo} = R$ ${pnl.toFixed(2)}`);
+        }
+      }
+    }
+    
+    console.log(`🎯 Total de trades processados: ${trades.length}`);
+    return trades;
+    
+  } catch (error) {
+    console.error('❌ Erro ao processar Excel:', error);
+    return [];
+  }
+}
 
 // Configure multer for file uploads - use disk storage for better compatibility
 const upload = multer({ 
@@ -1335,6 +1513,49 @@ export async function registerRoutes(app: Express): Promise<void> {
         broker,
         csvName: req.body.csvName
       });
+      
+      // DETECTAR SE É ARQUIVO EXCEL
+      const buffer = fs.readFileSync(file.path);
+      const isExcel = buffer[0] === 0x50 && buffer[1] === 0x4B; // PK magic bytes
+      
+      if (isExcel) {
+        console.log(`📊 Arquivo Excel detectado, processando como Clear...`);
+        const excelResult = await processExcelFile(file.path, userId);
+        
+        const csvImport = await storage.createCsvImport({
+          userId,
+          fileName: file.originalname,
+          displayName: req.body.csvName || file.originalname,
+          broker: 'clear',
+          tradesImported: excelResult.length,
+          status: "completed",
+          tradesSkipped: 0,
+          errorMessage: null
+        });
+
+        if (excelResult.length > 0) {
+          console.log(`💾 [${userId}] Inserindo ${excelResult.length} trades Excel no banco`);
+          await storage.createBulkTrades(excelResult);
+        }
+
+        // Clean up uploaded file
+        fs.unlinkSync(file.path);
+
+        return res.json({
+          message: `🎉 ${excelResult.length} trades importados do Excel Clear!`,
+          tradesImported: excelResult.length,
+          broker: 'clear',
+          market: 'b3',
+          csvId: csvImport.id,
+          summary: {
+            totalRows: excelResult.length,
+            tradesFound: excelResult.length,
+            detectedBroker: 'clear',
+            detectedMarket: 'b3',
+            processingMethod: 'Processamento Excel Clear'
+          }
+        });
+      }
 
       // VALIDAÇÃO PRÉ-PROCESSAMENTO: Verificar estrutura básica (modo compatibilidade)
       console.log(`🔍 Executando validação básica de estrutura...`);
