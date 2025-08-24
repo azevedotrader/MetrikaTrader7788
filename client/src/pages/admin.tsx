@@ -307,11 +307,11 @@ export default function AdminPage() {
 
   const getPlanBadgeColor = (planType: string) => {
     switch (planType) {
-      case 'free':
-        return 'bg-gray-100 text-gray-800';
-      case 'premium':
+      case 'starter':
+        return 'bg-green-100 text-green-800';
+      case 'pro':
         return 'bg-blue-100 text-blue-800';
-      case 'vip':
+      case 'black':
         return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -409,10 +409,10 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {statsLoading ? "..." : ((stats as any)?.premiumUsers || 0) + ((stats as any)?.vipUsers || 0)}
+                  {statsLoading ? "..." : ((stats as any)?.proUsers || 0) + ((stats as any)?.blackUsers || 0)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats as any)?.premiumUsers || 0} Premium + {(stats as any)?.vipUsers || 0} VIP
+                  {(stats as any)?.proUsers || 0} Pro + {(stats as any)?.blackUsers || 0} Black
                 </p>
               </CardContent>
             </Card>
@@ -426,45 +426,45 @@ export default function AdminPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Gratuito</span>
+                  <span className="text-sm font-medium">Starter</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-gray-400 rounded" 
+                        className="h-full bg-green-500 rounded" 
                         style={{ 
-                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.freeUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.starterUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{(stats as any)?.freeUsers || 0}</span>
+                    <span className="text-sm text-gray-600">{(stats as any)?.starterUsers || 0}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Premium</span>
+                  <span className="text-sm font-medium">Pro</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
                         className="h-full bg-blue-500 rounded" 
                         style={{ 
-                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.premiumUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.proUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{(stats as any)?.premiumUsers || 0}</span>
+                    <span className="text-sm text-gray-600">{(stats as any)?.proUsers || 0}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">VIP</span>
+                  <span className="text-sm font-medium">Black</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
                         className="h-full bg-purple-500 rounded" 
                         style={{ 
-                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.vipUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.blackUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{(stats as any)?.vipUsers || 0}</span>
+                    <span className="text-sm text-gray-600">{(stats as any)?.blackUsers || 0}</span>
                   </div>
                 </div>
               </div>
@@ -607,9 +607,9 @@ export default function AdminPage() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="free">Gratuito</SelectItem>
-                            <SelectItem value="premium">Premium</SelectItem>
-                            <SelectItem value="vip">VIP</SelectItem>
+                            <SelectItem value="starter">Trader Starter (R$ 29,90/mês)</SelectItem>
+                            <SelectItem value="pro">Trader Pro (R$ 49,90/mês)</SelectItem>
+                            <SelectItem value="black">Trader Black (R$ 97,00/mês)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

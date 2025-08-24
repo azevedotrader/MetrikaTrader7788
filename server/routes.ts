@@ -2470,12 +2470,12 @@ export async function registerRoutes(app: Express): Promise<void> {
         
         const totalUsers = allUsers.length;
         const activeUsers = allUsers.filter(u => u.isActive).length;
-        const freeUsers = allUsers.filter(u => u.planType === 'free').length;
-        const premiumUsers = allUsers.filter(u => u.planType === 'premium').length;
-        const vipUsers = allUsers.filter(u => u.planType === 'vip').length;
+        const starterUsers = allUsers.filter(u => u.planType === 'starter').length;
+        const proUsers = allUsers.filter(u => u.planType === 'pro').length;
+        const blackUsers = allUsers.filter(u => u.planType === 'black').length;
         
-        // Calcular receita mensal (exemplo baseado nos planos)
-        const monthlyRevenue = (premiumUsers * 97) + (vipUsers * 297);
+        // Calcular receita mensal baseado nos novos planos
+        const monthlyRevenue = (starterUsers * 29.90) + (proUsers * 49.90) + (blackUsers * 97.00);
         
         const calculatedStats = {
           date: new Date(),
@@ -2483,10 +2483,10 @@ export async function registerRoutes(app: Express): Promise<void> {
           activeUsers,
           newUsers: 0, // Seria calculado baseado em registros do mês
           totalTrades: allTrades.length,
-          monthlyRevenue,
-          freeUsers,
-          premiumUsers,
-          vipUsers,
+          monthlyRevenue: monthlyRevenue.toFixed(2),
+          starterUsers,
+          proUsers,
+          blackUsers,
         };
         
         res.json(calculatedStats);

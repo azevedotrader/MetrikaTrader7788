@@ -12,7 +12,7 @@ export const users = pgTable("users", {
   capitalInicial: decimal("capital_inicial", { precision: 12, scale: 2 }).default("0"),
   metaMensal: decimal("meta_mensal", { precision: 5, scale: 2 }).default("5"),
   perfilRisco: text("perfil_risco").default("moderado"),
-  planType: text("plan_type").default("free"), // "free", "premium", "vip"
+  planType: text("plan_type").default("starter"), // "starter", "pro", "black"
   planExpiresAt: timestamp("plan_expires_at"),
   isActive: boolean("is_active").default(true),
   role: text("role").default("user"), // "user", "admin"
@@ -228,7 +228,7 @@ export const updateUserByAdminSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   phone: z.string().optional(),
-  planType: z.enum(["free", "premium", "vip"]).optional(),
+  planType: z.enum(["starter", "pro", "black"]).optional(),
   isActive: z.boolean().optional(),
   planExpiresAt: z.string().optional(),
 });
