@@ -1756,16 +1756,36 @@ export async function registerRoutes(app: Express): Promise<void> {
           });
         }
         
+        // Verificar se o erro é específico sobre datas
+        const isDateError = result.errors.some(error => 
+          error.includes('estatísticas/relatórios') ||
+          error.includes('Nenhum trade com data específica') ||
+          error.includes('trades reais com datas específicas')
+        );
+        
+        if (isDateError) {
+          return res.status(400).json({
+            message: "🚫 Arquivo sem datas específicas de trades",
+            details: "O arquivo enviado não contém trades individuais com datas específicas. Para usar o calendário, são necessárias operações com datas reais de execução.",
+            errors: result.errors,
+            suggestion: "📅 Envie um arquivo de histórico de trades que contenha:\n• Data/hora específica de cada operação\n• Símbolo do ativo negociado\n• Resultado individual de cada trade\n\nExemplos: extrato de execuções, relatório de ordens, histórico de negociações.",
+            type: "validation_error",
+            errorCode: "NO_TRADE_DATES"
+          });
+        }
+        
         return res.status(400).json({ 
-          message: "Nenhum trade válido identificado no CSV",
+          message: "🚫 Nenhum trade válido encontrado no arquivo",
           type: "no_trades_found",
           details: {
             totalRows: result.summary.totalRows,
             statisticsSkipped: result.summary.statisticsSkipped,
             detectedBroker: result.summary.detectedBroker,
-            detectedMarket: result.summary.detectedMarket
+            detectedMarket: result.summary.detectedMarket,
+            reason: "O arquivo foi processado mas não contém dados de trades reconhecíveis."
           },
-          errors: result.errors
+          errors: result.errors,
+          suggestion: "Verifique se o arquivo contém dados de trading em formato válido."
         });
       }
 
