@@ -6,9 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Perfil() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: user?.name || "",
     email: user?.email || "",
@@ -17,10 +21,102 @@ export default function Perfil() {
     confirmarSenha: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Perfil atualizado:", formData);
-    // TODO: Implement profile update logic
+    
+    // Validação básica
+    if (!formData.nome.trim()) {
+      toast({
+        title: "Erro de validação",
+        description: "O nome é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      toast({
+        title: "Erro de validação",
+        description: "O email é obrigatório.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validação de senha
+    if (formData.senha && formData.senha !== formData.confirmarSenha) {
+      toast({
+        title: "Erro de validação",
+        description: "As senhas não coincidem.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (formData.senha && formData.senha.length < 6) {
+      toast({
+        title: "Erro de validação",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Preparar dados para envio (remover senha vazia)
+      const updateData: any = {
+        nome: formData.nome.trim(),
+        email: formData.email.trim(),
+      };
+      
+      if (formData.telefone.trim()) {
+        updateData.telefone = formData.telefone.trim();
+      }
+      
+      if (formData.senha.trim()) {
+        updateData.senha = formData.senha;
+      }
+      
+      // Chamar API real
+      const response = await apiRequest('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao atualizar perfil');
+      }
+      
+      const result = await response.json();
+      
+      toast({
+        title: "Perfil atualizado!",
+        description: "Suas informações foram atualizadas com sucesso.",
+      });
+      
+      // Limpar campos de senha após sucesso
+      setFormData(prev => ({
+        ...prev,
+        senha: "",
+        confirmarSenha: ""
+      }));
+      
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Não foi possível atualizar o perfil. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -118,9 +214,10 @@ export default function Perfil() {
 
               <Button 
                 type="submit" 
-                className="w-full bg-black hover:bg-gray-800 text-white transition-colors"
+                disabled={isLoading}
+                className="w-full bg-black hover:bg-gray-800 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Salvar Alterações
+                {isLoading ? "Salvando..." : "Salvar Alterações"}
               </Button>
             </form>
           </CardContent>

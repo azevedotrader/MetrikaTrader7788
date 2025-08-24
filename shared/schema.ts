@@ -249,7 +249,16 @@ export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).omit({
   improvements: z.string().optional(),
 });
 
+// Schema para usuários atualizarem seu próprio perfil
+export const updateProfileSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório").optional(),
+  email: z.string().email("Email deve ser válido").optional(),
+  telefone: z.string().optional(),
+  senha: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional(),
+});
+
 export type UpdateUserByAdmin = z.infer<typeof updateUserByAdminSchema>;
+export type UpdateProfile = z.infer<typeof updateProfileSchema>;
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 export type UpdateCsvImport = z.infer<typeof updateCsvImportSchema>;
 export type InsertDiaryEntry = z.infer<typeof insertDiaryEntrySchema>;

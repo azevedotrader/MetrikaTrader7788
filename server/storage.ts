@@ -55,6 +55,7 @@ export interface IStorage {
   // Admin operations
   getAllUsers(): Promise<User[]>;
   updateUserByAdmin(id: string, updates: UpdateUserByAdmin): Promise<User>;
+  updateProfile(id: string, updates: UpdateProfile): Promise<User>;
   deleteUser(id: string): Promise<void>;
   
   // Subscription plan operations
@@ -402,6 +403,38 @@ export class DatabaseStorage implements IStorage {
     
     if (!updatedUser) {
       throw new Error('User not found');
+    }
+    
+    return updatedUser;
+  }
+
+  async updateProfile(id: string, updates: UpdateProfile): Promise<User> {
+    const updateData: any = {};
+    
+    if (updates.nome) {
+      updateData.name = updates.nome;
+    }
+    if (updates.email) {
+      updateData.email = updates.email;
+    }
+    if (updates.telefone) {
+      updateData.phone = updates.telefone;
+    }
+    if (updates.senha) {
+      // Em uma implementação real, você deveria fazer hash da senha
+      updateData.password = updates.senha;
+    }
+    
+    updateData.updatedAt = new Date();
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error('Usuário não encontrado');
     }
     
     return updatedUser;

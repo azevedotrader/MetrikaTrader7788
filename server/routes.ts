@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -2309,6 +2309,35 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
     } catch (error) {
       res.status(401).json({ message: 'Token inválido' });
+    }
+  });
+  
+  // USER PROFILE ROUTES
+  
+  // PUT /api/profile - Atualizar perfil do usuário
+  app.put("/api/profile", async (req: AuthenticatedRequest, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      
+      const updates = updateProfileSchema.parse(req.body);
+      const updatedUser = await storage.updateProfile(req.user.id, updates);
+      
+      res.json({
+        message: "Perfil atualizado com sucesso",
+        user: {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone
+        }
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Erro ao atualizar perfil" 
+      });
     }
   });
   
