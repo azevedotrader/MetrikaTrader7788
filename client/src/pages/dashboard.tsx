@@ -361,13 +361,15 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
           groupBy = "month";
           break;
         case "specific-month":
-          const selectedDate = new Date(selectedMonth + "-01");
-          startDate = startOfMonth(selectedDate);
-          endDate = new Date(
-            selectedDate.getFullYear(),
-            selectedDate.getMonth() + 1,
-            0,
-          );
+          // Corrigir problema de timezone na conversão da data
+          const [yearStr, monthStr] = selectedMonth.split("-");
+          const yearNum = parseInt(yearStr, 10);
+          const monthNum = parseInt(monthStr, 10);
+          
+          // Criar datas explicitamente para evitar problemas de timezone
+          startDate = new Date(yearNum, monthNum - 1, 1); // Janeiro = 0, então agosto = 7
+          endDate = new Date(yearNum, monthNum, 0); // último dia do mês (dia 0 do próximo mês)
+          
           groupBy = "day";
           break;
         default:
