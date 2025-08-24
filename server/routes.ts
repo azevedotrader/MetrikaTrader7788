@@ -2315,14 +2315,15 @@ export async function registerRoutes(app: Express): Promise<void> {
   // USER PROFILE ROUTES
   
   // PUT /api/profile - Atualizar perfil do usuário
-  app.put("/api/profile", async (req: AuthenticatedRequest, res) => {
+  app.put("/api/profile", requireAuth, async (req, res) => {
     try {
-      if (!req.user?.id) {
+      const userId = req.userId;
+      if (!userId) {
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
       
       const updates = updateProfileSchema.parse(req.body);
-      const updatedUser = await storage.updateProfile(req.user.id, updates);
+      const updatedUser = await storage.updateProfile(userId, updates);
       
       res.json({
         message: "Perfil atualizado com sucesso",

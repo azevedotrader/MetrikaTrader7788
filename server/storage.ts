@@ -1,4 +1,4 @@
-os dadoimport { 
+import { 
   users, 
   trades, 
   brokerApiConfigs, 
@@ -18,6 +18,7 @@ os dadoimport {
   type Subscription,
   type PlatformStats,
   type UpdateUserByAdmin,
+  type UpdateProfile,
   type InsertSubscriptionPlan,
   type DiaryEntry,
   type InsertDiaryEntry,
