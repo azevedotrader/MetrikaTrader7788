@@ -335,6 +335,8 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
   );
 
   const getChartData = () => {
+    // Usar diretamente os trades já filtrados que vêm do dashboard principal
+    // Isso garante que respeitamos todos os filtros (broker, período global, etc.)
     if (!trades.length) return [];
 
     const now = new Date();
@@ -374,16 +376,16 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
         groupBy = "day";
     }
 
-    // Filtrar trades por período
-    const filteredTrades = trades.filter((trade) => {
+    // Aplicar filtro adicional de período sobre os trades já filtrados
+    const periodFilteredTrades = trades.filter((trade) => {
       const tradeDate = new Date(trade.dataHora);
       return tradeDate >= startDate && tradeDate <= endDate;
     });
 
-    if (filteredTrades.length === 0) return [];
+    if (periodFilteredTrades.length === 0) return [];
 
     // Ordenar trades por data
-    const sortedTrades = [...filteredTrades].sort(
+    const sortedTrades = [...periodFilteredTrades].sort(
       (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime(),
     );
 
