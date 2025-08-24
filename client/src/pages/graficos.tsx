@@ -447,50 +447,6 @@ export default function Graficos() {
         </CardContent>
       </Card>
 
-      {/* Quick Access Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-4">
-            <Button 
-              onClick={() => {
-                setSelectedMarket("forex");
-                setSelectedSymbol("FX_IDC:EURBRL");
-              }}
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
-            >
-              EUR/BRL (Forex)
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-4">
-            <Button 
-              onClick={() => {
-                setSelectedMarket("crypto");
-                setSelectedSymbol("BINANCE:BTCUSDT");
-              }}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-            >
-              BTC/USDT (Crypto)
-            </Button>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="p-4">
-            <Button 
-              onClick={() => {
-                setSelectedMarket("b3");
-                setSelectedSymbol("BMFBOVESPA:WINQ25");
-              }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Mini Índice (B3)
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
