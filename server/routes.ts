@@ -1661,37 +1661,57 @@ export async function registerRoutes(app: Express): Promise<void> {
         
         // NOVA ABORDAGEM: Sistema colaborativo - sempre tentar ambos métodos
         const isStatisticsFile = result.errors.some(error => 
-          error.includes('ARQUIVO DE ESTATÍSTICAS DETECTADO')
+          error.includes('ARQUIVO DE ESTATÍSTICAS DETECTADO') ||
+          error.includes('estatísticas/relatórios') ||
+          error.includes('Nenhum trade com data específica')
         );
+
+        // VALIDAÇÃO CRÍTICA: Rejeitar arquivos sem trades reais (para preservar calendário)
+        if (isStatisticsFile) {
+          console.log(`❌ Arquivo rejeitado: contém apenas estatísticas/relatórios sem datas específicas`);
+          
+          // Clean up uploaded file
+          fs.unlinkSync(file.path);
+          
+          return res.status(400).json({
+            message: "❌ Arquivo rejeitado: contém apenas estatísticas ou relatórios",
+            details: "Para usar o calendário, são necessários trades com datas específicas de execução. O arquivo enviado contém apenas resumos ou métricas sem datas reais.",
+            errors: result.errors,
+            suggestion: "Envie um arquivo de histórico de trades com datas específicas (ex: relatório de execuções, extrato de ordens executadas)."
+          });
+        }
 
         // Se ChatGPT não encontrou trades, SEMPRE tentar sistema tradicional
         if (result.trades.length === 0) {
-          console.log(`🤝 Sistema Colaborativo: ChatGPT não encontrou dados (${isStatisticsFile ? 'estatísticas detectadas' : 'falha'})`);
+          console.log(`🤝 Sistema Colaborativo: ChatGPT não encontrou dados`);
           console.log(`🔄 Tentando sistema tradicional para extrair qualquer dado possível...`);
           const { processSmartCSV } = await import('./smart-csv-processor');
           
-          // Sistema tradicional com modo "força bruta" - aceita qualquer formato
+          // Sistema tradicional - com validação de datas reais
           const fallbackResult = await processSmartCSV(file.path, userId, broker);
           
           if (fallbackResult.trades.length > 0) {
-            console.log(`✅ Sistema tradicional extraiu ${fallbackResult.trades.length} itens como trades`);
+            console.log(`✅ Sistema tradicional extraiu ${fallbackResult.trades.length} trades com datas válidas`);
             result = {
               ...fallbackResult,
               summary: {
                 ...fallbackResult.summary,
-                processingMethod: isStatisticsFile ? 
-                  'Sistema Híbrido (Dados não-tradicionais interpretados como trades)' :
-                  'Sistema Tradicional (Fallback após ChatGPT)'
+                processingMethod: 'Sistema Tradicional (Fallback após ChatGPT)'
               },
-              errors: isStatisticsFile ? 
-                ['ℹ️ Arquivo de estatísticas convertido para trades usando interpretação flexível'] :
-                result.errors.concat(['ℹ️ ChatGPT falhou, sistema tradicional extraiu os dados'])
+              errors: result.errors.concat(['ℹ️ ChatGPT falhou, sistema tradicional extraiu os dados'])
             };
           } else {
-            console.log(`❌ Ambos sistemas não conseguiram extrair dados válidos`);
-            if (isStatisticsFile) {
-              result.errors.push('⚠️ Sistema tentou interpretar estatísticas como trades mas não conseguiu');
-            }
+            console.log(`❌ Ambos sistemas não conseguiram extrair trades válidos`);
+            
+            // Clean up uploaded file
+            fs.unlinkSync(file.path);
+            
+            return res.status(400).json({
+              message: "❌ Nenhum trade válido encontrado no arquivo",
+              details: "O arquivo não contém trades com datas específicas necessárias para o calendário.",
+              errors: fallbackResult.errors,
+              suggestion: "Verifique se o arquivo contém histórico real de trades (não apenas estatísticas ou resumos)."
+            });
           }
         }
       }

@@ -1317,7 +1317,7 @@ export default function Dashboard() {
                     value="broker"
                     className="text-white hover:bg-zinc-700"
                   >
-                    Filtrar por Corretora
+                    Filtrar por Mercado
                   </SelectItem>
                   <SelectItem
                     value="csv"
@@ -1336,7 +1336,7 @@ export default function Dashboard() {
                     onValueChange={setSelectedBrokerFilter}
                   >
                     <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm">
-                      <SelectValue placeholder="Selecione uma corretora" />
+                      <SelectValue placeholder="Selecione o Mercado" />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700">
                       <SelectItem

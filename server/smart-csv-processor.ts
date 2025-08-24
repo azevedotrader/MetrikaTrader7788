@@ -126,6 +126,75 @@ function validateTradeRow(row: any, index: number): ValidatedTradeRow | null {
 }
 
 /**
+ * Valida se o arquivo contém trades reais com datas específicas
+ */
+function validateTradesWithRealDates(data: any[]): { isValid: boolean; reason?: string } {
+  console.log(`🔍 Validando se arquivo contém trades reais com datas específicas...`);
+  
+  let realTradesFound = 0;
+  let statisticsFound = 0;
+  
+  for (const row of data.slice(0, 20)) { // Verificar primeiras 20 linhas
+    const values = Object.values(row as Record<string, any>);
+    const stringValues = values.filter(v => typeof v === 'string').map(v => String(v).toLowerCase());
+    
+    // Detectar se é linha de estatística/relatório
+    const isStatistic = stringValues.some(val => 
+      val.includes('média de') ||
+      val.includes('total de') ||
+      val.includes('drawdown') ||
+      val.includes('patrimônio') ||
+      val.includes('saldo líquido') ||
+      val.includes('lucro bruto') ||
+      val.includes('prejuízo bruto') ||
+      val.includes('operações vencedoras') ||
+      val.includes('operações perdedoras') ||
+      val.includes('maior operação') ||
+      val.includes('menor operação') ||
+      val.includes('sequência') ||
+      val.includes('percentual') ||
+      val.includes('retorno no capital') ||
+      val.includes('declínio máximo')
+    );
+    
+    if (isStatistic) {
+      statisticsFound++;
+      continue;
+    }
+    
+    // Verificar se tem data específica válida
+    const hasValidDate = extractAndValidateDate(row) !== null;
+    
+    // Verificar se tem símbolo de trading válido
+    const hasValidSymbol = extractAndValidateSymbol(row) !== null;
+    
+    if (hasValidDate && hasValidSymbol) {
+      realTradesFound++;
+    }
+  }
+  
+  console.log(`📊 Análise do arquivo: ${realTradesFound} trades reais, ${statisticsFound} estatísticas detectadas`);
+  
+  // Se mais de 50% são estatísticas, rejeitar
+  if (statisticsFound > realTradesFound && statisticsFound > 3) {
+    return { 
+      isValid: false, 
+      reason: `Arquivo contém principalmente estatísticas/relatórios (${statisticsFound} estatísticas vs ${realTradesFound} trades). Para usar o calendário, são necessários trades com datas específicas.` 
+    };
+  }
+  
+  // Se não encontrou nenhum trade real, rejeitar
+  if (realTradesFound === 0) {
+    return { 
+      isValid: false, 
+      reason: 'Nenhum trade com data específica encontrado. O calendário requer trades com datas reais de execução.' 
+    };
+  }
+  
+  return { isValid: true };
+}
+
+/**
  * Função principal para processar CSV de forma inteligente
  */
 export async function processSmartCSV(
@@ -187,6 +256,15 @@ export async function processSmartCSV(
       transformHeader: (header: string) => header.trim(),
       transform: (value: string) => value.trim()
     });
+    
+    // 4.5. VALIDAÇÃO CRÍTICA: Verificar se contém trades reais com datas específicas
+    const validation = validateTradesWithRealDates(parseResult.data);
+    if (!validation.isValid) {
+      console.log(`❌ Arquivo rejeitado: ${validation.reason}`);
+      result.errors.push(`❌ ${validation.reason}`);
+      return result;
+    }
+    console.log(`✅ Arquivo validado: contém trades reais com datas específicas`);
 
     if (parseResult.errors.length > 0) {
       console.warn('⚠️ Erros no parse:', parseResult.errors);
