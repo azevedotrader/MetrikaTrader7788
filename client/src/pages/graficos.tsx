@@ -5,6 +5,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TrendingUp, BarChart3, Activity, AlertTriangle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
+// TypeScript declarations for TradingView
+declare global {
+  interface Window {
+    TradingView: {
+      widget: new (config: any) => void;
+    };
+  }
+}
+
 // Professional chart component with realistic trading data
 function AlternativeChart({ symbol, interval }: { symbol: string; interval: string }) {
   // Generate realistic trading data
@@ -164,13 +173,94 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
   );
 }
 
-// TradingView widget with proper fallback
+// TradingView widget real implementation
 function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
-  const [useFallback, setUseFallback] = useState(true); // Start with fallback due to connection issues
+  const [widgetId] = useState(() => `tradingview_chart_${Math.random().toString(36).substr(2, 9)}`);
   
-  // For now, always use the fallback chart since TradingView has connection issues
-  // This can be changed back when TradingView connectivity is restored
-  return <AlternativeChart symbol={symbol} interval={interval} />;
+  useEffect(() => {
+    // Clean up any existing widget
+    const container = document.getElementById(widgetId);
+    if (container) {
+      container.innerHTML = '';
+    }
+
+    // Check if TradingView script is already loaded
+    if (document.getElementById("tradingview_script")) {
+      initializeWidget();
+      return;
+    }
+
+    // Load TradingView script if not already loaded
+    const script = document.createElement("script");
+    script.id = "tradingview_script";
+    script.src = "https://s3.tradingview.com/tv.js";
+    script.async = true;
+    script.onload = initializeWidget;
+    script.onerror = () => {
+      console.warn("Failed to load TradingView script, using fallback");
+      setUseFallback(true);
+    };
+    document.body.appendChild(script);
+
+    function initializeWidget() {
+      if (window.TradingView && window.TradingView.widget) {
+        try {
+          new window.TradingView.widget({
+            width: "100%",
+            height: 580,
+            symbol: symbol,
+            interval: interval,
+            timezone: "America/Sao_Paulo",
+            theme: "dark",
+            style: "1",
+            locale: "br",
+            toolbar_bg: "#1e293b",
+            container_id: widgetId,
+            enable_publishing: false,
+            withdateranges: true,
+            hide_side_toolbar: false,
+            allow_symbol_change: false,
+            details: true,
+            hotlist: true,
+            calendar: true,
+            studies: [
+              "BB@tv-basicstudies",
+              "MASimple@tv-basicstudies"
+            ],
+            show_popup_button: true,
+            popup_width: "1000",
+            popup_height: "650"
+          });
+        } catch (error) {
+          console.error("Error initializing TradingView widget:", error);
+          setUseFallback(true);
+        }
+      } else {
+        console.warn("TradingView library not available, using fallback");
+        setUseFallback(true);
+      }
+    }
+
+    return () => {
+      // Cleanup on unmount
+      const container = document.getElementById(widgetId);
+      if (container) {
+        container.innerHTML = '';
+      }
+    };
+  }, [symbol, interval, widgetId]);
+
+  const [useFallback, setUseFallback] = useState(false);
+
+  if (useFallback) {
+    return <AlternativeChart symbol={symbol} interval={interval} />;
+  }
+
+  return (
+    <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden">
+      <div id={widgetId} className="w-full h-full" />
+    </div>
+  );
 }
 
 // Pre-configured symbols for different markets
