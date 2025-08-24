@@ -329,15 +329,6 @@ export default function Graficos() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-end">
-        <div className="flex items-center space-x-2">
-          <TrendingUp className="w-6 h-6 text-purple-500" />
-          <BarChart3 className="w-6 h-6 text-blue-500" />
-          <Activity className="w-6 h-6 text-green-500" />
-        </div>
-      </div>
-
       {/* Controls */}
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader>
