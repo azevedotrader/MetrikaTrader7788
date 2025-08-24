@@ -336,51 +336,53 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
 
   const getChartData = () => {
     // Usar diretamente os trades já filtrados que vêm do dashboard principal
-    // Isso garante que respeitamos todos os filtros (broker, período global, etc.)
+    // Isso garante que respeitamos todos os filtros (broker, CSV, etc.)
     if (!trades.length) return [];
 
-    const now = new Date();
-    let startDate: Date;
-    let endDate: Date;
-    let groupBy: "day" | "week" | "month";
+    let periodFilteredTrades = trades;
+    let groupBy: "day" | "week" | "month" = "day";
 
-    switch (selectedPeriod) {
-      case "week":
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        endDate = now;
-        groupBy = "day";
-        break;
-      case "month":
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        endDate = now;
-        groupBy = "day";
-        break;
-      case "year":
-        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        endDate = now;
-        groupBy = "month";
-        break;
-      case "specific-month":
-        const selectedDate = new Date(selectedMonth + "-01");
-        startDate = startOfMonth(selectedDate);
-        endDate = new Date(
-          selectedDate.getFullYear(),
-          selectedDate.getMonth() + 1,
-          0,
-        );
-        groupBy = "day";
-        break;
-      default:
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        endDate = now;
-        groupBy = "day";
+    // Apenas aplica filtro de período se um período específico for selecionado
+    // Isso evita conflito com os filtros globais do dashboard
+    if (selectedPeriod !== "month") { // "month" é o padrão, mostra todos os trades filtrados
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date;
+
+      switch (selectedPeriod) {
+        case "week":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          endDate = now;
+          groupBy = "day";
+          break;
+        case "year":
+          startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          endDate = now;
+          groupBy = "month";
+          break;
+        case "specific-month":
+          const selectedDate = new Date(selectedMonth + "-01");
+          startDate = startOfMonth(selectedDate);
+          endDate = new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth() + 1,
+            0,
+          );
+          groupBy = "day";
+          break;
+        default:
+          // Para "month" (30 dias) usa todos os trades já filtrados
+          break;
+      }
+
+      // Aplicar filtro adicional de período apenas se definido
+      if (startDate! && endDate!) {
+        periodFilteredTrades = trades.filter((trade) => {
+          const tradeDate = new Date(trade.dataHora);
+          return tradeDate >= startDate && tradeDate <= endDate;
+        });
+      }
     }
-
-    // Aplicar filtro adicional de período sobre os trades já filtrados
-    const periodFilteredTrades = trades.filter((trade) => {
-      const tradeDate = new Date(trade.dataHora);
-      return tradeDate >= startDate && tradeDate <= endDate;
-    });
 
     if (periodFilteredTrades.length === 0) return [];
 
@@ -466,7 +468,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap">
         {[
           { key: "week", label: "7 Dias" },
-          { key: "month", label: "30 Dias" },
+          { key: "month", label: "Todos" },
           { key: "year", label: "1 Ano" },
           { key: "specific-month", label: "Mês Específico" },
         ].map((filter) => (
