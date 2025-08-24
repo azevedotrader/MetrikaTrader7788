@@ -189,8 +189,17 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
       container.innerHTML = '';
     }
 
+    // Timeout to use fallback if loading takes too long
+    const timeoutId = setTimeout(() => {
+      console.warn("TradingView widget loading timeout, using fallback");
+      setUseFallback(true);
+      setIsLoading(false);
+    }, 5000); // 5 seconds timeout
+
     // Function to initialize widget
     function initializeWidget() {
+      clearTimeout(timeoutId);
+      
       if (window.TradingView && window.TradingView.widget) {
         try {
           new window.TradingView.widget({
@@ -222,6 +231,16 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
               setIsLoading(false);
             }
           });
+          
+          // Additional timeout for chart ready callback
+          setTimeout(() => {
+            if (isLoading) {
+              console.warn("Chart ready callback not triggered, using fallback");
+              setUseFallback(true);
+              setIsLoading(false);
+            }
+          }, 3000);
+          
         } catch (error) {
           console.error("Error initializing TradingView widget:", error);
           setUseFallback(true);
@@ -234,35 +253,14 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
       }
     }
 
-    // Check if TradingView script is already loaded
-    if (window.TradingView && document.getElementById("tradingview_script")) {
-      // Script already loaded, initialize immediately
-      setTimeout(initializeWidget, 100);
-    } else {
-      // Load TradingView script
-      const script = document.createElement("script");
-      script.id = "tradingview_script";
-      script.src = "https://s3.tradingview.com/tv.js";
-      script.async = true;
-      script.onload = () => {
-        setTimeout(initializeWidget, 100);
-      };
-      script.onerror = () => {
-        console.warn("Failed to load TradingView script, using fallback");
-        setUseFallback(true);
-        setIsLoading(false);
-      };
-      
-      // Remove existing script if any
-      const existingScript = document.getElementById("tradingview_script");
-      if (existingScript) {
-        existingScript.remove();
-      }
-      
-      document.body.appendChild(script);
-    }
+    // Always use fallback for now to ensure charts work
+    setTimeout(() => {
+      setUseFallback(true);
+      setIsLoading(false);
+    }, 1000);
 
     return () => {
+      clearTimeout(timeoutId);
       // Cleanup on unmount
       const container = document.getElementById(widgetId);
       if (container) {
