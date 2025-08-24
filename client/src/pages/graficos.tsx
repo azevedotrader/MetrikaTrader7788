@@ -176,91 +176,56 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
 // TradingView widget real implementation
 function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
   const [widgetId] = useState(() => `tradingview_chart_${Math.random().toString(36).substr(2, 9)}`);
-  const [useFallback, setUseFallback] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    setIsLoading(true);
-    setUseFallback(false);
-    
     // Clean up any existing widget
     const container = document.getElementById(widgetId);
     if (container) {
       container.innerHTML = '';
     }
 
-    // Timeout to use fallback if loading takes too long
-    const timeoutId = setTimeout(() => {
-      console.warn("TradingView widget loading timeout, using fallback");
-      setUseFallback(true);
-      setIsLoading(false);
-    }, 5000); // 5 seconds timeout
-
-    // Function to initialize widget
-    function initializeWidget() {
-      clearTimeout(timeoutId);
-      
+    // Check if script already exists
+    if (document.getElementById("tradingview_script")) {
+      // Script exists, initialize widget
       if (window.TradingView && window.TradingView.widget) {
-        try {
-          new window.TradingView.widget({
-            width: "100%",
-            height: 580,
-            symbol: symbol,
-            interval: interval,
-            timezone: "America/Sao_Paulo",
-            theme: "dark",
-            style: "1",
-            locale: "br",
-            toolbar_bg: "#1e293b",
-            container_id: widgetId,
-            enable_publishing: false,
-            withdateranges: true,
-            hide_side_toolbar: false,
-            allow_symbol_change: false,
-            details: true,
-            hotlist: true,
-            calendar: true,
-            studies: [
-              "BB@tv-basicstudies",
-              "MASimple@tv-basicstudies"
-            ],
-            show_popup_button: true,
-            popup_width: "1000",
-            popup_height: "650",
-            onChartReady: () => {
-              setIsLoading(false);
-            }
-          });
-          
-          // Additional timeout for chart ready callback
-          setTimeout(() => {
-            if (isLoading) {
-              console.warn("Chart ready callback not triggered, using fallback");
-              setUseFallback(true);
-              setIsLoading(false);
-            }
-          }, 3000);
-          
-        } catch (error) {
-          console.error("Error initializing TradingView widget:", error);
-          setUseFallback(true);
-          setIsLoading(false);
-        }
-      } else {
-        console.warn("TradingView library not available, using fallback");
-        setUseFallback(true);
-        setIsLoading(false);
+        new window.TradingView.widget({
+          width: "100%",
+          height: 580,
+          symbol: symbol,
+          interval: interval,
+          timezone: "America/Sao_Paulo",
+          theme: "dark",
+          style: "1",
+          locale: "br",
+          container_id: widgetId
+        });
       }
+      return;
     }
 
-    // Always use fallback for now to ensure charts work
-    setTimeout(() => {
-      setUseFallback(true);
-      setIsLoading(false);
-    }, 1000);
+    // Create and load script
+    const script = document.createElement("script");
+    script.id = "tradingview_script";
+    script.src = "https://s3.tradingview.com/tv.js";
+    script.async = true;
+    script.onload = () => {
+      if (window.TradingView && window.TradingView.widget) {
+        new window.TradingView.widget({
+          width: "100%",
+          height: 580,
+          symbol: symbol,
+          interval: interval,
+          timezone: "America/Sao_Paulo",
+          theme: "dark",
+          style: "1",
+          locale: "br",
+          container_id: widgetId
+        });
+      }
+    };
+    document.body.appendChild(script);
 
     return () => {
-      clearTimeout(timeoutId);
       // Cleanup on unmount
       const container = document.getElementById(widgetId);
       if (container) {
@@ -269,21 +234,9 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
     };
   }, [symbol, interval, widgetId]);
 
-  if (useFallback) {
-    return <AlternativeChart symbol={symbol} interval={interval} />;
-  }
-
   return (
     <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden">
-      {isLoading && (
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="text-center text-slate-400">
-            <Activity className="w-8 h-8 animate-spin mx-auto mb-2" />
-            <p>Carregando TradingView...</p>
-          </div>
-        </div>
-      )}
-      <div id={widgetId} className="w-full h-full" style={{ display: isLoading ? 'none' : 'block' }} />
+      <div id={widgetId} className="w-full h-full" />
     </div>
   );
 }
