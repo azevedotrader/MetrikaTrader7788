@@ -26,6 +26,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
       name: "",
       email: "",
       password: "",
+      phone: "",
       confirmPassword: "",
     },
   });
@@ -109,6 +110,20 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
             />
             {form.formState.errors.email && (
               <p className="text-red-400 text-sm">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-slate-300">Telefone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="(11) 99999-9999"
+              {...form.register("phone")}
+              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+            />
+            {form.formState.errors.phone && (
+              <p className="text-red-400 text-sm">{form.formState.errors.phone.message}</p>
             )}
           </div>
           

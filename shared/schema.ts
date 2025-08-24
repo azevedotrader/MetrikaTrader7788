@@ -143,9 +143,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   name: true,
   email: true,
   password: true,
+  phone: true,
 }).extend({
   email: z.string().email("Email deve ser válido"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  phone: z.string().optional(),
   confirmPassword: z.string()
 }).refine(data => data.password === data.confirmPassword, {
   message: "Senhas não conferem",
