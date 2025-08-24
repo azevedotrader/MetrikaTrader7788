@@ -31,15 +31,15 @@ export default function Perfil() {
   return (
     <div className="p-6">
       <div className="max-w-2xl mx-auto">
-        <Card className="bg-gray-100 border-gray-300">
+        <Card className="bg-zinc-900/90 border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-gray-800 text-xl font-semibold">Editar Dados do Usuário</CardTitle>
+            <CardTitle className="text-white text-xl font-semibold">Editar Dados do Usuário</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Picture Section */}
               <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 bg-gray-400 rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 gradient-purple-blue rounded-full flex items-center justify-center">
                   <span className="text-white text-2xl font-bold">{user?.initials}</span>
                 </div>
                 <div>
@@ -56,61 +56,61 @@ export default function Perfil() {
               {/* Dados do Usuário */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="nome" className="text-gray-700">Nome</Label>
+                  <Label htmlFor="nome" className="text-zinc-300">Nome</Label>
                   <Input
                     id="nome"
                     value={formData.nome}
                     onChange={(e) => handleInputChange("nome", e.target.value)}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-zinc-800 border-zinc-700 text-white"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-gray-700">Email</Label>
+                  <Label htmlFor="email" className="text-zinc-300">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-zinc-800 border-zinc-700 text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="telefone" className="text-gray-700">Telefone</Label>
+                  <Label htmlFor="telefone" className="text-zinc-300">Telefone</Label>
                   <Input
                     id="telefone"
                     type="tel"
                     placeholder="(11) 99999-9999"
                     value={formData.telefone}
                     onChange={(e) => handleInputChange("telefone", e.target.value)}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="senha" className="text-gray-700">Nova Senha</Label>
+                  <Label htmlFor="senha" className="text-zinc-300">Nova Senha</Label>
                   <Input
                     id="senha"
                     type="password"
                     placeholder="Digite uma nova senha"
                     value={formData.senha}
                     onChange={(e) => handleInputChange("senha", e.target.value)}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirmarSenha" className="text-gray-700">Confirmar Senha</Label>
+                  <Label htmlFor="confirmarSenha" className="text-zinc-300">Confirmar Senha</Label>
                   <Input
                     id="confirmarSenha"
                     type="password"
                     placeholder="Confirme a nova senha"
                     value={formData.confirmarSenha}
                     onChange={(e) => handleInputChange("confirmarSenha", e.target.value)}
-                    className="bg-white border-gray-300 text-gray-900"
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
                   />
                 </div>
               </div>
