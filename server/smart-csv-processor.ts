@@ -201,6 +201,7 @@ export async function processSmartCSV(
     console.log(`🔍 Headers do arquivo: [${parseResult.meta.fields?.join(', ')}]`);
     
     const isClear = isClearCSV(headers);
+    const isTickmill = isTickmillCSV(parseResult.meta.fields || []);
     
     if (isClear) {
       console.log(`🏦 CSV DA CLEAR DETECTADO - processamento especializado`);
@@ -210,6 +211,18 @@ export async function processSmartCSV(
       result.summary.tradesFound = clearTrades.length;
       result.summary.detectedBroker = 'clear';
       result.summary.detectedMarket = 'b3';
+      
+      return result;
+    }
+    
+    if (isTickmill) {
+      console.log(`🏦 CSV DA TICKMILL DETECTADO - processamento especializado para Forex`);
+      const tickmillTrades = processTickmillCSV(parseResult.data as Record<string, any>[], userId);
+      
+      result.trades = tickmillTrades;
+      result.summary.tradesFound = tickmillTrades.length;
+      result.summary.detectedBroker = 'tickmill';
+      result.summary.detectedMarket = 'forex';
       
       return result;
     }
@@ -471,6 +484,181 @@ function detectDelimiter(content: string): string {
 }
 
 /**
+ * Detecta se o CSV é da Tickmill
+ */
+function isTickmillCSV(headers: string[]): boolean {
+  const tickmillHeaders = [
+    'símbolo', 'symbol', 'lado', 'side', 'tipo', 'type',
+    'qtde', 'quantity', 'qtd. preenchida', 'filled qty',
+    'preço limite', 'limit price', 'preço de stop', 'stop price',
+    'preço médio', 'avg price', 'status', 'tempo de atualização', 'update time',
+    'position id', 'commission', 'closed p&l', 'net closed p&l', 'id da ordem', 'order id'
+  ];
+  
+  const normalizedHeaders = headers.map(h => h.toLowerCase()
+    .replace(/[áàâãäå]/g, 'a')
+    .replace(/[éèêë]/g, 'e') 
+    .replace(/[íìîï]/g, 'i')
+    .replace(/[óòôõö]/g, 'o')
+    .replace(/[úùûü]/g, 'u')
+    .replace(/[ç]/g, 'c')
+    .replace(/&/g, '')
+    .trim()
+  );
+  
+  console.log(`🔍 Verificando Tickmill CSV - Headers: [${normalizedHeaders.join(', ')}]`);
+  
+  const matchCount = tickmillHeaders.filter(h => 
+    normalizedHeaders.some(nh => nh.includes(h))
+  ).length;
+  
+  const isMatch = matchCount >= 6; // Precisa ter pelo menos 6 campos típicos da Tickmill
+  
+  console.log(`🏦 Tickmill headers encontrados: ${matchCount}/${tickmillHeaders.length} - É Tickmill? ${isMatch}`);
+  
+  return isMatch;
+}
+
+/**
+ * Processa CSV da Tickmill (apenas trades executados com P&L)
+ */
+function processTickmillCSV(data: any[], userId: string): InsertTrade[] {
+  console.log(`🏦 Processando ${data.length} linhas do CSV Tickmill...`);
+  
+  const trades: InsertTrade[] = [];
+  
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    
+    try {
+      const trade = processTickmillTradeRow(row, userId);
+      if (trade) {
+        trades.push(trade);
+        console.log(`✅ Trade ${i + 1} processado: ${trade.ativo} ${trade.tipo} = ${trade.resultado}`);
+      } else {
+        console.log(`⏭️ Linha ${i + 1} ignorada (não é trade executado)`);
+      }
+    } catch (error) {
+      console.log(`❌ Erro na linha ${i + 1}:`, error);
+    }
+  }
+  
+  console.log(`🎯 Tickmill: ${trades.length} trades válidos extraídos de ${data.length} linhas`);
+  return trades;
+}
+
+/**
+ * Processa uma linha individual do CSV Tickmill
+ */
+function processTickmillTradeRow(row: any, userId: string): InsertTrade | null {
+  // Encontrar campos com diferentes possíveis nomes
+  const findField = (row: any, fieldNames: string[]): string | undefined => {
+    for (const name of fieldNames) {
+      const normalizedName = name.toLowerCase()
+        .replace(/[áàâãäå]/g, 'a')
+        .replace(/[éèêë]/g, 'e') 
+        .replace(/[íìîï]/g, 'i')
+        .replace(/[óòôõö]/g, 'o')
+        .replace(/[úùûü]/g, 'u')
+        .replace(/[ç]/g, 'c')
+        .replace(/&/g, '')
+        .trim();
+      
+      for (const [key, value] of Object.entries(row)) {
+        const normalizedKey = key.toLowerCase()
+          .replace(/[áàâãäå]/g, 'a')
+          .replace(/[éèêë]/g, 'e') 
+          .replace(/[íìîï]/g, 'i')
+          .replace(/[óòôõö]/g, 'o')
+          .replace(/[úùûü]/g, 'u')
+          .replace(/[ç]/g, 'c')
+          .replace(/&/g, '')
+          .trim();
+        
+        if (normalizedKey.includes(normalizedName)) {
+          return String(value || '').trim();
+        }
+      }
+    }
+    return undefined;
+  };
+
+  // Extrair campos principais
+  const simbolo = findField(row, ['símbolo', 'symbol']);
+  const lado = findField(row, ['lado', 'side']);
+  const status = findField(row, ['status']);
+  const qtdPreenchida = findField(row, ['qtd. preenchida', 'filled qty', 'qtde preenchida']);
+  const tempoAtualizacao = findField(row, ['tempo de atualização', 'update time']);
+  const closedPL = findField(row, ['closed pl', 'closed p&l']);
+  const precoMedio = findField(row, ['preço médio', 'avg price', 'preco medio']);
+  
+  console.log(`🔍 Tickmill linha: símbolo="${simbolo}", status="${status}", closedPL="${closedPL}", qtd="${qtdPreenchida}"`);
+  
+  // Só processar trades que foram EXECUTADOS e têm P&L realizado
+  if (!simbolo || status !== 'Executado' || !closedPL || closedPL === '' || parseFloat(closedPL) === 0) {
+    return null;
+  }
+  
+  // Parse de valores
+  const parseNumberValue = (value: string): number => {
+    if (!value) return 0;
+    const str = value.toString().trim();
+    const cleaned = str.replace(/[^\d.,-]/g, '').replace(',', '.');
+    return parseFloat(cleaned) || 0;
+  };
+  
+  const quantidade = parseNumberValue(qtdPreenchida || '1');
+  const resultado = parseNumberValue(closedPL);
+  const precoEntrada = parseNumberValue(precoMedio || '0');
+  
+  // Parse da data
+  let dataHora = new Date();
+  if (tempoAtualizacao) {
+    try {
+      // Formato: 2025-07-28 12:20:50
+      const [datePart, timePart] = tempoAtualizacao.split(' ');
+      if (datePart && timePart) {
+        const [year, month, day] = datePart.split('-');
+        const [hour, minute, second] = timePart.split(':');
+        dataHora = new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          parseInt(hour),
+          parseInt(minute),
+          parseInt(second || '0')
+        );
+      }
+    } catch (error) {
+      console.log(`⚠️ Erro ao fazer parse da data: ${tempoAtualizacao}`);
+    }
+  }
+  
+  // Tipo de operação
+  const tipo: 'compra' | 'venda' = lado?.toLowerCase() === 'comprar' ? 'compra' : 'venda';
+  
+  console.log(`✅ Tickmill trade válido: ${simbolo} ${tipo} ${quantidade} = R$ ${resultado.toFixed(2)}`);
+  
+  return {
+    userId,
+    corretora: 'forex',
+    origem: 'csv',
+    mercado: 'forex',
+    setup: 'Tickmill CSV Import',
+    dataHora: dataHora.toISOString(),
+    ativo: simbolo.toUpperCase(),
+    tipo,
+    quantidade: quantidade.toString(),
+    precoEntrada: precoEntrada.toString(),
+    precoSaida: precoEntrada.toString(),
+    capitalUtilizado: (quantidade * precoEntrada).toString(),
+    resultado: resultado.toString(),
+    emocao: 'neutro',
+    comentario: `Tickmill: ${tipo} ${quantidade} - ${tempoAtualizacao || 'sem data'}`
+  };
+}
+
+/**
  * Detecta broker e mercado baseado nos dados
  */
 function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string; market: string } {
@@ -496,7 +684,7 @@ function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string
     return { broker: 'crypto', market: 'crypto' };
   }
   
-  if (/forex|fx|tickmill|meta|mt4|mt5|eur|gbp|usd/.test(headerStr)) {
+  if (/forex|fx|tickmill|meta|mt4|mt5|eur|gbp|usd|closed p&l|position id/.test(headerStr)) {
     return { broker: 'forex', market: 'forex' };
   }
   
