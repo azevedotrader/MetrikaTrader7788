@@ -10,13 +10,13 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Perfil() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: user?.name || "",
     email: user?.email || "",
-    telefone: "",
+    telefone: (user as any)?.phone || "",
     senha: "",
     confirmarSenha: ""
   });
@@ -83,17 +83,27 @@ export default function Perfil() {
       const response = await apiRequest('PUT', '/api/profile', updateData);
       const result = await response.json();
       
+      // Atualizar o contexto de usuário com os novos dados
+      updateUser({
+        name: updateData.nome,
+        email: updateData.email,
+        ...(updateData.telefone && { phone: updateData.telefone })
+      });
+      
+      // Atualizar o formulário com os novos dados (exceto senhas)
+      setFormData(prev => ({
+        ...prev,
+        nome: updateData.nome,
+        email: updateData.email,
+        telefone: updateData.telefone || "",
+        senha: "",
+        confirmarSenha: ""
+      }));
+      
       toast({
         title: "Perfil atualizado!",
         description: "Suas informações foram atualizadas com sucesso.",
       });
-      
-      // Limpar campos de senha após sucesso
-      setFormData(prev => ({
-        ...prev,
-        senha: "",
-        confirmarSenha: ""
-      }));
       
     } catch (error) {
       console.error("Erro ao atualizar perfil:", error);
