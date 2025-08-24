@@ -128,17 +128,18 @@ export function processClearTradeRow(
   const precoCompra = findField(row, ['preço compra', 'preco compra', 'preco_compra']);
   const precoVenda = findField(row, ['preço venda', 'preco venda', 'preco_venda']);
   
-  // Buscar o campo Res. Operação com diferentes variações
-  const resOperacao = findField(row, ['res. operação', 'res operação', 'res.operação', 'resoperação']) || 
-                      findField(row, ['resultado']);
-  const total = findField(row, ['total']); // Total acumulado, não o resultado individual
+  // Buscar o campo Res. Operação com diferentes variações - PRIORIDADE TOTAL
+  const resOperacao = findField(row, ['res. operação', 'res operação', 'res.operação', 'resoperação', 'res. operac']);
+  const resultadoField = findField(row, ['resultado']); 
+  const total = findField(row, ['total']); // Total acumulado - USAR APENAS COMO ÚLTIMA OPÇÃO
   
   // Usar abertura ou fechamento para data/hora
   const dataHoraStr = abertura || fechamento || '';
   
-  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", res.operação="${resOperacao}", total="${total}", lado="${lado}"`);
+  console.log(`🏦 Clear campos: ativo="${ativo}", abertura="${abertura}", res.operação="${resOperacao}", resultado="${resultadoField}", total="${total}", lado="${lado}"`);
   
-  if (!ativo || (!resOperacao && !total)) {
+  // Validação rigorosa: deve ter ativo e pelo menos um campo de resultado válido
+  if (!ativo || (!resOperacao && !resultadoField && !total)) {
     console.log('❌ Clear: campos obrigatórios ausentes (ativo, resultado)');
     return null;
   }
@@ -157,8 +158,26 @@ export function processClearTradeRow(
   const qtdVendaNum = parseFloat(qtdVenda || '0');
   const qtdFinal = qtdCampo || Math.max(qtdCompraNum, qtdVendaNum) || 1;
   
-  // Resultado da operação em REAIS (usar Res. Operação se disponível, senão Total)
-  const resultado = parseRealValue(resOperacao || total || '0');
+  // PRIORIDADE CORRETA: Res. Operação > Resultado > Total (apenas como última opção)
+  let resultado: number;
+  let fonteCampo: string;
+  
+  if (resOperacao) {
+    resultado = parseRealValue(resOperacao);
+    fonteCampo = "Res. Operação";
+  } else if (resultadoField) {
+    resultado = parseRealValue(resultadoField);
+    fonteCampo = "Resultado";
+  } else if (total) {
+    resultado = parseRealValue(total);
+    fonteCampo = "Total (acumulado)";
+    console.log('⚠️ ATENÇÃO: Usando campo Total (pode ser valor acumulado)');
+  } else {
+    resultado = 0;
+    fonteCampo = "valor padrão (0)";
+  }
+  
+  console.log(`💰 Resultado extraído: R$ ${resultado.toFixed(2)} (fonte: ${fonteCampo})`);
   
   // Preços em pontos (precisamos converter para valor real se necessário)
   const precoEntrada = precoCompra ? parseRealValue(precoCompra) : 0;
@@ -167,7 +186,7 @@ export function processClearTradeRow(
   // Tipo de operação  
   const tipo: 'compra' | 'venda' = lado?.toUpperCase() === 'C' ? 'compra' : 'venda';
   
-  console.log(`✅ Clear: ${ativo} ${tipo} ${qtdFinal} contratos, resultado = R$ ${resultado}`);
+  console.log(`✅ Clear: ${ativo} ${tipo} ${qtdFinal} contratos, resultado = R$ ${resultado.toFixed(2)} (${fonteCampo})`);
   
   return {
     userId,
@@ -235,7 +254,7 @@ export function processClearCSV(
     try {
       const trade = processClearTradeRow(row, userId);
       if (trade) {
-        const totalAcumulado = parseFloat(trade.resultado);
+        const totalAcumulado = parseFloat(trade.resultado || '0');
         tradesComAcumulado.push({ trade, totalAcumulado });
       }
     } catch (error) {
