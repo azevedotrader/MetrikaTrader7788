@@ -80,19 +80,7 @@ export default function Perfil() {
       }
       
       // Chamar API real
-      const response = await apiRequest('/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao atualizar perfil');
-      }
-      
+      const response = await apiRequest('PUT', '/api/profile', updateData);
       const result = await response.json();
       
       toast({
