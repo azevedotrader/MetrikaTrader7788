@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Calendar, Plus, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DiaryModal } from "@/components/ui/diary-modal";
+import { DayDetailsModal } from "@/components/ui/day-details-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, isSameDay } from "date-fns";
 import type { DiaryEntry } from "@shared/schema";
@@ -39,6 +40,7 @@ export function TradingCalendar({
 }: TradingCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isDayDetailsModalOpen, setIsDayDetailsModalOpen] = useState(false);
   const [isDiaryModalOpen, setIsDiaryModalOpen] = useState(false);
   const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<DiaryEntry | undefined>(undefined);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
@@ -57,11 +59,18 @@ export function TradingCalendar({
 
   // Funções para o diário
   const handleDateClick = (date: Date) => {
-    const existingEntry = getDiaryEntryForDate(date);
-    
-    // Sempre usar a funcionalidade interna do modal
-    setSelectedDiaryEntry(existingEntry);
+    // Abrir modal de detalhes do dia
     setSelectedDate(date);
+    setIsDayDetailsModalOpen(true);
+  };
+
+  const handleEditDiary = () => {
+    if (!selectedDate) return;
+    const existingEntry = getDiaryEntryForDate(selectedDate);
+    
+    // Fechar modal de detalhes e abrir modal de edição
+    setIsDayDetailsModalOpen(false);
+    setSelectedDiaryEntry(existingEntry);
     setIsDiaryModalOpen(true);
   };
 
@@ -497,6 +506,14 @@ export function TradingCalendar({
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Detalhes do Dia */}
+      <DayDetailsModal
+        isOpen={isDayDetailsModalOpen}
+        onClose={() => setIsDayDetailsModalOpen(false)}
+        selectedDate={selectedDate}
+        onEditDiary={handleEditDiary}
+      />
 
       {/* Modal do Diário */}
       <DiaryModal
