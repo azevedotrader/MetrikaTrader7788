@@ -1535,7 +1535,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
         if (excelResult.length > 0) {
           console.log(`💾 [${userId}] Inserindo ${excelResult.length} trades Excel no banco`);
-          await storage.createBulkTrades(excelResult);
+          await storage.createBulkTrades(excelResult, csvImport.id);
         }
 
         // Clean up uploaded file
