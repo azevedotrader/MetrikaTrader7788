@@ -176,57 +176,68 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
 // TradingView widget real implementation
 function TradingViewWidget({ symbol, interval }: { symbol: string; interval: string }) {
   const [widgetId] = useState(() => `tradingview_chart_${Math.random().toString(36).substr(2, 9)}`);
+  const [isReady, setIsReady] = useState(false);
   
   useEffect(() => {
+    let mounted = true;
+    
     // Clean up any existing widget
     const container = document.getElementById(widgetId);
     if (container) {
       container.innerHTML = '';
     }
 
-    // Check if script already exists
-    if (document.getElementById("tradingview_script")) {
-      // Script exists, initialize widget
-      if (window.TradingView && window.TradingView.widget) {
-        new window.TradingView.widget({
-          width: "100%",
-          height: 580,
-          symbol: symbol,
-          interval: interval,
-          timezone: "America/Sao_Paulo",
-          theme: "dark",
-          style: "1",
-          locale: "br",
-          container_id: widgetId
-        });
+    const initWidget = () => {
+      if (!mounted) return;
+      
+      try {
+        if (window.TradingView && window.TradingView.widget) {
+          new window.TradingView.widget({
+            width: "100%",
+            height: 580,
+            symbol: symbol,
+            interval: interval,
+            timezone: "America/Sao_Paulo",
+            theme: "dark",
+            style: "1",
+            locale: "br",
+            container_id: widgetId,
+            autosize: true
+          });
+          setIsReady(true);
+        }
+      } catch (error) {
+        console.log("Widget initialization skipped");
+        // Silently fail without showing error
       }
+    };
+
+    // Check if script already exists
+    const existingScript = document.getElementById("tradingview_script");
+    if (existingScript && window.TradingView) {
+      setTimeout(initWidget, 100);
       return;
     }
 
-    // Create and load script
-    const script = document.createElement("script");
-    script.id = "tradingview_script";
-    script.src = "https://s3.tradingview.com/tv.js";
-    script.async = true;
-    script.onload = () => {
-      if (window.TradingView && window.TradingView.widget) {
-        new window.TradingView.widget({
-          width: "100%",
-          height: 580,
-          symbol: symbol,
-          interval: interval,
-          timezone: "America/Sao_Paulo",
-          theme: "dark",
-          style: "1",
-          locale: "br",
-          container_id: widgetId
-        });
-      }
-    };
-    document.body.appendChild(script);
+    // Load script if not exists
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.id = "tradingview_script";
+      script.src = "https://s3.tradingview.com/tv.js";
+      script.async = true;
+      script.onload = () => {
+        if (mounted) {
+          setTimeout(initWidget, 100);
+        }
+      };
+      script.onerror = () => {
+        // Silently fail
+      };
+      document.head.appendChild(script);
+    }
 
     return () => {
-      // Cleanup on unmount
+      mounted = false;
       const container = document.getElementById(widgetId);
       if (container) {
         container.innerHTML = '';
@@ -237,6 +248,11 @@ function TradingViewWidget({ symbol, interval }: { symbol: string; interval: str
   return (
     <div className="w-full h-full bg-slate-900 rounded-lg overflow-hidden">
       <div id={widgetId} className="w-full h-full" />
+      {!isReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+          <AlternativeChart symbol={symbol} interval={interval} />
+        </div>
+      )}
     </div>
   );
 }
