@@ -249,7 +249,47 @@ export default function NovoTrade() {
     onError: (error: any) => {
       console.log("CSV Upload Error:", error);
 
-      // Detectar erro de validação de datas
+      // Parse da resposta de erro do servidor
+      let errorData = error;
+      if (typeof error === 'string') {
+        try {
+          errorData = JSON.parse(error);
+        } catch {
+          errorData = { message: error };
+        }
+      }
+
+      // Detectar erro específico de arquivos sem datas
+      if (
+        errorData.errorCode === "NO_TRADE_DATES" ||
+        errorData.errorCode === "NO_VALID_TRADES" ||
+        errorData.message?.includes("sem datas específicas") ||
+        errorData.message?.includes("Nenhum trade válido encontrado")
+      ) {
+        const title = errorData.errorCode === "NO_TRADE_DATES" ? 
+          "📅 Arquivo Sem Datas de Trades" : 
+          "🚫 Trades Não Encontrados";
+
+        let description = `${errorData.message}\n\n`;
+        
+        if (errorData.details) {
+          description += `${errorData.details}\n\n`;
+        }
+        
+        if (errorData.suggestion) {
+          description += `${errorData.suggestion}`;
+        }
+
+        toast({
+          title,
+          description,
+          variant: "destructive",
+          duration: 12000, // Mais tempo para ler a explicação completa
+        });
+        return;
+      }
+
+      // Detectar erro de validação de datas (código legado)
       if (
         error.message?.includes("não contém datas de trades válidas") ||
         error.message?.includes(

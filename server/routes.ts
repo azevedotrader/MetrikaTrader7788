@@ -1674,10 +1674,12 @@ export async function registerRoutes(app: Express): Promise<void> {
           fs.unlinkSync(file.path);
           
           return res.status(400).json({
-            message: "❌ Arquivo rejeitado: contém apenas estatísticas ou relatórios",
-            details: "Para usar o calendário, são necessários trades com datas específicas de execução. O arquivo enviado contém apenas resumos ou métricas sem datas reais.",
+            message: "🚫 Arquivo sem datas específicas de trades",
+            details: "O arquivo enviado contém apenas estatísticas ou resumos, mas não trades individuais com datas específicas. Para usar o calendário e visualizar trades por data, é necessário um arquivo de histórico real.",
             errors: result.errors,
-            suggestion: "Envie um arquivo de histórico de trades com datas específicas (ex: relatório de execuções, extrato de ordens executadas)."
+            suggestion: "📅 Envie um arquivo com histórico de trades que contenha:\n• Data/hora específica de cada operação\n• Símbolo do ativo negociado\n• Resultado individual de cada trade\n\nExemplos: extrato de execuções, relatório de ordens, histórico de negociações.",
+            type: "validation_error",
+            errorCode: "NO_TRADE_DATES"
           });
         }
 
@@ -1707,10 +1709,12 @@ export async function registerRoutes(app: Express): Promise<void> {
             fs.unlinkSync(file.path);
             
             return res.status(400).json({
-              message: "❌ Nenhum trade válido encontrado no arquivo",
+              message: "🚫 Nenhum trade válido encontrado",
               details: "O arquivo não contém trades com datas específicas necessárias para o calendário.",
               errors: fallbackResult.errors,
-              suggestion: "Verifique se o arquivo contém histórico real de trades (não apenas estatísticas ou resumos)."
+              suggestion: "📅 Verifique se o arquivo contém:\n• Histórico real de trades (não estatísticas)\n• Datas específicas de cada operação\n• Símbolos dos ativos negociados",
+              type: "validation_error", 
+              errorCode: "NO_VALID_TRADES"
             });
           }
         }
