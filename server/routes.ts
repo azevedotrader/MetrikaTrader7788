@@ -14,6 +14,8 @@ import XLSX from 'xlsx';
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
+import crypto from "crypto";
+import { sendPasswordResetEmail, configureEmailService } from "./email";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -1215,6 +1217,91 @@ export async function registerRoutes(app: Express): Promise<void> {
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
+  // Forgot password - Request password reset
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal if user exists for security
+        return res.json({ message: "Se o email existir em nossa base, você receberá instruções de recuperação" });
+      }
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+      
+      // Token expires in 1 hour
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+      
+      // Save token to database
+      await storage.createPasswordResetToken(user.id, hashedToken, expiresAt);
+      
+      // Build reset link
+      const baseUrl = process.env.FRONTEND_URL || `https://${req.hostname}`;
+      const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+      
+      // Send email
+      await sendPasswordResetEmail(user.email, resetLink);
+      
+      res.json({ message: "Se o email existir em nossa base, você receberá instruções de recuperação" });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Erro ao processar solicitação" });
+    }
+  });
+
+  // Reset password with token
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token e nova senha são obrigatórios" });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "A nova senha deve ter pelo menos 6 caracteres" });
+      }
+
+      // Hash the token to match stored version
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      
+      // Get token from database
+      const resetToken = await storage.getPasswordResetToken(hashedToken);
+      
+      if (!resetToken) {
+        return res.status(400).json({ message: "Token inválido ou expirado" });
+      }
+      
+      // Check if token is expired
+      if (new Date() > new Date(resetToken.expiresAt)) {
+        return res.status(400).json({ message: "Token expirado" });
+      }
+      
+      // Check if token was already used
+      if (resetToken.used) {
+        return res.status(400).json({ message: "Token já foi utilizado" });
+      }
+      
+      // Update user password
+      await storage.updateUserPassword(resetToken.userId, newPassword);
+      
+      // Mark token as used
+      await storage.markTokenAsUsed(hashedToken);
+      
+      res.json({ message: "Senha redefinida com sucesso" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ message: "Erro ao redefinir senha" });
     }
   });
 

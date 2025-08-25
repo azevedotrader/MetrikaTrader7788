@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { ForgotPasswordModal } from "./forgot-password-modal";
 
 interface LoginModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,6 +41,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
         <DialogHeader className="text-center space-y-4">
@@ -97,7 +100,15 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                 Lembrar de mim
               </Label>
             </div>
-            <Button variant="link" className="text-purple-400 hover:text-purple-300 p-0">
+            <Button 
+              type="button"
+              variant="link" 
+              className="text-purple-400 hover:text-purple-300 p-0"
+              onClick={() => {
+                onOpenChange(false);
+                setShowForgotPassword(true);
+              }}
+            >
               Esqueceu a senha?
             </Button>
           </div>
@@ -125,5 +136,15 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
         </div>
       </DialogContent>
     </Dialog>
+    
+    <ForgotPasswordModal
+      open={showForgotPassword}
+      onOpenChange={setShowForgotPassword}
+      onBackToLogin={() => {
+        setShowForgotPassword(false);
+        onOpenChange(true);
+      }}
+    />
+  </>
   );
 }

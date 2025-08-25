@@ -23,6 +23,7 @@ import Calendario from "@/pages/calendario";
 import TesteGateIO from "@/pages/teste-gateio";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
+import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 const pageTitles: Record<string, string> = {
@@ -50,6 +51,11 @@ function AppContent() {
         {/* Public test page - accessible without authentication */}
         <Route path="/teste-gateio">
           <TesteGateIO />
+        </Route>
+        
+        {/* Password reset route - public */}
+        <Route path="/reset-password">
+          <ResetPassword />
         </Route>
         
         {/* Admin routes - separate from regular app */}
