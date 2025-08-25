@@ -10,6 +10,278 @@ if (SENDGRID_API_KEY) {
   sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
+export async function sendWelcomeEmail(email: string, userName: string): Promise<void> {
+  if (!SENDGRID_API_KEY) {
+    console.log('⚠️ SendGrid não configurado. Email de boas-vindas não enviado.');
+    return;
+  }
+
+  const msg = {
+    to: email,
+    from: FROM_EMAIL,
+    subject: 'Bem-vindo ao Métrika! 🎯',
+    text: `
+Olá ${userName}!
+
+Seja muito bem-vindo ao Métrika - sua plataforma completa de análise de trading!
+
+Você acaba de dar o primeiro passo para transformar seus resultados no mercado.
+
+Com o Métrika, você poderá:
+✓ Importar trades automaticamente via CSV
+✓ Analisar sua performance com gráficos profissionais
+✓ Identificar padrões vencedores e perdedores
+✓ Manter um diário de trading organizado
+✓ Acompanhar sua evolução mês a mês
+
+Primeiros Passos:
+1. Faça login em sua conta
+2. Importe seus primeiros trades (CSV ou manual)
+3. Explore o Dashboard para ver suas estatísticas
+4. Configure suas corretoras favoritas
+
+Precisa de ajuda? Nossa IA assistente está sempre disponível no canto inferior direito!
+
+Bons trades e muito sucesso!
+
+Equipe Métrika
+    `.trim(),
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 32px;
+      font-weight: 600;
+    }
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      margin: 10px 0 0 0;
+      font-size: 18px;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #333;
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-size: 24px;
+    }
+    .content p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .features {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 25px;
+      margin: 30px 0;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .feature-icon {
+      color: #10b981;
+      font-size: 20px;
+      margin-right: 12px;
+    }
+    .feature-text {
+      color: #555;
+      font-size: 15px;
+    }
+    .steps {
+      background-color: #fff4e6;
+      border-left: 4px solid #f59e0b;
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 4px;
+    }
+    .steps h3 {
+      color: #92400e;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .steps ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #92400e;
+    }
+    .steps li {
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .button-container {
+      text-align: center;
+      margin: 35px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+    }
+    .help-section {
+      background-color: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+      text-align: center;
+    }
+    .help-section p {
+      margin: 0;
+      color: #166534;
+      font-size: 14px;
+    }
+    .footer {
+      padding: 30px;
+      background-color: #f8f9fa;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+    .social-links {
+      margin: 20px 0;
+    }
+    .social-links a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #667eea;
+      text-decoration: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 Bem-vindo ao Métrika!</h1>
+      <p>Sua jornada para o sucesso no trading começa agora</p>
+    </div>
+    <div class="content">
+      <h2>Olá, ${userName}! 👋</h2>
+      <p>
+        É com grande prazer que damos as boas-vindas a você no <strong>Métrika</strong>, 
+        a plataforma mais completa para análise e gestão de suas operações de trading!
+      </p>
+      
+      <div class="features">
+        <h3 style="margin-top: 0; color: #333;">✨ O que você pode fazer:</h3>
+        <div class="feature-item">
+          <span class="feature-icon">✅</span>
+          <span class="feature-text">Importar trades automaticamente via CSV de qualquer corretora</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✅</span>
+          <span class="feature-text">Visualizar sua performance com gráficos profissionais</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✅</span>
+          <span class="feature-text">Identificar seus melhores e piores setups</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✅</span>
+          <span class="feature-text">Manter um diário de trading completo</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">✅</span>
+          <span class="feature-text">Receber insights de IA sobre suas operações</span>
+        </div>
+      </div>
+      
+      <div class="steps">
+        <h3>🎯 Primeiros Passos Recomendados:</h3>
+        <ol>
+          <li>Faça seu primeiro login na plataforma</li>
+          <li>Configure suas corretoras (Tickmill, Clear, Gate.io)</li>
+          <li>Importe seu histórico de trades via CSV</li>
+          <li>Explore o Dashboard para ver suas estatísticas</li>
+          <li>Comece a registrar suas análises no diário</li>
+        </ol>
+      </div>
+      
+      <div class="button-container">
+        <a href="${APP_URL}" class="button">Acessar Minha Conta</a>
+      </div>
+      
+      <div class="help-section">
+        <p>
+          💡 <strong>Dica:</strong> Use nosso assistente de IA (canto inferior direito) 
+          para tirar dúvidas e receber sugestões personalizadas!
+        </p>
+      </div>
+      
+      <p style="text-align: center; font-style: italic; color: #888; margin-top: 30px;">
+        "O sucesso no trading não é sobre acertar sempre, mas sobre gerenciar bem quando você erra."
+      </p>
+    </div>
+    <div class="footer">
+      <p><strong>Métrika</strong> - Transformando dados em decisões inteligentes</p>
+      <div class="social-links">
+        <a href="#">📧 Suporte</a>
+        <a href="#">📚 Tutoriais</a>
+        <a href="#">💬 Comunidade</a>
+      </div>
+      <p style="font-size: 12px; margin-top: 20px;">
+        © 2025 Métrika. Todos os direitos reservados.<br>
+        Este é um email automático, por favor não responda.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim(),
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('✅ Email de boas-vindas enviado com sucesso para:', email);
+  } catch (error: any) {
+    console.error('❌ Erro ao enviar email de boas-vindas:', error);
+    if (error.response) {
+      console.error('Detalhes do erro:', error.response.body);
+    }
+    // Não lançar erro para não impedir o registro do usuário
+  }
+}
+
 export async function sendPasswordResetEmail(email: string, token: string): Promise<void> {
   if (!SENDGRID_API_KEY) {
     console.log('⚠️ SendGrid não configurado. Configure SENDGRID_API_KEY nas variáveis de ambiente.');

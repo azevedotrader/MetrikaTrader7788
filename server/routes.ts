@@ -15,7 +15,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
-import { sendPasswordResetEmail } from "./email";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -1181,6 +1181,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Create user (remove confirmPassword from data)
       const { confirmPassword, ...userData } = validatedData;
       const user = await storage.createUser(userData);
+
+      // Send welcome email (don't wait for it to complete)
+      sendWelcomeEmail(user.email, user.name).catch(error => {
+        console.error('Erro ao enviar email de boas-vindas:', error);
+      });
 
       // Remove password from response
       const { password, ...userResponse } = user;
