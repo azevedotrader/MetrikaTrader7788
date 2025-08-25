@@ -15,7 +15,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
-import { sendPasswordResetEmail, configureEmailService } from "./email";
+import { sendPasswordResetEmail } from "./email";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
@@ -1245,12 +1245,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Save token to database
       await storage.createPasswordResetToken(user.id, hashedToken, expiresAt);
       
-      // Build reset link
-      const baseUrl = process.env.FRONTEND_URL || `https://${req.hostname}`;
-      const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
-      
-      // Send email
-      await sendPasswordResetEmail(user.email, resetLink);
+      // Send email with reset token
+      await sendPasswordResetEmail(user.email, resetToken);
       
       res.json({ message: "Se o email existir em nossa base, você receberá instruções de recuperação" });
     } catch (error) {
