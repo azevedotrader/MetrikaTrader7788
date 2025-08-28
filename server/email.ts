@@ -3,7 +3,16 @@ import sgMail from '@sendgrid/mail';
 // Configure SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@metrika.com';
-const APP_URL = process.env.APP_URL || 'http://localhost:5000';
+
+// Get the correct URL for Replit environment
+const getAppUrl = () => {
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+  }
+  return process.env.APP_URL || 'http://localhost:5000';
+};
+
+const APP_URL = getAppUrl();
 
 // Initialize SendGrid if API key is provided
 if (SENDGRID_API_KEY) {
