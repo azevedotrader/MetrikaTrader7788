@@ -27,34 +27,33 @@ export async function sendWelcomeEmail(email: string, userName: string): Promise
 
   const msg = {
     to: email,
-    from: FROM_EMAIL,
-    subject: 'Bem-vindo ao Métrika! 🎯',
-    text: `
-Olá ${userName}!
+    from: {
+      email: FROM_EMAIL,
+      name: 'Métrika - Suporte'
+    },
+    replyTo: FROM_EMAIL,
+    subject: 'Bem-vindo ao Métrika',
+    text: `Olá ${userName},
 
-Seja muito bem-vindo ao Métrika - sua plataforma completa de análise de trading!
+Sua conta no Métrika foi criada com sucesso!
 
-Você acaba de dar o primeiro passo para transformar seus resultados no mercado.
+Você já pode acessar a plataforma através do link:
+${APP_URL}
 
-Com o Métrika, você poderá:
-✓ Importar trades automaticamente via CSV
-✓ Analisar sua performance com gráficos profissionais
-✓ Identificar padrões vencedores e perdedores
-✓ Manter um diário de trading organizado
-✓ Acompanhar sua evolução mês a mês
+O Métrika oferece recursos completos para análise de suas operações de trading, incluindo importação de dados via CSV, gráficos de performance e diário de trading.
 
-Primeiros Passos:
-1. Faça login em sua conta
-2. Importe seus primeiros trades (CSV ou manual)
-3. Explore o Dashboard para ver suas estatísticas
-4. Configure suas corretoras favoritas
+Para começar:
+1. Faça login com seu email e senha
+2. Configure suas corretoras preferidas
+3. Importe seu histórico de operações
 
-Precisa de ajuda? Nossa IA assistente está sempre disponível no canto inferior direito!
+Se tiver dúvidas, nossa equipe de suporte está disponível através do email ${FROM_EMAIL}.
 
-Bons trades e muito sucesso!
-
+Atenciosamente,
 Equipe Métrika
-    `.trim(),
+
+--
+Este é um email automático. Caso não tenha criado uma conta no Métrika, por favor ignore esta mensagem.`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -78,7 +77,7 @@ Equipe Métrika
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #667eea;
       padding: 40px 30px;
       text-align: center;
     }
@@ -118,7 +117,7 @@ Equipe Métrika
       margin-bottom: 15px;
     }
     .feature-icon {
-      color: #10b981;
+      color: #333;
       font-size: 20px;
       margin-right: 12px;
     }
@@ -155,7 +154,7 @@ Equipe Métrika
     .button {
       display: inline-block;
       padding: 16px 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #667eea;
       color: #ffffff !important;
       text-decoration: none;
       border-radius: 8px;
@@ -201,42 +200,42 @@ Equipe Métrika
 <body>
   <div class="container">
     <div class="header">
-      <h1>🚀 Bem-vindo ao Métrika!</h1>
-      <p>Sua jornada para o sucesso no trading começa agora</p>
+      <h1>Bem-vindo ao Métrika</h1>
+      <p>Plataforma de Análise de Trading</p>
     </div>
     <div class="content">
-      <h2>Olá, ${userName}! 👋</h2>
+      <h2>Olá, ${userName}</h2>
       <p>
         É com grande prazer que damos as boas-vindas a você no <strong>Métrika</strong>, 
         a plataforma mais completa para análise e gestão de suas operações de trading!
       </p>
       
       <div class="features">
-        <h3 style="margin-top: 0; color: #333;">✨ O que você pode fazer:</h3>
+        <h3 style="margin-top: 0; color: #333;">O que você pode fazer:</h3>
         <div class="feature-item">
-          <span class="feature-icon">✅</span>
+          <span class="feature-icon">•</span>
           <span class="feature-text">Importar trades automaticamente via CSV de qualquer corretora</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">✅</span>
+          <span class="feature-icon">•</span>
           <span class="feature-text">Visualizar sua performance com gráficos profissionais</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">✅</span>
+          <span class="feature-icon">•</span>
           <span class="feature-text">Identificar seus melhores e piores setups</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">✅</span>
+          <span class="feature-icon">•</span>
           <span class="feature-text">Manter um diário de trading completo</span>
         </div>
         <div class="feature-item">
-          <span class="feature-icon">✅</span>
+          <span class="feature-icon">•</span>
           <span class="feature-text">Receber insights de IA sobre suas operações</span>
         </div>
       </div>
       
       <div class="steps">
-        <h3>🎯 Primeiros Passos Recomendados:</h3>
+        <h3>Primeiros Passos Recomendados:</h3>
         <ol>
           <li>Faça seu primeiro login na plataforma</li>
           <li>Configure suas corretoras (Tickmill, Clear, Gate.io)</li>
@@ -252,7 +251,7 @@ Equipe Métrika
       
       <div class="help-section">
         <p>
-          💡 <strong>Dica:</strong> Use nosso assistente de IA (canto inferior direito) 
+          <strong>Dica:</strong> Use nosso assistente de IA (canto inferior direito) 
           para tirar dúvidas e receber sugestões personalizadas!
         </p>
       </div>
@@ -264,9 +263,9 @@ Equipe Métrika
     <div class="footer">
       <p><strong>Métrika</strong> - Transformando dados em decisões inteligentes</p>
       <div class="social-links">
-        <a href="#">📧 Suporte</a>
-        <a href="#">📚 Tutoriais</a>
-        <a href="#">💬 Comunidade</a>
+        <a href="#">Suporte</a>
+        <a href="#">Tutoriais</a>
+        <a href="#">Comunidade</a>
       </div>
       <p style="font-size: 12px; margin-top: 20px;">
         © 2025 Métrika. Todos os direitos reservados.<br>
@@ -302,23 +301,29 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
   
   const msg = {
     to: email,
-    from: FROM_EMAIL,
-    subject: 'Recuperação de Senha - Métrika',
-    text: `
-Olá!
+    from: {
+      email: FROM_EMAIL,
+      name: 'Métrika - Suporte'
+    },
+    replyTo: FROM_EMAIL,
+    subject: 'Redefinir senha da sua conta Métrika',
+    text: `Olá,
 
-Você solicitou a recuperação de senha da sua conta no Métrika.
+Recebemos uma solicitação para redefinir a senha da sua conta no Métrika.
 
-Clique no link abaixo para redefinir sua senha:
+Para criar uma nova senha, acesse o link abaixo:
 ${resetLink}
 
-Este link expira em 1 hora.
+Este link é válido por 1 hora. Após esse período, será necessário solicitar um novo link.
 
-Se você não solicitou esta recuperação, ignore este email.
+Se você não fez esta solicitação, pode ignorar este email com segurança. Sua senha atual permanecerá inalterada.
 
 Atenciosamente,
 Equipe Métrika
-    `.trim(),
+
+--
+Este é um email automático enviado pelo sistema Métrika. Por favor, não responda a este email.
+Se precisar de ajuda, entre em contato através de ${FROM_EMAIL}.`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -342,7 +347,7 @@ Equipe Métrika
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #667eea;
       padding: 30px;
       text-align: center;
     }
@@ -372,7 +377,7 @@ Equipe Métrika
     .button {
       display: inline-block;
       padding: 14px 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #667eea;
       color: #ffffff !important;
       text-decoration: none;
       border-radius: 8px;
@@ -415,7 +420,7 @@ Equipe Métrika
 <body>
   <div class="container">
     <div class="header">
-      <h1>📊 Métrika</h1>
+      <h1>Métrika</h1>
     </div>
     <div class="content">
       <h2>Recuperação de Senha</h2>
@@ -427,7 +432,7 @@ Equipe Métrika
       </div>
       
       <div class="warning">
-        <p>⏰ <strong>Este link expira em 1 hora.</strong></p>
+        <p><strong>Este link expira em 1 hora.</strong></p>
       </div>
       
       <p style="font-size: 14px; color: #999;">
