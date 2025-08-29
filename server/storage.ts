@@ -163,7 +163,7 @@ export class DatabaseStorage implements IStorage {
     const tradeData: any = {
       ...insertTrade,
       userId: insertTrade.userId, // Ensure userId is string
-      dataHora: new Date(insertTrade.dataHora),
+      dataHora: new Date(insertTrade.dataHora.includes('T') && !insertTrade.dataHora.includes('Z') ? insertTrade.dataHora + ':00.000Z' : insertTrade.dataHora),
       // Limitar valores para evitar erros de precisão
       capitalUtilizado: validateDecimal(insertTrade.capitalUtilizado, 9999999999.99, "0"),
       quantidade: validateDecimal(insertTrade.quantidade, 9999.9999, "1"),
