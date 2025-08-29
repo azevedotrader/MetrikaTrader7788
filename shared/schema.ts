@@ -27,7 +27,7 @@ export const trades = pgTable("trades", {
   dataHora: timestamp("data_hora").notNull(),
   ativo: text("ativo").notNull(),
   mercado: text("mercado").notNull(), // "crypto", "forex", "b3"
-  setup: text("setup").notNull(),
+  setup: text("setup"),
   capitalUtilizado: decimal("capital_utilizado", { precision: 12, scale: 2 }).notNull(),
   stop: decimal("stop", { precision: 12, scale: 4 }),
   alvo: decimal("alvo", { precision: 12, scale: 4 }),

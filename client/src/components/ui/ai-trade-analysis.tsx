@@ -17,7 +17,7 @@ interface AITradeAnalysisProps {
   tradeData: {
     ativo: string;
     mercado: string;
-    setup: string;
+    setup?: string;
     tipo: string;
     alvo: number;
     stop: number;

@@ -99,7 +99,7 @@ export default function NovoTrade() {
       dataHora: new Date().toISOString().slice(0, 16),
       ativo: "",
       mercado: "crypto",
-      setup: "",
+      setup: undefined,
       capitalUtilizado: "1", // Default value for backend compatibility
       quantidade: "1", // Default value for backend compatibility
       tipo: "compra",
@@ -499,37 +499,7 @@ export default function NovoTrade() {
                   </div>
 
                   {/* Linha 2 - Setup, Tipo */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
-                    <FormField
-                      control={form.control}
-                      name="setup"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            Setup *
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder="Selecione o setup" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                              {setupOptions.map((setup) => (
-                                <SelectItem key={setup} value={setup}>
-                                  {setup}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
+                  <div className="grid grid-cols-1 gap-3 lg:gap-4">
                     <FormField
                       control={form.control}
                       name="tipo"
@@ -807,13 +777,11 @@ export default function NovoTrade() {
                         if (
                           formData.ativo &&
                           formData.mercado &&
-                          formData.setup &&
                           formData.tipo
                         ) {
                           setCurrentTradeData({
                             ativo: formData.ativo,
                             mercado: formData.mercado,
-                            setup: formData.setup,
                             tipo: formData.tipo,
                             alvo: parseFloat(formData.alvo || "0"),
                             stop: parseFloat(formData.stop || "0"),
@@ -825,7 +793,7 @@ export default function NovoTrade() {
                           toast({
                             title: "Campos obrigatórios",
                             description:
-                              "Preencha pelo menos: Ativo, Mercado, Setup e Tipo para análise.",
+                              "Preencha pelo menos: Ativo, Mercado e Tipo para análise.",
                             variant: "destructive",
                           });
                         }
