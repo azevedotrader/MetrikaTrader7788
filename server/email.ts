@@ -6,19 +6,8 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@metrika.com';
 
 // Get the correct URL for different environments
 const getAppUrl = () => {
-  // Use official Replit deployment domain with guaranteed SSL
-  // Check if we have a deployment domain first
-  if (process.env.REPL_SLUG) {
-    return `https://${process.env.REPL_SLUG}.replit.app`;
-  }
-  
-  // Fallback to development domain if available
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
-  }
-  
-  // Final fallback
-  return 'https://metrikai.shop';
+  // Use the universal project domain with guaranteed SSL
+  return 'https://metrikai.replit.app';
 };
 
 const APP_URL = getAppUrl();
