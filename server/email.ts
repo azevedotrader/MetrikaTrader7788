@@ -6,8 +6,18 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@metrika.com';
 
 // Get the correct URL for different environments
 const getAppUrl = () => {
-  // Always use production domain for emails to avoid SSL issues
-  // with complex Replit development domains
+  // Use official Replit deployment domain with guaranteed SSL
+  // Check if we have a deployment domain first
+  if (process.env.REPL_SLUG) {
+    return `https://${process.env.REPL_SLUG}.replit.app`;
+  }
+  
+  // Fallback to development domain if available
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+  }
+  
+  // Final fallback
   return 'https://metrikai.shop';
 };
 
@@ -292,12 +302,12 @@ Este é um email automático. Caso não tenha criado uma conta no Métrika, por 
 export async function sendPasswordResetEmail(email: string, token: string): Promise<void> {
   if (!SENDGRID_API_KEY) {
     console.log('⚠️ SendGrid não configurado. Configure SENDGRID_API_KEY nas variáveis de ambiente.');
-    console.log(`📧 Link de recuperação de senha: https://metrikai.shop/reset-password?token=${token}`);
+    console.log(`📧 Link de recuperação de senha: ${APP_URL}/reset-password?token=${token}`);
     return;
   }
 
-  // Always use production domain for reset links to avoid SSL issues
-  const resetLink = `https://metrikai.shop/reset-password?token=${token}`;
+  // Use the configured app URL with proper SSL
+  const resetLink = `${APP_URL}/reset-password?token=${token}`;
   console.log(`🔗 Link de reset gerado: ${resetLink}`);
   
   const msg = {
