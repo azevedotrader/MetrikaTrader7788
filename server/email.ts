@@ -292,7 +292,7 @@ Este é um email automático. Caso não tenha criado uma conta no Métrika, por 
 export async function sendPasswordResetEmail(email: string, token: string): Promise<void> {
   if (!SENDGRID_API_KEY) {
     console.log('⚠️ SendGrid não configurado. Configure SENDGRID_API_KEY nas variáveis de ambiente.');
-    console.log(`📧 Link de recuperação de senha: ${APP_URL}/reset-password?token=${token}`);
+    console.log(`📧 Link de recuperação de senha: https://metrikai.shop/reset-password?token=${token}`);
     return;
   }
 
