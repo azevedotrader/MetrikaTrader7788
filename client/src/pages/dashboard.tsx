@@ -1130,6 +1130,8 @@ export default function Dashboard() {
     currentName: string;
   } | null>(null);
   const [newCsvName, setNewCsvName] = useState("");
+  const [editingTrade, setEditingTrade] = useState<any>(null);
+  const [showEditTradeDialog, setShowEditTradeDialog] = useState(false);
 
   // Fetch trades data
   const { data: trades = [], isLoading } = useQuery<Trade[]>({
@@ -1145,6 +1147,11 @@ export default function Dashboard() {
   const { data: csvImports = [] } = useQuery({
     queryKey: ["/api/csv-imports"],
   });
+
+  // Filter manual trades
+  const manualTrades = useMemo(() => {
+    return trades.filter((trade: Trade) => trade.origem === 'manual');
+  }, [trades]);
 
   // Mutation para renomear CSV
   const renameCsvMutation = useMutation({
@@ -1196,6 +1203,52 @@ export default function Dashboard() {
       toast({
         title: "Erro ao excluir",
         description: error.message || "Não foi possível excluir o CSV",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation para deletar trade manual
+  const deleteManualTradeMutation = useMutation({
+    mutationFn: async (tradeId: string) => {
+      return apiRequest("DELETE", `/api/trades/${tradeId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
+      toast({
+        title: "Trade excluído com sucesso",
+        description: "O trade manual foi removido permanentemente.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir trade",
+        description: error.message || "Não foi possível excluir o trade",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation para editar trade manual
+  const editTradeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest("PATCH", `/api/trades/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
+      setShowEditTradeDialog(false);
+      setEditingTrade(null);
+      toast({
+        title: "Trade atualizado com sucesso",
+        description: "As alterações foram salvas.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao editar trade",
+        description: error.message || "Não foi possível salvar as alterações",
         variant: "destructive",
       });
     },
@@ -1832,137 +1885,239 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white">
-                Histórico de Importações CSV
+                Histórico de Importações e Trades
               </CardTitle>
               <CardDescription>
-                Acompanhe suas importações de dados
+                Gerencie suas importações CSV e trades manuais
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {(csvImports as any[]).length === 0 ? (
-                <div className="text-center py-8 text-zinc-400">
-                  Nenhuma importação realizada ainda
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {(csvImports as any[]).map((importItem: any) => (
-                    <div
-                      key={importItem.id}
-                      className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg"
-                    >
-                      <div className="flex items-center space-x-4">
+              <Tabs defaultValue="csv-imports" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-zinc-800">
+                  <TabsTrigger 
+                    value="csv-imports" 
+                    className="data-[state=active]:bg-slate-700 text-white"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    CSV Importados
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="manual-trades" 
+                    className="data-[state=active]:bg-slate-700 text-white"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Trades Manuais
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="csv-imports" className="space-y-4 mt-6">
+                  {(csvImports as any[]).length === 0 ? (
+                    <div className="text-center py-8 text-zinc-400">
+                      Nenhuma importação CSV realizada ainda
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {(csvImports as any[]).map((importItem: any) => (
                         <div
-                          className={`w-3 h-3 rounded-full ${importItem.status === "completed" ? "bg-green-500" : "bg-yellow-500"}`}
-                        />
-                        <div>
-                          {editingCsv?.id === importItem.id ? (
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="text"
-                                value={newCsvName}
-                                onChange={(e) => setNewCsvName(e.target.value)}
-                                className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm"
-                                placeholder="Nome do arquivo"
-                                data-testid={`input-csv-name-${importItem.id}`}
-                              />
+                          key={importItem.id}
+                          className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div
+                              className={`w-3 h-3 rounded-full ${importItem.status === "completed" ? "bg-green-500" : "bg-yellow-500"}`}
+                            />
+                            <div>
+                              {editingCsv?.id === importItem.id ? (
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="text"
+                                    value={newCsvName}
+                                    onChange={(e) => setNewCsvName(e.target.value)}
+                                    className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm"
+                                    placeholder="Nome do arquivo"
+                                    data-testid={`input-csv-name-${importItem.id}`}
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      if (newCsvName.trim()) {
+                                        renameCsvMutation.mutate({
+                                          csvId: importItem.id,
+                                          displayName: newCsvName.trim(),
+                                        });
+                                      }
+                                    }}
+                                    disabled={renameCsvMutation.isPending}
+                                    className="h-7 px-2"
+                                    data-testid={`button-save-csv-${importItem.id}`}
+                                  >
+                                    ✓
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setEditingCsv(null);
+                                      setNewCsvName("");
+                                    }}
+                                    className="h-7 px-2"
+                                    data-testid={`button-cancel-csv-${importItem.id}`}
+                                  >
+                                    ✕
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="font-medium text-white">
+                                  {importItem.displayName || importItem.fileName}
+                                </div>
+                              )}
+                              <div className="text-sm text-zinc-400">
+                                {brokerInfo[
+                                  importItem.broker as keyof typeof brokerInfo
+                                ]?.name || importItem.broker}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-right">
+                              <div className="text-white">
+                                {importItem.tradesImported} trades
+                              </div>
+                              <div className="text-xs text-zinc-400">
+                                {new Date(importItem.createdAt).toLocaleDateString(
+                                  "pt-BR",
+                                )}
+                              </div>
+                            </div>
+                            {editingCsv?.id !== importItem.id && (
+                              <div className="flex space-x-1 ml-3">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingCsv({
+                                      id: importItem.id,
+                                      currentName:
+                                        importItem.displayName ||
+                                        importItem.fileName,
+                                    });
+                                    setNewCsvName(
+                                      importItem.displayName || importItem.fileName,
+                                    );
+                                  }}
+                                  className="h-7 px-2 text-zinc-400 hover:text-white"
+                                  data-testid={`button-edit-csv-${importItem.id}`}
+                                >
+                                  <Edit2 className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (
+                                      confirm(
+                                        `Tem certeza que deseja excluir "${importItem.displayName || importItem.fileName}"?\n\nEsta ação irá deletar:\n• O arquivo CSV\n• Todos os trades relacionados a este CSV\n\nEsta ação não pode ser desfeita.`,
+                                      )
+                                    ) {
+                                      deleteCsvMutation.mutate(importItem.id);
+                                    }
+                                  }}
+                                  disabled={deleteCsvMutation.isPending}
+                                  className="h-7 px-2 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300"
+                                  data-testid={`button-delete-csv-${importItem.id}`}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="manual-trades" className="space-y-4 mt-6">
+                  {manualTrades.length === 0 ? (
+                    <div className="text-center py-8 text-zinc-400">
+                      Nenhum trade manual criado ainda
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {manualTrades.map((trade: any) => (
+                        <div
+                          key={trade.id}
+                          className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div
+                              className={`w-3 h-3 rounded-full ${
+                                parseFloat(trade.resultado || "0") >= 0 ? "bg-green-500" : "bg-red-500"
+                              }`}
+                            />
+                            <div>
+                              <div className="font-medium text-white">
+                                {trade.ativo} - {trade.tipo === 'compra' ? '📈' : '📉'} {trade.tipo}
+                              </div>
+                              <div className="text-sm text-zinc-400">
+                                {brokerInfo[
+                                  trade.mercado as keyof typeof brokerInfo
+                                ]?.name || trade.mercado} • Manual
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="text-right">
+                              <div className={`text-sm font-medium ${
+                                parseFloat(trade.resultado || "0") >= 0 ? "text-green-400" : "text-red-400"
+                              }`}>
+                                R$ {parseFloat(trade.resultado || "0").toFixed(2)}
+                              </div>
+                              <div className="text-xs text-zinc-400">
+                                {new Date(trade.dataHora).toLocaleDateString(
+                                  "pt-BR",
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex space-x-1 ml-3">
                               <Button
                                 size="sm"
+                                variant="outline"
                                 onClick={() => {
-                                  if (newCsvName.trim()) {
-                                    renameCsvMutation.mutate({
-                                      csvId: importItem.id,
-                                      displayName: newCsvName.trim(),
-                                    });
-                                  }
+                                  setEditingTrade(trade);
+                                  setShowEditTradeDialog(true);
                                 }}
-                                disabled={renameCsvMutation.isPending}
-                                className="h-7 px-2"
-                                data-testid={`button-save-csv-${importItem.id}`}
+                                className="h-7 px-2 text-zinc-400 hover:text-white"
+                                data-testid={`button-edit-trade-${trade.id}`}
                               >
-                                ✓
+                                <Edit2 className="w-3 h-3" />
                               </Button>
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setEditingCsv(null);
-                                  setNewCsvName("");
+                                  if (
+                                    confirm(
+                                      `Tem certeza que deseja excluir este trade?\n\nAtivo: ${trade.ativo}\nTipo: ${trade.tipo}\nResultado: R$ ${parseFloat(trade.resultado || "0").toFixed(2)}\n\nEsta ação não pode ser desfeita.`,
+                                    )
+                                  ) {
+                                    deleteManualTradeMutation.mutate(trade.id);
+                                  }
                                 }}
-                                className="h-7 px-2"
-                                data-testid={`button-cancel-csv-${importItem.id}`}
+                                disabled={deleteManualTradeMutation.isPending}
+                                className="h-7 px-2 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300"
+                                data-testid={`button-delete-trade-${trade.id}`}
                               >
-                                ✕
+                                <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>
-                          ) : (
-                            <div className="font-medium text-white">
-                              {importItem.displayName || importItem.fileName}
-                            </div>
-                          )}
-                          <div className="text-sm text-zinc-400">
-                            {brokerInfo[
-                              importItem.broker as keyof typeof brokerInfo
-                            ]?.name || importItem.broker}
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="text-right">
-                          <div className="text-white">
-                            {importItem.tradesImported} trades
-                          </div>
-                          <div className="text-xs text-zinc-400">
-                            {new Date(importItem.createdAt).toLocaleDateString(
-                              "pt-BR",
-                            )}
-                          </div>
-                        </div>
-                        {editingCsv?.id !== importItem.id && (
-                          <div className="flex space-x-1 ml-3">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                setEditingCsv({
-                                  id: importItem.id,
-                                  currentName:
-                                    importItem.displayName ||
-                                    importItem.fileName,
-                                });
-                                setNewCsvName(
-                                  importItem.displayName || importItem.fileName,
-                                );
-                              }}
-                              className="h-7 px-2 text-zinc-400 hover:text-white"
-                              data-testid={`button-edit-csv-${importItem.id}`}
-                            >
-                              <Edit2 className="w-3 h-3" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => {
-                                if (
-                                  confirm(
-                                    `Tem certeza que deseja excluir "${importItem.displayName || importItem.fileName}"?\n\nEsta ação irá deletar:\n• O arquivo CSV\n• Todos os trades relacionados a este CSV\n\nEsta ação não pode ser desfeita.`,
-                                  )
-                                ) {
-                                  deleteCsvMutation.mutate(importItem.id);
-                                }
-                              }}
-                              disabled={deleteCsvMutation.isPending}
-                              className="h-7 px-2 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300"
-                              data-testid={`button-delete-csv-${importItem.id}`}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
@@ -2096,6 +2251,102 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog de Edição de Trade Manual */}
+      <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar Trade Manual</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Altere as informações do trade selecionado
+            </DialogDescription>
+          </DialogHeader>
+          {editingTrade && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-ativo">Ativo</Label>
+                <Input
+                  id="edit-ativo"
+                  value={editingTrade.ativo || ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, ativo: e.target.value})}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-tipo">Tipo</Label>
+                <Select 
+                  value={editingTrade.tipo || ''} 
+                  onValueChange={(value) => setEditingTrade({...editingTrade, tipo: value})}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectItem value="compra" className="text-white">Compra</SelectItem>
+                    <SelectItem value="venda" className="text-white">Venda</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-resultado">Resultado (R$)</Label>
+                <Input
+                  id="edit-resultado"
+                  type="number"
+                  step="0.01"
+                  value={editingTrade.resultado || ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-quantidade">Quantidade</Label>
+                <Input
+                  id="edit-quantidade"
+                  type="number"
+                  step="0.01"
+                  value={editingTrade.quantidade || ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditTradeDialog(false);
+                setEditingTrade(null);
+              }}
+              className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingTrade) {
+                  editTradeMutation.mutate({
+                    id: editingTrade.id,
+                    data: {
+                      ativo: editingTrade.ativo,
+                      tipo: editingTrade.tipo,
+                      resultado: parseFloat(editingTrade.resultado || '0'),
+                      quantidade: parseFloat(editingTrade.quantidade || '0'),
+                    }
+                  });
+                }
+              }}
+              disabled={editTradeMutation.isPending}
+              className="bg-white text-black hover:bg-gray-200"
+            >
+              {editTradeMutation.isPending ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
