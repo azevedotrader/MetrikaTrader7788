@@ -14,6 +14,7 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [token, setToken] = useState("");
+  const [isValidatingToken, setIsValidatingToken] = useState(true);
 
   useEffect(() => {
     // Extract token from URL query params
@@ -22,10 +23,32 @@ export default function ResetPassword() {
     
     if (!tokenParam) {
       setError("Link inválido. Por favor, solicite um novo link de recuperação.");
+      setIsValidatingToken(false);
     } else {
       setToken(tokenParam);
+      // Validate token with server
+      validateToken(tokenParam);
     }
   }, [location]);
+
+  const validateToken = async (tokenToValidate: string) => {
+    try {
+      const response = await fetch("/api/auth/validate-reset-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: tokenToValidate }),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.message || "Token inválido ou expirado. Solicite um novo link de recuperação.");
+      }
+    } catch (err) {
+      setError("Erro ao validar token. Verifique sua conexão com a internet.");
+    } finally {
+      setIsValidatingToken(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +69,10 @@ export default function ResetPassword() {
     try {
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache"
+        },
         body: JSON.stringify({ token, newPassword }),
       });
       
@@ -58,10 +84,18 @@ export default function ResetPassword() {
           navigate("/");
         }, 3000);
       } else {
-        setError(data.message || "Erro ao redefinir senha");
+        // More detailed error handling
+        if (response.status === 400) {
+          setError(data.message || "Token inválido, expirado ou já utilizado. Solicite um novo link.");
+        } else if (response.status === 500) {
+          setError("Erro interno do servidor. Tente novamente em alguns minutos.");
+        } else {
+          setError(data.message || "Erro ao redefinir senha. Tente novamente.");
+        }
       }
     } catch (err) {
-      setError("Erro ao conectar com o servidor");
+      console.error("Reset password error:", err);
+      setError("Erro de conectividade. Verifique sua internet e tente novamente.");
     } finally {
       setIsLoading(false);
     }
@@ -117,11 +151,12 @@ export default function ResetPassword() {
                 </div>
               )}
               
-              {!token && !error ? (
-                <div className="text-center text-slate-400">
-                  Carregando...
+              {isValidatingToken ? (
+                <div className="text-center text-slate-400 space-y-2">
+                  <div className="animate-spin w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full mx-auto"></div>
+                  <p>Validando link de recuperação...</p>
                 </div>
-              ) : token && (
+              ) : (token && !error) ? (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="new-password" className="text-slate-300">
@@ -165,7 +200,7 @@ export default function ResetPassword() {
                     {isLoading ? "Redefinindo..." : "Redefinir Senha"}
                   </Button>
                 </>
-              )}
+              ) : null}
               
               <div className="text-center">
                 <Button

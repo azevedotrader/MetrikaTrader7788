@@ -4,12 +4,25 @@ import sgMail from '@sendgrid/mail';
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@metrika.com';
 
-// Get the correct URL for Replit environment
+// Get the correct URL for different environments
 const getAppUrl = () => {
+  // Production domain override
+  if (process.env.PRODUCTION_URL) {
+    return process.env.PRODUCTION_URL;
+  }
+  
+  // Replit deployment
   if (process.env.REPLIT_DEV_DOMAIN) {
     return `https://${process.env.REPLIT_DEV_DOMAIN}`;
   }
-  return process.env.APP_URL || 'http://localhost:5000';
+  
+  // Manual APP_URL setting
+  if (process.env.APP_URL) {
+    return process.env.APP_URL;
+  }
+  
+  // Default fallback to deployed URL
+  return 'https://metrikai.shop';
 };
 
 const APP_URL = getAppUrl();
@@ -298,6 +311,7 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
   }
 
   const resetLink = `${APP_URL}/reset-password?token=${token}`;
+  console.log(`🔗 Link de reset gerado: ${resetLink}`);
   
   const msg = {
     to: email,

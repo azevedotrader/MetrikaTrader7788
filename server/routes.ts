@@ -1260,6 +1260,42 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Validate reset token endpoint
+  app.post("/api/auth/validate-reset-token", async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token é obrigatório" });
+      }
+
+      // Hash the token to match stored version
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      
+      // Get token from database
+      const resetToken = await storage.getPasswordResetToken(hashedToken);
+      
+      if (!resetToken) {
+        return res.status(400).json({ message: "Token inválido" });
+      }
+      
+      // Check if token is expired
+      if (new Date() > new Date(resetToken.expiresAt)) {
+        return res.status(400).json({ message: "Token expirado" });
+      }
+      
+      // Check if token was already used
+      if (resetToken.used) {
+        return res.status(400).json({ message: "Token já foi utilizado" });
+      }
+      
+      res.json({ message: "Token válido" });
+    } catch (error) {
+      console.error("Validate token error:", error);
+      res.status(500).json({ message: "Erro ao validar token" });
+    }
+  });
+
   // Reset password with token
   app.post("/api/auth/reset-password", async (req, res) => {
     try {
