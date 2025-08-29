@@ -163,7 +163,7 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   dataHora: z.string().min(1, "Data e hora são obrigatórias"),
   ativo: z.string().min(1, "Ativo é obrigatório"),
   mercado: z.enum(["crypto", "forex", "b3"], { message: "Mercado deve ser crypto, forex ou b3" }),
-  setup: z.string().min(1, "Setup é obrigatório"),
+  setup: z.string().optional(),
   // Simplified fields - removed required validations for removed fields
   capitalUtilizado: z.string().optional(),
   quantidade: z.string().optional(), 
