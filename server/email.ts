@@ -6,22 +6,8 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@metrika.com';
 
 // Get the correct URL for different environments
 const getAppUrl = () => {
-  // Production domain override
-  if (process.env.PRODUCTION_URL) {
-    return process.env.PRODUCTION_URL;
-  }
-  
-  // Replit deployment
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
-  }
-  
-  // Manual APP_URL setting
-  if (process.env.APP_URL) {
-    return process.env.APP_URL;
-  }
-  
-  // Default fallback to deployed URL
+  // Always use production domain for emails to avoid SSL issues
+  // with complex Replit development domains
   return 'https://metrikai.shop';
 };
 
@@ -310,7 +296,8 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
     return;
   }
 
-  const resetLink = `${APP_URL}/reset-password?token=${token}`;
+  // Always use production domain for reset links to avoid SSL issues
+  const resetLink = `https://metrikai.shop/reset-password?token=${token}`;
   console.log(`🔗 Link de reset gerado: ${resetLink}`);
   
   const msg = {
