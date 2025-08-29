@@ -152,14 +152,14 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
                   className={`flex gap-2 md:gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.type === 'ai' && (
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
                       <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
                   <div
                     className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg ${
                       message.type === 'user'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-slate-800 text-white'
                         : 'bg-slate-700 text-slate-100'
                     }`}
                     data-testid={`message-${message.type}-${message.id}`}
@@ -170,7 +170,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
                     </p>
                   </div>
                   {message.type === 'user' && (
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-900 flex items-center justify-center flex-shrink-0">
                       <User className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
@@ -178,7 +178,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
               ))}
               {chatMutation.isPending && (
                 <div className="flex gap-2 md:gap-3 justify-start">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
                     <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
                   </div>
                   <div className="bg-slate-700 text-slate-100 p-2 md:p-3 rounded-lg">
@@ -208,7 +208,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
               <Button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || chatMutation.isPending}
-                className="gradient-purple-blue hover:opacity-90 px-3 md:px-4"
+                className="bg-slate-700 hover:bg-slate-600 transition-colors px-3 md:px-4"
                 data-testid="button-send-message"
               >
                 <Send className="h-3 w-3 md:h-4 md:w-4" />
