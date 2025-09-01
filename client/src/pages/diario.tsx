@@ -104,7 +104,7 @@ export default function Diario() {
         </div>
 
         {entries.length === 0 ? (
-          <Card className="bg-slate-800 border-slate-700 text-center py-12">
+          <Card className="bg-[#141414] border-slate-700 text-center py-12">
             <CardContent>
               <Calendar className="h-16 w-16 mx-auto mb-4 text-slate-500" />
               <h3 className="text-xl font-semibold text-white mb-2">
