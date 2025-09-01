@@ -368,7 +368,7 @@ export default function Graficos() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-300">Ativo</label>
               <Select value={selectedSymbol} onValueChange={setSelectedSymbol}>
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                <SelectTrigger className="flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 border-slate-600 text-white bg-[#0f0e0ee0]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-700 border-slate-600">
