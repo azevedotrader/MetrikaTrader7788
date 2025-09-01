@@ -424,12 +424,7 @@ export default function Graficos() {
       </Card>
       {/* TradingView Chart */}
       <Card className="bg-slate-800 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            {getCurrentSymbolName()} - Análise Técnica
-          </CardTitle>
-        </CardHeader>
+        
         <CardContent className="p-0">
           <div className="relative rounded-b-lg overflow-hidden" style={{ height: '600px' }}>
             <TradingViewWidget 
