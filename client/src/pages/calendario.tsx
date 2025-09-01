@@ -15,7 +15,7 @@ export default function CalendarioPage() {
     <div className="space-y-6 pb-8">
 
       {/* Instrucoes */}
-      <Card className="bg-slate-900/50 border-slate-700">
+      <Card className="rounded-lg border text-card-foreground shadow-sm border-slate-700 bg-[#141313c4]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-blue-400" />
