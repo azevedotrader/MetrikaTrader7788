@@ -95,7 +95,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
     return (
       <Button
         onClick={onToggle}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-12 w-12 md:h-14 md:w-14 rounded-full gradient-purple-blue shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-12 w-12 md:h-14 md:w-14 rounded-full bg-black hover:bg-gray-800 border border-gray-600 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
         data-testid="button-open-ai-chat"
       >
         <MessageCircle className="h-5 w-5 md:h-6 md:w-6 text-white" />
@@ -104,19 +104,19 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
   }
 
   return (
-    <Card className={`fixed bg-slate-900/95 border-slate-700 shadow-2xl z-50 transition-all duration-300 ${
+    <Card className={`fixed bg-black/95 border-gray-600 shadow-2xl z-50 transition-all duration-300 ${
       isMinimized 
         ? 'bottom-4 right-4 md:bottom-6 md:right-6 w-72 md:w-80 h-14 md:h-16' 
         : 'bottom-4 right-4 left-4 md:bottom-6 md:right-6 md:left-auto w-auto md:w-96 h-[70vh] md:h-[500px] max-h-[600px]'
     }`}>
-      <CardHeader className="p-3 md:p-4 border-b border-slate-700">
+      <CardHeader className="p-3 md:p-4 border-b border-gray-600">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-white text-sm md:text-base">
-            <Bot className="h-4 w-4 md:h-5 md:w-5 text-purple-400" />
+            <Bot className="h-4 w-4 md:h-5 md:w-5 text-white" />
             <span className="hidden sm:inline">Assistente IA</span>
             <span className="sm:hidden">IA</span>
             {chatMutation.isPending && (
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             )}
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
               variant="ghost"
               size="sm"
               onClick={onMinimize}
-              className="text-slate-400 hover:text-white h-8 w-8 p-0"
+              className="text-gray-400 hover:text-white h-8 w-8 p-0"
               data-testid="button-minimize-chat"
             >
               {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
@@ -133,7 +133,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
               variant="ghost"
               size="sm"
               onClick={onToggle}
-              className="text-slate-400 hover:text-white h-8 w-8 p-0"
+              className="text-gray-400 hover:text-white h-8 w-8 p-0"
               data-testid="button-close-chat"
             >
               <X className="h-4 w-4" />
@@ -152,15 +152,15 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
                   className={`flex gap-2 md:gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.type === 'ai' && (
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
                       <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
                   <div
                     className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg ${
                       message.type === 'user'
-                        ? 'bg-slate-800 text-white'
-                        : 'bg-slate-700 text-slate-100'
+                        ? 'bg-gray-800 text-white'
+                        : 'bg-gray-700 text-white'
                     }`}
                     data-testid={`message-${message.type}-${message.id}`}
                   >
@@ -170,7 +170,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
                     </p>
                   </div>
                   {message.type === 'user' && (
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-900 flex items-center justify-center flex-shrink-0">
+                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                       <User className="h-3 w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
@@ -178,14 +178,14 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
               ))}
               {chatMutation.isPending && (
                 <div className="flex gap-2 md:gap-3 justify-start">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
                     <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
                   </div>
-                  <div className="bg-slate-700 text-slate-100 p-2 md:p-3 rounded-lg">
+                  <div className="bg-gray-700 text-white p-2 md:p-3 rounded-lg">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -194,21 +194,21 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
             </div>
           </ScrollArea>
 
-          <div className="p-3 md:p-4 border-t border-slate-700">
+          <div className="p-3 md:p-4 border-t border-gray-600">
             <div className="flex gap-2">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Digite sua mensagem..."
-                className="bg-slate-800 border-slate-600 text-white text-sm md:text-base"
+                className="bg-gray-800 border-gray-600 text-white text-sm md:text-base"
                 disabled={chatMutation.isPending}
                 data-testid="input-chat-message"
               />
               <Button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || chatMutation.isPending}
-                className="bg-slate-700 hover:bg-slate-600 transition-colors px-3 md:px-4"
+                className="bg-gray-700 hover:bg-gray-600 transition-colors px-3 md:px-4"
                 data-testid="button-send-message"
               >
                 <Send className="h-3 w-3 md:h-4 md:w-4" />
