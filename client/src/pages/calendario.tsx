@@ -64,7 +64,7 @@ export default function CalendarioPage() {
       />
 
       {/* Dicas de Análise */}
-      <Card className="bg-slate-900/50 border-slate-700">
+      <Card className="bg-[#070b12] border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-purple-400" />
