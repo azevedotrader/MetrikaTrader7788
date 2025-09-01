@@ -334,7 +334,7 @@ export default function Graficos() {
   return (
     <div className="p-6 space-y-6">
       {/* Controls */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="rounded-lg border text-card-foreground shadow-sm border-slate-700 bg-[#292727]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5" />
