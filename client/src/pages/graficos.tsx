@@ -408,7 +408,7 @@ export default function Graficos() {
           </div>
 
           {/* Current Symbol Info */}
-          <div className="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-600">
+          <div className="mt-4 p-3 rounded-lg border border-slate-600 bg-[#000000d6]">
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-400">Ativo Atual:</span>
               <span className="text-white font-medium">{getCurrentSymbolName()}</span>
@@ -422,7 +422,6 @@ export default function Graficos() {
           </div>
         </CardContent>
       </Card>
-
       {/* TradingView Chart */}
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader>
@@ -441,7 +440,6 @@ export default function Graficos() {
           </div>
         </CardContent>
       </Card>
-
     </div>
   );
 }
