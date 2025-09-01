@@ -1602,22 +1602,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-zinc-400 text-sm">Setup Top</p>
-                    <p className="text-lg font-bold text-green-400">
-                      {metrics.setupMaisLucrativo.setup || "N/A"}
-                    </p>
-                    <p className="text-sm text-zinc-500">
-                      R$ {metrics.setupMaisLucrativo.total.toFixed(2)}
-                    </p>
-                  </div>
-                  <BarChart3 className="h-8 w-8 text-green-400" />
-                </div>
-              </CardContent>
-            </Card>
+            
 
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
               <CardContent className="p-4">
