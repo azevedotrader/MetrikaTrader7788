@@ -545,7 +545,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
           width="100%"
           height={window.innerWidth < 768 ? 500 : 550}
         >
-          <RechartsLineChart
+          <AreaChart
             data={chartData}
             margin={{
               top: window.innerWidth < 768 ? 0 : 10,
@@ -554,6 +554,26 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               bottom: window.innerWidth < 768 ? 25 : 60,
             }}
           >
+            <defs>
+              <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0.3} />
+              </linearGradient>
+              <linearGradient id="negativeGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.8} />
+              </linearGradient>
+              <linearGradient
+                id="accumulatedGradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.6} />
+                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
 
             <CartesianGrid
               strokeDasharray="3 3"
@@ -600,7 +620,14 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               }}
               formatter={(value: any, name: string) => {
                 const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                const displayName = "📊 Saldo Acumulado";
+                const displayName =
+                  name === "positive"
+                    ? "✅ Lucros"
+                    : name === "negative"
+                      ? "❌ Perdas"
+                      : name === "accumulated"
+                        ? "📊 Acumulado"
+                        : name;
                 return [formattedValue, displayName];
               }}
               content={(props: any) => {
@@ -706,17 +733,36 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               }}
             />
 
-            {/* Linha de performance com cor dinâmica baseada no último valor */}
+            {/* Barras de lucros */}
+            <Area
+              type="monotone"
+              dataKey="positive"
+              stackId="1"
+              stroke="#22c55e"
+              strokeWidth={2}
+              fill="url(#positiveGradient)"
+            />
+
+            {/* Barras de perdas (negativo) */}
+            <Area
+              type="monotone"
+              dataKey={(data: any) => -data.negative}
+              stackId="1"
+              stroke="#ef4444"
+              strokeWidth={2}
+              fill="url(#negativeGradient)"
+            />
+
+            {/* Linha acumulada */}
             <Line
               type="monotone"
               dataKey="accumulated"
-              stroke={chartData[chartData.length - 1]?.accumulated >= 0 ? "#22c55e" : "#ef4444"}
+              stroke="#3b82f6"
               strokeWidth={3}
-              dot={{ fill: chartData[chartData.length - 1]?.accumulated >= 0 ? "#22c55e" : "#ef4444", strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, fill: chartData[chartData.length - 1]?.accumulated >= 0 ? "#22c55e" : "#ef4444" }}
-              connectNulls={false}
+              dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
             />
-          </RechartsLineChart>
+          </AreaChart>
         </ResponsiveContainer>
       )}
 
