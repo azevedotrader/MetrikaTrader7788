@@ -28,14 +28,7 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
           <h1 className="text-lg lg:text-2xl font-bold text-white truncate">{title}</h1>
         </div>
         
-        <div className="flex items-center space-x-2 lg:space-x-4">
-          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
-            <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
-          </Button>
-          <Button variant="ghost" size="sm" className="text-zinc-400 hover:text-white">
-            <Settings className="w-4 h-4 lg:w-5 lg:h-5" />
-          </Button>
-        </div>
+        
       </div>
     </header>
   );
