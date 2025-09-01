@@ -344,6 +344,25 @@ export default function NovoTrade() {
   });
 
   const onSubmit = (data: InsertTrade) => {
+    // Validate required fields for calculation
+    if (!data.alvo || !data.stop || parseFloat(data.alvo) <= 0 || parseFloat(data.stop) <= 0) {
+      toast({
+        title: "Valores obrigatórios",
+        description: "Preencha os valores de Take Profit e Stop Loss para calcular o resultado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!tradeResult) {
+      toast({
+        title: "Resultado obrigatório",
+        description: "Selecione se o trade foi 'Take' ou 'Loss' para registrar o resultado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Calculate result based on take/stop and trade result selection
     let calculatedResult = data.resultado;
 
@@ -597,6 +616,11 @@ export default function NovoTrade() {
                       <label className="block text-sm font-medium mb-3 text-charcoal-300">
                         Resultado da Operação *
                       </label>
+                      {!tradeResult && (
+                        <p className="text-xs text-red-400 mb-2">
+                          ⚠️ Selecione o resultado para calcular o valor financeiro
+                        </p>
+                      )}
                       <div className="grid grid-cols-2 gap-3">
                         <Button
                           type="button"
