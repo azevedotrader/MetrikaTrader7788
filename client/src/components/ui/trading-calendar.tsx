@@ -112,13 +112,31 @@ export function TradingCalendar({
   const processCalendarData = (): TradeDay[] => {
     const tradeDays: TradeDay[] = [];
     
+    // Debug log
+    console.log("🔍 Calendar Debug:", {
+      calendarDataLength: calendarData?.length || 0,
+      currentYear: year,
+      currentMonth: month,
+      monthName: monthName
+    });
+    
     // Se tivermos dados do calendário, usar eles
     if (calendarData && calendarData.length > 0) {
       calendarData.forEach(dayData => {
         const dayDate = new Date(dayData.date);
         if (dayDate.getFullYear() === year && dayDate.getMonth() === month) {
+          // Calcular P&L total: profit é positivo, loss é o valor absoluto das perdas
           const totalPnl = dayData.profit - dayData.loss;
-          const winRate = dayData.totalTrades > 0 ? (dayData.profit > 0 ? 100 : 0) : 0;
+          
+          // Calcular win rate baseado nos trades do dia
+          let winRate = 0;
+          if (dayData.trades && dayData.trades.length > 0) {
+            const winningTrades = dayData.trades.filter((trade: any) => {
+              const resultado = parseFloat(trade.resultado || "0");
+              return resultado > 0;
+            });
+            winRate = (winningTrades.length / dayData.trades.length) * 100;
+          }
           
           tradeDays.push({
             date: dayDate.getDate(),
