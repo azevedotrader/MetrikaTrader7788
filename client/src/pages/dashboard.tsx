@@ -733,25 +733,51 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               }}
             />
 
-            {/* Barras de lucros */}
-            <Area
-              type="monotone"
-              dataKey="positive"
-              stackId="1"
-              stroke="#22c55e"
-              strokeWidth={2}
-              fill="url(#positiveGradient)"
-            />
 
 
-            {/* Linha acumulada */}
+            {/* Linha de resultado acumulado com gradiente dinâmico */}
+            <defs>
+              <linearGradient id="dynamicLineGradient" x1="0" y1="0" x2="1" y2="0">
+                {chartData.map((entry, index) => {
+                  const position = index / (chartData.length - 1);
+                  const color = entry.accumulated >= 0 ? "#22c55e" : "#ef4444";
+                  return (
+                    <stop
+                      key={index}
+                      offset={`${position * 100}%`}
+                      stopColor={color}
+                    />
+                  );
+                })}
+              </linearGradient>
+            </defs>
+            
             <Line
               type="monotone"
               dataKey="accumulated"
-              stroke="#3b82f6"
+              stroke="url(#dynamicLineGradient)"
               strokeWidth={3}
-              dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              dot={(props: any) => {
+                const { payload } = props;
+                const color = payload.accumulated >= 0 ? "#22c55e" : "#ef4444";
+                return {
+                  ...props,
+                  fill: color,
+                  stroke: color,
+                  strokeWidth: 2,
+                  r: 4
+                };
+              }}
+              activeDot={(props: any) => {
+                const { payload } = props;
+                const color = payload.accumulated >= 0 ? "#22c55e" : "#ef4444";
+                return {
+                  ...props,
+                  fill: color,
+                  stroke: color,
+                  r: 6
+                };
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>
