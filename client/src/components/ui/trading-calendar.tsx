@@ -117,7 +117,8 @@ export function TradingCalendar({
       calendarDataLength: calendarData?.length || 0,
       currentYear: year,
       currentMonth: month,
-      monthName: monthName
+      monthName: monthName,
+      actualCalendarData: calendarData
     });
     
     // Se tivermos dados do calendário, usar eles

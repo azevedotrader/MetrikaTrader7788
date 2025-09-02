@@ -12,7 +12,9 @@ export default function CalendarioPage() {
   const { data: calendarData = [], isLoading: calendarLoading, error: calendarError } = useQuery<any[]>({ 
     queryKey: ['/api/calendar'],
     staleTime: 0,
-    gcTime: 0
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true
   });
 
   // Debug da consulta
