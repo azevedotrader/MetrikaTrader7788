@@ -16,6 +16,9 @@ interface TradeDay {
   pnl: number;
   trades: number;
   winRate?: number;
+  avgRR?: number;
+  maxLoss?: number;
+  maxWin?: number;
 }
 
 interface WeekSummary {
@@ -138,12 +141,31 @@ export function TradingCalendar({
       const totalPnl = dayTrades.reduce((sum, trade) => sum + (parseFloat(trade.resultado) || trade.pnl || 0), 0);
       const winningTrades = dayTrades.filter(trade => (parseFloat(trade.resultado) || trade.pnl || 0) > 0).length;
       const winRate = dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
+      
+      // Calcular R/R médio do dia
+      const tradesComRR = dayTrades.filter(trade => 
+        trade.alvo && trade.stop && 
+        parseFloat(trade.alvo) > 0 && parseFloat(trade.stop) > 0
+      );
+      const avgRR = tradesComRR.length > 0 
+        ? tradesComRR.reduce((sum, trade) => 
+            sum + (parseFloat(trade.alvo) / parseFloat(trade.stop)), 0
+          ) / tradesComRR.length
+        : 0;
+      
+      // Maior perda e maior ganho do dia
+      const results = dayTrades.map(trade => parseFloat(trade.resultado) || trade.pnl || 0);
+      const maxWin = Math.max(...results.filter(r => r > 0), 0);
+      const maxLoss = Math.min(...results.filter(r => r < 0), 0);
 
       tradeDays.push({
         date: day,
         pnl: totalPnl,
         trades: dayTrades.length,
         winRate: winRate,
+        avgRR: avgRR,
+        maxWin: maxWin,
+        maxLoss: maxLoss,
       });
     });
 
@@ -216,7 +238,7 @@ export function TradingCalendar({
         <div
           className={cn(
             "p-1 border-r border-b border-zinc-700",
-            isMobile ? "h-[110px]" : "h-20",
+            isMobile ? "h-[130px]" : "h-24",
           )}
         ></div>
       );
@@ -239,7 +261,7 @@ export function TradingCalendar({
       <div
         className={cn(
           "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer",
-          isMobile ? "h-[110px] p-2" : "h-20 p-1",
+          isMobile ? "h-[130px] p-2" : "h-24 p-1",
           isToday && "bg-zinc-800/50 border-zinc-600",
           hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20"),
         )}
@@ -268,10 +290,11 @@ export function TradingCalendar({
           </div>
 
           {hasData && tradeDay && (
-            <div className="flex-1 flex flex-col justify-start">
+            <div className="flex-1 flex flex-col justify-start space-y-0.5">
+              {/* P&L Principal */}
               <div
                 className={cn(
-                  "font-bold",
+                  "font-bold leading-tight",
                   isMobile ? "text-sm" : "text-sm",
                   isProfit ? "text-green-400" : "text-red-400",
                 )}
@@ -284,22 +307,50 @@ export function TradingCalendar({
                     }`
                   : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString("pt-BR")}`}
               </div>
+              
+              {/* Número de trades */}
               <div
                 className={cn(
-                  "text-zinc-500",
-                  isMobile ? "text-[11px] leading-tight" : "text-xs",
+                  "text-zinc-500 leading-tight",
+                  isMobile ? "text-[10px]" : "text-[10px]",
                 )}
               >
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
               </div>
-              {isMobile && tradeDay.winRate && (
-                <div className="text-[10px] text-zinc-600 leading-tight">
+              
+              {/* Taxa de acerto */}
+              {tradeDay.winRate !== undefined && (
+                <div className={cn(
+                  "text-zinc-600 leading-tight",
+                  isMobile ? "text-[9px]" : "text-[9px]"
+                )}>
                   {tradeDay.winRate.toFixed(0)}% win
                 </div>
               )}
-              {!isMobile && tradeDay.winRate && (
-                <div className="text-[10px] text-zinc-600">
-                  {tradeDay.winRate.toFixed(0)}% win
+              
+              {/* R/R médio - só se houver dados */}
+              {tradeDay.avgRR && tradeDay.avgRR > 0 && (
+                <div className={cn(
+                  "text-blue-400 leading-tight font-medium",
+                  isMobile ? "text-[9px]" : "text-[9px]"
+                )}>
+                  1:{tradeDay.avgRR.toFixed(1)}
+                </div>
+              )}
+              
+              {/* Maior ganho/perda - mobile apenas */}
+              {isMobile && (
+                <div className="flex justify-between items-center">
+                  {tradeDay.maxWin > 0 && (
+                    <div className="text-[8px] text-green-500 leading-tight">
+                      ↑{(tradeDay.maxWin / 1000).toFixed(1)}k
+                    </div>
+                  )}
+                  {tradeDay.maxLoss < 0 && (
+                    <div className="text-[8px] text-red-500 leading-tight">
+                      ↓{Math.abs(tradeDay.maxLoss / 1000).toFixed(1)}k
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -319,7 +370,7 @@ export function TradingCalendar({
     const isProfit = week.pnl > 0;
 
     return (
-      <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[80px] flex flex-col justify-center">
+      <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[96px] flex flex-col justify-center">
         <div className="text-xs text-zinc-400 mb-1">
           Semana {week.weekNumber}
         </div>
@@ -451,7 +502,7 @@ export function TradingCalendar({
                 ) : !isMobile ? (
                   <div
                     key={`week-empty-${weekIndex}`}
-                    className="border-l border-zinc-700 min-h-[80px]"
+                    className="border-l border-zinc-700 min-h-[96px]"
                   ></div>
                 ) : null,
               ].filter(Boolean),
