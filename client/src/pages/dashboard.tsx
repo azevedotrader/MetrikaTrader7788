@@ -733,56 +733,26 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               }}
             />
 
+            {/* Barras de lucros */}
+            <Area
+              type="monotone"
+              dataKey="positive"
+              stackId="1"
+              stroke="#22c55e"
+              strokeWidth={2}
+              fill="url(#positiveGradient)"
+            />
 
 
-            {/* Linha acumulada que muda de cor baseada no valor */}
+            {/* Linha acumulada */}
             <Line
               type="monotone"
               dataKey="accumulated"
-              stroke="#22c55e"
+              stroke="#3b82f6"
               strokeWidth={3}
-              dot={(props: any) => {
-                const { payload } = props;
-                if (!payload) return props;
-                const color = payload.accumulated >= 0 ? "#22c55e" : "#ef4444";
-                return {
-                  fill: color,
-                  stroke: color,
-                  strokeWidth: 2,
-                  r: 4
-                };
-              }}
-              activeDot={(props: any) => {
-                const { payload } = props;
-                if (!payload) return props;
-                const color = payload.accumulated >= 0 ? "#22c55e" : "#ef4444";
-                return {
-                  fill: color,
-                  stroke: color,
-                  r: 6
-                };
-              }}
+              dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
             />
-            
-            {/* Segmentos vermelhos para valores negativos */}
-            {chartData.map((entry, index) => {
-              if (index === 0 || entry.accumulated >= 0) return null;
-              
-              const prevEntry = chartData[index - 1];
-              const segmentData = [prevEntry, entry];
-              
-              return (
-                <Line
-                  key={`red-segment-${index}`}
-                  type="monotone"
-                  dataKey="accumulated"
-                  data={segmentData}
-                  stroke="#ef4444"
-                  strokeWidth={3}
-                  dot={false}
-                />
-              );
-            })}
           </AreaChart>
         </ResponsiveContainer>
       )}

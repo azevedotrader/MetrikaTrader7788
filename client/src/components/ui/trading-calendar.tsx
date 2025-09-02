@@ -108,55 +108,19 @@ export function TradingCalendar({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
 
-  // Processar dados do calendário (preferir dados do endpoint /api/calendar)
-  const processCalendarData = (): TradeDay[] => {
+  // Processar dados reais dos trades
+  const processRealTradeData = (): TradeDay[] => {
     const tradeDays: TradeDay[] = [];
     
-    // Debug log
-    console.log("🔍 Calendar Debug:", {
-      calendarDataLength: calendarData?.length || 0,
-      currentYear: year,
-      currentMonth: month,
-      monthName: monthName,
-      actualCalendarData: calendarData
-    });
-    
-    // Se tivermos dados do calendário, usar eles
-    if (calendarData && calendarData.length > 0) {
-      calendarData.forEach(dayData => {
-        const dayDate = new Date(dayData.date);
-        if (dayDate.getFullYear() === year && dayDate.getMonth() === month) {
-          // Calcular P&L total: profit é positivo, loss é o valor absoluto das perdas
-          const totalPnl = dayData.profit - dayData.loss;
-          
-          // Calcular win rate baseado nos trades do dia
-          let winRate = 0;
-          if (dayData.trades && dayData.trades.length > 0) {
-            const winningTrades = dayData.trades.filter((trade: any) => {
-              const resultado = parseFloat(trade.resultado || "0");
-              return resultado > 0;
-            });
-            winRate = (winningTrades.length / dayData.trades.length) * 100;
-          }
-          
-          tradeDays.push({
-            date: dayDate.getDate(),
-            pnl: totalPnl,
-            trades: dayData.totalTrades,
-            winRate: winRate,
-          });
-        }
-      });
-      return tradeDays;
-    }
-    
-    // Fallback: processar trades diretamente
+    // Agrupar trades por dia do mês atual
     const monthTrades = trades.filter(trade => {
+      // Usar dataHora se disponível, senão date
       const dateStr = trade.dataHora || trade.date;
       const tradeDate = new Date(dateStr);
       return tradeDate.getFullYear() === year && tradeDate.getMonth() === month;
     });
 
+    // Criar mapa de trades por dia
     const tradesByDay = new Map<number, any[]>();
     monthTrades.forEach(trade => {
       const dateStr = trade.dataHora || trade.date;
@@ -169,6 +133,7 @@ export function TradingCalendar({
       tradesByDay.get(day)!.push(trade);
     });
 
+    // Calcular estatísticas por dia
     tradesByDay.forEach((dayTrades, day) => {
       const totalPnl = dayTrades.reduce((sum, trade) => sum + (parseFloat(trade.resultado) || trade.pnl || 0), 0);
       const winningTrades = dayTrades.filter(trade => (parseFloat(trade.resultado) || trade.pnl || 0) > 0).length;
@@ -185,7 +150,7 @@ export function TradingCalendar({
     return tradeDays;
   };
 
-  const tradeDays = processCalendarData();
+  const tradeDays = processRealTradeData();
 
   // Calcular resumos semanais
   const calculateWeekSummaries = (): WeekSummary[] => {
