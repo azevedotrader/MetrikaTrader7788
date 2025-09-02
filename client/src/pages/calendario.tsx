@@ -60,7 +60,7 @@ export default function CalendarioPage() {
       {/* Calendário Principal */}
       <TradingCalendar 
         trades={trades} 
-        calendarData={calendarData || []}
+        calendarData={(calendarData || []) as any[]}
       />
 
       {/* Dicas de Análise */}

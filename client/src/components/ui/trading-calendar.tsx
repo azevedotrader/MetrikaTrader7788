@@ -428,38 +428,34 @@ export function TradingCalendar({
             )}
 
             {/* Dias do calendário */}
-            {Array.from({ length: Math.ceil((firstDayOfWeek + daysInMonth) / 7) }).map(
-              (_, weekIndex) => (
-                <React.Fragment key={`week-fragment-${weekIndex}`}>
-                  {/* Dias da semana */}
-                  {Array.from({ length: 7 }).map((_, dayIndex) => {
-                    const dayNumber =
-                      weekIndex * 7 + dayIndex - firstDayOfWeek + 1;
-                    return (
-                      <div key={`day-${weekIndex}-${dayIndex}`}>
-                        {renderDayCell(
-                          dayNumber > 0 && dayNumber <= daysInMonth
-                            ? dayNumber
-                            : null,
-                        )}
-                      </div>
-                    );
-                  })}
-                  {/* Resumo semanal - apenas desktop */}
-                  {!isMobile && weekSummaries[weekIndex] && (
-                    <div key={`week-summary-${weekIndex}`}>
-                      {renderWeekSummary(weekSummaries[weekIndex])}
+{Array.from({ length: Math.ceil((firstDayOfWeek + daysInMonth) / 7) }).map(
+              (_, weekIndex) => [
+                ...Array.from({ length: 7 }).map((_, dayIndex) => {
+                  const dayNumber =
+                    weekIndex * 7 + dayIndex - firstDayOfWeek + 1;
+                  return (
+                    <div key={`day-${weekIndex}-${dayIndex}`}>
+                      {renderDayCell(
+                        dayNumber > 0 && dayNumber <= daysInMonth
+                          ? dayNumber
+                          : null,
+                      )}
                     </div>
-                  )}
-                  {!isMobile && !weekSummaries[weekIndex] && (
-                    <div
-                      key={`week-empty-${weekIndex}`}
-                      className="border-l border-zinc-700 min-h-[80px]"
-                    ></div>
-                  )}
-                </React.Fragment>
-              ),
-            )}
+                  );
+                }),
+                // Resumo semanal - apenas desktop
+                !isMobile && weekSummaries[weekIndex] ? (
+                  <div key={`week-summary-${weekIndex}`}>
+                    {renderWeekSummary(weekSummaries[weekIndex])}
+                  </div>
+                ) : !isMobile ? (
+                  <div
+                    key={`week-empty-${weekIndex}`}
+                    className="border-l border-zinc-700 min-h-[80px]"
+                  ></div>
+                ) : null,
+              ].filter(Boolean),
+            ).flat()}
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
