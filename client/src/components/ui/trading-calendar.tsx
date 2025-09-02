@@ -143,14 +143,18 @@ export function TradingCalendar({
       const winRate = dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
       
       // Calcular R/R médio do dia
-      const tradesComRR = dayTrades.filter(trade => 
-        trade.alvo && trade.stop && 
-        parseFloat(trade.alvo) > 0 && parseFloat(trade.stop) > 0
-      );
+      const tradesComRR = dayTrades.filter(trade => {
+        const alvo = parseFloat(trade.alvo) || 0;
+        const stop = parseFloat(trade.stop) || 0;
+        return alvo > 0 && stop > 0;
+      });
+      
       const avgRR = tradesComRR.length > 0 
-        ? tradesComRR.reduce((sum, trade) => 
-            sum + (parseFloat(trade.alvo) / parseFloat(trade.stop)), 0
-          ) / tradesComRR.length
+        ? tradesComRR.reduce((sum, trade) => {
+            const alvo = parseFloat(trade.alvo);
+            const stop = parseFloat(trade.stop);
+            return sum + (alvo / stop);
+          }, 0) / tradesComRR.length
         : 0;
       
       // Maior perda e maior ganho do dia
@@ -328,25 +332,25 @@ export function TradingCalendar({
                 </div>
               )}
               
-              {/* R/R médio - só se houver dados */}
+              {/* R/R médio - sempre mostrar se houver dados */}
               {tradeDay.avgRR && tradeDay.avgRR > 0 && (
                 <div className={cn(
                   "text-blue-400 leading-tight font-medium",
                   isMobile ? "text-[9px]" : "text-[9px]"
                 )}>
-                  1:{tradeDay.avgRR.toFixed(1)}
+                  1:{tradeDay.avgRR.toFixed(2)}
                 </div>
               )}
               
               {/* Maior ganho/perda - mobile apenas */}
               {isMobile && (
                 <div className="flex justify-between items-center">
-                  {tradeDay.maxWin > 0 && (
+                  {tradeDay.maxWin && tradeDay.maxWin > 0 && (
                     <div className="text-[8px] text-green-500 leading-tight">
                       ↑{(tradeDay.maxWin / 1000).toFixed(1)}k
                     </div>
                   )}
-                  {tradeDay.maxLoss < 0 && (
+                  {tradeDay.maxLoss && tradeDay.maxLoss < 0 && (
                     <div className="text-[8px] text-red-500 leading-tight">
                       ↓{Math.abs(tradeDay.maxLoss / 1000).toFixed(1)}k
                     </div>
