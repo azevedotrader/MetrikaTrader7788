@@ -743,15 +743,6 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               fill="url(#positiveGradient)"
             />
 
-            {/* Barras de perdas (negativo) */}
-            <Area
-              type="monotone"
-              dataKey={(data: any) => -data.negative}
-              stackId="1"
-              stroke="#ef4444"
-              strokeWidth={2}
-              fill="url(#negativeGradient)"
-            />
 
             {/* Linha acumulada */}
             <Line
