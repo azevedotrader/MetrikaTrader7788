@@ -9,10 +9,18 @@ export default function CalendarioPage() {
     staleTime: 0, // Sempre buscar dados frescos
     gcTime: 0   // Não manter cache (nova nomenclatura do React Query v5)
   });
-  const { data: calendarData = [] } = useQuery<any[]>({ 
+  const { data: calendarData = [], isLoading: calendarLoading, error: calendarError } = useQuery<any[]>({ 
     queryKey: ['/api/calendar'],
     staleTime: 0,
     gcTime: 0
+  });
+
+  // Debug da consulta
+  console.log("📊 Calendar Query Debug:", {
+    calendarData,
+    calendarLoading,
+    calendarError,
+    hasData: !!calendarData?.length
   });
 
   return (
@@ -64,7 +72,7 @@ export default function CalendarioPage() {
       {/* Calendário Principal */}
       <TradingCalendar 
         trades={trades} 
-        calendarData={calendarData as any[] || []}
+        calendarData={(calendarData as any[]) || []}
       />
 
       {/* Dicas de Análise */}
