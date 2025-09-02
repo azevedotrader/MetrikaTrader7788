@@ -18,14 +18,15 @@ import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CsvSelectionModal } from "@/components/modals/csv-selection-modal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Novo Trade", href: "/novo-trade", icon: PlusCircle },
-  { name: "Gráficos", href: "/graficos", icon: TrendingUp },
-  { name: "Calendário", href: "/calendario", icon: Calendar },
-  { name: "Diário do Trader", href: "/diario", icon: Book },
-  { name: "Perfil", href: "/perfil", icon: User },
+  { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { nameKey: "trades.add_new", href: "/novo-trade", icon: PlusCircle },
+  { nameKey: "charts.title", href: "/graficos", icon: TrendingUp },
+  { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
+  { nameKey: "journal.title", href: "/diario", icon: Book },
+  { nameKey: "profile.title", href: "/perfil", icon: User },
 ];
 
 interface SidebarProps {
@@ -36,6 +37,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const isMobile = useIsMobile();
@@ -123,7 +125,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <nav className="flex-1 p-2">
             <ul className="space-y-2">
               {navigation.map((item) => (
-                <li key={item.name}>
+                <li key={item.href}>
                   <Link href={item.href}>
                     <Button
                       variant="ghost"
@@ -132,7 +134,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         location === item.href && "bg-zinc-800 text-white",
                         sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                       )}
-                      title={!sidebarExpanded ? item.name : undefined}
+                      title={!sidebarExpanded ? t(item.nameKey) : undefined}
                       onClick={handleLinkClick}
                     >
                       <item.icon className={cn("w-5 h-5 flex-shrink-0", sidebarExpanded && "mr-3")} />
@@ -142,7 +144,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                           sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
                         )}
                       >
-                        {item.name}
+                        {t(item.nameKey)}
                       </span>
                     </Button>
                   </Link>
@@ -158,7 +160,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   "w-full text-zinc-300 hover:bg-green-700 hover:text-white transition-all duration-200 bg-green-600/20 border border-green-600/30",
                   sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                 )}
-                title={!sidebarExpanded ? "Analisar CSV com IA" : undefined}
+                title={!sidebarExpanded ? t('brokers.csv_import') : undefined}
                 data-testid="analyze-csv-sidebar-button"
               >
                 <FileSpreadsheet className={cn(
@@ -171,7 +173,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
                   )}
                 >
-                  Analisar CSV com IA
+                  {t('brokers.csv_import')}
                 </span>
               </Button>
             </div>
@@ -205,7 +207,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   "text-zinc-400 hover:text-white transition-all duration-300 flex-shrink-0",
                   sidebarExpanded ? "opacity-100" : "opacity-0 w-0 p-0"
                 )}
-                title="Sair"
+                title={t('nav.logout')}
               >
                 <LogOut className="w-4 h-4" />
               </Button>

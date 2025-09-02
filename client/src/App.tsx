@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { AIChat } from "@/components/ui/ai-chat";
@@ -26,20 +27,22 @@ import AdminLogin from "@/pages/admin-login";
 import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
-const pageTitles: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/novo-trade": "Novo Trade",
-  "/graficos": "Gráficos em Tempo Real",
-  "/analises": "Análises",
-  "/diario": "Diário do Trader",
-  "/calendario": "Calendário de Trading",
-  "/perfil": "Perfil",
-  "/admin": "Painel Administrativo",
+// Títulos das páginas agora são chaves de tradução
+const pageTitleKeys: Record<string, string> = {
+  "/dashboard": "nav.dashboard",
+  "/novo-trade": "trades.add_new",
+  "/graficos": "charts.title",
+  "/analises": "nav.trades",
+  "/diario": "journal.title",
+  "/calendario": "calendar.title",
+  "/perfil": "profile.title",
+  "/admin": "nav.admin",
   "/teste-gateio": "Teste Gate.io API"
 };
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,49 +86,49 @@ function AppContent() {
                 <Switch>
                   <Route path="/dashboard">
                     <TopBar 
-                      title={pageTitles["/dashboard"]} 
+                      title={t(pageTitleKeys["/dashboard"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Dashboard />
                   </Route>
                   <Route path="/novo-trade">
                     <TopBar 
-                      title={pageTitles["/novo-trade"]} 
+                      title={t(pageTitleKeys["/novo-trade"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <NovoTrade />
                   </Route>
                   <Route path="/graficos">
                     <TopBar 
-                      title={pageTitles["/graficos"]} 
+                      title={t(pageTitleKeys["/graficos"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Graficos />
                   </Route>
                   <Route path="/analises">
                     <TopBar 
-                      title={pageTitles["/analises"]} 
+                      title={t(pageTitleKeys["/analises"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Analises />
                   </Route>
                   <Route path="/diario">
                     <TopBar 
-                      title={pageTitles["/diario"]} 
+                      title={t(pageTitleKeys["/diario"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Diario />
                   </Route>
                   <Route path="/calendario">
                     <TopBar 
-                      title={pageTitles["/calendario"]} 
+                      title={t(pageTitleKeys["/calendario"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Calendario />
                   </Route>
                   <Route path="/perfil">
                     <TopBar 
-                      title={pageTitles["/perfil"]} 
+                      title={t(pageTitleKeys["/perfil"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Perfil />
@@ -133,7 +136,7 @@ function AppContent() {
                   {/* Admin route moved to standalone section */}
                   <Route path="/">
                     <TopBar 
-                      title={pageTitles["/dashboard"]} 
+                      title={t(pageTitleKeys["/dashboard"])} 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Dashboard />
@@ -163,12 +166,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AuthProvider>
-          <AdminAuthProvider>
-            <Toaster />
-            <AppContent />
-          </AdminAuthProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AdminAuthProvider>
+              <Toaster />
+              <AppContent />
+            </AdminAuthProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

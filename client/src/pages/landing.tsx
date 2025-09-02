@@ -27,8 +27,10 @@ import {
 } from "lucide-react";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Landing() {
+  const { t } = useLanguage();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
@@ -56,13 +58,13 @@ export default function Landing() {
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
-                Recursos
+                {t('landing.header.features')}
               </a>
               <a href="#precos" className="text-slate-300 hover:text-white transition-colors">
-                Preços
+                {t('landing.header.pricing')}
               </a>
               <a href="#contato" className="text-slate-300 hover:text-white transition-colors">
-                Contato
+                {t('landing.header.contact')}
               </a>
             </nav>
             <div className="flex space-x-2 sm:space-x-4">
@@ -107,14 +109,14 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-6 sm:mb-8 lg:mb-10 leading-tight">
-                <span className="text-white">O Fim das</span>
-                <span className="gradient-text block animate-pulse-slow">Planilhas</span>
-                <span className="text-white">de Trading</span>
+                <span className="text-white">{t('landing.hero.title1')}</span>
+                <span className="gradient-text block animate-pulse-slow">{t('landing.hero.title2')}</span>
+                <span className="text-white">{t('landing.hero.title3')}</span>
               </h1>
               
               <p className="font-body text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 mb-6 sm:mb-8 leading-relaxed">
-                A única plataforma que analisa seus trades automaticamente e revela 
-                <span className="text-emerald-400 font-bold"> os padrões que geram lucro</span>
+                {t('landing.hero.subtitle')} 
+                <span className="text-emerald-400 font-bold"> {t('landing.hero.subtitle_highlight')}</span>
               </p>
               
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8 justify-center lg:justify-start">

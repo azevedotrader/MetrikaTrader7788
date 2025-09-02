@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Bell, Settings, Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { LanguageSelector } from "@/components/ui/language-selector";
 
 interface TopBarProps {
   title: string;
@@ -28,7 +29,9 @@ export function TopBar({ title, onMenuClick }: TopBarProps) {
           <h1 className="text-lg lg:text-2xl font-bold text-white truncate">{title}</h1>
         </div>
         
-        
+        <div className="flex items-center space-x-2">
+          <LanguageSelector />
+        </div>
       </div>
     </header>
   );

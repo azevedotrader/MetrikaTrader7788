@@ -80,6 +80,7 @@ import {
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   format,
   startOfDay,
@@ -1105,6 +1106,7 @@ function MetricCard({
 
 export default function Dashboard() {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
 
   // Get current user ID for isolation info
@@ -1504,7 +1506,7 @@ export default function Dashboard() {
             value="overview"
             className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
-            <span className="hidden sm:inline">Visão Geral</span>
+            <span className="hidden sm:inline">{t('dashboard.overview')}</span>
             <span className="sm:hidden">Geral</span>
           </TabsTrigger>
           <TabsTrigger
@@ -1539,7 +1541,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="Total de Trades"
+              title={t('dashboard.total_trades')}
               value={metrics.totalTrades}
               icon={BarChart3}
               color="text-zinc-300"
@@ -1547,7 +1549,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="Taxa de Acerto"
+              title={t('dashboard.win_rate')}
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
               color="text-white"
@@ -1555,7 +1557,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="R/R Médio"
+              title={t('dashboard.avg_rr')}
               value={`1:${metrics.riscoRetornoMedio.toFixed(2)}`}
               icon={TrendingUp}
               color="text-white"
@@ -1622,7 +1624,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-green-400" />
-                Performance por Período
+                {t('dashboard.performance_chart')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pl-0 pr-2 md:px-6">
@@ -1702,14 +1704,14 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="Total de Trades"
+              title={t('dashboard.total_trades')}
               value={metrics.totalTrades}
               icon={BarChart3}
               color="text-zinc-300"
             />
 
             <MetricCard
-              title="Taxa de Acerto"
+              title={t('dashboard.win_rate')}
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
               color={
@@ -1718,7 +1720,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="R/R Médio"
+              title={t('dashboard.avg_rr')}
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
               color={
@@ -2108,7 +2110,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="Total de Trades"
+              title={t('dashboard.total_trades')}
               value={metrics.totalTrades}
               icon={BarChart3}
               color="text-zinc-300"
@@ -2116,7 +2118,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="Taxa de Acerto Geral"
+              title={t('dashboard.win_rate')}
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
               color={
@@ -2126,7 +2128,7 @@ export default function Dashboard() {
             />
 
             <MetricCard
-              title="R/R Médio Consolidado"
+              title={t('dashboard.avg_rr')}
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
               color={

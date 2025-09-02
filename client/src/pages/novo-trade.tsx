@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Dialog,
   DialogContent,
@@ -76,6 +77,7 @@ const emocaoOptions = [
 
 export default function NovoTrade() {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [selectedBroker, setSelectedBroker] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);

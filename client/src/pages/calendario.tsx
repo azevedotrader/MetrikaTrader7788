@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, BarChart3, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CalendarioPage() {
+  const { t } = useLanguage();
   const { data: trades = [] } = useQuery({ 
     queryKey: ['/api/trades'],
     staleTime: 0, // Sempre buscar dados frescos
@@ -19,7 +21,7 @@ export default function CalendarioPage() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-blue-400" />
-            Como Usar o Calendário
+            {t('calendar.how_to_use')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -29,8 +31,8 @@ export default function CalendarioPage() {
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               </div>
               <div>
-                <div className="text-white font-medium mb-1">Dias Lucrativos</div>
-                <div className="text-slate-400">Marcados com ponto verde, mostram o P&L positivo do dia</div>
+                <div className="text-white font-medium mb-1">{t('calendar.profitable_days')}</div>
+                <div className="text-slate-400">{t('calendar.profitable_days_desc')}</div>
               </div>
             </div>
             
@@ -39,8 +41,8 @@ export default function CalendarioPage() {
                 <div className="w-2 h-2 bg-red-400 rounded-full"></div>
               </div>
               <div>
-                <div className="text-white font-medium mb-1">Dias com Prejuízo</div>
-                <div className="text-slate-400">Marcados com ponto vermelho, mostram o P&L negativo do dia</div>
+                <div className="text-white font-medium mb-1">{t('calendar.loss_days')}</div>
+                <div className="text-slate-400">{t('calendar.loss_days_desc')}</div>
               </div>
             </div>
             
@@ -49,8 +51,8 @@ export default function CalendarioPage() {
                 <TrendingUp className="w-4 h-4 text-slate-400" />
               </div>
               <div>
-                <div className="text-white font-medium mb-1">Resumo Semanal</div>
-                <div className="text-slate-400">Coluna lateral com totais consolidados por semana</div>
+                <div className="text-white font-medium mb-1">{t('calendar.weekly_summary')}</div>
+                <div className="text-slate-400">{t('calendar.weekly_summary_desc')}</div>
               </div>
             </div>
           </div>
@@ -68,7 +70,7 @@ export default function CalendarioPage() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-purple-400" />
-            Dicas de Análise
+            {t('calendar.analysis_tips')}
           </CardTitle>
         </CardHeader>
         <CardContent>
