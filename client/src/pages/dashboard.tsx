@@ -735,33 +735,17 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
 
 
 
-            {/* Linha de resultado acumulado com gradiente dinâmico */}
-            <defs>
-              <linearGradient id="dynamicLineGradient" x1="0" y1="0" x2="1" y2="0">
-                {chartData.map((entry, index) => {
-                  const position = index / (chartData.length - 1);
-                  const color = entry.accumulated >= 0 ? "#22c55e" : "#ef4444";
-                  return (
-                    <stop
-                      key={index}
-                      offset={`${position * 100}%`}
-                      stopColor={color}
-                    />
-                  );
-                })}
-              </linearGradient>
-            </defs>
-            
+            {/* Linha acumulada que muda de cor baseada no valor */}
             <Line
               type="monotone"
               dataKey="accumulated"
-              stroke="url(#dynamicLineGradient)"
+              stroke="#22c55e"
               strokeWidth={3}
               dot={(props: any) => {
                 const { payload } = props;
+                if (!payload) return props;
                 const color = payload.accumulated >= 0 ? "#22c55e" : "#ef4444";
                 return {
-                  ...props,
                   fill: color,
                   stroke: color,
                   strokeWidth: 2,
@@ -770,15 +754,35 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               }}
               activeDot={(props: any) => {
                 const { payload } = props;
+                if (!payload) return props;
                 const color = payload.accumulated >= 0 ? "#22c55e" : "#ef4444";
                 return {
-                  ...props,
                   fill: color,
                   stroke: color,
                   r: 6
                 };
               }}
             />
+            
+            {/* Segmentos vermelhos para valores negativos */}
+            {chartData.map((entry, index) => {
+              if (index === 0 || entry.accumulated >= 0) return null;
+              
+              const prevEntry = chartData[index - 1];
+              const segmentData = [prevEntry, entry];
+              
+              return (
+                <Line
+                  key={`red-segment-${index}`}
+                  type="monotone"
+                  dataKey="accumulated"
+                  data={segmentData}
+                  stroke="#ef4444"
+                  strokeWidth={3}
+                  dot={false}
+                />
+              );
+            })}
           </AreaChart>
         </ResponsiveContainer>
       )}
