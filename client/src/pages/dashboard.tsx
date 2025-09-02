@@ -733,25 +733,25 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
               }}
             />
 
-            {/* Linha de resultado líquido */}
-            <Line
+            {/* Barras de lucros */}
+            <Area
               type="monotone"
-              dataKey="total"
+              dataKey="positive"
+              stackId="1"
               stroke="#22c55e"
-              strokeWidth={3}
-              dot={{ fill: "#22c55e", strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              strokeWidth={2}
+              fill="url(#positiveGradient)"
             />
-            
-            {/* Linha para valores negativos */}
+
+
+            {/* Linha acumulada */}
             <Line
               type="monotone"
-              dataKey={(data: any) => data.total < 0 ? data.total : null}
-              stroke="#ef4444"
+              dataKey="accumulated"
+              stroke="#3b82f6"
               strokeWidth={3}
-              dot={{ fill: "#ef4444", strokeWidth: 2, r: 4 }}
+              dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6 }}
-              connectNulls={false}
             />
           </AreaChart>
         </ResponsiveContainer>
