@@ -90,6 +90,9 @@ const translations: Record<Language, Record<string, string>> = {
     'time.times': 'vezes',
     'time.trades_today': 'Trades Hoje',
 
+    // Emoções
+    'emotion.neutral': 'neutro',
+
     // Consolidação
     'consolidated.summary': 'Resumo Consolidado',
     'consolidated.market_analysis': 'Análise consolidada dos diferentes mercados',
@@ -810,6 +813,9 @@ const translations: Record<Language, Record<string, string>> = {
     'time.times': 'times',
     'time.trades_today': 'Trades Today',
 
+    // Emotions
+    'emotion.neutral': 'neutral',
+
     // Consolidation
     'consolidated.summary': 'Consolidated Summary',
     'consolidated.market_analysis': 'Consolidated analysis of different markets',
@@ -1529,6 +1535,9 @@ const translations: Record<Language, Record<string, string>> = {
     'time.1_year': '1 Año',
     'time.times': 'veces',
     'time.trades_today': 'Operaciones Hoy',
+
+    // Emociones
+    'emotion.neutral': 'neutro',
 
     // Consolidación
     'consolidated.summary': 'Resumen Consolidado',

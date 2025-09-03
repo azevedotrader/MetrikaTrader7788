@@ -1632,7 +1632,7 @@ export default function Dashboard() {
                         metrics.emocaoMaisRecorrente
                           .emocao as keyof typeof simbolosEmocoes
                       ] || "○"}
-                      {metrics.emocaoMaisRecorrente.emocao || "neutro"}
+                      {metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')}
                     </p>
                     <p className="text-sm text-zinc-500">
                       {metrics.emocaoMaisRecorrente.count} {t('time.times')}
