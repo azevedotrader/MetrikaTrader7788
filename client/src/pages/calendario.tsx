@@ -11,7 +11,7 @@ export default function CalendarioPage() {
     staleTime: 0, // Sempre buscar dados frescos
     gcTime: 0   // Não manter cache (nova nomenclatura do React Query v5)
   });
-  const { data: calendarData = [] } = useQuery<any[]>({ queryKey: ['/api/trades/calendar'] });
+  const { data: calendarData = [] } = useQuery({ queryKey: ['/api/trades/calendar'] });
 
   return (
     <div className="space-y-6 pb-8">
@@ -62,7 +62,7 @@ export default function CalendarioPage() {
       {/* Calendário Principal */}
       <TradingCalendar 
         trades={trades} 
-        calendarData={(calendarData || []) as any[]}
+        calendarData={calendarData as any[]}
       />
 
       {/* Dicas de Análise */}
