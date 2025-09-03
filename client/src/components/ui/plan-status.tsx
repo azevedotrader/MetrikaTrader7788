@@ -17,7 +17,20 @@ export function PlanStatus() {
   const { data: planInfo, isLoading, error } = useQuery({
     queryKey: ['/api/user/plan'],
     queryFn: async () => {
-      const response = await fetch('/api/user/plan');
+      const userId = localStorage.getItem('user-id');
+      
+      if (!userId || userId === '' || userId === 'null') {
+        throw new Error('Usuário não autenticado');
+      }
+      
+      const response = await fetch('/api/user/plan', {
+        credentials: "include",
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId,
+        },
+      });
+      
       if (!response.ok) {
         throw new Error('Failed to fetch plan info');
       }
