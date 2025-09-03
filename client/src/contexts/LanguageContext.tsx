@@ -230,6 +230,69 @@ const translations: Record<Language, Record<string, string>> = {
     'action.export': 'Exportar',
     'action.sync': 'Sincronizar',
     'action.refresh': 'Atualizar',
+
+    // Corretoras e mercados
+    'broker.forex.name': 'Forex',
+    'broker.forex.type': 'Câmbio',
+    'broker.forex.description': 'Trading Forex com importação CSV',
+    'broker.b3.name': 'B3',
+    'broker.b3.type': 'Ações BR',
+    'broker.b3.description': 'Ações brasileiras B3 com importação CSV',
+    'broker.crypto.name': 'Crypto',
+    'broker.crypto.type': 'Criptomoedas',
+    'broker.crypto.description': 'Trading de criptomoedas com importação CSV',
+
+    // Setups de trading
+    'setup.breakout': 'Breakout',
+    'setup.pullback': 'Pullback',
+    'setup.reversao': 'Reversão',
+    'setup.tendencia': 'Tendência',
+    'setup.support_resistance': 'Support/Resistance',
+    'setup.fibonacci': 'Fibonacci',
+    'setup.candlestick': 'Candlestick Pattern',
+    'setup.divergencia': 'Divergência',
+    'setup.scalping': 'Scalping',
+    'setup.swing': 'Swing',
+
+    // Emoções
+    'emotion.confiante': 'Confiante',
+    'emotion.ansioso': 'Ansioso',
+    'emotion.impulsivo': 'Impulsivo',
+    'emotion.calmo': 'Calmo',
+    'emotion.euforico': 'Eufórico',
+    'emotion.frustrado': 'Frustrado',
+    'emotion.neutro': 'Neutro',
+
+    // Labels de gráficos
+    'chart.profitability_accumulated': 'Rentabilidade Acumulada',
+    'chart.period_result': 'Resultado do Período',
+    'chart.daily': 'Dia',
+    'chart.weekly': 'Semana',
+    'chart.monthly': 'Mês',
+    'chart.yearly': 'Ano',
+    'chart.all_months': 'Todos',
+    'chart.specific_month': 'Mês Específico',
+    'chart.select_month': 'Selecione o mês',
+
+    // Períodos de tempo
+    'time.day': 'Dia',
+    'time.week': 'Semana',
+    'time.month': 'Mês',
+    'time.year': 'Ano',
+    'time.all': 'Todos',
+
+    // Placeholders e dicas
+    'placeholder.select_month': 'Selecione o mês',
+    'placeholder.select_option': 'Selecione uma opção',
+    'placeholder.search': 'Pesquisar...',
+
+    // Upload e importação
+    'upload.csv_import': 'Importação CSV',
+    'upload.select_file': 'Selecionar arquivo',
+    'upload.analyzing': 'Analisando...',
+    'upload.processing': 'Processando...',
+    'upload.success': 'Sucesso!',
+    'upload.error': 'Erro no upload',
   },
 
   en: {
@@ -417,6 +480,69 @@ const translations: Record<Language, Record<string, string>> = {
     'action.export': 'Export',
     'action.sync': 'Sync',
     'action.refresh': 'Refresh',
+
+    // Brokers and markets
+    'broker.forex.name': 'Forex',
+    'broker.forex.type': 'Currency',
+    'broker.forex.description': 'Forex trading with CSV import',
+    'broker.b3.name': 'B3',
+    'broker.b3.type': 'BR Stocks',
+    'broker.b3.description': 'Brazilian B3 stocks with CSV import',
+    'broker.crypto.name': 'Crypto',
+    'broker.crypto.type': 'Cryptocurrencies',
+    'broker.crypto.description': 'Cryptocurrency trading with CSV import',
+
+    // Trading setups
+    'setup.breakout': 'Breakout',
+    'setup.pullback': 'Pullback',
+    'setup.reversao': 'Reversal',
+    'setup.tendencia': 'Trend',
+    'setup.support_resistance': 'Support/Resistance',
+    'setup.fibonacci': 'Fibonacci',
+    'setup.candlestick': 'Candlestick Pattern',
+    'setup.divergencia': 'Divergence',
+    'setup.scalping': 'Scalping',
+    'setup.swing': 'Swing',
+
+    // Emotions
+    'emotion.confiante': 'Confident',
+    'emotion.ansioso': 'Anxious',
+    'emotion.impulsivo': 'Impulsive',
+    'emotion.calmo': 'Calm',
+    'emotion.euforico': 'Euphoric',
+    'emotion.frustrado': 'Frustrated',
+    'emotion.neutro': 'Neutral',
+
+    // Chart labels
+    'chart.profitability_accumulated': 'Accumulated Profitability',
+    'chart.period_result': 'Period Result',
+    'chart.daily': 'Day',
+    'chart.weekly': 'Week',
+    'chart.monthly': 'Month',
+    'chart.yearly': 'Year',
+    'chart.all_months': 'All',
+    'chart.specific_month': 'Specific Month',
+    'chart.select_month': 'Select month',
+
+    // Time periods
+    'time.day': 'Day',
+    'time.week': 'Week',
+    'time.month': 'Month',
+    'time.year': 'Year',
+    'time.all': 'All',
+
+    // Placeholders and hints
+    'placeholder.select_month': 'Select month',
+    'placeholder.select_option': 'Select an option',
+    'placeholder.search': 'Search...',
+
+    // Upload and import
+    'upload.csv_import': 'CSV Import',
+    'upload.select_file': 'Select file',
+    'upload.analyzing': 'Analyzing...',
+    'upload.processing': 'Processing...',
+    'upload.success': 'Success!',
+    'upload.error': 'Upload error',
   },
 
   es: {

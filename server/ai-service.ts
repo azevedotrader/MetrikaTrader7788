@@ -178,7 +178,7 @@ export class AITradingService {
           }
         ],
         temperature: 0.7,
-        max_tokens: 300
+        max_completion_tokens: 300
       });
 
       return response.choices[0].message.content || 'Desculpe, não consegui processar sua mensagem no momento.';
@@ -380,7 +380,7 @@ export class AITradingService {
           { role: "user", content: promptText }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 4000,
+        max_completion_tokens: 4000,
         temperature: 0.2
       });
 
@@ -440,7 +440,7 @@ export class AITradingService {
           { role: "user", content: promptText }
         ],
         response_format: { type: "json_object" },
-        max_tokens: 3000,
+        max_completion_tokens: 3000,
         temperature: 0.3
       });
 

@@ -111,7 +111,7 @@ Response as JSON with structure:
 
     // 4. Chamar OpenAI
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-5", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
       messages: [
         {
           role: "system",
@@ -125,7 +125,7 @@ Response as JSON with structure:
       ],
       response_format: { type: "json_object" },
       temperature: 0.05, // Temperatura ultra baixa para máxima precisão
-      max_tokens: 160000, // Máximo de tokens para análise completa sem limites
+      max_completion_tokens: 160000, // Máximo de tokens para análise completa sem limites
     });
 
     const aiResponse = response.choices[0]?.message?.content;

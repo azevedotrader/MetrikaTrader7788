@@ -96,29 +96,7 @@ interface BrokerStats {
   winRate: number;
 }
 
-const brokerInfo = {
-  forex: {
-    name: "Forex",
-    type: "Câmbio",
-    color: "bg-blue-500",
-    icon: TrendingUp,
-    description: "Trading Forex com importação CSV",
-  },
-  b3: {
-    name: "B3",
-    type: "Ações BR",
-    color: "bg-green-500",
-    icon: BarChart3,
-    description: "Ações brasileiras B3 com importação CSV",
-  },
-  crypto: {
-    name: "Crypto",
-    type: "Criptomoedas",
-    color: "bg-green-500",
-    icon: Activity,
-    description: "Trading de criptomoedas com importação CSV",
-  },
-};
+// Mover brokerInfo para dentro do componente para acessar t()
 
 interface TradeMetrics {
   totalTrades: number;
@@ -147,7 +125,7 @@ const simbolosEmocoes = {
 };
 
 // Capital Curve Chart - Professional Trading Analytics
-function CapitalCurveChart({ trades }: { trades: Trade[] }) {
+function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
   const [timeFilter, setTimeFilter] = useState<
     "dia" | "semana" | "mes" | "ano"
   >("mes");
@@ -225,9 +203,9 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
 
   const formatTooltipValue = (value: number, name: string) => {
     if (name === "cumulativeProfit") {
-      return [`R$ ${value.toFixed(2)}`, "Rentabilidade Acumulada"];
+      return [`R$ ${value.toFixed(2)}`, t('chart.profitability_accumulated')];
     }
-    return [`R$ ${value.toFixed(2)}`, "Resultado do Período"];
+    return [`R$ ${value.toFixed(2)}`, t('chart.period_result')];
   };
 
   return (
@@ -236,10 +214,10 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
         {/* Filtros de Tempo */}
         <div className="flex justify-end gap-2 mb-4">
           {[
-            { key: "dia", label: "Dia" },
-            { key: "semana", label: "Semana" },
-            { key: "mes", label: "Mês" },
-            { key: "ano", label: "Ano" },
+            { key: "dia", label: t('time.day') },
+            { key: "semana", label: t('time.week') },
+            { key: "mes", label: t('time.month') },
+            { key: "ano", label: t('time.year') },
           ].map((filter) => (
             <Button
               key={filter.key}
@@ -327,7 +305,7 @@ function CapitalCurveChart({ trades }: { trades: Trade[] }) {
 }
 
 // Performance Period Chart Component
-function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
+function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
   const [selectedPeriod, setSelectedPeriod] = useState<
     "week" | "month" | "year" | "specific-month"
   >("month");
@@ -471,9 +449,9 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
       <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap">
         {[
           { key: "week", label: "7 Dias" },
-          { key: "month", label: "Todos" },
+          { key: "month", label: t('chart.all_months') },
           { key: "year", label: "1 Ano" },
-          { key: "specific-month", label: "Mês Específico" },
+          { key: "specific-month", label: t('chart.specific_month') },
         ].map((filter) => (
           <Button
             key={filter.key}
@@ -500,7 +478,7 @@ function PerformancePeriodChart({ trades }: { trades: Trade[] }) {
         <div className="flex justify-center mb-4 md:mb-6">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-36 md:w-48 text-sm">
-              <SelectValue placeholder="Selecione o mês" />
+              <SelectValue placeholder={t('placeholder.select_month')} />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700">
               {(() => {
@@ -1109,6 +1087,31 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
 
+  // Broker info with translations
+  const brokerInfo = {
+    forex: {
+      name: t('broker.forex.name'),
+      type: t('broker.forex.type'),
+      color: "bg-blue-500",
+      icon: TrendingUp,
+      description: t('broker.forex.description'),
+    },
+    b3: {
+      name: t('broker.b3.name'),
+      type: t('broker.b3.type'),
+      color: "bg-green-500",
+      icon: BarChart3,
+      description: t('broker.b3.description'),
+    },
+    crypto: {
+      name: t('broker.crypto.name'),
+      type: t('broker.crypto.type'),
+      color: "bg-green-500",
+      icon: Activity,
+      description: t('broker.crypto.description'),
+    },
+  };
+
   // Get current user ID for isolation info
   const currentUserId = localStorage.getItem("user-id") || "default-user";
 
@@ -1628,7 +1631,7 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pl-0 pr-2 md:px-6">
-              <PerformancePeriodChart trades={filteredTrades} />
+              <PerformancePeriodChart trades={filteredTrades} t={t} />
             </CardContent>
           </Card>
 
@@ -1739,7 +1742,7 @@ export default function Dashboard() {
                   Curva de Capital
                 </CardTitle>
               </CardHeader>
-              <CapitalCurveChart trades={filteredTrades} />
+              <CapitalCurveChart trades={filteredTrades} t={t} />
             </Card>
           </div>
 

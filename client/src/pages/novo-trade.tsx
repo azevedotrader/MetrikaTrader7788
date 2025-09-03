@@ -52,33 +52,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { AITradeAnalysis } from "@/components/ui/ai-trade-analysis";
 
-const setupOptions = [
-  "Breakout",
-  "Pullback",
-  "Reversão",
-  "Tendência",
-  "Support/Resistance",
-  "Fibonacci",
-  "Candlestick Pattern",
-  "Divergência",
-  "Scalping",
-  "Swing",
-];
+// Mover setupOptions para dentro do componente para acessar t()
 
-const emocaoOptions = [
-  { value: "confiante", label: "● Confiante", icon: "●" },
-  { value: "ansioso", label: "▲ Ansioso", icon: "▲" },
-  { value: "impulsivo", label: "♦ Impulsivo", icon: "♦" },
-  { value: "calmo", label: "◆ Calmo", icon: "◆" },
-  { value: "eufórico", label: "★ Eufórico", icon: "★" },
-  { value: "frustrado", label: "■ Frustrado", icon: "■" },
-  { value: "neutro", label: "○ Neutro", icon: "○" },
-];
+// Mover emocaoOptions para dentro do componente para acessar t()
 
 export default function NovoTrade() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+
+  // Setup options with translations
+  const setupOptions = [
+    t('setup.breakout'),
+    t('setup.pullback'),
+    t('setup.reversao'),
+    t('setup.tendencia'),
+    t('setup.support_resistance'),
+    t('setup.fibonacci'),
+    t('setup.candlestick'),
+    t('setup.divergencia'),
+    t('setup.scalping'),
+    t('setup.swing'),
+  ];
+
+  // Emotion options with translations
+  const emocaoOptions = [
+    { value: "confiante", label: `● ${t('emotion.confiante')}`, icon: "●" },
+    { value: "ansioso", label: `▲ ${t('emotion.ansioso')}`, icon: "▲" },
+    { value: "impulsivo", label: `♦ ${t('emotion.impulsivo')}`, icon: "♦" },
+    { value: "calmo", label: `◆ ${t('emotion.calmo')}`, icon: "◆" },
+    { value: "eufórico", label: `★ ${t('emotion.euforico')}`, icon: "★" },
+    { value: "frustrado", label: `■ ${t('emotion.frustrado')}`, icon: "■" },
+    { value: "neutro", label: `○ ${t('emotion.neutro')}`, icon: "○" },
+  ];
   const [selectedBroker, setSelectedBroker] = useState<string>("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvName, setCsvName] = useState<string>("");

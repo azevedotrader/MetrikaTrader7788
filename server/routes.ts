@@ -1724,7 +1724,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           const testResponse = await testClient.chat.completions.create({
             model: 'gpt-4o',
             messages: [{ role: 'user', content: 'Hello' }],
-            max_tokens: 5
+            max_completion_tokens: 5
           });
           
           console.log('✅ OpenAI conectado com sucesso!');
