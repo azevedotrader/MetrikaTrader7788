@@ -492,6 +492,17 @@ const translations: Record<Language, Record<string, string>> = {
     // Mensagens de estado vazio
     'empty.no_trades_period': 'Nenhum trade no período selecionado',
     'empty.no_manual_trades': 'Nenhum trade manual criado ainda',
+
+    // Assistente IA
+    'ai.chat_title': 'Assistente IA',
+    'ai.chat_title_short': 'IA',
+    'ai.welcome_message': 'Olá! Sou seu assistente de trading. Como posso ajudá-lo hoje? Posso analisar seus trades, dar sugerências de mercado ou tirar dúvidas sobre estratégias.',
+    'ai.error_message': 'Desculpe, ocorreu um erro. Tente novamente em alguns instantes.',
+    'ai.input_placeholder': 'Digite sua mensagem...',
+    'ai.send_button': 'Enviar',
+    'ai.minimize_button': 'Minimizar',
+    'ai.maximize_button': 'Maximizar',
+    'ai.close_button': 'Fechar',
   },
 
   en: {
@@ -941,6 +952,17 @@ const translations: Record<Language, Record<string, string>> = {
     // Empty state messages
     'empty.no_trades_period': 'No trades in selected period',
     'empty.no_manual_trades': 'No manual trades created yet',
+
+    // AI Assistant
+    'ai.chat_title': 'AI Assistant',
+    'ai.chat_title_short': 'AI',
+    'ai.welcome_message': 'Hello! I\'m your trading assistant. How can I help you today? I can analyze your trades, provide market suggestions, or answer questions about strategies.',
+    'ai.error_message': 'Sorry, an error occurred. Please try again in a few moments.',
+    'ai.input_placeholder': 'Type your message...',
+    'ai.send_button': 'Send',
+    'ai.minimize_button': 'Minimize',
+    'ai.maximize_button': 'Maximize',
+    'ai.close_button': 'Close',
   },
 
   es: {
@@ -1327,5 +1349,16 @@ const translations: Record<Language, Record<string, string>> = {
     // Mensajes de estado vacío
     'empty.no_trades_period': 'Ninguna operación en el período seleccionado',
     'empty.no_manual_trades': 'Ninguna operación manual creada aún',
+
+    // Assistente IA
+    'ai.chat_title': 'Asistente IA',
+    'ai.chat_title_short': 'IA',
+    'ai.welcome_message': '¡Hola! Soy tu asistente de trading. ¿Cómo puedo ayudarte hoy? Puedo analizar tus operaciones, dar sugerencias de mercado o resolver dudas sobre estrategias.',
+    'ai.error_message': 'Lo siento, ocurrió un error. Inténtalo de nuevo en unos momentos.',
+    'ai.input_placeholder': 'Escribe tu mensaje...',
+    'ai.send_button': 'Enviar',
+    'ai.minimize_button': 'Minimizar',
+    'ai.maximize_button': 'Maximizar',
+    'ai.close_button': 'Cerrar',
   }
 };

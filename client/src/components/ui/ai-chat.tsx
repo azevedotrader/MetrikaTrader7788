@@ -6,6 +6,7 @@ import { ScrollArea } from "./scroll-area";
 import { MessageCircle, Send, Bot, User, X, Minimize2, Maximize2 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ChatMessage {
   id: string;
@@ -22,11 +23,13 @@ interface AIChatProps {
 }
 
 export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProps) {
+  const { t, language } = useLanguage();
+  
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       type: 'ai',
-      content: 'Olá! Sou seu assistente de trading. Como posso ajudá-lo hoje? Posso analisar seus trades, dar sugestões de mercado ou tirar dúvidas sobre estratégias.',
+      content: t('ai.welcome_message'),
       timestamp: new Date()
     }
   ]);
@@ -41,7 +44,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message, language })
       });
       return response.json();
     },
@@ -58,7 +61,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
       const errorMessage: ChatMessage = {
         id: Date.now().toString() + '_error',
         type: 'ai',
-        content: 'Desculpe, ocorreu um erro. Tente novamente em alguns instantes.',
+        content: t('ai.error_message'),
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -113,8 +116,8 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-white text-sm md:text-base">
             <Bot className="h-4 w-4 md:h-5 md:w-5 text-white" />
-            <span className="hidden sm:inline">Assistente IA</span>
-            <span className="sm:hidden">IA</span>
+            <span className="hidden sm:inline">{t('ai.chat_title')}</span>
+            <span className="sm:hidden">{t('ai.chat_title_short')}</span>
             {chatMutation.isPending && (
               <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
             )}
@@ -200,7 +203,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Digite sua mensagem..."
+                placeholder={t('ai.input_placeholder')}
                 className="bg-gray-800 border-gray-600 text-white text-sm md:text-base"
                 disabled={chatMutation.isPending}
                 data-testid="input-chat-message"

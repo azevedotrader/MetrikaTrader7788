@@ -145,7 +145,7 @@ export class AITradingService {
     }
   }
 
-  async chatWithTrader(userMessage: string, context?: any): Promise<string> {
+  async chatWithTrader(userMessage: string, context?: any, language: string = 'pt'): Promise<string> {
     try {
       const contextInfo = context ? `
         Contexto do usuário:
@@ -154,12 +154,9 @@ export class AITradingService {
         - Meta mensal: ${context.metaMensal || '0'}%
         - Trades recentes: ${context.tradesCount || 0}
       ` : '';
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-        messages: [
-          {
-            role: "system",
-            content: `Você é um mentor experiente de trading brasileiro. Ajude o trader com:
+      // Prompts específicos por idioma
+      const systemPrompts = {
+        pt: `Você é um mentor experiente de trading brasileiro. Ajude o trader com:
             - Estratégias de trading
             - Gestão de risco
             - Psicologia do trading
@@ -167,7 +164,33 @@ export class AITradingService {
             - Dicas práticas
             
             Seja direto, prático e motivacional. Use português brasileiro.
+            ${contextInfo}`,
+        en: `You are an experienced trading mentor. Help the trader with:
+            - Trading strategies
+            - Risk management
+            - Trading psychology
+            - Technical and fundamental analysis
+            - Practical tips
+            
+            Be direct, practical and motivational. Use English.
+            ${contextInfo}`,
+        es: `Eres un mentor experimentado de trading. Ayuda al trader con:
+            - Estrategias de trading
+            - Gestión de riesgo
+            - Psicología del trading
+            - Análisis técnico y fundamental
+            - Consejos prácticos
+            
+            Sé directo, práctico y motivacional. Usa español.
             ${contextInfo}`
+      };
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: systemPrompts[language as keyof typeof systemPrompts] || systemPrompts.pt
           },
           {
             role: "user",

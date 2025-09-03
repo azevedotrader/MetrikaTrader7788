@@ -2342,7 +2342,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI Chat endpoint
   app.post('/api/ai/chat', async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, language = 'pt' } = req.body;
       
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: 'Mensagem é obrigatória' });
@@ -2367,7 +2367,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const { aiService } = await import('./ai-service');
-      const reply = await aiService.chatWithTrader(message, userContext);
+      const reply = await aiService.chatWithTrader(message, userContext, language);
       res.json({ reply });
     } catch (error) {
       console.error('Erro no chat AI:', error);
