@@ -743,50 +743,50 @@ export default function Landing() {
             {[
               {
                 icon: Zap,
-                title: t('landing.features.sync_title'),
-                description: t('landing.features.sync_description'),
+                titleKey: 'landing.features.sync_title',
+                descriptionKey: 'landing.features.sync_description',
                 color: "from-yellow-500 to-orange-500"
               },
               {
                 icon: Brain,
-                title: t('landing.features.ai_title'),
-                description: t('landing.features.ai_description'),
+                titleKey: 'landing.features.ai_title',
+                descriptionKey: 'landing.features.ai_description',
                 color: "from-purple-500 to-pink-500"  
               },
               {
                 icon: Target,
-                title: t('landing.features.risk_title'),
-                description: t('landing.features.risk_description'),
+                titleKey: 'landing.features.risk_title',
+                descriptionKey: 'landing.features.risk_description',
                 color: "from-blue-500 to-cyan-500"
               },
               {
                 icon: FileText,
-                title: t('landing.features.journal_title'),
-                description: t('landing.features.journal_description'),
+                titleKey: 'landing.features.journal_title',
+                descriptionKey: 'landing.features.journal_description',
                 color: "from-green-500 to-emerald-500"
               },
               {
                 icon: PieChart,
-                title: t('landing.features.charts_title'),
-                description: t('landing.features.charts_description'),
+                titleKey: 'landing.features.charts_title',
+                descriptionKey: 'landing.features.charts_description',
                 color: "from-indigo-500 to-purple-500"
               },
               {
                 icon: Clock,
-                title: t('landing.features.time_title'),
-                description: t('landing.features.time_description'),
+                titleKey: 'landing.features.time_title',
+                descriptionKey: 'landing.features.time_description',
                 color: "from-teal-500 to-green-500"
               },
               {
                 icon: Database,
-                title: t('landing.features.multiasset_title'),
-                description: t('landing.features.multiasset_description'),
+                titleKey: 'landing.features.multiasset_title',
+                descriptionKey: 'landing.features.multiasset_description',
                 color: "from-rose-500 to-pink-500"
               },
               {
                 icon: Download,
-                title: t('landing.features.export_title'),
-                description: t('landing.features.export_description'),
+                titleKey: 'landing.features.export_title',
+                descriptionKey: 'landing.features.export_description',
                 color: "from-slate-500 to-gray-500"
               }
             ].map((feature, index) => (
@@ -795,8 +795,8 @@ export default function Landing() {
                   <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-3">{feature.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-bold text-white mb-3">{t(feature.titleKey)}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{t(feature.descriptionKey)}</p>
                 </CardContent>
               </Card>
             ))}
