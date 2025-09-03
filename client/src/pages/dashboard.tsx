@@ -1493,24 +1493,24 @@ export default function Dashboard() {
       <AdvancedFilters />
 
       <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-slate-800 border border-zinc-700 rounded-lg p-1 gap-1 h-auto">
+        <TabsList className="grid w-full grid-cols-3 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1 h-auto">
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
           >
             <span className="hidden sm:inline">{t('dashboard.overview')}</span>
             <span className="sm:hidden">Geral</span>
           </TabsTrigger>
           <TabsTrigger
             value="imports"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
           >
             <span className="hidden sm:inline">{t('tabs.imports')}</span>
             <span className="sm:hidden">Import</span>
           </TabsTrigger>
           <TabsTrigger
             value="consolidated"
-            className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
+            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
           >
             <span className="hidden sm:inline">{t('tabs.consolidated')}</span>
             <span className="sm:hidden">Consol</span>
