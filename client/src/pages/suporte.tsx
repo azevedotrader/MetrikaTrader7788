@@ -69,7 +69,7 @@ export default function Suporte() {
   // Mutation para criar nova conversa
   const createConversationMutation = useMutation({
     mutationFn: async (data: any) => {
-      return apiRequest('/api/support/conversations', 'POST', data);
+      return apiRequest('POST', '/api/support/conversations', data);
     },
     onSuccess: (data) => {
       toast({
@@ -93,7 +93,7 @@ export default function Suporte() {
   // Mutation para enviar mensagem
   const sendMessageMutation = useMutation({
     mutationFn: async ({ conversationId, message }: { conversationId: string; message: string }) => {
-      return apiRequest(`/api/support/conversations/${conversationId}/messages`, 'POST', { message });
+      return apiRequest('POST', `/api/support/conversations/${conversationId}/messages`, { message });
     },
     onSuccess: () => {
       toast({
