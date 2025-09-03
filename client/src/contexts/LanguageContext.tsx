@@ -71,6 +71,41 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.performance_chart': 'Gráfico de Performance',
     'dashboard.ai_insights': 'Insights da IA',
     'dashboard.trading_calendar': 'Calendário de Trading',
+    'dashboard.best_trade': 'Melhor Trade',
+    'dashboard.worst_trade': 'Pior Trade',
+    'dashboard.frequent_emotion': 'Emoção Frequente',
+    'dashboard.capital_curve': 'Curva de Capital',
+    'dashboard.detailed_temporal_performance': 'Performance Temporal Detalhada',
+    'dashboard.imports_and_trades': 'Histórico de Importações e Trades',
+    'dashboard.consolidated_total': 'Resultado Total Consolidado',
+    'dashboard.market_distribution': 'Distribuição por Mercado',
+
+    // Tabs
+    'tabs.imports': 'Importações',
+    'tabs.consolidated': 'Consolidado',
+
+    // Filtros de tempo
+    'time.7_days': '7 Dias',
+    'time.1_year': '1 Ano',
+    'time.times': 'vezes',
+    'time.trades_today': 'Trades Hoje',
+
+    // Consolidação
+    'consolidated.summary': 'Resumo Consolidado',
+    'consolidated.market_analysis': 'Análise consolidada dos diferentes mercados',
+
+    // Gráficos e Métricas
+    'metrics.accumulated_profitability': 'Rentabilidade Acumulada',
+    'metrics.period_result': 'Resultado do Período',
+    'metrics.profits': '✅ Lucros',
+    'metrics.losses': '❌ Perdas',
+    'metrics.total_profits': 'Total de Lucros',
+    'metrics.total_losses': 'Total de Perdas',
+    'metrics.period_result_short': 'Resultado Período',
+    'metrics.total_profitability': 'Rentabilidade Total',
+    'metrics.general_result': 'Resultado geral',
+    'metrics.profitability_chart': 'Gráfico de Rentabilidade ao Longo do Tempo',
+    'metrics.result': 'Resultado',
 
     // Trades
     'trades.title': 'Trades',
@@ -293,6 +328,19 @@ const translations: Record<Language, Record<string, string>> = {
     'upload.processing': 'Processando...',
     'upload.success': 'Sucesso!',
     'upload.error': 'Erro no upload',
+
+    // Dias da semana
+    'weekdays.sunday': 'Domingo',
+    'weekdays.monday': 'Segunda',
+    'weekdays.tuesday': 'Terça',
+    'weekdays.wednesday': 'Quarta',
+    'weekdays.thursday': 'Quinta',
+    'weekdays.friday': 'Sexta',
+    'weekdays.saturday': 'Sábado',
+
+    // Mensagens de estado vazio
+    'empty.no_trades_period': 'Nenhum trade no período selecionado',
+    'empty.no_manual_trades': 'Nenhum trade manual criado ainda',
   },
 
   en: {
@@ -321,6 +369,41 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.performance_chart': 'Performance Chart',
     'dashboard.ai_insights': 'AI Insights',
     'dashboard.trading_calendar': 'Trading Calendar',
+    'dashboard.best_trade': 'Best Trade',
+    'dashboard.worst_trade': 'Worst Trade',
+    'dashboard.frequent_emotion': 'Frequent Emotion',
+    'dashboard.capital_curve': 'Capital Curve',
+    'dashboard.detailed_temporal_performance': 'Detailed Temporal Performance',
+    'dashboard.imports_and_trades': 'Imports and Trades History',
+    'dashboard.consolidated_total': 'Total Consolidated Result',
+    'dashboard.market_distribution': 'Market Distribution',
+
+    // Tabs
+    'tabs.imports': 'Imports',
+    'tabs.consolidated': 'Consolidated',
+
+    // Time filters
+    'time.7_days': '7 Days',
+    'time.1_year': '1 Year',
+    'time.times': 'times',
+    'time.trades_today': 'Trades Today',
+
+    // Consolidation
+    'consolidated.summary': 'Consolidated Summary',
+    'consolidated.market_analysis': 'Consolidated analysis of different markets',
+
+    // Charts and Metrics
+    'metrics.accumulated_profitability': 'Accumulated Profitability',
+    'metrics.period_result': 'Period Result',
+    'metrics.profits': '✅ Profits',
+    'metrics.losses': '❌ Losses',
+    'metrics.total_profits': 'Total Profits',
+    'metrics.total_losses': 'Total Losses',
+    'metrics.period_result_short': 'Period Result',
+    'metrics.total_profitability': 'Total Profitability',
+    'metrics.general_result': 'General result',
+    'metrics.profitability_chart': 'Profitability Chart Over Time',
+    'metrics.result': 'Result',
 
     // Trades
     'trades.title': 'Trades',
@@ -543,6 +626,19 @@ const translations: Record<Language, Record<string, string>> = {
     'upload.processing': 'Processing...',
     'upload.success': 'Success!',
     'upload.error': 'Upload error',
+
+    // Weekdays
+    'weekdays.sunday': 'Sunday',
+    'weekdays.monday': 'Monday',
+    'weekdays.tuesday': 'Tuesday',
+    'weekdays.wednesday': 'Wednesday',
+    'weekdays.thursday': 'Thursday',
+    'weekdays.friday': 'Friday',
+    'weekdays.saturday': 'Saturday',
+
+    // Empty state messages
+    'empty.no_trades_period': 'No trades in selected period',
+    'empty.no_manual_trades': 'No manual trades created yet',
   },
 
   es: {
@@ -571,6 +667,41 @@ const translations: Record<Language, Record<string, string>> = {
     'dashboard.performance_chart': 'Gráfico de Rendimiento',
     'dashboard.ai_insights': 'Insights de IA',
     'dashboard.trading_calendar': 'Calendario de Trading',
+    'dashboard.best_trade': 'Mejor Operación',
+    'dashboard.worst_trade': 'Peor Operación',
+    'dashboard.frequent_emotion': 'Emoción Frecuente',
+    'dashboard.capital_curve': 'Curva de Capital',
+    'dashboard.detailed_temporal_performance': 'Rendimiento Temporal Detallado',
+    'dashboard.imports_and_trades': 'Historial de Importaciones y Operaciones',
+    'dashboard.consolidated_total': 'Resultado Total Consolidado',
+    'dashboard.market_distribution': 'Distribución por Mercado',
+
+    // Tabs
+    'tabs.imports': 'Importaciones',
+    'tabs.consolidated': 'Consolidado',
+
+    // Filtros de tiempo
+    'time.7_days': '7 Días',
+    'time.1_year': '1 Año',
+    'time.times': 'veces',
+    'time.trades_today': 'Operaciones Hoy',
+
+    // Consolidación
+    'consolidated.summary': 'Resumen Consolidado',
+    'consolidated.market_analysis': 'Análisis consolidado de diferentes mercados',
+
+    // Gráficos y Métricas
+    'metrics.accumulated_profitability': 'Rentabilidad Acumulada',
+    'metrics.period_result': 'Resultado del Período',
+    'metrics.profits': '✅ Ganancias',
+    'metrics.losses': '❌ Pérdidas',
+    'metrics.total_profits': 'Total Ganancias',
+    'metrics.total_losses': 'Total Pérdidas',
+    'metrics.period_result_short': 'Resultado Período',
+    'metrics.total_profitability': 'Rentabilidad Total',
+    'metrics.general_result': 'Resultado general',
+    'metrics.profitability_chart': 'Gráfico de Rentabilidad en el Tiempo',
+    'metrics.result': 'Resultado',
 
     // Trades
     'trades.title': 'Operaciones',
@@ -730,5 +861,18 @@ const translations: Record<Language, Record<string, string>> = {
     'action.export': 'Exportar',
     'action.sync': 'Sincronizar',
     'action.refresh': 'Actualizar',
+
+    // Días de la semana
+    'weekdays.sunday': 'Domingo',
+    'weekdays.monday': 'Lunes',
+    'weekdays.tuesday': 'Martes',
+    'weekdays.wednesday': 'Miércoles',
+    'weekdays.thursday': 'Jueves',
+    'weekdays.friday': 'Viernes',
+    'weekdays.saturday': 'Sábado',
+
+    // Mensajes de estado vacío
+    'empty.no_trades_period': 'Ninguna operación en el período seleccionado',
+    'empty.no_manual_trades': 'Ninguna operación manual creada aún',
   }
 };

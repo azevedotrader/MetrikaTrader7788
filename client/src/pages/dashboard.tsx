@@ -292,11 +292,11 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
         <div className="flex justify-center gap-6 mt-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-green-500"></div>
-            <span className="text-slate-300">Rentabilidade Acumulada</span>
+            <span className="text-slate-300">{t('metrics.accumulated_profitability')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-green-500 border-dashed"></div>
-            <span className="text-slate-300">Resultado do Período</span>
+            <span className="text-slate-300">{t('metrics.period_result')}</span>
           </div>
         </div>
       </CardContent>
@@ -448,9 +448,9 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
       {/* Filtros de Período */}
       <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap">
         {[
-          { key: "week", label: "7 Dias" },
+          { key: "week", label: t('time.7_days') },
           { key: "month", label: t('chart.all_months') },
-          { key: "year", label: "1 Ano" },
+          { key: "year", label: t('time.1_year') },
           { key: "specific-month", label: t('chart.specific_month') },
         ].map((filter) => (
           <Button
@@ -516,7 +516,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
         <div className="h-[550px] md:h-[380px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
             <BarChart3 className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">Nenhum trade no período selecionado</p>
+            <p className="text-sm">{t('empty.no_trades_period')}</p>
           </div>
         </div>
       ) : (
@@ -601,9 +601,9 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                 const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 const displayName =
                   name === "positive"
-                    ? "✅ Lucros"
+                    ? t('metrics.profits')
                     : name === "negative"
-                      ? "❌ Perdas"
+                      ? t('metrics.losses')
                       : name === "accumulated"
                         ? "📊 Acumulado"
                         : name;
@@ -634,7 +634,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                     >
                       <div className="flex justify-between gap-2">
                         <span className="text-green-400 truncate">
-                          ✅ Lucros:
+                          {t('metrics.profits')}:
                         </span>
                         <span className="text-green-400 font-semibold shrink-0">
                           R${" "}
@@ -740,7 +740,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
       {chartData.length > 0 && (
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
-            <div className="text-xs text-zinc-400 mb-1">Total de Lucros</div>
+            <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_profits')}</div>
             <div className="text-sm md:text-xl font-bold text-green-400 truncate">
               R${" "}
               {window.innerWidth < 768
@@ -757,7 +757,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           </div>
 
           <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
-            <div className="text-xs text-zinc-400 mb-1">Total de Perdas</div>
+            <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_losses')}</div>
             <div className="text-sm md:text-xl font-bold text-red-400 truncate">
               -R${" "}
               {window.innerWidth < 768
@@ -774,7 +774,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           </div>
 
           <div className="text-center p-3 md:p-4 bg-zinc-800/50 rounded-lg border border-zinc-700 min-w-0">
-            <div className="text-xs text-zinc-400 mb-1">Resultado Período</div>
+            <div className="text-xs text-zinc-400 mb-1">{t('metrics.period_result_short')}</div>
             <div
               className={`text-sm md:text-xl font-bold truncate ${chartData[chartData.length - 1]?.accumulated >= 0 ? "text-green-400" : "text-red-400"}`}
             >
@@ -825,7 +825,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   );
 }
 
-function calculateMetrics(trades: Trade[]): TradeMetrics {
+function calculateMetrics(trades: Trade[], t: (key: string) => string): TradeMetrics {
   if (!trades.length) {
     return {
       totalTrades: 0,
@@ -983,13 +983,13 @@ function calculateMetrics(trades: Trade[]): TradeMetrics {
 
   // Lucro por dia da semana
   const diasSemana = [
-    "Domingo",
-    "Segunda",
-    "Terça",
-    "Quarta",
-    "Quinta",
-    "Sexta",
-    "Sábado",
+    t('weekdays.sunday'),
+    t('weekdays.monday'),
+    t('weekdays.tuesday'),
+    t('weekdays.wednesday'),
+    t('weekdays.thursday'),
+    t('weekdays.friday'),
+    t('weekdays.saturday'),
   ];
   const lucroPorDia = trades.reduce((acc, trade) => {
     const dia = new Date(trade.dataHora).getDay();
@@ -1307,7 +1307,7 @@ export default function Dashboard() {
   }
 
   // Calcular métricas com base nos trades filtrados
-  const metrics = calculateMetrics(filteredTrades);
+  const metrics = calculateMetrics(filteredTrades, t);
 
   // Componente de Filtros Avançados
   const AdvancedFilters = () => {
@@ -1516,14 +1516,14 @@ export default function Dashboard() {
             value="imports"
             className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
-            <span className="hidden sm:inline">Importações</span>
+            <span className="hidden sm:inline">{t('tabs.imports')}</span>
             <span className="sm:hidden">Import</span>
           </TabsTrigger>
           <TabsTrigger
             value="consolidated"
             className="data-[state=active]:bg-slate-700 data-[state=active]:border data-[state=active]:border-zinc-600 text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200"
           >
-            <span className="hidden sm:inline">Consolidado</span>
+            <span className="hidden sm:inline">{t('tabs.consolidated')}</span>
             <span className="sm:hidden">Consol</span>
           </TabsTrigger>
         </TabsList>
@@ -1532,7 +1532,7 @@ export default function Dashboard() {
           {/* Main Metrics Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <MetricCard
-              title="Rentabilidade Total"
+              title={t('metrics.total_profitability')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
               color={
@@ -1540,7 +1540,7 @@ export default function Dashboard() {
                   ? "text-green-400"
                   : "text-red-400"
               }
-              subtitle="Resultado geral"
+              subtitle={t('metrics.general_result')}
             />
 
             <MetricCard
@@ -1574,7 +1574,7 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-zinc-400 text-sm">Melhor Trade</p>
+                    <p className="text-zinc-400 text-sm">{t('dashboard.best_trade')}</p>
                     <p className="text-2xl font-bold text-green-400">
                       R$ {metrics.melhorTrade.toFixed(2)}
                     </p>
@@ -1588,7 +1588,7 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-zinc-400 text-sm">Pior Trade</p>
+                    <p className="text-zinc-400 text-sm">{t('dashboard.worst_trade')}</p>
                     <p className="text-2xl font-bold text-red-400">
                       R$ {metrics.piorTrade.toFixed(2)}
                     </p>
@@ -1604,7 +1604,7 @@ export default function Dashboard() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-zinc-400 text-sm">Emoção Frequente</p>
+                    <p className="text-zinc-400 text-sm">{t('dashboard.frequent_emotion')}</p>
                     <p className="text-lg font-bold text-white flex items-center gap-1">
                       {simbolosEmocoes[
                         metrics.emocaoMaisRecorrente
@@ -1613,7 +1613,7 @@ export default function Dashboard() {
                       {metrics.emocaoMaisRecorrente.emocao || "neutro"}
                     </p>
                     <p className="text-sm text-zinc-500">
-                      {metrics.emocaoMaisRecorrente.count} vezes
+                      {metrics.emocaoMaisRecorrente.count} {t('time.times')}
                     </p>
                   </div>
                   <Calendar className="h-8 w-8 text-white" />
@@ -1640,7 +1640,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-green-400" />
-                Distribuição por Mercado
+                {t('dashboard.market_distribution')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1696,7 +1696,7 @@ export default function Dashboard() {
           {/* Main Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <MetricCard
-              title="Rentabilidade Total"
+              title={t('metrics.total_profitability')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
               color={
@@ -1734,12 +1734,12 @@ export default function Dashboard() {
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Gráfico de Rentabilidade ao Longo do Tempo */}
+            {/* {t('metrics.profitability_chart')} */}
             <Card className="bg-zinc-900/90 border-zinc-800 lg:col-span-1">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <LineChart className="h-5 w-5 text-zinc-400" />
-                  Curva de Capital
+                  {t('dashboard.capital_curve')}
                 </CardTitle>
               </CardHeader>
               <CapitalCurveChart trades={filteredTrades} t={t} />
@@ -1751,7 +1751,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
                 <Calendar className="h-4 w-4 md:h-5 md:w-5 text-green-400" />
-                Performance Temporal Detalhada
+                {t('dashboard.detailed_temporal_performance')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1768,7 +1768,7 @@ export default function Dashboard() {
                     })()}
                   </div>
                   <div className="text-xs text-zinc-400 mb-1 md:mb-2">
-                    Trades Hoje
+                    {t('time.trades_today')}
                   </div>
                   <div
                     className={`text-xs md:text-sm font-semibold ${(() => {
@@ -1860,7 +1860,7 @@ export default function Dashboard() {
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white">
-                Histórico de Importações e Trades
+                {t('dashboard.imports_and_trades')}
               </CardTitle>
               <CardDescription>
                 Gerencie suas importações CSV e trades manuais
@@ -2015,7 +2015,7 @@ export default function Dashboard() {
                 <TabsContent value="manual-trades" className="space-y-4 mt-6">
                   {manualTrades.length === 0 ? (
                     <div className="text-center py-8 text-zinc-400">
-                      Nenhum trade manual criado ainda
+                      {t('empty.no_manual_trades')}
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -2098,10 +2098,10 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="consolidated" className="space-y-6">
-          {/* Resumo Consolidado */}
+          {/* {t('consolidated.summary')} */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <MetricCard
-              title="Resultado Total Consolidado"
+              title={t('dashboard.consolidated_total')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
               color={
@@ -2146,10 +2146,10 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-green-400" />
-                Distribuição por Mercado
+                {t('dashboard.market_distribution')}
               </CardTitle>
               <CardDescription>
-                Análise consolidada dos diferentes mercados
+                {t('consolidated.market_analysis')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -2209,7 +2209,7 @@ export default function Dashboard() {
                             {totalMercado >= 0 ? "+" : ""}R${" "}
                             {totalMercado.toFixed(2)}
                           </div>
-                          <div className="text-xs text-zinc-400">Resultado</div>
+                          <div className="text-xs text-zinc-400">{t('metrics.result')}</div>
                         </div>
                         <div className="text-center">
                           <div className={`text-lg font-bold ${info.color}`}>
@@ -2265,7 +2265,7 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-resultado">Resultado (R$)</Label>
+                <Label htmlFor="edit-resultado">{t('metrics.result')} (R$)</Label>
                 <Input
                   id="edit-resultado"
                   type="number"
