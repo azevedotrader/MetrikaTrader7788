@@ -1857,17 +1857,17 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="csv-imports" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-zinc-800">
+                <TabsList className="grid w-full grid-cols-2 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1">
                   <TabsTrigger 
                     value="csv-imports" 
-                    className="data-[state=active]:bg-slate-700 text-white"
+                    className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
                   >
                     <FileText className="w-4 h-4 mr-2" />
                     CSV Importados
                   </TabsTrigger>
                   <TabsTrigger 
                     value="manual-trades" 
-                    className="data-[state=active]:bg-slate-700 text-white"
+                    className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
                     Trades Manuais
@@ -1884,7 +1884,7 @@ export default function Dashboard() {
                       {(csvImports as any[]).map((importItem: any) => (
                         <div
                           key={importItem.id}
-                          className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg"
+                          className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg"
                         >
                           <div className="flex items-center space-x-4">
                             <div
@@ -2011,7 +2011,7 @@ export default function Dashboard() {
                       {manualTrades.map((trade: any) => (
                         <div
                           key={trade.id}
-                          className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg"
+                          className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg"
                         >
                           <div className="flex items-center space-x-4">
                             <div
