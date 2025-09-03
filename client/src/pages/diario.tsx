@@ -183,7 +183,7 @@ export default function Diario() {
         ) : (
           <div className="space-y-6">
             {entries.map((entry) => (
-              <Card key={entry.id} className="bg-slate-800 border-slate-700 hover:border-slate-600 transition-colors">
+              <Card key={entry.id} className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-4">
                     <div>
