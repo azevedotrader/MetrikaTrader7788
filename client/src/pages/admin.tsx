@@ -33,10 +33,7 @@ import {
   UserCheck,
   UserX,
   Eye,
-  Settings,
-  LogOut,
-  Plus,
-  Trash2
+  LogOut
 } from "lucide-react";
 
 // Admin-specific API request function
@@ -393,7 +390,6 @@ export default function AdminPage() {
             </Card>
           </div>
 
-          {/* Distribution Chart Placeholder */}
           <Card>
             <CardHeader>
               <CardTitle>Distribuição de Planos</CardTitle>
