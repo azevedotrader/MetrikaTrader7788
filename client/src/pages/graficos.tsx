@@ -17,6 +17,7 @@ declare global {
 
 // Professional chart component with realistic trading data
 function AlternativeChart({ symbol, interval }: { symbol: string; interval: string }) {
+  const { t } = useLanguage();
   // Generate realistic trading data
   const generateRealisticData = () => {
     const data = [];
@@ -95,7 +96,7 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
       <div className="flex items-center justify-between mb-4 p-4 bg-slate-800/50 border border-slate-600 rounded-lg">
         <div>
           <h3 className="text-lg font-semibold text-white">{symbolName}</h3>
-          <p className="text-sm text-slate-400">Gráfico profissional integrado</p>
+          <p className="text-sm text-slate-400">{t('charts.professional_chart')}</p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold text-white">
@@ -166,9 +167,9 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
 
       {/* Footer info */}
       <div className="mt-4 flex justify-between items-center text-sm text-slate-400 border-t border-slate-700 pt-3">
-        <span>⏰ Intervalo: {interval} minutos</span>
-        <span>📊 Dados em tempo real simulados</span>
-        <span>🔄 Atualizado: {new Date().toLocaleTimeString('pt-BR')}</span>
+        <span>⏰ {t('charts.interval_label')} {interval} {t('charts.minutes')}</span>
+        <span>📊 {t('charts.simulated_data')}</span>
+        <span>🔄 {t('charts.updated')} {new Date().toLocaleTimeString('pt-BR')}</span>
       </div>
     </div>
   );
@@ -284,14 +285,14 @@ const SYMBOLS = {
 };
 
 const INTERVALS = [
-  { value: "1", label: "1 minuto" },
-  { value: "5", label: "5 minutos" },
-  { value: "15", label: "15 minutos" },
-  { value: "30", label: "30 minutos" },
-  { value: "60", label: "1 hora" },
-  { value: "240", label: "4 horas" },
-  { value: "D", label: "Diário" },
-  { value: "W", label: "Semanal" },
+  { value: "1", labelKey: "charts.interval.1min" },
+  { value: "5", labelKey: "charts.interval.5min" },
+  { value: "15", labelKey: "charts.interval.15min" },
+  { value: "30", labelKey: "charts.interval.30min" },
+  { value: "60", labelKey: "charts.interval.1hour" },
+  { value: "240", labelKey: "charts.interval.4hours" },
+  { value: "D", labelKey: "charts.interval.daily" },
+  { value: "W", labelKey: "charts.interval.weekly" },
 ];
 
 export default function Graficos() {
@@ -401,7 +402,7 @@ export default function Graficos() {
                       value={interval.value}
                       className="text-white hover:bg-slate-600"
                     >
-                      {interval.label}
+                      {t(interval.labelKey)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -418,7 +419,7 @@ export default function Graficos() {
             <div className="flex items-center justify-between mt-1">
               <span className="text-sm text-slate-400">{t('charts.current_timeframe')}</span>
               <span className="text-white font-medium">
-                {INTERVALS.find(i => i.value === selectedInterval)?.label}
+                {INTERVALS.find(i => i.value === selectedInterval)?.labelKey && t(INTERVALS.find(i => i.value === selectedInterval)!.labelKey)}
               </span>
             </div>
           </div>
