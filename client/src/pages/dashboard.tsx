@@ -1357,26 +1357,26 @@ export default function Dashboard() {
                 }}
               >
                 <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm">
-                  <SelectValue placeholder="Selecione o modo de visualização" />
+                  <SelectValue placeholder={t('placeholder.select_view_mode')} />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
                   <SelectItem
                     value="all"
                     className="text-white hover:bg-zinc-700"
                   >
-                    Consolidar Todos os Dados
+                    {t('filter.consolidate_all_data')}
                   </SelectItem>
                   <SelectItem
                     value="broker"
                     className="text-white hover:bg-zinc-700"
                   >
-                    Filtrar por Mercado
+                    {t('filter.filter_by_market')}
                   </SelectItem>
                   <SelectItem
                     value="csv"
                     className="text-white hover:bg-zinc-700"
                   >
-                    Filtrar por CSVs Importados
+                    {t('filter.filter_by_csv')}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -1389,7 +1389,7 @@ export default function Dashboard() {
                     onValueChange={setSelectedBrokerFilter}
                   >
                     <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm">
-                      <SelectValue placeholder="Selecione o Mercado" />
+                      <SelectValue placeholder={t('placeholder.select_market')} />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700">
                       <SelectItem

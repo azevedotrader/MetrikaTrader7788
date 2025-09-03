@@ -632,9 +632,16 @@ const translations: Record<Language, Record<string, string>> = {
     'time.year': 'Ano',
     'time.all': 'Todos',
 
+    // Filtros
+    'filter.consolidate_all_data': 'Consolidar Todos os Dados',
+    'filter.filter_by_market': 'Filtrar por Mercado',
+    'filter.filter_by_csv': 'Filtrar por CSVs Importados',
+
     // Placeholders e dicas
     'placeholder.select_month': 'Selecione o mês',
     'placeholder.select_option': 'Selecione uma opção',
+    'placeholder.select_view_mode': 'Selecione o modo de visualização',
+    'placeholder.select_market': 'Selecione o Mercado',
     'placeholder.search': 'Pesquisar...',
 
     // Upload e importação
@@ -1315,9 +1322,16 @@ const translations: Record<Language, Record<string, string>> = {
     'time.year': 'Year',
     'time.all': 'All',
 
+    // Filters
+    'filter.consolidate_all_data': 'Consolidate All Data',
+    'filter.filter_by_market': 'Filter by Market',
+    'filter.filter_by_csv': 'Filter by Imported CSVs',
+
     // Placeholders and hints
     'placeholder.select_month': 'Select month',
     'placeholder.select_option': 'Select an option',
+    'placeholder.select_view_mode': 'Select view mode',
+    'placeholder.select_market': 'Select Market',
     'placeholder.search': 'Search...',
 
     // Upload and import
@@ -1959,9 +1973,16 @@ const translations: Record<Language, Record<string, string>> = {
     'weekdays.friday': 'Viernes',
     'weekdays.saturday': 'Sábado',
 
+    // Filtros
+    'filter.consolidate_all_data': 'Consolidar Todos los Datos',
+    'filter.filter_by_market': 'Filtrar por Mercado',
+    'filter.filter_by_csv': 'Filtrar por CSVs Importados',
+
     // Placeholders y consejos
     'placeholder.select_month': 'Seleccionar mes',
     'placeholder.select_option': 'Seleccionar una opción',
+    'placeholder.select_view_mode': 'Seleccionar modo de visualización',
+    'placeholder.select_market': 'Seleccionar Mercado',
     'placeholder.search': 'Buscar...',
 
     // Mensajes de estado vacío
