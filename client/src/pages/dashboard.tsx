@@ -30,6 +30,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -62,6 +67,7 @@ import {
   Edit2,
   Filter,
   CheckSquare,
+  ChevronDown,
 } from "lucide-react";
 import {
   LineChart as RechartsLineChart,
@@ -1409,56 +1415,79 @@ export default function Dashboard() {
               {/* Seletor de CSVs */}
               {viewMode === "csv" && (
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleSelectAllCsvs}
-                      className="text-zinc-400 hover:text-white text-xs h-6 px-2"
-                    >
-                      <CheckSquare className="w-3 h-3 mr-1" />
-                      {selectedCsvIds.length === (csvImports as any[]).length
-                        ? "Desmarcar Todos"
-                        : "Selecionar Todos"}
-                    </Button>
-                  </div>
-
                   {(csvImports as any[]).length === 0 ? (
                     <div className="text-center py-2 text-zinc-500">
                       <p className="text-xs">Nenhum CSV importado ainda</p>
                     </div>
                   ) : (
-                    <div className="space-y-1 max-h-40 overflow-y-auto">
-                      {(csvImports as any[]).map((csv: any) => (
-                        <div
-                          key={csv.id}
-                          className="flex items-center space-x-2 p-2 bg-zinc-800/30 rounded border border-zinc-700/50 hover:bg-zinc-700/30 transition-colors"
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between bg-zinc-800 border-zinc-700 text-white h-8 text-sm hover:bg-zinc-700"
                         >
-                          <Checkbox
-                            checked={selectedCsvIds.includes(csv.id)}
-                            onCheckedChange={() => handleCsvToggle(csv.id)}
-                            className="border-zinc-600 h-3 w-3"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium text-xs truncate">
-                              {csv.displayName || csv.fileName}
-                            </p>
-                            <p className="text-zinc-400 text-xs">
-                              {csv.tradesImported} trades
-                            </p>
+                          <span className="text-xs">
+                            {selectedCsvIds.length === 0
+                              ? "Selecionar CSVs"
+                              : selectedCsvIds.length === (csvImports as any[]).length
+                              ? "Todos os CSVs"
+                              : `${selectedCsvIds.length} CSV${selectedCsvIds.length > 1 ? "s" : ""} selecionado${selectedCsvIds.length > 1 ? "s" : ""}`}
+                          </span>
+                          <ChevronDown className="h-3 w-3 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0 bg-zinc-900 border-zinc-700">
+                        <div className="p-2">
+                          <div className="flex items-center justify-between p-2 border-b border-zinc-700">
+                            <span className="text-sm font-medium text-white">
+                              Selecionar CSVs
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleSelectAllCsvs}
+                              className="text-zinc-400 hover:text-white text-xs h-6 px-2"
+                            >
+                              {selectedCsvIds.length === (csvImports as any[]).length
+                                ? "Desmarcar Todos"
+                                : "Selecionar Todos"}
+                            </Button>
                           </div>
+                          <div className="max-h-48 overflow-y-auto">
+                            {(csvImports as any[]).map((csv: any) => (
+                              <div
+                                key={csv.id}
+                                className="flex items-center space-x-2 p-2 hover:bg-zinc-800/50 transition-colors cursor-pointer"
+                                onClick={() => handleCsvToggle(csv.id)}
+                              >
+                                <Checkbox
+                                  checked={selectedCsvIds.includes(csv.id)}
+                                  onCheckedChange={() => handleCsvToggle(csv.id)}
+                                  className="border-zinc-600 h-3 w-3"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white font-medium text-xs truncate">
+                                    {csv.displayName || csv.fileName}
+                                  </p>
+                                  <p className="text-zinc-400 text-xs">
+                                    {csv.tradesImported} trades
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          {selectedCsvIds.length > 0 && (
+                            <div className="mt-2 p-2 bg-green-900/20 border border-green-700/50 rounded text-center">
+                              <p className="text-green-400 text-xs font-medium">
+                                ✓ {selectedCsvIds.length} CSV
+                                {selectedCsvIds.length > 1 ? "s" : ""} selecionado
+                                {selectedCsvIds.length > 1 ? "s" : ""}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedCsvIds.length > 0 && (
-                    <div className="mt-1 p-1 bg-green-900/20 border border-green-700/50 rounded text-center">
-                      <p className="text-green-400 text-xs font-medium">
-                        ✓ {selectedCsvIds.length} CSV
-                        {selectedCsvIds.length > 1 ? "s" : ""}
-                      </p>
-                    </div>
+                      </PopoverContent>
+                    </Popover>
                   )}
                 </div>
               )}
