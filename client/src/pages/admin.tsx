@@ -98,34 +98,7 @@ export default function AdminPage() {
   const { isAdminAuthenticated, adminUser, adminLogout, isLoading } = useAdminAuth();
   const [, setLocation] = useLocation();
 
-  // Redirect to admin login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAdminAuthenticated) {
-      setLocation('/admin/login');
-    }
-  }, [isAdminAuthenticated, isLoading, setLocation]);
-
-  // Show loading while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Verificando autenticação...</div>
-      </div>
-    );
-  }
-
-  // Don't render anything if not authenticated (will redirect)
-  if (!isAdminAuthenticated) {
-    return null;
-  }
-
-  const handleLogout = () => {
-    adminLogout();
-    toast({ title: "Logout realizado com sucesso" });
-    setLocation('/admin/login');
-  };
-
-  // Admin queries with authentication
+  // Admin queries with authentication - MOVED TO TOP TO FIX HOOKS ORDER
   const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ["/api/admin/users"],
     queryFn: () => adminApiRequest("/api/admin/users"),
@@ -228,6 +201,34 @@ export default function AdminPage() {
   });
 
   // Função de exclusão de planos removida - apenas 4 planos fixos permitidos
+
+  // Redirect to admin login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAdminAuthenticated) {
+      setLocation('/admin/login');
+    }
+  }, [isAdminAuthenticated, isLoading, setLocation]);
+
+  // Handle logout
+  const handleLogout = () => {
+    adminLogout();
+    toast({ title: "Logout realizado com sucesso" });
+    setLocation('/admin/login');
+  };
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white">Verificando autenticação...</div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAdminAuthenticated) {
+    return null;
+  }
 
   // Handle user edit
   const handleEditUser = (user: any) => {
