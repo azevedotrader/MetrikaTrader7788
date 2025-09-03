@@ -1625,6 +1625,8 @@ const translations: Record<Language, Record<string, string>> = {
     'form.traditional_description': '⚡ Tradicional: Más rápido y consistente, ideal para formatos estándar',
 
     // Gráficos
+    'charts.all_months': 'Todos',
+    'charts.specific_month': 'Mes Específico',
     'charts.chart_settings': 'Configuración de Gráficos',
     'charts.market': 'Mercado',
     'charts.asset': 'Activo',
@@ -1956,6 +1958,11 @@ const translations: Record<Language, Record<string, string>> = {
     'weekdays.thursday': 'Jueves',
     'weekdays.friday': 'Viernes',
     'weekdays.saturday': 'Sábado',
+
+    // Placeholders y consejos
+    'placeholder.select_month': 'Seleccionar mes',
+    'placeholder.select_option': 'Seleccionar una opción',
+    'placeholder.search': 'Buscar...',
 
     // Mensajes de estado vacío
     'empty.no_trades_period': 'Ninguna operación en el período seleccionado',
