@@ -80,8 +80,7 @@ export class AITradingService {
             content: prompt
           }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.3
+        response_format: { type: "json_object" }
       });
 
       return JSON.parse(response.choices[0].message.content || '{}');
@@ -130,8 +129,7 @@ export class AITradingService {
             content: prompt
           }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.4
+        response_format: { type: "json_object" }
       });
 
       return JSON.parse(response.choices[0].message.content || '{}');
@@ -177,13 +175,16 @@ export class AITradingService {
             content: userMessage
           }
         ],
-        temperature: 0.7,
         max_completion_tokens: 300
       });
 
       return response.choices[0].message.content || 'Desculpe, não consegui processar sua mensagem no momento.';
     } catch (error) {
-      console.error('Erro no chat:', error);
+      console.error('❌ ERRO DETALHADO NO CHAT:', error);
+      if (error instanceof Error) {
+        console.error('❌ ERRO MESSAGE:', error.message);
+        console.error('❌ ERRO STACK:', error.stack);
+      }
       return 'Desculpe, o assistente está temporariamente indisponível. Tente novamente em alguns instantes.';
     }
   }
@@ -226,8 +227,7 @@ export class AITradingService {
             content: prompt
           }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.6
+        response_format: { type: "json_object" }
       });
 
       const result = JSON.parse(response.choices[0].message.content || '{"advice": []}');
@@ -275,8 +275,7 @@ export class AITradingService {
             content: prompt
           }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.4
+        response_format: { type: "json_object" }
       });
 
       return JSON.parse(response.choices[0].message.content || '{}');
@@ -380,8 +379,7 @@ export class AITradingService {
           { role: "user", content: promptText }
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 4000,
-        temperature: 0.2
+        max_completion_tokens: 4000
       });
 
       const content = response.choices[0].message.content;
@@ -440,8 +438,7 @@ export class AITradingService {
           { role: "user", content: promptText }
         ],
         response_format: { type: "json_object" },
-        max_completion_tokens: 3000,
-        temperature: 0.3
+        max_completion_tokens: 3000
       });
 
       const content = response.choices[0].message.content;
