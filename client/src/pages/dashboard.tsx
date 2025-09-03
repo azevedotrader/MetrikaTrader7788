@@ -430,6 +430,8 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           negative: Math.abs(totalNegative),
           total: periodTotal,
           accumulated,
+          accumulatedPositive: accumulated >= 0 ? accumulated : null,
+          accumulatedNegative: accumulated < 0 ? accumulated : null,
           positiveCount: positives.length,
           negativeCount: negatives.length,
           totalCount: periodTrades.length,
@@ -718,14 +720,26 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               }}
             />
 
-            {/* Área do valor acumulado */}
+            {/* Área do valor acumulado - Parte Positiva */}
             <Area
               type="monotone"
-              dataKey="accumulated"
-              stroke={(chartData[chartData.length - 1]?.accumulated || 0) >= 0 ? "#22c55e" : "#ef4444"}
+              dataKey="accumulatedPositive"
+              stroke="#22c55e"
               strokeWidth={3}
-              fill={(chartData[chartData.length - 1]?.accumulated || 0) >= 0 ? "url(#positiveGradient)" : "url(#negativeGradient)"}
+              fill="url(#positiveGradient)"
               dot={false}
+              connectNulls={false}
+            />
+            
+            {/* Área do valor acumulado - Parte Negativa */}
+            <Area
+              type="monotone"
+              dataKey="accumulatedNegative"
+              stroke="#ef4444"
+              strokeWidth={3}
+              fill="url(#negativeGradient)"
+              dot={false}
+              connectNulls={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
