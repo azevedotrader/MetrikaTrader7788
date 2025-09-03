@@ -1570,7 +1570,7 @@ export default function Dashboard() {
               value={metrics.totalTrades}
               icon={BarChart3}
               color="text-zinc-300"
-              subtitle="Operações realizadas"
+              subtitle={t('metrics.operations_performed')}
             />
 
             <MetricCard

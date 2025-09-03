@@ -661,6 +661,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Métricas
     'metrics.operations_precision': 'Precisão das operações',
+    'metrics.operations_performed': 'Operações realizadas',
     'metrics.risk_vs_return': 'Risco vs Retorno',
     'metrics.general_risk_return': 'Risco/Retorno geral',
     'metrics.win_rate': 'Win Rate',
@@ -1378,6 +1379,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Metrics
     'metrics.operations_precision': 'Operations Precision',
+    'metrics.operations_performed': 'Operations Performed',
     'metrics.risk_vs_return': 'Risk vs Return',
     'metrics.general_risk_return': 'Overall Risk/Return',
     'metrics.win_rate': 'Win Rate',
@@ -2056,6 +2058,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Métricas
     'metrics.operations_precision': 'Precisión de las operaciones',
+    'metrics.operations_performed': 'Operaciones realizadas',
     'metrics.risk_vs_return': 'Riesgo vs Retorno',
     'metrics.general_risk_return': 'Riesgo/Retorno general',
     'metrics.win_rate': 'Tasa de Éxito',
