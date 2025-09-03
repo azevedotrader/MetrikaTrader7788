@@ -447,15 +447,9 @@ export default function AdminPage() {
         <TabsContent value="users" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Gerenciamento de Usuários</span>
-                <Button variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Usuário
-                </Button>
-              </CardTitle>
+              <CardTitle>Usuários</CardTitle>
               <CardDescription>
-                Visualize e gerencie todos os usuários da plataforma
+                Visualize todos os usuários da plataforma
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -470,7 +464,6 @@ export default function AdminPage() {
                       <TableHead>Plano</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Registrado</TableHead>
-                      <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -499,25 +492,6 @@ export default function AdminPage() {
                         <TableCell>
                           {new Date(user.createdAt).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditUser(user)}
-                            >
-                              <Edit3 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => deleteUserMutation.mutate(user.id)}
-                              disabled={deleteUserMutation.isPending}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -526,96 +500,6 @@ export default function AdminPage() {
             </CardContent>
           </Card>
 
-          {/* User Edit Dialog */}
-          <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingUser ? "Editar Usuário" : "Novo Usuário"}
-                </DialogTitle>
-                <DialogDescription>
-                  Faça alterações nas informações do usuário
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...userForm}>
-                <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
-                  <FormField
-                    control={userForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="planType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Plano</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um plano" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="starter">Trader Starter (R$ 29,90/mês)</SelectItem>
-                            <SelectItem value="pro">Trader Pro (R$ 49,90/mês)</SelectItem>
-                            <SelectItem value="black">Trader Black (R$ 97,00/mês)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={userForm.control}
-                    name="planExpiresAt"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Data de Expiração do Plano</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsUserDialogOpen(false)}
-                    >
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={updateUserMutation.isPending}>
-                      {updateUserMutation.isPending ? "Salvando..." : "Salvar"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
         </TabsContent>
 
 
