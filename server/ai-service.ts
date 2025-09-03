@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export interface TradeAnalysis {
@@ -69,7 +69,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
@@ -119,7 +119,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
@@ -158,7 +158,7 @@ export class AITradingService {
       ` : '';
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
@@ -215,7 +215,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
@@ -264,7 +264,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system", 
@@ -371,7 +371,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           { 
             role: "system", 
@@ -431,7 +431,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           { 
             role: "system", 
@@ -491,8 +491,8 @@ export class AITradingService {
     const temporal = {
       bestDay: this.getBestPerformer(dayStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
       worstDay: this.getWorstPerformer(dayStats) || { name: 'N/A', avgResult: 0, winRate: 0 },
-      bestHour: (this.getBestPerformer(hourStats) || { name: 'N/A' }).name,
-      worstHour: (this.getWorstPerformer(hourStats) || { name: 'N/A' }).name
+      bestHour: this.getBestPerformer(hourStats)?.name || 'N/A',
+      worstHour: this.getWorstPerformer(hourStats)?.name || 'N/A'
     };
 
     // Análise de ativos simplificada
@@ -768,10 +768,10 @@ export class AITradingService {
       dayOfWeek: dayOfWeekStats,
       hourly: hourStats,
       monthly: monthStats,
-      bestDay: this.getBestPerformer(dayOfWeekStats),
-      worstDay: this.getWorstPerformer(dayOfWeekStats),
-      bestHour: this.getBestPerformer(hourStats),
-      worstHour: this.getWorstPerformer(hourStats)
+      bestDay: this.getBestPerformer(dayOfWeekStats)?.name || 'N/A',
+      worstDay: this.getWorstPerformer(dayOfWeekStats)?.name || 'N/A',
+      bestHour: this.getBestPerformer(hourStats)?.name || 'N/A',
+      worstHour: this.getWorstPerformer(hourStats)?.name || 'N/A'
     };
   }
 
@@ -815,10 +815,10 @@ export class AITradingService {
       assets: assetStats,
       setups: setupStats,
       brokers: brokerStats,
-      bestAsset: this.getBestPerformer(assetStats),
-      worstAsset: this.getWorstPerformer(assetStats),
-      bestSetup: this.getBestPerformer(setupStats),
-      worstSetup: this.getWorstPerformer(setupStats),
+      bestAsset: this.getBestPerformer(assetStats)?.name || 'N/A',
+      worstAsset: this.getWorstPerformer(assetStats)?.name || 'N/A',
+      bestSetup: this.getBestPerformer(setupStats)?.name || 'N/A',
+      worstSetup: this.getWorstPerformer(setupStats)?.name || 'N/A',
       diversification: {
         assetsCount: Object.keys(assetStats).length,
         setupsCount: Object.keys(setupStats).length,
@@ -917,15 +917,25 @@ export class AITradingService {
   }
 
   private getBestPerformer(stats: any) {
-    return Object.keys(stats).reduce((best, current) => 
+    const bestKey = Object.keys(stats).reduce((best, current) => 
       stats[current].profitability > stats[best].profitability ? current : best
     );
+    return {
+      name: bestKey,
+      avgResult: stats[bestKey]?.avgResult || 0,
+      winRate: stats[bestKey]?.winRate || 0
+    };
   }
 
   private getWorstPerformer(stats: any) {
-    return Object.keys(stats).reduce((worst, current) => 
+    const worstKey = Object.keys(stats).reduce((worst, current) => 
       stats[current].profitability < stats[worst].profitability ? current : worst
     );
+    return {
+      name: worstKey,
+      avgResult: stats[worstKey]?.avgResult || 0,
+      winRate: stats[worstKey]?.winRate || 0
+    };
   }
 
   private groupTradesByMonth(trades: any[]) {

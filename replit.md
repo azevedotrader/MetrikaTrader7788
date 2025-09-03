@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Integração OpenAI e SendGrid Ativada - Janeiro 2025
+- **OpenAI GPT-5**: ✅ Integrado e funcionando (modelo mais recente)
+- **SendGrid**: ✅ Configurado para emails (boas-vindas, recuperação de senha)
+- **Análise IA**: Sistema de análise de trades com GPT-5
+- **Emails Automáticos**: Welcome emails e password reset funcionais
+- **Chaves API**: OPENAI_API_KEY e SENDGRID_API_KEY configuradas
+
 ### Sistema Colaborativo ChatGPT + Tradicional - ACEITA QUALQUER FORMATO
 - **Status**: Sistema híbrido ultra-flexível para análise de qualquer tipo de CSV
 - **Nova Abordagem Colaborativa**: 
