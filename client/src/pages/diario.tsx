@@ -284,11 +284,11 @@ export default function Diario() {
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {entryImages[entry.id].slice(0, 6).map((image) => (
-                          <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700 hover:border-slate-600 transition-colors">
+                          <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700 hover:border-slate-500 transition-all hover:shadow-lg">
                             <img
                               src={`/api/images/${image.id}`}
                               alt={image.originalName}
-                              className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                              className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                               title={image.originalName}
                               onClick={() => setSelectedImage(image)}
                               onError={(e) => {

@@ -289,11 +289,11 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                       {dayImages.slice(0, 8).map((image) => (
-                        <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-colors group">
+                        <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-500 transition-all hover:shadow-lg">
                           <img
                             src={`/api/images/${image.id}`}
                             alt={image.originalName}
-                            className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
                             title={image.originalName}
                             onClick={() => setSelectedImage(image)}
                             onError={(e) => {
@@ -301,12 +301,6 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                             }}
                             data-testid={`calendar-image-${image.id}`}
                           />
-                          {/* Overlay com título ao hover */}
-                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-                            <span className="text-white text-xs truncate">
-                              {image.originalName}
-                            </span>
-                          </div>
                         </div>
                       ))}
                       {dayImages.length > 8 && (
