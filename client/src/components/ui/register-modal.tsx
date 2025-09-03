@@ -10,6 +10,7 @@ import { insertUserSchema, type InsertUser } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RegisterModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface RegisterModalProps {
 
 export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterModalProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
@@ -50,8 +52,8 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
     },
     onSuccess: () => {
       toast({
-        title: "Conta criada com sucesso!",
-        description: "Agora você pode fazer login com suas credenciais.",
+        title: t('register.success_title'),
+        description: t('register.success_description'),
       });
       form.reset();
       onOpenChange(false);
@@ -59,8 +61,8 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
     },
     onError: (error: any) => {
       toast({
-        title: "Erro ao criar conta",
-        description: error.message || "Tente novamente mais tarde.",
+        title: t('register.error_title'),
+        description: error.message || t('register.error_description'),
         variant: "destructive",
       });
     },
@@ -79,18 +81,18 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">
-              Criar Conta no Métrika
+              {t('register.title')}
             </DialogTitle>
-            <p className="text-slate-400 mt-2">Comece sua jornada de trading analytics</p>
+            <p className="text-slate-400 mt-2">{t('register.subtitle')}</p>
           </div>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-slate-300">Nome Completo</Label>
+            <Label htmlFor="name" className="text-slate-300">{t('register.name_label')}</Label>
             <Input
               id="name"
-              placeholder="João Silva"
+              placeholder={t('register.name_placeholder')}
               {...form.register("name")}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
@@ -100,11 +102,11 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-slate-300">Email</Label>
+            <Label htmlFor="email" className="text-slate-300">{t('register.email_label')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="seu@email.com"
+              placeholder={t('register.email_placeholder')}
               {...form.register("email")}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
@@ -114,11 +116,11 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-slate-300">Telefone</Label>
+            <Label htmlFor="phone" className="text-slate-300">{t('register.phone_label')}</Label>
             <Input
               id="phone"
               type="tel"
-              placeholder="(11) 99999-9999"
+              placeholder={t('register.phone_placeholder')}
               {...form.register("phone")}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
@@ -128,11 +130,11 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-slate-300">Senha</Label>
+            <Label htmlFor="password" className="text-slate-300">{t('register.password_label')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('register.password_placeholder')}
               {...form.register("password")}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
@@ -142,11 +144,11 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-slate-300">Confirmar Senha</Label>
+            <Label htmlFor="confirmPassword" className="text-slate-300">{t('register.confirm_password_label')}</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('register.confirm_password_placeholder')}
               {...form.register("confirmPassword")}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
@@ -160,19 +162,19 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
             className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
             disabled={registerMutation.isPending}
           >
-            {registerMutation.isPending ? "Criando conta..." : "Criar Conta"}
+            {registerMutation.isPending ? t('register.loading_button') : t('register.submit_button')}
           </Button>
         </form>
 
         <div className="text-center mt-6">
           <p className="text-slate-400">
-            Já tem conta?{" "}
+            {t('register.already_have_account')}{" "}
             <Button 
               variant="link" 
               className="text-purple-400 hover:text-purple-300 p-0"
               onClick={onSwitchToLogin}
             >
-              Fazer login
+              {t('register.login_link')}
             </Button>
           </p>
         </div>
