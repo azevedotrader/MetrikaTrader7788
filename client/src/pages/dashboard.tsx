@@ -430,8 +430,6 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           negative: Math.abs(totalNegative),
           total: periodTotal,
           accumulated,
-          accumulatedPositive: accumulated >= 0 ? accumulated : null,
-          accumulatedNegative: accumulated < 0 ? accumulated : null,
           positiveCount: positives.length,
           negativeCount: negatives.length,
           totalCount: periodTrades.length,
@@ -550,15 +548,10 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                 <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="#ef4444" stopOpacity={0.8} />
               </linearGradient>
-              <linearGradient
-                id="accumulatedGradient"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.6} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+              <linearGradient id="dynamicGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.6} />
+                <stop offset="50%" stopColor="#ffffff" stopOpacity={0.1} />
+                <stop offset="100%" stopColor="#22c55e" stopOpacity={0.6} />
               </linearGradient>
             </defs>
 
@@ -720,26 +713,14 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               }}
             />
 
-            {/* Área do valor acumulado - Parte Positiva */}
+            {/* Área do valor acumulado com cor dinâmica baseada no valor final */}
             <Area
               type="monotone"
-              dataKey="accumulatedPositive"
-              stroke="#22c55e"
+              dataKey="accumulated"
+              stroke={(chartData[chartData.length - 1]?.accumulated || 0) >= 0 ? "#22c55e" : "#ef4444"}
               strokeWidth={3}
-              fill="url(#positiveGradient)"
+              fill={(chartData[chartData.length - 1]?.accumulated || 0) >= 0 ? "url(#positiveGradient)" : "url(#negativeGradient)"}
               dot={false}
-              connectNulls={false}
-            />
-            
-            {/* Área do valor acumulado - Parte Negativa */}
-            <Area
-              type="monotone"
-              dataKey="accumulatedNegative"
-              stroke="#ef4444"
-              strokeWidth={3}
-              fill="url(#negativeGradient)"
-              dot={false}
-              connectNulls={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
