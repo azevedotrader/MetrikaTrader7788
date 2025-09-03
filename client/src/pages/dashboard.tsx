@@ -524,7 +524,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           width="100%"
           height={window.innerWidth < 768 ? 500 : 550}
         >
-          <AreaChart
+          <ComposedChart
             data={chartData}
             margin={{
               top: window.innerWidth < 768 ? 0 : 10,
@@ -664,7 +664,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                       </div>
                       <div className="border-t border-zinc-600 pt-1 mt-1">
                         <div className="flex justify-between gap-2">
-                          <span className="text-zinc-300 truncate">Total:</span>
+                          <span className="text-zinc-300 truncate">Total do Período:</span>
                           <span
                             className={`font-semibold shrink-0 ${data.total >= 0 ? "text-green-400" : "text-red-400"}`}
                           >
@@ -678,12 +678,12 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                                 })}
                           </span>
                         </div>
-                        <div className="flex justify-between gap-2">
-                          <span className="text-blue-400 truncate">
-                            📊 Acumulado:
+                        <div className="flex justify-between gap-2 bg-blue-900/30 px-2 py-1 rounded mt-1">
+                          <span className="text-blue-300 truncate font-medium">
+                            📈 Valor Acumulado:
                           </span>
                           <span
-                            className={`font-bold shrink-0 ${data.accumulated >= 0 ? "text-blue-400" : "text-red-400"}`}
+                            className={`font-bold shrink-0 ${data.accumulated >= 0 ? "text-blue-300" : "text-red-400"}`}
                           >
                             R${" "}
                             {isMobile
@@ -712,7 +712,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               }}
             />
 
-            {/* Barras de lucros */}
+            {/* Área de lucros */}
             <Area
               type="monotone"
               dataKey="positive"
@@ -721,18 +721,39 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               strokeWidth={2}
               fill="url(#positiveGradient)"
             />
+            
+            {/* Área de perdas */}
+            <Area
+              type="monotone"
+              dataKey="negative"
+              stackId="1"
+              stroke="#ef4444"
+              strokeWidth={2}
+              fill="url(#negativeGradient)"
+            />
 
-
-            {/* Linha acumulada */}
+            {/* Linha do valor acumulado - Principal destaque */}
             <Line
               type="monotone"
               dataKey="accumulated"
               stroke="#3b82f6"
-              strokeWidth={3}
-              dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6 }}
+              strokeWidth={5}
+              dot={{ 
+                fill: "#3b82f6", 
+                strokeWidth: 2, 
+                r: 6,
+                stroke: "#ffffff"
+              }}
+              activeDot={{ 
+                r: 10, 
+                stroke: "#3b82f6", 
+                strokeWidth: 4, 
+                fill: "#ffffff",
+                filter: "drop-shadow(0 0 6px #3b82f6)"
+              }}
+              connectNulls={false}
             />
-          </AreaChart>
+          </ComposedChart>
         </ResponsiveContainer>
       )}
 
