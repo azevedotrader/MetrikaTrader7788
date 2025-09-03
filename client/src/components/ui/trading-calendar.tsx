@@ -487,7 +487,7 @@ export function TradingCalendar({
             ))}
             {!isMobile && (
               <div className="text-center font-medium text-zinc-400 border-b border-zinc-700 py-3 text-sm">
-                Semana
+                {t('calendar.week')}
               </div>
             )}
 
@@ -533,13 +533,13 @@ export function TradingCalendar({
                   <div className="text-2xl font-bold text-white">
                     {monthlyStats.tradingDays}
                   </div>
-                  <div className="text-sm text-zinc-400">Dias de Trading</div>
+                  <div className="text-sm text-zinc-400">{t('calendar.trading_days')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">
                     {monthlyStats.totalTrades}
                   </div>
-                  <div className="text-sm text-zinc-400">Total de Trades</div>
+                  <div className="text-sm text-zinc-400">{t('calendar.total_trades')}</div>
                 </div>
                 <div className="text-center">
                   <div
@@ -559,7 +559,7 @@ export function TradingCalendar({
                   <div className="text-2xl font-bold text-white">
                     {monthlyStats.winRate}%
                   </div>
-                  <div className="text-sm text-zinc-400">Taxa de Acerto</div>
+                  <div className="text-sm text-zinc-400">{t('calendar.win_rate')}</div>
                 </div>
               </div>
             </div>

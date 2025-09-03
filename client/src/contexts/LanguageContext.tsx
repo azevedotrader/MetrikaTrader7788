@@ -149,7 +149,6 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Calendário
     'calendar.title': 'Calendário de Trading',
-    'calendar.week': 'Semana',
     'calendar.trades_count': 'trades',
     'calendar.win': 'win',
     'calendar.diary_entry': 'Entrada do Diário',
@@ -188,6 +187,10 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.pnl_total': 'P&L Total',
     'calendar.day': 'dia',
     'calendar.days': 'dias',
+    'calendar.week': 'Semana',
+    'calendar.trading_days': 'Dias de Trading',
+    'calendar.total_trades': 'Total de Trades',
+    'calendar.win_rate': 'Taxa de Acerto',
 
     // Gráficos
     'charts.title': 'Gráficos',
@@ -472,7 +475,6 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Calendar
     'calendar.title': 'Trading Calendar',
-    'calendar.week': 'Week',
     'calendar.trades_count': 'trades',
     'calendar.win': 'win',
     'calendar.diary_entry': 'Diary Entry',
@@ -511,6 +513,10 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.pnl_total': 'Total P&L',
     'calendar.day': 'day',
     'calendar.days': 'days',
+    'calendar.week': 'Week',
+    'calendar.trading_days': 'Trading Days',
+    'calendar.total_trades': 'Total Trades',
+    'calendar.win_rate': 'Win Rate',
 
     // Charts
     'charts.title': 'Charts',
@@ -795,7 +801,6 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Calendario
     'calendar.title': 'Calendario de Trading',
-    'calendar.week': 'Semana',
     'calendar.trades_count': 'operaciones',
     'calendar.win': 'acierto',
     'calendar.diary_entry': 'Entrada del Diario',
@@ -834,6 +839,10 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.pnl_total': 'P&L Total',
     'calendar.day': 'día',
     'calendar.days': 'días',
+    'calendar.week': 'Semana',
+    'calendar.trading_days': 'Días de Trading',
+    'calendar.total_trades': 'Total Operaciones',
+    'calendar.win_rate': 'Tasa de Acierto',
 
     // Gráficos
     'charts.title': 'Gráficos',
