@@ -682,7 +682,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.features.multiasset_title': 'Multi-Asset',
     'landing.features.multiasset_description': 'Forex, Crypto, Ações, Futuros - todos os mercados em uma plataforma.',
     'landing.features.export_title': 'Export Completo',
-    'landing.features.export_description': 'Exporte relatórios profissionais em PDF para clientes e investidores.',
+    'landing.features.export_description': 'Exporte relatórios profissionais em PDF para clientes e investidores',
   },
 
   en: {
@@ -1322,7 +1322,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.features.multiasset_title': 'Multi-Asset',
     'landing.features.multiasset_description': 'Forex, Crypto, Stocks, Futures - all markets in one platform.',
     'landing.features.export_title': 'Complete Export',
-    'landing.features.export_description': 'Export professional reports in PDF for clients and investors.',
+    'landing.features.export_description': 'Export professional reports in PDF for clients and investors',
   },
 
   es: {
@@ -1899,6 +1899,6 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.features.multiasset_title': 'Multi-Activo',
     'landing.features.multiasset_description': 'Forex, Crypto, Acciones, Futuros - todos los mercados en una plataforma.',
     'landing.features.export_title': 'Exportación Completa',
-    'landing.features.export_description': 'Exporta reportes profesionales en PDF para clientes e inversores.',
+    'landing.features.export_description': 'Exporta reportes profesionales en PDF para clientes e inversores',
   }
 };
