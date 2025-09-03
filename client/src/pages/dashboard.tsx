@@ -1550,7 +1550,7 @@ export default function Dashboard() {
 
             <MetricCard
               title={t('dashboard.avg_rr')}
-              value={`1:${metrics.riscoRetornoMedio.toFixed(2)}`}
+              value={`${metrics.riscoRetornoMedio.toFixed(2)}`}
               icon={TrendingUp}
               color="text-white"
               subtitle="Risco vs Retorno"
