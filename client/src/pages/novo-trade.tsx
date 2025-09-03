@@ -505,7 +505,11 @@ export default function NovoTrade() {
                             {t('form.market')} *
                           </FormLabel>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              // Atualizar corretora automaticamente quando o mercado mudar
+                              form.setValue("corretora", value);
+                            }}
                             defaultValue={field.value}
                           >
                             <FormControl>
