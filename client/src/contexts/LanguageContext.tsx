@@ -192,6 +192,22 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.total_trades': 'Total de Trades',
     'calendar.win_rate': 'Taxa de Acerto',
 
+    // Novo Trade e CSV
+    'trade.manual': 'Manual',
+    'trade.import_csv': 'Importar CSV',
+    'trade.csv_file': 'Arquivo CSV',
+    'trade.csv_format_by_market': 'Formato do CSV por Mercado',
+    'trade.analyzing_ai': 'Analisando com IA...',
+    'trade.import_with_ai': '🤖 Importar com IA',
+    'trade.import_fast': '⚡ Importar Rápido',
+    'trade.csv_rejected': '❌ Arquivo CSV rejeitado:',
+    'trade.processing': 'Processando...',
+    'trade.import_trades_csv': 'Importar Trades via CSV',
+    'trade.select_csv_exported': 'Selecione um arquivo CSV exportado do seu mercado',
+    'trade.analysis_complete': '✨ Análise Profunda Concluída',
+    'trade.insights_generated': 'insights detalhados gerados! Visualize a análise completa na tela.',
+    'trade.import_csv_first': 'Importe um arquivo CSV primeiro para usar a análise IA.',
+
     // Gráficos
     'charts.title': 'Gráficos',
     'charts.forex': 'Forex',
@@ -518,6 +534,22 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.total_trades': 'Total Trades',
     'calendar.win_rate': 'Win Rate',
 
+    // New Trade and CSV
+    'trade.manual': 'Manual',
+    'trade.import_csv': 'Import CSV',
+    'trade.csv_file': 'CSV File',
+    'trade.csv_format_by_market': 'CSV Format by Market',
+    'trade.analyzing_ai': 'Analyzing with AI...',
+    'trade.import_with_ai': '🤖 Import with AI',
+    'trade.import_fast': '⚡ Import Fast',
+    'trade.csv_rejected': '❌ CSV file rejected:',
+    'trade.processing': 'Processing...',
+    'trade.import_trades_csv': 'Import Trades via CSV',
+    'trade.select_csv_exported': 'Select a CSV file exported from your market',
+    'trade.analysis_complete': '✨ Deep Analysis Complete',
+    'trade.insights_generated': 'detailed insights generated! View the complete analysis on screen.',
+    'trade.import_csv_first': 'Import a CSV file first to use AI analysis.',
+
     // Charts
     'charts.title': 'Charts',
     'charts.forex': 'Forex',
@@ -843,6 +875,22 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.trading_days': 'Días de Trading',
     'calendar.total_trades': 'Total Operaciones',
     'calendar.win_rate': 'Tasa de Acierto',
+
+    // Nuevo Trade y CSV
+    'trade.manual': 'Manual',
+    'trade.import_csv': 'Importar CSV',
+    'trade.csv_file': 'Archivo CSV',
+    'trade.csv_format_by_market': 'Formato CSV por Mercado',
+    'trade.analyzing_ai': 'Analizando con IA...',
+    'trade.import_with_ai': '🤖 Importar con IA',
+    'trade.import_fast': '⚡ Importar Rápido',
+    'trade.csv_rejected': '❌ Archivo CSV rechazado:',
+    'trade.processing': 'Procesando...',
+    'trade.import_trades_csv': 'Importar Operaciones vía CSV',
+    'trade.select_csv_exported': 'Selecciona un archivo CSV exportado de tu mercado',
+    'trade.analysis_complete': '✨ Análisis Profundo Completo',
+    'trade.insights_generated': 'insights detallados generados! Visualiza el análisis completo en pantalla.',
+    'trade.import_csv_first': 'Importa un archivo CSV primero para usar el análisis IA.',
 
     // Gráficos
     'charts.title': 'Gráficos',

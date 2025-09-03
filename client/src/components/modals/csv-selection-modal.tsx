@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AiAnalysisResultsModal } from "./ai-analysis-results-modal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CsvImport {
   id: string;
@@ -39,6 +40,7 @@ interface AiTip {
 }
 
 export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps) {
+  const { t } = useLanguage();
   const [selectedCsvId, setSelectedCsvId] = useState<string | null>(null);
   const [analysisResults, setAnalysisResults] = useState<AiTip[]>([]);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
@@ -70,8 +72,8 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
         setShowAnalysisModal(true);
         
         toast({
-          title: `✨ Análise Profunda Concluída`,
-          description: `${data.tips.length} insights detalhados gerados! Visualize a análise completa na tela.`,
+          title: t('trade.analysis_complete'),
+          description: `${data.tips.length} ${t('trade.insights_generated')}`,
           duration: 5000
         });
       } else {
@@ -154,7 +156,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 <FileSpreadsheet className="w-12 h-12 text-slate-500 mx-auto mb-4" />
                 <p className="text-slate-400">Nenhum CSV importado encontrado.</p>
                 <p className="text-sm text-slate-500 mt-2">
-                  Importe um arquivo CSV primeiro para usar a análise IA.
+                  {t('trade.import_csv_first')}
                 </p>
               </div>
             ) : (

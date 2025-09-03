@@ -306,7 +306,7 @@ export default function NovoTrade() {
         error.details?.reason === "MISSING_VALID_DATES"
       ) {
         const errorDetails = error.details || {};
-        let description = "❌ Arquivo CSV rejeitado:\n\n";
+        let description = `${t('trade.csv_rejected')}\n\n`;
 
         if (!errorDetails.dateColumn) {
           description += "📅 Nenhuma coluna de data encontrada.\n\n";
@@ -436,8 +436,8 @@ export default function NovoTrade() {
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
       <Tabs defaultValue="manual" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="manual">Manual</TabsTrigger>
-          <TabsTrigger value="csv">Importar CSV</TabsTrigger>
+          <TabsTrigger value="manual">{t('trade.manual')}</TabsTrigger>
+          <TabsTrigger value="csv">{t('trade.import_csv')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="manual">
@@ -858,7 +858,7 @@ export default function NovoTrade() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <Upload className="h-5 w-5 text-neutral-400" />
-                Importar Trades via CSV
+                {t('trade.import_trades_csv')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -921,7 +921,7 @@ export default function NovoTrade() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    Arquivo CSV
+                    {t('trade.csv_file')}
                   </label>
                   <Input
                     type="file"
@@ -930,14 +930,14 @@ export default function NovoTrade() {
                     className="bg-charcoal-800 border-charcoal-600 text-white file:bg-charcoal-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4"
                   />
                   <p className="text-sm text-charcoal-400 mt-2">
-                    Selecione um arquivo CSV exportado do seu mercado
+                    {t('trade.select_csv_exported')}
                   </p>
                 </div>
 
                 <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
                   <h4 className="text-white font-medium mb-2 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-neutral-400" />
-                    Formato do CSV por Mercado
+                    {t('trade.csv_format_by_market')}
                   </h4>
                   <div className="space-y-2 text-sm text-charcoal-400">
                     <p>
@@ -967,15 +967,15 @@ export default function NovoTrade() {
                     <>
                       <Upload className="w-4 h-4 mr-2 animate-spin" />
                       {analysisMethod === "ai"
-                        ? "Analisando com IA..."
-                        : "Processando..."}
+                        ? t('trade.analyzing_ai')
+                        : t('trade.processing')}
                     </>
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
                       {analysisMethod === "ai"
-                        ? "🤖 Importar com IA"
-                        : "⚡ Importar Rápido"}
+                        ? t('trade.import_with_ai')
+                        : t('trade.import_fast')}
                     </>
                   )}
                 </Button>
