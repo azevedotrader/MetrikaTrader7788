@@ -44,29 +44,42 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
     enabled: isOpen,
   });
 
-  if (!selectedDate) return null;
-
-  // Filtrar dados para a data selecionada
-  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+  // Filtrar dados para a data selecionada (só se selectedDate existir)
+  const selectedDateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
   
-  const dayDiaryEntry = diaryEntries.find(entry => {
-    const entryDate = new Date(entry.date);
-    const entryDateStr = format(entryDate, 'yyyy-MM-dd');
-    return entryDateStr === selectedDateStr;
-  });
+  const dayDiaryEntry = selectedDateStr ? diaryEntries.find(entry => {
+    try {
+      const entryDate = new Date(entry.date);
+      if (isNaN(entryDate.getTime())) return false;
+      const entryDateStr = format(entryDate, 'yyyy-MM-dd');
+      return entryDateStr === selectedDateStr;
+    } catch {
+      return false;
+    }
+  }) : undefined;
 
-  const dayTrades = trades.filter(trade => {
-    const dateStr = trade.dataHora || trade.date;
-    if (!dateStr) return false;
-    const tradeDate = new Date(dateStr);
-    const tradeDateStr = format(tradeDate, 'yyyy-MM-dd');
-    return tradeDateStr === selectedDateStr;
+  const dayTrades = selectedDateStr ? trades.filter(trade => {
+    try {
+      const dateStr = trade.dataHora || trade.date;
+      if (!dateStr) return false;
+      const tradeDate = new Date(dateStr);
+      if (isNaN(tradeDate.getTime())) return false;
+      const tradeDateStr = format(tradeDate, 'yyyy-MM-dd');
+      return tradeDateStr === selectedDateStr;
+    } catch {
+      return false;
+    }
   }).sort((a, b) => {
-    // Ordenar por hora (mais recente primeiro)
-    const dateA = new Date(a.dataHora || a.date);
-    const dateB = new Date(b.dataHora || b.date);
-    return dateA.getTime() - dateB.getTime();
-  });
+    try {
+      // Ordenar por hora (mais recente primeiro)
+      const dateA = new Date(a.dataHora || a.date);
+      const dateB = new Date(b.dataHora || b.date);
+      if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
+      return dateA.getTime() - dateB.getTime();
+    } catch {
+      return 0;
+    }
+  }) : [];
 
   // Calcular estatísticas dos trades do dia
   const dayStats = dayTrades.reduce((acc, trade) => {
@@ -87,8 +100,13 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   };
 
   const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return format(date, 'HH:mm', { locale: ptBR });
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "Hora inválida";
+      return format(date, 'HH:mm', { locale: ptBR });
+    } catch {
+      return "Hora inválida";
+    }
   };
 
   // Carregar imagens da entrada do diário do dia
@@ -124,6 +142,9 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
       setLoadingImages(false);
     }
   };
+
+  // Verificação de segurança - retornar null se selectedDate não existir
+  if (!selectedDate) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
