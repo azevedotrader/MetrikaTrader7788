@@ -28,9 +28,7 @@ import {
   DollarSign, 
   TrendingUp, 
   Activity, 
-  Edit3, 
-  Trash2, 
-  Plus,
+  Edit3,
   Shield,
   UserCheck,
   UserX,
@@ -75,9 +73,11 @@ const updateUserSchema = z.object({
   planExpiresAt: z.string().optional(),
 });
 
-const createPlanSchema = z.object({
+const editPlanSchema = z.object({
   name: z.string().min(1, "Nome obrigatório"),
-  type: z.string().min(1, "Tipo obrigatório"),
+  type: z.enum(["free", "starter", "pro", "black"], {
+    errorMap: () => ({ message: "Tipo deve ser: free, starter, pro ou black" })
+  }),
   price: z.string().transform(Number),
   features: z.string().transform(val => val.split(',').map(f => f.trim())),
   maxTrades: z.string().optional().transform(val => val ? Number(val) : null),
@@ -159,7 +159,7 @@ export default function AdminPage() {
   });
 
   const planForm = useForm({
-    resolver: zodResolver(createPlanSchema),
+    resolver: zodResolver(editPlanSchema),
     defaultValues: {
       name: "",
       type: "",
@@ -207,23 +207,7 @@ export default function AdminPage() {
     },
   });
 
-  const createPlanMutation = useMutation({
-    mutationFn: (data: any) =>
-      adminApiRequest("/api/admin/plans", "POST", data),
-    onSuccess: () => {
-      toast({ title: "Plano criado com sucesso!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
-      setIsPlanDialogOpen(false);
-      planForm.reset();
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "Erro ao criar plano", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    },
-  });
+  // Função de criação de planos removida - apenas 4 planos fixos permitidos
 
   const updatePlanMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
@@ -243,21 +227,7 @@ export default function AdminPage() {
     },
   });
 
-  const deletePlanMutation = useMutation({
-    mutationFn: (id: string) =>
-      adminApiRequest(`/api/admin/plans/${id}`, "DELETE"),
-    onSuccess: () => {
-      toast({ title: "Plano deletado com sucesso!" });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/plans"] });
-    },
-    onError: (error: any) => {
-      toast({ 
-        title: "Erro ao deletar plano", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    },
-  });
+  // Função de exclusão de planos removida - apenas 4 planos fixos permitidos
 
   // Handle user edit
   const handleEditUser = (user: any) => {
@@ -301,7 +271,11 @@ export default function AdminPage() {
     if (editingPlan) {
       updatePlanMutation.mutate({ id: editingPlan.id, data });
     } else {
-      createPlanMutation.mutate(data);
+      toast({ 
+        title: "Erro", 
+        description: "Apenas edição de planos existentes é permitida.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -651,19 +625,11 @@ export default function AdminPage() {
         <TabsContent value="plans" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle>
                 <span>Gerenciamento de Planos</span>
-                <Button variant="outline" size="sm" onClick={() => {
-                  setEditingPlan(null);
-                  planForm.reset();
-                  setIsPlanDialogOpen(true);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Plano
-                </Button>
               </CardTitle>
               <CardDescription>
-                Configure os planos de assinatura disponíveis
+                Edite os 4 planos fixos: Free, Starter, Pro e Black
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -706,23 +672,14 @@ export default function AdminPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleEditPlan(plan)}
-                            >
-                              <Edit3 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => deletePlanMutation.mutate(plan.id)}
-                              disabled={deletePlanMutation.isPending}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditPlan(plan)}
+                          >
+                            <Edit3 className="h-3 w-3 mr-2" />
+                            Editar
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -737,7 +694,7 @@ export default function AdminPage() {
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>
-                  {editingPlan ? "Editar Plano" : "Novo Plano"}
+                  Editar Plano
                 </DialogTitle>
                 <DialogDescription>
                   Configure os detalhes do plano de assinatura
@@ -807,9 +764,9 @@ export default function AdminPage() {
                     </Button>
                     <Button 
                       type="submit" 
-                      disabled={createPlanMutation.isPending || updatePlanMutation.isPending}
+                      disabled={updatePlanMutation.isPending}
                     >
-                      {(createPlanMutation.isPending || updatePlanMutation.isPending) ? "Salvando..." : "Salvar"}
+                      {updatePlanMutation.isPending ? "Salvando..." : "Salvar"}
                     </Button>
                   </div>
                 </form>
