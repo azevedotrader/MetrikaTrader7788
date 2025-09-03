@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ForgotPasswordModal } from "./forgot-password-modal";
 
 interface LoginModalProps {
@@ -22,6 +23,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useAuth();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,9 +52,9 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">
-              Entrar no Métrika
+              {t('login.title')}
             </DialogTitle>
-            <p className="text-slate-400 mt-2">Acesse sua conta para continuar</p>
+            <p className="text-slate-400 mt-2">{t('login.subtitle')}</p>
           </div>
         </DialogHeader>
 
@@ -64,11 +66,11 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-slate-300">Email</Label>
+            <Label htmlFor="email" className="text-slate-300">{t('login.email_label')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="seu@email.com"
+              placeholder={t('login.email_placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
@@ -77,11 +79,11 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-slate-300">Senha</Label>
+            <Label htmlFor="password" className="text-slate-300">{t('login.password_label')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('login.password_placeholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
@@ -97,7 +99,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                 onCheckedChange={(checked) => setRememberMe(!!checked)}
               />
               <Label htmlFor="remember" className="text-sm text-slate-300">
-                Lembrar de mim
+                {t('login.remember_me')}
               </Label>
             </div>
             <Button 
@@ -109,7 +111,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                 setShowForgotPassword(true);
               }}
             >
-              Esqueceu a senha?
+              {t('login.forgot_password')}
             </Button>
           </div>
 
@@ -118,19 +120,19 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
             className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
             disabled={isLoading}
           >
-            {isLoading ? "Entrando..." : "Entrar"}
+            {isLoading ? t('login.loading_button') : t('login.submit_button')}
           </Button>
         </form>
 
         <div className="text-center mt-6">
           <p className="text-slate-400">
-            Não tem conta?{" "}
+            {t('login.no_account')}{" "}
             <Button 
               variant="link" 
               className="text-purple-400 hover:text-purple-300 p-0"
               onClick={onSwitchToRegister}
             >
-              Criar conta gratuita
+              {t('login.create_account')}
             </Button>
           </p>
         </div>

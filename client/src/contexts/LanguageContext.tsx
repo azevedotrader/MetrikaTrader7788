@@ -683,6 +683,20 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.features.multiasset_description': 'Forex, Crypto, Ações, Futuros - todos os mercados em uma plataforma.',
     'landing.features.export_title': 'Export Completo',
     'landing.features.export_description': 'Exporte relatórios profissionais em PDF para clientes e investidores',
+
+    // Login Modal
+    'login.title': 'Entrar no Métrika',
+    'login.subtitle': 'Acesse sua conta para continuar',
+    'login.email_label': 'Email',
+    'login.email_placeholder': 'seu@email.com',
+    'login.password_label': 'Senha',
+    'login.password_placeholder': '••••••••',
+    'login.remember_me': 'Lembrar de mim',
+    'login.forgot_password': 'Esqueceu a senha?',
+    'login.submit_button': 'Entrar',
+    'login.loading_button': 'Entrando...',
+    'login.no_account': 'Não tem conta?',
+    'login.create_account': 'Criar conta gratuita',
   },
 
   en: {
@@ -1323,6 +1337,20 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.features.multiasset_description': 'Forex, Crypto, Stocks, Futures - all markets in one platform.',
     'landing.features.export_title': 'Complete Export',
     'landing.features.export_description': 'Export professional reports in PDF for clients and investors',
+
+    // Login Modal
+    'login.title': 'Login to Métrika',
+    'login.subtitle': 'Access your account to continue',
+    'login.email_label': 'Email',
+    'login.email_placeholder': 'your@email.com',
+    'login.password_label': 'Password',
+    'login.password_placeholder': '••••••••',
+    'login.remember_me': 'Remember me',
+    'login.forgot_password': 'Forgot password?',
+    'login.submit_button': 'Login',
+    'login.loading_button': 'Logging in...',
+    'login.no_account': 'Don\'t have an account?',
+    'login.create_account': 'Create free account',
   },
 
   es: {
@@ -1900,5 +1928,19 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.features.multiasset_description': 'Forex, Crypto, Acciones, Futuros - todos los mercados en una plataforma.',
     'landing.features.export_title': 'Exportación Completa',
     'landing.features.export_description': 'Exporta reportes profesionales en PDF para clientes e inversores',
+
+    // Login Modal
+    'login.title': 'Entrar a Métrika',
+    'login.subtitle': 'Accede a tu cuenta para continuar',
+    'login.email_label': 'Email',
+    'login.email_placeholder': 'tu@email.com',
+    'login.password_label': 'Contraseña',
+    'login.password_placeholder': '••••••••',
+    'login.remember_me': 'Recordarme',
+    'login.forgot_password': '¿Olvidaste tu contraseña?',
+    'login.submit_button': 'Entrar',
+    'login.loading_button': 'Entrando...',
+    'login.no_account': '¿No tienes cuenta?',
+    'login.create_account': 'Crear cuenta gratuita',
   }
 };
