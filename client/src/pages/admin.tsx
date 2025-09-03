@@ -33,7 +33,11 @@ import {
   UserCheck,
   UserX,
   Eye,
-  LogOut
+  LogOut,
+  MessageSquare,
+  Clock,
+  User,
+  Send
 } from "lucide-react";
 
 // Admin-specific API request function
@@ -91,6 +95,8 @@ export default function AdminPage() {
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isPlanDialogOpen, setIsPlanDialogOpen] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [adminMessage, setAdminMessage] = useState('');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -321,9 +327,10 @@ export default function AdminPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="support">Suporte</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
@@ -502,9 +509,278 @@ export default function AdminPage() {
 
         </TabsContent>
 
+        {/* Support Tab */}
+        <TabsContent value="support" className="space-y-6">
+          <SupportAdminPanel 
+            selectedConversation={selectedConversation}
+            setSelectedConversation={setSelectedConversation}
+            adminMessage={adminMessage}
+            setAdminMessage={setAdminMessage}
+          />
+        </TabsContent>
 
         
       </Tabs>
+    </div>
+  );
+}
+
+// Support Admin Panel Component
+function SupportAdminPanel({ 
+  selectedConversation, 
+  setSelectedConversation, 
+  adminMessage, 
+  setAdminMessage 
+}: {
+  selectedConversation: string | null;
+  setSelectedConversation: (id: string | null) => void;
+  adminMessage: string;
+  setAdminMessage: (message: string) => void;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Buscar todas as conversas de suporte
+  const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
+    queryKey: ['/api/admin/support/conversations'],
+    queryFn: () => adminApiRequest('/api/admin/support/conversations'),
+  });
+
+  // Buscar mensagens da conversa selecionada
+  const { data: messages = [], isLoading: messagesLoading } = useQuery({
+    queryKey: ['/api/admin/support/conversations', selectedConversation, 'messages'],
+    queryFn: () => adminApiRequest(`/api/admin/support/conversations/${selectedConversation}/messages`),
+    enabled: !!selectedConversation,
+  });
+
+  // Mutation para enviar resposta
+  const sendReplyMutation = useMutation({
+    mutationFn: ({ conversationId, message }: { conversationId: string; message: string }) =>
+      adminApiRequest(`/api/admin/support/conversations/${conversationId}/messages`, 'POST', { message }),
+    onSuccess: () => {
+      toast({ title: 'Resposta enviada com sucesso!' });
+      setAdminMessage('');
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/conversations', selectedConversation, 'messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/conversations'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Erro ao enviar resposta', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  // Mutation para alterar status
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ conversationId, status }: { conversationId: string; status: string }) =>
+      adminApiRequest(`/api/admin/support/conversations/${conversationId}/status`, 'PUT', { status }),
+    onSuccess: () => {
+      toast({ title: 'Status atualizado com sucesso!' });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/support/conversations'] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Erro ao atualizar status', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  const handleSendReply = () => {
+    if (!selectedConversation || !adminMessage.trim()) {
+      toast({ 
+        title: 'Erro', 
+        description: 'Selecione uma conversa e digite uma mensagem',
+        variant: 'destructive' 
+      });
+      return;
+    }
+
+    sendReplyMutation.mutate({ 
+      conversationId: selectedConversation, 
+      message: adminMessage.trim() 
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'open': return 'bg-green-100 text-green-800';
+      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
+      case 'resolved': return 'bg-blue-100 text-blue-800';
+      case 'closed': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'technical': return 'bg-red-100 text-red-800';
+      case 'billing': return 'bg-purple-100 text-purple-800';
+      case 'feature': return 'bg-blue-100 text-blue-800';
+      case 'general': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+      {/* Lista de Conversas */}
+      <Card className="lg:col-span-1">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" />
+            Conversas de Suporte
+          </CardTitle>
+          <CardDescription>
+            {conversations.length} conversa(s) total
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {conversationsLoading ? (
+            <div className="p-4">Carregando conversas...</div>
+          ) : conversations.length === 0 ? (
+            <div className="p-4 text-gray-500">Nenhuma conversa encontrada</div>
+          ) : (
+            <div className="max-h-[400px] overflow-y-auto">
+              {conversations.map((conversation: any) => (
+                <div
+                  key={conversation.id}
+                  className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${
+                    selectedConversation === conversation.id ? 'bg-blue-50 border-blue-200' : ''
+                  }`}
+                  onClick={() => setSelectedConversation(conversation.id)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-medium text-sm truncate">{conversation.subject}</h4>
+                    <Badge className={getStatusColor(conversation.status)} size="sm">
+                      {conversation.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className={getCategoryColor(conversation.category)} size="sm">
+                      {conversation.category}
+                    </Badge>
+                    <Badge className={getPriorityColor(conversation.priority)} size="sm">
+                      {conversation.priority}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <User className="h-3 w-3" />
+                    <span>{conversation.userName} ({conversation.userEmail})</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                    <Clock className="h-3 w-3" />
+                    <span>{new Date(conversation.lastMessageAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Chat */}
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <CardTitle>
+            {selectedConversation ? 'Chat de Suporte' : 'Selecione uma Conversa'}
+          </CardTitle>
+          {selectedConversation && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateStatusMutation.mutate({ conversationId: selectedConversation, status: 'in_progress' })}
+              >
+                Marcar em Andamento
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateStatusMutation.mutate({ conversationId: selectedConversation, status: 'resolved' })}
+              >
+                Marcar como Resolvido
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => updateStatusMutation.mutate({ conversationId: selectedConversation, status: 'closed' })}
+              >
+                Fechar
+              </Button>
+            </div>
+          )}
+        </CardHeader>
+        <CardContent className="flex flex-col h-[400px]">
+          {!selectedConversation ? (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              Selecione uma conversa para visualizar as mensagens
+            </div>
+          ) : (
+            <>
+              {/* Mensagens */}
+              <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+                {messagesLoading ? (
+                  <div>Carregando mensagens...</div>
+                ) : messages.length === 0 ? (
+                  <div className="text-gray-500">Nenhuma mensagem nesta conversa</div>
+                ) : (
+                  messages.map((message: any) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          message.senderType === 'admin'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <p className="text-sm">{message.message}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {new Date(message.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Campo de resposta */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Digite sua resposta..."
+                  value={adminMessage}
+                  onChange={(e) => setAdminMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendReply()}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleSendReply}
+                  disabled={sendReplyMutation.isPending || !adminMessage.trim()}
+                  className="flex items-center gap-2"
+                >
+                  <Send className="h-4 w-4" />
+                  Enviar
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

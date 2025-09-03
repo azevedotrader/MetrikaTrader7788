@@ -688,6 +688,86 @@ export class DatabaseStorage implements IStorage {
       limitReached
     };
   }
+
+  // Support Conversations Operations
+  async getSupportConversations(userId: string): Promise<SupportConversation[]> {
+    return await db.select().from(supportConversations)
+      .where(eq(supportConversations.userId, userId))
+      .orderBy(supportConversations.lastMessageAt);
+  }
+
+  async getAllSupportConversations(): Promise<(SupportConversation & { userName: string; userEmail: string })[]> {
+    const result = await db.select({
+      id: supportConversations.id,
+      userId: supportConversations.userId,
+      subject: supportConversations.subject,
+      category: supportConversations.category,
+      priority: supportConversations.priority,
+      status: supportConversations.status,
+      lastMessageAt: supportConversations.lastMessageAt,
+      lastMessageByAdmin: supportConversations.lastMessageByAdmin,
+      createdAt: supportConversations.createdAt,
+      userName: users.name,
+      userEmail: users.email
+    })
+    .from(supportConversations)
+    .leftJoin(users, eq(supportConversations.userId, users.id))
+    .orderBy(supportConversations.lastMessageAt);
+    
+    return result;
+  }
+
+  async getSupportConversation(id: string): Promise<SupportConversation | undefined> {
+    const [conversation] = await db.select().from(supportConversations)
+      .where(eq(supportConversations.id, id));
+    return conversation || undefined;
+  }
+
+  async createSupportConversation(conversation: InsertSupportConversation): Promise<SupportConversation> {
+    const [newConversation] = await db
+      .insert(supportConversations)
+      .values({
+        ...conversation,
+        lastMessageAt: new Date(),
+        createdAt: new Date()
+      })
+      .returning();
+    return newConversation;
+  }
+
+  async updateSupportConversationStatus(id: string, status: string): Promise<void> {
+    await db
+      .update(supportConversations)
+      .set({ status })
+      .where(eq(supportConversations.id, id));
+  }
+
+  async getSupportMessages(conversationId: string): Promise<SupportMessage[]> {
+    return await db.select().from(supportMessages)
+      .where(eq(supportMessages.conversationId, conversationId))
+      .orderBy(supportMessages.createdAt);
+  }
+
+  async createSupportMessage(message: InsertSupportMessage): Promise<SupportMessage> {
+    const [newMessage] = await db
+      .insert(supportMessages)
+      .values({
+        ...message,
+        createdAt: new Date()
+      })
+      .returning();
+
+    // Update conversation's last message timestamp
+    await db
+      .update(supportConversations)
+      .set({ 
+        lastMessageAt: new Date(),
+        lastMessageByAdmin: message.senderType === 'admin'
+      })
+      .where(eq(supportConversations.id, message.conversationId));
+
+    return newMessage;
+  }
 }
 
 export const storage = new DatabaseStorage();

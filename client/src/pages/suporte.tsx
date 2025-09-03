@@ -71,7 +71,8 @@ export default function Suporte() {
     mutationFn: async (data: any) => {
       return apiRequest('POST', '/api/support/conversations', data);
     },
-    onSuccess: (data) => {
+    onSuccess: async (response) => {
+      const data = await response.json();
       toast({
         title: t('support.conversation_started'),
         description: t('support.conversation_started'),
