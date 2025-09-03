@@ -1453,7 +1453,7 @@ export default function Dashboard() {
                                 : "Selecionar Todos"}
                             </Button>
                           </div>
-                          <div className="max-h-48 overflow-y-auto">
+                          <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-zinc-800">
                             {(csvImports as any[]).map((csv: any) => (
                               <div
                                 key={csv.id}
@@ -1463,6 +1463,7 @@ export default function Dashboard() {
                                 <Checkbox
                                   checked={selectedCsvIds.includes(csv.id)}
                                   onCheckedChange={() => handleCsvToggle(csv.id)}
+                                  onClick={(e) => e.stopPropagation()}
                                   className="border-zinc-600 h-3 w-3"
                                 />
                                 <div className="flex-1 min-w-0">
