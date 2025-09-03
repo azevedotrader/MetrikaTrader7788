@@ -665,6 +665,7 @@ const translations: Record<Language, Record<string, string>> = {
     'metrics.risk_vs_return': 'Risco vs Retorno',
     'metrics.general_risk_return': 'Risco/Retorno geral',
     'metrics.sum_all_brokers': 'Soma de todas as corretoras',
+    'metrics.weighted_average': 'Média ponderada',
     'metrics.win_rate': 'Win Rate',
 
     // Placeholders e dicas
@@ -1384,6 +1385,7 @@ const translations: Record<Language, Record<string, string>> = {
     'metrics.risk_vs_return': 'Risk vs Return',
     'metrics.general_risk_return': 'Overall Risk/Return',
     'metrics.sum_all_brokers': 'Sum of all brokers',
+    'metrics.weighted_average': 'Weighted Average',
     'metrics.win_rate': 'Win Rate',
 
     // Placeholders and hints
@@ -2064,6 +2066,7 @@ const translations: Record<Language, Record<string, string>> = {
     'metrics.risk_vs_return': 'Riesgo vs Retorno',
     'metrics.general_risk_return': 'Riesgo/Retorno general',
     'metrics.sum_all_brokers': 'Suma de todos los brokers',
+    'metrics.weighted_average': 'Promedio ponderado',
     'metrics.win_rate': 'Tasa de Éxito',
 
     // Placeholders y consejos

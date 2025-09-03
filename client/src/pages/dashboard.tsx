@@ -2149,7 +2149,7 @@ export default function Dashboard() {
               color={
                 metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"
               }
-              subtitle="Média ponderada"
+              subtitle={t('metrics.weighted_average')}
             />
 
             <MetricCard
