@@ -715,26 +715,20 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               }}
             />
 
-            {/* Área para valores positivos (verde) */}
+            {/* Linha única que muda de cor baseada no valor final */}
             <Area
               type="monotone"
-              dataKey="accumulatedPositive"
-              stroke="#22c55e"
+              dataKey="accumulated"
+              stroke={(() => {
+                const finalValue = chartData[chartData.length - 1]?.accumulated || 0;
+                return finalValue < 0 ? "#ef4444" : "#22c55e";
+              })()}
               strokeWidth={3}
-              fill="url(#positiveGradient)"
+              fill={(() => {
+                const finalValue = chartData[chartData.length - 1]?.accumulated || 0;
+                return finalValue < 0 ? "url(#negativeGradient)" : "url(#positiveGradient)";
+              })()}
               dot={false}
-              connectNulls={false}
-            />
-            
-            {/* Área para valores negativos (vermelho) */}
-            <Area
-              type="monotone"
-              dataKey="accumulatedNegative"
-              stroke="#ef4444"
-              strokeWidth={3}
-              fill="url(#negativeGradient)"
-              dot={false}
-              connectNulls={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
