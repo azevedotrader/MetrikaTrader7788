@@ -163,6 +163,31 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.weekly_summary': 'Resumo Semanal',
     'calendar.weekly_summary_desc': 'Coluna lateral com totais consolidados por semana',
     'calendar.analysis_tips': 'Dicas de Análise',
+    'calendar.temporal_patterns': '📈 Padrões Temporais',
+    'calendar.improvement_strategies': '🎯 Estratégias de Melhoria',
+    'calendar.tip1': 'Identifique quais dias da semana são mais lucrativos',
+    'calendar.tip2': 'Observe se há padrões em sequências de wins/losses',
+    'calendar.tip3': 'Analise a performance em diferentes semanas do mês',
+    'calendar.tip4': 'Compare meses para identificar sazonalidade',
+    'calendar.strategy1': 'Evite trading em dias consistentemente negativos',
+    'calendar.strategy2': 'Aumente volume em dias/períodos mais lucrativos',
+    'calendar.strategy3': 'Use breaks após sequências de perdas',
+    'calendar.strategy4': 'Documente o que funcionou nos dias verdes',
+
+    // Dias da semana abreviados
+    'calendar.sun_short': 'Dom',
+    'calendar.mon_short': 'Seg',
+    'calendar.tue_short': 'Ter',
+    'calendar.wed_short': 'Qua',
+    'calendar.thu_short': 'Qui',
+    'calendar.fri_short': 'Sex',
+    'calendar.sat_short': 'Sáb',
+
+    // Resumos e estatísticas
+    'calendar.summary_of': 'Resumo de',
+    'calendar.pnl_total': 'P&L Total',
+    'calendar.day': 'dia',
+    'calendar.days': 'dias',
 
     // Gráficos
     'charts.title': 'Gráficos',
@@ -461,6 +486,31 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.weekly_summary': 'Weekly Summary',
     'calendar.weekly_summary_desc': 'Side column with consolidated weekly totals',
     'calendar.analysis_tips': 'Analysis Tips',
+    'calendar.temporal_patterns': '📈 Temporal Patterns',
+    'calendar.improvement_strategies': '🎯 Improvement Strategies',
+    'calendar.tip1': 'Identify which days of the week are most profitable',
+    'calendar.tip2': 'Observe patterns in win/loss sequences',
+    'calendar.tip3': 'Analyze performance across different weeks of the month',
+    'calendar.tip4': 'Compare months to identify seasonality',
+    'calendar.strategy1': 'Avoid trading on consistently negative days',
+    'calendar.strategy2': 'Increase volume on more profitable days/periods',
+    'calendar.strategy3': 'Take breaks after losing streaks',
+    'calendar.strategy4': 'Document what worked on green days',
+
+    // Abbreviated weekdays
+    'calendar.sun_short': 'Sun',
+    'calendar.mon_short': 'Mon',
+    'calendar.tue_short': 'Tue',
+    'calendar.wed_short': 'Wed',
+    'calendar.thu_short': 'Thu',
+    'calendar.fri_short': 'Fri',
+    'calendar.sat_short': 'Sat',
+
+    // Summaries and statistics
+    'calendar.summary_of': 'Summary of',
+    'calendar.pnl_total': 'Total P&L',
+    'calendar.day': 'day',
+    'calendar.days': 'days',
 
     // Charts
     'charts.title': 'Charts',
@@ -759,6 +809,31 @@ const translations: Record<Language, Record<string, string>> = {
     'calendar.weekly_summary': 'Resumen Semanal',
     'calendar.weekly_summary_desc': 'Columna lateral con totales consolidados por semana',
     'calendar.analysis_tips': 'Consejos de Análisis',
+    'calendar.temporal_patterns': '📈 Patrones Temporales',
+    'calendar.improvement_strategies': '🎯 Estrategias de Mejora',
+    'calendar.tip1': 'Identifica qué días de la semana son más rentables',
+    'calendar.tip2': 'Observa patrones en secuencias de aciertos/fallos',
+    'calendar.tip3': 'Analiza el rendimiento en diferentes semanas del mes',
+    'calendar.tip4': 'Compara meses para identificar estacionalidad',
+    'calendar.strategy1': 'Evita trading en días consistentemente negativos',
+    'calendar.strategy2': 'Aumenta volumen en días/períodos más rentables',
+    'calendar.strategy3': 'Usa descansos después de secuencias de pérdidas',
+    'calendar.strategy4': 'Documenta lo que funcionó en los días verdes',
+
+    // Días de la semana abreviados
+    'calendar.sun_short': 'Dom',
+    'calendar.mon_short': 'Lun',
+    'calendar.tue_short': 'Mar',
+    'calendar.wed_short': 'Mié',
+    'calendar.thu_short': 'Jue',
+    'calendar.fri_short': 'Vie',
+    'calendar.sat_short': 'Sáb',
+
+    // Resúmenes y estadísticas
+    'calendar.summary_of': 'Resumen de',
+    'calendar.pnl_total': 'P&L Total',
+    'calendar.day': 'día',
+    'calendar.days': 'días',
 
     // Gráficos
     'charts.title': 'Gráficos',

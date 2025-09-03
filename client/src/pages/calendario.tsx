@@ -76,22 +76,22 @@ export default function CalendarioPage() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6 text-sm">
             <div>
-              <h4 className="text-white font-medium mb-3">📈 Padrões Temporais</h4>
+              <h4 className="text-white font-medium mb-3">{t('calendar.temporal_patterns')}</h4>
               <ul className="space-y-2 text-slate-400">
-                <li>• Identifique quais dias da semana são mais lucrativos</li>
-                <li>• Observe se há padrões em sequências de wins/losses</li>
-                <li>• Analise a performance em diferentes semanas do mês</li>
-                <li>• Compare meses para identificar sazonalidade</li>
+                <li>• {t('calendar.tip1')}</li>
+                <li>• {t('calendar.tip2')}</li>
+                <li>• {t('calendar.tip3')}</li>
+                <li>• {t('calendar.tip4')}</li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-medium mb-3">🎯 Estratégias de Melhoria</h4>
+              <h4 className="text-white font-medium mb-3">{t('calendar.improvement_strategies')}</h4>
               <ul className="space-y-2 text-slate-400">
-                <li>• Evite trading em dias consistentemente negativos</li>
-                <li>• Aumente volume em dias/períodos mais lucrativos</li>
-                <li>• Use breaks após sequências de perdas</li>
-                <li>• Documente o que funcionou nos dias verdes</li>
+                <li>• {t('calendar.strategy1')}</li>
+                <li>• {t('calendar.strategy2')}</li>
+                <li>• {t('calendar.strategy3')}</li>
+                <li>• {t('calendar.strategy4')}</li>
               </ul>
             </div>
           </div>

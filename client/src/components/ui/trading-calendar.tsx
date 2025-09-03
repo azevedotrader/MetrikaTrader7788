@@ -10,6 +10,7 @@ import { DayDetailsModal } from "@/components/ui/day-details-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, isSameDay } from "date-fns";
 import type { DiaryEntry } from "@shared/schema";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TradeDay {
   date: number;
@@ -41,6 +42,7 @@ export function TradingCalendar({
   className,
   onDateClick,
 }: TradingCalendarProps) {
+  const { t, language } = useLanguage();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isDayDetailsModalOpen, setIsDayDetailsModalOpen] = useState(false);
@@ -56,9 +58,15 @@ export function TradingCalendar({
   });
 
   // Dias da semana - versão curta para mobile
-  const weekDays = isMobile
-    ? ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
-    : ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const weekDays = [
+    t('calendar.sun_short'),
+    t('calendar.mon_short'),
+    t('calendar.tue_short'),
+    t('calendar.wed_short'),
+    t('calendar.thu_short'),
+    t('calendar.fri_short'),
+    t('calendar.sat_short')
+  ];
 
   // Funções para o diário
   const handleDateClick = (date: Date) => {
@@ -107,7 +115,8 @@ export function TradingCalendar({
   // Dados do mês atual
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const monthName = currentDate.toLocaleDateString("pt-BR", { month: "long" });
+  const locale = language === 'en' ? 'en-US' : language === 'es' ? 'es-ES' : 'pt-BR';
+  const monthName = currentDate.toLocaleDateString(locale, { month: "long" });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
 
@@ -309,7 +318,7 @@ export function TradingCalendar({
                         ? `${(tradeDay.pnl / 1000).toFixed(1)}k`
                         : tradeDay.pnl.toFixed(0)
                     }`
-                  : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString("pt-BR")}`}
+                  : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
               </div>
               
               {/* Número de trades */}
@@ -384,10 +393,10 @@ export function TradingCalendar({
             isProfit ? "text-green-400" : "text-red-400",
           )}
         >
-          {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString("pt-BR")}
+          {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale)}
         </div>
         <div className="text-xs text-zinc-400">
-          {week.days} dia{week.days !== 1 ? "s" : ""}
+          {week.days} {week.days !== 1 ? t('calendar.days') : t('calendar.day')}
         </div>
       </div>
     );
@@ -517,7 +526,7 @@ export function TradingCalendar({
           {isMobile && (
             <div className="border-t border-zinc-700 p-4">
               <div className="text-center text-white font-medium mb-3">
-                Resumo de {monthName}
+                {t('calendar.summary_of')} {monthName}
               </div>
               <div className="grid grid-cols-4 gap-4">
                 <div className="text-center">
@@ -542,9 +551,9 @@ export function TradingCalendar({
                     )}
                   >
                     {monthlyStats.totalPnl > 0 ? "+" : ""}
-                    R$ {Math.abs(monthlyStats.totalPnl).toLocaleString("pt-BR")}
+                    R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale)}
                   </div>
-                  <div className="text-sm text-zinc-400">P&L Total</div>
+                  <div className="text-sm text-zinc-400">{t('calendar.pnl_total')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">
