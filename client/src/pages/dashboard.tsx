@@ -287,7 +287,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                 <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>Nenhum dado para exibir</p>
                 <p className="text-sm">
-                  Registre alguns trades para ver o gráfico
+                  {t('charts.register_trades_to_see')}
                 </p>
               </div>
             </div>
@@ -1578,7 +1578,7 @@ export default function Dashboard() {
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
               color="text-white"
-              subtitle="Precisão das operações"
+              subtitle={t('metrics.operations_precision')}
             />
 
             <MetricCard
@@ -1586,7 +1586,7 @@ export default function Dashboard() {
               value={`${metrics.riscoRetornoMedio.toFixed(2)}`}
               icon={TrendingUp}
               color="text-white"
-              subtitle="Risco vs Retorno"
+              subtitle={t('metrics.risk_vs_return')}
             />
           </div>
 
@@ -1885,7 +1885,7 @@ export default function Dashboard() {
                 {t('dashboard.imports_and_trades')}
               </CardTitle>
               <CardDescription>
-                Gerencie suas importações CSV e trades manuais
+                {t('imports.manage_description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1896,21 +1896,21 @@ export default function Dashboard() {
                     className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
                   >
                     <FileText className="w-4 h-4 mr-2" />
-                    CSV Importados
+                    {t('imports.csv_imported')}
                   </TabsTrigger>
                   <TabsTrigger 
                     value="manual-trades" 
                     className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
                   >
                     <Edit3 className="w-4 h-4 mr-2" />
-                    Trades Manuais
+                    {t('imports.manual_trades')}
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="csv-imports" className="space-y-4 mt-6">
                   {(csvImports as any[]).length === 0 ? (
                     <div className="text-center py-8 text-zinc-400">
-                      Nenhuma importação CSV realizada ainda
+                      {t('empty.no_csv_imports')}
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -2159,7 +2159,7 @@ export default function Dashboard() {
               color={
                 metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-white"
               }
-              subtitle="Risco/Retorno geral"
+              subtitle={t('metrics.general_risk_return')}
             />
           </div>
 
@@ -2237,7 +2237,7 @@ export default function Dashboard() {
                           <div className={`text-lg font-bold ${info.color}`}>
                             {winRateMercado.toFixed(1)}%
                           </div>
-                          <div className="text-xs text-zinc-400">Win Rate</div>
+                          <div className="text-xs text-zinc-400">{t('metrics.win_rate')}</div>
                         </div>
                       </div>
                     </div>
@@ -2253,15 +2253,15 @@ export default function Dashboard() {
       <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
         <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar Trade Manual</DialogTitle>
+            <DialogTitle>{t('trades.edit_manual_trade')}</DialogTitle>
             <DialogDescription className="text-zinc-400">
-              Altere as informações do trade selecionado
+              {t('trades.edit_trade_description')}
             </DialogDescription>
           </DialogHeader>
           {editingTrade && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-ativo">Ativo</Label>
+                <Label htmlFor="edit-ativo">{t('trades.asset')}</Label>
                 <Input
                   id="edit-ativo"
                   value={editingTrade.ativo || ''}
@@ -2271,7 +2271,7 @@ export default function Dashboard() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="edit-tipo">Tipo</Label>
+                <Label htmlFor="edit-tipo">{t('trades.type')}</Label>
                 <Select 
                   value={editingTrade.tipo || ''} 
                   onValueChange={(value) => setEditingTrade({...editingTrade, tipo: value})}
@@ -2299,7 +2299,7 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-quantidade">Quantidade</Label>
+                <Label htmlFor="edit-quantidade">{t('trades.quantity')}</Label>
                 <Input
                   id="edit-quantidade"
                   type="number"
@@ -2320,7 +2320,7 @@ export default function Dashboard() {
               }}
               className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={() => {
@@ -2339,7 +2339,7 @@ export default function Dashboard() {
               disabled={editTradeMutation.isPending}
               className="bg-white text-black hover:bg-gray-200"
             >
-              {editTradeMutation.isPending ? 'Salvando...' : 'Salvar'}
+              {editTradeMutation.isPending ? t('common.saving') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

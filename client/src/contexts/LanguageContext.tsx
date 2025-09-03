@@ -637,6 +637,34 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.filter_by_market': 'Filtrar por Mercado',
     'filter.filter_by_csv': 'Filtrar por CSVs Importados',
 
+    // Importações
+    'imports.manage_description': 'Gerencie suas importações CSV e trades manuais',
+    'imports.csv_imported': 'CSV Importados',
+    'imports.manual_trades': 'Trades Manuais',
+
+    // Estados vazios
+    'empty.no_csv_imports': 'Nenhuma importação CSV realizada ainda',
+    'empty.no_manual_trades': 'Nenhum trade manual criado ainda',
+
+    // Trades
+    'trades.edit_manual_trade': 'Editar Trade Manual',
+    'trades.edit_trade_description': 'Altere as informações do trade selecionado',
+    'trades.asset': 'Ativo',
+
+    // Gráficos
+    'charts.register_trades_to_see': 'Registre alguns trades para ver o gráfico',
+
+    // Ações comuns
+    'common.cancel': 'Cancelar',
+    'common.save': 'Salvar',
+    'common.saving': 'Salvando...',
+
+    // Métricas
+    'metrics.operations_precision': 'Precisão das operações',
+    'metrics.risk_vs_return': 'Risco vs Retorno',
+    'metrics.general_risk_return': 'Risco/Retorno geral',
+    'metrics.win_rate': 'Win Rate',
+
     // Placeholders e dicas
     'placeholder.select_month': 'Selecione o mês',
     'placeholder.select_option': 'Selecione uma opção',
@@ -663,7 +691,6 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Mensagens de estado vazio
     'empty.no_trades_period': 'Nenhum trade no período selecionado',
-    'empty.no_manual_trades': 'Nenhum trade manual criado ainda',
 
     // Assistente IA
     'ai.chat_title': 'Assistente IA',
@@ -1327,6 +1354,34 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.filter_by_market': 'Filter by Market',
     'filter.filter_by_csv': 'Filter by Imported CSVs',
 
+    // Imports
+    'imports.manage_description': 'Manage your CSV imports and manual trades',
+    'imports.csv_imported': 'Imported CSVs',
+    'imports.manual_trades': 'Manual Trades',
+
+    // Empty states
+    'empty.no_csv_imports': 'No CSV imports performed yet',
+    'empty.no_manual_trades': 'No manual trades created yet',
+
+    // Trades
+    'trades.edit_manual_trade': 'Edit Manual Trade',
+    'trades.edit_trade_description': 'Modify the information of the selected trade',
+    'trades.asset': 'Asset',
+
+    // Charts
+    'charts.register_trades_to_see': 'Register some trades to see the chart',
+
+    // Common actions
+    'common.cancel': 'Cancel',
+    'common.save': 'Save',
+    'common.saving': 'Saving...',
+
+    // Metrics
+    'metrics.operations_precision': 'Operations Precision',
+    'metrics.risk_vs_return': 'Risk vs Return',
+    'metrics.general_risk_return': 'Overall Risk/Return',
+    'metrics.win_rate': 'Win Rate',
+
     // Placeholders and hints
     'placeholder.select_month': 'Select month',
     'placeholder.select_option': 'Select an option',
@@ -1353,7 +1408,6 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Empty state messages
     'empty.no_trades_period': 'No trades in selected period',
-    'empty.no_manual_trades': 'No manual trades created yet',
 
     // AI Assistant
     'ai.chat_title': 'AI Assistant',
@@ -1978,6 +2032,34 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.filter_by_market': 'Filtrar por Mercado',
     'filter.filter_by_csv': 'Filtrar por CSVs Importados',
 
+    // Importaciones
+    'imports.manage_description': 'Gestiona tus importaciones CSV y trades manuales',
+    'imports.csv_imported': 'CSVs Importados',
+    'imports.manual_trades': 'Trades Manuales',
+
+    // Estados vacíos
+    'empty.no_csv_imports': 'Ninguna importación CSV realizada aún',
+    'empty.no_manual_trades': 'Ningún trade manual creado aún',
+
+    // Trades
+    'trades.edit_manual_trade': 'Editar Trade Manual',
+    'trades.edit_trade_description': 'Modifica la información del trade seleccionado',
+    'trades.asset': 'Activo',
+
+    // Gráficos
+    'charts.register_trades_to_see': 'Registra algunos trades para ver el gráfico',
+
+    // Acciones comunes
+    'common.cancel': 'Cancelar',
+    'common.save': 'Guardar',
+    'common.saving': 'Guardando...',
+
+    // Métricas
+    'metrics.operations_precision': 'Precisión de las operaciones',
+    'metrics.risk_vs_return': 'Riesgo vs Retorno',
+    'metrics.general_risk_return': 'Riesgo/Retorno general',
+    'metrics.win_rate': 'Tasa de Éxito',
+
     // Placeholders y consejos
     'placeholder.select_month': 'Seleccionar mes',
     'placeholder.select_option': 'Seleccionar una opción',
@@ -1987,7 +2069,6 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Mensajes de estado vacío
     'empty.no_trades_period': 'Ninguna operación en el período seleccionado',
-    'empty.no_manual_trades': 'Ninguna operación manual creada aún',
 
     // Assistente IA
     'ai.chat_title': 'Asistente IA',
