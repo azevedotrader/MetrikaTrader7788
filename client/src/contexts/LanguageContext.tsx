@@ -255,11 +255,16 @@ const translations: Record<Language, Record<string, string>> = {
     'form.ai_description': '✨ IA: Mais inteligente, interpreta qualquer formato, mas pode ser mais lento',
     'form.traditional_description': '⚡ Tradicional: Mais rápido e consistente, ideal para formatos padrão',
 
-    // Gráficos
-    'charts.title': 'Gráficos',
+    // Gráficos/Charts
+    'charts.chart_settings': 'Configurações do Gráfico',
+    'charts.market': 'Mercado',
+    'charts.asset': 'Ativo',
+    'charts.timeframe': 'Temporalidade',
     'charts.forex': 'Forex',
     'charts.crypto': 'Crypto',
-    'charts.b3': 'B3',
+    'charts.b3_stocks': 'B3 (Ações/Futuros)',
+    'charts.current_asset': 'Ativo Atual:',
+    'charts.current_timeframe': 'Temporalidade:',
 
     // Diário
     'journal.title': 'Diário de Trading',
@@ -645,10 +650,16 @@ const translations: Record<Language, Record<string, string>> = {
     'form.traditional_description': '⚡ Traditional: Faster and consistent, ideal for standard formats',
 
     // Charts
-    'charts.title': 'Charts',
+    'charts.chart_settings': 'Chart Settings',
+    'charts.market': 'Market',
+    'charts.asset': 'Asset',
+    'charts.timeframe': 'Timeframe',
     'charts.forex': 'Forex',
     'charts.crypto': 'Crypto',
-    'charts.b3': 'B3',
+    'charts.b3_stocks': 'B3 (Stocks/Futures)',
+    'charts.current_asset': 'Current Asset:',
+    'charts.current_timeframe': 'Timeframe:',
+
 
     // Journal
     'journal.title': 'Trading Journal',
@@ -1034,10 +1045,16 @@ const translations: Record<Language, Record<string, string>> = {
     'form.traditional_description': '⚡ Tradicional: Más rápido y consistente, ideal para formatos estándar',
 
     // Gráficos
-    'charts.title': 'Gráficos',
+    'charts.chart_settings': 'Configuración de Gráficos',
+    'charts.market': 'Mercado',
+    'charts.asset': 'Activo',
+    'charts.timeframe': 'Marco Temporal',
     'charts.forex': 'Forex',
     'charts.crypto': 'Crypto',
-    'charts.b3': 'B3',
+    'charts.b3_stocks': 'B3 (Acciones/Futuros)',
+    'charts.current_asset': 'Activo Actual:',
+    'charts.current_timeframe': 'Marco Temporal:',
+
 
     // Diario
     'journal.title': 'Diario de Trading',

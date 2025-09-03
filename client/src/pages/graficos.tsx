@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, BarChart3, Activity, AlertTriangle } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // TypeScript declarations for TradingView
 declare global {
@@ -294,6 +295,7 @@ const INTERVALS = [
 ];
 
 export default function Graficos() {
+  const { t } = useLanguage();
   const [selectedMarket, setSelectedMarket] = useState<string>("forex");
   const [selectedSymbol, setSelectedSymbol] = useState<string>("FX_IDC:EURBRL");
   const [selectedInterval, setSelectedInterval] = useState<string>("15");
@@ -338,27 +340,27 @@ export default function Graficos() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5" />
-            Configurações do Gráfico
+            {t('charts.chart_settings')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Market Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Mercado</label>
+              <label className="text-sm font-medium text-slate-300">{t('charts.market')}</label>
               <Select value={selectedMarket} onValueChange={handleMarketChange}>
                 <SelectTrigger className="flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 border-slate-600 text-white bg-[#0f0e0ee0]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-700 border-slate-600">
                   <SelectItem value="forex" className="text-white hover:bg-slate-600">
-                    Forex
+                    {t('charts.forex')}
                   </SelectItem>
                   <SelectItem value="crypto" className="text-white hover:bg-slate-600">
-                    Crypto
+                    {t('charts.crypto')}
                   </SelectItem>
                   <SelectItem value="b3" className="text-white hover:bg-slate-600">
-                    B3 (Ações/Futuros)
+                    {t('charts.b3_stocks')}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -366,7 +368,7 @@ export default function Graficos() {
 
             {/* Symbol Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Ativo</label>
+              <label className="text-sm font-medium text-slate-300">{t('charts.asset')}</label>
               <Select value={selectedSymbol} onValueChange={setSelectedSymbol}>
                 <SelectTrigger className="flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 border-slate-600 text-white bg-[#0f0e0ee0]">
                   <SelectValue />
@@ -387,7 +389,7 @@ export default function Graficos() {
 
             {/* Interval Selection */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Temporalidade</label>
+              <label className="text-sm font-medium text-slate-300">{t('charts.timeframe')}</label>
               <Select value={selectedInterval} onValueChange={setSelectedInterval}>
                 <SelectTrigger className="flex h-10 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 border-slate-600 text-white bg-[#0f0e0ee0]">
                   <SelectValue />
@@ -410,11 +412,11 @@ export default function Graficos() {
           {/* Current Symbol Info */}
           <div className="mt-4 p-3 rounded-lg border border-slate-600 bg-[#000000d6]">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-400">Ativo Atual:</span>
+              <span className="text-sm text-slate-400">{t('charts.current_asset')}</span>
               <span className="text-white font-medium">{getCurrentSymbolName()}</span>
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-sm text-slate-400">Temporalidade:</span>
+              <span className="text-sm text-slate-400">{t('charts.current_timeframe')}</span>
               <span className="text-white font-medium">
                 {INTERVALS.find(i => i.value === selectedInterval)?.label}
               </span>
