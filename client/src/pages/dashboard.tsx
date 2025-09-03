@@ -450,6 +450,12 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   );
   const yAxisDomain =
     maxValue > 0 ? [-maxValue * 1.1, maxValue * 1.1] : [-100, 100];
+  
+  // Determinar cor da linha baseada no valor final
+  const finalAccumulated = chartData.length > 0 ? chartData[chartData.length - 1].accumulated : 0;
+  const isNegative = finalAccumulated < 0;
+  const lineColor = isNegative ? "#ef4444" : "#22c55e";
+  const fillGradient = isNegative ? "url(#negativeGradient)" : "url(#positiveGradient)";
 
   return (
     <div className="w-full">
@@ -719,15 +725,9 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             <Area
               type="monotone"
               dataKey="accumulated"
-              stroke={(() => {
-                const finalValue = chartData[chartData.length - 1]?.accumulated || 0;
-                return finalValue < 0 ? "#ef4444" : "#22c55e";
-              })()}
+              stroke={lineColor}
               strokeWidth={3}
-              fill={(() => {
-                const finalValue = chartData[chartData.length - 1]?.accumulated || 0;
-                return finalValue < 0 ? "url(#negativeGradient)" : "url(#positiveGradient)";
-              })()}
+              fill={fillGradient}
               dot={false}
             />
           </ComposedChart>
