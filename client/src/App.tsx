@@ -21,6 +21,7 @@ import Analises from "@/pages/analises";
 import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
 import Calendario from "@/pages/calendario";
+import Suporte from "@/pages/suporte";
 import TesteGateIO from "@/pages/teste-gateio";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
@@ -36,6 +37,7 @@ const pageTitleKeys: Record<string, string> = {
   "/diario": "journal.title",
   "/calendario": "calendar.title",
   "/perfil": "profile.title",
+  "/suporte": "support.title",
   "/admin": "nav.admin",
   "/teste-gateio": "Teste Gate.io API"
 };
@@ -132,6 +134,13 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Perfil />
+                  </Route>
+                  <Route path="/suporte">
+                    <TopBar 
+                      title={t(pageTitleKeys["/suporte"])} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <Suporte />
                   </Route>
                   {/* Admin route moved to standalone section */}
                   <Route path="/">

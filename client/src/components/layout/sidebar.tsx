@@ -12,7 +12,8 @@ import {
   LogOut,
   FileSpreadsheet,
   TrendingUp,
-  X
+  X,
+  MessageCircle
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
@@ -26,6 +27,7 @@ const navigation = [
   { nameKey: "charts.title", href: "/graficos", icon: TrendingUp },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
   { nameKey: "journal.title", href: "/diario", icon: Book },
+  { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
   { nameKey: "profile.title", href: "/perfil", icon: User },
 ];
 

@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -3132,6 +3132,267 @@ export async function registerRoutes(app: Express): Promise<void> {
         error: "Erro interno do servidor",
         message: error instanceof Error ? error.message : "Erro desconhecido"
       });
+    }
+  });
+
+  // ==================== ROTAS DE SUPORTE ====================
+  
+  // Buscar conversas do usuário
+  app.get('/api/support/conversations', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      
+      const conversations = await db
+        .select({
+          id: supportConversations.id,
+          subject: supportConversations.subject,
+          status: supportConversations.status,
+          priority: supportConversations.priority,
+          category: supportConversations.category,
+          lastMessageAt: supportConversations.lastMessageAt,
+          lastMessageByAdmin: supportConversations.lastMessageByAdmin,
+          createdAt: supportConversations.createdAt,
+        })
+        .from(supportConversations)
+        .where(eq(supportConversations.userId, userId))
+        .orderBy(supportConversations.lastMessageAt);
+
+      res.json(conversations);
+    } catch (error) {
+      console.error('Erro ao buscar conversas:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Criar nova conversa de suporte
+  app.post('/api/support/conversations', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const validatedData = insertSupportConversationSchema.parse({
+        ...req.body,
+        userId
+      });
+
+      const [conversation] = await db
+        .insert(supportConversations)
+        .values(validatedData)
+        .returning();
+
+      res.status(201).json(conversation);
+    } catch (error) {
+      console.error('Erro ao criar conversa:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Dados inválidos", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Buscar mensagens de uma conversa
+  app.get('/api/support/conversations/:id/messages', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const conversationId = req.params.id;
+
+      // Verificar se a conversa pertence ao usuário
+      const [conversation] = await db
+        .select()
+        .from(supportConversations)
+        .where(eq(supportConversations.id, conversationId))
+        .limit(1);
+
+      if (!conversation || conversation.userId !== userId) {
+        return res.status(404).json({ error: "Conversa não encontrada" });
+      }
+
+      const messages = await db
+        .select({
+          id: supportMessages.id,
+          message: supportMessages.message,
+          isFromAdmin: supportMessages.isFromAdmin,
+          createdAt: supportMessages.createdAt,
+        })
+        .from(supportMessages)
+        .where(eq(supportMessages.conversationId, conversationId))
+        .orderBy(supportMessages.createdAt);
+
+      res.json(messages);
+    } catch (error) {
+      console.error('Erro ao buscar mensagens:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Enviar mensagem em uma conversa
+  app.post('/api/support/conversations/:id/messages', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const conversationId = req.params.id;
+
+      // Verificar se a conversa pertence ao usuário
+      const [conversation] = await db
+        .select()
+        .from(supportConversations)
+        .where(eq(supportConversations.id, conversationId))
+        .limit(1);
+
+      if (!conversation || conversation.userId !== userId) {
+        return res.status(404).json({ error: "Conversa não encontrada" });
+      }
+
+      const validatedData = insertSupportMessageSchema.parse({
+        conversationId,
+        senderId: userId,
+        message: req.body.message,
+        isFromAdmin: false
+      });
+
+      const [message] = await db
+        .insert(supportMessages)
+        .values(validatedData)
+        .returning();
+
+      // Atualizar última mensagem da conversa
+      await db
+        .update(supportConversations)
+        .set({
+          lastMessageAt: new Date(),
+          lastMessageByAdmin: false,
+          status: conversation.status === 'closed' ? 'open' : conversation.status
+        })
+        .where(eq(supportConversations.id, conversationId));
+
+      res.status(201).json(message);
+    } catch (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Dados inválidos", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // ==================== ROTAS ADMIN DE SUPORTE ====================
+
+  // Buscar todas as conversas de suporte (admin)
+  app.get('/api/admin/support/conversations', requireAdmin, async (req: any, res: any) => {
+    try {
+      const conversations = await db
+        .select({
+          id: supportConversations.id,
+          userId: supportConversations.userId,
+          subject: supportConversations.subject,
+          status: supportConversations.status,
+          priority: supportConversations.priority,
+          category: supportConversations.category,
+          lastMessageAt: supportConversations.lastMessageAt,
+          lastMessageByAdmin: supportConversations.lastMessageByAdmin,
+          createdAt: supportConversations.createdAt,
+        })
+        .from(supportConversations)
+        .orderBy(supportConversations.lastMessageAt);
+
+      // Buscar informações do usuário para cada conversa
+      const conversationsWithUser = await Promise.all(
+        conversations.map(async (conv) => {
+          const user = await storage.getUserById(conv.userId);
+          return {
+            ...conv,
+            userName: user?.name || 'Usuário desconhecido',
+            userEmail: user?.email || ''
+          };
+        })
+      );
+
+      res.json(conversationsWithUser);
+    } catch (error) {
+      console.error('Erro ao buscar conversas (admin):', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Responder a uma conversa (admin)
+  app.post('/api/admin/support/conversations/:id/messages', requireAdmin, async (req: any, res: any) => {
+    try {
+      const conversationId = req.params.id;
+      const adminUserId = req.userId; // ID do admin
+
+      // Verificar se a conversa existe
+      const [conversation] = await db
+        .select()
+        .from(supportConversations)
+        .where(eq(supportConversations.id, conversationId))
+        .limit(1);
+
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversa não encontrada" });
+      }
+
+      const validatedData = insertSupportMessageSchema.parse({
+        conversationId,
+        senderId: adminUserId,
+        message: req.body.message,
+        isFromAdmin: true
+      });
+
+      const [message] = await db
+        .insert(supportMessages)
+        .values(validatedData)
+        .returning();
+
+      // Atualizar última mensagem da conversa
+      await db
+        .update(supportConversations)
+        .set({
+          lastMessageAt: new Date(),
+          lastMessageByAdmin: true,
+          status: 'in_progress'
+        })
+        .where(eq(supportConversations.id, conversationId));
+
+      res.status(201).json(message);
+    } catch (error) {
+      console.error('Erro ao responder mensagem (admin):', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Dados inválidos", 
+          details: error.errors 
+        });
+      }
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Alterar status de uma conversa (admin)
+  app.put('/api/admin/support/conversations/:id/status', requireAdmin, async (req: any, res: any) => {
+    try {
+      const conversationId = req.params.id;
+      const { status } = req.body;
+
+      if (!['open', 'in_progress', 'closed'].includes(status)) {
+        return res.status(400).json({ error: "Status inválido" });
+      }
+
+      const [conversation] = await db
+        .update(supportConversations)
+        .set({ status })
+        .where(eq(supportConversations.id, conversationId))
+        .returning();
+
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversa não encontrada" });
+      }
+
+      res.json(conversation);
+    } catch (error) {
+      console.error('Erro ao alterar status da conversa:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
     }
   });
 

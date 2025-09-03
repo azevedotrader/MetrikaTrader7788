@@ -369,3 +369,65 @@ export const passwordResetTokensRelations = relations(passwordResetTokens, ({ on
 }));
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+// Support system tables
+export const supportConversations = pgTable("support_conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  subject: text("subject").notNull(), // Assunto/título da conversa
+  status: text("status").default("open"), // "open", "in_progress", "closed"
+  priority: text("priority").default("normal"), // "low", "normal", "high", "urgent"
+  category: text("category").default("general"), // "general", "bug", "feature", "billing"
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+  lastMessageByAdmin: boolean("last_message_by_admin").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const supportMessages = pgTable("support_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id").notNull().references(() => supportConversations.id, { onDelete: "cascade" }),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  isFromAdmin: boolean("is_from_admin").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations for support system
+export const supportConversationsRelations = relations(supportConversations, ({ one, many }) => ({
+  user: one(users, {
+    fields: [supportConversations.userId],
+    references: [users.id],
+  }),
+  messages: many(supportMessages),
+}));
+
+export const supportMessagesRelations = relations(supportMessages, ({ one }) => ({
+  conversation: one(supportConversations, {
+    fields: [supportMessages.conversationId],
+    references: [supportConversations.id],
+  }),
+  sender: one(users, {
+    fields: [supportMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+// Types and schemas for support system
+export type SupportConversation = typeof supportConversations.$inferSelect;
+export type InsertSupportConversation = typeof supportConversations.$inferInsert;
+export type SupportMessage = typeof supportMessages.$inferSelect;
+export type InsertSupportMessage = typeof supportMessages.$inferInsert;
+
+export const insertSupportConversationSchema = createInsertSchema(supportConversations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastMessageAt: true,
+  lastMessageByAdmin: true,
+});
+
+export const insertSupportMessageSchema = createInsertSchema(supportMessages).omit({
+  id: true,
+  createdAt: true,
+});
