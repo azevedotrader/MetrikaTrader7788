@@ -665,6 +665,24 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.minimize_button': 'Minimizar',
     'ai.maximize_button': 'Maximizar',
     'ai.close_button': 'Fechar',
+
+    // Landing Page - Features Grid
+    'landing.features.sync_title': 'Sync Automático',
+    'landing.features.sync_description': 'Importe seus trades e tenha controle sobre cada mercado com todas métricas de visualização organizada.',
+    'landing.features.ai_title': 'IA Analytics',
+    'landing.features.ai_description': 'Integração com inteligência artificial para estudar as métricas da sua conta detalhada mostrando as melhores correções e ajustes para potencializar resultados.',
+    'landing.features.risk_title': 'Risk Manager',
+    'landing.features.risk_description': 'Monitore risco em tempo real e receba alertas antes de comprometer capital.',
+    'landing.features.journal_title': 'Journal Inteligente',
+    'landing.features.journal_description': 'Sistema aprende com seus trades e sugere melhorias automaticamente.',
+    'landing.features.charts_title': 'Charts Avançados',
+    'landing.features.charts_description': 'Visualizações interativas que revelam padrões ocultos nos seus dados.',
+    'landing.features.time_title': 'Time Analytics',
+    'landing.features.time_description': 'Descubra seus ativos, horários e dias mais lucrativos com uma análise de dados eficiente e organizada.',
+    'landing.features.multiasset_title': 'Multi-Asset',
+    'landing.features.multiasset_description': 'Forex, Crypto, Ações, Futuros - todos os mercados em uma plataforma.',
+    'landing.features.export_title': 'Export Completo',
+    'landing.features.export_description': 'Exporte relatórios profissionais em PDF para clientes e investidores.',
   },
 
   en: {
@@ -1287,6 +1305,24 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.minimize_button': 'Minimize',
     'ai.maximize_button': 'Maximize',
     'ai.close_button': 'Close',
+
+    // Landing Page - Features Grid
+    'landing.features.sync_title': 'Auto Sync',
+    'landing.features.sync_description': 'Import your trades and have control over each market with all organized visualization metrics.',
+    'landing.features.ai_title': 'AI Analytics',
+    'landing.features.ai_description': 'Integration with artificial intelligence to study your account metrics in detail showing the best corrections and adjustments to boost results.',
+    'landing.features.risk_title': 'Risk Manager',
+    'landing.features.risk_description': 'Monitor risk in real-time and receive alerts before compromising capital.',
+    'landing.features.journal_title': 'Smart Journal',
+    'landing.features.journal_description': 'System learns from your trades and suggests improvements automatically.',
+    'landing.features.charts_title': 'Advanced Charts',
+    'landing.features.charts_description': 'Interactive visualizations that reveal hidden patterns in your data.',
+    'landing.features.time_title': 'Time Analytics',
+    'landing.features.time_description': 'Discover your most profitable assets, times and days with efficient and organized data analysis.',
+    'landing.features.multiasset_title': 'Multi-Asset',
+    'landing.features.multiasset_description': 'Forex, Crypto, Stocks, Futures - all markets in one platform.',
+    'landing.features.export_title': 'Complete Export',
+    'landing.features.export_description': 'Export professional reports in PDF for clients and investors.',
   },
 
   es: {
@@ -1846,5 +1882,23 @@ const translations: Record<Language, Record<string, string>> = {
     'ai.minimize_button': 'Minimizar',
     'ai.maximize_button': 'Maximizar',
     'ai.close_button': 'Cerrar',
+
+    // Landing Page - Features Grid
+    'landing.features.sync_title': 'Sync Automático',
+    'landing.features.sync_description': 'Importa tus operaciones y ten control sobre cada mercado con todas las métricas de visualización organizadas.',
+    'landing.features.ai_title': 'IA Analytics',
+    'landing.features.ai_description': 'Integración con inteligencia artificial para estudiar las métricas de tu cuenta detalladamente mostrando las mejores correcciones y ajustes para potenciar resultados.',
+    'landing.features.risk_title': 'Gestor de Riesgo',
+    'landing.features.risk_description': 'Monitorea el riesgo en tiempo real y recibe alertas antes de comprometer el capital.',
+    'landing.features.journal_title': 'Diario Inteligente',
+    'landing.features.journal_description': 'El sistema aprende de tus operaciones y sugiere mejoras automáticamente.',
+    'landing.features.charts_title': 'Gráficos Avanzados',
+    'landing.features.charts_description': 'Visualizaciones interactivas que revelan patrones ocultos en tus datos.',
+    'landing.features.time_title': 'Análisis Temporal',
+    'landing.features.time_description': 'Descubre tus activos, horarios y días más rentables con un análisis de datos eficiente y organizado.',
+    'landing.features.multiasset_title': 'Multi-Activo',
+    'landing.features.multiasset_description': 'Forex, Crypto, Acciones, Futuros - todos los mercados en una plataforma.',
+    'landing.features.export_title': 'Exportación Completa',
+    'landing.features.export_description': 'Exporta reportes profesionales en PDF para clientes e inversores.',
   }
 };
