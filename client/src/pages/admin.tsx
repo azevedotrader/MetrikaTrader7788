@@ -664,15 +664,15 @@ function SupportAdminPanel({
                 >
                   <div className="flex items-start justify-between mb-2">
                     <h4 className="font-medium text-sm truncate">{conversation.subject}</h4>
-                    <Badge className={getStatusColor(conversation.status)} size="sm">
+                    <Badge className={getStatusColor(conversation.status)}>
                       {conversation.status}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge className={getCategoryColor(conversation.category)} size="sm">
+                    <Badge className={getCategoryColor(conversation.category)}>
                       {conversation.category}
                     </Badge>
-                    <Badge className={getPriorityColor(conversation.priority)} size="sm">
+                    <Badge className={getPriorityColor(conversation.priority)}>
                       {conversation.priority}
                     </Badge>
                   </div>
