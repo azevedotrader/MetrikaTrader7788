@@ -445,7 +445,7 @@ export default function NovoTrade() {
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-neutral-400" />
-                Dados da Operação
+                {t('form.trade_data')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -462,7 +462,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Data e Hora *
+                            {t('form.date_time')} *
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -482,7 +482,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Ativo *
+                            {t('form.asset')} *
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -502,7 +502,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Mercado *
+                            {t('form.market')} *
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -510,13 +510,13 @@ export default function NovoTrade() {
                           >
                             <FormControl>
                               <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder="Selecione o mercado" />
+                                <SelectValue placeholder={t('form.select_market')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                              <SelectItem value="crypto">₿ Crypto</SelectItem>
-                              <SelectItem value="forex">$ Forex</SelectItem>
-                              <SelectItem value="b3">▲ B3</SelectItem>
+                              <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
+                              <SelectItem value="forex">{t('form.forex')}</SelectItem>
+                              <SelectItem value="b3">{t('form.b3')}</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -533,7 +533,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Tipo *
+                            {t('form.type')} *
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -541,20 +541,20 @@ export default function NovoTrade() {
                           >
                             <FormControl>
                               <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder="Compra ou Venda" />
+                                <SelectValue placeholder={t('form.buy_or_sell')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-charcoal-800 border-charcoal-600">
                               <SelectItem value="compra">
                                 <span className="flex items-center gap-2">
                                   <TrendingUp className="h-4 w-4 text-green-400" />
-                                  Compra
+                                  {t('form.buy')}
                                 </span>
                               </SelectItem>
                               <SelectItem value="venda">
                                 <span className="flex items-center gap-2">
                                   <TrendingDown className="h-4 w-4 text-red-400" />
-                                  Venda
+                                  {t('form.sell')}
                                 </span>
                               </SelectItem>
                             </SelectContent>
@@ -573,7 +573,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Take Profit (valor de ganho) *
+                            {t('form.take_profit')} *
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
@@ -598,7 +598,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Stop Loss (valor de perda) *
+                            {t('form.stop_loss')} *
                           </FormLabel>
                           <FormControl>
                             <div className="relative">
@@ -622,11 +622,11 @@ export default function NovoTrade() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-3 text-charcoal-300">
-                        Resultado da Operação *
+                        {t('form.trade_result')} *
                       </label>
                       {!tradeResult && (
                         <p className="text-xs text-red-400 mb-2">
-                          ⚠️ Selecione o resultado para calcular o valor financeiro
+                          {t('form.select_result_warning')}
                         </p>
                       )}
                       <div className="grid grid-cols-2 gap-3">
@@ -642,7 +642,7 @@ export default function NovoTrade() {
                               : "border-charcoal-600 text-charcoal-300 hover:bg-green-600/20"
                           }`}
                         >
-                          ◉ Take
+                          {t('form.take')}
                         </Button>
                         <Button
                           type="button"
@@ -656,7 +656,7 @@ export default function NovoTrade() {
                               : "border-charcoal-600 text-charcoal-300 hover:bg-red-600/20"
                           }`}
                         >
-                          ○ Loss
+                          {t('form.loss')}
                         </Button>
                       </div>
                     </div>
@@ -666,13 +666,13 @@ export default function NovoTrade() {
                       <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
                         <h4 className="text-white font-medium mb-3 flex items-center gap-2">
                           <Calculator className="w-4 h-4 text-neutral-400" />
-                          Cálculos Automáticos
+                          {t('form.auto_calculations')}
                         </h4>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="text-center">
                             <div className="text-charcoal-300 text-sm mb-1">
-                              Razão Risco/Retorno
+                              {t('form.risk_reward_ratio')}
                             </div>
                             <div className="text-neutral-400 font-semibold text-lg">
                               {riskRewardRatio
@@ -683,7 +683,7 @@ export default function NovoTrade() {
 
                           <div className="text-center">
                             <div className="text-charcoal-300 text-sm mb-1">
-                              Resultado Financeiro
+                              {t('form.financial_result')}
                             </div>
                             <div
                               className={`font-semibold text-lg ${
@@ -715,10 +715,10 @@ export default function NovoTrade() {
                               }`}
                             >
                               {riskRewardRatio >= 3
-                                ? "● Excelente (≥3:1)"
+                                ? t('form.excellent_ratio')
                                 : riskRewardRatio >= 2
-                                  ? "▲ Bom (≥2:1)"
-                                  : "■ Arriscado (<2:1)"}
+                                  ? t('form.good_ratio')
+                                  : t('form.risky_ratio')}
                             </div>
                           </div>
                         )}
@@ -734,7 +734,7 @@ export default function NovoTrade() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-charcoal-300">
-                            Emoção Percebida
+                            {t('form.emotion')}
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -742,7 +742,7 @@ export default function NovoTrade() {
                           >
                             <FormControl>
                               <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder="Como você se sentiu?" />
+                                <SelectValue placeholder={t('form.how_felt')} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="bg-charcoal-800 border-charcoal-600">
@@ -769,11 +769,11 @@ export default function NovoTrade() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-charcoal-300">
-                          Comentário sobre o Trade
+                          {t('form.trade_comment')}
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Descreva seu raciocínio, observações sobre o mercado, lições aprendidas..."
+                            placeholder={t('form.comment_placeholder')}
                             className="bg-charcoal-800 border-charcoal-600 text-white min-h-[100px]"
                             {...field}
                           />
@@ -790,8 +790,8 @@ export default function NovoTrade() {
                       className="gradient-purple-blue hover:opacity-90 transition-opacity"
                     >
                       {createTradeMutation.isPending
-                        ? "Salvando..."
-                        : "Salvar Trade"}
+                        ? t('form.saving')
+                        : t('form.save_trade')}
                     </Button>
                     <Button
                       type="button"
@@ -799,7 +799,7 @@ export default function NovoTrade() {
                       onClick={() => form.reset()}
                       className="border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
                     >
-                      Limpar
+                      {t('form.clear')}
                     </Button>
                     <Button
                       type="button"
@@ -823,16 +823,15 @@ export default function NovoTrade() {
                           setShowAIAnalysis(true);
                         } else {
                           toast({
-                            title: "Campos obrigatórios",
-                            description:
-                              "Preencha pelo menos: Ativo, Mercado e Tipo para análise.",
+                            title: t('form.required_fields'),
+                            description: t('form.fill_required'),
                             variant: "destructive",
                           });
                         }
                       }}
                       className="border-purple-600 text-purple-300 hover:bg-purple-900/20"
                     >
-                      🤖 Analisar com IA
+                      {t('form.analyze_ai')}
                     </Button>
                   </div>
                 </form>
@@ -865,26 +864,26 @@ export default function NovoTrade() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    Selecione o Mercado
+                    {t('form.select_market_label')}
                   </label>
                   <Select
                     value={selectedBroker}
                     onValueChange={setSelectedBroker}
                   >
                     <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                      <SelectValue placeholder="Crypto, B3 ou Forex" />
+                      <SelectValue placeholder={t('form.crypto_b3_forex')} />
                     </SelectTrigger>
                     <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                      <SelectItem value="crypto">🪙 Crypto</SelectItem>
-                      <SelectItem value="b3">📈 B3</SelectItem>
-                      <SelectItem value="forex">🏦 Forex</SelectItem>
+                      <SelectItem value="crypto">{t('form.crypto_icon')}</SelectItem>
+                      <SelectItem value="b3">{t('form.b3_icon')}</SelectItem>
+                      <SelectItem value="forex">{t('form.forex_icon')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    Método de Análise
+                    {t('form.analysis_method')}
                   </label>
                   <Select
                     value={analysisMethod}
@@ -893,27 +892,25 @@ export default function NovoTrade() {
                     }
                   >
                     <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                      <SelectValue placeholder="Escolha o método de processamento" />
+                      <SelectValue placeholder={t('form.choose_processing')} />
                     </SelectTrigger>
                     <SelectContent className="bg-charcoal-800 border-charcoal-600">
                       <SelectItem value="ai">
-                        🤖 Análise Por IA (Beta)
+                        {t('form.ai_analysis')}
                       </SelectItem>
                       <SelectItem value="traditional">
-                        ⚡ Análise MetrikAI (Recomendado)
+                        {t('form.traditional_analysis')}
                       </SelectItem>
                     </SelectContent>
                   </Select>
                   <div className="mt-2 text-xs text-charcoal-400">
                     {analysisMethod === "ai" ? (
                       <p>
-                        ✨ <strong>IA:</strong> Mais inteligente, interpreta
-                        qualquer formato, mas pode ser mais lento
+                        {t('form.ai_description')}
                       </p>
                     ) : (
                       <p>
-                        ⚡ <strong>Tradicional:</strong> Mais rápido e
-                        consistente, ideal para formatos padrão
+                        {t('form.traditional_description')}
                       </p>
                     )}
                   </div>
