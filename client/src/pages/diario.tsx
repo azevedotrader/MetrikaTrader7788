@@ -9,8 +9,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { DiaryEntry } from "@shared/schema";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Diario() {
+  const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | undefined>(undefined);
   const queryClient = useQueryClient();
@@ -99,7 +101,7 @@ export default function Diario() {
             data-testid="button-new-entry"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Nova Entrada
+            {t('journal.add_entry')}
           </Button>
         </div>
 
@@ -108,10 +110,10 @@ export default function Diario() {
             <CardContent>
               <Calendar className="h-16 w-16 mx-auto mb-4 text-slate-500" />
               <h3 className="text-xl font-semibold text-white mb-2">
-                Nenhuma entrada ainda
+                {t('journal.no_entries')}
               </h3>
               <p className="text-slate-400 mb-6">
-                Comece registrando suas reflexões e análises de trading
+                {t('journal.start_recording')}
               </p>
               <Button
                 onClick={handleNewEntry}
@@ -119,7 +121,7 @@ export default function Diario() {
                 data-testid="button-first-entry"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Criar primeira entrada
+                {t('journal.create_first')}
               </Button>
             </CardContent>
           </Card>
@@ -180,12 +182,12 @@ export default function Diario() {
                   <div className="flex items-center space-x-4 text-sm text-slate-400">
                     {entry.trades !== undefined && entry.trades > 0 && (
                       <span data-testid={`trades-count-${entry.id}`}>
-                        💡 {entry.trades} trades realizados
+                        💡 {entry.trades} {t('journal.trades_performed')}
                       </span>
                     )}
                     {entry.winRate && entry.winRate !== "0" && (
                       <span data-testid={`win-rate-${entry.id}`}>
-                        🎯 {entry.winRate}% de acerto
+                        🎯 {entry.winRate}% {t('journal.accuracy_rate')}
                       </span>
                     )}
                     {entry.emotion && (
@@ -199,7 +201,7 @@ export default function Diario() {
                     <div className="mt-4 pt-4 border-t border-slate-700 space-y-2">
                       {entry.lessons && (
                         <div>
-                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Lições:</span>
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">{t('journal.lessons_label')}</span>
                           <p className="text-sm text-slate-300 mt-1" data-testid={`lessons-${entry.id}`}>
                             {entry.lessons}
                           </p>
@@ -207,7 +209,7 @@ export default function Diario() {
                       )}
                       {entry.improvements && (
                         <div>
-                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Melhorias:</span>
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">{t('journal.improvements_label')}</span>
                           <p className="text-sm text-slate-300 mt-1" data-testid={`improvements-${entry.id}`}>
                             {entry.improvements}
                           </p>

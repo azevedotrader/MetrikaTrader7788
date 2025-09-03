@@ -16,6 +16,7 @@ import { insertDiaryEntrySchema, type InsertDiaryEntry, type DiaryEntry } from "
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DiaryModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ interface DiaryModalProps {
 export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: DiaryModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Corrigir formatação da data para evitar problemas de timezone
   const formatDateForInput = (date: Date) => {
@@ -106,8 +108,8 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
           throw new Error("Erro ao atualizar entrada");
         }
         toast({
-          title: "Entrada atualizada!",
-          description: "Sua entrada do diário foi atualizada com sucesso.",
+          title: t('journal.toast.updated'),
+          description: t('journal.toast.updated_desc'),
         });
       } else {
         // Criar nova entrada
@@ -131,8 +133,8 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
           throw new Error("Erro ao criar entrada");
         }
         toast({
-          title: "Entrada criada!",
-          description: "Sua entrada do diário foi criada com sucesso.",
+          title: t('journal.toast.created'),
+          description: t('journal.toast.created_desc'),
         });
       }
       onSuccess();
@@ -141,8 +143,8 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     } catch (error) {
       console.error("Erro ao salvar entrada:", error);
       toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar a entrada. Tente novamente.",
+        title: t('journal.toast.error_save'),
+        description: t('journal.toast.error_save_desc'),
         variant: "destructive",
       });
     } finally {
@@ -153,7 +155,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   const handleDelete = async () => {
     if (!entry) return;
     
-    if (!confirm("Tem certeza que deseja deletar esta entrada?")) {
+    if (!confirm(t('journal.delete_confirm'))) {
       return;
     }
 
@@ -177,16 +179,16 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
         throw new Error("Erro ao deletar entrada");
       }
       toast({
-        title: "Entrada deletada!",
-        description: "Sua entrada do diário foi deletada com sucesso.",
+        title: t('journal.toast.deleted'),
+        description: t('journal.toast.deleted_desc'),
       });
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Erro ao deletar entrada:", error);
       toast({
-        title: "Erro ao deletar",
-        description: "Não foi possível deletar a entrada. Tente novamente.",
+        title: t('journal.toast.error_delete'),
+        description: t('journal.toast.error_delete_desc'),
         variant: "destructive",
       });
     } finally {
@@ -195,13 +197,13 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   };
 
   const emotionOptions = [
-    { value: "confiante", label: "Confiante 😎" },
-    { value: "ansioso", label: "Ansioso 😰" },
-    { value: "impulsivo", label: "Impulsivo 🏃‍♂️" },
-    { value: "calmo", label: "Calmo 😌" },
-    { value: "eufórico", label: "Eufórico 🤩" },
-    { value: "frustrado", label: "Frustrado 😤" },
-    { value: "neutro", label: "Neutro 😐" },
+    { value: "confiante", label: t('journal.emotion.confident') },
+    { value: "ansioso", label: t('journal.emotion.anxious') },
+    { value: "impulsivo", label: t('journal.emotion.impulsive') },
+    { value: "calmo", label: t('journal.emotion.calm') },
+    { value: "eufórico", label: t('journal.emotion.euphoric') },
+    { value: "frustrado", label: t('journal.emotion.frustrated') },
+    { value: "neutro", label: t('journal.emotion.neutral') },
   ];
 
   return (
@@ -209,7 +211,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="diary-modal">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle data-testid="modal-title">
-            {entry ? "Editar Entrada" : "Nova Entrada no Diário"}
+            {entry ? t('journal.edit_entry') : t('journal.new_entry')}
           </DialogTitle>
           {entry && (
             <Button
@@ -228,7 +230,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Data */}
           <div className="space-y-2">
-            <Label htmlFor="date">Data *</Label>
+            <Label htmlFor="date">{t('journal.date')} *</Label>
             <Input
               id="date"
               type="date"
@@ -243,10 +245,10 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
           {/* Título */}
           <div className="space-y-2">
-            <Label htmlFor="title">Título *</Label>
+            <Label htmlFor="title">{t('journal.title_field')} *</Label>
             <Input
               id="title"
-              placeholder="Ex: Sessão de trading matinal"
+              placeholder={t('journal.title_placeholder')}
               {...form.register("title")}
               data-testid="input-title"
             />
@@ -257,10 +259,10 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
           {/* Conteúdo */}
           <div className="space-y-2">
-            <Label htmlFor="content">Descrição da Sessão *</Label>
+            <Label htmlFor="content">{t('journal.session_description')} *</Label>
             <Textarea
               id="content"
-              placeholder="Descreva como foi sua sessão de trading hoje..."
+              placeholder={t('journal.session_placeholder')}
               rows={4}
               {...form.register("content")}
               data-testid="textarea-content"
@@ -274,13 +276,13 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Emoção */}
             <div className="space-y-2">
-              <Label>Estado Emocional</Label>
+              <Label>{t('journal.emotional_state')}</Label>
               <Select
                 value={form.watch("emotion") || ""}
                 onValueChange={(value) => form.setValue("emotion", value as any)}
               >
                 <SelectTrigger data-testid="select-emotion">
-                  <SelectValue placeholder="Como você se sentiu?" />
+                  <SelectValue placeholder={t('journal.how_felt')} />
                 </SelectTrigger>
                 <SelectContent>
                   {emotionOptions.map((option) => (
@@ -294,7 +296,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
             {/* Número de trades */}
             <div className="space-y-2">
-              <Label htmlFor="trades">Número de Trades</Label>
+              <Label htmlFor="trades">{t('journal.number_trades')}</Label>
               <Input
                 id="trades"
                 type="number"
@@ -307,7 +309,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
             {/* P&L */}
             <div className="space-y-2">
-              <Label htmlFor="pnl">P&L (R$)</Label>
+              <Label htmlFor="pnl">{t('journal.pnl')}</Label>
               <Input
                 id="pnl"
                 placeholder="0.00"
@@ -318,7 +320,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
             {/* Taxa de acerto */}
             <div className="space-y-2">
-              <Label htmlFor="winRate">Taxa de Acerto (%)</Label>
+              <Label htmlFor="winRate">{t('journal.win_rate')}</Label>
               <Input
                 id="winRate"
                 placeholder="0.0"
@@ -330,10 +332,10 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
           {/* Lições aprendidas */}
           <div className="space-y-2">
-            <Label htmlFor="lessons">Lições Aprendidas</Label>
+            <Label htmlFor="lessons">{t('journal.lessons_learned')}</Label>
             <Textarea
               id="lessons"
-              placeholder="O que você aprendeu hoje?"
+              placeholder={t('journal.lessons_placeholder')}
               rows={3}
               {...form.register("lessons")}
               data-testid="textarea-lessons"
@@ -342,10 +344,10 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
           {/* Melhorias */}
           <div className="space-y-2">
-            <Label htmlFor="improvements">Pontos de Melhoria</Label>
+            <Label htmlFor="improvements">{t('journal.improvements')}</Label>
             <Textarea
               id="improvements"
-              placeholder="O que você pode melhorar na próxima sessão?"
+              placeholder={t('journal.improvements_placeholder')}
               rows={3}
               {...form.register("improvements")}
               data-testid="textarea-improvements"
@@ -362,7 +364,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               className="flex-1"
               data-testid="button-cancel"
             >
-              Cancelar
+              {t('journal.cancel')}
             </Button>
             <Button
               type="submit"
@@ -370,7 +372,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               className="flex-1"
               data-testid="button-save"
             >
-              {isLoading ? "Salvando..." : entry ? "Atualizar" : "Salvar"}
+              {isLoading ? t('journal.saving') : entry ? t('journal.update') : t('journal.save')}
             </Button>
           </div>
         </form>
