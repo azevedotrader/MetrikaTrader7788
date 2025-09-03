@@ -1437,6 +1437,20 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post("/api/trades", requireAuth, async (req, res) => {
     try {
       const userId = req.userId;
+      
+      // Check if user is Free and reached limit
+      const user = await storage.getUser(userId);
+      if (user?.planType === 'free') {
+        const limits = await storage.checkFreeUserLimits(userId);
+        if (limits.limitReached) {
+          return res.status(403).json({ 
+            error: 'FREE_USER_LIMIT_REACHED',
+            message: `Limite de ${limits.total}/10 trades e imports atingido. Faça upgrade para continuar.`,
+            limits: limits
+          });
+        }
+      }
+      
       const validatedData = insertTradeSchema.parse({
         ...req.body,
         userId, // Usuário autenticado obrigatório
@@ -1639,6 +1653,20 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (!userId) {
         return res.status(401).json({ error: 'Usuário não autenticado' });
       }
+      
+      // Check if user is Free and reached limit
+      const user = await storage.getUser(userId);
+      if (user?.planType === 'free') {
+        const limits = await storage.checkFreeUserLimits(userId);
+        if (limits.limitReached) {
+          return res.status(403).json({ 
+            error: 'FREE_USER_LIMIT_REACHED',
+            message: `Limite de ${limits.total}/10 trades e imports atingido. Faça upgrade para continuar.`,
+            limits: limits
+          });
+        }
+      }
+      
       const file = req.file;
       const broker = req.body.broker || 'auto';
       const useTraditional = req.body.useTraditional === 'true' || req.body.useTraditional === true;
@@ -2454,6 +2482,29 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
   
   // USER PROFILE ROUTES
+  
+  // GET /api/user/plan - Get user plan information
+  app.get("/api/user/plan", requireAuth, async (req, res) => {
+    try {
+      const userId = req.userId;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      const planType = user.planType || 'free';
+      
+      res.json({
+        planType,
+        isAiEnabled: planType !== 'free',
+        hasUnlimitedTrades: planType !== 'free'
+      });
+    } catch (error) {
+      console.error("Error fetching user plan:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
   
   // PUT /api/profile - Atualizar perfil do usuário
   app.put("/api/profile", requireAuth, async (req, res) => {

@@ -97,6 +97,9 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   markTokenAsUsed(token: string): Promise<void>;
   updateUserPassword(userId: string, newPassword: string): Promise<void>;
+
+  // Free user limits
+  checkFreeUserLimits(userId: string): Promise<{ csvImports: number; manualTrades: number; total: number; limitReached: boolean }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -660,6 +663,30 @@ export class DatabaseStorage implements IStorage {
     const [image] = await db.select().from(diaryImages)
       .where(eq(diaryImages.id, imageId));
     return image || undefined;
+  }
+
+  async checkFreeUserLimits(userId: string): Promise<{ csvImports: number; manualTrades: number; total: number; limitReached: boolean }> {
+    // Count CSV imports for this user
+    const csvImportsResult = await db.select({ count: sql<number>`count(*)` })
+      .from(csvImports)
+      .where(eq(csvImports.userId, userId));
+
+    // Count manual trades for this user (origin = 'manual')
+    const manualTradesResult = await db.select({ count: sql<number>`count(*)` })
+      .from(trades)
+      .where(and(eq(trades.userId, userId), eq(trades.origem, 'manual')));
+
+    const csvImportsCount = Number(csvImportsResult[0]?.count || 0);
+    const manualTradesCount = Number(manualTradesResult[0]?.count || 0);
+    const total = csvImportsCount + manualTradesCount;
+    const limitReached = total >= 10;
+
+    return {
+      csvImports: csvImportsCount,
+      manualTrades: manualTradesCount,
+      total,
+      limitReached
+    };
   }
 }
 

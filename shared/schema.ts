@@ -12,7 +12,7 @@ export const users = pgTable("users", {
   capitalInicial: decimal("capital_inicial", { precision: 12, scale: 2 }).default("0"),
   metaMensal: decimal("meta_mensal", { precision: 5, scale: 2 }).default("5"),
   perfilRisco: text("perfil_risco").default("moderado"),
-  planType: text("plan_type").default("starter"), // "starter", "pro", "black"
+  planType: text("plan_type").default("free"), // "free", "starter", "pro", "black"
   planExpiresAt: timestamp("plan_expires_at"),
   isActive: boolean("is_active").default(true),
   role: text("role").default("user"), // "user", "admin"

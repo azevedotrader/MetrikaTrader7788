@@ -1,7 +1,15 @@
 import OpenAI from "openai";
+import { storage } from "./storage";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export class FreeUserRestrictedError extends Error {
+  constructor(feature: string) {
+    super(`Recurso "${feature}" não disponível para usuários Free. Faça upgrade para acessar recursos de IA.`);
+    this.name = "FreeUserRestrictedError";
+  }
+}
 
 export interface TradeAnalysis {
   sentiment: 'bullish' | 'bearish' | 'neutral';
@@ -29,7 +37,18 @@ export interface TradingAdvice {
 
 export class AITradingService {
   
-  async analyzeUserTrade(tradeData: {
+  private async checkUserPlan(userId: string, feature: string): Promise<void> {
+    const user = await storage.getUser(userId);
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+    
+    if (user.planType === 'free') {
+      throw new FreeUserRestrictedError(feature);
+    }
+  }
+  
+  async analyzeUserTrade(userId: string, tradeData: {
     ativo: string;
     mercado: string;
     setup: string;
@@ -39,6 +58,8 @@ export class AITradingService {
     emocao?: string;
     comentario?: string;
   }): Promise<TradeAnalysis> {
+    await this.checkUserPlan(userId, "Análise de Trade");
+    
     try {
       const prompt = `
         Analise este trade planejado como um especialista em trading:
@@ -96,7 +117,9 @@ export class AITradingService {
     }
   }
 
-  async generateMarketInsight(asset: string): Promise<MarketInsight> {
+  async generateMarketInsight(userId: string, asset: string): Promise<MarketInsight> {
+    await this.checkUserPlan(userId, "Insights de Mercado");
+    
     try {
       const prompt = `
         Como especialista em análise técnica e fundamentalista, forneça insights sobre o ativo ${asset}.
@@ -145,7 +168,9 @@ export class AITradingService {
     }
   }
 
-  async chatWithTrader(userMessage: string, context?: any, language: string = 'pt'): Promise<string> {
+  async chatWithTrader(userId: string, userMessage: string, context?: any, language: string = 'pt'): Promise<string> {
+    await this.checkUserPlan(userId, "Chat com IA");
+    
     try {
       const contextInfo = context ? `
         Contexto do usuário:
@@ -212,7 +237,9 @@ export class AITradingService {
     }
   }
 
-  async generateTradingAdvice(userProfile: any, recentTrades: any[]): Promise<TradingAdvice[]> {
+  async generateTradingAdvice(userId: string, userProfile: any, recentTrades: any[]): Promise<TradingAdvice[]> {
+    await this.checkUserPlan(userId, "Conselhos de Trading");
+    
     try {
       const prompt = `
         Analise este perfil de trader e forneça 3-5 conselhos personalizados:
@@ -268,11 +295,13 @@ export class AITradingService {
     }
   }
 
-  async analyzeTradingPerformance(trades: any[]): Promise<{
+  async analyzeTradingPerformance(userId: string, trades: any[]): Promise<{
     summary: string;
     insights: string[];
     recommendations: string[];
   }> {
+    await this.checkUserPlan(userId, "Análise de Performance");
+    
     try {
       const prompt = `
         Analise a performance destes trades como especialista:
@@ -312,7 +341,9 @@ export class AITradingService {
     }
   }
 
-  async generateCsvBasedTips(trades: any[], csvImports: any[]): Promise<any[]> {
+  async generateCsvBasedTips(userId: string, trades: any[], csvImports: any[]): Promise<any[]> {
+    await this.checkUserPlan(userId, "Análise de CSV");
+    
     try {
       // Analisar todos os trades, priorizando os de CSV mas incluindo todos
       const csvTrades = trades.filter(trade => trade.origem === 'csv');
