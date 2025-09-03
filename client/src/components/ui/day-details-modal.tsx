@@ -1,14 +1,25 @@
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, BookOpen, TrendingUp, TrendingDown, Clock, Edit } from "lucide-react";
+import { Calendar, BookOpen, TrendingUp, TrendingDown, Clock, Edit, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import type { DiaryEntry } from "@shared/schema";
 import { cn } from "@/lib/utils";
+
+interface DiaryImage {
+  id: string;
+  fileName: string;
+  originalName: string;
+  caption?: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+}
 
 interface DayDetailsModalProps {
   isOpen: boolean;
@@ -18,6 +29,9 @@ interface DayDetailsModalProps {
 }
 
 export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: DayDetailsModalProps) {
+  const [dayImages, setDayImages] = useState<DiaryImage[]>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
+
   // Buscar entradas do diário
   const { data: diaryEntries = [] } = useQuery<DiaryEntry[]>({
     queryKey: ["/api/diary"],
@@ -75,6 +89,40 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     return format(date, 'HH:mm', { locale: ptBR });
+  };
+
+  // Carregar imagens da entrada do diário do dia
+  useEffect(() => {
+    if (dayDiaryEntry && isOpen) {
+      loadDayImages(dayDiaryEntry.id);
+    } else {
+      setDayImages([]);
+    }
+  }, [dayDiaryEntry, isOpen]);
+
+  const loadDayImages = async (diaryEntryId: string) => {
+    setLoadingImages(true);
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) return;
+
+      const response = await fetch(`/api/diary/${diaryEntryId}/images`, {
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        credentials: "include"
+      });
+
+      if (response.ok) {
+        const images = await response.json();
+        setDayImages(images);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar imagens do dia:', error);
+    } finally {
+      setLoadingImages(false);
+    }
   };
 
   return (
@@ -204,6 +252,55 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                   <div>
                     <h4 className="font-medium text-white mb-1">Pontos de Melhoria</h4>
                     <p className="text-zinc-300 text-sm leading-relaxed">{dayDiaryEntry.improvements}</p>
+                  </div>
+                )}
+
+                {/* Seção de imagens */}
+                {dayImages.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <ImageIcon className="h-4 w-4 text-zinc-400" />
+                      <h4 className="font-medium text-white">
+                        {dayImages.length === 1 ? 'Imagem' : 'Imagens'} ({dayImages.length})
+                      </h4>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {dayImages.slice(0, 8).map((image) => (
+                        <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-600 transition-colors group">
+                          <img
+                            src={`/api/images/${image.id}`}
+                            alt={image.originalName}
+                            className="w-full h-full object-cover cursor-pointer"
+                            title={image.originalName}
+                            onClick={() => window.open(`/api/images/${image.id}`, '_blank')}
+                            onError={(e) => {
+                              e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
+                            }}
+                            data-testid={`calendar-image-${image.id}`}
+                          />
+                          {/* Overlay com título ao hover */}
+                          <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                            <span className="text-white text-xs truncate">
+                              {image.originalName}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      {dayImages.length > 8 && (
+                        <div className="aspect-square rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                          <span className="text-sm text-zinc-400">
+                            +{dayImages.length - 8}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {loadingImages && (
+                  <div className="flex items-center gap-2 text-zinc-400">
+                    <ImageIcon className="h-4 w-4 animate-pulse" />
+                    <span className="text-sm">Carregando imagens...</span>
                   </div>
                 )}
               </CardContent>

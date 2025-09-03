@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from "./types";
 import multer from "multer";
 import csv from "csv-parser";
 import fs from "fs";
+import path from "path";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
 import XLSX from 'xlsx';
@@ -3020,7 +3021,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Servir o arquivo
       res.setHeader('Content-Type', image.mimeType);
       res.setHeader('Content-Length', image.fileSize);
-      res.sendFile(require('path').resolve(image.filePath));
+      res.sendFile(path.resolve(image.filePath));
     } catch (error) {
       console.error('Erro ao servir imagem:', error);
       res.status(500).json({ 
