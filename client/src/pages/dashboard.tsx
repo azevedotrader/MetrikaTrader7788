@@ -712,46 +712,14 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               }}
             />
 
-            {/* Área de lucros */}
+            {/* Área do valor acumulado */}
             <Area
-              type="monotone"
-              dataKey="positive"
-              stackId="1"
-              stroke="#22c55e"
-              strokeWidth={2}
-              fill="url(#positiveGradient)"
-            />
-            
-            {/* Área de perdas */}
-            <Area
-              type="monotone"
-              dataKey="negative"
-              stackId="1"
-              stroke="#ef4444"
-              strokeWidth={2}
-              fill="url(#negativeGradient)"
-            />
-
-            {/* Linha do valor acumulado - Principal destaque */}
-            <Line
               type="monotone"
               dataKey="accumulated"
-              stroke="#3b82f6"
-              strokeWidth={5}
-              dot={{ 
-                fill: "#3b82f6", 
-                strokeWidth: 2, 
-                r: 6,
-                stroke: "#ffffff"
-              }}
-              activeDot={{ 
-                r: 10, 
-                stroke: "#3b82f6", 
-                strokeWidth: 4, 
-                fill: "#ffffff",
-                filter: "drop-shadow(0 0 6px #3b82f6)"
-              }}
-              connectNulls={false}
+              stroke="#22c55e"
+              strokeWidth={3}
+              fill="url(#positiveGradient)"
+              dot={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
