@@ -75,14 +75,14 @@ export default function Landing() {
                 onClick={() => setShowLogin(true)}
                 className="text-slate-300 hover:text-white text-sm sm:text-base px-2 sm:px-4"
               >
-                Entrar
+                {t('landing.header.login')}
               </Button>
               <Button 
                 onClick={() => setShowRegister(true)}
                 className="gradient-purple-blue hover:opacity-90 transition-opacity text-sm sm:text-base px-2 sm:px-4"
               >
-                <span className="hidden sm:inline">Começar Agora</span>
-                <span className="sm:hidden">Começar</span>
+                <span className="hidden sm:inline">{t('landing.header.start')}</span>
+                <span className="sm:hidden">{t('landing.header.start_short')}</span>
               </Button>
             </div>
           </div>
@@ -103,8 +103,8 @@ export default function Landing() {
           {/* Announcement Banner */}
           <div className="text-center mb-8 sm:mb-12">
             <Badge className="gradient-emerald-blue text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold animate-glow">
-              <span className="hidden sm:inline">✨ Novo: Integração com Gate.io + 3 Corretoras</span>
-              <span className="sm:hidden">✨ Novo: Integração Gate.io</span>
+              <span className="hidden sm:inline">{t('landing.hero.announcement')}</span>
+              <span className="sm:hidden">{t('landing.hero.announcement_mobile')}</span>
             </Badge>
           </div>
 
@@ -124,11 +124,11 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8 justify-center lg:justify-start">
                 <div className="flex items-center space-x-2 text-slate-300">
                   <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span>Import automático de trades</span>
+                  <span>{t('landing.hero.feature1')}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-slate-300">
                   <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span>Analytics avançado</span>
+                  <span>{t('landing.hero.feature2')}</span>
                 </div>
               </div>
 
@@ -138,7 +138,7 @@ export default function Landing() {
                   onClick={() => setShowRegister(true)}
                   className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-6 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-bold animate-glow"
                 >
-                  Começar Grátis
+                  {t('landing.hero.start_free')}
                   <ArrowRight className="w-6 h-6 ml-3" />
                 </Button>
                 <Button 
@@ -146,7 +146,7 @@ export default function Landing() {
                   variant="outline"
                   className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-semibold backdrop-blur-sm"
                 >
-                  Ver Demo
+                  {t('landing.hero.watch_demo')}
                 </Button>
               </div>
               
@@ -162,11 +162,11 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center space-x-2 text-slate-300">
                   <Users className="w-5 h-5 text-blue-400" />
-                  <span>1.200+ traders ativos</span>
+                  <span>{t('landing.hero.social_proof1')}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-slate-300">
                   <Activity className="w-5 h-5 text-green-400" />
-                  <span>2M+ trades analisados</span>
+                  <span>{t('landing.hero.social_proof2')}</span>
                 </div>
               </div>
             </div>
@@ -181,10 +181,10 @@ export default function Landing() {
                       <div className="w-10 h-10 gradient-emerald-blue rounded-xl flex items-center justify-center">
                         <BarChart3 className="w-5 h-5 text-white" />
                       </div>
-                      <span className="text-xl font-bold text-white">Dashboard Principal</span>
+                      <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
                     </div>
                     <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-3 py-1">
-                      Live
+                      {t('landing.dashboard.live')}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -194,22 +194,22 @@ export default function Landing() {
                     <Card className="bg-gradient-to-br from-emerald-500/25 to-teal-500/25 border-emerald-500/40 hover:border-emerald-400/60 transition-all duration-300">
                       <CardContent className="p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-medium text-slate-200">P&L Total</span>
+                          <span className="text-sm font-medium text-slate-200">{t('landing.dashboard.total_pnl')}</span>
                           <TrendingUp className="w-5 h-5 text-emerald-400" />
                         </div>
                         <div className="text-3xl font-bold text-emerald-400">+R$ 28.540</div>
-                        <div className="text-sm text-emerald-300">+12.4% este mês</div>
+                        <div className="text-sm text-emerald-300">{t('landing.dashboard.monthly_growth')}</div>
                       </CardContent>
                     </Card>
                     
                     <Card className="bg-gradient-to-br from-indigo-500/25 to-blue-500/25 border-indigo-500/40 hover:border-indigo-400/60 transition-all duration-300">
                       <CardContent className="p-5">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-medium text-slate-200">Win Rate</span>
+                          <span className="text-sm font-medium text-slate-200">{t('landing.dashboard.win_rate')}</span>
                           <Target className="w-5 h-5 text-indigo-400" />
                         </div>
                         <div className="text-3xl font-bold text-indigo-400">78.5%</div>
-                        <div className="text-sm text-indigo-300">156/199 trades</div>
+                        <div className="text-sm text-indigo-300">{t('landing.dashboard.trades_count')}</div>
                       </CardContent>
                     </Card>
                   </div>
@@ -218,7 +218,7 @@ export default function Landing() {
                   <Card className="bg-slate-800/50 border-slate-700">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-slate-300">Evolução do Capital</span>
+                        <span className="text-sm font-medium text-slate-300">{t('landing.dashboard.capital_evolution')}</span>
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                           <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
@@ -249,28 +249,28 @@ export default function Landing() {
                   {/* Broker Integration Status */}
                   <Card className="bg-slate-800/50 border-slate-700">
                     <CardContent className="p-4">
-                      <span className="text-sm font-medium text-slate-300 mb-3 block">Corretoras Conectadas</span>
+                      <span className="text-sm font-medium text-slate-300 mb-3 block">{t('landing.dashboard.connected_brokers')}</span>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                             <span className="text-sm text-slate-300">Gate.io</span>
                           </div>
-                          <Badge className="bg-green-500/20 text-green-400 text-xs">Sincronizado</Badge>
+                          <Badge className="bg-green-500/20 text-green-400 text-xs">{t('landing.dashboard.synchronized')}</Badge>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                             <span className="text-sm text-slate-300">Clear</span>
                           </div>
-                          <Badge className="bg-blue-500/20 text-blue-400 text-xs">Ativo</Badge>
+                          <Badge className="bg-blue-500/20 text-blue-400 text-xs">{t('landing.dashboard.active')}</Badge>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
                             <span className="text-sm text-slate-300">Tickmill</span>
                           </div>
-                          <Badge className="bg-orange-500/20 text-orange-400 text-xs">Conectado</Badge>
+                          <Badge className="bg-orange-500/20 text-orange-400 text-xs">{t('landing.dashboard.connected')}</Badge>
                         </div>
                       </div>
                     </CardContent>
@@ -292,33 +292,32 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-red-400">95% dos Traders</span>
-              <span className="text-white block">Falham Por Não Saberem</span>
-              <span className="gradient-text">O Que Estão Fazendo Errado</span>
+              <span className="text-red-400">{t('landing.problem.title1')}</span>
+              <span className="text-white block">{t('landing.problem.title2')}</span>
+              <span className="gradient-text">{t('landing.problem.title3')}</span>
             </h2>
             <p className="text-xl text-slate-300 max-w-4xl mx-auto">
-              Sem dados precisos e análises consistentes, você está operando no escuro. 
-              Métrika revela exatamente onde você perde dinheiro e como corrigir.
+              {t('landing.problem.subtitle')}
             </p>
           </div>
 
           <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
-                problem: "Planilhas Desatualizadas",
-                description: "Você perde tempo preenchendo planilhas manualmente em vez de focar nas operações",
+                problem: t('landing.problem.outdated_sheets'),
+                description: t('landing.problem.outdated_sheets_desc'),
                 icon: FileText,
                 color: "from-red-500 to-red-400"
               },
               {
-                problem: "Dados Imprecisos",
-                description: "Erros de cálculo e dados inconsistentes levam a decisões erradas",
+                problem: t('landing.problem.imprecise_data'),
+                description: t('landing.problem.imprecise_data_desc'),
                 icon: Database,
                 color: "from-orange-500 to-orange-400"
               },
               {
-                problem: "Análise Limitada",
-                description: "Sem insights profundos sobre seus padrões de trading, você repete os mesmos erros",
+                problem: t('landing.problem.limited_analysis'),
+                description: t('landing.problem.limited_analysis_desc'),
                 icon: Brain,
                 color: "from-yellow-500 to-yellow-400"
               }
@@ -342,14 +341,14 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 text-sm font-medium mb-6">
-              A Solução Definitiva
+              {t('landing.solution.badge')}
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="gradient-text">Screenshots Reais</span>
-              <span className="text-white block">da Plataforma</span>
+              <span className="gradient-text">{t('landing.solution.title1')}</span>
+              <span className="text-white block">{t('landing.solution.title2')}</span>
             </h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-              Veja exatamente como o Métrika transforma seus dados de trading em insights acionáveis
+              {t('landing.solution.subtitle')}
             </p>
           </div>
 
@@ -361,9 +360,9 @@ export default function Landing() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-white flex items-center gap-2">
                       <PieChart className="w-5 h-5" />
-                      Dashboard Analytics
+                      {t('landing.solution.dashboard_analytics')}
                     </CardTitle>
-                    <Badge className="bg-green-500/20 text-green-400">Real-time</Badge>
+                    <Badge className="bg-green-500/20 text-green-400">{t('landing.solution.realtime')}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -371,26 +370,26 @@ export default function Landing() {
                   <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-slate-300">Lucro Total</span>
+                        <span className="text-sm text-slate-300">{t('landing.solution.total_profit')}</span>
                         <DollarSign className="w-4 h-4 text-green-400" />
                       </div>
                       <div className="text-2xl font-bold text-green-400">R$ 45.230</div>
-                      <div className="text-xs text-green-300">+18.5% no mês</div>
+                      <div className="text-xs text-green-300">{t('landing.solution.monthly_growth')}</div>
                     </div>
                     <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-slate-300">Trades Vencedores</span>
+                        <span className="text-sm text-slate-300">{t('landing.solution.winning_trades')}</span>
                         <Target className="w-4 h-4 text-blue-400" />
                       </div>
                       <div className="text-2xl font-bold text-blue-400">82.3%</div>
-                      <div className="text-xs text-blue-300">234/284 trades</div>
+                      <div className="text-xs text-blue-300">{t('landing.solution.trades_stats')}</div>
                     </div>
                   </div>
 
                   {/* Analytics Chart */}
                   <div className="bg-slate-800/50 rounded-lg p-4 mb-4">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-slate-300">Evolução Mensal</span>
+                      <span className="text-sm font-medium text-slate-300">{t('landing.solution.monthly_evolution')}</span>
                       <LineChart className="w-4 h-4 text-slate-400" />
                     </div>
                     <div className="h-24 flex items-end justify-between space-x-1">
@@ -419,7 +418,7 @@ export default function Landing() {
 
                   {/* Recent Trades */}
                   <div className="space-y-2">
-                    <span className="text-sm font-medium text-slate-300">Últimos Trades</span>
+                    <span className="text-sm font-medium text-slate-300">{t('landing.solution.recent_trades')}</span>
                     {[
                       { pair: "BTC/USDT", result: "+R$ 1.250", positive: true, time: "14:32" },
                       { pair: "ETH/USDT", result: "+R$ 890", positive: true, time: "13:45" },
@@ -446,34 +445,34 @@ export default function Landing() {
             {/* Features List */}
             <div className="order-1 lg:order-2">
               <h3 className="text-3xl font-bold text-white mb-8">
-                Tudo Que Você Precisa Para
-                <span className="gradient-text block">Dominar Seus Trades</span>
+                {t('landing.solution.features_title1')}
+                <span className="gradient-text block">{t('landing.solution.features_title2')}</span>
               </h3>
               
               <div className="space-y-6">
                 {[
                   {
                     icon: Zap,
-                    title: "Import Automático",
-                    description: "Conecte suas corretoras e tenha todos os trades importados automaticamente. Zero trabalho manual.",
+                    title: t('landing.solution.auto_import'),
+                    description: t('landing.solution.auto_import_desc'),
                     color: "text-yellow-400"
                   },
                   {
                     icon: Brain,
-                    title: "IA Analytics",
-                    description: "Algoritmos avançados identificam seus padrões de lucro e perda, revelando insights invisíveis.",
+                    title: t('landing.solution.ai_analytics'),
+                    description: t('landing.solution.ai_analytics_desc'),
                     color: "text-purple-400"
                   },
                   {
                     icon: Shield,
-                    title: "Risk Management",
-                    description: "Monitore seu risco em tempo real e receba alertas antes de comprometer seu capital.",
+                    title: t('landing.solution.risk_management'),
+                    description: t('landing.solution.risk_management_desc'),
                     color: "text-blue-400"
                   },
                   {
                     icon: Calendar,
-                    title: "Journal Inteligente",
-                    description: "Sistema de journaling que aprende com seus trades e sugere melhorias automáticas.",
+                    title: t('landing.solution.smart_journal'),
+                    description: t('landing.solution.smart_journal_desc'),
                     color: "text-green-400"
                   }
                 ].map((feature, index) => (
@@ -498,16 +497,16 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-6">
-              Resultados Comprovados
+              {t('landing.stats.title')}
             </h2>
-            <p className="font-body text-xl text-slate-200">Números reais de traders que transformaram seus resultados</p>
+            <p className="font-body text-xl text-slate-200">{t('landing.stats.subtitle')}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: "2.1M+", label: "Trades Analisados", icon: Activity, color: "gradient-emerald-blue" },
-              { value: "1.200+", label: "Traders Ativos", icon: Users, color: "gradient-teal" },
-              { value: "847%", label: "Média de Melhoria", icon: TrendingUp, color: "gradient-gold" },
-              { value: "4.9/5", label: "Satisfação", icon: Star, color: "gradient-emerald-blue" }
+              { value: "2.1M+", label: t('landing.stats.trades_analyzed'), icon: Activity, color: "gradient-emerald-blue" },
+              { value: "1.200+", label: t('landing.stats.active_traders'), icon: Users, color: "gradient-teal" },
+              { value: "847%", label: t('landing.stats.improvement_avg'), icon: TrendingUp, color: "gradient-gold" },
+              { value: "4.9/5", label: t('landing.stats.satisfaction'), icon: Star, color: "gradient-emerald-blue" }
             ].map((stat, index) => (
               <div key={index} className="text-center group">
                 <div className={`w-20 h-20 ${stat.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:animate-glow transition-all duration-300`}>
@@ -530,14 +529,14 @@ export default function Landing() {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <Badge className="gradient-emerald-blue text-white px-6 py-3 text-base font-semibold mb-8 animate-glow">
-              Planos e Preços
+              {t('landing.pricing.badge')}
             </Badge>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 sm:mb-8">
-              <span className="text-white">Escolha o Plano</span>
-              <span className="gradient-text block animate-pulse-slow">Perfeito para Você</span>
+              <span className="text-white">{t('landing.pricing.title1')}</span>
+              <span className="gradient-text block animate-pulse-slow">{t('landing.pricing.title2')}</span>
             </h2>
             <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200 max-w-4xl mx-auto">
-              Transforme sua análise de trading hoje mesmo. Cancele quando quiser.
+              {t('landing.pricing.subtitle')}
             </p>
           </div>
 
@@ -546,20 +545,20 @@ export default function Landing() {
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Trader Starter</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.starter_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 29,90</span>
-                    <span className="text-slate-400 ml-2">/mês</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.starter_price')}</span>
+                    <span className="text-slate-400 ml-2">{t('landing.pricing.starter_period')}</span>
                   </div>
-                  <p className="text-slate-400">7 dias grátis</p>
+                  <p className="text-slate-400">{t('landing.pricing.starter_trial')}</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    "Acesso completo às métricas dos seus trades",
-                    "Backup seguro de todo histórico",
-                    "Anotações detalhadas para cada trade",
-                    "Filtros avançados por mercado e período"
+                    t('landing.pricing.starter_feature1'),
+                    t('landing.pricing.starter_feature2'),
+                    t('landing.pricing.starter_feature3'),
+                    t('landing.pricing.starter_feature4')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -573,7 +572,7 @@ export default function Landing() {
                   className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
                   onClick={() => setShowRegister(true)}
                 >
-                  Teste 7 Dias Grátis
+                  {t('landing.pricing.starter_button')}
                 </Button>
               </CardContent>
             </Card>
@@ -582,22 +581,22 @@ export default function Landing() {
             <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative sm:transform sm:scale-110 shadow-2xl animate-glow">
               <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Trader Pro</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.pro_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 49,90</span>
-                    <span className="text-slate-400 ml-2">/mês</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.pro_price')}</span>
+                    <span className="text-slate-400 ml-2">{t('landing.pricing.pro_period')}</span>
                   </div>
-                  <p className="text-slate-300">Anual: R$ 42/mês</p>
+                  <p className="text-slate-300">{t('landing.pricing.pro_annual')}</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    "Tudo do Starter +",
-                    "Suporte integrado direto no app",
-                    "Análise mensal das suas métricas",
-                    "Sugestões para melhoria",
-                    "Integração TradingView",
-                    "Acompanhamento profissional"
+                    t('landing.pricing.pro_feature1'),
+                    t('landing.pricing.pro_feature2'),
+                    t('landing.pricing.pro_feature3'),
+                    t('landing.pricing.pro_feature4'),
+                    t('landing.pricing.pro_feature5'),
+                    t('landing.pricing.pro_feature6')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
@@ -610,7 +609,7 @@ export default function Landing() {
                   className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 text-xl font-bold py-4 animate-glow"
                   onClick={() => setShowRegister(true)}
                 >
-                  Começar Agora
+                  {t('landing.pricing.pro_button')}
                   <ArrowRight className="w-6 h-6 ml-3" />
                 </Button>
               </CardContent>
@@ -620,22 +619,22 @@ export default function Landing() {
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-6 sm:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Trader Black</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.black_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 97</span>
-                    <span className="text-slate-400 ml-2">/mês</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.black_price')}</span>
+                    <span className="text-slate-400 ml-2">{t('landing.pricing.black_period')}</span>
                   </div>
-                  <p className="text-slate-400">Anual: R$ 80/mês</p>
+                  <p className="text-slate-400">{t('landing.pricing.black_annual')}</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    "IA treinada no seu histórico",
-                    "Relatórios inteligentes completos",
-                    "Suporte 24h via IA",
-                    "Análise 2x/mês com estratégias",
-                    "Gestão de risco personalizada",
-                    "Call mensal com equipe profissional"
+                    t('landing.pricing.black_feature1'),
+                    t('landing.pricing.black_feature2'),
+                    t('landing.pricing.black_feature3'),
+                    t('landing.pricing.black_feature4'),
+                    t('landing.pricing.black_feature5'),
+                    t('landing.pricing.black_feature6')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
@@ -649,7 +648,7 @@ export default function Landing() {
                   className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
                   onClick={() => setShowRegister(true)}
                 >
-                  Nível Máximo
+                  {t('landing.pricing.black_button')}
                 </Button>
               </CardContent>
             </Card>
@@ -659,7 +658,7 @@ export default function Landing() {
           <div className="text-center mt-12">
             <div className="inline-flex items-center space-x-2 text-slate-300 bg-slate-800/50 rounded-full px-6 py-3">
               <Shield className="w-5 h-5 text-green-400" />
-              <span>Garantia de 30 dias ou seu dinheiro de volta</span>
+              <span>{t('landing.pricing.guarantee')}</span>
             </div>
           </div>
         </div>
@@ -670,33 +669,33 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              O Que Nossos Traders Dizem
+              {t('landing.testimonials.title')}
             </h2>
-            <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200">Resultados reais de quem usa o Métrika todos os dias</p>
+            <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200">{t('landing.testimonials.subtitle')}</p>
           </div>
 
           <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
-                name: "Carlos Rodrigues",
-                role: "Day Trader • São Paulo",
-                content: "Métrika me fez economizar 4 horas por semana que eu gastava com planilhas. Agora posso focar 100% no trading. Meu win rate subiu de 62% para 78%.",
+                name: t('landing.testimonials.carlos_name'),
+                role: t('landing.testimonials.carlos_role'),
+                content: t('landing.testimonials.carlos_content'),
                 rating: 5,
-                improvement: "+R$ 23.400 em 3 meses"
+                improvement: t('landing.testimonials.carlos_improvement')
               },
               {
-                name: "Ana Silva",
-                role: "Swing Trader • Rio de Janeiro",
-                content: "A integração com Gate.io foi um divisor de águas. Todos os meus trades crypto são importados automaticamente. O analytics revelou padrões que eu nunca tinha notado.",
+                name: t('landing.testimonials.ana_name'),
+                role: t('landing.testimonials.ana_role'),
+                content: t('landing.testimonials.ana_content'),
                 rating: 5,
-                improvement: "Win rate: 65% → 81%"
+                improvement: t('landing.testimonials.ana_improvement')
               },
               {
-                name: "Pedro Santos",
-                role: "Forex Trader • Belo Horizonte",
-                content: "Testei várias plataformas de journaling, mas nenhuma chega perto do Métrika. O sistema de IA realmente aprende com meus trades e me dá insights valiosos.",
+                name: t('landing.testimonials.pedro_name'),
+                role: t('landing.testimonials.pedro_role'),
+                content: t('landing.testimonials.pedro_content'),
                 rating: 5,
-                improvement: "Capital cresceu 340%"
+                improvement: t('landing.testimonials.pedro_improvement')
               }
             ].map((testimonial, index) => (
               <Card key={index} className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-emerald-600/30 hover:border-emerald-500/50 transition-all duration-300 hover:scale-105">
@@ -732,11 +731,11 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-              <span className="gradient-text">Recursos Exclusivos</span>
-              <span className="text-white block">que Farão a Diferença</span>
+              <span className="gradient-text">{t('landing.features.title1')}</span>
+              <span className="text-white block">{t('landing.features.title2')}</span>
             </h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-              Cada função foi pensada para acelerar seu progresso e maximizar seus lucros
+              {t('landing.features.subtitle')}
             </p>
           </div>
 
@@ -744,50 +743,50 @@ export default function Landing() {
             {[
               {
                 icon: Zap,
-                title: "Sync Automático",
-                description: "Importe seus trades e tenha controle sobre cada mercado com todas métricas de visualização organizada.",
+                title: t('landing.features.sync_title'),
+                description: t('landing.features.sync_description'),
                 color: "from-yellow-500 to-orange-500"
               },
               {
                 icon: Brain,
-                title: "IA Analytics",
-                description: "Integração com inteligência artificial para estudar as métricas da sua conta detalhada mostrando as melhores correções e ajustes para potencializar resultados.",
+                title: t('landing.features.ai_title'),
+                description: t('landing.features.ai_description'),
                 color: "from-purple-500 to-pink-500"  
               },
               {
                 icon: Target,
-                title: "Risk Manager",
-                description: "Monitore risco em tempo real e receba alertas antes de comprometer capital.",
+                title: t('landing.features.risk_title'),
+                description: t('landing.features.risk_description'),
                 color: "from-blue-500 to-cyan-500"
               },
               {
                 icon: FileText,
-                title: "Journal Inteligente",
-                description: "Sistema aprende com seus trades e sugere melhorias automaticamente.",
+                title: t('landing.features.journal_title'),
+                description: t('landing.features.journal_description'),
                 color: "from-green-500 to-emerald-500"
               },
               {
                 icon: PieChart,
-                title: "Charts Avançados",
-                description: "Visualizações interativas que revelam padrões ocultos nos seus dados.",
+                title: t('landing.features.charts_title'),
+                description: t('landing.features.charts_description'),
                 color: "from-indigo-500 to-purple-500"
               },
               {
                 icon: Clock,
-                title: "Time Analytics",
-                description: "Descubra seus ativos, horários e dias mais lucrativos com uma análise de dados eficiente e organizada.",
+                title: t('landing.features.time_title'),
+                description: t('landing.features.time_description'),
                 color: "from-teal-500 to-green-500"
               },
               {
                 icon: Database,
-                title: "Multi-Asset",
-                description: "Forex, Crypto, Ações, Futuros - todos os mercados em uma plataforma.",
+                title: t('landing.features.multiasset_title'),
+                description: t('landing.features.multiasset_description'),
                 color: "from-rose-500 to-pink-500"
               },
               {
                 icon: Download,
-                title: "Export Completo",
-                description: "Exporte relatórios profissionais em PDF para clientes e investidores.",
+                title: t('landing.features.export_title'),
+                description: t('landing.features.export_description'),
                 color: "from-slate-500 to-gray-500"
               }
             ].map((feature, index) => (
@@ -814,14 +813,14 @@ export default function Landing() {
         <div className="relative max-w-6xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-emerald-600/30 rounded-3xl p-16 shadow-2xl animate-glow">
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-8 sm:mb-10 leading-tight">
-              <span className="text-white">Pare de Perder</span>
-              <span className="gradient-text block animate-pulse-slow">Dinheiro por Falta</span>
-              <span className="text-white">de Dados</span>
+              <span className="text-white">{t('landing.cta.title1')}</span>
+              <span className="gradient-text block animate-pulse-slow">{t('landing.cta.title2')}</span>
+              <span className="text-white">{t('landing.cta.title3')}</span>
             </h2>
             
             <p className="font-body text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 mb-8 sm:mb-12 max-w-4xl mx-auto">
-              95% dos traders falham porque não sabem o que estão fazendo errado. 
-              <span className="text-emerald-400 font-bold"> Você não precisa ser parte dessa estatística.</span>
+              {t('landing.cta.subtitle1')} 
+              <span className="text-emerald-400 font-bold">{t('landing.cta.subtitle2')}</span>
             </p>
 
             <div className="flex flex-col lg:flex-row gap-8 justify-center mb-16">
@@ -829,19 +828,19 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center">
                   <CheckCircle className="w-8 h-8 text-emerald-400" />
                 </div>
-                <span className="text-xl font-medium">Setup em 5 minutos</span>
+                <span className="text-xl font-medium">{t('landing.cta.benefit1')}</span>
               </div>
               <div className="flex items-center space-x-4 text-slate-200">
                 <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center">
                   <Zap className="w-8 h-8 text-indigo-400" />
                 </div>  
-                <span className="text-xl font-medium">Resultados imediatos</span>
+                <span className="text-xl font-medium">{t('landing.cta.benefit2')}</span>
               </div>
               <div className="flex items-center space-x-4 text-slate-200">
                 <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center">
                   <Shield className="w-8 h-8 text-teal-400" />
                 </div>
-                <span className="text-xl font-medium">Garantia 30 dias</span>
+                <span className="text-xl font-medium">{t('landing.cta.benefit3')}</span>
               </div>
             </div>
 
@@ -851,7 +850,7 @@ export default function Landing() {
                 onClick={() => setShowRegister(true)}
                 className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-8 sm:px-12 lg:px-16 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-bold animate-glow"
               >
-                Transformar Meus Resultados Agora
+                {t('landing.cta.primary_button')}
                 <ArrowRight className="w-7 h-7 ml-4" />
               </Button>
               <Button 
@@ -859,19 +858,19 @@ export default function Landing() {
                 variant="outline"
                 className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-8 lg:px-12 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-semibold backdrop-blur-sm"
               >
-                Ver Demo Completa
+                {t('landing.cta.secondary_button')}
               </Button>
             </div>
 
             <div className="text-center">
-              <p className="text-slate-300 mb-6 text-lg">Mais de 1.200 traders já transformaram seus resultados</p>
+              <p className="text-slate-300 mb-6 text-lg">{t('landing.cta.social_proof')}</p>
               <div className="flex items-center justify-center space-x-6">
                 <div className="flex text-gold-400">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-6 h-6 fill-current" />
                   ))}
                 </div>
-                <span className="text-slate-200 font-semibold text-lg">4.9/5 baseado em 500+ avaliações</span>
+                <span className="text-slate-200 font-semibold text-lg">{t('landing.cta.rating')}</span>
               </div>
             </div>
           </div>
@@ -890,37 +889,36 @@ export default function Landing() {
                 <span className="text-2xl font-bold gradient-text">Métrika</span>
               </div>
               <p className="text-slate-400 max-w-md">
-                A plataforma de analytics de trading mais avançada do Brasil. 
-                Transforme seus dados em lucro com inteligência artificial.
+                {t('landing.footer.description')}
               </p>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Produto</h4>
+              <h4 className="text-white font-semibold mb-4">{t('landing.footer.product_title')}</h4>
               <div className="space-y-2">
-                <a href="#recursos" className="text-slate-400 hover:text-white transition-colors block">Recursos</a>
-                <a href="#precos" className="text-slate-400 hover:text-white transition-colors block">Preços</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">Integrações</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">API</a>
+                <a href="#recursos" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.features')}</a>
+                <a href="#precos" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.pricing')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.integrations')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.api')}</a>
               </div>
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">Suporte</h4>
+              <h4 className="text-white font-semibold mb-4">{t('landing.footer.support_title')}</h4>
               <div className="space-y-2">
-                <a href="#contato" className="text-slate-400 hover:text-white transition-colors block">Contato</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">Documentação</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">Tutoriais</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">Status</a>
+                <a href="#contato" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.contact')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.documentation')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.tutorials')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.status')}</a>
               </div>
             </div>
           </div>
           
           <div className="border-t border-slate-800 mt-8 pt-8 text-center">
             <p className="text-slate-400">
-              © 2025 Métrika. Todos os direitos reservados. 
+              {t('landing.footer.copyright')} 
               <span className="mx-2">•</span>
-              Desenvolvido com ❤️ para traders brasileiros.
+              {t('landing.footer.made_with_love')}
             </p>
           </div>
         </div>
