@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Edit2, Calendar, TrendingUp, TrendingDown, Image as ImageIcon } from "lucide-react";
 import { DiaryModal } from "@/components/ui/diary-modal";
+import { ImageModal } from "@/components/ui/image-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,6 +27,7 @@ export default function Diario() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | undefined>(undefined);
   const [entryImages, setEntryImages] = useState<Record<string, DiaryImage[]>>({});
+  const [selectedImage, setSelectedImage] = useState<DiaryImage | null>(null);
   const queryClient = useQueryClient();
 
   const { data: entries = [], isLoading } = useQuery<DiaryEntry[]>({
@@ -233,7 +235,7 @@ export default function Diario() {
                   </p>
                   
                   <div className="flex items-center space-x-4 text-sm text-slate-400">
-                    {entry.trades !== undefined && entry.trades > 0 && (
+                    {entry.trades !== undefined && entry.trades !== null && entry.trades > 0 && (
                       <span data-testid={`trades-count-${entry.id}`}>
                         💡 {entry.trades} {t('journal.trades_performed')}
                       </span>
@@ -286,9 +288,9 @@ export default function Diario() {
                             <img
                               src={`/api/images/${image.id}`}
                               alt={image.originalName}
-                              className="w-full h-full object-cover cursor-pointer"
+                              className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                               title={image.originalName}
-                              onClick={() => window.open(`/api/images/${image.id}`, '_blank')}
+                              onClick={() => setSelectedImage(image)}
                               onError={(e) => {
                                 e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
                               }}
@@ -319,6 +321,16 @@ export default function Diario() {
           onSuccess={handleModalSuccess}
         />
       </div>
+
+      {/* Modal de visualização de imagem */}
+      {selectedImage && (
+        <ImageModal
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          imageId={selectedImage.id}
+          imageName={selectedImage.originalName}
+        />
+      )}
     </div>
   );
 }

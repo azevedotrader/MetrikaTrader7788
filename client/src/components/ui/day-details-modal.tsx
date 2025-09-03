@@ -10,6 +10,7 @@ import { ptBR } from "date-fns/locale";
 import { useQuery } from "@tanstack/react-query";
 import type { DiaryEntry } from "@shared/schema";
 import { cn } from "@/lib/utils";
+import { ImageModal } from "./image-modal";
 
 interface DiaryImage {
   id: string;
@@ -31,6 +32,7 @@ interface DayDetailsModalProps {
 export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: DayDetailsModalProps) {
   const [dayImages, setDayImages] = useState<DiaryImage[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<DiaryImage | null>(null);
 
   // Buscar entradas do diário
   const { data: diaryEntries = [] } = useQuery<DiaryEntry[]>({
@@ -291,9 +293,9 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                           <img
                             src={`/api/images/${image.id}`}
                             alt={image.originalName}
-                            className="w-full h-full object-cover cursor-pointer"
+                            className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                             title={image.originalName}
-                            onClick={() => window.open(`/api/images/${image.id}`, '_blank')}
+                            onClick={() => setSelectedImage(image)}
                             onError={(e) => {
                               e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
                             }}
@@ -427,6 +429,16 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
           </Button>
         </div>
       </DialogContent>
+
+      {/* Modal de visualização de imagem */}
+      {selectedImage && (
+        <ImageModal
+          isOpen={!!selectedImage}
+          onClose={() => setSelectedImage(null)}
+          imageId={selectedImage.id}
+          imageName={selectedImage.originalName}
+        />
+      )}
     </Dialog>
   );
 }
