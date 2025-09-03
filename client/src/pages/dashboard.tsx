@@ -2131,7 +2131,7 @@ export default function Dashboard() {
                   ? "text-green-400"
                   : "text-red-400"
               }
-              subtitle="Soma de todas as corretoras"
+              subtitle={t('metrics.sum_all_brokers')}
             />
 
             <MetricCard
