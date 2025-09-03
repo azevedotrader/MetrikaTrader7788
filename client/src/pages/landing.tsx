@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
+import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Landing() {
@@ -67,7 +68,8 @@ export default function Landing() {
                 {t('landing.header.contact')}
               </a>
             </nav>
-            <div className="flex space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <LanguageSelector />
               <Button 
                 variant="ghost" 
                 onClick={() => setShowLogin(true)}
