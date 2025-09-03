@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Crown, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { PlanDetailsModal } from "./plan-details-modal";
 
 interface PlanInfo {
   planType: 'free' | 'starter' | 'pro' | 'black';
@@ -13,6 +15,7 @@ interface PlanInfo {
 
 export function PlanStatus() {
   const { user } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const { data: planInfo, isLoading, error } = useQuery({
     queryKey: ['/api/user/plan'],
@@ -94,26 +97,35 @@ export function PlanStatus() {
   };
 
   return (
-    <div className="flex items-center space-x-2" data-testid="plan-status">
-      <Badge 
-        className={`${planDetails.color} text-white hover:${planDetails.color}/80 flex items-center space-x-1 px-2 py-1 text-xs`}
-        data-testid={`badge-plan-${planInfo.planType}`}
-      >
-        {planDetails.icon}
-        <span>{planDetails.name}</span>
-      </Badge>
-      
-      {showDuration && (
-        <div className="flex items-center space-x-1 text-xs text-zinc-400" data-testid="plan-duration">
-          <Clock className="w-3 h-3" />
-          <span>
-            {planInfo.daysRemaining !== undefined 
-              ? formatDaysRemaining(planInfo.daysRemaining)
-              : ''
-            }
-          </span>
-        </div>
-      )}
-    </div>
+    <>
+      <div className="flex items-center space-x-2" data-testid="plan-status">
+        <Badge 
+          className={`${planDetails.color} text-white hover:${planDetails.color}/80 flex items-center space-x-1 px-2 py-1 text-xs cursor-pointer transition-colors`}
+          data-testid={`badge-plan-${planInfo.planType}`}
+          onClick={() => setIsModalOpen(true)}
+        >
+          {planDetails.icon}
+          <span>{planDetails.name}</span>
+        </Badge>
+        
+        {showDuration && (
+          <div className="flex items-center space-x-1 text-xs text-zinc-400" data-testid="plan-duration">
+            <Clock className="w-3 h-3" />
+            <span>
+              {planInfo.daysRemaining !== undefined 
+                ? formatDaysRemaining(planInfo.daysRemaining)
+                : ''
+              }
+            </span>
+          </div>
+        )}
+      </div>
+
+      <PlanDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        planInfo={planInfo}
+      />
+    </>
   );
 }
