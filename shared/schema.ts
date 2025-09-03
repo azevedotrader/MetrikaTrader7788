@@ -139,6 +139,19 @@ export const diaryEntries = pgTable("diary_entries", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Tabela para imagens do diário
+export const diaryImages = pgTable("diary_images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  diaryEntryId: varchar("diary_entry_id").notNull().references(() => diaryEntries.id, { onDelete: "cascade" }),
+  fileName: text("file_name").notNull(),
+  originalName: text("original_name").notNull(),
+  filePath: text("file_path").notNull(), // Caminho no object storage
+  fileSize: integer("file_size").notNull(), // Tamanho do arquivo em bytes
+  mimeType: text("mime_type").notNull(), // tipo MIME (image/jpeg, image/png, etc)
+  caption: text("caption"), // legenda da imagem
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   name: true,
   email: true,
@@ -251,6 +264,14 @@ export const insertDiaryEntrySchema = createInsertSchema(diaryEntries).omit({
   improvements: z.string().optional(),
 });
 
+// Schema para imagens do diário
+export const insertDiaryImageSchema = createInsertSchema(diaryImages).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  caption: z.string().optional(),
+});
+
 // Schema para usuários atualizarem seu próprio perfil
 export const updateProfileSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").optional(),
@@ -265,6 +286,8 @@ export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema
 export type UpdateCsvImport = z.infer<typeof updateCsvImportSchema>;
 export type InsertDiaryEntry = z.infer<typeof insertDiaryEntrySchema>;
 export type DiaryEntry = typeof diaryEntries.$inferSelect;
+export type InsertDiaryImage = z.infer<typeof insertDiaryImageSchema>;
+export type DiaryImage = typeof diaryImages.$inferSelect;
 
 // Relações do Drizzle ORM
 import { relations } from "drizzle-orm";
@@ -313,10 +336,18 @@ export const subscriptionPlansRelations = relations(subscriptionPlans, ({ many }
   subscriptions: many(subscriptions),
 }));
 
-export const diaryEntriesRelations = relations(diaryEntries, ({ one }) => ({
+export const diaryEntriesRelations = relations(diaryEntries, ({ one, many }) => ({
   user: one(users, {
     fields: [diaryEntries.userId],
     references: [users.id],
+  }),
+  images: many(diaryImages),
+}));
+
+export const diaryImagesRelations = relations(diaryImages, ({ one }) => ({
+  diaryEntry: one(diaryEntries, {
+    fields: [diaryImages.diaryEntryId],
+    references: [diaryEntries.id],
   }),
 }));
 

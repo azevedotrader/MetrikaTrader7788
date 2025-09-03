@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Trash2 } from "lucide-react";
+import { CalendarIcon, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useForm } from "react-hook-form";
@@ -17,6 +17,16 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+interface DiaryImage {
+  id: string;
+  fileName: string;
+  originalName: string;
+  caption?: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+}
 
 interface DiaryModalProps {
   isOpen: boolean;
@@ -28,6 +38,8 @@ interface DiaryModalProps {
 
 export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: DiaryModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [images, setImages] = useState<DiaryImage[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
@@ -82,6 +94,138 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
       });
     }
   }, [entry, selectedDate, form]);
+
+  // Carregar imagens quando a entrada existir
+  useEffect(() => {
+    if (entry?.id) {
+      loadImages(entry.id);
+    } else {
+      setImages([]);
+    }
+  }, [entry]);
+
+  const loadImages = async (diaryEntryId: string) => {
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) return;
+
+      const response = await fetch(`/api/diary/${diaryEntryId}/images`, {
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        credentials: "include"
+      });
+
+      if (response.ok) {
+        const imageData = await response.json();
+        setImages(imageData);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar imagens:', error);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !entry?.id) return;
+
+    // Validação do arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione apenas arquivos de imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) throw new Error('Usuário não autenticado');
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`/api/diary/${entry.id}/images`, {
+        method: 'POST',
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        body: formData,
+        credentials: "include"
+      });
+
+      if (!response.ok) throw new Error('Erro ao fazer upload');
+
+      const result = await response.json();
+      setImages(prev => [...prev, result.image]);
+      
+      toast({
+        title: "Sucesso!",
+        description: "Imagem adicionada com sucesso.",
+      });
+
+      // Limpar o input
+      event.target.value = '';
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível fazer upload da imagem.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleImageDelete = async (imageId: string) => {
+    if (!entry?.id) return;
+
+    if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
+
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) throw new Error('Usuário não autenticado');
+
+      const response = await fetch(`/api/diary/${entry.id}/images/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        credentials: "include"
+      });
+
+      if (!response.ok) throw new Error('Erro ao deletar imagem');
+
+      setImages(prev => prev.filter(img => img.id !== imageId));
+      
+      toast({
+        title: "Sucesso!",
+        description: "Imagem removida com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao deletar imagem:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a imagem.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const onSubmit = async (data: InsertDiaryEntry) => {
     setIsLoading(true);
@@ -352,6 +496,82 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               {...form.register("improvements")}
               data-testid="textarea-improvements"
             />
+          </div>
+
+          {/* Seção de imagens */}
+          <div className="space-y-4">
+            <Label>{t('journal.images') || 'Imagens'}</Label>
+            
+            {/* Upload de nova imagem (só se estiver editando uma entrada existente) */}
+            {entry && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                  disabled={uploadingImage}
+                  className="flex items-center gap-2"
+                  data-testid="button-upload-image"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploadingImage ? "Enviando..." : "Adicionar Imagem"}
+                </Button>
+                <span className="text-sm text-slate-400">
+                  PNG, JPG até 5MB
+                </span>
+              </div>
+            )}
+
+            {/* Mensagem quando não há entrada ainda */}
+            {!entry && (
+              <div className="text-sm text-slate-400 p-4 border border-slate-700 rounded-lg text-center">
+                <ImageIcon className="h-8 w-8 mx-auto mb-2 text-slate-500" />
+                Salve a entrada do diário primeiro para adicionar imagens
+              </div>
+            )}
+
+            {/* Grid de imagens existentes */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {images.map((image) => (
+                  <div key={image.id} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
+                      <img
+                        src={`/api/images/${image.id}`}
+                        alt={image.originalName}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K';
+                        }}
+                      />
+                    </div>
+                    {/* Botão de remover */}
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleImageDelete(image.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
+                      data-testid={`button-delete-image-${image.id}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    {/* Nome do arquivo */}
+                    <p className="mt-2 text-xs text-slate-400 truncate" title={image.originalName}>
+                      {image.originalName}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Botões */}

@@ -7,6 +7,7 @@ import {
   subscriptions,
   platformStats,
   diaryEntries,
+  diaryImages,
   passwordResetTokens,
   type User, 
   type InsertUser, 
@@ -23,6 +24,8 @@ import {
   type InsertSubscriptionPlan,
   type DiaryEntry,
   type InsertDiaryEntry,
+  type DiaryImage,
+  type InsertDiaryImage,
   type PasswordResetToken,
 } from "@shared/schema";
 import { db } from "./db";
@@ -82,6 +85,12 @@ export interface IStorage {
   createDiaryEntry(entry: InsertDiaryEntry & { userId: string }): Promise<DiaryEntry>;
   updateDiaryEntry(id: string, updates: Partial<InsertDiaryEntry>, userId: string): Promise<DiaryEntry>;
   deleteDiaryEntry(id: string, userId: string): Promise<void>;
+  
+  // Diary images operations
+  getDiaryImages(diaryEntryId: string): Promise<DiaryImage[]>;
+  createDiaryImage(image: InsertDiaryImage): Promise<DiaryImage>;
+  deleteDiaryImage(imageId: string, diaryEntryId: string): Promise<void>;
+  getDiaryImage(imageId: string): Promise<DiaryImage | undefined>;
   
   // Password reset operations
   createPasswordResetToken(userId: string, token: string, expiresAt: Date): Promise<PasswordResetToken>;
@@ -622,6 +631,35 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ password: newPassword })
       .where(eq(users.id, userId));
+  }
+
+  // Diary images operations
+  async getDiaryImages(diaryEntryId: string): Promise<DiaryImage[]> {
+    return await db.select().from(diaryImages)
+      .where(eq(diaryImages.diaryEntryId, diaryEntryId))
+      .orderBy(diaryImages.createdAt);
+  }
+
+  async createDiaryImage(image: InsertDiaryImage): Promise<DiaryImage> {
+    const [newImage] = await db
+      .insert(diaryImages)
+      .values(image)
+      .returning();
+    return newImage;
+  }
+
+  async deleteDiaryImage(imageId: string, diaryEntryId: string): Promise<void> {
+    await db.delete(diaryImages)
+      .where(and(
+        eq(diaryImages.id, imageId), 
+        eq(diaryImages.diaryEntryId, diaryEntryId)
+      ));
+  }
+
+  async getDiaryImage(imageId: string): Promise<DiaryImage | undefined> {
+    const [image] = await db.select().from(diaryImages)
+      .where(eq(diaryImages.id, imageId));
+    return image || undefined;
   }
 }
 

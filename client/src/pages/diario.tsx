@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit2, Calendar, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Edit2, Calendar, TrendingUp, TrendingDown, Image as ImageIcon } from "lucide-react";
 import { DiaryModal } from "@/components/ui/diary-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -11,16 +11,69 @@ import { ptBR } from "date-fns/locale";
 import type { DiaryEntry } from "@shared/schema";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+interface DiaryImage {
+  id: string;
+  fileName: string;
+  originalName: string;
+  caption?: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+}
+
 export default function Diario() {
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | undefined>(undefined);
+  const [entryImages, setEntryImages] = useState<Record<string, DiaryImage[]>>({});
   const queryClient = useQueryClient();
 
   const { data: entries = [], isLoading } = useQuery<DiaryEntry[]>({
     queryKey: ["/api/diary"],
     enabled: true,
   });
+
+  // Carregar imagens das entradas quando as entradas mudarem
+  useEffect(() => {
+    if (entries.length > 0) {
+      loadAllEntryImages(entries);
+    }
+  }, [entries]);
+
+  const loadAllEntryImages = async (entries: DiaryEntry[]) => {
+    const userId = localStorage.getItem('user-id');
+    if (!userId) return;
+
+    const imagePromises = entries.map(async (entry) => {
+      try {
+        const response = await fetch(`/api/diary/${entry.id}/images`, {
+          headers: {
+            "user-id": userId,
+            "X-User-ID": userId
+          },
+          credentials: "include"
+        });
+
+        if (response.ok) {
+          const images = await response.json();
+          return { entryId: entry.id, images };
+        }
+        return { entryId: entry.id, images: [] };
+      } catch (error) {
+        console.error(`Erro ao carregar imagens da entrada ${entry.id}:`, error);
+        return { entryId: entry.id, images: [] };
+      }
+    });
+
+    const results = await Promise.all(imagePromises);
+    const imagesMap: Record<string, DiaryImage[]> = {};
+    
+    results.forEach(({ entryId, images }) => {
+      imagesMap[entryId] = images;
+    });
+
+    setEntryImages(imagesMap);
+  };
 
   const handleNewEntry = () => {
     setSelectedEntry(undefined);
@@ -215,6 +268,42 @@ export default function Diario() {
                           </p>
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* Seção de imagens */}
+                  {entryImages[entry.id] && entryImages[entry.id].length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-slate-700">
+                      <div className="flex items-center gap-2 mb-3">
+                        <ImageIcon className="h-4 w-4 text-slate-400" />
+                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                          {entryImages[entry.id].length === 1 ? 'Imagem' : 'Imagens'} ({entryImages[entry.id].length})
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {entryImages[entry.id].slice(0, 6).map((image) => (
+                          <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700 hover:border-slate-600 transition-colors">
+                            <img
+                              src={`/api/images/${image.id}`}
+                              alt={image.originalName}
+                              className="w-full h-full object-cover cursor-pointer"
+                              title={image.originalName}
+                              onClick={() => window.open(`/api/images/${image.id}`, '_blank')}
+                              onError={(e) => {
+                                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
+                              }}
+                              data-testid={`image-${image.id}`}
+                            />
+                          </div>
+                        ))}
+                        {entryImages[entry.id].length > 6 && (
+                          <div className="aspect-square rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
+                            <span className="text-sm text-slate-400">
+                              +{entryImages[entry.id].length - 6}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </CardContent>

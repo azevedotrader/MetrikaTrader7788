@@ -208,6 +208,22 @@ const upload = multer({
   dest: 'uploads/'
 });
 
+// Configure multer for image uploads with file type validation
+const uploadImage = multer({
+  dest: 'uploads/images/',
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  }
+});
+
 // Middleware para obter userId autenticado
 function getUserId(req: any): string {
   // Primeiro, tentar obter do token JWT
@@ -2895,6 +2911,158 @@ export async function registerRoutes(app: Express): Promise<void> {
       res.json({ message: "Entrada do diário deletada com sucesso" });
     } catch (error) {
       console.error('Erro ao deletar entrada do diário:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  // Rotas para imagens do diário
+  
+  // Upload de imagem para uma entrada do diário
+  app.post('/api/diary/:id/images', requireAuth, uploadImage.single('image'), async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id: diaryEntryId } = req.params;
+      const { caption } = req.body;
+      
+      if (!req.file) {
+        return res.status(400).json({ error: "Nenhuma imagem enviada" });
+      }
+      
+      // Verificar se a entrada do diário existe e pertence ao usuário
+      const diaryEntry = await storage.getDiaryEntry(diaryEntryId, userId);
+      if (!diaryEntry) {
+        return res.status(404).json({ error: "Entrada do diário não encontrada" });
+      }
+      
+      // Criar registro da imagem no banco
+      const imageData = {
+        diaryEntryId,
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        filePath: req.file.path,
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype,
+        caption: caption || null
+      };
+      
+      const image = await storage.createDiaryImage(imageData);
+      
+      res.json({
+        message: "Imagem enviada com sucesso",
+        image: {
+          id: image.id,
+          fileName: image.fileName,
+          originalName: image.originalName,
+          caption: image.caption,
+          fileSize: image.fileSize,
+          mimeType: image.mimeType,
+          createdAt: image.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao fazer upload da imagem:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+  
+  // Buscar imagens de uma entrada do diário
+  app.get('/api/diary/:id/images', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id: diaryEntryId } = req.params;
+      
+      // Verificar se a entrada do diário existe e pertence ao usuário
+      const diaryEntry = await storage.getDiaryEntry(diaryEntryId, userId);
+      if (!diaryEntry) {
+        return res.status(404).json({ error: "Entrada do diário não encontrada" });
+      }
+      
+      const images = await storage.getDiaryImages(diaryEntryId);
+      res.json(images.map(img => ({
+        id: img.id,
+        fileName: img.fileName,
+        originalName: img.originalName,
+        caption: img.caption,
+        fileSize: img.fileSize,
+        mimeType: img.mimeType,
+        createdAt: img.createdAt
+      })));
+    } catch (error) {
+      console.error('Erro ao buscar imagens:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+  
+  // Servir imagem específica
+  app.get('/api/images/:imageId', async (req: any, res: any) => {
+    try {
+      const { imageId } = req.params;
+      
+      const image = await storage.getDiaryImage(imageId);
+      if (!image) {
+        return res.status(404).json({ error: "Imagem não encontrada" });
+      }
+      
+      // Verificar se o arquivo existe
+      if (!fs.existsSync(image.filePath)) {
+        return res.status(404).json({ error: "Arquivo de imagem não encontrado" });
+      }
+      
+      // Servir o arquivo
+      res.setHeader('Content-Type', image.mimeType);
+      res.setHeader('Content-Length', image.fileSize);
+      res.sendFile(require('path').resolve(image.filePath));
+    } catch (error) {
+      console.error('Erro ao servir imagem:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+  
+  // Deletar imagem
+  app.delete('/api/diary/:diaryId/images/:imageId', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { diaryId, imageId } = req.params;
+      
+      // Verificar se a entrada do diário existe e pertence ao usuário
+      const diaryEntry = await storage.getDiaryEntry(diaryId, userId);
+      if (!diaryEntry) {
+        return res.status(404).json({ error: "Entrada do diário não encontrada" });
+      }
+      
+      // Buscar a imagem para obter o caminho do arquivo
+      const image = await storage.getDiaryImage(imageId);
+      if (!image || image.diaryEntryId !== diaryId) {
+        return res.status(404).json({ error: "Imagem não encontrada" });
+      }
+      
+      // Deletar o arquivo físico
+      try {
+        if (fs.existsSync(image.filePath)) {
+          fs.unlinkSync(image.filePath);
+        }
+      } catch (fileError) {
+        console.warn('Erro ao deletar arquivo físico:', fileError);
+      }
+      
+      // Deletar o registro do banco
+      await storage.deleteDiaryImage(imageId, diaryId);
+      
+      res.json({ message: "Imagem deletada com sucesso" });
+    } catch (error) {
+      console.error('Erro ao deletar imagem:', error);
       res.status(500).json({ 
         error: "Erro interno do servidor",
         message: error instanceof Error ? error.message : "Erro desconhecido"
