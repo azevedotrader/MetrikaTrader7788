@@ -147,6 +147,9 @@ const translations: Record<Language, Record<string, string>> = {
     'trade_form.validation_required': 'Campo obrigatório',
     'trade_form.validation_positive': 'Deve ser maior que zero',
 
+    // Gráficos
+    'charts.title': 'Gráfico',
+
     // Calendário
     'calendar.title': 'Calendário de Trading',
     'calendar.trades_count': 'trades',
@@ -827,6 +830,9 @@ const translations: Record<Language, Record<string, string>> = {
     'trade_form.validation_required': 'Required field',
     'trade_form.validation_positive': 'Must be greater than zero',
 
+    // Charts
+    'charts.title': 'Chart',
+
     // Calendar
     'calendar.title': 'Trading Calendar',
     'calendar.trades_count': 'trades',
@@ -1506,6 +1512,9 @@ const translations: Record<Language, Record<string, string>> = {
     'trade_form.cancel': 'Cancelar',
     'trade_form.validation_required': 'Campo requerido',
     'trade_form.validation_positive': 'Debe ser mayor que cero',
+
+    // Gráficos
+    'charts.title': 'Gráfico',
 
     // Calendario
     'calendar.title': 'Calendario de Trading',
