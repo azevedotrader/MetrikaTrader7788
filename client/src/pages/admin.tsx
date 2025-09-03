@@ -35,7 +35,8 @@ import {
   Eye,
   Settings,
   LogOut,
-  Plus
+  Plus,
+  Trash2
 } from "lucide-react";
 
 // Admin-specific API request function
