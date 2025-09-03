@@ -722,9 +722,9 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             <Area
               type="monotone"
               dataKey="accumulated"
-              stroke="#22c55e"
+              stroke={(chartData[chartData.length - 1]?.accumulated || 0) >= 0 ? "#22c55e" : "#ef4444"}
               strokeWidth={3}
-              fill="url(#positiveGradient)"
+              fill={(chartData[chartData.length - 1]?.accumulated || 0) >= 0 ? "url(#positiveGradient)" : "url(#negativeGradient)"}
               dot={false}
             />
           </ComposedChart>
