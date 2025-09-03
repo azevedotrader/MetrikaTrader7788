@@ -69,7 +69,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
@@ -118,7 +118,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
@@ -154,9 +154,8 @@ export class AITradingService {
         - Meta mensal: ${context.metaMensal || '0'}%
         - Trades recentes: ${context.tradesCount || 0}
       ` : '';
-
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
@@ -175,9 +174,10 @@ export class AITradingService {
             content: userMessage
           }
         ],
-        max_completion_tokens: 300
+        max_tokens: 300
       });
 
+      
       return response.choices[0].message.content || 'Desculpe, não consegui processar sua mensagem no momento.';
     } catch (error) {
       console.error('❌ ERRO DETALHADO NO CHAT:', error);
@@ -216,7 +216,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system",
@@ -264,7 +264,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           {
             role: "system", 
@@ -370,7 +370,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           { 
             role: "system", 
@@ -429,7 +429,7 @@ export class AITradingService {
       `;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-5",
+        model: "gpt-4o", // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
         messages: [
           { 
             role: "system", 
