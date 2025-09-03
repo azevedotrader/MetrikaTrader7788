@@ -34,7 +34,8 @@ import {
   UserX,
   Eye,
   Settings,
-  LogOut
+  LogOut,
+  Plus
 } from "lucide-react";
 
 // Admin-specific API request function
