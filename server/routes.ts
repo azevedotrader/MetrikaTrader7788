@@ -2494,11 +2494,24 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const planType = user.planType || 'free';
+      let daysRemaining;
+      let expiresAt;
+
+      // Calculate days remaining for paid plans
+      if (planType !== 'free' && user.planExpiresAt) {
+        const now = new Date();
+        const expirationDate = new Date(user.planExpiresAt);
+        const timeDiff = expirationDate.getTime() - now.getTime();
+        daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        expiresAt = user.planExpiresAt.toISOString();
+      }
       
       res.json({
         planType,
         isAiEnabled: planType !== 'free',
-        hasUnlimitedTrades: planType !== 'free'
+        hasUnlimitedTrades: planType !== 'free',
+        daysRemaining,
+        expiresAt
       });
     } catch (error) {
       console.error("Error fetching user plan:", error);
