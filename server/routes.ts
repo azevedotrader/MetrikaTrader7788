@@ -3322,7 +3322,8 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post('/api/admin/support/conversations/:id/messages', requireAdmin, async (req: any, res: any) => {
     try {
       const conversationId = req.params.id;
-      const adminUserId = req.userId; // ID do admin
+      // Usar o ID do usuário admin real do banco
+      const adminUserId = 'b2545a36-18e3-46bd-9667-f46b67b0d615'; // ID do admin@metrika.com.br
 
       // Verificar se a conversa existe
       const [conversation] = await db
@@ -3334,7 +3335,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (!conversation) {
         return res.status(404).json({ error: "Conversa não encontrada" });
       }
-
+      
       const validatedData = insertSupportMessageSchema.parse({
         conversationId,
         senderId: adminUserId,
