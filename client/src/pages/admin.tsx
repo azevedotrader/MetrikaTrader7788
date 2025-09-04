@@ -779,30 +779,30 @@ function SupportAdminPanel({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-blue-100 text-blue-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'open': return 'bg-gray-800 text-white';
+      case 'in_progress': return 'bg-black text-white';
+      case 'resolved': return 'bg-gray-700 text-white';
+      case 'closed': return 'bg-gray-600 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'technical': return 'bg-red-100 text-red-800';
-      case 'billing': return 'bg-purple-100 text-purple-800';
-      case 'feature': return 'bg-blue-100 text-blue-800';
-      case 'general': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'technical': return 'bg-black text-white';
+      case 'billing': return 'bg-gray-800 text-white';
+      case 'feature': return 'bg-gray-700 text-white';
+      case 'general': return 'bg-gray-600 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'high': return 'bg-black text-white';
+      case 'medium': return 'bg-gray-800 text-white';
+      case 'low': return 'bg-gray-700 text-white';
+      default: return 'bg-gray-600 text-white';
     }
   };
 
