@@ -740,11 +740,11 @@ function SupportAdminPanel({
                   messages.map((message: any) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.senderType === 'admin' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.isFromAdmin ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.senderType === 'admin'
+                          message.isFromAdmin
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-100 text-gray-900'
                         }`}

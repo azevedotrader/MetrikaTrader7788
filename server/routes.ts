@@ -3371,6 +3371,40 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Buscar mensagens de uma conversa (admin)
+  app.get('/api/admin/support/conversations/:id/messages', requireAdmin, async (req: any, res: any) => {
+    try {
+      const conversationId = req.params.id;
+
+      // Verificar se a conversa existe
+      const [conversation] = await db
+        .select()
+        .from(supportConversations)
+        .where(eq(supportConversations.id, conversationId))
+        .limit(1);
+
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversa não encontrada" });
+      }
+
+      const messages = await db
+        .select({
+          id: supportMessages.id,
+          message: supportMessages.message,
+          isFromAdmin: supportMessages.isFromAdmin,
+          createdAt: supportMessages.createdAt,
+        })
+        .from(supportMessages)
+        .where(eq(supportMessages.conversationId, conversationId))
+        .orderBy(supportMessages.createdAt);
+
+      res.json(messages);
+    } catch (error) {
+      console.error('Erro ao buscar mensagens (admin):', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
   // Alterar status de uma conversa (admin)
   app.put('/api/admin/support/conversations/:id/status', requireAdmin, async (req: any, res: any) => {
     try {
