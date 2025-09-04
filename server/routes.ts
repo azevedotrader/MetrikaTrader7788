@@ -2565,6 +2565,7 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(403).json({ message: 'Acesso negado. Privilégios de administrador requeridos.' });
       }
       req.admin = decoded;
+      req.userId = decoded.sub || decoded.id || 'admin'; // Definir userId para compatibilidade
       next();
     } catch (error) {
       return res.status(401).json({ message: 'Token inválido' });
