@@ -327,14 +327,14 @@ export default function Suporte() {
                   {typedConversations.find((c: Conversation) => c.id === selectedConversation)?.subject}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <ScrollArea className="flex-1 mb-4">
+              <CardContent className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto mb-4 max-h-[500px]">
                   {isLoadingMessages ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 p-1">
                       {typedMessages.map((message: Message) => (
                         <div
                           key={message.id}
@@ -348,7 +348,7 @@ export default function Suporte() {
                                 : 'bg-primary text-primary-foreground'
                             }`}
                           >
-                            <p className="text-sm">{message.message}</p>
+                            <p className="text-sm break-words">{message.message}</p>
                             <p className="text-xs opacity-70 mt-1">
                               {formatDate(message.createdAt)}
                               {message.isFromAdmin && (
@@ -360,7 +360,7 @@ export default function Suporte() {
                       ))}
                     </div>
                   )}
-                </ScrollArea>
+                </div>
                 <div className="flex gap-2">
                   <Input
                     value={newMessage}

@@ -919,7 +919,7 @@ function SupportAdminPanel({
             </div>
           )}
         </CardHeader>
-        <CardContent className="flex flex-col h-[400px]">
+        <CardContent className="flex flex-col h-[400px] overflow-hidden">
           {!selectedConversation ? (
             <div className="flex-1 flex items-center justify-center text-gray-500">
               Selecione uma conversa para visualizar as mensagens
@@ -927,7 +927,7 @@ function SupportAdminPanel({
           ) : (
             <>
               {/* Mensagens */}
-              <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+              <div className="flex-1 overflow-y-auto mb-4 space-y-4 max-h-[300px] p-1">
                 {messagesLoading ? (
                   <div>Carregando mensagens...</div>
                 ) : (
@@ -941,7 +941,7 @@ function SupportAdminPanel({
                             <div className="flex flex-col items-start max-w-xs lg:max-w-md">
                               <span className="text-xs text-gray-500 mb-1">Usuário (mensagem inicial)</span>
                               <div className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 rounded-bl-sm">
-                                <p className="text-sm">{currentConversation.firstUserMessage}</p>
+                                <p className="text-sm break-words">{currentConversation.firstUserMessage}</p>
                                 <p className="text-xs mt-1 opacity-70">
                                   {new Date(currentConversation.createdAt).toLocaleString('pt-BR')}
                                 </p>
@@ -980,7 +980,7 @@ function SupportAdminPanel({
                                   : 'bg-gray-100 text-gray-900 rounded-bl-sm'
                               }`}
                             >
-                              <p className="text-sm">{message.message}</p>
+                              <p className="text-sm break-words">{message.message}</p>
                               <p className="text-xs mt-1 opacity-70">
                                 {message.createdAt ? new Date(message.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
                               </p>
