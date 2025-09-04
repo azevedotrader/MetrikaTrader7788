@@ -722,7 +722,6 @@ function SupportAdminPanel({
     conversationsLoading,
     conversationsCount: conversations.length,
     conversations: conversations.slice(0, 2), // Só os primeiros 2
-    isAuthenticated
   });
 
   // Buscar mensagens da conversa selecionada
