@@ -3388,12 +3388,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const messages = await db
-        .select({
-          id: supportMessages.id,
-          message: supportMessages.message,
-          isFromAdmin: supportMessages.isFromAdmin,
-          createdAt: supportMessages.createdAt,
-        })
+        .select()
         .from(supportMessages)
         .where(eq(supportMessages.conversationId, conversationId))
         .orderBy(supportMessages.createdAt);
