@@ -740,19 +740,26 @@ function SupportAdminPanel({
                   messages.map((message: any) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.is_from_admin ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.is_from_admin ? 'justify-end' : 'justify-start'} mb-4`}
                     >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.is_from_admin
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100 text-gray-900'
-                        }`}
-                      >
-                        <p className="text-sm">{message.message}</p>
-                        <p className="text-xs mt-1 opacity-70">
-                          {new Date(message.created_at).toLocaleString()}
-                        </p>
+                      <div className={`flex flex-col ${message.is_from_admin ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
+                        {/* Label de quem enviou */}
+                        <span className="text-xs text-gray-500 mb-1">
+                          {message.is_from_admin ? 'Admin' : 'Usuário'}
+                        </span>
+                        {/* Mensagem */}
+                        <div
+                          className={`px-4 py-2 rounded-lg ${
+                            message.is_from_admin
+                              ? 'bg-blue-500 text-white rounded-br-sm'
+                              : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+                          }`}
+                        >
+                          <p className="text-sm">{message.message}</p>
+                          <p className="text-xs mt-1 opacity-70">
+                            {message.created_at ? new Date(message.created_at).toLocaleString('pt-BR') : 'Data não disponível'}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))
