@@ -714,9 +714,15 @@ function SupportAdminPanel({
 
   // Buscar todas as conversas de suporte
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
-    queryKey: ['/api/admin/support/conversations', Date.now()],
+    queryKey: ['/api/admin/support/conversations'],
     queryFn: () => adminApiRequest('/api/admin/support/conversations'),
-    staleTime: 0, // Força atualização sempre
+  });
+
+  console.log('🔍 Debug Support Admin:', {
+    conversationsLoading,
+    conversationsCount: conversations.length,
+    conversations: conversations.slice(0, 2), // Só os primeiros 2
+    isAuthenticated
   });
 
   // Buscar mensagens da conversa selecionada
@@ -824,7 +830,11 @@ function SupportAdminPanel({
           {conversationsLoading ? (
             <div className="p-4">Carregando conversas...</div>
           ) : conversations.length === 0 ? (
-            <div className="p-4 text-gray-500">Nenhuma conversa encontrada</div>
+            <div className="p-4 text-gray-500">
+              Nenhuma conversa encontrada
+              <br />
+              <small>Debug: {JSON.stringify(conversations)}</small>
+            </div>
           ) : (
             <div className="max-h-[400px] overflow-y-auto">
               {conversations.map((conversation: any) => (
