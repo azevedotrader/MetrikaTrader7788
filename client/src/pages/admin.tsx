@@ -834,13 +834,16 @@ function SupportAdminPanel({
                   }`}
                   onClick={() => setSelectedConversation(conversation.id)}
                 >
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-medium text-sm truncate">{conversation.subject}</h4>
+                  {/* Título e Status */}
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-sm truncate pr-2">{conversation.subject}</h4>
                     <Badge className={getStatusColor(conversation.status)}>
                       {conversation.status}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
+                  
+                  {/* Categoria e Prioridade */}
+                  <div className="flex items-center gap-2 mb-3">
                     <Badge className={getCategoryColor(conversation.category)}>
                       {conversation.category}
                     </Badge>
@@ -848,13 +851,17 @@ function SupportAdminPanel({
                       {conversation.priority}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <User className="h-3 w-3" />
-                    <span>{conversation.userName} ({conversation.userEmail})</span>
+                  
+                  {/* Informações do usuário */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                    <User className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{conversation.userName} ({conversation.userEmail})</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{new Date(conversation.lastMessageAt).toLocaleString()}</span>
+                  
+                  {/* Data da última mensagem */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Clock className="h-3 w-3 flex-shrink-0" />
+                    <span>{new Date(conversation.lastMessageAt).toLocaleString('pt-BR')}</span>
                   </div>
                 </div>
               ))}
