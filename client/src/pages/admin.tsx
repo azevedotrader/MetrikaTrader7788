@@ -718,11 +718,6 @@ function SupportAdminPanel({
     queryFn: () => adminApiRequest('/api/admin/support/conversations'),
   });
 
-  console.log('🔍 Debug Support Admin:', {
-    conversationsLoading,
-    conversationsCount: conversations.length,
-    conversations: conversations.slice(0, 2), // Só os primeiros 2
-  });
 
   // Buscar mensagens da conversa selecionada
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
@@ -935,35 +930,66 @@ function SupportAdminPanel({
               <div className="flex-1 overflow-y-auto mb-4 space-y-4">
                 {messagesLoading ? (
                   <div>Carregando mensagens...</div>
-                ) : messages.length === 0 ? (
-                  <div className="text-gray-500">Nenhuma mensagem nesta conversa</div>
                 ) : (
-                  messages.map((message: any) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.isFromAdmin ? 'justify-end' : 'justify-start'} mb-4`}
-                    >
-                      <div className={`flex flex-col ${message.isFromAdmin ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
-                        {/* Label de quem enviou */}
-                        <span className="text-xs text-gray-500 mb-1">
-                          {message.isFromAdmin ? 'Admin' : 'Usuário'}
-                        </span>
-                        {/* Mensagem */}
-                        <div
-                          className={`px-4 py-2 rounded-lg ${
-                            message.isFromAdmin
-                              ? 'bg-blue-500 text-white rounded-br-sm'
-                              : 'bg-gray-100 text-gray-900 rounded-bl-sm'
-                          }`}
-                        >
-                          <p className="text-sm">{message.message}</p>
-                          <p className="text-xs mt-1 opacity-70">
-                            {message.createdAt ? new Date(message.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
-                          </p>
-                        </div>
+                  <>
+                    {/* Primeira mensagem do usuário (contexto inicial) */}
+                    {(() => {
+                      const currentConversation = conversations.find((c: any) => c.id === selectedConversation);
+                      if (currentConversation?.firstUserMessage) {
+                        return (
+                          <div className="flex justify-start mb-4">
+                            <div className="flex flex-col items-start max-w-xs lg:max-w-md">
+                              <span className="text-xs text-gray-500 mb-1">Usuário (mensagem inicial)</span>
+                              <div className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 rounded-bl-sm">
+                                <p className="text-sm">{currentConversation.firstUserMessage}</p>
+                                <p className="text-xs mt-1 opacity-70">
+                                  {new Date(currentConversation.createdAt).toLocaleString('pt-BR')}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                    
+                    {/* Outras mensagens */}
+                    {messages.length === 0 ? (
+                      <div className="text-gray-500 text-center">
+                        {conversations.find((c: any) => c.id === selectedConversation)?.firstUserMessage 
+                          ? "Aguardando resposta..." 
+                          : "Nenhuma mensagem nesta conversa"
+                        }
                       </div>
-                    </div>
-                  ))
+                    ) : (
+                      messages.map((message: any) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.isFromAdmin ? 'justify-end' : 'justify-start'} mb-4`}
+                        >
+                          <div className={`flex flex-col ${message.isFromAdmin ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
+                            {/* Label de quem enviou */}
+                            <span className="text-xs text-gray-500 mb-1">
+                              {message.isFromAdmin ? 'Admin' : 'Usuário'}
+                            </span>
+                            {/* Mensagem */}
+                            <div
+                              className={`px-4 py-2 rounded-lg ${
+                                message.isFromAdmin
+                                  ? 'bg-blue-500 text-white rounded-br-sm'
+                                  : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+                              }`}
+                            >
+                              <p className="text-sm">{message.message}</p>
+                              <p className="text-xs mt-1 opacity-70">
+                                {message.createdAt ? new Date(message.createdAt).toLocaleString('pt-BR') : 'Data não disponível'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </>
                 )}
               </div>
 
