@@ -15,8 +15,9 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -29,6 +30,8 @@ import {
   TrendingUp, 
   Activity, 
   Edit3,
+  Edit,
+  Trash2,
   Shield,
   UserCheck,
   UserX,
@@ -71,7 +74,7 @@ const updateUserSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   phone: z.string().optional(),
-  planType: z.enum(["free", "premium", "vip"]).optional(),
+  planType: z.enum(["starter", "pro", "black"]).optional(),
   isActive: z.boolean().optional(),
   planExpiresAt: z.string().optional(),
 });
@@ -130,7 +133,7 @@ export default function AdminPage() {
       email: "",
       password: "",
       phone: "",
-      planType: "free",
+      planType: "starter",
       isActive: true,
       planExpiresAt: "",
     },
@@ -468,9 +471,11 @@ export default function AdminPage() {
                     <TableRow>
                       <TableHead>Nome</TableHead>
                       <TableHead>Email</TableHead>
+                      <TableHead>Telefone</TableHead>
                       <TableHead>Plano</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Registrado</TableHead>
+                      <TableHead>Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -478,6 +483,7 @@ export default function AdminPage() {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.phone || '-'}</TableCell>
                         <TableCell>
                           <Badge className={getPlanBadgeColor(user.planType)}>
                             {user.planType.toUpperCase()}
@@ -499,6 +505,28 @@ export default function AdminPage() {
                         <TableCell>
                           {new Date(user.createdAt).toLocaleDateString()}
                         </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditUser(user)}
+                              className="h-8 w-8 p-0"
+                              data-testid={`button-edit-user-${user.id}`}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => deleteUserMutation.mutate(user.id)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                              data-testid={`button-delete-user-${user.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -508,6 +536,147 @@ export default function AdminPage() {
           </Card>
 
         </TabsContent>
+
+        {/* User Edit Dialog */}
+        <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Editar Usuário</DialogTitle>
+              <DialogDescription>
+                Faça alterações nos dados do usuário. Clique em salvar quando terminar.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...userForm}>
+              <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
+                <FormField
+                  control={userForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome do usuário" {...field} data-testid="input-user-name" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={userForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="email@exemplo.com" {...field} data-testid="input-user-email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={userForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="(11) 99999-9999" {...field} data-testid="input-user-phone" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={userForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nova Senha (opcional)</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Deixe em branco para manter a atual" {...field} data-testid="input-user-password" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={userForm.control}
+                  name="planType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Plano</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} data-testid="select-user-plan">
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o plano" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="starter">Starter</SelectItem>
+                          <SelectItem value="pro">Pro</SelectItem>
+                          <SelectItem value="black">Black</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={userForm.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Status Ativo</FormLabel>
+                        <FormDescription>
+                          Usuário pode acessar a plataforma
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          data-testid="switch-user-active"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={userForm.control}
+                  name="planExpiresAt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data de Expiração do Plano</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} data-testid="input-user-plan-expires" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsUserDialogOpen(false)}
+                    data-testid="button-cancel-user-edit"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={updateUserMutation.isPending}
+                    data-testid="button-save-user-edit"
+                  >
+                    {updateUserMutation.isPending ? "Salvando..." : "Salvar alterações"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
 
         {/* Support Tab */}
         <TabsContent value="support" className="space-y-6">
