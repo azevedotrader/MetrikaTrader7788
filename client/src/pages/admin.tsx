@@ -714,8 +714,9 @@ function SupportAdminPanel({
 
   // Buscar todas as conversas de suporte
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery({
-    queryKey: ['/api/admin/support/conversations'],
+    queryKey: ['/api/admin/support/conversations', Date.now()],
     queryFn: () => adminApiRequest('/api/admin/support/conversations'),
+    staleTime: 0, // Força atualização sempre
   });
 
   // Buscar mensagens da conversa selecionada
@@ -836,7 +837,7 @@ function SupportAdminPanel({
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1 pr-2">
                       <h4 className="font-medium text-sm truncate">{conversation.subject}</h4>
-                      {conversation.firstUserMessage && (
+                      {conversation.firstUserMessage ? (
                         <p className="text-xs text-gray-600 mt-1 overflow-hidden" style={{
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -844,8 +845,10 @@ function SupportAdminPanel({
                           maxHeight: '2.4em',
                           lineHeight: '1.2em'
                         }}>
-                          {conversation.firstUserMessage}
+                          📝 {conversation.firstUserMessage}
                         </p>
+                      ) : (
+                        <p className="text-xs text-gray-400 mt-1 italic">Sem mensagem inicial</p>
                       )}
                     </div>
                     <Badge className={getStatusColor(conversation.status)}>
