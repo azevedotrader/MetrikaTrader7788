@@ -829,9 +829,7 @@ function SupportAdminPanel({
               {conversations.map((conversation: any) => (
                 <div
                   key={conversation.id}
-                  className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors ${
-                    selectedConversation === conversation.id ? 'bg-blue-50 border-blue-200' : ''
-                  }`}
+                  className="p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors border-blue-200 bg-[#21212199]"
                   onClick={() => setSelectedConversation(conversation.id)}
                 >
                   {/* Título e Status */}
@@ -869,7 +867,6 @@ function SupportAdminPanel({
           )}
         </CardContent>
       </Card>
-
       {/* Chat */}
       <Card className="lg:col-span-2">
         <CardHeader>
