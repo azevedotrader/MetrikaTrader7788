@@ -834,7 +834,20 @@ function SupportAdminPanel({
                 >
                   {/* Título e Status */}
                   <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-sm truncate pr-2">{conversation.subject}</h4>
+                    <div className="flex-1 pr-2">
+                      <h4 className="font-medium text-sm truncate">{conversation.subject}</h4>
+                      {conversation.firstUserMessage && (
+                        <p className="text-xs text-gray-600 mt-1 overflow-hidden" style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          maxHeight: '2.4em',
+                          lineHeight: '1.2em'
+                        }}>
+                          {conversation.firstUserMessage}
+                        </p>
+                      )}
+                    </div>
                     <Badge className={getStatusColor(conversation.status)}>
                       {conversation.status}
                     </Badge>

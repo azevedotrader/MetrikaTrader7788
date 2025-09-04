@@ -13,7 +13,7 @@ import jwt from "jsonwebtoken";
 import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
@@ -3299,14 +3299,31 @@ export async function registerRoutes(app: Express): Promise<void> {
         .from(supportConversations)
         .orderBy(supportConversations.lastMessageAt);
 
-      // Buscar informações do usuário para cada conversa
+      // Buscar informações do usuário e primeira mensagem para cada conversa
       const conversationsWithUser = await Promise.all(
         conversations.map(async (conv) => {
           const user = await storage.getUserById(conv.userId);
+          
+          // Buscar a primeira mensagem do usuário
+          const [firstUserMessage] = await db
+            .select({
+              message: supportMessages.message,
+            })
+            .from(supportMessages)
+            .where(
+              and(
+                eq(supportMessages.conversationId, conv.id),
+                eq(supportMessages.isFromAdmin, false)
+              )
+            )
+            .orderBy(supportMessages.createdAt)
+            .limit(1);
+          
           return {
             ...conv,
             userName: user?.name || 'Usuário desconhecido',
-            userEmail: user?.email || ''
+            userEmail: user?.email || '',
+            firstUserMessage: firstUserMessage?.message || null
           };
         })
       );
