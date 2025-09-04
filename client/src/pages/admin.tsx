@@ -74,7 +74,7 @@ const updateUserSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   phone: z.string().optional(),
-  planType: z.enum(["starter", "pro", "black"]).optional(),
+  planType: z.enum(["free", "starter", "pro", "black"]).optional(),
   isActive: z.boolean().optional(),
   planExpiresAt: z.string().optional(),
 });
@@ -133,7 +133,7 @@ export default function AdminPage() {
       email: "",
       password: "",
       phone: "",
-      planType: "starter",
+      planType: "free",
       isActive: true,
       planExpiresAt: "",
     },
@@ -290,6 +290,8 @@ export default function AdminPage() {
 
   const getPlanBadgeColor = (planType: string) => {
     switch (planType) {
+      case 'free':
+        return 'bg-gray-100 text-gray-800';
       case 'starter':
         return 'bg-green-100 text-green-800';
       case 'pro':
@@ -613,6 +615,7 @@ export default function AdminPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="free">Free</SelectItem>
                           <SelectItem value="starter">Starter</SelectItem>
                           <SelectItem value="pro">Pro</SelectItem>
                           <SelectItem value="black">Black</SelectItem>
