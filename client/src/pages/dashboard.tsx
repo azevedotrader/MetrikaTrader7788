@@ -1606,21 +1606,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-zinc-400 text-sm">{t('dashboard.worst_trade')}</p>
-                    <p className="text-2xl font-bold text-red-400">
-                      R$ {metrics.piorTrade.toFixed(2)}
-                    </p>
-                  </div>
-                  <Activity className="h-8 w-8 text-red-400" />
-                </div>
-              </CardContent>
-            </Card>
-
-            
 
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
               <CardContent className="p-4">
