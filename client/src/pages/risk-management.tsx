@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Calculator, TrendingUp, DollarSign, Target, BarChart3 } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Target, BarChart3, BookOpen, Lightbulb, Shield, AlertTriangle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -97,77 +97,134 @@ export default function RiskManagement() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          {/* Configurações */}
-          <Card data-testid="risk-calculator" className="bg-zinc-900/50 border-zinc-800">
-            <CardHeader>
-              <CardTitle className="text-white">
-                {t('risk_management.settings')}
-              </CardTitle>
-              <CardDescription className="text-zinc-400">
-                {t('risk_management.settings_description')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
-              <div className="space-y-2">
-                <Label htmlFor="balance" className="text-sm md:text-base text-zinc-300">
-                  {t('risk_management.account_balance')}
-                </Label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
-                  <Input
-                    id="balance"
-                    type="number"
-                    placeholder="10000.00"
-                    value={accountBalance}
-                    onChange={(e) => setAccountBalance(e.target.value)}
-                    className="pl-10 bg-zinc-800 border-zinc-700 text-white h-12 text-base"
-                    data-testid="input-account-balance"
-                  />
+          <div className="space-y-6">
+            {/* Configurações */}
+            <Card data-testid="risk-calculator" className="bg-zinc-900/50 border-zinc-800">
+              <CardHeader>
+                <CardTitle className="text-white">
+                  {t('risk_management.settings')}
+                </CardTitle>
+                <CardDescription className="text-zinc-400">
+                  {t('risk_management.settings_description')}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 md:space-y-6 p-4 md:p-6">
+                <div className="space-y-2">
+                  <Label htmlFor="balance" className="text-sm md:text-base text-zinc-300">
+                    {t('risk_management.account_balance')}
+                  </Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                    <Input
+                      id="balance"
+                      type="number"
+                      placeholder="10000.00"
+                      value={accountBalance}
+                      onChange={(e) => setAccountBalance(e.target.value)}
+                      className="pl-10 bg-zinc-800 border-zinc-700 text-white h-12 text-base"
+                      data-testid="input-account-balance"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="risk-profile" className="text-sm md:text-base text-zinc-300">
-                  Perfil de Risco
-                </Label>
-                <Select
-                  value={riskProfile}
-                  onValueChange={setRiskProfile}
+                <div className="space-y-2">
+                  <Label htmlFor="risk-profile" className="text-sm md:text-base text-zinc-300">
+                    Perfil de Risco
+                  </Label>
+                  <Select
+                    value={riskProfile}
+                    onValueChange={setRiskProfile}
+                  >
+                    <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-12 text-base">
+                      <SelectValue placeholder="Selecione seu perfil de risco" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-zinc-800 border-zinc-700">
+                      <SelectItem value="conservador" className="text-white">
+                        🛡️ Conservador (1% por operação)
+                      </SelectItem>
+                      <SelectItem value="moderado" className="text-white">
+                        ⚖️ Moderado (2.5% por operação)
+                      </SelectItem>
+                      <SelectItem value="alto_risco" className="text-white">
+                        🚀 Alto Risco (5% por operação)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-zinc-400">
+                    {riskProfile === "conservador" && "Perfil conservador: menor risco, crescimento gradual"}
+                    {riskProfile === "moderado" && "Perfil moderado: equilibrio entre risco e retorno"}
+                    {riskProfile === "alto_risco" && "Alto risco: maior potencial, mas riscos elevados"}
+                  </p>
+                </div>
+
+                <Button 
+                  onClick={calculateRisk}
+                  className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-base"
+                  data-testid="button-calculate-risk"
                 >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-12 text-base">
-                    <SelectValue placeholder="Selecione seu perfil de risco" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    <SelectItem value="conservador" className="text-white">
-                      🛡️ Conservador (1% por operação)
-                    </SelectItem>
-                    <SelectItem value="moderado" className="text-white">
-                      ⚖️ Moderado (2.5% por operação)
-                    </SelectItem>
-                    <SelectItem value="alto_risco" className="text-white">
-                      🚀 Alto Risco (5% por operação)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-zinc-400">
-                  {riskProfile === "conservador" && "Perfil conservador: menor risco, crescimento gradual"}
-                  {riskProfile === "moderado" && "Perfil moderado: equilibrio entre risco e retorno"}
-                  {riskProfile === "alto_risco" && "Alto risco: maior potencial, mas riscos elevados"}
-                </p>
-              </div>
+                  <Calculator className="w-4 h-4 mr-2" />
+                  {t('risk_management.calculate')}
+                </Button>
+              </CardContent>
+            </Card>
 
-              
+            {/* Guia e Dicas */}
+            <Card className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-800/50">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-400" />
+                  Como Usar a Gestão de Risco
+                </CardTitle>
+                <CardDescription className="text-blue-200">
+                  Dicas essenciais para maximizar seus resultados
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 p-4 md:p-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 p-3 bg-green-900/20 rounded-lg border border-green-800/30">
+                    <Shield className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-green-300 mb-1">Regra dos 2%</h4>
+                      <p className="text-xs text-green-100">
+                        Nunca arrisque mais que 2-3% do capital por operação. Esta é a base da preservação de capital no trading profissional.
+                      </p>
+                    </div>
+                  </div>
 
-              <Button 
-                onClick={calculateRisk}
-                className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-base"
-                data-testid="button-calculate-risk"
-              >
-                <Calculator className="w-4 h-4 mr-2" />
-                {t('risk_management.calculate')}
-              </Button>
-            </CardContent>
-          </Card>
+                  <div className="flex items-start gap-3 p-3 bg-yellow-900/20 rounded-lg border border-yellow-800/30">
+                    <Lightbulb className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-yellow-300 mb-1">Tamanho da Posição</h4>
+                      <p className="text-xs text-yellow-100">
+                        Use nossa calculadora para determinar exatamente quantos lotes operar baseado no seu stop loss e tolerância ao risco.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 bg-red-900/20 rounded-lg border border-red-800/30">
+                    <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-red-300 mb-1">Importante</h4>
+                      <p className="text-xs text-red-100">
+                        Os resultados são projeções baseadas em dados históricos. Performance passada não garante resultados futuros.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-zinc-700">
+                    <h5 className="text-sm font-medium text-white mb-2">Passos para usar:</h5>
+                    <ol className="text-xs text-zinc-300 space-y-1 list-decimal list-inside">
+                      <li>Insira o saldo real da sua conta</li>
+                      <li>Escolha seu perfil de risco</li>
+                      <li>Analise os resultados da calculadora</li>
+                      <li>Use o gráfico para visualizar o crescimento</li>
+                      <li>Siga sempre seu plano de risco</li>
+                    </ol>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Resultados */}
           {results && (
