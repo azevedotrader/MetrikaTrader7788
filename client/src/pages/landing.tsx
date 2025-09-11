@@ -222,35 +222,7 @@ export default function Landing() {
                     </CardContent>
                   </Card>
 
-                  {/* Broker Integration Status */}
-                  <Card className="bg-slate-800/50 border-slate-700">
-                    <CardContent className="p-4">
-                      <span className="text-sm font-medium text-slate-300 mb-3 block">{t('landing.dashboard.connected_brokers')}</span>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <span className="text-sm text-slate-300">Gate.io</span>
-                          </div>
-                          <Badge className="bg-green-500/20 text-green-400 text-xs">{t('landing.dashboard.synchronized')}</Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                            <span className="text-sm text-slate-300">Clear</span>
-                          </div>
-                          <Badge className="bg-blue-500/20 text-blue-400 text-xs">{t('landing.dashboard.active')}</Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                            <span className="text-sm text-slate-300">Tickmill</span>
-                          </div>
-                          <Badge className="bg-orange-500/20 text-orange-400 text-xs">{t('landing.dashboard.connected')}</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  
                 </CardContent>
               </Card>
 
