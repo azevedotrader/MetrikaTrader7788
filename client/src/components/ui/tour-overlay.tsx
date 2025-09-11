@@ -26,6 +26,7 @@ export function TourOverlay() {
   const [targetElement, setTargetElement] = useState<Element | null>(null);
   const [elementPosition, setElementPosition] = useState<ElementPosition | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [finalPosition, setFinalPosition] = useState<string>('center');
   const [viewport, setViewport] = useState<ViewportInfo>({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -58,71 +59,139 @@ export function TourOverlay() {
     };
   }, []);
 
-  // Encontrar elemento alvo quando mudar de passo ou página
-  useEffect(() => {
+  // Calcular posição do elemento usando coordenadas de viewport
+  const calculateElementPosition = (element: Element): ElementPosition => {
+    const rect = element.getBoundingClientRect();
+    return {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height
+    };
+  };
+
+  // Encontrar e posicionar elemento alvo
+  const findAndPositionElement = () => {
     if (!isActive || !isCurrentPage || !currentTourStep?.targetSelector) {
       setTargetElement(null);
       setElementPosition(null);
       return;
     }
 
-    const findElement = () => {
-      const element = document.querySelector(currentTourStep.targetSelector!);
-      if (element) {
-        setTargetElement(element);
-        
-        const rect = element.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        
-        setElementPosition({
-          top: rect.top + scrollTop,
-          left: rect.left + scrollLeft,
-          width: rect.width,
-          height: rect.height
-        });
+    const element = document.querySelector(currentTourStep.targetSelector!);
+    if (element) {
+      setTargetElement(element);
+      setElementPosition(calculateElementPosition(element));
+      
+      // Scroll suave para o elemento
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (currentTourStep.waitForElement) {
+      // Tentar novamente após delay para elementos dinâmicos
+      return setTimeout(findAndPositionElement, 500);
+    }
+    
+    return null;
+  };
 
-        // Scroll suave para o elemento
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Encontrar elemento quando mudar de passo ou página
+  useEffect(() => {
+    const timeoutId = findAndPositionElement();
+    
+    // Limpar timeout se o componente for desmontado ou passo mudar
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isActive, isCurrentPage, currentStep, currentTourStep?.targetSelector, currentTourStep?.waitForElement]);
+
+  // Recalcular posições no scroll e resize
+  useEffect(() => {
+    if (!targetElement) return;
+
+    let rafId: number;
+    const updatePosition = () => {
+      if (targetElement) {
+        setElementPosition(calculateElementPosition(targetElement));
       }
     };
 
-    // Tentar encontrar o elemento imediatamente
-    findElement();
+    const debouncedUpdate = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updatePosition);
+    };
 
-    // Se não encontrou, tentar novamente após um delay (para elementos que carregam dinamicamente)
-    if (!targetElement && currentTourStep.waitForElement) {
-      const timeout = setTimeout(findElement, 500);
-      return () => clearTimeout(timeout);
+    window.addEventListener('scroll', debouncedUpdate, { passive: true });
+    window.addEventListener('resize', debouncedUpdate);
+    window.addEventListener('orientationchange', debouncedUpdate);
+    
+    return () => {
+      window.removeEventListener('scroll', debouncedUpdate);
+      window.removeEventListener('resize', debouncedUpdate);
+      window.removeEventListener('orientationchange', debouncedUpdate);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [targetElement]);
+
+  // Função para obter dimensões responsivas do tooltip
+  const getTooltipDimensions = () => {
+    if (viewport.isMobile) {
+      return {
+        width: Math.min(350, viewport.width - 32),
+        height: 220,
+        margin: 16
+      };
+    } else if (viewport.isTablet) {
+      return {
+        width: Math.min(400, viewport.width - 64),
+        height: 200,
+        margin: 32
+      };
+    } else {
+      return {
+        width: 420,
+        height: 200,
+        margin: 40
+      };
     }
-  }, [isActive, isCurrentPage, currentStep, currentTourStep?.targetSelector, currentTourStep?.waitForElement]);
+  };
+
+  // Função para calcular posição derivada (unificada para tooltip e seta)
+  const getDerivedPosition = (requestedPosition: string | undefined, elementPos: ElementPosition | null) => {
+    if (!elementPos) return 'center';
+    
+    let position = requestedPosition;
+    
+    // Em mobile, escolher automaticamente a melhor posição
+    if (viewport.isMobile) {
+      const { height: tooltipHeight, margin } = getTooltipDimensions();
+      const spaceAbove = elementPos.top;
+      const spaceBelow = viewport.height - (elementPos.top + elementPos.height);
+      
+      if (spaceBelow > tooltipHeight + margin && spaceBelow > spaceAbove) {
+        position = 'bottom';
+      } else if (spaceAbove > tooltipHeight + margin) {
+        position = 'top';
+      } else {
+        position = 'center';
+      }
+      
+      // Forçar bottom para posições laterais no mobile
+      if (position === 'left' || position === 'right') {
+        position = 'bottom';
+      }
+    }
+    
+    return position || 'center';
+  };
 
   // Calcular posição do tooltip responsivo
   useEffect(() => {
-    // Dimensões responsivas do tooltip
-    const getTooltipDimensions = () => {
-      if (viewport.isMobile) {
-        return {
-          width: Math.min(350, viewport.width - 32), // 16px margin em cada lado
-          height: 220,
-          margin: 16
-        };
-      } else if (viewport.isTablet) {
-        return {
-          width: Math.min(400, viewport.width - 64),
-          height: 200,
-          margin: 32
-        };
-      } else {
-        return {
-          width: 420,
-          height: 200,
-          margin: 40
-        };
-      }
-    };
-
     const { width: tooltipWidth, height: tooltipHeight, margin } = getTooltipDimensions();
+    
+    // Calcular posição final unificada
+    const derivedPosition = getDerivedPosition(currentTourStep?.position, elementPosition);
+    setFinalPosition(derivedPosition);
 
     if (!elementPosition) {
       // Se não há elemento específico, centralizar tooltip
@@ -135,26 +204,8 @@ export function TourOverlay() {
 
     let top = 0;
     let left = 0;
-    let position = currentTourStep?.position;
 
-    // Em mobile, preferir posições que não saiam da tela
-    if (viewport.isMobile && elementPosition) {
-      const spaceAbove = elementPosition.top;
-      const spaceBelow = viewport.height - (elementPosition.top + elementPosition.height);
-      const spaceLeft = elementPosition.left;
-      const spaceRight = viewport.width - (elementPosition.left + elementPosition.width);
-
-      // Escolher a melhor posição automaticamente no mobile
-      if (spaceBelow > tooltipHeight + margin && spaceBelow > spaceAbove) {
-        position = 'bottom';
-      } else if (spaceAbove > tooltipHeight + margin) {
-        position = 'top';
-      } else {
-        position = 'center';
-      }
-    }
-
-    switch (position) {
+    switch (derivedPosition) {
       case 'top':
         top = elementPosition.top - tooltipHeight - margin;
         left = elementPosition.left + elementPosition.width / 2 - tooltipWidth / 2;
@@ -164,24 +215,12 @@ export function TourOverlay() {
         left = elementPosition.left + elementPosition.width / 2 - tooltipWidth / 2;
         break;
       case 'left':
-        if (viewport.isMobile) {
-          // No mobile, colocar embaixo do elemento em vez de ao lado
-          top = elementPosition.top + elementPosition.height + margin;
-          left = elementPosition.left + elementPosition.width / 2 - tooltipWidth / 2;
-        } else {
-          top = elementPosition.top + elementPosition.height / 2 - tooltipHeight / 2;
-          left = elementPosition.left - tooltipWidth - margin;
-        }
+        top = elementPosition.top + elementPosition.height / 2 - tooltipHeight / 2;
+        left = elementPosition.left - tooltipWidth - margin;
         break;
       case 'right':
-        if (viewport.isMobile) {
-          // No mobile, colocar embaixo do elemento em vez de ao lado
-          top = elementPosition.top + elementPosition.height + margin;
-          left = elementPosition.left + elementPosition.width / 2 - tooltipWidth / 2;
-        } else {
-          top = elementPosition.top + elementPosition.height / 2 - tooltipHeight / 2;
-          left = elementPosition.left + elementPosition.width + margin;
-        }
+        top = elementPosition.top + elementPosition.height / 2 - tooltipHeight / 2;
+        left = elementPosition.left + elementPosition.width + margin;
         break;
       case 'center':
       default:
@@ -209,36 +248,62 @@ export function TourOverlay() {
         <>
           {/* Spotlight no elemento */}
           <div
-            className="absolute border-2 border-blue-400 rounded-lg bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] animate-pulse"
+            className={`absolute border-2 border-blue-400 rounded-lg bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] animate-pulse ${
+              viewport.isMobile ? 'border-4' : 'border-2'
+            }`}
             style={{
-              top: elementPosition.top - 4,
-              left: elementPosition.left - 4,
-              width: elementPosition.width + 8,
-              height: elementPosition.height + 8,
+              top: elementPosition.top - (viewport.isMobile ? 6 : 4),
+              left: elementPosition.left - (viewport.isMobile ? 6 : 4),
+              width: elementPosition.width + (viewport.isMobile ? 12 : 8),
+              height: elementPosition.height + (viewport.isMobile ? 12 : 8),
               zIndex: 51
             }}
           />
           
           {/* Seta apontando para o elemento */}
-          <div
-            className="absolute w-0 h-0 z-52"
-            style={{
-              top: currentTourStep?.position === 'top' 
-                ? tooltipPosition.top + 200
-                : currentTourStep?.position === 'bottom' 
-                ? tooltipPosition.top - 12
-                : tooltipPosition.top + 100,
-              left: currentTourStep?.position === 'left'
-                ? tooltipPosition.left + 400
-                : currentTourStep?.position === 'right'
-                ? tooltipPosition.left - 12
-                : tooltipPosition.left + 200,
-              borderLeft: currentTourStep?.position === 'right' ? '12px solid #1e293b' : '12px solid transparent',
-              borderRight: currentTourStep?.position === 'left' ? '12px solid #1e293b' : '12px solid transparent',
-              borderTop: currentTourStep?.position === 'bottom' ? '12px solid #1e293b' : '12px solid transparent',
-              borderBottom: currentTourStep?.position === 'top' ? '12px solid #1e293b' : '12px solid transparent'
-            }}
-          />
+          {(() => {
+            const { width: tooltipWidth, height: tooltipHeight } = getTooltipDimensions();
+            const arrowSize = viewport.isMobile ? 10 : 12;
+            let arrowTop = 0;
+            let arrowLeft = 0;
+            
+            // Usar a posição final unificada
+            switch (finalPosition) {
+              case 'top':
+                arrowTop = tooltipPosition.top + tooltipHeight;
+                arrowLeft = tooltipPosition.left + tooltipWidth / 2 - arrowSize;
+                break;
+              case 'bottom':
+                arrowTop = tooltipPosition.top - arrowSize;
+                arrowLeft = tooltipPosition.left + tooltipWidth / 2 - arrowSize;
+                break;
+              case 'left':
+                arrowTop = tooltipPosition.top + tooltipHeight / 2 - arrowSize;
+                arrowLeft = tooltipPosition.left + tooltipWidth;
+                break;
+              case 'right':
+                arrowTop = tooltipPosition.top + tooltipHeight / 2 - arrowSize;
+                arrowLeft = tooltipPosition.left - arrowSize;
+                break;
+              default:
+                return null; // Sem seta para posição center
+            }
+            
+            return (
+              <div
+                className="absolute w-0 h-0"
+                style={{
+                  top: arrowTop,
+                  left: arrowLeft,
+                  zIndex: 52,
+                  borderLeft: finalPosition === 'right' ? `${arrowSize}px solid #1e293b` : `${arrowSize}px solid transparent`,
+                  borderRight: finalPosition === 'left' ? `${arrowSize}px solid #1e293b` : `${arrowSize}px solid transparent`,
+                  borderTop: finalPosition === 'top' ? `${arrowSize}px solid #1e293b` : `${arrowSize}px solid transparent`,
+                  borderBottom: finalPosition === 'bottom' ? `${arrowSize}px solid #1e293b` : `${arrowSize}px solid transparent`
+                }}
+              />
+            );
+          })()}
         </>
       )}
 
