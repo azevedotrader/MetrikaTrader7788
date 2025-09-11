@@ -387,7 +387,7 @@ export default function NovoTrade() {
       // Add RRR info to comment
       if (takeNum > 0 && stopNum > 0) {
         const rrr = (takeNum / stopNum).toFixed(2);
-        const rrrInfo = `RRR: 1:${rrr} | Resultado: ${tradeResult === "take" ? "◉ Take" : "○ Loss"}`;
+        const rrrInfo = `RRR: 1:${rrr} | Resultado: ${tradeResult === "take" ? "Take" : "Loss"}`;
         data.comentario = data.comentario
           ? `${data.comentario}\n\n${rrrInfo}`
           : rrrInfo;

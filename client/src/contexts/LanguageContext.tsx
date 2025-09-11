@@ -306,8 +306,8 @@ const translations: Record<Language, Record<string, string>> = {
     "form.trade_result": "Resultado da Operação",
     "form.select_result_warning":
       "⚠️ Selecione o resultado para calcular o valor financeiro",
-    "form.take": "◉ Take",
-    "form.loss": "○ Loss",
+    "form.take": "Take",
+    "form.loss": "Loss",
     "form.auto_calculations": "Cálculos Automáticos",
     "form.risk_reward_ratio": "Razão Risco/Retorno",
     "form.financial_result": "Resultado Financeiro",
@@ -1125,8 +1125,8 @@ const translations: Record<Language, Record<string, string>> = {
     "form.trade_result": "Trade Result",
     "form.select_result_warning":
       "⚠️ Select result to calculate financial value",
-    "form.take": "◉ Take",
-    "form.loss": "○ Loss",
+    "form.take": "Take",
+    "form.loss": "Loss",
     "form.auto_calculations": "Automatic Calculations",
     "form.risk_reward_ratio": "Risk/Reward Ratio",
     "form.financial_result": "Financial Result",
@@ -1935,8 +1935,8 @@ const translations: Record<Language, Record<string, string>> = {
     "form.trade_result": "Resultado de la Operación",
     "form.select_result_warning":
       "⚠️ Selecciona el resultado para calcular el valor financiero",
-    "form.take": "◉ Take",
-    "form.loss": "○ Loss",
+    "form.take": "Take",
+    "form.loss": "Loss",
     "form.auto_calculations": "Cálculos Automáticos",
     "form.risk_reward_ratio": "Razón Riesgo/Recompensa",
     "form.financial_result": "Resultado Financiero",
