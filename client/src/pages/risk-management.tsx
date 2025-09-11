@@ -192,12 +192,6 @@ export default function RiskManagement() {
                       icon={TrendingUp}
                     />
                     <ProjectionCard
-                      title={t('risk_management.position_size')}
-                      value={`${results.positionSize.toFixed(2)} lots`}
-                      color="bg-blue-600"
-                      icon={Calculator}
-                    />
-                    <ProjectionCard
                       title={t('risk_management.daily_growth')}
                       value={`${results.dailyGrowthProjection.toFixed(2)}%`}
                       color="bg-purple-600"
