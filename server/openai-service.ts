@@ -109,7 +109,7 @@ export async function generateImage(text: string): Promise<{ url: string }> {
       quality: "standard",
     });
 
-    return { url: response.data[0].url || "" };
+    return { url: response.data?.[0]?.url || "" };
   } catch (error) {
     console.error("❌ Erro na geração de imagem:", error);
     throw new Error("Falha na geração de imagem: " + (error as Error).message);
@@ -182,7 +182,7 @@ export async function transcribeAudio(audioFilePath: string): Promise<{ text: st
 
     return {
       text: transcription.text,
-      duration: transcription.duration || 0,
+      duration: 0, // Duration não está disponível na API atual
     };
   } catch (error) {
     console.error("❌ Erro na transcrição de áudio:", error);
