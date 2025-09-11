@@ -100,13 +100,7 @@ export default function Landing() {
         <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-gradient-to-r from-gold-400/20 to-yellow-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Announcement Banner */}
-          <div className="text-center mb-8 sm:mb-12">
-            <Badge className="gradient-emerald-blue text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-semibold animate-glow">
-              <span className="hidden sm:inline">{t('landing.hero.announcement')}</span>
-              <span className="sm:hidden">{t('landing.hero.announcement_mobile')}</span>
-            </Badge>
-          </div>
+          
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
