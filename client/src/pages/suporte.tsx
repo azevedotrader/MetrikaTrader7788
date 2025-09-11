@@ -115,16 +115,22 @@ export default function Suporte() {
   });
 
   const handleCreateConversation = () => {
-    if (!newConversation.subject.trim() || !newConversation.message.trim()) {
+    if (!newConversation.subject.trim()) {
       toast({
         title: t('support.error'),
-        description: "Assunto e mensagem são obrigatórios",
+        description: "Assunto é obrigatório",
         variant: "destructive",
       });
       return;
     }
 
-    createConversationMutation.mutate(newConversation);
+    // Cria a conversa sem mensagem inicial - usuário pode enviar mensagens no chat após criação
+    createConversationMutation.mutate({
+      subject: newConversation.subject,
+      category: newConversation.category,
+      priority: newConversation.priority,
+      message: "Conversa iniciada" // Mensagem automática inicial
+    });
   };
 
   const handleSendMessage = () => {
@@ -247,16 +253,19 @@ export default function Suporte() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="message">{t('support.message_label')}</Label>
-                      <Textarea
-                        id="message"
-                        value={newConversation.message}
-                        onChange={(e) => setNewConversation({ ...newConversation, message: e.target.value })}
-                        placeholder={t('support.message_placeholder')}
-                        rows={4}
-                        data-testid="textarea-message"
-                      />
+                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                            Chat Direto com Admin
+                          </h4>
+                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                            Após criar este ticket, você poderá enviar mensagens diretamente para nossa equipe de suporte através do chat. 
+                            Responderemos o mais rápido possível de acordo com a prioridade selecionada.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     <Button 
                       onClick={handleCreateConversation} 
