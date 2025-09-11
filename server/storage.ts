@@ -708,7 +708,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(supportConversations.lastMessageAt);
   }
 
-  async getAllSupportConversations(): Promise<(SupportConversation & { userName: string; userEmail: string })[]> {
+  async getAllSupportConversations(): Promise<(SupportConversation & { userName: string | null; userEmail: string | null })[]> {
     const result = await db.select({
       id: supportConversations.id,
       userId: supportConversations.userId,
@@ -719,6 +719,7 @@ export class DatabaseStorage implements IStorage {
       lastMessageAt: supportConversations.lastMessageAt,
       lastMessageByAdmin: supportConversations.lastMessageByAdmin,
       createdAt: supportConversations.createdAt,
+      updatedAt: supportConversations.updatedAt,
       userName: users.name,
       userEmail: users.email
     })
@@ -774,7 +775,7 @@ export class DatabaseStorage implements IStorage {
       .update(supportConversations)
       .set({ 
         lastMessageAt: new Date(),
-        lastMessageByAdmin: message.senderType === 'admin'
+        lastMessageByAdmin: message.isFromAdmin || false
       })
       .where(eq(supportConversations.id, message.conversationId));
 
