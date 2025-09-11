@@ -86,7 +86,7 @@ export default function RiskManagement() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
           {/* Configurações */}
-          <Card className="bg-zinc-900/50 border-zinc-800">
+          <Card data-testid="risk-calculator" className="bg-zinc-900/50 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white">
                 {t('risk_management.settings')}

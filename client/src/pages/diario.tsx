@@ -181,7 +181,7 @@ export default function Diario() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
+          <div data-testid="journal-entries" className="space-y-6">
             {entries.map((entry) => (
               <Card key={entry.id} className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors">
                 <CardHeader>

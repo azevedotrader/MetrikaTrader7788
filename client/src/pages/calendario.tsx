@@ -60,10 +60,12 @@ export default function CalendarioPage() {
       </Card>
 
       {/* Calendário Principal */}
-      <TradingCalendar 
-        trades={trades} 
-        calendarData={calendarData as any[]}
-      />
+      <div data-testid="trading-calendar">
+        <TradingCalendar 
+          trades={trades} 
+          calendarData={calendarData as any[]}
+        />
+      </div>
 
       {/* Dicas de Análise */}
       <Card className="bg-[#070b12] border-slate-700">

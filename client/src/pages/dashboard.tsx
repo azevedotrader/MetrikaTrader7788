@@ -458,7 +458,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   const fillGradient = isNegative ? "url(#negativeGradient)" : "url(#positiveGradient)";
 
   return (
-    <div className="w-full">
+    <div data-testid="performance-chart" className="w-full">
       {/* Filtros de Período */}
       <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap">
         {[
@@ -1503,7 +1503,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
+    <div data-testid="dashboard-overview" className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex flex-wrap gap-2">
           {/* Smart Reprocess Button */}
@@ -1552,7 +1552,7 @@ export default function Dashboard() {
 
         <TabsContent value="overview" className="space-y-4 md:space-y-6">
           {/* Main Metrics Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div data-testid="metrics-cards" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <MetricCard
               title={t('metrics.total_profitability')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}

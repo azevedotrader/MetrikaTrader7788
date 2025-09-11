@@ -143,7 +143,9 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     // Navegar para a primeira página do tour
     const firstStep = steps[0];
     if (firstStep.page) {
-      setLocation(firstStep.page);
+      setTimeout(() => {
+        setLocation(firstStep.page);
+      }, 100);
     }
   };
 
@@ -159,9 +161,11 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       
       setCurrentStep(nextStepIndex);
       
-      // Navegar para a página do próximo passo se for diferente da atual
+      // Navegar para a página do próximo passo
       if (nextStep.page) {
-        setLocation(nextStep.page);
+        setTimeout(() => {
+          setLocation(nextStep.page);
+        }, 100);
       }
     } else {
       stopTour();
@@ -175,9 +179,11 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
       
       setCurrentStep(prevStepIndex);
       
-      // Navegar para a página do passo anterior se for diferente da atual
+      // Navegar para a página do passo anterior
       if (prevStep.page) {
-        setLocation(prevStep.page);
+        setTimeout(() => {
+          setLocation(prevStep.page);
+        }, 100);
       }
     }
   };

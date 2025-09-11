@@ -451,6 +451,7 @@ export default function NovoTrade() {
             <CardContent>
               <Form {...form}>
                 <form
+                  data-testid="trade-form"
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
@@ -864,7 +865,7 @@ export default function NovoTrade() {
                 {t('trade.import_trades_csv')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent data-testid="csv-import-section" className="space-y-6">
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">
