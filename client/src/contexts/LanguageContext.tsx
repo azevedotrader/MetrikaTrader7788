@@ -419,7 +419,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Corretoras
     "brokers.title": "Corretoras",
-    "brokers.csv_import": "Importar CSV",
+    "brokers.csv_import": "Analisar CSVs com IA",
     "brokers.api_config": "Configurar API",
     "brokers.manual_entry": "Entrada Manual",
 
@@ -2049,7 +2049,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Brokers
     "brokers.title": "Brokers",
-    "brokers.csv_import": "Importar CSV",
+    "brokers.csv_import": "Analisar CSVs com IA",
     "brokers.api_config": "Configurar API",
     "brokers.manual_entry": "Entrada Manual",
 
