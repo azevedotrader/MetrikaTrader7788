@@ -586,67 +586,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-900/80 to-emerald-900/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              {t('landing.testimonials.title')}
-            </h2>
-            <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200">{t('landing.testimonials.subtitle')}</p>
-          </div>
-
-          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              {
-                name: t('landing.testimonials.carlos_name'),
-                role: t('landing.testimonials.carlos_role'),
-                content: t('landing.testimonials.carlos_content'),
-                rating: 5,
-                improvement: t('landing.testimonials.carlos_improvement')
-              },
-              {
-                name: t('landing.testimonials.ana_name'),
-                role: t('landing.testimonials.ana_role'),
-                content: t('landing.testimonials.ana_content'),
-                rating: 5,
-                improvement: t('landing.testimonials.ana_improvement')
-              },
-              {
-                name: t('landing.testimonials.pedro_name'),
-                role: t('landing.testimonials.pedro_role'),
-                content: t('landing.testimonials.pedro_content'),
-                rating: 5,
-                improvement: t('landing.testimonials.pedro_improvement')
-              }
-            ].map((testimonial, index) => (
-              <Card key={index} className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-emerald-600/30 hover:border-emerald-500/50 transition-all duration-300 hover:scale-105">
-                <CardContent className="p-6 sm:p-8">
-                  <div className="flex text-gold-400 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-current" />
-                    ))}
-                  </div>
-                  
-                  <p className="font-body text-slate-200 mb-6 leading-relaxed text-lg">"{testimonial.content}"</p>
-                  
-                  <div className="border-t border-slate-700 pt-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-semibold text-white">{testimonial.name}</div>
-                        <div className="text-sm text-slate-400">{testimonial.role}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold text-emerald-400">{testimonial.improvement}</div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* Features Grid Section */}
       <section id="recursos" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-slate-800/30 to-slate-900/30">
