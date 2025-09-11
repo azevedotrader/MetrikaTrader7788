@@ -96,7 +96,7 @@ export default function RiskManagement() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Configurações */}
           <Card data-testid="risk-calculator" className="bg-zinc-900/50 border-zinc-800">
             <CardHeader>
@@ -171,7 +171,7 @@ export default function RiskManagement() {
 
           {/* Resultados */}
           {results && (
-            <div className="space-y-4 md:space-y-6">
+            <div className="lg:col-span-2 space-y-4 md:space-y-6">
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="text-lg md:text-xl text-white">
@@ -179,7 +179,7 @@ export default function RiskManagement() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     <ProjectionCard
                       title={t('risk_management.risk_amount')}
                       value={`$${results.riskAmount.toFixed(2)}`}
@@ -214,7 +214,7 @@ export default function RiskManagement() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
-                  <div className="h-80 w-full">
+                  <div className="h-80 lg:h-96 xl:h-[450px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart
                         data={Array.from({ length: 91 }, (_, index) => {
@@ -304,14 +304,14 @@ export default function RiskManagement() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
-                  <div className="space-y-3 md:space-y-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     {[7, 15, 30, 90].map((days) => {
                       const projectedBalance = results.accountBalance * Math.pow(1 + (results.dailyGrowthProjection / 100), days);
                       const totalGain = projectedBalance - results.accountBalance;
                       const gainPercentage = (totalGain / results.accountBalance) * 100;
                       
                       return (
-                        <div key={days} className="space-y-2">
+                        <div key={days} className="space-y-3 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700">
                           <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                             <span className="text-sm md:text-base text-zinc-400">
                               Após {days} dias
@@ -322,8 +322,11 @@ export default function RiskManagement() {
                           </div>
                           <Progress 
                             value={Math.min(gainPercentage, 100)} 
-                            className="h-2"
+                            className="h-3"
                           />
+                          <div className="text-xs text-zinc-500">
+                            Ganho: +${totalGain.toFixed(2)}
+                          </div>
                         </div>
                       );
                     })}
@@ -335,11 +338,11 @@ export default function RiskManagement() {
         </div>
 
         {!results && (
-          <Card className="bg-zinc-900/50 border-zinc-800 mt-6 md:mt-8">
+          <Card className="bg-zinc-900/50 border-zinc-800 mt-6 md:mt-8 lg:col-span-3">
             <CardContent className="p-6 md:p-8 text-center">
               <Calculator className="w-12 h-12 md:w-16 md:h-16 text-zinc-600 mx-auto mb-3 md:mb-4" />
               <p className="text-sm md:text-base text-zinc-400">
-                {t('risk_management.enter_balance_to_start')}
+                Insira o saldo da conta para começar
               </p>
             </CardContent>
           </Card>
