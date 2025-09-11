@@ -150,25 +150,7 @@ export default function Landing() {
                 </Button>
               </div>
               
-              {/* Social Proof */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-8">
-                <div className="flex items-center space-x-2">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-slate-300 font-medium">4.9/5</span>
-                </div>
-                <div className="flex items-center space-x-2 text-slate-300">
-                  <Users className="w-5 h-5 text-blue-400" />
-                  <span>{t('landing.hero.social_proof1')}</span>
-                </div>
-                <div className="flex items-center space-x-2 text-slate-300">
-                  <Activity className="w-5 h-5 text-green-400" />
-                  <span>{t('landing.hero.social_proof2')}</span>
-                </div>
-              </div>
+              
             </div>
             
             {/* Enhanced Dashboard Preview */}
