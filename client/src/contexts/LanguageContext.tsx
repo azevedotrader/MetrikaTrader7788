@@ -65,6 +65,26 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.admin": "Admin",
     "nav.logout": "Sair",
 
+    // Gestão de Risco
+    "risk_management.title": "Gestão de Risco",
+    "risk_management.description": "Calcule o tamanho ideal da posição e projete seu crescimento",
+    "risk_management.settings": "Configurações",
+    "risk_management.settings_description": "Insira os dados da sua conta e operação",
+    "risk_management.account_balance": "Saldo da Conta",
+    "risk_management.risk_percentage": "Risco por Operação",
+    "risk_management.stop_loss_pips": "Stop Loss (pips)",
+    "risk_management.risk_reward_ratio": "Razão Risco:Retorno",
+    "risk_management.calculate": "Calcular",
+    "risk_management.results": "Resultados",
+    "risk_management.risk_amount": "Valor em Risco",
+    "risk_management.potential_profit": "Lucro Potencial",
+    "risk_management.position_size": "Tamanho da Posição",
+    "risk_management.daily_growth": "Crescimento Diário",
+    "risk_management.growth_projection": "Projeção de Crescimento",
+    "risk_management.growth_projection_description": "Baseado em performance consistente",
+    "risk_management.after_days": "Após {days} dias",
+    "risk_management.enter_balance_to_start": "Insira o saldo da conta para começar",
+
     // Suporte
     "support.title": "Suporte",
     "support.description":

@@ -18,6 +18,7 @@ import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
 import Graficos from "@/pages/graficos";
 import Analises from "@/pages/analises";
+import RiskManagement from "@/pages/risk-management";
 import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
 import Calendario from "@/pages/calendario";
@@ -34,6 +35,7 @@ const pageTitleKeys: Record<string, string> = {
   "/novo-trade": "trades.add_new",
   "/graficos": "charts.title",
   "/analises": "nav.trades",
+  "/gestao": "risk_management.title",
   "/diario": "journal.title",
   "/calendario": "calendar.title",
   "/perfil": "profile.title",
@@ -99,6 +101,13 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <NovoTrade />
+                  </Route>
+                  <Route path="/gestao">
+                    <TopBar 
+                      title={t(pageTitleKeys["/gestao"])} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <RiskManagement />
                   </Route>
                   <Route path="/graficos">
                     <TopBar 
