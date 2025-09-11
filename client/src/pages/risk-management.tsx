@@ -184,9 +184,12 @@ export default function RiskManagement() {
                   <div className="flex items-start gap-3 p-3 bg-green-900/20 rounded-lg border border-green-800/30">
                     <Shield className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-sm font-semibold text-green-300 mb-1">Regra dos 2%</h4>
+                      <h4 className="text-sm font-semibold text-green-300 mb-1">Gestão de Risco por Perfil</h4>
                       <p className="text-xs text-green-100">
-                        Nunca arrisque mais que 2-3% do capital por operação. Esta é a base da preservação de capital no trading profissional.
+                        {riskProfile === "conservador" && "Conservador: Mantenha sempre 1% por operação para preservar capital a longo prazo."}
+                        {riskProfile === "moderado" && "Moderado: Use 2-3% por operação, equilibrando crescimento e segurança."}
+                        {riskProfile === "alto_risco" && "Alto Risco: Até 5% por operação para traders experientes com alta tolerância ao risco."}
+                        {!riskProfile && "Selecione um perfil para ver recomendações específicas de risco por operação."}
                       </p>
                     </div>
                   </div>
