@@ -726,14 +726,6 @@ export default function Landing() {
 
             <div className="text-center">
               <p className="text-slate-300 mb-6 text-lg">{t('landing.cta.social_proof')}</p>
-              <div className="flex items-center justify-center space-x-6">
-                <div className="flex text-gold-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-6 h-6 fill-current" />
-                  ))}
-                </div>
-                <span className="text-slate-200 font-semibold text-lg">{t('landing.cta.rating')}</span>
-              </div>
             </div>
           </div>
         </div>
