@@ -39,13 +39,7 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message, language })
-      });
+      const response = await apiRequest('POST', '/api/ai/chat', { message, language });
       return response.json();
     },
     onSuccess: (response) => {
