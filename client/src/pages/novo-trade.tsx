@@ -902,7 +902,7 @@ export default function NovoTrade() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    {t('trade.csv_file')}
+                    Arquivo CSV (Os CSVS devem conter a data específica de cada trade para melhor performance).
                   </label>
                   <Input
                     type="file"
