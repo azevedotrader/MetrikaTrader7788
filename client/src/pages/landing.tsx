@@ -690,19 +690,19 @@ export default function Landing() {
                 <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center">
                   <CheckCircle className="w-8 h-8 text-emerald-400" />
                 </div>
-                <span className="text-xl font-medium">{t('landing.cta.benefit1')}</span>
+                <span className="text-xl font-medium">{t('landing.cta.feature1')}</span>
               </div>
               <div className="flex items-center space-x-4 text-slate-200">
                 <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center">
                   <Zap className="w-8 h-8 text-indigo-400" />
                 </div>  
-                <span className="text-xl font-medium">{t('landing.cta.benefit2')}</span>
+                <span className="text-xl font-medium">{t('landing.cta.feature2')}</span>
               </div>
               <div className="flex items-center space-x-4 text-slate-200">
                 <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center">
                   <Shield className="w-8 h-8 text-teal-400" />
                 </div>
-                <span className="text-xl font-medium">{t('landing.cta.benefit3')}</span>
+                <span className="text-xl font-medium">{t('landing.cta.feature3')}</span>
               </div>
             </div>
 
@@ -712,7 +712,7 @@ export default function Landing() {
                 onClick={() => setShowRegister(true)}
                 className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-8 sm:px-12 lg:px-16 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-bold animate-glow"
               >
-                {t('landing.cta.primary_button')}
+                {t('landing.cta.main_button')}
                 <ArrowRight className="w-7 h-7 ml-4" />
               </Button>
               <Button 
@@ -720,7 +720,7 @@ export default function Landing() {
                 variant="outline"
                 className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-8 lg:px-12 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-semibold backdrop-blur-sm"
               >
-                {t('landing.cta.secondary_button')}
+                {t('landing.cta.demo_button')}
               </Button>
             </div>
 
