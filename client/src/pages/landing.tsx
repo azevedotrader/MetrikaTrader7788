@@ -468,33 +468,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="py-24 bg-gradient-to-r from-emerald-900/25 to-indigo-900/25 border-y border-emerald-800/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-6">
-              {t('landing.stats.title')}
-            </h2>
-            <p className="font-body text-xl text-slate-200">{t('landing.stats.subtitle')}</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { value: "2.1M+", label: t('landing.stats.trades_analyzed'), icon: Activity, color: "gradient-emerald-blue" },
-              { value: "1.200+", label: t('landing.stats.active_traders'), icon: Users, color: "gradient-teal" },
-              { value: "847%", label: t('landing.stats.improvement_avg'), icon: TrendingUp, color: "gradient-gold" },
-              { value: "4.9/5", label: t('landing.stats.satisfaction'), icon: Star, color: "gradient-emerald-blue" }
-            ].map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div className={`w-20 h-20 ${stat.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:animate-glow transition-all duration-300`}>
-                  <stat.icon className="w-10 h-10 text-white" />
-                </div>
-                <div className="text-4xl md:text-5xl font-display font-bold text-white mb-3">{stat.value}</div>
-                <div className="text-slate-300 font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* Pricing Section */}
       <section id="precos" className="py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-emerald-900/15 to-slate-900 relative overflow-hidden">
