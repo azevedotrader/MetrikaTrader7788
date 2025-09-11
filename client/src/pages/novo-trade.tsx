@@ -892,7 +892,7 @@ export default function NovoTrade() {
                   <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="text-yellow-400">⚡</div>
-                      <span className="text-white font-medium">Análise MetrikAI (Recomendado)</span>
+                      <span className="text-white font-medium">Análise MetrikAI </span>
                     </div>
                     <p className="text-xs text-charcoal-400">
                       Tradicional: Mais rápido e consistente, ideal para formatos padrão
