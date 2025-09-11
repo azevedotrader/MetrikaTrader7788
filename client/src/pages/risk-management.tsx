@@ -157,14 +157,7 @@ export default function RiskManagement() {
                   </p>
                 </div>
 
-                <Button 
-                  onClick={calculateRisk}
-                  className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-base"
-                  data-testid="button-calculate-risk"
-                >
-                  <Calculator className="w-4 h-4 mr-2" />
-                  {t('risk_management.calculate')}
-                </Button>
+                
               </CardContent>
             </Card>
 
