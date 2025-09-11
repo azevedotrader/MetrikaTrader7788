@@ -756,7 +756,7 @@ export default function Landing() {
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">{t('landing.footer.product_title')}</h4>
+              <h4 className="text-white font-semibold mb-4">{t('landing.footer.product')}</h4>
               <div className="space-y-2">
                 <a href="#recursos" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.features')}</a>
                 <a href="#precos" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.pricing')}</a>
@@ -766,7 +766,7 @@ export default function Landing() {
             </div>
             
             <div>
-              <h4 className="text-white font-semibold mb-4">{t('landing.footer.support_title')}</h4>
+              <h4 className="text-white font-semibold mb-4">{t('landing.footer.support')}</h4>
               <div className="space-y-2">
                 <a href="#contato" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.contact')}</a>
                 <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.documentation')}</a>
