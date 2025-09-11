@@ -1094,10 +1094,17 @@ function parseNumericValue(str: string): number | null {
     return result;
   }
   
-  // 7. Números decimais simples com ponto (ex: 123.45)
-  if (/^\d+\.\d{1,2}$/.test(cleaned) && !cleaned.includes(',')) {
+  // 7. Números decimais simples com ponto (ex: 123.45, -12.36)
+  if (/^-?\d+\.\d{1,4}$/.test(cleaned) && !cleaned.includes(',')) {
     const result = parseFloat(cleaned);
     console.log(`    📊 Decimal: "${original}" → ${result} (decimal com ponto)`);
+    return result;
+  }
+  
+  // 8. Números decimais pequenos para forex (ex: 0.86589, 1.38493)
+  if (/^-?\d{0,3}\.\d{3,6}$/.test(cleaned)) {
+    const result = parseFloat(cleaned);
+    console.log(`    📊 Forex: "${original}" → ${result} (preço forex)`);
     return result;
   }
   
@@ -1269,7 +1276,10 @@ function extractSymbol(row: any, market: string): string | null {
     if (/^[A-Z]{2,8}\d*$/.test(valueStr) || 
         /^[A-Z]{3,6}[0-9]{1,4}$/.test(valueStr) ||
         /^[A-Z]+[\/\-][A-Z]+$/.test(valueStr) ||
-        /WIN|WDO|IND|DOL|PETR|VALE|ITUB|BBDC/i.test(valueStr)) {
+        /^[A-Z]+ \d+$/.test(valueStr) ||  // US 100, US 500
+        /^[A-Z]+ [A-Z]+\s*\d*$/.test(valueStr) ||  // GERMANY 40
+        /^[A-Z]{6}$/.test(valueStr) ||  // EURUSD, XAUUSD
+        /WIN|WDO|IND|DOL|PETR|VALE|ITUB|BBDC|EURUSD|XAUUSD|GBPUSD|USDJPY|USDCAD|EURJPY|EURGBP|EURAUD|USDCHF/i.test(valueStr)) {
       console.log(`🎯 Símbolo genérico: ${valueStr}`);
       return valueStr;
     }
@@ -1338,9 +1348,9 @@ function extractNumericValues(row: any): {
     
     if (!isNaN(num) && isFinite(num)) {
       // Priorizar colunas específicas pelo nome
-      if (keyLower.includes('profit') || keyLower.includes('resultado') || keyLower.includes('pl')) {
+      if (keyLower.includes('profit') || keyLower.includes('resultado') || keyLower.includes('pl') || keyLower.includes('líquidos') || keyLower.includes('liquidos')) {
         profitValue = num;
-      } else if (keyLower.includes('volume') || keyLower.includes('quantidade') || keyLower.includes('size')) {
+      } else if (keyLower.includes('volume') || keyLower.includes('quantidade') || keyLower.includes('size') || keyLower.includes('lotes')) {
         quantityValue = num;
       } else if (keyLower.includes('open') && keyLower.includes('price')) {
         entryPriceValue = num;
