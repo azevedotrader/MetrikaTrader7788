@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 interface RiskCalculation {
   accountBalance: number;
   riskPercentage: number;
-  stopLossPips: number;
   riskRewardRatio: number;
   riskAmount: number;
   potentialProfit: number;
@@ -23,27 +22,24 @@ export default function RiskManagement() {
   const { t } = useLanguage();
   const [accountBalance, setAccountBalance] = useState<string>("");
   const [riskPercentage, setRiskPercentage] = useState<string>("2");
-  const [stopLossPips, setStopLossPips] = useState<string>("20");
   const [riskRewardRatio, setRiskRewardRatio] = useState<string>("2");
   const [results, setResults] = useState<RiskCalculation | null>(null);
 
   const calculateRisk = () => {
     const balance = parseFloat(accountBalance) || 0;
     const risk = parseFloat(riskPercentage) || 2;
-    const stopPips = parseFloat(stopLossPips) || 20;
     const rrRatio = parseFloat(riskRewardRatio) || 2;
 
     if (balance <= 0) return;
 
     const riskAmount = (balance * risk) / 100;
     const potentialProfit = riskAmount * rrRatio;
-    const positionSize = riskAmount / (stopPips * 10); // Simplified calculation
+    const positionSize = riskAmount / 200; // Simplified calculation without stop loss pips
     const dailyGrowthProjection = (potentialProfit / balance) * 100;
 
     setResults({
       accountBalance: balance,
       riskPercentage: risk,
-      stopLossPips: stopPips,
       riskRewardRatio: rrRatio,
       riskAmount,
       potentialProfit,
@@ -56,7 +52,7 @@ export default function RiskManagement() {
     if (accountBalance && parseFloat(accountBalance) > 0) {
       calculateRisk();
     }
-  }, [accountBalance, riskPercentage, stopLossPips, riskRewardRatio]);
+  }, [accountBalance, riskPercentage, riskRewardRatio]);
 
   const ProjectionCard = ({ title, value, color, icon: Icon }: { 
     title: string; 
@@ -122,39 +118,21 @@ export default function RiskManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="risk" className="text-sm md:text-base text-zinc-300">
-                    {t('risk_management.risk_percentage')} (%)
-                  </Label>
-                  <Input
-                    id="risk"
-                    type="number"
-                    min="0.1"
-                    max="10"
-                    step="0.1"
-                    value={riskPercentage}
-                    onChange={(e) => setRiskPercentage(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white h-12 text-base"
-                    data-testid="input-risk-percentage"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="stopLoss" className="text-sm md:text-base text-zinc-300">
-                    {t('risk_management.stop_loss_pips')}
-                  </Label>
-                  <Input
-                    id="stopLoss"
-                    type="number"
-                    min="5"
-                    step="1"
-                    value={stopLossPips}
-                    onChange={(e) => setStopLossPips(e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white h-12 text-base"
-                    data-testid="input-stop-loss-pips"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="risk" className="text-sm md:text-base text-zinc-300">
+                  {t('risk_management.risk_percentage')} (%)
+                </Label>
+                <Input
+                  id="risk"
+                  type="number"
+                  min="0.1"
+                  max="10"
+                  step="0.1"
+                  value={riskPercentage}
+                  onChange={(e) => setRiskPercentage(e.target.value)}
+                  className="bg-zinc-800 border-zinc-700 text-white h-12 text-base"
+                  data-testid="input-risk-percentage"
+                />
               </div>
 
               <div className="space-y-2">
