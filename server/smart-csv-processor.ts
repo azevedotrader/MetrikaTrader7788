@@ -762,7 +762,7 @@ function detectBrokerAndMarket(data: any[], headers: string[]): { broker: string
     return { broker: 'crypto', market: 'crypto' };
   }
   
-  if (/forex|fx|tickmill|meta|mt4|mt5|eur|gbp|usd|closed p&l|position id/.test(headerStr)) {
+  if (/forex|fx|tickmill|meta|mt4|mt5|eur|gbp|usd|closed p&l|position id|open time|close time|open price|close price|stop loss|take profit|profit|commission|swap/.test(headerStr)) {
     return { broker: 'forex', market: 'forex' };
   }
   
@@ -1318,9 +1318,14 @@ function extractNumericValues(row: any): {
   stopLoss?: number;
 } {
   const numbers: number[] = [];
+  let profitValue: number | null = null;
+  let quantityValue: number | null = null;
+  let entryPriceValue: number | null = null;
+  let exitPriceValue: number | null = null;
   
-  // Extrair todos os números da linha
+  // Primeiro, tentar extrair valores específicos por nome da coluna
   for (const [key, value] of Object.entries(row)) {
+    const keyLower = String(key).toLowerCase();
     const valueStr = String(value);
     
     // Limpar e converter número brasileiro
@@ -1330,19 +1335,31 @@ function extractNumericValues(row: any): {
       .replace(',', '.'); // Converte vírgula decimal
     
     const num = parseFloat(cleanStr);
-    if (!isNaN(num) && isFinite(num) && Math.abs(num) < 10000000000) { // Limitar para evitar overflow no DB
-      numbers.push(num);
+    
+    if (!isNaN(num) && isFinite(num)) {
+      // Priorizar colunas específicas pelo nome
+      if (keyLower.includes('profit') || keyLower.includes('resultado') || keyLower.includes('pl')) {
+        profitValue = num;
+      } else if (keyLower.includes('volume') || keyLower.includes('quantidade') || keyLower.includes('size')) {
+        quantityValue = num;
+      } else if (keyLower.includes('open') && keyLower.includes('price')) {
+        entryPriceValue = num;
+      } else if (keyLower.includes('close') && keyLower.includes('price')) {
+        exitPriceValue = num;
+      }
+      
+      // Também adicionar à lista geral para fallback
+      if (Math.abs(num) < 10000000000) {
+        numbers.push(num);
+      }
     }
   }
   
   // Filtrar números válidos para trading
   const validNumbers = numbers.filter(n => Math.abs(n) < 10000000000);
   
-  // Ordenar números por magnitude
-  validNumbers.sort((a, b) => Math.abs(a) - Math.abs(b));
-  
   // Se não há números válidos, usar padrões mínimos
-  if (validNumbers.length === 0) {
+  if (validNumbers.length === 0 && profitValue === null) {
     return {
       quantity: 1,
       entryPrice: 100,
@@ -1352,14 +1369,14 @@ function extractNumericValues(row: any): {
     };
   }
   
-  // Ser mais flexível na interpretação dos números
+  // Ordenar números por magnitude para fallback
   const sortedNums = [...validNumbers].sort((a, b) => Math.abs(a) - Math.abs(b));
   
   return {
-    quantity: Math.min(sortedNums.find(n => n > 0 && n <= 100000) || sortedNums.find(n => n > 0) || 1, 9999),
-    entryPrice: Math.min(sortedNums.find(n => n >= 1) || 100, 999999),
-    exitPrice: sortedNums.length > 2 ? Math.min(sortedNums[sortedNums.length - 2], 999999) : undefined,
-    result: Math.max(Math.min(sortedNums[sortedNums.length - 1] || 0, 99999999), -99999999),
+    quantity: quantityValue || Math.min(sortedNums.find(n => n > 0 && n <= 100000) || sortedNums.find(n => n > 0) || 1, 9999),
+    entryPrice: entryPriceValue || Math.min(sortedNums.find(n => n >= 1) || 100, 999999),
+    exitPrice: exitPriceValue || (sortedNums.length > 2 ? Math.min(sortedNums[sortedNums.length - 2], 999999) : undefined),
+    result: profitValue !== null ? Math.max(Math.min(profitValue, 99999999), -99999999) : Math.max(Math.min(sortedNums[sortedNums.length - 1] || 0, 99999999), -99999999),
     stopLoss: sortedNums.find(n => n < 0 && Math.abs(n) < 10000) || undefined
   };
 }
