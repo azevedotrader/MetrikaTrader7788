@@ -1612,18 +1612,14 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-zinc-400 text-sm">{t('dashboard.frequent_emotion')}</p>
-                    <p className="text-lg font-bold text-white flex items-center gap-1">
-                      {simbolosEmocoes[
-                        metrics.emocaoMaisRecorrente
-                          .emocao as keyof typeof simbolosEmocoes
-                      ] || "○"}
-                      {metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')}
+                    <p className="text-lg font-bold text-white">
+                      {(metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).charAt(0).toUpperCase() + (metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).slice(1)}
                     </p>
                     <p className="text-sm text-zinc-500">
                       {metrics.emocaoMaisRecorrente.count} {t('time.times')}
                     </p>
                   </div>
-                  <Calendar className="h-8 w-8 text-white" />
+                  <div className="h-8 w-8"></div>
                 </div>
               </CardContent>
             </Card>
@@ -1632,8 +1628,7 @@ export default function Dashboard() {
           {/* Performance por Período - Gráfico Visual */}
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-green-400" />
+              <CardTitle className="text-white">
                 {t('dashboard.performance_chart')}
               </CardTitle>
             </CardHeader>
@@ -1756,8 +1751,7 @@ export default function Dashboard() {
           {/* Análise Temporal Detalhada */}
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2 text-sm md:text-base">
-                <Calendar className="h-4 w-4 md:h-5 md:w-5 text-green-400" />
+              <CardTitle className="text-white text-sm md:text-base">
                 {t('dashboard.detailed_temporal_performance')}
               </CardTitle>
             </CardHeader>
