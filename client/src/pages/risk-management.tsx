@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 interface RiskCalculation {
   accountBalance: number;
   riskPercentage: number;
-  riskRewardRatio: number;
   riskAmount: number;
   potentialProfit: number;
   positionSize: number;
@@ -22,25 +21,22 @@ export default function RiskManagement() {
   const { t } = useLanguage();
   const [accountBalance, setAccountBalance] = useState<string>("");
   const [riskPercentage, setRiskPercentage] = useState<string>("2");
-  const [riskRewardRatio, setRiskRewardRatio] = useState<string>("2");
   const [results, setResults] = useState<RiskCalculation | null>(null);
 
   const calculateRisk = () => {
     const balance = parseFloat(accountBalance) || 0;
     const risk = parseFloat(riskPercentage) || 2;
-    const rrRatio = parseFloat(riskRewardRatio) || 2;
 
     if (balance <= 0) return;
 
     const riskAmount = (balance * risk) / 100;
-    const potentialProfit = riskAmount * rrRatio;
+    const potentialProfit = riskAmount; // Simplified: potential profit equals risk amount
     const positionSize = riskAmount / 200; // Simplified calculation without stop loss pips
     const dailyGrowthProjection = (potentialProfit / balance) * 100;
 
     setResults({
       accountBalance: balance,
       riskPercentage: risk,
-      riskRewardRatio: rrRatio,
       riskAmount,
       potentialProfit,
       positionSize,
@@ -52,7 +48,7 @@ export default function RiskManagement() {
     if (accountBalance && parseFloat(accountBalance) > 0) {
       calculateRisk();
     }
-  }, [accountBalance, riskPercentage, riskRewardRatio]);
+  }, [accountBalance, riskPercentage]);
 
   const ProjectionCard = ({ title, value, color, icon: Icon }: { 
     title: string; 
@@ -135,22 +131,7 @@ export default function RiskManagement() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="rrRatio" className="text-sm md:text-base text-zinc-300">
-                  {t('risk_management.risk_reward_ratio')}
-                </Label>
-                <Input
-                  id="rrRatio"
-                  type="number"
-                  min="1"
-                  max="10"
-                  step="0.1"
-                  value={riskRewardRatio}
-                  onChange={(e) => setRiskRewardRatio(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white h-12 text-base"
-                  data-testid="input-risk-reward-ratio"
-                />
-              </div>
+              
 
               <Button 
                 onClick={calculateRisk}
