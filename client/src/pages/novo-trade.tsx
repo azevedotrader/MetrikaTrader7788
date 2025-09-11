@@ -92,9 +92,8 @@ export default function NovoTrade() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
   const [currentTradeData, setCurrentTradeData] = useState<any>(null);
-  const [analysisMethod, setAnalysisMethod] = useState<"ai" | "traditional">(
-    "traditional",
-  );
+  // Usando apenas análise MetrikAI (recomendada)
+  const analysisMethod = "traditional";
 
   // Take/Stop calculation state
   const [tradeResult, setTradeResult] = useState<"take" | "loss" | "">("");
@@ -251,7 +250,7 @@ export default function NovoTrade() {
 
       toast({
         title: "Importação concluída com sucesso!",
-        description: `🎉 ${data.tradesImported} trades importados\n📊 Método: ${data.methodUsed || data.processingMethod || (analysisMethod === "ai" ? "IA" : "Tradicional")}`,
+        description: `🎉 ${data.tradesImported} trades importados\n📊 Método: ${data.methodUsed || data.processingMethod || "MetrikAI"}`,
       });
     },
     onError: (error: any) => {
@@ -509,7 +508,7 @@ export default function NovoTrade() {
                             onValueChange={(value) => {
                               field.onChange(value);
                               // Atualizar corretora automaticamente quando o mercado mudar
-                              form.setValue("corretora", value);
+                              form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
                             }}
                             defaultValue={field.value}
                           >
@@ -888,36 +887,16 @@ export default function NovoTrade() {
 
                 <div>
                   <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    {t('form.analysis_method')}
+                    Método de Análise
                   </label>
-                  <Select
-                    value={analysisMethod}
-                    onValueChange={(value: "ai" | "traditional") =>
-                      setAnalysisMethod(value)
-                    }
-                  >
-                    <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                      <SelectValue placeholder={t('form.choose_processing')} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                      <SelectItem value="ai">
-                        {t('form.ai_analysis')}
-                      </SelectItem>
-                      <SelectItem value="traditional">
-                        {t('form.traditional_analysis')}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="mt-2 text-xs text-charcoal-400">
-                    {analysisMethod === "ai" ? (
-                      <p>
-                        {t('form.ai_description')}
-                      </p>
-                    ) : (
-                      <p>
-                        {t('form.traditional_description')}
-                      </p>
-                    )}
+                  <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="text-yellow-400">⚡</div>
+                      <span className="text-white font-medium">Análise MetrikAI (Recomendado)</span>
+                    </div>
+                    <p className="text-xs text-charcoal-400">
+                      Tradicional: Mais rápido e consistente, ideal para formatos padrão
+                    </p>
                   </div>
                 </div>
 
@@ -968,16 +947,12 @@ export default function NovoTrade() {
                   {uploadMutation.isPending ? (
                     <>
                       <Upload className="w-4 h-4 mr-2 animate-spin" />
-                      {analysisMethod === "ai"
-                        ? t('trade.analyzing_ai')
-                        : t('trade.processing')}
+                      {t('trade.processing')}
                     </>
                   ) : (
                     <>
                       <Upload className="w-4 h-4 mr-2" />
-                      {analysisMethod === "ai"
-                        ? t('trade.import_with_ai')
-                        : t('trade.import_fast')}
+                      {t('trade.import_fast')}
                     </>
                   )}
                 </Button>
