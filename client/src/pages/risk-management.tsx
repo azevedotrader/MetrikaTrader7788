@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Calculator, TrendingUp, DollarSign, Target } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -20,12 +21,22 @@ interface RiskCalculation {
 export default function RiskManagement() {
   const { t } = useLanguage();
   const [accountBalance, setAccountBalance] = useState<string>("");
-  const [riskPercentage, setRiskPercentage] = useState<string>("2");
+  const [riskProfile, setRiskProfile] = useState<string>("moderado");
+  
+  // Map risk profiles to percentages
+  const getRiskPercentage = (profile: string): number => {
+    switch (profile) {
+      case "conservador": return 1;
+      case "moderado": return 2.5;
+      case "alto_risco": return 5;
+      default: return 2.5;
+    }
+  };
   const [results, setResults] = useState<RiskCalculation | null>(null);
 
   const calculateRisk = () => {
     const balance = parseFloat(accountBalance) || 0;
-    const risk = parseFloat(riskPercentage) || 2;
+    const risk = getRiskPercentage(riskProfile);
 
     if (balance <= 0) return;
 
@@ -48,7 +59,7 @@ export default function RiskManagement() {
     if (accountBalance && parseFloat(accountBalance) > 0) {
       calculateRisk();
     }
-  }, [accountBalance, riskPercentage]);
+  }, [accountBalance, riskProfile]);
 
   const ProjectionCard = ({ title, value, color, icon: Icon }: { 
     title: string; 
@@ -115,20 +126,33 @@ export default function RiskManagement() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="risk" className="text-sm md:text-base text-zinc-300">
-                  {t('risk_management.risk_percentage')} (%)
+                <Label htmlFor="risk-profile" className="text-sm md:text-base text-zinc-300">
+                  Perfil de Risco
                 </Label>
-                <Input
-                  id="risk"
-                  type="number"
-                  min="0.1"
-                  max="10"
-                  step="0.1"
-                  value={riskPercentage}
-                  onChange={(e) => setRiskPercentage(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white h-12 text-base"
-                  data-testid="input-risk-percentage"
-                />
+                <Select
+                  value={riskProfile}
+                  onValueChange={setRiskProfile}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-12 text-base">
+                    <SelectValue placeholder="Selecione seu perfil de risco" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectItem value="conservador" className="text-white">
+                      🛡️ Conservador (1% por operação)
+                    </SelectItem>
+                    <SelectItem value="moderado" className="text-white">
+                      ⚖️ Moderado (2.5% por operação)
+                    </SelectItem>
+                    <SelectItem value="alto_risco" className="text-white">
+                      🚀 Alto Risco (5% por operação)
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-zinc-400">
+                  {riskProfile === "conservador" && "Perfil conservador: menor risco, crescimento gradual"}
+                  {riskProfile === "moderado" && "Perfil moderado: equilibrio entre risco e retorno"}
+                  {riskProfile === "alto_risco" && "Alto risco: maior potencial, mas riscos elevados"}
+                </p>
               </div>
 
               
