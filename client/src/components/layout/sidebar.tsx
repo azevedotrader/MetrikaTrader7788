@@ -24,7 +24,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const navigation = [
   { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { nameKey: "trades.add_new", href: "/novo-trade", icon: PlusCircle },
-  { nameKey: "charts.title", href: "/graficos", icon: TrendingUp },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
   { nameKey: "journal.title", href: "/diario", icon: Book },
   { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
