@@ -725,7 +725,6 @@ export default function Landing() {
             </div>
 
             <div className="text-center">
-              <p className="text-slate-300 mb-6 text-lg">{t('landing.cta.social_proof')}</p>
             </div>
           </div>
         </div>
