@@ -156,40 +156,67 @@ export function TourOverlay() {
     }
   };
 
+  // Função para verificar se uma posição cabe na tela
+  const positionFitsInViewport = (position: string, elementPos: ElementPosition, tooltipWidth: number, tooltipHeight: number, margin: number): boolean => {
+    let top = 0;
+    let left = 0;
+    
+    switch (position) {
+      case 'top':
+        top = elementPos.top - tooltipHeight - margin;
+        left = elementPos.left + elementPos.width / 2 - tooltipWidth / 2;
+        break;
+      case 'bottom':
+        top = elementPos.top + elementPos.height + margin;
+        left = elementPos.left + elementPos.width / 2 - tooltipWidth / 2;
+        break;
+      case 'left':
+        top = elementPos.top + elementPos.height / 2 - tooltipHeight / 2;
+        left = elementPos.left - tooltipWidth - margin;
+        break;
+      case 'right':
+        top = elementPos.top + elementPos.height / 2 - tooltipHeight / 2;
+        left = elementPos.left + elementPos.width + margin;
+        break;
+      default:
+        return true; // center sempre cabe
+    }
+    
+    return (
+      top >= margin && 
+      top + tooltipHeight <= viewport.height - margin &&
+      left >= margin && 
+      left + tooltipWidth <= viewport.width - margin
+    );
+  };
+
   // Função para calcular posição derivada (unificada para tooltip e seta)
   const getDerivedPosition = (requestedPosition: string | undefined, elementPos: ElementPosition | null) => {
     if (!elementPos) return 'center';
     
-    let position = requestedPosition;
+    const { width: tooltipWidth, height: tooltipHeight, margin } = getTooltipDimensions();
     
-    // Em mobile, escolher automaticamente a melhor posição
-    if (viewport.isMobile) {
-      const { height: tooltipHeight, margin } = getTooltipDimensions();
-      const spaceAbove = elementPos.top;
-      const spaceBelow = viewport.height - (elementPos.top + elementPos.height);
-      
-      if (spaceBelow > tooltipHeight + margin && spaceBelow > spaceAbove) {
-        position = 'bottom';
-      } else if (spaceAbove > tooltipHeight + margin) {
-        position = 'top';
-      } else {
-        position = 'center';
-      }
-      
-      // Forçar bottom para posições laterais no mobile
-      if (position === 'left' || position === 'right') {
-        position = 'bottom';
+    // Lista de posições em ordem de preferência
+    const positionPriority = viewport.isMobile ? 
+      ['bottom', 'top', 'center'] : 
+      [requestedPosition, 'bottom', 'top', 'left', 'right', 'center'].filter(Boolean);
+    
+    // Tentar cada posição até encontrar uma que cabe
+    for (const position of positionPriority) {
+      if (positionFitsInViewport(position!, elementPos, tooltipWidth, tooltipHeight, margin)) {
+        return position!;
       }
     }
     
-    return position || 'center';
+    // Fallback para center se nenhuma posição couber
+    return 'center';
   };
 
   // Calcular posição do tooltip responsivo
   useEffect(() => {
     const { width: tooltipWidth, height: tooltipHeight, margin } = getTooltipDimensions();
     
-    // Calcular posição final unificada
+    // Calcular posição final unificada (inteligente)
     const derivedPosition = getDerivedPosition(currentTourStep?.position, elementPosition);
     setFinalPosition(derivedPosition);
 
@@ -224,12 +251,12 @@ export function TourOverlay() {
         break;
       case 'center':
       default:
-        top = (viewport.height - tooltipHeight) / 2;
-        left = (viewport.width - tooltipWidth) / 2;
+        top = Math.max(margin, (viewport.height - tooltipHeight) / 2);
+        left = Math.max(margin, (viewport.width - tooltipWidth) / 2);
         break;
     }
 
-    // Garantir que o tooltip não saia da tela
+    // Clamp final apenas para ajustes menores (já calculamos uma posição que deve caber)
     left = Math.max(margin, Math.min(left, viewport.width - tooltipWidth - margin));
     top = Math.max(margin, Math.min(top, viewport.height - tooltipHeight - margin));
 
