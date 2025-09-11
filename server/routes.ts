@@ -1437,6 +1437,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post("/api/trades", requireAuth, async (req, res) => {
     try {
       const userId = req.userId;
+      if (!userId) return res.status(401).json({ message: 'Usuário não autenticado' });
       
       // Check if user is Free and reached limit
       const user = await storage.getUser(userId);
@@ -2375,7 +2376,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       // Analisar trades (do CSV específico ou todos)
       const { aiService } = await import('./ai-service');
-      const tips = await aiService.generateCsvBasedTips(trades, csvImports);
+      const tips = await aiService.generateCsvBasedTips(userId, trades, csvImports);
       
       res.json({ tips });
     } catch (error) {
@@ -2412,7 +2413,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const { aiService } = await import('./ai-service');
-      const reply = await aiService.chatWithTrader(message, userContext, language);
+      const reply = await aiService.chatWithTrader(userId || '', message, userContext, language);
       res.json({ reply });
     } catch (error) {
       console.error('Erro no chat AI:', error);
@@ -2487,6 +2488,8 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.get("/api/user/plan", requireAuth, async (req, res) => {
     try {
       const userId = req.userId;
+      if (!userId) return res.status(401).json({ message: 'Usuário não autenticado' });
+      
       const user = await storage.getUser(userId);
       
       if (!user) {
