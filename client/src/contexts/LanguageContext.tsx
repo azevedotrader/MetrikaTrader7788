@@ -61,6 +61,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.charts": "Gráficos",
     "nav.journal": "Diário",
     "nav.brokers": "Corretoras",
+    "nav.learning": "Aprendizado",
     "nav.profile": "Perfil",
     "nav.admin": "Admin",
     "nav.logout": "Sair",
