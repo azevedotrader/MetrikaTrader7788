@@ -6,11 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
+import { TourProvider } from "@/contexts/TourContext";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { AIChat } from "@/components/ui/ai-chat";
 import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
 import { CsvTipsPopup } from "@/components/ui/csv-tips-popup";
+import { TourOverlay } from "@/components/ui/tour-overlay";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import Landing from "@/pages/landing";
@@ -181,6 +183,9 @@ function AppContent() {
               />
               <AISuggestionsPopup />
               <CsvTipsPopup />
+              
+              {/* Tour Overlay - Global */}
+              <TourOverlay />
             </>
           )}
         </Route>
@@ -196,8 +201,10 @@ function App() {
         <LanguageProvider>
           <AuthProvider>
             <AdminAuthProvider>
-              <Toaster />
-              <AppContent />
+              <TourProvider>
+                <Toaster />
+                <AppContent />
+              </TourProvider>
             </AdminAuthProvider>
           </AuthProvider>
         </LanguageProvider>

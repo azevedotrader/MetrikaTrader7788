@@ -85,6 +85,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       )}
       
       <div 
+        data-testid="sidebar"
         className={cn(
           "fixed inset-y-0 left-0 bg-zinc-900/90 border-r border-zinc-800 transition-all duration-300 ease-in-out z-50",
           isMobile 

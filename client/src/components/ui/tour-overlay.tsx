@@ -3,7 +3,7 @@ import { useTour } from '@/contexts/TourContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, ArrowLeft, ArrowRight, Skip } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, SkipForward } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 interface ElementPosition {
@@ -225,7 +225,7 @@ export function TourOverlay() {
                 onClick={skipTour}
                 className="text-slate-400 hover:text-white"
               >
-                <Skip className="h-4 w-4 mr-1" />
+                <SkipForward className="h-4 w-4 mr-1" />
                 Pular
               </Button>
               

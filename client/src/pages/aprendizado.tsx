@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTour } from "@/contexts/TourContext";
 import { 
   Play, 
   GraduationCap, 
@@ -12,171 +13,49 @@ import {
   ArrowRight,
   BookOpen,
   Video,
-  Users
+  Users,
+  Route
 } from "lucide-react";
 
-// Componente Tour para guiar o usuário pela plataforma
+// Componente Tour Interativo - Nova versão global
 export function PlatformTour() {
-  const { t } = useLanguage();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-
-  const tourSteps = [
-    {
-      id: "dashboard",
-      title: "Dashboard - Visão Geral",
-      description: "Aqui você encontra um resumo completo da sua performance de trading, incluindo rentabilidade total, taxa de acerto e métricas importantes.",
-      target: "/dashboard",
-      icon: "📊"
-    },
-    {
-      id: "new-trade", 
-      title: "Novo Trade",
-      description: "Use esta seção para registrar manualmente seus trades ou importar dados via CSV. A IA pode ajudar a analisar seus arquivos.",
-      target: "/novo-trade",
-      icon: "➕"
-    },
-    {
-      id: "risk-management",
-      title: "Gestão de Risco",
-      description: "Calcule o tamanho ideal das posições, gerencie seu risco por operação e projete seu crescimento de capital.",
-      target: "/gestao", 
-      icon: "🎯"
-    },
-    {
-      id: "calendar",
-      title: "Calendário de Trading",
-      description: "Visualize sua performance diária, identifique padrões temporais e analise seus melhores e piores dias de trading.",
-      target: "/calendario",
-      icon: "📅"
-    },
-    {
-      id: "journal",
-      title: "Diário de Trading",
-      description: "Mantenha um registro detalhado de suas reflexões, emoções e lições aprendidas. Fundamental para evolução consistente.",
-      target: "/diario",
-      icon: "📔"
-    },
-    {
-      id: "learning",
-      title: "Aprendizado",
-      description: "Acesse videoaulas, faça tours pela plataforma e aprenda a usar todas as funcionalidades disponíveis.",
-      target: "/aprendizado",
-      icon: "🎓"
-    },
-    {
-      id: "support",
-      title: "Suporte",
-      description: "Precisa de ajuda? Entre em contato conosco através do sistema de suporte integrado para resolver dúvidas ou problemas.",
-      target: "/suporte", 
-      icon: "💬"
-    }
-  ];
-
-  const startTour = () => {
-    setIsActive(true);
-    setCurrentStep(0);
-  };
-
-  const nextStep = () => {
-    if (currentStep < tourSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setIsActive(false);
-      setCurrentStep(0);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const stopTour = () => {
-    setIsActive(false);
-    setCurrentStep(0);
-  };
-
-  if (!isActive) {
-    return (
-      <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-500/30">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-blue-400" />
-            Tour pela Plataforma
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-zinc-300">
-              Novo na plataforma? Faça um tour guiado para conhecer todas as funcionalidades e como usar cada seção.
-            </p>
-            <Button onClick={startTour} className="bg-blue-600 hover:bg-blue-700">
-              <Play className="h-4 w-4 mr-2" />
-              Iniciar Tour
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const currentTourStep = tourSteps[currentStep];
+  const { startTour } = useTour();
 
   return (
     <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-500/30">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            <span className="text-2xl">{currentTourStep.icon}</span>
-            {currentTourStep.title}
-          </CardTitle>
-          <Badge variant="outline" className="text-blue-300 border-blue-400">
-            {currentStep + 1} / {tourSteps.length}
-          </Badge>
-        </div>
+        <CardTitle className="text-white flex items-center gap-2">
+          <Route className="h-5 w-5 text-blue-400" />
+          Tour Interativo pela Plataforma
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-zinc-300 text-lg">
-            {currentTourStep.description}
+          <p className="text-zinc-300">
+            Faça um tour completo e interativo pela plataforma! O sistema irá navegar automaticamente por cada seção, destacando elementos importantes e explicando como usar cada funcionalidade.
           </p>
-          
-          {/* Progress bar */}
-          <div className="w-full bg-zinc-700 rounded-full h-2">
-            <div 
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / tourSteps.length) * 100}%` }}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2">
-              <Button
-                variant="outline" 
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className="text-zinc-300 border-zinc-600"
-              >
-                Anterior
-              </Button>
-              <Button
-                onClick={nextStep}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {currentStep === tourSteps.length - 1 ? 'Finalizar' : 'Próximo'}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-400">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span>Navegação automática entre páginas</span>
             </div>
-            <Button
-              variant="ghost"
-              onClick={stopTour}
-              className="text-zinc-400 hover:text-white"
-            >
-              Pular Tour
-            </Button>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span>Destaques visuais em elementos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span>Explicações contextuais detalhadas</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span>13 passos completos</span>
+            </div>
           </div>
+          <Button onClick={startTour} className="bg-blue-600 hover:bg-blue-700 w-full">
+            <Play className="h-4 w-4 mr-2" />
+            Iniciar Tour Interativo
+          </Button>
         </div>
       </CardContent>
     </Card>
