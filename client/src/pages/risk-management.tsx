@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Calculator, TrendingUp, DollarSign, Target } from "lucide-react";
+import { Calculator, TrendingUp, DollarSign, Target, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface RiskCalculation {
   accountBalance: number;
@@ -201,14 +202,105 @@ export default function RiskManagement() {
                 </CardContent>
               </Card>
 
-              {/* Projeção de Crescimento */}
+              {/* Gráfico de Projeção */}
+              <Card className="bg-zinc-900/50 border-zinc-800">
+                <CardHeader className="p-4 md:p-6">
+                  <CardTitle className="text-lg md:text-xl text-white flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Gráfico de Projeção de Crescimento
+                  </CardTitle>
+                  <CardDescription className="text-sm md:text-base text-zinc-400">
+                    Visualização da evolução projetada do saldo da conta
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 md:p-6">
+                  <div className="h-80 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={Array.from({ length: 91 }, (_, index) => {
+                          const day = index;
+                          const projectedBalance = day === 0 
+                            ? results.accountBalance 
+                            : results.accountBalance * Math.pow(1 + (results.dailyGrowthProjection / 100), day);
+                          return {
+                            day,
+                            balance: projectedBalance,
+                            gain: projectedBalance - results.accountBalance
+                          };
+                        })}
+                        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="day" 
+                          stroke="#9CA3AF"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis 
+                          stroke="#9CA3AF"
+                          fontSize={12}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(value) => `$${value.toFixed(0)}`}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: '#1F2937',
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }}
+                          formatter={(value: number, name: string) => [
+                            name === 'balance' ? `$${value.toFixed(2)}` : `+$${value.toFixed(2)}`,
+                            name === 'balance' ? 'Saldo Projetado' : 'Ganho Acumulado'
+                          ]}
+                          labelFormatter={(day) => `Dia ${day}`}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="balance" 
+                          stroke="#3B82F6" 
+                          strokeWidth={3}
+                          dot={false}
+                          activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2 }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="gain" 
+                          stroke="#10B981" 
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                          dot={false}
+                          activeDot={{ r: 4, stroke: '#10B981', strokeWidth: 2 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  {/* Legenda */}
+                  <div className="flex justify-center gap-6 mt-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-1 bg-blue-500 rounded"></div>
+                      <span className="text-zinc-400">Saldo Projetado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-1 bg-green-500 rounded border-2 border-dashed border-green-500"></div>
+                      <span className="text-zinc-400">Ganho Acumulado</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Marcos de Tempo */}
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="text-lg md:text-xl text-white">
-                    {t('risk_management.growth_projection')}
+                    Marcos de Crescimento
                   </CardTitle>
                   <CardDescription className="text-sm md:text-base text-zinc-400">
-                    {t('risk_management.growth_projection_description')}
+                    Projeções em períodos específicos
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
@@ -222,7 +314,7 @@ export default function RiskManagement() {
                         <div key={days} className="space-y-2">
                           <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                             <span className="text-sm md:text-base text-zinc-400">
-                              {t('risk_management.after_days').replace('{days}', days.toString())}
+                              Após {days} dias
                             </span>
                             <span className="text-sm md:text-base text-white font-medium">
                               ${projectedBalance.toFixed(2)} (+{gainPercentage.toFixed(1)}%)
