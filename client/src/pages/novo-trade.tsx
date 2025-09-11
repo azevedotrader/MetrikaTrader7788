@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
-import { AITradeAnalysis } from "@/components/ui/ai-trade-analysis";
+
 
 // Mover setupOptions para dentro do componente para acessar t()
 
@@ -90,8 +90,7 @@ export default function NovoTrade() {
   const [csvName, setCsvName] = useState<string>("");
   const [csvDescription, setCsvDescription] = useState<string>("");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
-  const [currentTradeData, setCurrentTradeData] = useState<any>(null);
+  
   // Usando apenas análise MetrikAI (recomendada)
   const analysisMethod = "traditional";
 
@@ -805,55 +804,13 @@ export default function NovoTrade() {
                     >
                       {t('form.clear')}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const formData = form.getValues();
-                        if (
-                          formData.ativo &&
-                          formData.mercado &&
-                          formData.tipo
-                        ) {
-                          setCurrentTradeData({
-                            ativo: formData.ativo,
-                            mercado: formData.mercado,
-                            tipo: formData.tipo,
-                            alvo: parseFloat(formData.alvo || "0"),
-                            stop: parseFloat(formData.stop || "0"),
-                            emocao: formData.emocao,
-                            comentario: formData.comentario,
-                          });
-                          setShowAIAnalysis(true);
-                        } else {
-                          toast({
-                            title: t('form.required_fields'),
-                            description: t('form.fill_required'),
-                            variant: "destructive",
-                          });
-                        }
-                      }}
-                      className="border-purple-600 text-purple-300 hover:bg-purple-900/20"
-                    >
-                      {t('form.analyze_ai')}
-                    </Button>
                   </div>
                 </form>
               </Form>
             </CardContent>
           </Card>
 
-          {/* AI Analysis Component */}
-          {showAIAnalysis && currentTradeData && (
-            <div className="mt-6">
-              <AITradeAnalysis
-                tradeData={currentTradeData}
-                onAnalysisComplete={(analysis) => {
-                  console.log("Análise concluída:", analysis);
-                }}
-              />
-            </div>
-          )}
+          
         </TabsContent>
 
         <TabsContent value="csv">
