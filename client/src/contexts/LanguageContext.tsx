@@ -263,6 +263,12 @@ const translations: Record<Language, Record<string, string>> = {
     "calendar.total_trades": "Total de Trades",
     "calendar.win_rate": "Taxa de Acerto",
 
+    // Aprendizado
+    "learning.title": "Centro de Aprendizado", 
+    "learning.tour": "Tour pela Plataforma",
+    "learning.videos": "Videoaulas",
+    "learning.progress": "Seu Progresso",
+
     // Novo Trade e CSV
     "trade.manual": "Manual",
     "trade.import_csv": "Importar CSV",

@@ -14,7 +14,8 @@ import {
   TrendingUp,
   X,
   MessageCircle,
-  Calculator
+  Calculator,
+  GraduationCap
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
@@ -28,6 +29,7 @@ const navigation = [
   { nameKey: "risk_management.title", href: "/gestao", icon: Calculator },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
   { nameKey: "journal.title", href: "/diario", icon: Book },
+  { nameKey: "nav.learning", href: "/aprendizado", icon: GraduationCap },
   { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
   { nameKey: "profile.title", href: "/perfil", icon: User },
 ];
