@@ -1745,7 +1745,25 @@ export default function Dashboard() {
           </Card>
 
           {/* Trading Calendar */}
-          <TradingCalendar trades={filteredTrades} />
+          <div className="relative">
+            <TradingCalendar trades={filteredTrades} />
+            
+            {/* Logo watermark grande no centro do calendário */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="opacity-[0.35] hover:opacity-[0.45] transition-opacity duration-300 flex items-center justify-center">
+                <img 
+                  src={metrikaLogo} 
+                  alt="Métrika" 
+                  style={{
+                    height: '300px',
+                    width: 'auto',
+                    objectFit: 'contain',
+                  }}
+                  className="block"
+                />
+              </div>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-6">
