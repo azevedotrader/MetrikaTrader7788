@@ -340,6 +340,18 @@ export function TradingCalendar({
                     : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
                 </div>
               )}
+
+              {/* Taxa de acerto - só mostrar se houver trades */}
+              {tradeDay.trades > 0 && (
+                <div
+                  className={cn(
+                    "text-zinc-400 leading-tight font-medium",
+                    isMobile ? "text-[10px]" : "text-[10px]",
+                  )}
+                >
+                  {tradeDay.winRate.toFixed(0)}% acerto
+                </div>
+              )}
             </div>
           )}
 
