@@ -4,12 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileSpreadsheet, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { FileSpreadsheet, Clock, CheckCircle, AlertCircle, Crown, Star, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { AiAnalysisResultsModal } from "./ai-analysis-results-modal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserPlan } from "@/hooks/useUserPlan";
 
 interface CsvImport {
   id: string;
@@ -44,8 +45,10 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
   const [selectedCsvId, setSelectedCsvId] = useState<string | null>(null);
   const [analysisResults, setAnalysisResults] = useState<AiTip[]>([]);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState<string>('');
   const { toast } = useToast();
+  const { isAiEnabled, planType } = useUserPlan();
 
   const { data: csvImports = [], isLoading } = useQuery<CsvImport[]>({
     queryKey: ['/api/csv-imports'],
@@ -100,6 +103,12 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
         description: "Escolha um arquivo CSV para analisar.",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Verificar se o usuário tem acesso à IA
+    if (!isAiEnabled) {
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -248,6 +257,180 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
         tips={analysisResults}
         csvFileName={selectedFileName}
       />
+
+      {/* Modal de Upgrade */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2 text-xl">
+              <Zap className="w-6 h-6 text-yellow-500" />
+              Upgrade Necessário para Análise de CSV com IA
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="text-center">
+              <p className="text-zinc-300 text-lg mb-4">
+                🤖 Nossa IA está pronta para analisar seus CSVs e fornecer insights personalizados!
+              </p>
+              <p className="text-zinc-400">
+                A análise de CSV com Inteligência Artificial está disponível apenas para membros premium.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Plano Starter */}
+              <div className="border border-zinc-700 rounded-lg p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                <div className="text-center mb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-500/20 rounded-lg mb-3">
+                    <Star className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Starter</h3>
+                  <p className="text-sm text-zinc-400">Perfeito para começar</p>
+                </div>
+                
+                <div className="text-center mb-4">
+                  <div className="text-2xl font-bold text-blue-400">R$ 89</div>
+                  <div className="text-sm text-zinc-400">/mês</div>
+                </div>
+
+                <ul className="space-y-2 text-sm text-zinc-300 mb-6">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Análise IA de CSV
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Chat com Assistente IA
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Analytics avançados
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Suporte prioritário
+                  </li>
+                </ul>
+
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  Escolher Starter
+                </Button>
+              </div>
+
+              {/* Plano Pro */}
+              <div className="border-2 border-green-500 rounded-lg p-6 bg-green-500/10 hover:bg-green-500/15 transition-colors relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-3 py-1">
+                    MAIS POPULAR
+                  </Badge>
+                </div>
+                
+                <div className="text-center mb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-green-500/20 rounded-lg mb-3">
+                    <Crown className="w-6 h-6 text-green-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Pro</h3>
+                  <p className="text-sm text-zinc-400">Escolha mais popular</p>
+                </div>
+                
+                <div className="text-center mb-4">
+                  <div className="text-2xl font-bold text-green-400">R$ 239</div>
+                  <div className="text-sm text-zinc-400">/mês</div>
+                </div>
+
+                <ul className="space-y-2 text-sm text-zinc-300 mb-6">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Tudo do Starter
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Gestão de risco avançada
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Estratégias personalizadas
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Alertas em tempo real
+                  </li>
+                </ul>
+
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  Escolher Pro
+                </Button>
+              </div>
+
+              {/* Plano Black */}
+              <div className="border border-zinc-700 rounded-lg p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                <div className="text-center mb-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-500/20 rounded-lg mb-3">
+                    <Crown className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Black</h3>
+                  <p className="text-sm text-zinc-400">Para traders sérios</p>
+                </div>
+                
+                <div className="text-center mb-4">
+                  <div className="text-2xl font-bold text-purple-400">R$ 599</div>
+                  <div className="text-sm text-zinc-400">/mês</div>
+                </div>
+
+                <ul className="space-y-2 text-sm text-zinc-300 mb-6">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Tudo do Pro
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Sessões 1-on-1
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Suporte VIP
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    Sinais exclusivos
+                  </li>
+                </ul>
+
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                  Escolher Black
+                </Button>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-zinc-400 mb-4">
+                ⚡ Faça upgrade agora e desbloqueie todo o potencial da análise de trading powered por IA!
+              </p>
+              
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="flex-1 border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowUpgradeModal(false);
+                    // Aqui seria redirecionado para a página de planos
+                    window.open('/pricing', '_blank');
+                  }}
+                  className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                >
+                  Ver Todos os Planos
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
