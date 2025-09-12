@@ -762,12 +762,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             <img 
               src={metrikaLogo} 
               alt="Métrika" 
-              style={{
-                height: '400px',
-                width: 'auto',
-                objectFit: 'contain',
-              }}
-              className="block"
+              className="block object-contain h-64 sm:h-80 md:h-96 lg:h-[400px] xl:h-[450px] w-auto max-w-full max-h-full"
             />
           </div>
         </div>
