@@ -654,7 +654,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               >
                 {/* Gradiente dinâmico baseado no domínio real do eixo Y */}
                 <defs>
-                  <linearGradient id="dynamicLineGradient" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="dynamicGradient" x1="0" y1="0" x2="0" y2="1">
                     {/* Verde acima de 0 */}
                     <stop offset="0%" stopColor="#22c55e" />
                     <stop offset={`${zeroPosition}%`} stopColor="#22c55e" />
@@ -707,11 +707,21 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                 {/* Linha do eixo 0 */}
                 <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
 
-                {/* Linha única com gradiente dinâmico */}
+                {/* Área preenchida */}
+                <Area
+                  type="monotone"
+                  dataKey="accumulated"
+                  stroke="none"
+                  fill="url(#dynamicGradient)"
+                  fillOpacity={0.3}
+                  isAnimationActive={false}
+                />
+
+                {/* Linha principal */}
                 <Line
                   type="monotone"
                   dataKey="accumulated"
-                  stroke="url(#dynamicLineGradient)"
+                  stroke="url(#dynamicGradient)"
                   strokeWidth={2}
                   dot={false}
                   isAnimationActive={false}
