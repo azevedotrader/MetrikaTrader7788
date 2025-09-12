@@ -247,7 +247,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
         <div className="h-80 w-full">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <RechartsLineChart data={chartData}>
+              <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="period" stroke="#9CA3AF" fontSize={12} />
                 <YAxis
@@ -281,7 +281,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                   dot={{ fill: "#10B981", strokeWidth: 2, r: 3 }}
                   strokeDasharray="5 5"
                 />
-              </RechartsLineChart>
+              </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-full text-zinc-400">
@@ -647,7 +647,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             }
             
             return (
-              <RechartsLineChart
+              <ComposedChart
                 data={chartData}
                 margin={{
                   top: 10,
@@ -730,7 +730,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                   dot={false}
                   isAnimationActive={false}
                 />
-              </RechartsLineChart>
+              </ComposedChart>
             );
           })()}
         </ResponsiveContainer>
