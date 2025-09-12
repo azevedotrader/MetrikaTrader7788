@@ -89,7 +89,7 @@ import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Logo } from "@/components/ui/logo";
+import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 11_01_20_1757685845156.png";
 import {
   format,
   startOfDay,
@@ -759,7 +759,16 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
         {/* Logo watermark grande no centro do gráfico */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="opacity-[0.35] hover:opacity-[0.45] transition-opacity duration-300 flex items-center justify-center">
-            <Logo variant="modal" className="!h-80 md:!h-96 lg:!h-[28rem] xl:!h-[32rem] 2xl:!h-[36rem] !w-auto" />
+            <img 
+              src={metrikaLogo} 
+              alt="Métrika" 
+              style={{
+                height: '400px',
+                width: 'auto',
+                objectFit: 'contain',
+              }}
+              className="block"
+            />
           </div>
         </div>
       </div>
