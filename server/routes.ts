@@ -2415,7 +2415,7 @@ export async function registerRoutes(app: Express): Promise<void> {
           const upgradeMessage = language === 'en' 
             ? `🤖 **AI Assistant Available for Premium Members Only**
 
-I'm your dedicated trading mentor powered by GPT-5, ready to analyze your trades, optimize your strategies, and accelerate your trading success. However, this advanced AI assistance is exclusive to our premium members.
+I'm your dedicated trading mentor powered by the most advanced technology available, ready to analyze your trades, optimize your strategies, and accelerate your trading success. However, this advanced AI assistance is exclusive to our premium members.
 
 **🚀 Unlock Premium AI Features:**
 
