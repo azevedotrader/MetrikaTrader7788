@@ -635,11 +635,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           height={300}
         >
           <AreaChart
-            data={chartData.map(d => ({
-              ...d,
-              positiveAccumulated: d.accumulated > 0 ? d.accumulated : 0,
-              negativeAccumulated: d.accumulated < 0 ? d.accumulated : 0,
-            }))}
+            data={chartData}
             margin={{
               top: 10,
               right: 30,
@@ -647,6 +643,16 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               bottom: 0,
             }}
           >
+            <defs>
+              {/* Gradiente que muda de vermelho (valores negativos) para verde (valores positivos) */}
+              <linearGradient id="dynamicAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#22c55e" stopOpacity={0.6} />
+                <stop offset="50%" stopColor="#22c55e" stopOpacity={0.1} />
+                <stop offset="50%" stopColor="#ef4444" stopOpacity={0.1} />
+                <stop offset="100%" stopColor="#ef4444" stopOpacity={0.6} />
+              </linearGradient>
+            </defs>
+
             <CartesianGrid strokeDasharray="3 3" stroke="#444" />
             
             <XAxis 
@@ -677,65 +683,24 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                 color: "#fff"
               }}
               formatter={(value: any, name: string) => {
-                if (name === "positiveAccumulated" || name === "negativeAccumulated") {
-                  // Buscar o valor original accumulated do ponto de dados
-                  const originalValue = chartData.find(d => d.period === value)?.accumulated || 0;
-                  const formattedValue = `R$ ${originalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                if (name === "accumulated") {
+                  const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                   return [formattedValue, "💰 Acumulado"];
                 }
                 return [value, name];
-              }}
-              content={(props: any) => {
-                const { active, payload, label } = props;
-                if (!active || !payload || !payload.length) return null;
-
-                // Encontrar o valor original accumulated
-                const data = chartData.find(d => d.period === label);
-                if (!data) return null;
-
-                const formattedValue = `R$ ${data.accumulated.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                
-                return (
-                  <div
-                    style={{
-                      backgroundColor: "#000000",
-                      border: "1px solid #444",
-                      borderRadius: "8px",
-                      padding: "8px",
-                      color: "#fff"
-                    }}
-                  >
-                    <p style={{ margin: 0, fontWeight: "bold", marginBottom: "4px" }}>
-                      {label}
-                    </p>
-                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#22c55e" : "#ef4444" }}>
-                      💰 Acumulado: {formattedValue}
-                    </p>
-                  </div>
-                );
               }}
             />
 
             {/* Linha do eixo 0 */}
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
 
-            {/* Área positiva (verde) */}
+            {/* UMA linha contínua que muda de cor baseada no valor */}
             <Area
               type="monotone"
-              dataKey="positiveAccumulated"
-              stroke="#22c55e"
-              fill="#22c55e"
-              fillOpacity={0.4}
-              isAnimationActive={false}
-            />
-
-            {/* Área negativa (vermelha) */}
-            <Area
-              type="monotone"
-              dataKey="negativeAccumulated"
-              stroke="#ef4444"
-              fill="#ef4444"
-              fillOpacity={0.4}
+              dataKey="accumulated"
+              stroke={finalAccumulated >= 0 ? "#22c55e" : "#ef4444"}
+              strokeWidth={2}
+              fill="url(#dynamicAreaGradient)"
               isAnimationActive={false}
             />
           </AreaChart>
