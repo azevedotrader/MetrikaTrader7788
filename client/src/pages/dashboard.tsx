@@ -645,6 +645,40 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               zeroPosition = ((yMax - 0) / (yMax - yMin)) * 100;
               zeroPosition = Math.max(0, Math.min(100, zeroPosition));
             }
+
+            // Tooltip personalizado
+            const CustomTooltip = ({ active, payload, label }: any) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                  <div style={{
+                    backgroundColor: "#000000",
+                    border: "1px solid #444",
+                    borderRadius: "8px",
+                    padding: "8px",
+                    color: "#fff"
+                  }}>
+                    <p style={{ margin: 0, fontWeight: "bold", marginBottom: "4px" }}>
+                      {label}
+                    </p>
+                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#22c55e" : "#ef4444" }}>
+                      💰 Acumulado: R$ {data.accumulated.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </p>
+                    {data.positive > 0 && (
+                      <p style={{ margin: 0, color: "#22c55e" }}>
+                        📈 Lucro: R$ {data.positive.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                    )}
+                    {data.negative < 0 && (
+                      <p style={{ margin: 0, color: "#ef4444" }}>
+                        📉 Perda: R$ {Math.abs(data.negative).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            };
             
             return (
               <ComposedChart
@@ -691,22 +725,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
                   }
                 />
                 
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: "#000000",
-                    border: "1px solid #444",
-                    borderRadius: "8px",
-                    padding: "8px",
-                    color: "#fff"
-                  }}
-                  formatter={(value: any, name: string) => {
-                    if (name === "accumulated") {
-                      const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                      return [formattedValue, "💰 Acumulado"];
-                    }
-                    return [value, name];
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
 
                 {/* Linha do eixo 0 */}
                 <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
