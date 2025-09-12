@@ -2215,7 +2215,7 @@ export default function Dashboard() {
 
         <TabsContent value="consolidated" className="space-y-6">
           {/* {t('consolidated.summary')} */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <MetricCard
               title={t('dashboard.consolidated_total')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
@@ -2244,16 +2244,6 @@ export default function Dashboard() {
                 metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"
               }
               subtitle={t('metrics.weighted_average')}
-            />
-
-            <MetricCard
-              title={t('dashboard.avg_rr')}
-              value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
-              icon={TrendingUp}
-              color={
-                metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-white"
-              }
-              subtitle={t('metrics.general_risk_return')}
             />
           </div>
 
