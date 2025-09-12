@@ -1872,17 +1872,19 @@ export default function Dashboard() {
                 <TabsList className="grid w-full grid-cols-2 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1">
                   <TabsTrigger 
                     value="csv-imports" 
-                    className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
+                    className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-2 md:py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50 text-xs md:text-sm"
                   >
-                    <FileText className="w-4 h-4 mr-2" />
-                    {t('imports.csv_imported')}
+                    <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    <span className="hidden sm:inline">{t('imports.csv_imported')}</span>
+                    <span className="sm:hidden">CSV</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="manual-trades" 
-                    className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
+                    className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-2 md:py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50 text-xs md:text-sm"
                   >
-                    <Edit3 className="w-4 h-4 mr-2" />
-                    {t('imports.manual_trades')}
+                    <Edit3 className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
+                    <span className="hidden sm:inline">{t('imports.manual_trades')}</span>
+                    <span className="sm:hidden">Manual</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -1896,67 +1898,70 @@ export default function Dashboard() {
                       {(csvImports as any[]).map((importItem: any) => (
                         <div
                           key={importItem.id}
-                          className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 md:p-4 bg-zinc-800/50 rounded-lg space-y-3 sm:space-y-0"
                         >
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <div
-                              className={`w-3 h-3 rounded-full ${importItem.status === "completed" ? "bg-green-500" : "bg-yellow-500"}`}
+                              className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-500" : "bg-yellow-500"}`}
                             />
-                            <div>
+                            <div className="min-w-0 flex-1">
                               {editingCsv?.id === importItem.id ? (
-                                <div className="flex items-center space-x-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                                   <input
                                     type="text"
                                     value={newCsvName}
                                     onChange={(e) => setNewCsvName(e.target.value)}
-                                    className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm"
+                                    className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm w-full sm:w-auto min-w-0"
                                     placeholder="Nome do arquivo"
                                     data-testid={`input-csv-name-${importItem.id}`}
                                   />
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      if (newCsvName.trim()) {
-                                        renameCsvMutation.mutate({
-                                          csvId: importItem.id,
-                                          displayName: newCsvName.trim(),
-                                        });
-                                      }
-                                    }}
-                                    disabled={renameCsvMutation.isPending}
-                                    className="h-7 px-2"
-                                    data-testid={`button-save-csv-${importItem.id}`}
-                                  >
-                                    ✓
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      setEditingCsv(null);
-                                      setNewCsvName("");
-                                    }}
-                                    className="h-7 px-2"
-                                    data-testid={`button-cancel-csv-${importItem.id}`}
-                                  >
-                                    ✕
-                                  </Button>
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        if (newCsvName.trim()) {
+                                          renameCsvMutation.mutate({
+                                            csvId: importItem.id,
+                                            displayName: newCsvName.trim(),
+                                          });
+                                        }
+                                      }}
+                                      disabled={renameCsvMutation.isPending}
+                                      className="h-7 px-2 flex-shrink-0"
+                                      data-testid={`button-save-csv-${importItem.id}`}
+                                    >
+                                      ✓
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingCsv(null);
+                                        setNewCsvName("");
+                                      }}
+                                      className="h-7 px-2 flex-shrink-0"
+                                      data-testid={`button-cancel-csv-${importItem.id}`}
+                                    >
+                                      ✕
+                                    </Button>
+                                  </div>
                                 </div>
                               ) : (
-                                <div className="font-medium text-white">
+                                <div className="font-medium text-white truncate pr-2">
                                   {importItem.displayName || importItem.fileName}
                                 </div>
                               )}
-                              <div className="text-sm text-zinc-400">
+                              <div className="text-sm text-zinc-400 mt-1">
                                 {brokerInfo[
                                   importItem.broker as keyof typeof brokerInfo
                                 ]?.name || importItem.broker}
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-right">
-                              <div className="text-white">
+                          
+                          <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-2 flex-shrink-0">
+                            <div className="text-left sm:text-right">
+                              <div className="text-white text-sm font-medium">
                                 {importItem.tradesImported} trades
                               </div>
                               <div className="text-xs text-zinc-400">
@@ -1966,7 +1971,7 @@ export default function Dashboard() {
                               </div>
                             </div>
                             {editingCsv?.id !== importItem.id && (
-                              <div className="flex space-x-1 ml-3">
+                              <div className="flex space-x-1 flex-shrink-0">
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -1981,7 +1986,7 @@ export default function Dashboard() {
                                       importItem.displayName || importItem.fileName,
                                     );
                                   }}
-                                  className="h-7 px-2 text-zinc-400 hover:text-white"
+                                  className="h-7 w-7 p-0 text-zinc-400 hover:text-white flex items-center justify-center"
                                   data-testid={`button-edit-csv-${importItem.id}`}
                                 >
                                   <Edit2 className="w-3 h-3" />
@@ -1999,7 +2004,7 @@ export default function Dashboard() {
                                     }
                                   }}
                                   disabled={deleteCsvMutation.isPending}
-                                  className="h-7 px-2 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300"
+                                  className="h-7 w-7 p-0 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300 flex items-center justify-center"
                                   data-testid={`button-delete-csv-${importItem.id}`}
                                 >
                                   <Trash2 className="w-3 h-3" />
@@ -2023,27 +2028,28 @@ export default function Dashboard() {
                       {manualTrades.map((trade: any) => (
                         <div
                           key={trade.id}
-                          className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-lg"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 md:p-4 bg-zinc-800/50 rounded-lg space-y-3 sm:space-y-0"
                         >
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <div
-                              className={`w-3 h-3 rounded-full ${
+                              className={`w-3 h-3 rounded-full flex-shrink-0 ${
                                 parseFloat(trade.resultado || "0") >= 0 ? "bg-green-500" : "bg-red-500"
                               }`}
                             />
-                            <div>
-                              <div className="font-medium text-white">
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-white truncate pr-2">
                                 {trade.ativo} - {trade.tipo === 'compra' ? '📈' : '📉'} {trade.tipo}
                               </div>
-                              <div className="text-sm text-zinc-400">
+                              <div className="text-sm text-zinc-400 mt-1">
                                 {brokerInfo[
                                   trade.mercado as keyof typeof brokerInfo
                                 ]?.name || trade.mercado} • Manual
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <div className="text-right">
+                          
+                          <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-2 flex-shrink-0">
+                            <div className="text-left sm:text-right">
                               <div className={`text-sm font-medium ${
                                 parseFloat(trade.resultado || "0") >= 0 ? "text-green-400" : "text-red-400"
                               }`}>
@@ -2055,7 +2061,7 @@ export default function Dashboard() {
                                 )}
                               </div>
                             </div>
-                            <div className="flex space-x-1 ml-3">
+                            <div className="flex space-x-1 flex-shrink-0">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -2063,7 +2069,7 @@ export default function Dashboard() {
                                   setEditingTrade(trade);
                                   setShowEditTradeDialog(true);
                                 }}
-                                className="h-7 px-2 text-zinc-400 hover:text-white"
+                                className="h-7 w-7 p-0 text-zinc-400 hover:text-white flex items-center justify-center"
                                 data-testid={`button-edit-trade-${trade.id}`}
                               >
                                 <Edit2 className="w-3 h-3" />
@@ -2081,7 +2087,7 @@ export default function Dashboard() {
                                   }
                                 }}
                                 disabled={deleteManualTradeMutation.isPending}
-                                className="h-7 px-2 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300"
+                                className="h-7 w-7 p-0 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300 flex items-center justify-center"
                                 data-testid={`button-delete-trade-${trade.id}`}
                               >
                                 <Trash2 className="w-3 h-3" />
