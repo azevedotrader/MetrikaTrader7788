@@ -260,159 +260,159 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
       {/* Modal de Upgrade */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800">
+        <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2 text-xl">
-              <Zap className="w-6 h-6 text-yellow-500" />
-              Upgrade Necessário para Análise de CSV com IA
+            <DialogTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
+              <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
+              <span className="text-sm md:text-base">Upgrade Necessário para Análise de CSV com IA</span>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <div className="text-center">
-              <p className="text-zinc-300 text-lg mb-4">
+              <p className="text-zinc-300 text-base md:text-lg mb-2 md:mb-4">
                 🤖 Nossa IA está pronta para analisar seus CSVs e fornecer insights personalizados!
               </p>
-              <p className="text-zinc-400">
+              <p className="text-zinc-400 text-sm md:text-base">
                 A análise de CSV com Inteligência Artificial está disponível apenas para membros premium.
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-3">
               {/* Plano Starter */}
-              <div className="border border-zinc-700 rounded-lg p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-500/20 rounded-lg mb-3">
-                    <Star className="w-6 h-6 text-blue-400" />
+              <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                <div className="text-center mb-3 md:mb-4">
+                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-blue-500/20 rounded-lg mb-2 md:mb-3">
+                    <Star className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">Starter</h3>
-                  <p className="text-sm text-zinc-400">Perfeito para começar</p>
+                  <h3 className="text-base md:text-lg font-bold text-white">Starter</h3>
+                  <p className="text-xs md:text-sm text-zinc-400">Perfeito para começar</p>
                 </div>
                 
-                <div className="text-center mb-4">
-                  <div className="text-2xl font-bold text-blue-400">R$ 89</div>
-                  <div className="text-sm text-zinc-400">/mês</div>
+                <div className="text-center mb-3 md:mb-4">
+                  <div className="text-xl md:text-2xl font-bold text-blue-400">R$ 89</div>
+                  <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
-                <ul className="space-y-2 text-sm text-zinc-300 mb-6">
+                <ul className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-zinc-300 mb-4 md:mb-6">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Análise IA de CSV
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Análise IA de CSV</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Chat com Assistente IA
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Chat com Assistente IA</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Analytics avançados
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Analytics avançados</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Suporte prioritário
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Suporte prioritário</span>
                   </li>
                 </ul>
 
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm md:text-base py-2 md:py-3">
                   Escolher Starter
                 </Button>
               </div>
 
               {/* Plano Pro */}
-              <div className="border-2 border-green-500 rounded-lg p-6 bg-green-500/10 hover:bg-green-500/15 transition-colors relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-3 py-1">
+              <div className="border-2 border-green-500 rounded-lg p-4 md:p-6 bg-green-500/10 hover:bg-green-500/15 transition-colors relative">
+                <div className="absolute -top-2 md:-top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-2 py-0.5 md:px-3 md:py-1 text-xs md:text-sm">
                     MAIS POPULAR
                   </Badge>
                 </div>
                 
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-green-500/20 rounded-lg mb-3">
-                    <Crown className="w-6 h-6 text-green-400" />
+                <div className="text-center mb-3 md:mb-4 mt-3 md:mt-0">
+                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-green-500/20 rounded-lg mb-2 md:mb-3">
+                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-green-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">Pro</h3>
-                  <p className="text-sm text-zinc-400">Escolha mais popular</p>
+                  <h3 className="text-base md:text-lg font-bold text-white">Pro</h3>
+                  <p className="text-xs md:text-sm text-zinc-400">Escolha mais popular</p>
                 </div>
                 
-                <div className="text-center mb-4">
-                  <div className="text-2xl font-bold text-green-400">R$ 239</div>
-                  <div className="text-sm text-zinc-400">/mês</div>
+                <div className="text-center mb-3 md:mb-4">
+                  <div className="text-xl md:text-2xl font-bold text-green-400">R$ 239</div>
+                  <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
-                <ul className="space-y-2 text-sm text-zinc-300 mb-6">
+                <ul className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-zinc-300 mb-4 md:mb-6">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Tudo do Starter
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Tudo do Starter</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Gestão de risco avançada
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Gestão de risco avançada</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Estratégias personalizadas
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Estratégias personalizadas</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Alertas em tempo real
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Alertas em tempo real</span>
                   </li>
                 </ul>
 
-                <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                <Button className="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base py-2 md:py-3">
                   Escolher Pro
                 </Button>
               </div>
 
               {/* Plano Black */}
-              <div className="border border-zinc-700 rounded-lg p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-500/20 rounded-lg mb-3">
-                    <Crown className="w-6 h-6 text-purple-400" />
+              <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+                <div className="text-center mb-3 md:mb-4">
+                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-purple-500/20 rounded-lg mb-2 md:mb-3">
+                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-purple-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">Black</h3>
-                  <p className="text-sm text-zinc-400">Para traders sérios</p>
+                  <h3 className="text-base md:text-lg font-bold text-white">Black</h3>
+                  <p className="text-xs md:text-sm text-zinc-400">Para traders sérios</p>
                 </div>
                 
-                <div className="text-center mb-4">
-                  <div className="text-2xl font-bold text-purple-400">R$ 599</div>
-                  <div className="text-sm text-zinc-400">/mês</div>
+                <div className="text-center mb-3 md:mb-4">
+                  <div className="text-xl md:text-2xl font-bold text-purple-400">R$ 599</div>
+                  <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
-                <ul className="space-y-2 text-sm text-zinc-300 mb-6">
+                <ul className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-zinc-300 mb-4 md:mb-6">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Tudo do Pro
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Tudo do Pro</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Sessões 1-on-1
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Sessões 1-on-1</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Suporte VIP
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Suporte VIP</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    Sinais exclusivos
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-400 flex-shrink-0" />
+                    <span>Sinais exclusivos</span>
                   </li>
                 </ul>
 
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm md:text-base py-2 md:py-3">
                   Escolher Black
                 </Button>
               </div>
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-zinc-400 mb-4">
+              <p className="text-xs md:text-sm text-zinc-400 mb-3 md:mb-4 px-2">
                 ⚡ Faça upgrade agora e desbloqueie todo o potencial da análise de trading powered por IA!
               </p>
               
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                 <Button
                   variant="outline"
                   onClick={() => setShowUpgradeModal(false)}
-                  className="flex-1 border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+                  className="w-full sm:flex-1 border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm md:text-base py-2 md:py-3"
                 >
                   Cancelar
                 </Button>
@@ -422,7 +422,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                     // Aqui seria redirecionado para a página de planos
                     window.open('/pricing', '_blank');
                   }}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                  className="w-full sm:flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white text-sm md:text-base py-2 md:py-3"
                 >
                   Ver Todos os Planos
                 </Button>
