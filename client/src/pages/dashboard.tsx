@@ -640,7 +640,11 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             const yMax = Math.max(...chartData.map(d => d.accumulated));
             
             // Calcular a posição do zero no gradiente
-            const zeroPosition = Math.max(0, Math.min(100, (yMax / (yMax - yMin)) * 100));
+            let zeroPosition = 0;
+            if (yMax !== yMin) {
+              zeroPosition = ((yMax - 0) / (yMax - yMin)) * 100;
+              zeroPosition = Math.max(0, Math.min(100, zeroPosition));
+            }
             
             return (
               <RechartsLineChart
