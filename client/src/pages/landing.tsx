@@ -52,7 +52,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
-              <Logo variant="header" />
+              <Logo variant="header" className="!h-40 lg:!h-40 md:!h-36 sm:!h-32" />
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">

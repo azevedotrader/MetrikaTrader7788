@@ -11,13 +11,13 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
   const getSize = () => {
     switch (variant) {
       case "header":
-        return "h-24 lg:h-24 md:h-20 sm:h-16";
+        return "h-32 lg:h-32 md:h-28 sm:h-24";
       case "modal":
-        return "h-28 md:h-24 sm:h-20";
+        return "h-36 md:h-32 sm:h-28";
       case "sidebar":
-        return expanded ? "h-24" : "h-16";
+        return expanded ? "h-28" : "h-20";
       default:
-        return "h-16";
+        return "h-20";
     }
   };
 
