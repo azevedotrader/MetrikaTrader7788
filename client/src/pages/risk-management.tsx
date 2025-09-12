@@ -433,7 +433,10 @@ export default function RiskManagement() {
                 <CardContent className="p-4 md:p-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     {[7, 15, 30, 90].map((days) => {
-                      const projectedBalance = results.accountBalance * Math.pow(1 + (results.dailyGrowthProjection / 100), days);
+                      // Usar a mesma lógica inteligente do gráfico baseada no perfil
+                      const config = getProfileConfig(riskProfile);
+                      const targetDailyReturn = Math.pow(1 + config.expectedMonthlyReturn, 1/30) - 1;
+                      const projectedBalance = results.accountBalance * Math.pow(1 + targetDailyReturn, days);
                       const totalGain = projectedBalance - results.accountBalance;
                       const gainPercentage = (totalGain / results.accountBalance) * 100;
                       
