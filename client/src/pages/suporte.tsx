@@ -94,7 +94,12 @@ export default function Suporte() {
   // Mutation para enviar mensagem
   const sendMessageMutation = useMutation({
     mutationFn: async ({ conversationId, message }: { conversationId: string; message: string }) => {
-      return apiRequest('POST', `/api/support/conversations/${conversationId}/messages`, { message });
+      const response = await apiRequest('POST', `/api/support/conversations/${conversationId}/messages`, { message });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(JSON.stringify({ status: response.status, message: errorData.error || 'Erro desconhecido' }));
+      }
+      return response;
     },
     onSuccess: () => {
       toast({
@@ -105,12 +110,31 @@ export default function Suporte() {
       queryClient.invalidateQueries({ queryKey: ['/api/support/conversations', selectedConversation, 'messages'] });
       queryClient.invalidateQueries({ queryKey: ['/api/support/conversations'] });
     },
-    onError: () => {
-      toast({
-        title: t('support.error'),
-        description: t('support.error'),
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      let errorInfo;
+      try {
+        errorInfo = JSON.parse(error.message);
+      } catch {
+        errorInfo = { status: 500, message: 'Erro desconhecido' };
+      }
+
+      if (errorInfo.status === 403) {
+        // Conversa foi resolvida
+        toast({
+          title: "💚 Problema Resolvido",
+          description: "Este suporte já foi resolvido! Para reportar um novo problema, clique em 'Novo Suporte' e descreva sua situação.",
+          variant: "default",
+        });
+        // Limpar conversa selecionada para forçar usuário a criar nova
+        setSelectedConversation(null);
+        setNewMessage("");
+      } else {
+        toast({
+          title: t('support.error'),
+          description: errorInfo.message || t('support.error'),
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -338,6 +362,25 @@ export default function Suporte() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col overflow-hidden p-3 sm:p-6">
+                {/* Banner para conversa resolvida */}
+                {typedConversations.find((c: Conversation) => c.id === selectedConversation)?.status === 'resolved' && (
+                  <div className="mb-3 sm:mb-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-3 sm:p-4">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium text-green-800 dark:text-green-200 mb-1 text-sm sm:text-base">
+                          💚 Problema Resolvido
+                        </h4>
+                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 leading-relaxed mb-2">
+                          Este suporte foi marcado como resolvido por nossa equipe. Você não pode mais enviar mensagens nesta conversa.
+                        </p>
+                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 leading-relaxed">
+                          <strong>Precisa de mais ajuda?</strong> Clique em "Novo Suporte" acima para reportar um novo problema.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="flex-1 overflow-y-auto mb-3 sm:mb-4 max-h-[400px] sm:max-h-[500px]">
                   {isLoadingMessages ? (
                     <div className="flex items-center justify-center h-full">
@@ -375,14 +418,23 @@ export default function Suporte() {
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder={t('support.message_placeholder')}
+                    placeholder={
+                      typedConversations.find((c: Conversation) => c.id === selectedConversation)?.status === 'resolved'
+                        ? "Conversa resolvida - Crie um novo suporte"
+                        : t('support.message_placeholder')
+                    }
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     className="h-9 sm:h-10 text-sm flex-1"
                     data-testid="input-new-message"
+                    disabled={typedConversations.find((c: Conversation) => c.id === selectedConversation)?.status === 'resolved'}
                   />
                   <Button 
                     onClick={handleSendMessage} 
-                    disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                    disabled={
+                      !newMessage.trim() || 
+                      sendMessageMutation.isPending || 
+                      typedConversations.find((c: Conversation) => c.id === selectedConversation)?.status === 'resolved'
+                    }
                     className="h-9 sm:h-10 px-3 sm:px-4 text-sm flex-shrink-0"
                     data-testid="button-send-message"
                   >
