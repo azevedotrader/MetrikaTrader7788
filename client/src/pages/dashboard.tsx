@@ -1750,14 +1750,18 @@ export default function Dashboard() {
             
             {/* Logo watermark grande no centro do calendário */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-              <div className="opacity-[0.35] hover:opacity-[0.45] transition-opacity duration-300 flex items-center justify-center">
+              <div className="opacity-[0.35] hover:opacity-[0.45] transition-opacity duration-300 flex items-center justify-center w-full h-full">
                 <img 
                   src={metrikaLogo} 
                   alt="Métrika" 
                   style={{
-                    height: '600px',
+                    height: '800px',
                     width: 'auto',
                     objectFit: 'contain',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
                   }}
                   className="block"
                 />
