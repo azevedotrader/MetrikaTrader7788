@@ -337,14 +337,14 @@ export default function Suporte() {
                   {typedConversations.find((c: Conversation) => c.id === selectedConversation)?.subject}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col overflow-hidden">
-                <div className="flex-1 overflow-y-auto mb-4 max-h-[500px]">
+              <CardContent className="flex-1 flex flex-col overflow-hidden p-3 sm:p-6">
+                <div className="flex-1 overflow-y-auto mb-3 sm:mb-4 max-h-[400px] sm:max-h-[500px]">
                   {isLoadingMessages ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                     </div>
                   ) : (
-                    <div className="space-y-4 p-1">
+                    <div className="space-y-2 sm:space-y-4 p-1">
                       {typedMessages.map((message: Message) => (
                         <div
                           key={message.id}
@@ -352,14 +352,14 @@ export default function Suporte() {
                           data-testid={`message-${message.id}`}
                         >
                           <div
-                            className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                            className={`max-w-[90%] sm:max-w-[80%] rounded-lg px-2 py-1.5 sm:px-4 sm:py-2 ${
                               message.isFromAdmin
                                 ? 'bg-muted text-foreground'
                                 : 'bg-primary text-primary-foreground'
                             }`}
                           >
-                            <p className="text-sm break-words">{message.message}</p>
-                            <p className="text-xs opacity-70 mt-1">
+                            <p className="text-xs sm:text-sm break-words leading-relaxed">{message.message}</p>
+                            <p className="text-[10px] sm:text-xs opacity-70 mt-0.5 sm:mt-1">
                               {formatDate(message.createdAt)}
                               {message.isFromAdmin && (
                                 <span className="ml-2 font-medium">Admin</span>
@@ -371,20 +371,23 @@ export default function Suporte() {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 sm:gap-2">
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder={t('support.message_placeholder')}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="h-9 sm:h-10 text-sm flex-1"
                     data-testid="input-new-message"
                   />
                   <Button 
                     onClick={handleSendMessage} 
                     disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                    className="h-9 sm:h-10 px-3 sm:px-4 text-sm flex-shrink-0"
                     data-testid="button-send-message"
                   >
-                    {sendMessageMutation.isPending ? t('support.loading') : t('support.send_button')}
+                    <span className="hidden sm:inline">{sendMessageMutation.isPending ? t('support.loading') : t('support.send_button')}</span>
+                    <span className="sm:hidden">📤</span>
                   </Button>
                 </div>
               </CardContent>
