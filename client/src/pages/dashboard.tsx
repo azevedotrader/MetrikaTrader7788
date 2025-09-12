@@ -1755,7 +1755,7 @@ export default function Dashboard() {
                   src={metrikaLogo} 
                   alt="Métrika" 
                   style={{
-                    height: '300px',
+                    height: '600px',
                     width: 'auto',
                     objectFit: 'contain',
                   }}
