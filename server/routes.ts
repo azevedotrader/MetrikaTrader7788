@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -3351,8 +3351,32 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post('/api/admin/support/conversations/:id/messages', requireAdmin, async (req: any, res: any) => {
     try {
       const conversationId = req.params.id;
-      // Usar o ID do usuário admin real do banco
-      const adminUserId = 'b2545a36-18e3-46bd-9667-f46b67b0d615'; // ID do admin@metrika.com.br
+      
+      // Buscar o ID do usuário admin no banco pelo email
+      let [adminUser] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, ADMIN_CREDENTIALS.email));
+
+      // Se o usuário admin não existir, criar ele
+      if (!adminUser) {
+        const [createdAdmin] = await db
+          .insert(users)
+          .values({
+            name: ADMIN_CREDENTIALS.name,
+            email: ADMIN_CREDENTIALS.email,
+            password: ADMIN_CREDENTIALS.password, // Idealmente seria hasheado
+            planType: 'black',
+            isActive: true,
+          })
+          .returning({ id: users.id });
+
+        adminUser = createdAdmin;
+      }
+
+      if (!adminUser) {
+        return res.status(500).json({ error: "Erro ao encontrar ou criar usuário admin" });
+      }
 
       // Verificar se a conversa existe
       const [conversation] = await db
@@ -3367,7 +3391,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       
       const validatedData = insertSupportMessageSchema.parse({
         conversationId,
-        senderId: adminUserId,
+        senderId: adminUser.id,
         message: req.body.message,
         isFromAdmin: true
       });
