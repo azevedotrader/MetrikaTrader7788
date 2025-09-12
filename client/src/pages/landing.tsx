@@ -85,7 +85,6 @@ export default function Landing() {
           </div>
         </div>
       </header>
-
       {/* Hero Section */}
       <section className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-slate-900 to-indigo-900/40"></div>
@@ -154,7 +153,7 @@ export default function Landing() {
                       <div className="w-24 h-24 sm:w-20 sm:h-20 gradient-emerald-blue rounded-xl flex items-center justify-center">
                         <Logo variant="header" className="w-22 h-16" />
                       </div>
-                      <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
+                      <span className="text-xl font-bold text-white ml-[75px] mr-[75px]">{t('landing.dashboard.main_title')}</span>
                     </div>
                     <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-3 py-1">
                       {t('landing.dashboard.live')}
@@ -231,7 +230,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Problem Statement Section */}
       <section className="py-24 bg-gradient-to-r from-slate-800/50 to-slate-900/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -280,7 +278,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Solution Preview Section */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -436,9 +433,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      
-
       {/* Pricing Section */}
       <section id="precos" className="py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-emerald-900/15 to-slate-900 relative overflow-hidden">
         {/* Background Effects */}
@@ -582,9 +576,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      
-
       {/* Features Grid Section */}
       <section id="recursos" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-slate-800/30 to-slate-900/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -662,7 +653,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Final CTA Section */}
       <section className="py-20 sm:py-24 lg:py-32 bg-gradient-to-br from-emerald-900/40 via-slate-900 to-indigo-900/40 border-t border-emerald-800/30 relative overflow-hidden">
         {/* Background Effects */}
@@ -726,7 +716,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-slate-900 border-t border-slate-800 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -773,7 +762,6 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-
       <LoginModal 
         open={showLogin} 
         onOpenChange={setShowLogin} 
