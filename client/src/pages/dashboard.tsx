@@ -758,7 +758,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
         
         {/* Logo watermark grande no centro do gráfico */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="opacity-[0.35] hover:opacity-[0.45] transition-opacity duration-300 flex items-center justify-center">
+          <div className="opacity-[0.25] hover:opacity-[0.35] transition-opacity duration-300 flex items-center justify-center">
             <img 
               src={metrikaLogo} 
               alt="Métrika" 
