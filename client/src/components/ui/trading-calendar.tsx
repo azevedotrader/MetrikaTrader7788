@@ -3,7 +3,13 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, Calendar, Plus, BookOpen } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Plus,
+  BookOpen,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DiaryModal } from "@/components/ui/diary-modal";
 import { DayDetailsModal } from "@/components/ui/day-details-modal";
@@ -47,7 +53,9 @@ export function TradingCalendar({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isDayDetailsModalOpen, setIsDayDetailsModalOpen] = useState(false);
   const [isDiaryModalOpen, setIsDiaryModalOpen] = useState(false);
-  const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<DiaryEntry | undefined>(undefined);
+  const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<
+    DiaryEntry | undefined
+  >(undefined);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const queryClient = useQueryClient();
 
@@ -59,13 +67,13 @@ export function TradingCalendar({
 
   // Dias da semana - versão curta para mobile
   const weekDays = [
-    t('calendar.sun_short'),
-    t('calendar.mon_short'),
-    t('calendar.tue_short'),
-    t('calendar.wed_short'),
-    t('calendar.thu_short'),
-    t('calendar.fri_short'),
-    t('calendar.sat_short')
+    t("calendar.sun_short"),
+    t("calendar.mon_short"),
+    t("calendar.tue_short"),
+    t("calendar.wed_short"),
+    t("calendar.thu_short"),
+    t("calendar.fri_short"),
+    t("calendar.sat_short"),
   ];
 
   // Funções para o diário
@@ -78,7 +86,7 @@ export function TradingCalendar({
   const handleEditDiary = () => {
     if (!selectedDate) return;
     const existingEntry = getDiaryEntryForDate(selectedDate);
-    
+
     // Fechar modal de detalhes e abrir modal de edição
     setIsDayDetailsModalOpen(false);
     setSelectedDiaryEntry(existingEntry);
@@ -90,11 +98,11 @@ export function TradingCalendar({
   };
 
   const getDiaryEntryForDate = (date: Date) => {
-    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    
-    return diaryEntries.find(entry => {
+    const targetDateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+    return diaryEntries.find((entry) => {
       const entryDate = new Date(entry.date);
-      const entryDateString = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, '0')}-${String(entryDate.getDate()).padStart(2, '0')}`;
+      const entryDateString = `${entryDate.getFullYear()}-${String(entryDate.getMonth() + 1).padStart(2, "0")}-${String(entryDate.getDate()).padStart(2, "0")}`;
       return entryDateString === targetDateString;
     });
   };
@@ -115,7 +123,8 @@ export function TradingCalendar({
   // Dados do mês atual
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const locale = language === 'en' ? 'en-US' : language === 'es' ? 'es-ES' : 'pt-BR';
+  const locale =
+    language === "en" ? "en-US" : language === "es" ? "es-ES" : "pt-BR";
   const monthName = currentDate.toLocaleDateString(locale, { month: "long" });
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOfWeek = new Date(year, month, 1).getDay();
@@ -123,9 +132,9 @@ export function TradingCalendar({
   // Processar dados reais dos trades
   const processRealTradeData = (): TradeDay[] => {
     const tradeDays: TradeDay[] = [];
-    
+
     // Agrupar trades por dia do mês atual
-    const monthTrades = trades.filter(trade => {
+    const monthTrades = trades.filter((trade) => {
       // Usar dataHora se disponível, senão date
       const dateStr = trade.dataHora || trade.date;
       const tradeDate = new Date(dateStr);
@@ -134,11 +143,11 @@ export function TradingCalendar({
 
     // Criar mapa de trades por dia
     const tradesByDay = new Map<number, any[]>();
-    monthTrades.forEach(trade => {
+    monthTrades.forEach((trade) => {
       const dateStr = trade.dataHora || trade.date;
       const tradeDate = new Date(dateStr);
       const day = tradeDate.getDate();
-      
+
       if (!tradesByDay.has(day)) {
         tradesByDay.set(day, []);
       }
@@ -147,29 +156,38 @@ export function TradingCalendar({
 
     // Calcular estatísticas por dia
     tradesByDay.forEach((dayTrades, day) => {
-      const totalPnl = dayTrades.reduce((sum, trade) => sum + (parseFloat(trade.resultado) || trade.pnl || 0), 0);
-      const winningTrades = dayTrades.filter(trade => (parseFloat(trade.resultado) || trade.pnl || 0) > 0).length;
-      const winRate = dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
-      
+      const totalPnl = dayTrades.reduce(
+        (sum, trade) => sum + (parseFloat(trade.resultado) || trade.pnl || 0),
+        0,
+      );
+      const winningTrades = dayTrades.filter(
+        (trade) => (parseFloat(trade.resultado) || trade.pnl || 0) > 0,
+      ).length;
+      const winRate =
+        dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
+
       // Calcular R/R médio do dia
-      const tradesComRR = dayTrades.filter(trade => {
+      const tradesComRR = dayTrades.filter((trade) => {
         const alvo = parseFloat(trade.alvo) || 0;
         const stop = parseFloat(trade.stop) || 0;
         return alvo > 0 && stop > 0;
       });
-      
-      const avgRR = tradesComRR.length > 0 
-        ? tradesComRR.reduce((sum, trade) => {
-            const alvo = parseFloat(trade.alvo);
-            const stop = parseFloat(trade.stop);
-            return sum + (alvo / stop);
-          }, 0) / tradesComRR.length
-        : 0;
-      
+
+      const avgRR =
+        tradesComRR.length > 0
+          ? tradesComRR.reduce((sum, trade) => {
+              const alvo = parseFloat(trade.alvo);
+              const stop = parseFloat(trade.stop);
+              return sum + alvo / stop;
+            }, 0) / tradesComRR.length
+          : 0;
+
       // Maior perda e maior ganho do dia
-      const results = dayTrades.map(trade => parseFloat(trade.resultado) || trade.pnl || 0);
-      const maxWin = Math.max(...results.filter(r => r > 0), 0);
-      const maxLoss = Math.min(...results.filter(r => r < 0), 0);
+      const results = dayTrades.map(
+        (trade) => parseFloat(trade.resultado) || trade.pnl || 0,
+      );
+      const maxWin = Math.max(...results.filter((r) => r > 0), 0);
+      const maxLoss = Math.min(...results.filter((r) => r < 0), 0);
 
       tradeDays.push({
         date: day,
@@ -294,8 +312,8 @@ export function TradingCalendar({
             </div>
             {hasDiary && (
               <div title="Entrada de diário disponível">
-                <BookOpen 
-                  className="w-3 h-3 text-blue-400 opacity-70" 
+                <BookOpen
+                  className="w-3 h-3 text-blue-400 opacity-70"
                   data-testid={`diary-indicator-${dayNumber}`}
                 />
               </div>
@@ -322,24 +340,15 @@ export function TradingCalendar({
                     : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
                 </div>
               )}
-              
-              {/* Número de trades */}
-              <div
-                className={cn(
-                  "text-zinc-500 leading-tight",
-                  isMobile ? "text-[10px]" : "text-[10px]",
-                )}
-              >
-                {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
-              </div>
-              
-              
+
               {/* R/R médio - só mostrar se houver dados válidos */}
               {tradeDay.avgRR && tradeDay.avgRR > 0.1 && (
-                <div className={cn(
-                  "text-blue-400 leading-tight font-medium",
-                  isMobile ? "text-[9px]" : "text-[9px]"
-                )}>
+                <div
+                  className={cn(
+                    "text-blue-400 leading-tight font-medium",
+                    isMobile ? "text-[9px]" : "text-[9px]",
+                  )}
+                >
                   1:{tradeDay.avgRR.toFixed(2)}
                 </div>
               )}
@@ -353,7 +362,7 @@ export function TradingCalendar({
         </div>
       </div>
     );
-  }; 
+  };
 
   // Renderizar resumo semanal - apenas desktop
   const renderWeekSummary = (week: WeekSummary) => {
@@ -373,7 +382,7 @@ export function TradingCalendar({
           {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale)}
         </div>
         <div className="text-xs text-zinc-400">
-          {week.days} {week.days !== 1 ? t('calendar.days') : t('calendar.day')}
+          {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")}
         </div>
       </div>
     );
@@ -410,7 +419,7 @@ export function TradingCalendar({
               )}
             >
               <Calendar className={cn(isMobile ? "w-4 h-4" : "w-5 h-5")} />
-              <span className="hidden md:inline">{t('calendar.title')}</span>
+              <span className="hidden md:inline">{t("calendar.title")}</span>
               <span className="md:hidden">Trading</span>
             </CardTitle>
             <div className="flex items-center space-x-1">
@@ -436,7 +445,9 @@ export function TradingCalendar({
                 onClick={() => navigateMonth("next")}
                 className="text-zinc-400 hover:text-white p-1"
               >
-                <ChevronRight className={cn(isMobile ? "w-3 h-3" : "w-4 h-4")} />
+                <ChevronRight
+                  className={cn(isMobile ? "w-3 h-3" : "w-4 h-4")}
+                />
               </Button>
             </div>
           </div>
@@ -464,59 +475,67 @@ export function TradingCalendar({
             ))}
             {!isMobile && (
               <div className="text-center font-medium text-zinc-400 border-b border-zinc-700 py-3 text-sm">
-                {t('calendar.week')}
+                {t("calendar.week")}
               </div>
             )}
 
             {/* Dias do calendário */}
-{Array.from({ length: Math.ceil((firstDayOfWeek + daysInMonth) / 7) }).map(
-              (_, weekIndex) => [
-                ...Array.from({ length: 7 }).map((_, dayIndex) => {
-                  const dayNumber =
-                    weekIndex * 7 + dayIndex - firstDayOfWeek + 1;
-                  return (
-                    <div key={`day-${weekIndex}-${dayIndex}`}>
-                      {renderDayCell(
-                        dayNumber > 0 && dayNumber <= daysInMonth
-                          ? dayNumber
-                          : null,
-                      )}
+            {Array.from({
+              length: Math.ceil((firstDayOfWeek + daysInMonth) / 7),
+            })
+              .map((_, weekIndex) =>
+                [
+                  ...Array.from({ length: 7 }).map((_, dayIndex) => {
+                    const dayNumber =
+                      weekIndex * 7 + dayIndex - firstDayOfWeek + 1;
+                    return (
+                      <div key={`day-${weekIndex}-${dayIndex}`}>
+                        {renderDayCell(
+                          dayNumber > 0 && dayNumber <= daysInMonth
+                            ? dayNumber
+                            : null,
+                        )}
+                      </div>
+                    );
+                  }),
+                  // Resumo semanal - apenas desktop
+                  !isMobile && weekSummaries[weekIndex] ? (
+                    <div key={`week-summary-${weekIndex}`}>
+                      {renderWeekSummary(weekSummaries[weekIndex])}
                     </div>
-                  );
-                }),
-                // Resumo semanal - apenas desktop
-                !isMobile && weekSummaries[weekIndex] ? (
-                  <div key={`week-summary-${weekIndex}`}>
-                    {renderWeekSummary(weekSummaries[weekIndex])}
-                  </div>
-                ) : !isMobile ? (
-                  <div
-                    key={`week-empty-${weekIndex}`}
-                    className="border-l border-zinc-700 min-h-[96px]"
-                  ></div>
-                ) : null,
-              ].filter(Boolean),
-            ).flat()}
+                  ) : !isMobile ? (
+                    <div
+                      key={`week-empty-${weekIndex}`}
+                      className="border-l border-zinc-700 min-h-[96px]"
+                    ></div>
+                  ) : null,
+                ].filter(Boolean),
+              )
+              .flat()}
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
           {isMobile && (
             <div className="border-t border-zinc-700 p-4">
               <div className="text-center text-white font-medium mb-3">
-                {t('calendar.summary_of')} {monthName}
+                {t("calendar.summary_of")} {monthName}
               </div>
               <div className="grid grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">
                     {monthlyStats.tradingDays}
                   </div>
-                  <div className="text-sm text-zinc-400">{t('calendar.trading_days')}</div>
+                  <div className="text-sm text-zinc-400">
+                    {t("calendar.trading_days")}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">
                     {monthlyStats.totalTrades}
                   </div>
-                  <div className="text-sm text-zinc-400">{t('calendar.total_trades')}</div>
+                  <div className="text-sm text-zinc-400">
+                    {t("calendar.total_trades")}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div
@@ -530,13 +549,17 @@ export function TradingCalendar({
                     {monthlyStats.totalPnl > 0 ? "+" : ""}
                     R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale)}
                   </div>
-                  <div className="text-sm text-zinc-400">{t('calendar.pnl_total')}</div>
+                  <div className="text-sm text-zinc-400">
+                    {t("calendar.pnl_total")}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-white">
                     {monthlyStats.winRate}%
                   </div>
-                  <div className="text-sm text-zinc-400">{t('calendar.win_rate')}</div>
+                  <div className="text-sm text-zinc-400">
+                    {t("calendar.win_rate")}
+                  </div>
                 </div>
               </div>
             </div>
