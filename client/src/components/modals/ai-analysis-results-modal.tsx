@@ -74,87 +74,89 @@ export function AiAnalysisResultsModal({
   };
 
   const sortedTips = [...tips].sort((a, b) => {
-    const priorityOrder = { high: 3, medium: 2, low: 1 };
-    return priorityOrder[b.priority] - priorityOrder[a.priority];
+    const priorityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
+    return (priorityOrder[b.priority] || 1) - (priorityOrder[a.priority] || 1);
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[95vh] bg-slate-900 border-slate-700 overflow-hidden">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <div>
-            <DialogTitle className="text-2xl font-bold text-white flex items-center gap-3">
-              <Brain className="w-6 h-6 text-purple-400" />
-              Análise Profunda de Trading
-            </DialogTitle>
-            {csvFileName && (
-              <p className="text-slate-400 mt-1">
-                Análise baseada no arquivo: <span className="text-purple-300">{csvFileName}</span>
-              </p>
-            )}
+      <DialogContent className="w-[95vw] max-w-7xl h-[95vh] max-h-[95vh] md:w-[90vw] lg:w-[85vw] bg-slate-900 border-slate-700 overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0 pb-4 border-b border-slate-700">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+                <span className="truncate">Análise Profunda de Trading</span>
+              </DialogTitle>
+              {csvFileName && (
+                <p className="text-slate-400 mt-1 text-sm break-all">
+                  Análise baseada no arquivo: <span className="text-purple-300">{csvFileName}</span>
+                </p>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="text-slate-400 hover:text-white self-start sm:self-center flex-shrink-0"
+            >
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            className="text-slate-400 hover:text-white"
-          >
-            <X className="w-5 h-5" />
-          </Button>
         </DialogHeader>
 
-        <div className="space-y-4 flex flex-col h-full">
+        <div className="flex-1 flex flex-col gap-4 min-h-0">
           {/* Resumo Geral */}
-          <div className="bg-slate-800/50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-white mb-2">
+          <div className="bg-slate-800/50 rounded-lg p-3 sm:p-4 flex-shrink-0">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3">
               📊 Resumo da Análise
             </h3>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-purple-400">{tips.length}</p>
-                <p className="text-sm text-slate-400">Insights Gerados</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+              <div className="p-2">
+                <p className="text-xl sm:text-2xl font-bold text-purple-400">{tips.length}</p>
+                <p className="text-xs sm:text-sm text-slate-400">Insights Gerados</p>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-red-400">
+              <div className="p-2">
+                <p className="text-xl sm:text-2xl font-bold text-red-400">
                   {tips.filter(t => t.priority === 'high').length}
                 </p>
-                <p className="text-sm text-slate-400">Alta Prioridade</p>
+                <p className="text-xs sm:text-sm text-slate-400">Alta Prioridade</p>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-green-400">
+              <div className="p-2">
+                <p className="text-xl sm:text-2xl font-bold text-green-400">
                   {tips.filter(t => t.type === 'opportunity').length}
                 </p>
-                <p className="text-sm text-slate-400">Oportunidades</p>
+                <p className="text-xs sm:text-sm text-slate-400">Oportunidades</p>
               </div>
             </div>
           </div>
 
           {/* Lista de Dicas com Scroll */}
           <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full max-h-[60vh] pr-4">
+            <ScrollArea className="h-full max-h-[calc(95vh-280px)] pr-2 sm:pr-4">
               <div className="space-y-4 pr-2">
                 {sortedTips.map((tip, index) => (
                 <div
                   key={tip.id}
-                  className="bg-slate-800/50 rounded-lg p-6 border border-slate-700 hover:border-slate-600 transition-colors mb-4"
+                  className="bg-slate-800/50 rounded-lg p-3 sm:p-4 md:p-6 border border-slate-700 hover:border-slate-600 transition-colors mb-4"
                   data-testid={`ai-tip-${tip.id}`}
                 >
                   {/* Header da Dica */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${getTypeColor(tip.type)}`}>
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className={`p-2 rounded-lg ${getTypeColor(tip.type)} flex-shrink-0`}>
                         {getTypeIcon(tip.type)}
                       </div>
-                      <div>
-                        <h4 className="text-lg font-semibold text-white">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-base sm:text-lg font-semibold text-white break-words">
                           {tip.title}
                         </h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge className={getPriorityColor(tip.priority)}>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <Badge className={`${getPriorityColor(tip.priority)} text-xs`}>
                             {tip.priority === 'high' ? 'Alta' : 
                              tip.priority === 'medium' ? 'Média' : 'Baixa'} Prioridade
                           </Badge>
-                          <Badge className={getTypeColor(tip.type)}>
+                          <Badge className={`${getTypeColor(tip.type)} text-xs`}>
                             {tip.type === 'critical' ? 'Crítico' :
                              tip.type === 'warning' ? 'Atenção' :
                              tip.type === 'opportunity' ? 'Oportunidade' : 'Sugestão'}
@@ -162,8 +164,8 @@ export function AiAnalysisResultsModal({
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-sm font-medium text-slate-400">
+                    <div className="text-right flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-medium text-slate-400">
                         #{index + 1}
                       </span>
                     </div>
@@ -232,11 +234,11 @@ export function AiAnalysisResultsModal({
           </div>
 
           {/* Rodapé com Ações */}
-          <div className="flex gap-3 pt-4 border-t border-slate-700 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 border-t border-slate-700 flex-shrink-0">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+              className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800 text-sm sm:text-base"
               data-testid="close-analysis-modal"
             >
               Fechar
@@ -251,7 +253,7 @@ export function AiAnalysisResultsModal({
                 navigator.clipboard.writeText(analysisText);
                 // Pode adicionar toast aqui
               }}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm sm:text-base"
               data-testid="copy-analysis"
             >
               📋 Copiar Análise
