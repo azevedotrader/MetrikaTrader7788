@@ -21,5 +21,16 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
     }
   };
 
-  return <div></div>;
+  return (
+    <img 
+      src={metrikaLogo} 
+      alt="Métrika" 
+      className={cn(
+        "transition-all duration-300 block w-auto max-w-none",
+        getSize(),
+        className
+      )}
+      data-testid={`img-logo-${variant}`}
+    />
+  );
 }
