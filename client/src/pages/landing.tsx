@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
-  BarChart3, 
   ChartBar, 
   Link2, 
   TrendingUp, 
@@ -25,6 +24,7 @@ import {
   Download,
   LineChart
 } from "lucide-react";
+import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
 import { LanguageSelector } from "@/components/ui/language-selector";
@@ -53,7 +53,7 @@ export default function Landing() {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 gradient-purple-blue rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-white" />
+                <img src={metrikaLogo} alt="Métrika" className="w-6 h-4 object-contain" />
               </div>
               <span className="text-2xl font-bold gradient-text">Métrika</span>
             </div>
@@ -155,7 +155,7 @@ export default function Landing() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 gradient-emerald-blue rounded-xl flex items-center justify-center">
-                        <BarChart3 className="w-5 h-5 text-white" />
+                        <img src={metrikaLogo} alt="Métrika" className="w-8 h-5 object-contain" />
                       </div>
                       <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
                     </div>
@@ -737,7 +737,7 @@ export default function Landing() {
             <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 gradient-purple-blue rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
+                  <img src={metrikaLogo} alt="Métrika" className="w-6 h-4 object-contain" />
                 </div>
                 <span className="text-2xl font-bold gradient-text">Métrika</span>
               </div>

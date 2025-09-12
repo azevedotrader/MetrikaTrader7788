@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BarChart3 } from "lucide-react";
+import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
@@ -77,7 +77,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
       <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
         <DialogHeader className="text-center space-y-4">
           <div className="w-16 h-16 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
-            <BarChart3 className="w-8 h-8 text-white" />
+            <img src={metrikaLogo} alt="Métrika" className="w-12 h-8 object-contain" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">

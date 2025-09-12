@@ -2,7 +2,6 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
-  BarChart3, 
   LayoutDashboard, 
   PlusCircle, 
   BarChart, 
@@ -17,6 +16,7 @@ import {
   Calculator,
   GraduationCap
 } from "lucide-react";
+import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -114,7 +114,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <BarChart3 className="w-5 h-5 text-white" />
+                  <img src={metrikaLogo} alt="Métrika" className="w-6 h-4 object-contain" />
                 </div>
                 <span 
                   className={cn(
