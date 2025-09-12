@@ -2582,7 +2582,7 @@ Faça upgrade agora e desbloqueie todo o potencial dos insights de trading power
       
       res.json({
         planType,
-        isAiEnabled: planType !== 'free',
+        isAiEnabled: planType === 'pro' || planType === 'black',
         hasUnlimitedTrades: planType !== 'free',
         daysRemaining,
         expiresAt

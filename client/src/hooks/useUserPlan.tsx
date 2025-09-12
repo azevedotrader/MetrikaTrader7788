@@ -1,19 +1,34 @@
 import { useAuth } from "@/lib/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface UserPlan {
   planType: 'free' | 'starter' | 'pro' | 'black';
   isAiEnabled: boolean;
   hasUnlimitedTrades: boolean;
+  daysRemaining?: number;
+  expiresAt?: string;
 }
 
 export function useUserPlan() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: userPlan, isLoading } = useQuery({
     queryKey: ['/api/user/plan', user?.id],
     queryFn: async () => {
-      const response = await fetch('/api/user/plan');
+      const userId = localStorage.getItem('user-id');
+      
+      if (!userId || userId === '' || userId === 'null') {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const response = await fetch('/api/user/plan', {
+        headers: {
+          'user-id': userId,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       if (!response.ok) {
         throw new Error('Failed to fetch user plan');
       }
@@ -29,12 +44,21 @@ export function useUserPlan() {
   
   return {
     planType,
-    isAiEnabled: planType !== 'free',
+    isAiEnabled: planType === 'pro' || planType === 'black',
     hasUnlimitedTrades: planType !== 'free',
+    daysRemaining: userPlan?.daysRemaining,
+    expiresAt: userPlan?.expiresAt,
     isLoading,
     refresh: () => {
-      // Re-fetch the user plan
-      return fetch('/api/user/plan', { method: 'GET' });
+      // Invalidar cache e re-fetch
+      queryClient.invalidateQueries({ queryKey: ['/api/user/plan'] });
+      return fetch('/api/user/plan', { 
+        method: 'GET',
+        headers: {
+          'user-id': localStorage.getItem('user-id') || '',
+          'Content-Type': 'application/json'
+        }
+      });
     }
   };
 }

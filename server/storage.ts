@@ -426,9 +426,24 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserByAdmin(id: string, updates: UpdateUserByAdmin): Promise<User> {
     const updateData: any = { ...updates };
-    if (updates.planExpiresAt) {
+    
+    // Se planType está sendo atualizado para um plano pago, definir automaticamente 30 dias de duração
+    if (updates.planType) {
+      // Se planExpiresAt não foi fornecido explicitamente, definir para 30 dias a partir de agora
+      if (!updates.planExpiresAt) {
+        const now = new Date();
+        const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+        updateData.planExpiresAt = thirtyDaysFromNow;
+        console.log(`✅ Plano ${updates.planType} ativado para usuário ${id} até ${thirtyDaysFromNow.toISOString()}`);
+      } else {
+        updateData.planExpiresAt = new Date(updates.planExpiresAt);
+        console.log(`✅ Plano ${updates.planType} ativado para usuário ${id} até ${updates.planExpiresAt}`);
+      }
+    } else if (updates.planExpiresAt) {
+      // Se apenas planExpiresAt foi fornecido sem planType
       updateData.planExpiresAt = new Date(updates.planExpiresAt);
     }
+    
     updateData.updatedAt = new Date();
     
     const [updatedUser] = await db
