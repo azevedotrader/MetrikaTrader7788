@@ -272,9 +272,51 @@ export default function RiskManagement() {
                       <LineChart
                         data={Array.from({ length: 91 }, (_, index) => {
                           const day = index;
-                          const projectedBalance = day === 0 
-                            ? results.accountBalance 
-                            : results.accountBalance * Math.pow(1 + (results.dailyGrowthProjection / 100), day);
+                          
+                          if (day === 0) {
+                            return {
+                              day: 0,
+                              balance: results.accountBalance,
+                              gain: 0
+                            };
+                          }
+                          
+                          // Simulação realista: ganhos e perdas com média de ~10% ao mês
+                          // Meta: ~0.33% por dia em média para chegar a 10% ao mês
+                          const targetMonthlyReturn = 0.10; // 10% ao mês
+                          const targetDailyReturn = targetMonthlyReturn / 30; // ~0.33% por dia
+                          
+                          let cumulativeReturn = 0;
+                          
+                          // Simular cada dia com variação realista
+                          for (let d = 1; d <= day; d++) {
+                            // Usar semente pseudo-aleatória baseada no dia para consistência
+                            const seed = (d * 1234567) % 1000000;
+                            const random1 = (seed / 1000000);
+                            const random2 = ((seed * 7) % 1000000) / 1000000;
+                            
+                            // 60% chance de ganho, 40% chance de perda (mais realista)
+                            const isWin = random1 > 0.4;
+                            
+                            // Variação do retorno diário
+                            let dailyReturn;
+                            if (isWin) {
+                              // Ganhos: 0.2% a 1.5%
+                              dailyReturn = 0.002 + (random2 * 0.013);
+                            } else {
+                              // Perdas: -0.1% a -1.2%
+                              dailyReturn = -0.001 - (random2 * 0.011);
+                            }
+                            
+                            // Ajustar para tender à meta mensal
+                            const adjustment = (targetDailyReturn * d - cumulativeReturn) * 0.1;
+                            dailyReturn += adjustment;
+                            
+                            cumulativeReturn += dailyReturn;
+                          }
+                          
+                          const projectedBalance = results.accountBalance * (1 + cumulativeReturn);
+                          
                           return {
                             day,
                             balance: projectedBalance,
