@@ -13,7 +13,7 @@ import jwt from "jsonwebtoken";
 import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
@@ -3412,6 +3412,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           createdAt: supportConversations.createdAt,
         })
         .from(supportConversations)
+        .where(ne(supportConversations.status, 'resolved'))
         .orderBy(supportConversations.lastMessageAt);
 
       // Buscar informações do usuário e primeira mensagem para cada conversa
@@ -3562,7 +3563,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       const conversationId = req.params.id;
       const { status } = req.body;
 
-      if (!['open', 'in_progress', 'closed'].includes(status)) {
+      if (!['open', 'in_progress', 'resolved', 'closed'].includes(status)) {
         return res.status(400).json({ error: "Status inválido" });
       }
 
