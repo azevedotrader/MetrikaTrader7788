@@ -333,15 +333,6 @@ export function TradingCalendar({
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
               </div>
               
-              {/* Taxa de acerto - mostrar apenas se houver trades */}
-              {tradeDay.trades > 0 && (
-                <div className={cn(
-                  "text-zinc-600 leading-tight",
-                  isMobile ? "text-[9px]" : "text-[9px]"
-                )}>
-                  {tradeDay.winRate.toFixed(0)}% acerto
-                </div>
-              )}
               
               {/* R/R médio - só mostrar se houver dados válidos */}
               {tradeDay.avgRR && tradeDay.avgRR > 0.1 && (
