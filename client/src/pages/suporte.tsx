@@ -211,25 +211,26 @@ export default function Suporte() {
                     {t('support.new_conversation')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>{t('support.new_conversation')}</DialogTitle>
+                <DialogContent className="w-full max-w-[95vw] sm:max-w-md bg-background border max-h-[90vh] overflow-y-auto">
+                  <DialogHeader className="pb-3 sm:pb-4">
+                    <DialogTitle className="text-lg sm:text-xl">{t('support.new_conversation')}</DialogTitle>
                   </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="subject">{t('support.subject_label')}</Label>
+                  <div className="space-y-3 sm:space-y-4 p-1">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="subject" className="text-sm font-medium">{t('support.subject_label')}</Label>
                       <Input
                         id="subject"
                         value={newConversation.subject}
                         onChange={(e) => setNewConversation({ ...newConversation, subject: e.target.value })}
                         placeholder={t('support.subject_placeholder')}
+                        className="h-9 sm:h-10 text-sm"
                         data-testid="input-subject"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="category">{t('support.category_label')}</Label>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="category" className="text-sm font-medium">{t('support.category_label')}</Label>
                       <Select value={newConversation.category} onValueChange={(value) => setNewConversation({ ...newConversation, category: value })}>
-                        <SelectTrigger data-testid="select-category">
+                        <SelectTrigger data-testid="select-category" className="h-9 sm:h-10 text-sm">
                           <SelectValue placeholder={t('support.category_label')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -240,10 +241,10 @@ export default function Suporte() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label htmlFor="priority">{t('support.priority_label')}</Label>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="priority" className="text-sm font-medium">{t('support.priority_label')}</Label>
                       <Select value={newConversation.priority} onValueChange={(value) => setNewConversation({ ...newConversation, priority: value })}>
-                        <SelectTrigger data-testid="select-priority">
+                        <SelectTrigger data-testid="select-priority" className="h-9 sm:h-10 text-sm">
                           <SelectValue placeholder={t('support.priority_label')} />
                         </SelectTrigger>
                         <SelectContent>
@@ -253,14 +254,14 @@ export default function Suporte() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                         <div>
-                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                          <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1 text-sm sm:text-base">
                             Chat Direto com Admin
                           </h4>
-                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                          <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
                             Após criar este ticket, você poderá enviar mensagens diretamente para nossa equipe de suporte através do chat. 
                             Responderemos o mais rápido possível de acordo com a prioridade selecionada.
                           </p>
@@ -270,7 +271,7 @@ export default function Suporte() {
                     <Button 
                       onClick={handleCreateConversation} 
                       disabled={createConversationMutation.isPending}
-                      className="w-full"
+                      className="w-full h-9 sm:h-10 text-sm sm:text-base font-medium"
                       data-testid="button-start-conversation"
                     >
                       {createConversationMutation.isPending ? t('support.loading') : t('support.start_conversation')}
