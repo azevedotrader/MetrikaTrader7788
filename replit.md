@@ -17,6 +17,12 @@ Preferred communication style: Simple, everyday language.
 - **Emails Automáticos**: Welcome emails e password reset funcionais
 - **Chaves API**: OPENAI_API_KEY e SENDGRID_API_KEY configuradas
 
+### Sistema de Suporte Admin - Janeiro 2025
+- **Conversas Resolvidas**: ✅ Admin pode marcar conversas como "resolvidas"
+- **Filtro Admin**: Conversas resolvidas desaparecem automaticamente da lista do admin
+- **Bloqueio de Mensagens**: Usuários não podem enviar mais mensagens em conversas resolvidas
+- **Visibilidade Usuário**: Conversas resolvidas permanecem visíveis para o usuário
+
 ### Sistema Colaborativo ChatGPT + Tradicional - ACEITA QUALQUER FORMATO
 - **Status**: Sistema híbrido ultra-flexível para análise de qualquer tipo de CSV
 - **Nova Abordagem Colaborativa**: 

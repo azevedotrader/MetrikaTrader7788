@@ -3359,6 +3359,11 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         return res.status(404).json({ error: "Conversa não encontrada" });
       }
 
+      // Verificar se a conversa foi resolvida
+      if (conversation.status === 'resolved') {
+        return res.status(403).json({ error: "Esta conversa foi resolvida e não pode receber mais mensagens" });
+      }
+
       const validatedData = insertSupportMessageSchema.parse({
         conversationId,
         senderId: userId,
