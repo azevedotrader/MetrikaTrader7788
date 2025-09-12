@@ -341,8 +341,18 @@ export function TradingCalendar({
                 </div>
               )}
 
+              {/* Quantidade de trades */}
+              <div
+                className={cn(
+                  "text-zinc-500 leading-tight",
+                  isMobile ? "text-[10px]" : "text-[10px]",
+                )}
+              >
+                {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
+              </div>
+
               {/* Taxa de acerto - só mostrar se houver trades */}
-              {tradeDay.trades > 0 && (
+              {tradeDay.trades > 0 && tradeDay.winRate !== undefined && (
                 <div
                   className={cn(
                     "text-zinc-400 leading-tight font-medium",
