@@ -528,8 +528,8 @@ export default function NovoTrade() {
                     />
                   </div>
 
-                  {/* Linha 2 - Setup, Tipo */}
-                  <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* Linha 2 - Tipo e Emoção */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
                     <FormField
                       control={form.control}
                       name="tipo"
@@ -560,6 +560,39 @@ export default function NovoTrade() {
                                   {t('form.sell')}
                                 </span>
                               </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="emocao"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-charcoal-300">
+                            {t('form.emotion')}
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                                <SelectValue placeholder={t('form.how_felt')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                              {emocaoOptions.map((emocao) => (
+                                <SelectItem
+                                  key={emocao.value}
+                                  value={emocao.value}
+                                >
+                                  {emocao.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -729,41 +762,6 @@ export default function NovoTrade() {
                     )}
                   </div>
 
-                  {/* Linha 5 - Emoção */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="emocao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.emotion')}
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder={t('form.how_felt')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                              {emocaoOptions.map((emocao) => (
-                                <SelectItem
-                                  key={emocao.value}
-                                  value={emocao.value}
-                                >
-                                  {emocao.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
 
                   {/* Comentário */}
                   <FormField
