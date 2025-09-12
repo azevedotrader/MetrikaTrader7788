@@ -305,49 +305,56 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent truncate">
             Painel Administrativo
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
             Gerencie usuários, planos e visualize estatísticas da plataforma
           </p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate">
             Logado como: {adminUser?.name || adminUser?.email}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-end gap-2 sm:gap-4 flex-shrink-0">
           <Button 
             variant="outline" 
             onClick={handleLogout}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-sm sm:text-base"
             data-testid="button-admin-logout"
           >
             <LogOut className="h-4 w-4" />
-            Logout
+            <span className="hidden sm:inline">Logout</span>
           </Button>
-          <Shield className="h-12 w-12 text-purple-600" />
+          <Shield className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-purple-600 flex-shrink-0" />
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="users">Usuários</TabsTrigger>
-          <TabsTrigger value="support">Suporte</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+            <span className="hidden sm:inline">Visão Geral</span>
+            <span className="sm:hidden">Geral</span>
+          </TabsTrigger>
+          <TabsTrigger value="users" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+            Usuários
+          </TabsTrigger>
+          <TabsTrigger value="support" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+            Suporte
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-xs sm:text-sm font-medium">Total de Usuários</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="pb-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   {statsLoading ? "..." : (stats as any)?.totalUsers || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -358,11 +365,11 @@ export default function AdminPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Receita Mensal</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-xs sm:text-sm font-medium">Receita Mensal</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="pb-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   R$ {statsLoading ? "..." : (stats as any)?.monthlyRevenue || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -373,11 +380,11 @@ export default function AdminPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Trades</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-xs sm:text-sm font-medium">Total de Trades</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="pb-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   {statsLoading ? "..." : (stats as any)?.totalTrades || 0}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -388,11 +395,11 @@ export default function AdminPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Planos Premium</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-xs sm:text-sm font-medium">Planos Premium</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
+              <CardContent className="pb-3">
+                <div className="text-xl sm:text-2xl font-bold">
                   {statsLoading ? "..." : ((stats as any)?.proUsers || 0) + ((stats as any)?.blackUsers || 0)}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -468,71 +475,149 @@ export default function AdminPage() {
               {usersLoading ? (
                 <p>Carregando usuários...</p>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Telefone</TableHead>
-                      <TableHead>Plano</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Registrado</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Telefone</TableHead>
+                          <TableHead>Plano</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Registrado</TableHead>
+                          <TableHead>Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {(users as any)?.map((user: any) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.name}</TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>{user.phone || '-'}</TableCell>
+                            <TableCell>
+                              <Badge className={getPlanBadgeColor(user.planType)}>
+                                {user.planType.toUpperCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {user.isActive ? (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <UserCheck className="h-3 w-3 mr-1" />
+                                  Ativo
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-red-100 text-red-800">
+                                  <UserX className="h-3 w-3 mr-1" />
+                                  Inativo
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleEditUser(user)}
+                                  className="h-8 w-8 p-0"
+                                  data-testid={`button-edit-user-${user.id}`}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => deleteUserMutation.mutate(user.id)}
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                  data-testid={`button-delete-user-${user.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="md:hidden space-y-4">
                     {(users as any)?.map((user: any) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.phone || '-'}</TableCell>
-                        <TableCell>
-                          <Badge className={getPlanBadgeColor(user.planType)}>
-                            {user.planType.toUpperCase()}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {user.isActive ? (
-                            <Badge className="bg-green-100 text-green-800">
-                              <UserCheck className="h-3 w-3 mr-1" />
-                              Ativo
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-red-100 text-red-800">
-                              <UserX className="h-3 w-3 mr-1" />
-                              Inativo
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(user.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditUser(user)}
-                              className="h-8 w-8 p-0"
-                              data-testid={`button-edit-user-${user.id}`}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => deleteUserMutation.mutate(user.id)}
-                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                              data-testid={`button-delete-user-${user.id}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                      <Card key={user.id} className="border border-gray-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg truncate">{user.name}</h3>
+                              <p className="text-sm text-gray-600 truncate">{user.email}</p>
+                            </div>
+                            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEditUser(user)}
+                                className="h-8 w-8 p-0"
+                                data-testid={`button-edit-user-${user.id}`}
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => deleteUserMutation.mutate(user.id)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                data-testid={`button-delete-user-${user.id}`}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
-                        </TableCell>
-                      </TableRow>
+                          
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <span className="text-gray-500">Telefone:</span>
+                              <p className="font-medium">{user.phone || '-'}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Plano:</span>
+                              <div className="mt-1">
+                                <Badge className={getPlanBadgeColor(user.planType)}>
+                                  {user.planType.toUpperCase()}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Status:</span>
+                              <div className="mt-1">
+                                {user.isActive ? (
+                                  <Badge className="bg-green-100 text-green-800">
+                                    <UserCheck className="h-3 w-3 mr-1" />
+                                    Ativo
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-red-100 text-red-800">
+                                    <UserX className="h-3 w-3 mr-1" />
+                                    Inativo
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Registrado:</span>
+                              <p className="font-medium">
+                                {new Date(user.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
