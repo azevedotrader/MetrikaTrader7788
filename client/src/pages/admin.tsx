@@ -897,39 +897,39 @@ function SupportAdminPanel({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+    <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 h-auto lg:h-[600px]">
       {/* Lista de Conversas */}
-      <Card className="lg:col-span-1">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Conversas de Suporte
+      <Card className="lg:col-span-1 order-1 lg:order-none">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-sm lg:text-base">
+            <MessageSquare className="h-4 w-4 lg:h-5 lg:w-5 flex-shrink-0" />
+            <span className="truncate">Conversas de Suporte</span>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs lg:text-sm">
             {conversations.length} conversa(s) total
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {conversationsLoading ? (
-            <div className="p-4">Carregando conversas...</div>
+            <div className="p-4 text-sm">Carregando conversas...</div>
           ) : conversations.length === 0 ? (
-            <div className="p-4 text-gray-500">
+            <div className="p-4 text-gray-500 text-sm">
               Nenhuma conversa encontrada
-              <br />
-              <small>Debug: {JSON.stringify(conversations)}</small>
             </div>
           ) : (
-            <div className="max-h-[400px] overflow-y-auto">
+            <div className="max-h-[300px] lg:max-h-[400px] overflow-y-auto">
               {conversations.map((conversation: any) => (
                 <div
                   key={conversation.id}
-                  className="p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors border-blue-200 bg-[#21212199]"
+                  className={`p-3 lg:p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors border-blue-200 bg-[#21212199] ${
+                    selectedConversation === conversation.id ? 'bg-blue-50 border-blue-300' : ''
+                  }`}
                   onClick={() => setSelectedConversation(conversation.id)}
                 >
                   {/* Título e Status */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1 pr-2">
-                      <h4 className="font-medium text-sm truncate">{conversation.subject}</h4>
+                  <div className="flex items-start justify-between mb-2 lg:mb-3">
+                    <div className="flex-1 pr-2 min-w-0">
+                      <h4 className="font-medium text-xs lg:text-sm truncate">{conversation.subject}</h4>
                       {conversation.firstUserMessage ? (
                         <p className="text-xs text-gray-600 mt-1 overflow-hidden" style={{
                           display: '-webkit-box',
@@ -944,23 +944,23 @@ function SupportAdminPanel({
                         <p className="text-xs text-gray-400 mt-1 italic">Sem mensagem inicial</p>
                       )}
                     </div>
-                    <Badge className={getStatusColor(conversation.status)}>
+                    <Badge className={`${getStatusColor(conversation.status)} text-xs px-2 py-1 flex-shrink-0`}>
                       {conversation.status}
                     </Badge>
                   </div>
                   
                   {/* Categoria e Prioridade */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge className={getCategoryColor(conversation.category)}>
+                  <div className="flex items-center gap-1 lg:gap-2 mb-2 lg:mb-3 flex-wrap">
+                    <Badge className={`${getCategoryColor(conversation.category)} text-xs px-2 py-1`}>
                       {conversation.category}
                     </Badge>
-                    <Badge className={getPriorityColor(conversation.priority)}>
+                    <Badge className={`${getPriorityColor(conversation.priority)} text-xs px-2 py-1`}>
                       {conversation.priority}
                     </Badge>
                   </div>
                   
                   {/* Informações do usuário */}
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-1 lg:mb-2">
                     <User className="h-3 w-3 flex-shrink-0" />
                     <span className="truncate">{conversation.userName} ({conversation.userEmail})</span>
                   </div>
@@ -968,7 +968,7 @@ function SupportAdminPanel({
                   {/* Data da última mensagem */}
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <Clock className="h-3 w-3 flex-shrink-0" />
-                    <span>{new Date(conversation.lastMessageAt).toLocaleString('pt-BR')}</span>
+                    <span className="text-xs">{new Date(conversation.lastMessageAt).toLocaleString('pt-BR')}</span>
                   </div>
                 </div>
               ))}
@@ -977,48 +977,53 @@ function SupportAdminPanel({
         </CardContent>
       </Card>
       {/* Chat */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle>
+      <Card className="lg:col-span-2 order-2 lg:order-none">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm lg:text-base mb-2 lg:mb-0">
             {selectedConversation ? 'Chat de Suporte' : 'Selecione uma Conversa'}
           </CardTitle>
           {selectedConversation && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 lg:gap-2 mt-2 lg:mt-0">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => updateStatusMutation.mutate({ conversationId: selectedConversation, status: 'in_progress' })}
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2 flex-1 sm:flex-none"
               >
-                Marcar em Andamento
+                <span className="lg:hidden">Em Andamento</span>
+                <span className="hidden lg:inline">Marcar em Andamento</span>
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => updateStatusMutation.mutate({ conversationId: selectedConversation, status: 'resolved' })}
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2 flex-1 sm:flex-none"
               >
-                Marcar como Resolvido
+                <span className="lg:hidden">Resolvido</span>
+                <span className="hidden lg:inline">Marcar como Resolvido</span>
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => updateStatusMutation.mutate({ conversationId: selectedConversation, status: 'closed' })}
+                className="text-xs lg:text-sm px-2 lg:px-3 py-1 lg:py-2 flex-1 sm:flex-none"
               >
                 Fechar
               </Button>
             </div>
           )}
         </CardHeader>
-        <CardContent className="flex flex-col h-[400px] overflow-hidden">
+        <CardContent className="flex flex-col h-[350px] lg:h-[400px] overflow-hidden p-3 lg:p-6">
           {!selectedConversation ? (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center text-gray-500 text-sm lg:text-base text-center px-4">
               Selecione uma conversa para visualizar as mensagens
             </div>
           ) : (
             <>
               {/* Mensagens */}
-              <div className="flex-1 overflow-y-auto mb-4 space-y-4 max-h-[300px] p-1">
+              <div className="flex-1 overflow-y-auto mb-3 lg:mb-4 space-y-3 lg:space-y-4 max-h-[250px] lg:max-h-[300px] p-1">
                 {messagesLoading ? (
-                  <div>Carregando mensagens...</div>
+                  <div className="text-sm lg:text-base">Carregando mensagens...</div>
                 ) : (
                   <>
                     {/* Primeira mensagem do usuário (contexto inicial) */}
@@ -1026,10 +1031,10 @@ function SupportAdminPanel({
                       const currentConversation = conversations.find((c: any) => c.id === selectedConversation);
                       if (currentConversation?.firstUserMessage) {
                         return (
-                          <div className="flex justify-start mb-4">
-                            <div className="flex flex-col items-start max-w-xs lg:max-w-md">
+                          <div className="flex justify-start mb-3 lg:mb-4">
+                            <div className="flex flex-col items-start max-w-[85%] sm:max-w-[75%] lg:max-w-md">
                               <span className="text-xs text-gray-500 mb-1">Usuário (mensagem inicial)</span>
-                              <div className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 rounded-bl-sm">
+                              <div className="px-3 lg:px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-gray-900 rounded-bl-sm">
                                 <p className="text-sm break-words">{currentConversation.firstUserMessage}</p>
                                 <p className="text-xs mt-1 opacity-70">
                                   {new Date(currentConversation.createdAt).toLocaleString('pt-BR')}
@@ -1044,7 +1049,7 @@ function SupportAdminPanel({
                     
                     {/* Outras mensagens */}
                     {messages.length === 0 ? (
-                      <div className="text-gray-500 text-center">
+                      <div className="text-gray-500 text-center text-sm lg:text-base">
                         {conversations.find((c: any) => c.id === selectedConversation)?.firstUserMessage 
                           ? "Aguardando resposta..." 
                           : "Nenhuma mensagem nesta conversa"
@@ -1054,16 +1059,16 @@ function SupportAdminPanel({
                       messages.map((message: any) => (
                         <div
                           key={message.id}
-                          className={`flex ${message.isFromAdmin ? 'justify-end' : 'justify-start'} mb-4`}
+                          className={`flex ${message.isFromAdmin ? 'justify-end' : 'justify-start'} mb-3 lg:mb-4`}
                         >
-                          <div className={`flex flex-col ${message.isFromAdmin ? 'items-end' : 'items-start'} max-w-xs lg:max-w-md`}>
+                          <div className={`flex flex-col ${message.isFromAdmin ? 'items-end' : 'items-start'} max-w-[85%] sm:max-w-[75%] lg:max-w-md`}>
                             {/* Label de quem enviou */}
                             <span className="text-xs text-gray-500 mb-1">
                               {message.isFromAdmin ? 'Admin' : 'Usuário'}
                             </span>
                             {/* Mensagem */}
                             <div
-                              className={`px-4 py-2 rounded-lg ${
+                              className={`px-3 lg:px-4 py-2 rounded-lg ${
                                 message.isFromAdmin
                                   ? 'bg-blue-500 text-white rounded-br-sm'
                                   : 'bg-gray-100 text-gray-900 rounded-bl-sm'
@@ -1083,21 +1088,22 @@ function SupportAdminPanel({
               </div>
 
               {/* Campo de resposta */}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 lg:gap-2">
                 <Input
                   placeholder="Digite sua resposta..."
                   value={adminMessage}
                   onChange={(e) => setAdminMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendReply()}
-                  className="flex-1"
+                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendReply()}
+                  className="flex-1 text-sm lg:text-base"
                 />
                 <Button
                   onClick={handleSendReply}
                   disabled={sendReplyMutation.isPending || !adminMessage.trim()}
-                  className="flex items-center gap-2"
+                  className="flex items-center justify-center gap-2 text-sm lg:text-base px-4 lg:px-6 w-full sm:w-auto"
                 >
-                  <Send className="h-4 w-4" />
-                  Enviar
+                  <Send className="h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="sm:hidden lg:inline">Enviar</span>
+                  <span className="hidden sm:inline lg:hidden">Enviar</span>
                 </Button>
               </div>
             </>
