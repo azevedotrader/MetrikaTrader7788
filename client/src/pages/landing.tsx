@@ -50,9 +50,9 @@ export default function Landing() {
       {/* Header */}
       <header className="relative z-50 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center py-2">
             <div className="flex items-center space-x-2">
-              <Logo variant="header" className="!h-40 lg:!h-40 md:!h-36 sm:!h-32" />
+              <Logo variant="header" className="!h-40 lg:!h-40 md:!h-36 sm:!h-32 max-w-fit" />
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
