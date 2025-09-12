@@ -2413,60 +2413,66 @@ export async function registerRoutes(app: Express): Promise<void> {
         // Check if user has a free or starter plan (pro and black have full access)
         if (user && (user.planType === 'free' || user.planType === 'starter')) {
           const upgradeMessage = language === 'en' 
-            ? `🚀 **Upgrade Required to Chat with AI Assistant**
+            ? `🤖 **AI Assistant Available for Premium Members Only**
 
-I'd love to help you analyze your trades and provide personalized insights, but the AI Assistant is available only for premium members.
+I'm your dedicated trading mentor powered by GPT-5, ready to analyze your trades, optimize your strategies, and accelerate your trading success. However, this advanced AI assistance is exclusive to our premium members.
 
-**Available Plans:**
+**🚀 Unlock Premium AI Features:**
 
-**💼 Starter Plan** - Perfect to get started
-• AI Trading Assistant with personalized analysis
-• Advanced analytics and insights
-• Priority support
-• Starting from $29/month
+**💼 Starter Plan** - Perfect entry point
+• AI Trading Assistant with deep market analysis
+• Personalized trade recommendations
+• Advanced performance analytics
+• Priority email support
+• Only $6.99/month
 
 **⭐ Pro Plan** - Most popular choice
-• Everything in Starter
-• Advanced risk management tools
-• Custom trading strategies
-• Real-time market alerts
-• Starting from $79/month
+• Everything in Starter PLUS
+• Advanced risk management algorithms
+• Custom trading strategies tailored to your style
+• Real-time market alerts and signals
+• Live chat support
+• Only $17.99/month
 
 **🏆 Black Plan** - For serious traders
-• Everything in Pro
-• 1-on-1 strategy sessions
-• VIP support and priority features
-• Exclusive trading signals
-• Starting from $199/month
+• Everything in Pro PLUS
+• Exclusive 1-on-1 strategy sessions
+• VIP support with instant response
+• Premium trading signals from experts
+• Early access to new features
+• Only $34.99/month
 
-Upgrade now to unlock the full potential of AI-powered trading insights!`
-            : `🚀 **Upgrade Necessário para Conversar com o Assistente IA**
+**Ready to dominate the markets?** Upgrade now and get your first AI analysis in seconds!`
+            : `🤖 **Assistente IA Exclusivo para Membros Premium**
 
-Adoraria te ajudar a analisar seus trades e fornecer insights personalizados, mas o Assistente IA está disponível apenas para membros premium.
+Sou seu mentor de trading pessoal, alimentado pela tecnologia GPT-5 mais avançada do mercado. Estou aqui para analisar seus trades, otimizar suas estratégias e acelerar seus resultados. Porém, este assistente premium está disponível apenas para nossos membros.
 
-**Planos Disponíveis:**
+**🚀 Desbloqueie o Poder da IA Premium:**
 
-**💼 Plano Starter** - Perfeito para começar
-• Assistente IA de Trading com análise personalizada
-• Analytics avançados e insights
-• Suporte prioritário
-• A partir de R$ 89/mês
+**💼 Plano Starter** - Entrada perfeita
+• Assistente IA com análise profunda de mercado
+• Recomendações personalizadas de trades
+• Analytics avançados de performance
+• Suporte prioritário por email
+• Apenas R$ 19,90/mês
 
 **⭐ Plano Pro** - Escolha mais popular
-• Tudo do Starter
-• Ferramentas avançadas de gestão de risco
-• Estratégias de trading personalizadas
-• Alertas de mercado em tempo real
-• A partir de R$ 239/mês
+• Tudo do Starter MAIS
+• Algoritmos avançados de gestão de risco
+• Estratégias customizadas para seu perfil
+• Alertas e sinais de mercado em tempo real
+• Chat de suporte ao vivo
+• Apenas R$ 49,90/mês
 
-**🏆 Plano Black** - Para traders sérios
-• Tudo do Pro
-• Sessões de estratégia 1-on-1
-• Suporte VIP e recursos prioritários
-• Sinais de trading exclusivos
-• A partir de R$ 599/mês
+**🏆 Plano Black** - Para traders profissionais
+• Tudo do Pro MAIS
+• Sessões exclusivas 1-on-1 de estratégia
+• Suporte VIP com resposta instantânea
+• Sinais premium de especialistas
+• Acesso antecipado a novos recursos
+• Apenas R$ 97,00/mês
 
-Faça upgrade agora e desbloqueie todo o potencial dos insights de trading powered por IA!`;
+**Pronto para dominar os mercados?** Faça upgrade agora e tenha sua primeira análise IA em segundos!`;
 
           return res.json({ reply: upgradeMessage });
         }
