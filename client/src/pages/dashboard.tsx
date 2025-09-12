@@ -634,76 +634,91 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           width="100%"
           height={300}
         >
-          <RechartsLineChart
-            data={chartData}
-            margin={{
-              top: 10,
-              right: 30,
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            {/* Definição de gradiente para linha (verde acima, vermelho abaixo) */}
-            <defs>
-              <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="50%" stopColor="#22c55e" />
-                <stop offset="50%" stopColor="#ef4444" />
-              </linearGradient>
-            </defs>
-
-            {/* Grid */}
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+          {(() => {
+            // Calcular yMin e yMax dos dados reais
+            const yMin = Math.min(...chartData.map(d => d.accumulated));
+            const yMax = Math.max(...chartData.map(d => d.accumulated));
             
-            {/* Eixos */}
-            <XAxis 
-              dataKey="period" 
-              stroke="#aaa"
-              fontSize={window.innerWidth < 768 ? 8 : 11}
-              angle={-45}
-              textAnchor="end"
-              height={window.innerWidth < 768 ? 50 : 80}
-            />
+            // Calcular a posição do zero no gradiente
+            const zeroPosition = Math.max(0, Math.min(100, (yMax / (yMax - yMin)) * 100));
             
-            <YAxis 
-              stroke="#aaa"
-              fontSize={window.innerWidth < 768 ? 9 : 12}
-              tickFormatter={(value) =>
-                window.innerWidth < 768
-                  ? `${(value / 1000).toFixed(0)}k`
-                  : `R$ ${(value / 1000).toFixed(1)}k`
-              }
-            />
-            
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: "#000000",
-                border: "1px solid #444",
-                borderRadius: "8px",
-                padding: "8px",
-                color: "#fff"
-              }}
-              formatter={(value: any, name: string) => {
-                if (name === "accumulated") {
-                  const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                  return [formattedValue, "💰 Acumulado"];
-                }
-                return [value, name];
-              }}
-            />
+            return (
+              <RechartsLineChart
+                data={chartData}
+                margin={{
+                  top: 10,
+                  right: 30,
+                  left: 0,
+                  bottom: 0,
+                }}
+              >
+                {/* Gradiente dinâmico baseado no domínio real do eixo Y */}
+                <defs>
+                  <linearGradient id="dynamicLineGradient" x1="0" y1="0" x2="0" y2="1">
+                    {/* Verde acima de 0 */}
+                    <stop offset="0%" stopColor="#22c55e" />
+                    <stop offset={`${zeroPosition}%`} stopColor="#22c55e" />
+                    {/* Vermelho abaixo de 0 */}
+                    <stop offset={`${zeroPosition}%`} stopColor="#ef4444" />
+                    <stop offset="100%" stopColor="#ef4444" />
+                  </linearGradient>
+                </defs>
 
-            {/* Linha do eixo 0 */}
-            <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
+                {/* Grid */}
+                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                
+                {/* Eixos */}
+                <XAxis 
+                  dataKey="period" 
+                  stroke="#aaa"
+                  fontSize={window.innerWidth < 768 ? 8 : 11}
+                  angle={-45}
+                  textAnchor="end"
+                  height={window.innerWidth < 768 ? 50 : 80}
+                />
+                
+                <YAxis 
+                  stroke="#aaa"
+                  fontSize={window.innerWidth < 768 ? 9 : 12}
+                  tickFormatter={(value) =>
+                    window.innerWidth < 768
+                      ? `${(value / 1000).toFixed(0)}k`
+                      : `R$ ${(value / 1000).toFixed(1)}k`
+                  }
+                />
+                
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: "#000000",
+                    border: "1px solid #444",
+                    borderRadius: "8px",
+                    padding: "8px",
+                    color: "#fff"
+                  }}
+                  formatter={(value: any, name: string) => {
+                    if (name === "accumulated") {
+                      const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                      return [formattedValue, "💰 Acumulado"];
+                    }
+                    return [value, name];
+                  }}
+                />
 
-            {/* Linha única com gradiente */}
-            <Line
-              type="monotone"
-              dataKey="accumulated"
-              stroke="url(#lineGradient)"
-              strokeWidth={2}
-              dot={false}
-              isAnimationActive={false}
-            />
-          </RechartsLineChart>
+                {/* Linha do eixo 0 */}
+                <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
+
+                {/* Linha única com gradiente dinâmico */}
+                <Line
+                  type="monotone"
+                  dataKey="accumulated"
+                  stroke="url(#dynamicLineGradient)"
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </RechartsLineChart>
+            );
+          })()}
         </ResponsiveContainer>
       )}
 
