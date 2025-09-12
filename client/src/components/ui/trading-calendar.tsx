@@ -340,18 +340,6 @@ export function TradingCalendar({
                     : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
                 </div>
               )}
-
-              {/* R/R médio - só mostrar se houver dados válidos */}
-              {tradeDay.avgRR && tradeDay.avgRR > 0.1 && (
-                <div
-                  className={cn(
-                    "text-blue-400 leading-tight font-medium",
-                    isMobile ? "text-[9px]" : "text-[9px]",
-                  )}
-                >
-                  1:{tradeDay.avgRR.toFixed(2)}
-                </div>
-              )}
             </div>
           )}
 
