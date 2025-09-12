@@ -735,19 +735,6 @@ export default function AdminPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={userForm.control}
-                  name="planExpiresAt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Data de Expiração do Plano</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} data-testid="input-user-plan-expires" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <DialogFooter>
                   <Button
                     type="button"
