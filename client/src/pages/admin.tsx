@@ -272,7 +272,11 @@ export default function AdminPage() {
   // Submit handlers
   const onUserSubmit = (data: any) => {
     if (editingUser) {
-      updateUserMutation.mutate({ id: editingUser.id, data });
+      // Remove empty string fields to avoid unwanted updates
+      const processedData = Object.fromEntries(
+        Object.entries(data).filter(([key, value]) => value !== "")
+      );
+      updateUserMutation.mutate({ id: editingUser.id, data: processedData });
     }
   };
 

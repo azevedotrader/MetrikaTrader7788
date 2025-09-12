@@ -243,7 +243,10 @@ export const updateUserByAdminSchema = z.object({
   phone: z.string().optional(),
   planType: z.enum(["starter", "pro", "black"]).optional(),
   isActive: z.boolean().optional(),
-  planExpiresAt: z.string().optional(),
+  planExpiresAt: z.string().optional().transform(val => {
+    if (!val || val.trim() === '') return undefined;
+    return new Date(val);
+  }),
 });
 
 // Schema para entradas do diário
