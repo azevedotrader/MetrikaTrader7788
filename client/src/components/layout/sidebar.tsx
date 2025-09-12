@@ -116,14 +116,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
                   <img src={metrikaLogo} alt="Métrika" className="w-6 h-4 object-contain" />
                 </div>
-                <span 
+                <img 
+                  src={metrikaLogo} 
+                  alt="Métrika" 
                   className={cn(
-                    "text-xl font-bold gradient-text transition-all duration-300 whitespace-nowrap",
+                    "h-6 object-contain transition-all duration-300",
                     sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
                   )}
-                >
-                  Métrika
-                </span>
+                />
               </div>
               
               {/* Close button for mobile */}
