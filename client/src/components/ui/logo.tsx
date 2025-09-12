@@ -25,7 +25,7 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
     <img 
       src={metrikaLogo} 
       alt="Métrika" 
-      className="object-contain transition-all duration-300 flex-shrink-0 h-32 lg:h-32 md:h-28 sm:h-24 !h-32 lg:!h-32 md:!h-28 sm:!h-24 max-w-fit pt-[0px] pb-[0px] mt-[-33px] mb-[-33px]"
+      className="object-contain transition-all duration-300 flex-shrink-0 h-32 lg:h-32 md:h-28 sm:h-24 !h-32 lg:!h-32 md:!h-28 sm:!h-24 max-w-fit pt-[0px] pb-[0px] mt-[-33px] mb-[-33px] pl-[0px] pr-[0px] ml-[25px] mr-[25px]"
       data-testid={`img-logo-${variant}`}
     />
   );
