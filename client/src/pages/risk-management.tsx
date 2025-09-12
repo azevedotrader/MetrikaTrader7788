@@ -33,6 +33,38 @@ export default function RiskManagement() {
       default: return 2.5;
     }
   };
+
+  // Configuração inteligente por perfil de risco
+  const PROFILE_CONFIG = {
+    conservador: {
+      expectedMonthlyReturn: 0.04, // 4% ao mês
+      winRate: 0.62, // 62% de trades positivos
+      winRange: [0.001, 0.006], // +0.1% a +0.6% por trade
+      lossRange: [-0.0005, -0.004], // -0.05% a -0.4% por trade
+      driftAdjustStrength: 0.15,
+      description: "Retorno esperado: ~4% ao mês, Taxa de sucesso: ~62%"
+    },
+    moderado: {
+      expectedMonthlyReturn: 0.10, // 10% ao mês
+      winRate: 0.55, // 55% de trades positivos
+      winRange: [0.002, 0.012], // +0.2% a +1.2% por trade
+      lossRange: [-0.001, -0.009], // -0.1% a -0.9% por trade
+      driftAdjustStrength: 0.10,
+      description: "Retorno esperado: ~10% ao mês, Taxa de sucesso: ~55%"
+    },
+    alto_risco: {
+      expectedMonthlyReturn: 0.20, // 20% ao mês
+      winRate: 0.48, // 48% de trades positivos
+      winRange: [0.004, 0.025], // +0.4% a +2.5% por trade
+      lossRange: [-0.002, -0.02], // -0.2% a -2.0% por trade
+      driftAdjustStrength: 0.06,
+      description: "Retorno esperado: ~20% ao mês, Taxa de sucesso: ~48%"
+    }
+  };
+
+  const getProfileConfig = (profile: string) => {
+    return PROFILE_CONFIG[profile as keyof typeof PROFILE_CONFIG] || PROFILE_CONFIG.moderado;
+  };
   const [results, setResults] = useState<RiskCalculation | null>(null);
 
   const calculateRisk = () => {
@@ -151,9 +183,7 @@ export default function RiskManagement() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-zinc-400">
-                    {riskProfile === "conservador" && "Perfil conservador: menor risco, crescimento gradual"}
-                    {riskProfile === "moderado" && "Perfil moderado: equilibrio entre risco e retorno"}
-                    {riskProfile === "alto_risco" && "Alto risco: maior potencial, mas riscos elevados"}
+                    {getProfileConfig(riskProfile).description}
                   </p>
                 </div>
 
@@ -281,35 +311,37 @@ export default function RiskManagement() {
                             };
                           }
                           
-                          // Simulação realista: ganhos e perdas com média de ~10% ao mês
-                          // Meta: ~0.33% por dia em média para chegar a 10% ao mês
-                          const targetMonthlyReturn = 0.10; // 10% ao mês
-                          const targetDailyReturn = targetMonthlyReturn / 30; // ~0.33% por dia
+                          // Usar configuração inteligente baseada no perfil de risco
+                          const config = getProfileConfig(riskProfile);
+                          const targetDailyReturn = Math.pow(1 + config.expectedMonthlyReturn, 1/30) - 1;
                           
                           let cumulativeReturn = 0;
                           
-                          // Simular cada dia com variação realista
+                          // Simular cada dia com configurações específicas do perfil
                           for (let d = 1; d <= day; d++) {
-                            // Usar semente pseudo-aleatória baseada no dia para consistência
-                            const seed = (d * 1234567) % 1000000;
+                            // Semente baseada no perfil + dia para consistência determinística
+                            const profileHash = riskProfile.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0);
+                            const seed = ((profileHash + d) * 1234567) % 1000000;
                             const random1 = (seed / 1000000);
                             const random2 = ((seed * 7) % 1000000) / 1000000;
                             
-                            // 60% chance de ganho, 40% chance de perda (mais realista)
-                            const isWin = random1 > 0.4;
+                            // Taxa de sucesso específica do perfil
+                            const isWin = random1 < config.winRate;
                             
-                            // Variação do retorno diário
+                            // Variação do retorno diário baseada no perfil
                             let dailyReturn;
                             if (isWin) {
-                              // Ganhos: 0.2% a 1.5%
-                              dailyReturn = 0.002 + (random2 * 0.013);
+                              // Ganhos dentro do range do perfil
+                              const [minWin, maxWin] = config.winRange;
+                              dailyReturn = minWin + (random2 * (maxWin - minWin));
                             } else {
-                              // Perdas: -0.1% a -1.2%
-                              dailyReturn = -0.001 - (random2 * 0.011);
+                              // Perdas dentro do range do perfil
+                              const [minLoss, maxLoss] = config.lossRange;
+                              dailyReturn = minLoss + (random2 * (maxLoss - minLoss));
                             }
                             
-                            // Ajustar para tender à meta mensal
-                            const adjustment = (targetDailyReturn * d - cumulativeReturn) * 0.1;
+                            // Ajustar para tender à meta mensal (força específica do perfil)
+                            const adjustment = (targetDailyReturn * d - cumulativeReturn) * config.driftAdjustStrength;
                             dailyReturn += adjustment;
                             
                             cumulativeReturn += dailyReturn;
