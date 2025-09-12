@@ -22,6 +22,8 @@ import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CsvSelectionModal } from "@/components/modals/csv-selection-modal";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { UpgradeModal } from "@/components/modals/UpgradeModal";
 
 const navigation = [
   { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -45,7 +47,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isMobile = useIsMobile();
+  const { planType } = useUserPlan();
   
   // On mobile, sidebar is controlled by isOpen prop
   // On desktop, use hover behavior
@@ -55,7 +59,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     setShowCsvModal(true);
   };
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (href: string, e?: React.MouseEvent) => {
+    // Verificar se é suporte e se o usuário tem acesso
+    if (href === '/suporte') {
+      if (planType === 'free' || planType === 'starter') {
+        e?.preventDefault();
+        setShowUpgradeModal(true);
+        return;
+      }
+    }
+    
     if (isMobile && onClose) {
       onClose();
     }
@@ -141,7 +154,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                       )}
                       title={!sidebarExpanded ? t(item.nameKey) : undefined}
-                      onClick={handleLinkClick}
+                      onClick={(e) => handleLinkClick(item.href, e)}
                     >
                       <item.icon className={cn("w-5 h-5 flex-shrink-0", sidebarExpanded && "mr-3")} />
                       <span 
@@ -224,6 +237,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         <CsvSelectionModal 
           open={showCsvModal} 
           onOpenChange={setShowCsvModal}
+        />
+        
+        <UpgradeModal
+          open={showUpgradeModal}
+          onOpenChange={setShowUpgradeModal}
+          reason="ai_feature"
         />
       </div>
     </>
