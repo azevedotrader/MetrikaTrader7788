@@ -451,11 +451,11 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   const yAxisDomain =
     maxValue > 0 ? [-maxValue * 1.1, maxValue * 1.1] : [-100, 100];
   
-  // Determinar cor da linha baseada no valor final
+  // Cor da linha sempre verde, independente do valor
   const finalAccumulated = chartData.length > 0 ? chartData[chartData.length - 1].accumulated : 0;
   const isNegative = finalAccumulated < 0;
-  const lineColor = isNegative ? "#ef4444" : "#22c55e";
-  const fillGradient = isNegative ? "url(#negativeGradient)" : "url(#positiveGradient)";
+  const lineColor = "#22c55e"; // Sempre verde
+  const fillGradient = "url(#positiveGradient)"; // Sempre gradient verde
 
   return (
     <div data-testid="performance-chart" className="w-full">
