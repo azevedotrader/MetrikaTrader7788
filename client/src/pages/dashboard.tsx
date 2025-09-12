@@ -632,10 +632,14 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
       ) : (
         <ResponsiveContainer
           width="100%"
-          height={window.innerWidth < 768 ? 500 : 300}
+          height={300}
         >
           <AreaChart
-            data={chartData}
+            data={chartData.map(d => ({
+              ...d,
+              positiveAccumulated: d.accumulated > 0 ? d.accumulated : 0,
+              negativeAccumulated: d.accumulated < 0 ? d.accumulated : 0,
+            }))}
             margin={{
               top: 10,
               right: 30,
@@ -666,27 +670,73 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             
             <Tooltip 
               contentStyle={{
-                backgroundColor: "#1e293b",
-                border: "1px solid #475569",
+                backgroundColor: "#000000",
+                border: "1px solid #444",
                 borderRadius: "8px",
                 padding: "8px",
+                color: "#fff"
               }}
-              formatter={(value: any) => {
-                const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                return [formattedValue, "💰 Acumulado"];
+              formatter={(value: any, name: string) => {
+                if (name === "positiveAccumulated" || name === "negativeAccumulated") {
+                  // Buscar o valor original accumulated do ponto de dados
+                  const originalValue = chartData.find(d => d.period === value)?.accumulated || 0;
+                  const formattedValue = `R$ ${originalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  return [formattedValue, "💰 Acumulado"];
+                }
+                return [value, name];
+              }}
+              content={(props: any) => {
+                const { active, payload, label } = props;
+                if (!active || !payload || !payload.length) return null;
+
+                // Encontrar o valor original accumulated
+                const data = chartData.find(d => d.period === label);
+                if (!data) return null;
+
+                const formattedValue = `R$ ${data.accumulated.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                
+                return (
+                  <div
+                    style={{
+                      backgroundColor: "#000000",
+                      border: "1px solid #444",
+                      borderRadius: "8px",
+                      padding: "8px",
+                      color: "#fff"
+                    }}
+                  >
+                    <p style={{ margin: 0, fontWeight: "bold", marginBottom: "4px" }}>
+                      {label}
+                    </p>
+                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#22c55e" : "#ef4444" }}>
+                      💰 Acumulado: {formattedValue}
+                    </p>
+                  </div>
+                );
               }}
             />
 
             {/* Linha do eixo 0 */}
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
 
-            {/* Área única que muda de cor baseada no valor final */}
+            {/* Área positiva (verde) */}
             <Area
               type="monotone"
-              dataKey="accumulated"
-              stroke={lineColor}
-              fill={lineColor}
+              dataKey="positiveAccumulated"
+              stroke="#22c55e"
+              fill="#22c55e"
               fillOpacity={0.4}
+              isAnimationActive={false}
+            />
+
+            {/* Área negativa (vermelha) */}
+            <Area
+              type="monotone"
+              dataKey="negativeAccumulated"
+              stroke="#ef4444"
+              fill="#ef4444"
+              fillOpacity={0.4}
+              isAnimationActive={false}
             />
           </AreaChart>
         </ResponsiveContainer>
