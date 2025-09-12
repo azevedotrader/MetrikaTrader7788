@@ -11,7 +11,7 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
   const getSize = () => {
     switch (variant) {
       case "header":
-        return "h-32 lg:h-32 md:h-28 sm:h-24";
+        return "h-48 lg:h-48 md:h-44 sm:h-40";
       case "modal":
         return "h-36 md:h-32 sm:h-28";
       case "sidebar":
