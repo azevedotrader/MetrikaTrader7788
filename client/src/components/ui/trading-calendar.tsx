@@ -341,8 +341,8 @@ export function TradingCalendar({
                 </div>
               )}
               
-              {/* R/R médio - sempre mostrar se houver dados */}
-              {tradeDay.avgRR && tradeDay.avgRR > 0 && (
+              {/* R/R médio - só mostrar se houver dados válidos */}
+              {tradeDay.avgRR && tradeDay.avgRR > 0.1 && (
                 <div className={cn(
                   "text-blue-400 leading-tight font-medium",
                   isMobile ? "text-[9px]" : "text-[9px]"
