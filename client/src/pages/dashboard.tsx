@@ -83,6 +83,7 @@ import {
   BarChart,
   Bar,
   ComposedChart,
+  ReferenceLine,
 } from "recharts";
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
@@ -631,201 +632,63 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
       ) : (
         <ResponsiveContainer
           width="100%"
-          height={window.innerWidth < 768 ? 500 : 550}
+          height={window.innerWidth < 768 ? 500 : 300}
         >
-          <ComposedChart
+          <AreaChart
             data={chartData}
             margin={{
-              top: window.innerWidth < 768 ? 0 : 10,
-              right: window.innerWidth < 768 ? 2 : 50,
-              left: window.innerWidth < 768 ? -38 : 30,
-              bottom: window.innerWidth < 768 ? 25 : 60,
+              top: 10,
+              right: 30,
+              left: 0,
+              bottom: 0,
             }}
           >
-            <defs>
-              <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#22c55e" stopOpacity={0.3} />
-              </linearGradient>
-              <linearGradient id="negativeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.8} />
-              </linearGradient>
-              <linearGradient id="dynamicGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#ef4444" stopOpacity={0.6} />
-                <stop offset="50%" stopColor="#ffffff" stopOpacity={0.1} />
-                <stop offset="100%" stopColor="#22c55e" stopOpacity={0.6} />
-              </linearGradient>
-            </defs>
-
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#374151"
-              opacity={0.4}
-            />
-
-            <XAxis
-              dataKey="period"
-              stroke="#9CA3AF"
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            
+            <XAxis 
+              dataKey="period" 
+              stroke="#aaa"
               fontSize={window.innerWidth < 768 ? 8 : 11}
               angle={-45}
               textAnchor="end"
               height={window.innerWidth < 768 ? 50 : 80}
-              tick={{ fill: "#e2e8f0" }}
-              axisLine={{ stroke: "#64748b", strokeWidth: 1 }}
             />
-
-            <YAxis
-              stroke="#9CA3AF"
+            
+            <YAxis 
+              stroke="#aaa"
               fontSize={window.innerWidth < 768 ? 9 : 12}
-              tick={{ fill: "#cbd5e1" }}
               tickFormatter={(value) =>
                 window.innerWidth < 768
                   ? `${(value / 1000).toFixed(0)}k`
                   : `R$ ${(value / 1000).toFixed(1)}k`
               }
-              domain={yAxisDomain}
-              axisLine={{ stroke: "#64748b", strokeWidth: 1 }}
             />
-
-            <Tooltip
+            
+            <Tooltip 
               contentStyle={{
                 backgroundColor: "#1e293b",
                 border: "1px solid #475569",
-                borderRadius: "12px",
-                boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
-                padding: "12px",
+                borderRadius: "8px",
+                padding: "8px",
               }}
-              labelStyle={{
-                color: "#e2e8f0",
-                fontWeight: "bold",
-                marginBottom: "8px",
-              }}
-              formatter={(value: any, name: string) => {
+              formatter={(value: any) => {
                 const formattedValue = `R$ ${parseFloat(value).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                const displayName =
-                  name === "positive"
-                    ? t('metrics.profits')
-                    : name === "negative"
-                      ? t('metrics.losses')
-                      : name === "accumulated"
-                        ? "📊 Acumulado"
-                        : name;
-                return [formattedValue, displayName];
-              }}
-              content={(props: any) => {
-                const { active, payload, label } = props;
-                if (!active || !payload || !payload.length) return null;
-
-                const data = payload[0].payload;
-                const isMobile = window.innerWidth < 768;
-
-                return (
-                  <div
-                    className={`bg-zinc-800 border border-zinc-600 rounded-lg shadow-xl ${
-                      isMobile
-                        ? "p-2 text-xs max-w-[250px]"
-                        : "p-3 text-sm max-w-[320px]"
-                    }`}
-                  >
-                    <p
-                      className={`text-white font-bold mb-2 ${isMobile ? "text-xs truncate" : "text-sm"}`}
-                    >
-                      {label}
-                    </p>
-                    <div
-                      className={`space-y-1 ${isMobile ? "text-xs" : "text-sm"}`}
-                    >
-                      <div className="flex justify-between gap-2">
-                        <span className="text-green-400 truncate">
-                          {t('metrics.profits')}:
-                        </span>
-                        <span className="text-green-400 font-semibold shrink-0">
-                          R${" "}
-                          {isMobile
-                            ? data.positive.toLocaleString("pt-BR", {
-                                maximumFractionDigits: 0,
-                              })
-                            : data.positive.toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                              })}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-red-400 truncate">
-                          ❌ Perdas:
-                        </span>
-                        <span className="text-red-400 font-semibold shrink-0">
-                          -R${" "}
-                          {isMobile
-                            ? data.negative.toLocaleString("pt-BR", {
-                                maximumFractionDigits: 0,
-                              })
-                            : data.negative.toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                              })}
-                        </span>
-                      </div>
-                      <div className="border-t border-zinc-600 pt-1 mt-1">
-                        <div className="flex justify-between gap-2">
-                          <span className="text-zinc-300 truncate">Total do Período:</span>
-                          <span
-                            className={`font-semibold shrink-0 ${data.total >= 0 ? "text-green-400" : "text-red-400"}`}
-                          >
-                            R${" "}
-                            {isMobile
-                              ? data.total.toLocaleString("pt-BR", {
-                                  maximumFractionDigits: 0,
-                                })
-                              : data.total.toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                })}
-                          </span>
-                        </div>
-                        <div className="flex justify-between gap-2 bg-blue-900/30 px-2 py-1 rounded mt-1">
-                          <span className="text-blue-300 truncate font-medium">
-                            📈 Valor Acumulado:
-                          </span>
-                          <span
-                            className={`font-bold shrink-0 ${data.accumulated >= 0 ? "text-blue-300" : "text-red-400"}`}
-                          >
-                            R${" "}
-                            {isMobile
-                              ? data.accumulated.toLocaleString("pt-BR", {
-                                  maximumFractionDigits: 0,
-                                })
-                              : data.accumulated.toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                })}
-                          </span>
-                        </div>
-                      </div>
-                      <div
-                        className={`border-t border-zinc-600 pt-1 mt-1 text-zinc-400 ${
-                          isMobile ? "text-xs" : "text-xs"
-                        }`}
-                      >
-                        <div>
-                          Trades: {data.totalCount} ({data.positiveCount}✅/
-                          {data.negativeCount}❌)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
+                return [formattedValue, "💰 Acumulado"];
               }}
             />
 
-            {/* Linha única que muda de cor baseada no valor final */}
+            {/* Linha do eixo 0 */}
+            <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
+
+            {/* Área única que muda de cor baseada no valor final */}
             <Area
               type="monotone"
               dataKey="accumulated"
               stroke={lineColor}
-              strokeWidth={3}
-              fill={fillGradient}
-              dot={false}
+              fill={lineColor}
+              fillOpacity={0.4}
             />
-          </ComposedChart>
+          </AreaChart>
         </ResponsiveContainer>
       )}
 
