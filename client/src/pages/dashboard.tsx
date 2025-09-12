@@ -318,6 +318,8 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   const [selectedMonth, setSelectedMonth] = useState<string>(
     format(new Date(), "yyyy-MM"),
   );
+  const [selectedStartDay, setSelectedStartDay] = useState<number>(1);
+  const [selectedEndDay, setSelectedEndDay] = useState<number>(31);
 
   const getChartData = () => {
     // Usar diretamente os trades já filtrados que vêm do dashboard principal
@@ -351,9 +353,13 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           const yearNum = parseInt(yearStr, 10);
           const monthNum = parseInt(monthStr, 10);
           
-          // Criar datas explicitamente para evitar problemas de timezone
-          startDate = new Date(yearNum, monthNum - 1, 1); // Janeiro = 0, então agosto = 7
-          endDate = new Date(yearNum, monthNum, 0); // último dia do mês (dia 0 do próximo mês)
+          // Determinar último dia do mês selecionado
+          const lastDayOfMonth = new Date(yearNum, monthNum, 0).getDate();
+          const actualEndDay = Math.min(selectedEndDay, lastDayOfMonth);
+          
+          // Criar datas com range de dias específicos
+          startDate = new Date(yearNum, monthNum - 1, selectedStartDay);
+          endDate = new Date(yearNum, monthNum - 1, actualEndDay, 23, 59, 59);
           
           groupBy = "day";
           break;
@@ -487,42 +493,130 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
         ))}
       </div>
 
-      {/* Seletor de Mês Específico */}
+      {/* Seletor de Mês Específico e Range de Dias */}
       {selectedPeriod === "specific-month" && (
-        <div className="flex justify-center mb-4 md:mb-6">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-36 md:w-48 text-sm">
-              <SelectValue placeholder={t('placeholder.select_month')} />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
-              {(() => {
-                const months = [];
-                const now = new Date();
+        <div className="space-y-4 mb-4 md:mb-6">
+          {/* Seletor de Mês */}
+          <div className="flex justify-center">
+            <Select value={selectedMonth} onValueChange={(value) => {
+              setSelectedMonth(value);
+              // Reset day range when month changes
+              const [year, month] = value.split('-');
+              const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+              setSelectedStartDay(1);
+              setSelectedEndDay(lastDay);
+            }}>
+              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-36 md:w-48 text-sm">
+                <SelectValue placeholder={t('placeholder.select_month')} />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700">
+                {(() => {
+                  const months = [];
+                  const now = new Date();
 
-                // Criar lista dos últimos 24 meses
-                for (let i = 0; i < 24; i++) {
-                  const date = new Date(
-                    now.getFullYear(),
-                    now.getMonth() - i,
-                    1,
-                  );
-                  const value = format(date, "yyyy-MM");
-                  const label = format(date, "MMMM yyyy", { locale: ptBR });
-                  months.push({ value, label });
-                }
+                  // Criar lista dos últimos 24 meses
+                  for (let i = 0; i < 24; i++) {
+                    const date = new Date(
+                      now.getFullYear(),
+                      now.getMonth() - i,
+                      1,
+                    );
+                    const value = format(date, "yyyy-MM");
+                    const label = format(date, "MMMM yyyy", { locale: ptBR });
+                    months.push({ value, label });
+                  }
 
-                return months.map((month) => (
-                  <SelectItem
-                    key={month.value}
-                    value={month.value}
-                    className="text-white hover:bg-zinc-700 text-sm"
-                  >
-                    {month.label}
-                  </SelectItem>
-                ));
-              })()}
-            </SelectContent>
-          </Select>
+                  return months.map((month) => (
+                    <SelectItem
+                      key={month.value}
+                      value={month.value}
+                      className="text-white hover:bg-zinc-700 text-sm"
+                    >
+                      {month.label}
+                    </SelectItem>
+                  ));
+                })()}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Seletor de Range de Dias */}
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-zinc-300">Do dia</span>
+              <Select 
+                value={selectedStartDay.toString()} 
+                onValueChange={(value) => {
+                  const day = parseInt(value);
+                  setSelectedStartDay(day);
+                  if (day > selectedEndDay) {
+                    setSelectedEndDay(day);
+                  }
+                }}
+              >
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-16 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
+                  {(() => {
+                    const [year, month] = selectedMonth.split('-');
+                    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+                    const days = [];
+                    for (let i = 1; i <= lastDay; i++) {
+                      days.push(
+                        <SelectItem key={i} value={i.toString()} className="text-white hover:bg-zinc-700 text-sm">
+                          {i}
+                        </SelectItem>
+                      );
+                    }
+                    return days;
+                  })()}
+                </SelectContent>
+              </Select>
+              
+              <span className="text-zinc-300">ao dia</span>
+              
+              <Select 
+                value={selectedEndDay.toString()} 
+                onValueChange={(value) => {
+                  const day = parseInt(value);
+                  setSelectedEndDay(day);
+                  if (day < selectedStartDay) {
+                    setSelectedStartDay(day);
+                  }
+                }}
+              >
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-16 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
+                  {(() => {
+                    const [year, month] = selectedMonth.split('-');
+                    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+                    const days = [];
+                    for (let i = 1; i <= lastDay; i++) {
+                      days.push(
+                        <SelectItem key={i} value={i.toString()} className="text-white hover:bg-zinc-700 text-sm">
+                          {i}
+                        </SelectItem>
+                      );
+                    }
+                    return days;
+                  })()}
+                </SelectContent>
+              </Select>
+              
+              <div className="text-xs text-zinc-400 ml-2">
+                {(() => {
+                  const [year, month] = selectedMonth.split('-');
+                  const startDate = new Date(parseInt(year), parseInt(month) - 1, selectedStartDay);
+                  const endDate = new Date(parseInt(year), parseInt(month) - 1, selectedEndDay);
+                  const dayCount = Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+                  return `(${dayCount} dia${dayCount !== 1 ? 's' : ''})`;
+                })()}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
