@@ -150,7 +150,7 @@ export default function Landing() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-24 h-24 sm:w-20 sm:h-20 gradient-emerald-blue rounded-xl flex items-center justify-center">
-                        <Logo variant="header" className="w-22 h-16" />
+                        <PieChart className="w-12 h-12 text-white" />
                       </div>
                       <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
                     </div>
