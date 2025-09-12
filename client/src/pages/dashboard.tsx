@@ -759,7 +759,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
         {/* Logo watermark sutil no centro do gráfico */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <div className="opacity-[0.35] hover:opacity-[0.45] transition-opacity duration-300 flex items-center justify-center">
-            <Logo variant="modal" className="!h-32 md:!h-40 lg:!h-48 xl:!h-56" />
+            <Logo variant="modal" className="!h-48 md:!h-56 lg:!h-64 xl:!h-72 2xl:!h-80" />
           </div>
         </div>
       </div>
