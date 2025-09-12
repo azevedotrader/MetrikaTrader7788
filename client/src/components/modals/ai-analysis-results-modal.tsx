@@ -82,26 +82,16 @@ export function AiAnalysisResultsModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-7xl h-[95vh] max-h-[95vh] md:w-[90vw] lg:w-[85vw] bg-slate-900 border-slate-700 overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0 pb-4 border-b border-slate-700">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
-                <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
-                <span className="truncate">Análise Profunda de Trading</span>
-              </DialogTitle>
-              {csvFileName && (
-                <p className="text-slate-400 mt-1 text-sm break-all">
-                  Análise baseada no arquivo: <span className="text-purple-300">{csvFileName}</span>
-                </p>
-              )}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              className="text-slate-400 hover:text-white self-start sm:self-center flex-shrink-0"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
+          <div className="flex-1 min-w-0">
+            <DialogTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
+              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+              <span className="truncate">Análise Profunda de Trading</span>
+            </DialogTitle>
+            {csvFileName && (
+              <p className="text-slate-400 mt-1 text-sm break-all">
+                Análise baseada no arquivo: <span className="text-purple-300">{csvFileName}</span>
+              </p>
+            )}
           </div>
         </DialogHeader>
 
