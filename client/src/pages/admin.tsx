@@ -76,7 +76,6 @@ const updateUserSchema = z.object({
   phone: z.string().optional(),
   planType: z.enum(["free", "starter", "pro", "black"]).optional(),
   isActive: z.boolean().optional(),
-  planExpiresAt: z.string().optional(),
 });
 
 const editPlanSchema = z.object({
@@ -135,7 +134,6 @@ export default function AdminPage() {
       phone: "",
       planType: "free",
       isActive: true,
-      planExpiresAt: "",
     },
   });
 
@@ -247,8 +245,6 @@ export default function AdminPage() {
       phone: user.phone || "",
       planType: user.planType,
       isActive: user.isActive,
-      planExpiresAt: user.planExpiresAt ? 
-        new Date(user.planExpiresAt).toISOString().split('T')[0] : "",
     });
     setIsUserDialogOpen(true);
   };

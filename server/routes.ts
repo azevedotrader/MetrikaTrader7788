@@ -2561,23 +2561,37 @@ Faça upgrade agora e desbloqueie todo o potencial dos insights de trading power
       const userId = req.userId;
       if (!userId) return res.status(401).json({ message: 'Usuário não autenticado' });
       
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
 
-      const planType = user.planType || 'free';
+      let planType = user.planType || 'free';
       let daysRemaining;
       let expiresAt;
 
-      // Calculate days remaining for paid plans
+      // Check if paid plan has expired and automatically downgrade to free
       if (planType !== 'free' && user.planExpiresAt) {
         const now = new Date();
         const expirationDate = new Date(user.planExpiresAt);
-        const timeDiff = expirationDate.getTime() - now.getTime();
-        daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
-        expiresAt = user.planExpiresAt.toISOString();
+        
+        if (now > expirationDate) {
+          // Plan expired - automatically downgrade to free
+          console.log(`🔄 Plano ${planType} do usuário ${userId} expirou. Mudando para free.`);
+          await storage.updateUserByAdmin(userId, { 
+            planType: 'free',
+            planExpiresAt: undefined 
+          });
+          planType = 'free';
+          daysRemaining = undefined;
+          expiresAt = undefined;
+        } else {
+          // Plan still active - calculate remaining days
+          const timeDiff = expirationDate.getTime() - now.getTime();
+          daysRemaining = Math.ceil(timeDiff / (1000 * 3600 * 24));
+          expiresAt = user.planExpiresAt.toISOString();
+        }
       }
       
       res.json({
@@ -2662,6 +2676,13 @@ Faça upgrade agora e desbloqueie todo o potencial dos insights de trading power
     try {
       const userId = req.params.id;
       const updates = updateUserByAdminSchema.parse(req.body);
+      
+      // Política de 30 dias automáticos: sempre ignorar planExpiresAt do frontend
+      // e aplicar automaticamente 30 dias quando planType é alterado para plano pago
+      if (updates.planExpiresAt) {
+        delete updates.planExpiresAt; // Ignorar qualquer data manual
+        console.log('⚠️ Admin tentou definir planExpiresAt manualmente. Política de 30 dias automáticos aplicada.');
+      }
       
       const updatedUser = await storage.updateUserByAdmin(userId, updates);
       res.json(updatedUser);
