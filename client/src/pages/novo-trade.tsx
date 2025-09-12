@@ -821,37 +821,37 @@ export default function NovoTrade() {
             </CardHeader>
             <CardContent data-testid="csv-import-section" className="space-y-6">
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    {t('form.select_market_label')}
-                  </label>
-                  <Select
-                    value={selectedBroker}
-                    onValueChange={setSelectedBroker}
-                  >
-                    <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                      <SelectValue placeholder={t('form.crypto_b3_forex')} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                      <SelectItem value="crypto">{t('form.crypto_icon')}</SelectItem>
-                      <SelectItem value="b3">{t('form.b3_icon')}</SelectItem>
-                      <SelectItem value="forex">{t('form.forex_icon')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Linha 1: Mercado e Método de Análise lado a lado */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-charcoal-300">
+                      {t('form.select_market_label')}
+                    </label>
+                    <Select
+                      value={selectedBroker}
+                      onValueChange={setSelectedBroker}
+                    >
+                      <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                        <SelectValue placeholder={t('form.crypto_b3_forex')} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                        <SelectItem value="crypto">{t('form.crypto_icon')}</SelectItem>
+                        <SelectItem value="b3">{t('form.b3_icon')}</SelectItem>
+                        <SelectItem value="forex">{t('form.forex_icon')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    Método de Análise
-                  </label>
-                  <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="text-yellow-400">⚡</div>
-                      <span className="text-white font-medium">Análise MetrikAI </span>
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-charcoal-300">
+                      Método de Análise
+                    </label>
+                    <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600 h-[42px] flex items-center">
+                      <div className="flex items-center gap-2">
+                        <div className="text-yellow-400">⚡</div>
+                        <span className="text-white font-medium text-sm">MetrikAI Tradicional</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-charcoal-400">
-                      Tradicional: Mais rápido e consistente, ideal para formatos padrão
-                    </p>
                   </div>
                 </div>
 
@@ -871,57 +871,62 @@ export default function NovoTrade() {
                 </div>
 
                 <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
-                  <h4 className="text-white font-medium mb-2 flex items-center gap-2">
+                  <h4 className="text-white font-medium mb-3 flex items-center gap-2">
                     <FileText className="w-4 h-4 text-neutral-400" />
                     {t('trade.csv_format_by_market')}
                   </h4>
-                  <div className="space-y-2 text-sm text-charcoal-400">
-                    <p>
-                      <strong className="text-white">Forex:</strong> Data,
-                      Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take
-                      Profit, Resultado
-                    </p>
-                    <p>
-                      <strong className="text-white">B3:</strong> Data, Código,
-                      Operação, Quantidade, Preço, Total, Resultado
-                    </p>
-                    <p>
-                      <strong className="text-white">Crypto:</strong> Time,
-                      Symbol, Side, Amount, Price, Fee, Total, PnL
-                    </p>
+                  {/* Layout responsivo: vertical no mobile, grid no desktop */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm text-charcoal-400">
+                    <div className="space-y-1">
+                      <strong className="text-white block">Forex:</strong>
+                      <span className="text-xs leading-relaxed">Data, Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take Profit, Resultado</span>
+                    </div>
+                    <div className="space-y-1">
+                      <strong className="text-white block">B3:</strong>
+                      <span className="text-xs leading-relaxed">Data, Código, Operação, Quantidade, Preço, Total, Resultado</span>
+                    </div>
+                    <div className="space-y-1">
+                      <strong className="text-white block">Crypto:</strong>
+                      <span className="text-xs leading-relaxed">Time, Symbol, Side, Amount, Price, Fee, Total, PnL</span>
+                    </div>
                   </div>
                 </div>
 
-                <Button
-                  onClick={handleUpload}
-                  className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
-                  disabled={
-                    uploadMutation.isPending || !csvFile || !selectedBroker
-                  }
-                >
-                  {uploadMutation.isPending ? (
-                    <>
-                      <Upload className="w-4 h-4 mr-2 animate-spin" />
-                      {t('trade.processing')}
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="w-4 h-4 mr-2" />
-                      {t('trade.import_fast')}
-                    </>
-                  )}
-                </Button>
-
-                {csvFile && (
-                  <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600">
-                    <p className="text-sm text-charcoal-300">
-                      <strong>Arquivo selecionado:</strong> {csvFile.name}
-                    </p>
-                    <p className="text-xs text-charcoal-400 mt-1">
-                      Tamanho: {(csvFile.size / 1024).toFixed(2)} KB
-                    </p>
+                {/* Layout responsivo: botão e info do arquivo */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
+                  <div className="lg:col-span-2">
+                    <Button
+                      onClick={handleUpload}
+                      className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
+                      disabled={
+                        uploadMutation.isPending || !csvFile || !selectedBroker
+                      }
+                    >
+                      {uploadMutation.isPending ? (
+                        <>
+                          <Upload className="w-4 h-4 mr-2 animate-spin" />
+                          {t('trade.processing')}
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          {t('trade.import_fast')}
+                        </>
+                      )}
+                    </Button>
                   </div>
-                )}
+                  
+                  {csvFile && (
+                    <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600 lg:col-span-1">
+                      <p className="text-sm text-charcoal-300 truncate">
+                        <strong>Arquivo:</strong> {csvFile.name}
+                      </p>
+                      <p className="text-xs text-charcoal-400">
+                        {(csvFile.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
