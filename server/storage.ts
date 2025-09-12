@@ -107,6 +107,9 @@ export interface IStorage {
 
   // Free user limits
   checkFreeUserLimits(userId: string): Promise<{ csvImports: number; manualTrades: number; total: number; limitReached: boolean }>;
+  
+  // Login tracking
+  updateLastLogin(userId: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -780,6 +783,23 @@ export class DatabaseStorage implements IStorage {
       .where(eq(supportConversations.id, message.conversationId));
 
     return newMessage;
+  }
+
+  async updateLastLogin(userId: string): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ 
+        lastLoginAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    if (!updatedUser) {
+      throw new Error('Usuário não encontrado');
+    }
+    
+    return updatedUser;
   }
 }
 

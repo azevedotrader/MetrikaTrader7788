@@ -65,6 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('user', JSON.stringify(userWithInitials));
       localStorage.setItem('user-id', userData.id);
       
+      // Store first login flag for tour triggering
+      if (userData.isFirstLogin) {
+        localStorage.setItem('should-start-tour', 'true');
+      }
+      
       // Limpar cache anterior para garantir isolamento
       clearUserDataCache();
     } catch (error: any) {

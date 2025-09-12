@@ -1233,9 +1233,18 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(401).json({ message: "Credenciais inválidas" });
       }
 
-      // Remove password from response
+      // Check if this is the first login (lastLoginAt is null)
+      const isFirstLogin = !user.lastLoginAt;
+      
+      // Update lastLoginAt timestamp
+      await storage.updateLastLogin(user.id);
+
+      // Remove password from response and add first login flag
       const { password: _, ...userResponse } = user;
-      res.json(userResponse);
+      res.json({
+        ...userResponse,
+        isFirstLogin
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Erro interno do servidor" });

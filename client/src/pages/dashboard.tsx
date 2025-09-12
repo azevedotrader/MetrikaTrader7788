@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   Card,
@@ -48,6 +48,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useTour } from "@/contexts/TourContext";
 import {
   TrendingUp,
   Target,
@@ -1178,6 +1179,20 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
+  const { startTour } = useTour();
+
+  // Check if this is the user's first time on dashboard and should start tour
+  useEffect(() => {
+    const shouldStartTour = localStorage.getItem('should-start-tour');
+    if (shouldStartTour === 'true') {
+      // Remove the flag to avoid starting tour again
+      localStorage.removeItem('should-start-tour');
+      // Start tour after a short delay to ensure the page is fully loaded
+      setTimeout(() => {
+        startTour();
+      }, 1000);
+    }
+  }, [startTour]);
 
   // Broker info with translations
   const brokerInfo = {
