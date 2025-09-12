@@ -106,8 +106,8 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
       return;
     }
 
-    // Verificar se o usuário tem acesso à IA
-    if (!isAiEnabled) {
+    // Verificar se o usuário tem acesso à IA (apenas free e starter precisam fazer upgrade)
+    if (planType === 'free' || planType === 'starter') {
       setShowUpgradeModal(true);
       return;
     }

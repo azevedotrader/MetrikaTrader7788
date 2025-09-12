@@ -2410,8 +2410,8 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (userId) {
         const user = await storage.getUser(userId);
         
-        // Check if user has a free plan
-        if (user && user.planType === 'free') {
+        // Check if user has a free or starter plan (pro and black have full access)
+        if (user && (user.planType === 'free' || user.planType === 'starter')) {
           const upgradeMessage = language === 'en' 
             ? `🚀 **Upgrade Required to Chat with AI Assistant**
 

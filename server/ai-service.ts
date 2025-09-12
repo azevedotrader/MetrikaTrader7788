@@ -43,7 +43,8 @@ export class AITradingService {
       throw new Error("Usuário não encontrado");
     }
     
-    if (user.planType === 'free') {
+    // Apenas usuários free e starter são bloqueados, pro e black têm acesso completo
+    if (user.planType === 'free' || user.planType === 'starter') {
       throw new FreeUserRestrictedError(feature);
     }
   }
