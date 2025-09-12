@@ -52,7 +52,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
-              <img src={metrikaLogo} alt="Métrika" className="h-8 object-contain" />
+              <img src={metrikaLogo} alt="Métrika" className="h-12 object-contain" />
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
@@ -151,8 +151,8 @@ export default function Landing() {
                 <CardHeader className="pb-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 gradient-emerald-blue rounded-xl flex items-center justify-center">
-                        <img src={metrikaLogo} alt="Métrika" className="w-8 h-5 object-contain" />
+                      <div className="w-12 h-12 gradient-emerald-blue rounded-xl flex items-center justify-center">
+                        <img src={metrikaLogo} alt="Métrika" className="w-10 h-7 object-contain" />
                       </div>
                       <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
                     </div>
@@ -733,8 +733,8 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 gradient-purple-blue rounded-lg flex items-center justify-center">
-                  <img src={metrikaLogo} alt="Métrika" className="w-6 h-4 object-contain" />
+                <div className="w-10 h-10 gradient-purple-blue rounded-lg flex items-center justify-center">
+                  <img src={metrikaLogo} alt="Métrika" className="w-8 h-6 object-contain" />
                 </div>
                 <span className="text-2xl font-bold gradient-text">Métrika</span>
               </div>
