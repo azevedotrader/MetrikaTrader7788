@@ -528,8 +528,8 @@ export default function NovoTrade() {
                     />
                   </div>
 
-                  {/* Linha 2 - Setup, Tipo */}
-                  <div className="grid grid-cols-1 gap-3 lg:gap-4">
+                  {/* Linha 2 - Tipo, Setup */}
+                  <div className="grid grid-cols-2 gap-3 lg:gap-4">
                     <FormField
                       control={form.control}
                       name="tipo"
@@ -560,6 +560,36 @@ export default function NovoTrade() {
                                   {t('form.sell')}
                                 </span>
                               </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="setup"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-charcoal-300">
+                            {t('form.setup')}
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                                <SelectValue placeholder={t('form.select_setup')} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                              {setupOptions.map((setup) => (
+                                <SelectItem key={setup} value={setup}>
+                                  {setup}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -729,8 +759,8 @@ export default function NovoTrade() {
                     )}
                   </div>
 
-                  {/* Linha 5 - Emoção */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Linha 5 - Emoção, Quantidade */}
+                  <div className="grid grid-cols-2 gap-3 lg:gap-4">
                     <FormField
                       control={form.control}
                       name="emocao"
@@ -759,6 +789,28 @@ export default function NovoTrade() {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="quantidade"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-charcoal-300">
+                            {t('form.quantity')}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="1.00"
+                              className="bg-charcoal-800 border-charcoal-600 text-white"
+                              {...field}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
