@@ -2445,7 +2445,7 @@ I'm your dedicated trading mentor powered by GPT-5, ready to analyze your trades
 **Ready to dominate the markets?** Upgrade now and get your first AI analysis in seconds!`
             : `🤖 **Assistente IA Exclusivo para Membros Premium**
 
-Sou seu mentor de trading pessoal, alimentado pela tecnologia GPT-5 mais avançada do mercado. Estou aqui para analisar seus trades, otimizar suas estratégias e acelerar seus resultados. Porém, este assistente premium está disponível apenas para nossos membros.
+Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do mercado. Estou aqui para analisar seus trades, otimizar suas estratégias e acelerar seus resultados. Porém, este assistente premium está disponível apenas para nossos membros.
 
 **🚀 Desbloqueie o Poder da IA Premium:**
 
