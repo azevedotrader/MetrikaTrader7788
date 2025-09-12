@@ -51,7 +51,9 @@ export default function Landing() {
       <header className="relative z-50 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <Logo variant="header" className="!h-16 lg:!h-16 md:!h-14 sm:!h-12 max-w-fit" />
+            <div className="flex items-center space-x-2">
+              <Logo variant="header" className="!h-16 lg:!h-16 md:!h-14 sm:!h-12 max-w-fit" />
+            </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
                 {t('landing.header.features')}
@@ -150,7 +152,7 @@ export default function Landing() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-24 h-24 sm:w-20 sm:h-20 gradient-emerald-blue rounded-xl flex items-center justify-center">
-                        <PieChart className="w-12 h-12 text-white" />
+                        <Logo variant="header" className="w-22 h-16" />
                       </div>
                       <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
                     </div>
