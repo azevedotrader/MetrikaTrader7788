@@ -269,7 +269,7 @@ export function TradingCalendar({
         <div
           className={cn(
             "p-1 border-r border-b border-zinc-700",
-            isMobile ? "h-[130px]" : "h-24",
+            isMobile ? "h-[85px]" : "h-24",
           )}
         ></div>
       );
@@ -292,7 +292,7 @@ export function TradingCalendar({
       <div
         className={cn(
           "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer",
-          isMobile ? "h-[130px] p-2" : "h-24 p-1",
+          isMobile ? "h-[85px] p-1.5" : "h-24 p-1",
           isToday && "bg-zinc-800/50 border-zinc-600",
           hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20"),
         )}
@@ -300,11 +300,14 @@ export function TradingCalendar({
         data-testid={`calendar-day-${dayNumber}`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-1">
+          <div className={cn(
+            "flex items-center justify-between",
+            isMobile ? "mb-0.5" : "mb-1"
+          )}>
             <div
               className={cn(
                 "font-medium",
-                isMobile ? "text-sm" : "text-sm",
+                isMobile ? "text-xs" : "text-sm",
                 isToday ? "text-white" : "text-zinc-400",
               )}
             >
@@ -321,13 +324,16 @@ export function TradingCalendar({
           </div>
 
           {hasData && tradeDay && (
-            <div className="flex-1 flex flex-col justify-start space-y-0.5">
+            <div className={cn(
+              "flex-1 flex flex-col justify-start",
+              isMobile ? "space-y-0" : "space-y-0.5"
+            )}>
               {/* P&L Principal - só mostrar se não for zero */}
               {tradeDay.pnl !== 0 && (
                 <div
                   className={cn(
                     "font-bold leading-tight",
-                    isMobile ? "text-sm" : "text-sm",
+                    isMobile ? "text-xs" : "text-sm",
                     isProfit ? "text-green-400" : "text-red-400",
                   )}
                 >
@@ -345,7 +351,7 @@ export function TradingCalendar({
               <div
                 className={cn(
                   "text-zinc-500 leading-tight",
-                  isMobile ? "text-[10px]" : "text-[10px]",
+                  isMobile ? "text-[9px]" : "text-[10px]",
                 )}
               >
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
@@ -356,7 +362,7 @@ export function TradingCalendar({
                 <div
                   className={cn(
                     "text-zinc-400 leading-tight font-medium",
-                    isMobile ? "text-[10px]" : "text-[10px]",
+                    isMobile ? "text-[9px]" : "text-[10px]",
                   )}
                 >
                   {tradeDay.winRate.toFixed(0)}% acerto
