@@ -350,22 +350,6 @@ export function TradingCalendar({
                   1:{tradeDay.avgRR.toFixed(2)}
                 </div>
               )}
-              
-              {/* Maior ganho/perda - mobile apenas */}
-              {isMobile && (
-                <div className="flex justify-between items-center">
-                  {tradeDay.maxWin && tradeDay.maxWin > 0 && (
-                    <div className="text-[8px] text-green-500 leading-tight">
-                      ↑{(tradeDay.maxWin / 1000).toFixed(1)}k
-                    </div>
-                  )}
-                  {tradeDay.maxLoss && tradeDay.maxLoss < 0 && (
-                    <div className="text-[8px] text-red-500 leading-tight">
-                      ↓{Math.abs(tradeDay.maxLoss / 1000).toFixed(1)}k
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           )}
 
