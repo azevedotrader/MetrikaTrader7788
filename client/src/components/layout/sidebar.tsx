@@ -113,13 +113,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <div className="p-4 border-b border-zinc-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center">
-                <Logo 
-                  variant="sidebar" 
-                  expanded={sidebarExpanded}
-                  className={cn(
-                    sidebarExpanded ? "opacity-100" : "opacity-100"
-                  )}
-                />
+                {sidebarExpanded && (
+                  <Logo variant="sidebar" expanded />
+                )}
               </div>
               
               {/* Close button for mobile */}
