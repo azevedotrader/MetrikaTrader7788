@@ -104,9 +104,9 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
     <Card className={`fixed bg-black/95 border-gray-600 shadow-2xl z-50 transition-all duration-300 ${
       isMinimized 
         ? 'bottom-4 right-4 md:bottom-6 md:right-6 w-72 md:w-80 h-14 md:h-16' 
-        : 'bottom-4 right-4 left-4 md:bottom-6 md:right-6 md:left-auto w-auto md:w-96 h-[70vh] md:h-[500px] max-h-[600px]'
+        : 'bottom-2 right-2 left-2 sm:bottom-4 sm:right-4 sm:left-4 md:bottom-6 md:right-6 md:left-auto w-auto md:w-96 h-[75vh] sm:h-[70vh] md:h-[500px] max-h-[85vh] sm:max-h-[600px]'
     }`}>
-      <CardHeader className="p-3 md:p-4 border-b border-gray-600">
+      <CardHeader className="p-2 sm:p-3 md:p-4 border-b border-gray-600">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-white text-sm md:text-base">
             <Bot className="h-4 w-4 md:h-5 md:w-5 text-white" />
@@ -140,49 +140,49 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
       </CardHeader>
 
       {!isMinimized && (
-        <CardContent className="p-0 flex flex-col h-[calc(70vh-73px)] md:h-[calc(500px-73px)]">
-          <ScrollArea className="flex-1 p-3 md:p-4">
-            <div className="space-y-3 md:space-y-4">
+        <CardContent className="p-0 flex flex-col h-[calc(75vh-60px)] sm:h-[calc(70vh-73px)] md:h-[calc(500px-73px)]">
+          <ScrollArea className="flex-1 p-2 sm:p-3 md:p-4">
+            <div className="space-y-2 sm:space-y-3 md:space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-2 md:gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-1.5 sm:gap-2 md:gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {message.type === 'ai' && (
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
-                      <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <Bot className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[85%] md:max-w-[80%] p-2 md:p-3 rounded-lg ${
+                    className={`max-w-[90%] sm:max-w-[85%] md:max-w-[80%] p-1.5 sm:p-2 md:p-3 rounded-lg ${
                       message.type === 'user'
                         ? 'bg-gray-800 text-white'
                         : 'bg-gray-700 text-white'
                     }`}
                     data-testid={`message-${message.type}-${message.id}`}
                   >
-                    <p className="text-xs md:text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p className="text-[10px] md:text-xs opacity-60 mt-1">
+                    <p className="text-[11px] sm:text-xs md:text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <p className="text-[9px] sm:text-[10px] md:text-xs opacity-60 mt-0.5 sm:mt-1">
                       {message.timestamp.toLocaleTimeString()}
                     </p>
                   </div>
                   {message.type === 'user' && (
-                    <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
-                      <User className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+                      <User className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" />
                     </div>
                   )}
                 </div>
               ))}
               {chatMutation.isPending && (
-                <div className="flex gap-2 md:gap-3 justify-start">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
-                    <Bot className="h-3 w-3 md:h-4 md:w-4 text-white" />
+                <div className="flex gap-1.5 sm:gap-2 md:gap-3 justify-start">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <Bot className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 text-white" />
                   </div>
-                  <div className="bg-gray-700 text-white p-2 md:p-3 rounded-lg">
+                  <div className="bg-gray-700 text-white p-1.5 sm:p-2 md:p-3 rounded-lg">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -191,24 +191,24 @@ export function AIChat({ isOpen, onToggle, isMinimized, onMinimize }: AIChatProp
             </div>
           </ScrollArea>
 
-          <div className="p-3 md:p-4 border-t border-gray-600">
-            <div className="flex gap-2">
+          <div className="p-2 sm:p-3 md:p-4 border-t border-gray-600">
+            <div className="flex gap-1.5 sm:gap-2">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={t('ai.input_placeholder')}
-                className="bg-gray-800 border-gray-600 text-white text-sm md:text-base"
+                className="bg-gray-800 border-gray-600 text-white text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 px-2 sm:px-3 md:px-4"
                 disabled={chatMutation.isPending}
                 data-testid="input-chat-message"
               />
               <Button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || chatMutation.isPending}
-                className="bg-gray-700 hover:bg-gray-600 transition-colors px-3 md:px-4"
+                className="bg-gray-700 hover:bg-gray-600 transition-colors h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-auto md:px-4 p-0 md:p-2 flex-shrink-0"
                 data-testid="button-send-message"
               >
-                <Send className="h-3 w-3 md:h-4 md:w-4" />
+                <Send className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
               </Button>
             </div>
           </div>
