@@ -89,6 +89,7 @@ import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Logo } from "@/components/ui/logo";
 import {
   format,
   startOfDay,
@@ -630,10 +631,11 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           </div>
         </div>
       ) : (
-        <ResponsiveContainer
-          width="100%"
-          height={300}
-        >
+        <div className="relative">
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
           {(() => {
             // Calcular yMin e yMax dos dados reais
             const yMin = Math.min(...chartData.map(d => d.accumulated));
@@ -753,6 +755,14 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             );
           })()}
         </ResponsiveContainer>
+        
+        {/* Logo watermark sutil no centro do gráfico */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="opacity-[0.08] hover:opacity-[0.15] transition-opacity duration-300">
+            <Logo variant="modal" className="!h-16 md:!h-20 lg:!h-24 grayscale" />
+          </div>
+        </div>
+      </div>
       )}
 
       {/* Resumo abaixo do gráfico */}
