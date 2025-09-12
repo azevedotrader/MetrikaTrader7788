@@ -106,11 +106,18 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
       return;
     }
 
+    // Debug: verificar o plano do usuário
+    console.log('🔍 Debug CSV Analysis - User Plan:', planType);
+    console.log('🔍 Debug CSV Analysis - isAiEnabled:', isAiEnabled);
+
     // Verificar se o usuário tem acesso à IA (apenas free e starter precisam fazer upgrade)
     if (planType === 'free' || planType === 'starter') {
+      console.log('❌ Usuário bloqueado - Plan:', planType);
       setShowUpgradeModal(true);
       return;
     }
+
+    console.log('✅ Usuário autorizado para IA - Plan:', planType);
 
     // Guardar nome do arquivo selecionado
     const selectedCsv = csvImports.find(csv => csv.id === selectedCsvId);
