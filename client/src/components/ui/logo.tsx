@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
+import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 11_01_20_1757685845156.png";
 
 interface LogoProps {
   variant: "header" | "modal" | "sidebar";
