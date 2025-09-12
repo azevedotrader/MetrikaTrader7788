@@ -353,7 +353,7 @@ export function TradingCalendar({
         </div>
       </div>
     );
-  };
+  }; 
 
   // Renderizar resumo semanal - apenas desktop
   const renderWeekSummary = (week: WeekSummary) => {
