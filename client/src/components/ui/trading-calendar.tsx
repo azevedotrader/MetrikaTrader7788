@@ -331,8 +331,8 @@ export function TradingCalendar({
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
               </div>
               
-              {/* Taxa de acerto */}
-              {tradeDay.winRate !== undefined && (
+              {/* Taxa de acerto - só mostrar se houver trades e winRate > 0 */}
+              {tradeDay.winRate !== undefined && tradeDay.winRate > 0 && (
                 <div className={cn(
                   "text-zinc-600 leading-tight",
                   isMobile ? "text-[9px]" : "text-[9px]"
