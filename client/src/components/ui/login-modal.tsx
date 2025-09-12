@@ -47,8 +47,8 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-20 h-20 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
-            <img src={metrikaLogo} alt="Métrika" className="w-16 h-12 object-contain" />
+          <div className="w-24 h-24 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
+            <img src={metrikaLogo} alt="Métrika" className="w-20 h-15 object-contain" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">
