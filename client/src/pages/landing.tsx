@@ -725,7 +725,7 @@ export default function Landing() {
                 <div className="w-20 h-20 gradient-purple-blue rounded-lg flex items-center justify-center">
                   <Logo variant="header" className="w-16 h-12" />
                 </div>
-                <span className="text-2xl font-bold gradient-text">Métrika</span>
+                
               </div>
               <p className="text-slate-400 max-w-md">
                 {t('landing.footer.description')}
