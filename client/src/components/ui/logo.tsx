@@ -26,7 +26,7 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
       src={metrikaLogo} 
       alt="Métrika" 
       className={cn(
-        "transition-all duration-300 flex-shrink-0 block",
+        "transition-all duration-300 block w-auto max-w-none",
         getSize(),
         className
       )}
