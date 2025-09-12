@@ -16,7 +16,7 @@ import {
   Calculator,
   GraduationCap
 } from "lucide-react";
-import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
+import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -102,8 +102,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         className={cn(
           "fixed inset-y-0 left-0 bg-zinc-900/90 border-r border-zinc-800 transition-all duration-300 ease-in-out z-50",
           isMobile 
-            ? cn("w-64 transform", isOpen ? "translate-x-0" : "-translate-x-full")
-            : cn(isExpanded ? "w-64" : "w-16")
+            ? cn("w-72 transform", isOpen ? "translate-x-0" : "-translate-x-full")
+            : cn(isExpanded ? "w-72" : "w-20")
         )}
         onMouseEnter={() => !isMobile && setIsExpanded(true)}
         onMouseLeave={() => !isMobile && setIsExpanded(false)}
@@ -112,16 +112,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           {/* Logo and Close Button */}
           <div className="p-4 border-b border-zinc-800">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-14 h-14 bg-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <img src={metrikaLogo} alt="Métrika" className="w-12 h-9 object-contain" />
-                </div>
-                <img 
-                  src={metrikaLogo} 
-                  alt="Métrika" 
+              <div className="flex items-center justify-center">
+                <Logo 
+                  variant="sidebar" 
+                  expanded={sidebarExpanded}
                   className={cn(
-                    "h-12 object-contain transition-all duration-300",
-                    sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"
+                    sidebarExpanded ? "opacity-100" : "opacity-100"
                   )}
                 />
               </div>

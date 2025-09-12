@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
+import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ForgotPasswordModal } from "./forgot-password-modal";
@@ -47,8 +47,8 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-24 h-24 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
-            <img src={metrikaLogo} alt="Métrika" className="w-20 h-15 object-contain" />
+          <div className="w-36 h-36 md:w-32 md:h-32 sm:w-24 sm:h-24 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
+            <Logo variant="modal" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">

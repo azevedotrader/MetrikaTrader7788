@@ -24,7 +24,7 @@ import {
   Download,
   LineChart
 } from "lucide-react";
-import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 10_39_06_1757684975641.png";
+import { Logo } from "@/components/ui/logo";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
 import { LanguageSelector } from "@/components/ui/language-selector";
@@ -52,7 +52,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
-              <img src={metrikaLogo} alt="Métrika" className="h-16 object-contain" />
+              <Logo variant="header" />
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
@@ -151,8 +151,8 @@ export default function Landing() {
                 <CardHeader className="pb-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-16 h-16 gradient-emerald-blue rounded-xl flex items-center justify-center">
-                        <img src={metrikaLogo} alt="Métrika" className="w-14 h-10 object-contain" />
+                      <div className="w-24 h-24 sm:w-20 sm:h-20 gradient-emerald-blue rounded-xl flex items-center justify-center">
+                        <Logo variant="header" className="w-22 h-16" />
                       </div>
                       <span className="text-xl font-bold text-white">{t('landing.dashboard.main_title')}</span>
                     </div>
@@ -733,8 +733,8 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-14 h-14 gradient-purple-blue rounded-lg flex items-center justify-center">
-                  <img src={metrikaLogo} alt="Métrika" className="w-12 h-9 object-contain" />
+                <div className="w-20 h-20 gradient-purple-blue rounded-lg flex items-center justify-center">
+                  <Logo variant="header" className="w-16 h-12" />
                 </div>
                 <span className="text-2xl font-bold gradient-text">Métrika</span>
               </div>
