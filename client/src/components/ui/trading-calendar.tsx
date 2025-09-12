@@ -304,22 +304,24 @@ export function TradingCalendar({
 
           {hasData && tradeDay && (
             <div className="flex-1 flex flex-col justify-start space-y-0.5">
-              {/* P&L Principal */}
-              <div
-                className={cn(
-                  "font-bold leading-tight",
-                  isMobile ? "text-sm" : "text-sm",
-                  isProfit ? "text-green-400" : "text-red-400",
-                )}
-              >
-                {isMobile
-                  ? `${isProfit ? "+" : ""}${
-                      Math.abs(tradeDay.pnl) >= 1000
-                        ? `${(tradeDay.pnl / 1000).toFixed(1)}k`
-                        : tradeDay.pnl.toFixed(0)
-                    }`
-                  : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
-              </div>
+              {/* P&L Principal - só mostrar se não for zero */}
+              {tradeDay.pnl !== 0 && (
+                <div
+                  className={cn(
+                    "font-bold leading-tight",
+                    isMobile ? "text-sm" : "text-sm",
+                    isProfit ? "text-green-400" : "text-red-400",
+                  )}
+                >
+                  {isMobile
+                    ? `${isProfit ? "+" : ""}${
+                        Math.abs(tradeDay.pnl) >= 1000
+                          ? `${(tradeDay.pnl / 1000).toFixed(1)}k`
+                          : tradeDay.pnl.toFixed(0)
+                      }`
+                    : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
+                </div>
+              )}
               
               {/* Número de trades */}
               <div
