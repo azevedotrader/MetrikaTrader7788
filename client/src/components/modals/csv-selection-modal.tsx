@@ -146,7 +146,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800">
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <FileSpreadsheet className="w-5 h-5" />
