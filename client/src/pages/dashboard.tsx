@@ -634,7 +634,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           width="100%"
           height={300}
         >
-          <AreaChart
+          <RechartsLineChart
             data={chartData}
             margin={{
               top: 10,
@@ -643,18 +643,18 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
               bottom: 0,
             }}
           >
+            {/* Definição de gradiente para linha (verde acima, vermelho abaixo) */}
             <defs>
-              {/* Gradiente que muda de vermelho (valores negativos) para verde (valores positivos) */}
-              <linearGradient id="dynamicAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22c55e" stopOpacity={0.6} />
-                <stop offset="50%" stopColor="#22c55e" stopOpacity={0.1} />
-                <stop offset="50%" stopColor="#ef4444" stopOpacity={0.1} />
-                <stop offset="100%" stopColor="#ef4444" stopOpacity={0.6} />
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="50%" stopColor="#22c55e" />
+                <stop offset="50%" stopColor="#ef4444" />
               </linearGradient>
             </defs>
 
+            {/* Grid */}
             <CartesianGrid strokeDasharray="3 3" stroke="#444" />
             
+            {/* Eixos */}
             <XAxis 
               dataKey="period" 
               stroke="#aaa"
@@ -694,16 +694,16 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             {/* Linha do eixo 0 */}
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
 
-            {/* UMA linha contínua que muda de cor baseada no valor */}
-            <Area
+            {/* Linha única com gradiente */}
+            <Line
               type="monotone"
               dataKey="accumulated"
-              stroke={finalAccumulated >= 0 ? "#22c55e" : "#ef4444"}
+              stroke="url(#lineGradient)"
               strokeWidth={2}
-              fill="url(#dynamicAreaGradient)"
+              dot={false}
               isAnimationActive={false}
             />
-          </AreaChart>
+          </RechartsLineChart>
         </ResponsiveContainer>
       )}
 
