@@ -2571,6 +2571,20 @@ Faça upgrade agora e desbloqueie todo o potencial dos insights de trading power
       let daysRemaining;
       let expiresAt;
 
+      // Fix legacy users: if paid plan but no expiration date, set 30 days from now
+      if (planType !== 'free' && !user.planExpiresAt) {
+        const now = new Date();
+        const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
+        console.log(`🔧 Corrigindo usuário ${userId} com plano ${planType} sem data de expiração. Definindo 30 dias.`);
+        
+        await storage.updateUserByAdmin(userId, { 
+          planExpiresAt: thirtyDaysFromNow
+        });
+        
+        // Update user object for calculations below
+        user.planExpiresAt = thirtyDaysFromNow;
+      }
+
       // Check if paid plan has expired and automatically downgrade to free
       if (planType !== 'free' && user.planExpiresAt) {
         const now = new Date();

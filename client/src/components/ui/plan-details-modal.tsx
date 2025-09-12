@@ -80,6 +80,15 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
       };
     }
     
+    // Se não há informação de dias restantes (plano sem expiração definida)
+    if (planInfo.daysRemaining === undefined) {
+      return {
+        message: "Plano ativo (sem expiração definida)",
+        color: "text-blue-600",
+        icon: <CheckCircle className="w-4 h-4" />
+      };
+    }
+    
     if (isExpired) {
       return {
         message: "Seu plano expirou",
