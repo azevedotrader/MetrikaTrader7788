@@ -290,7 +290,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 </div>
                 
                 <div className="text-center mb-3 md:mb-4">
-                  <div className="text-xl md:text-2xl font-bold text-blue-400">R$ 89</div>
+                  <div className="text-xl md:text-2xl font-bold text-blue-400">R$ 19,90</div>
                   <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
@@ -335,7 +335,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 </div>
                 
                 <div className="text-center mb-3 md:mb-4">
-                  <div className="text-xl md:text-2xl font-bold text-green-400">R$ 239</div>
+                  <div className="text-xl md:text-2xl font-bold text-green-400">R$ 49,90</div>
                   <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
@@ -374,7 +374,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 </div>
                 
                 <div className="text-center mb-3 md:mb-4">
-                  <div className="text-xl md:text-2xl font-bold text-purple-400">R$ 599</div>
+                  <div className="text-xl md:text-2xl font-bold text-purple-400">R$ 97,00</div>
                   <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
