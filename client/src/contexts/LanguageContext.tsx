@@ -481,6 +481,11 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.synchronized": "Sincronizado",
     "landing.dashboard.active": "Ativo",
     "landing.dashboard.connected": "Conectado",
+    "landing.dashboard.demo_total_pnl": "+R$ 28.540",
+    "landing.solution.demo_total_profit": "R$ 45.230",
+    "landing.solution.demo_trade1_result": "+R$ 1.250",
+    "landing.solution.demo_trade2_result": "+R$ 890", 
+    "landing.solution.demo_trade3_result": "-R$ 320",
 
     // Landing Page - Problem Section
     "landing.problem.title1": "95% dos Traders",
@@ -1295,6 +1300,11 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.synchronized": "Synchronized",
     "landing.dashboard.active": "Active",
     "landing.dashboard.connected": "Connected",
+    "landing.dashboard.demo_total_pnl": "+$28,540",
+    "landing.solution.demo_total_profit": "$45,230",
+    "landing.solution.demo_trade1_result": "+$1,250",
+    "landing.solution.demo_trade2_result": "+$890", 
+    "landing.solution.demo_trade3_result": "-$320",
 
     // Landing Page - Problem Section
     "landing.problem.title1": "95% of Traders",
@@ -2111,6 +2121,11 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.synchronized": "Sincronizado",
     "landing.dashboard.active": "Activo",
     "landing.dashboard.connected": "Conectado",
+    "landing.dashboard.demo_total_pnl": "+$28,540",
+    "landing.solution.demo_total_profit": "$45,230",
+    "landing.solution.demo_trade1_result": "+$1,250",
+    "landing.solution.demo_trade2_result": "+$890", 
+    "landing.solution.demo_trade3_result": "-$320",
 
     // Landing Page - Problem Section
     "landing.problem.title1": "95% de los Traders",
