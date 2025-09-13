@@ -89,7 +89,7 @@ import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { useLanguage } from "@/contexts/LanguageContext";
-import metrikaLogo from "@assets/ChatGPT Image 12 de set. de 2025, 11_01_20_1757685845156.png";
+import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 import {
   format,
   startOfDay,
