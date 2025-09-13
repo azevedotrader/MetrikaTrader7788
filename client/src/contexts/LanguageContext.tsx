@@ -123,7 +123,7 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.overview": "Visão Geral",
     "dashboard.total_balance": "Saldo Total",
     "dashboard.monthly_result": "Resultado Mensal",
-    "dashboard.win_rate": "Taxa de Acerto",
+    "dashboard.win_rate": "Acertividade",
     "dashboard.total_trades": "Total de Trades",
     "dashboard.avg_rr": "R/R Médio",
     "dashboard.best_setup": "Melhor Setup",
@@ -261,7 +261,7 @@ const translations: Record<Language, Record<string, string>> = {
     "calendar.week": "Semana",
     "calendar.trading_days": "Dias de Trading",
     "calendar.total_trades": "Total de Trades",
-    "calendar.win_rate": "Taxa de Acerto",
+    "calendar.win_rate": "Acertividade",
 
     // Aprendizado
     "learning.title": "Centro de Aprendizado", 
@@ -392,7 +392,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.how_felt": "Como você se sentiu?",
     "journal.number_trades": "Número de Trades",
     "journal.pnl": "P&L (R$)",
-    "journal.win_rate": "Taxa de Acerto (%)",
+    "journal.win_rate": "Acertividade (%)",
     "journal.lessons_learned": "Lições Aprendidas",
     "journal.lessons_placeholder": "O que você aprendeu hoje?",
     "journal.improvements": "Pontos de Melhoria",
