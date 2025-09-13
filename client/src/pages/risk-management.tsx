@@ -196,10 +196,10 @@ export default function RiskManagement() {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-blue-400" />
-                  Como Usar a Gestão de Risco
+                  {t('risk_management.how_to_use')}
                 </CardTitle>
                 <CardDescription className="text-blue-200">
-                  Dicas essenciais para maximizar seus resultados
+                  {t('risk_management.essential_tips')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 p-4 md:p-6">
@@ -207,12 +207,12 @@ export default function RiskManagement() {
                   <div className="flex items-start gap-3 p-3 bg-green-900/20 rounded-lg border border-green-800/30">
                     <Shield className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-sm font-semibold text-green-300 mb-1">Gestão de Risco por Perfil</h4>
+                      <h4 className="text-sm font-semibold text-green-300 mb-1">{t('risk_management.risk_by_profile')}</h4>
                       <p className="text-xs text-green-100">
-                        {riskProfile === "conservador" && "Conservador: Mantenha sempre 1% por operação para preservar capital a longo prazo."}
-                        {riskProfile === "moderado" && "Moderado: Use 2-3% por operação, equilibrando crescimento e segurança."}
-                        {riskProfile === "alto_risco" && "Alto Risco: Até 5% por operação para traders experientes com alta tolerância ao risco."}
-                        {!riskProfile && "Selecione um perfil para ver recomendações específicas de risco por operação."}
+                        {riskProfile === "conservador" && t('risk_management.conservative_desc')}
+                        {riskProfile === "moderado" && t('risk_management.moderate_desc')}
+                        {riskProfile === "alto_risco" && t('risk_management.high_risk_desc')}
+                        {!riskProfile && t('risk_management.no_profile_desc')}
                       </p>
                     </div>
                   </div>
@@ -220,9 +220,9 @@ export default function RiskManagement() {
                   <div className="flex items-start gap-3 p-3 bg-yellow-900/20 rounded-lg border border-yellow-800/30">
                     <Lightbulb className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-sm font-semibold text-yellow-300 mb-1">Tamanho da Posição</h4>
+                      <h4 className="text-sm font-semibold text-yellow-300 mb-1">{t('risk_management.position_size_title')}</h4>
                       <p className="text-xs text-yellow-100">
-                        Use nossa calculadora para determinar exatamente quantos lotes operar baseado no seu stop loss e tolerância ao risco.
+                        {t('risk_management.position_size_desc')}
                       </p>
                     </div>
                   </div>
@@ -230,18 +230,18 @@ export default function RiskManagement() {
                   <div className="flex items-start gap-3 p-3 bg-red-900/20 rounded-lg border border-red-800/30">
                     <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-sm font-semibold text-red-300 mb-1">Importante</h4>
+                      <h4 className="text-sm font-semibold text-red-300 mb-1">{t('risk_management.important')}</h4>
                       <p className="text-xs text-red-100">
-                        Os resultados são projeções baseadas em dados históricos. Performance passada não garante resultados futuros.
+                        {t('risk_management.disclaimer')}
                       </p>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-zinc-700">
-                    <h5 className="text-sm font-medium text-white mb-2">Passos para usar:</h5>
+                    <h5 className="text-sm font-medium text-white mb-2">{t('risk_management.steps_to_use')}</h5>
                     <ol className="text-xs text-zinc-300 space-y-1 list-decimal list-inside">
-                      <li>Insira o saldo real da sua conta</li>
-                      <li>Escolha seu perfil de risco</li>
+                      <li>{t('risk_management.step1')}</li>
+                      <li>{t('risk_management.step2')}</li>
                       <li>Analise os resultados da calculadora</li>
                       <li>Use o gráfico para visualizar o crescimento</li>
                       <li>Siga sempre seu plano de risco</li>
