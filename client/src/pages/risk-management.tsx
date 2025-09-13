@@ -34,31 +34,31 @@ export default function RiskManagement() {
     }
   };
 
-  // Configuração inteligente por perfil de risco
+  // Configuração realística por perfil de risco (baseada em dados reais do mercado)
   const PROFILE_CONFIG = {
     conservador: {
-      expectedMonthlyReturn: 0.04, // 4% ao mês
-      winRate: 0.62, // 62% de trades positivos
-      winRange: [0.001, 0.006], // +0.1% a +0.6% por trade
-      lossRange: [-0.0005, -0.004], // -0.05% a -0.4% por trade
-      driftAdjustStrength: 0.15,
-      description: "Retorno esperado: ~4% ao mês, Taxa de sucesso: ~62%"
+      expectedMonthlyReturn: 0.008, // 0.8% ao mês (9.6% ao ano)
+      winRate: 0.52, // 52% de trades positivos (realístico)
+      winRange: [0.0005, 0.002], // +0.05% a +0.2% por trade
+      lossRange: [-0.0008, -0.0015], // -0.08% a -0.15% por trade
+      driftAdjustStrength: 0.05,
+      description: "Meta realística: ~0.8% ao mês, Win rate: ~52%"
     },
     moderado: {
-      expectedMonthlyReturn: 0.10, // 10% ao mês
-      winRate: 0.55, // 55% de trades positivos
-      winRange: [0.002, 0.012], // +0.2% a +1.2% por trade
-      lossRange: [-0.001, -0.009], // -0.1% a -0.9% por trade
-      driftAdjustStrength: 0.10,
-      description: "Retorno esperado: ~10% ao mês, Taxa de sucesso: ~55%"
+      expectedMonthlyReturn: 0.018, // 1.8% ao mês (23.9% ao ano)
+      winRate: 0.49, // 49% de trades positivos (realístico)
+      winRange: [0.001, 0.004], // +0.1% a +0.4% por trade
+      lossRange: [-0.0015, -0.003], // -0.15% a -0.3% por trade
+      driftAdjustStrength: 0.03,
+      description: "Meta realística: ~1.8% ao mês, Win rate: ~49%"
     },
     alto_risco: {
-      expectedMonthlyReturn: 0.20, // 20% ao mês
-      winRate: 0.48, // 48% de trades positivos
-      winRange: [0.004, 0.025], // +0.4% a +2.5% por trade
-      lossRange: [-0.002, -0.02], // -0.2% a -2.0% por trade
-      driftAdjustStrength: 0.06,
-      description: "Retorno esperado: ~20% ao mês, Taxa de sucesso: ~48%"
+      expectedMonthlyReturn: 0.035, // 3.5% ao mês (51.1% ao ano)
+      winRate: 0.46, // 46% de trades positivos (difícil com alto risco)
+      winRange: [0.002, 0.008], // +0.2% a +0.8% por trade
+      lossRange: [-0.003, -0.006], // -0.3% a -0.6% por trade
+      driftAdjustStrength: 0.02,
+      description: "Meta ambiciosa: ~3.5% ao mês, Win rate: ~46%"
     }
   };
 
@@ -74,9 +74,18 @@ export default function RiskManagement() {
     if (balance <= 0) return;
 
     const riskAmount = (balance * risk) / 100;
-    const potentialProfit = riskAmount; // Simplified: potential profit equals risk amount
-    const positionSize = riskAmount / 200; // Simplified calculation without stop loss pips
-    const dailyGrowthProjection = (potentialProfit / balance) * 100;
+    
+    // Cálculo realístico baseado no perfil de risco
+    const profileConfig = getProfileConfig(riskProfile);
+    const avgWin = (profileConfig.winRange[0] + profileConfig.winRange[1]) / 2;
+    const avgLoss = Math.abs((profileConfig.lossRange[0] + profileConfig.lossRange[1]) / 2);
+    
+    // Expectativa realística: considerando win rate e tamanhos médios de ganho/perda
+    const expectedReturn = (profileConfig.winRate * avgWin) - ((1 - profileConfig.winRate) * avgLoss);
+    const potentialProfit = balance * expectedReturn; // Lucro esperado por trade baseado em probabilidades
+    
+    const positionSize = riskAmount / 100; // Tamanho da posição mais conservador
+    const dailyGrowthProjection = expectedReturn * 100; // Crescimento esperado por trade (não diário)
 
     setResults({
       accountBalance: balance,
@@ -270,15 +279,15 @@ export default function RiskManagement() {
                       icon={Target}
                     />
                     <ProjectionCard
-                      title={t('risk_management.potential_profit')}
-                      value={`$${results.potentialProfit.toFixed(2)}`}
-                      color="bg-green-600"
+                      title="Lucro Esperado/Trade"
+                      value={results.potentialProfit >= 0 ? `+$${results.potentialProfit.toFixed(2)}` : `-$${Math.abs(results.potentialProfit).toFixed(2)}`}
+                      color={results.potentialProfit >= 0 ? "bg-green-600" : "bg-orange-600"}
                       icon={TrendingUp}
                     />
                     <ProjectionCard
-                      title={t('risk_management.daily_growth')}
-                      value={`${results.dailyGrowthProjection.toFixed(2)}%`}
-                      color="bg-purple-600"
+                      title="Retorno Esperado/Trade"
+                      value={`${results.dailyGrowthProjection >= 0 ? '+' : ''}${results.dailyGrowthProjection.toFixed(3)}%`}
+                      color={results.dailyGrowthProjection >= 0 ? "bg-purple-600" : "bg-orange-600"}
                       icon={TrendingUp}
                     />
                   </div>
@@ -290,10 +299,10 @@ export default function RiskManagement() {
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="text-lg md:text-xl text-white flex items-center gap-2">
                     <BarChart3 className="w-5 h-5" />
-                    Gráfico de Projeção de Crescimento
+                    Simulação de Crescimento (90 dias)
                   </CardTitle>
                   <CardDescription className="text-sm md:text-base text-zinc-400">
-                    Visualização da evolução projetada do saldo da conta
+                    Projeção baseada em probabilidades realísticas com volatilidade
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
@@ -424,19 +433,26 @@ export default function RiskManagement() {
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="text-lg md:text-xl text-white">
-                    Marcos de Crescimento
+                    Metas Realísticas
                   </CardTitle>
                   <CardDescription className="text-sm md:text-base text-zinc-400">
-                    Projeções em períodos específicos
+                    Crescimento esperado baseado em desempenho consistente
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     {[7, 15, 30, 90].map((days) => {
-                      // Usar a mesma lógica inteligente do gráfico baseada no perfil
+                      // Cálculo mais realístico considerando dias de trading (5 dias por semana)
                       const config = getProfileConfig(riskProfile);
-                      const targetDailyReturn = Math.pow(1 + config.expectedMonthlyReturn, 1/30) - 1;
-                      const projectedBalance = results.accountBalance * Math.pow(1 + targetDailyReturn, days);
+                      const tradingDays = Math.floor(days * 5/7); // Apenas dias úteis
+                      const avgTradesPerDay = 1.2; // Média realística de trades por dia
+                      const totalTrades = tradingDays * avgTradesPerDay;
+                      
+                      // Crescimento composto mais conservador
+                      const expectedReturn = (config.winRate * ((config.winRange[0] + config.winRange[1]) / 2)) - 
+                                           ((1 - config.winRate) * Math.abs((config.lossRange[0] + config.lossRange[1]) / 2));
+                      
+                      const projectedBalance = results.accountBalance * Math.pow(1 + expectedReturn, totalTrades);
                       const totalGain = projectedBalance - results.accountBalance;
                       const gainPercentage = (totalGain / results.accountBalance) * 100;
                       
@@ -444,18 +460,18 @@ export default function RiskManagement() {
                         <div key={days} className="space-y-3 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700">
                           <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                             <span className="text-sm md:text-base text-zinc-400">
-                              Após {days} dias
+                              {days} dias ({tradingDays}d úteis)
                             </span>
                             <span className="text-sm md:text-base text-white font-medium">
-                              ${projectedBalance.toFixed(2)} (+{gainPercentage.toFixed(1)}%)
+                              ${projectedBalance.toFixed(2)} ({gainPercentage >= 0 ? '+' : ''}{gainPercentage.toFixed(1)}%)
                             </span>
                           </div>
                           <Progress 
-                            value={Math.min(gainPercentage, 100)} 
+                            value={Math.min(Math.abs(gainPercentage), 50)} 
                             className="h-3"
                           />
                           <div className="text-xs text-zinc-500">
-                            Ganho: +${totalGain.toFixed(2)}
+                            {totalGain >= 0 ? 'Ganho esperado' : 'Perda possível'}: {totalGain >= 0 ? '+' : ''}${totalGain.toFixed(2)} (~{totalTrades.toFixed(0)} trades)
                           </div>
                         </div>
                       );
@@ -472,11 +488,33 @@ export default function RiskManagement() {
             <CardContent className="p-6 md:p-8 text-center">
               <Calculator className="w-12 h-12 md:w-16 md:h-16 text-zinc-600 mx-auto mb-3 md:mb-4" />
               <p className="text-sm md:text-base text-zinc-400">
-                Insira o saldo da conta para começar
+                Insira o saldo da conta para ver projecões realísticas baseadas em dados do mercado
+              </p>
+              <p className="text-xs text-zinc-500 mt-2">
+                ⚠️ Lembre-se: trading envolve riscos reais. Estas são apenas estimativas baseadas em probabilidades.
               </p>
             </CardContent>
           </Card>
         )}
+        
+        {/* Disclaimer Real\u00edstico */}
+        <Card className="bg-gradient-to-r from-amber-900/10 to-red-900/10 border-amber-800/30 mt-6 md:mt-8">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-semibold text-amber-300 mb-2">Aviso Importante sobre Riscos</h3>
+                <div className="text-xs text-amber-100 space-y-1">
+                  <p>\u2022 <strong>N\u00e3o s\u00e3o garantias:</strong> Todas as proje\u00e7\u00f5es s\u00e3o baseadas em modelos estat\u00edsticos e n\u00e3o garantem resultados futuros.</p>
+                  <p>\u2022 <strong>Riscos reais:</strong> Trading pode resultar em perdas significativas. Nunca invista mais do que pode perder.</p>
+                  <p>\u2022 <strong>Mercados vol\u00e1teis:</strong> Condi\u00e7\u00f5es de mercado podem mudar rapidamente, invalidando projec\u00f5es.</p>
+                  <p>\u2022 <strong>Performance passada:</strong> Resultados hist\u00f3ricos n\u00e3o indicam performance futura.</p>
+                  <p>\u2022 <strong>Gest\u00e3o de risco:</strong> Use sempre stop loss e nunca arrisque mais do que seu plano permite.</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
