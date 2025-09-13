@@ -169,7 +169,7 @@ export default function Landing() {
                           <span className="text-sm font-medium text-slate-200">{t('landing.dashboard.total_pnl')}</span>
                           <TrendingUp className="w-5 h-5 text-emerald-400" />
                         </div>
-                        <div className="text-3xl font-bold text-emerald-400">+R$ 28.540</div>
+                        <div className="text-3xl font-bold text-emerald-400">{t('landing.dashboard.demo_total_pnl')}</div>
                         <div className="text-sm text-emerald-300">{t('landing.dashboard.monthly_growth')}</div>
                       </CardContent>
                     </Card>
@@ -315,7 +315,7 @@ export default function Landing() {
                         <span className="text-sm text-slate-300">{t('landing.solution.total_profit')}</span>
                         <DollarSign className="w-4 h-4 text-green-400" />
                       </div>
-                      <div className="text-2xl font-bold text-green-400">R$ 45.230</div>
+                      <div className="text-2xl font-bold text-green-400">{t('landing.solution.demo_total_profit')}</div>
                       <div className="text-xs text-green-300">{t('landing.solution.monthly_growth')}</div>
                     </div>
                     <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-4">
@@ -362,9 +362,9 @@ export default function Landing() {
                   <div className="space-y-2">
                     <span className="text-sm font-medium text-slate-300">{t('landing.solution.recent_trades')}</span>
                     {[
-                      { pair: "BTC/USDT", result: "+R$ 1.250", positive: true, time: "14:32" },
-                      { pair: "ETH/USDT", result: "+R$ 890", positive: true, time: "13:45" },
-                      { pair: "EUR/USD", result: "-R$ 320", positive: false, time: "12:18" }
+                      { pair: "BTC/USDT", result: t('landing.solution.demo_trade1_result'), positive: true, time: "14:32" },
+                      { pair: "ETH/USDT", result: t('landing.solution.demo_trade2_result'), positive: true, time: "13:45" },
+                      { pair: "EUR/USD", result: t('landing.solution.demo_trade3_result'), positive: false, time: "12:18" }
                     ].map((trade, i) => (
                       <div key={i} className="flex items-center justify-between py-2 px-3 bg-slate-800/30 rounded">
                         <div className="flex items-center space-x-3">
