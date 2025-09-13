@@ -270,20 +270,84 @@ export function TourOverlay() {
       {/* Overlay escuro */}
       <div className="absolute inset-0 bg-black/60" />
       
-      {/* Destaque do elemento */}
+      {/* Destaque do elemento com múltiplas camadas */}
       {elementPosition && (
         <>
-          {/* Spotlight no elemento */}
+          {/* Camada externa com glow intenso */}
           <div
-            className={`absolute border-2 border-blue-400 rounded-lg bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.6)] animate-pulse ${
-              viewport.isMobile ? 'border-4' : 'border-2'
-            }`}
+            className="absolute rounded-lg bg-transparent animate-pulse"
             style={{
-              top: elementPosition.top - (viewport.isMobile ? 6 : 4),
-              left: elementPosition.left - (viewport.isMobile ? 6 : 4),
-              width: elementPosition.width + (viewport.isMobile ? 12 : 8),
-              height: elementPosition.height + (viewport.isMobile ? 12 : 8),
-              zIndex: 51
+              top: elementPosition.top - (viewport.isMobile ? 12 : 8),
+              left: elementPosition.left - (viewport.isMobile ? 12 : 8),
+              width: elementPosition.width + (viewport.isMobile ? 24 : 16),
+              height: elementPosition.height + (viewport.isMobile ? 24 : 16),
+              zIndex: 49,
+              boxShadow: `
+                0 0 0 9999px rgba(0,0,0,0.75),
+                inset 0 0 0 3px rgba(59, 130, 246, 0.3),
+                0 0 20px rgba(59, 130, 246, 0.6),
+                0 0 40px rgba(59, 130, 246, 0.4),
+                0 0 60px rgba(59, 130, 246, 0.2)
+              `,
+              border: '2px solid rgba(59, 130, 246, 0.5)'
+            }}
+          />
+          
+          {/* Camada do meio com borda brilhante */}
+          <div
+            className="absolute rounded-lg bg-transparent animate-pulse"
+            style={{
+              top: elementPosition.top - (viewport.isMobile ? 8 : 6),
+              left: elementPosition.left - (viewport.isMobile ? 8 : 6),
+              width: elementPosition.width + (viewport.isMobile ? 16 : 12),
+              height: elementPosition.height + (viewport.isMobile ? 16 : 12),
+              zIndex: 50,
+              border: '2px solid rgb(59, 130, 246)',
+              boxShadow: `
+                0 0 15px rgba(59, 130, 246, 0.8),
+                inset 0 0 10px rgba(255, 255, 255, 0.1)
+              `,
+              animationDuration: '1.5s'
+            }}
+          />
+          
+          {/* Camada interna principal com destaque máximo */}
+          <div
+            className="absolute rounded-lg bg-transparent"
+            style={{
+              top: elementPosition.top - (viewport.isMobile ? 4 : 3),
+              left: elementPosition.left - (viewport.isMobile ? 4 : 3),
+              width: elementPosition.width + (viewport.isMobile ? 8 : 6),
+              height: elementPosition.height + (viewport.isMobile ? 8 : 6),
+              zIndex: 51,
+              border: '3px solid rgb(34, 197, 94)',
+              boxShadow: `
+                0 0 25px rgba(34, 197, 94, 1),
+                0 0 50px rgba(34, 197, 94, 0.6),
+                inset 0 0 0 2px rgba(255, 255, 255, 0.2)
+              `,
+              animation: 'tourHighlight 2s ease-in-out infinite'
+            }}
+          />
+          
+          {/* Efeito de canto brilhante */}
+          <div
+            className="absolute rounded-lg"
+            style={{
+              top: elementPosition.top - 2,
+              left: elementPosition.left - 2,
+              width: elementPosition.width + 4,
+              height: elementPosition.height + 4,
+              zIndex: 52,
+              background: `
+                linear-gradient(45deg, 
+                  rgba(34, 197, 94, 0.3) 0%, 
+                  transparent 20%, 
+                  transparent 80%, 
+                  rgba(34, 197, 94, 0.3) 100%
+                )
+              `,
+              animation: 'tourCorners 3s ease-in-out infinite'
             }}
           />
           
