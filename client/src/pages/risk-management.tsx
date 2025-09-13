@@ -509,34 +509,7 @@ export default function RiskManagement() {
           </Card>
         )}
         
-        {/* Disclaimer Real\u00edstico */}
-        <Card className="bg-gradient-to-r from-amber-900/10 to-red-900/10 border-amber-800/30 mt-6 md:mt-8">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-amber-300 mb-2">Aviso Importante sobre Riscos</h3>
-                <div className="text-xs text-amber-100 space-y-2">
-                  <p className="leading-relaxed">
-                    \u2022 <strong>N\u00e3o s\u00e3o garantias:</strong> Todas as proje\u00e7\u00f5es s\u00e3o baseadas em modelos estat\u00edsticos e n\u00e3o garantem resultados futuros.
-                  </p>
-                  <p className="leading-relaxed">
-                    \u2022 <strong>Riscos reais:</strong> Trading pode resultar em perdas significativas. Nunca invista mais do que pode perder.
-                  </p>
-                  <p className="leading-relaxed">
-                    \u2022 <strong>Mercados vol\u00e1teis:</strong> Condi\u00e7\u00f5es de mercado podem mudar rapidamente, invalidando projec\u00f5es.
-                  </p>
-                  <p className="leading-relaxed">
-                    \u2022 <strong>Performance passada:</strong> Resultados hist\u00f3ricos n\u00e3o indicam performance futura.
-                  </p>
-                  <p className="leading-relaxed">
-                    \u2022 <strong>Gest\u00e3o de risco:</strong> Use sempre stop loss e nunca arrisque mais do que seu plano permite.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   );
