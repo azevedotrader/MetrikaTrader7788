@@ -20,7 +20,19 @@ interface RiskCalculation {
 }
 
 export default function RiskManagement() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  
+  // Sistema de moeda dinâmica baseado no idioma
+  const getCurrency = () => {
+    switch (language) {
+      case 'pt': return { symbol: 'R$', code: 'BRL' };
+      case 'en': return { symbol: '$', code: 'USD' };
+      case 'es': return { symbol: '$', code: 'USD' };
+      default: return { symbol: 'R$', code: 'BRL' };
+    }
+  };
+  
+  const currency = getCurrency();
   const [accountBalance, setAccountBalance] = useState<string>("");
   const [riskProfile, setRiskProfile] = useState<string>("moderado");
   
@@ -34,31 +46,31 @@ export default function RiskManagement() {
     }
   };
 
-  // Configuração realística por perfil de risco (baseada em dados reais do mercado)
+  // Configuração realística por perfil de risco
   const PROFILE_CONFIG = {
     conservador: {
-      expectedMonthlyReturn: 0.008, // 0.8% ao mês (9.6% ao ano)
-      winRate: 0.52, // 52% de trades positivos (realístico)
-      winRange: [0.0005, 0.002], // +0.05% a +0.2% por trade
-      lossRange: [-0.0008, -0.0015], // -0.08% a -0.15% por trade
-      driftAdjustStrength: 0.05,
-      description: "Meta realística: ~0.8% ao mês, Win rate: ~52%"
+      expectedMonthlyReturn: 0.05, // 5% ao mês
+      winRate: 0.58, // 58% de trades positivos
+      winRange: [0.008, 0.025], // +0.8% a +2.5% por trade
+      lossRange: [-0.005, -0.015], // -0.5% a -1.5% por trade
+      driftAdjustStrength: 0.1,
+      description: "Meta: ~5% ao mês, Win rate: ~58%"
     },
     moderado: {
-      expectedMonthlyReturn: 0.018, // 1.8% ao mês (23.9% ao ano)
-      winRate: 0.49, // 49% de trades positivos (realístico)
-      winRange: [0.001, 0.004], // +0.1% a +0.4% por trade
-      lossRange: [-0.0015, -0.003], // -0.15% a -0.3% por trade
-      driftAdjustStrength: 0.03,
-      description: "Meta realística: ~1.8% ao mês, Win rate: ~49%"
+      expectedMonthlyReturn: 0.08, // 8% ao mês
+      winRate: 0.55, // 55% de trades positivos
+      winRange: [0.015, 0.035], // +1.5% a +3.5% por trade
+      lossRange: [-0.01, -0.025], // -1% a -2.5% por trade
+      driftAdjustStrength: 0.08,
+      description: "Meta: ~8% ao mês, Win rate: ~55%"
     },
     alto_risco: {
-      expectedMonthlyReturn: 0.035, // 3.5% ao mês (51.1% ao ano)
-      winRate: 0.46, // 46% de trades positivos (difícil com alto risco)
-      winRange: [0.002, 0.008], // +0.2% a +0.8% por trade
-      lossRange: [-0.003, -0.006], // -0.3% a -0.6% por trade
-      driftAdjustStrength: 0.02,
-      description: "Meta ambiciosa: ~3.5% ao mês, Win rate: ~46%"
+      expectedMonthlyReturn: 0.12, // 12% ao mês
+      winRate: 0.52, // 52% de trades positivos
+      winRange: [0.025, 0.06], // +2.5% a +6% por trade
+      lossRange: [-0.02, -0.045], // -2% a -4.5% por trade
+      driftAdjustStrength: 0.05,
+      description: "Meta: ~12% ao mês, Win rate: ~52%"
     }
   };
 
@@ -75,17 +87,17 @@ export default function RiskManagement() {
 
     const riskAmount = (balance * risk) / 100;
     
-    // Cálculo realístico baseado no perfil de risco
+    // Cálculo mais realístico baseado no perfil de risco
     const profileConfig = getProfileConfig(riskProfile);
     const avgWin = (profileConfig.winRange[0] + profileConfig.winRange[1]) / 2;
     const avgLoss = Math.abs((profileConfig.lossRange[0] + profileConfig.lossRange[1]) / 2);
     
     // Expectativa realística: considerando win rate e tamanhos médios de ganho/perda
     const expectedReturn = (profileConfig.winRate * avgWin) - ((1 - profileConfig.winRate) * avgLoss);
-    const potentialProfit = balance * expectedReturn; // Lucro esperado por trade baseado em probabilidades
+    const potentialProfit = riskAmount * (avgWin / Math.abs(avgLoss)) * 2; // Potencial baseado no risco
     
-    const positionSize = riskAmount / 100; // Tamanho da posição mais conservador
-    const dailyGrowthProjection = expectedReturn * 100; // Crescimento esperado por trade (não diário)
+    const positionSize = riskAmount / 50; // Tamanho da posição baseado no risco
+    const dailyGrowthProjection = expectedReturn * 100; // Crescimento esperado por trade
 
     setResults({
       accountBalance: balance,
@@ -159,7 +171,7 @@ export default function RiskManagement() {
                     <Input
                       id="balance"
                       type="number"
-                      placeholder="10000.00"
+                      placeholder={language === 'pt' ? '10000,00' : '10000.00'}
                       value={accountBalance}
                       onChange={(e) => setAccountBalance(e.target.value)}
                       className="pl-10 bg-zinc-800 border-zinc-700 text-white h-12 text-base"
@@ -274,19 +286,19 @@ export default function RiskManagement() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     <ProjectionCard
                       title={t('risk_management.risk_amount')}
-                      value={`$${results.riskAmount.toFixed(2)}`}
+                      value={`${currency.symbol}${results.riskAmount.toFixed(2)}`}
                       color="bg-red-600"
                       icon={Target}
                     />
                     <ProjectionCard
                       title="Lucro Esperado/Trade"
-                      value={results.potentialProfit >= 0 ? `+$${results.potentialProfit.toFixed(2)}` : `-$${Math.abs(results.potentialProfit).toFixed(2)}`}
+                      value={results.potentialProfit >= 0 ? `+${currency.symbol}${results.potentialProfit.toFixed(2)}` : `-${currency.symbol}${Math.abs(results.potentialProfit).toFixed(2)}`}
                       color={results.potentialProfit >= 0 ? "bg-green-600" : "bg-orange-600"}
                       icon={TrendingUp}
                     />
                     <ProjectionCard
                       title="Retorno Esperado/Trade"
-                      value={`${results.dailyGrowthProjection >= 0 ? '+' : ''}${results.dailyGrowthProjection.toFixed(3)}%`}
+                      value={`${results.dailyGrowthProjection >= 0 ? '+' : ''}${results.dailyGrowthProjection.toFixed(2)}%`}
                       color={results.dailyGrowthProjection >= 0 ? "bg-purple-600" : "bg-orange-600"}
                       icon={TrendingUp}
                     />
@@ -379,7 +391,7 @@ export default function RiskManagement() {
                           fontSize={12}
                           tickLine={false}
                           axisLine={false}
-                          tickFormatter={(value) => `$${value.toFixed(0)}`}
+                          tickFormatter={(value) => `${currency.symbol}${value.toFixed(0)}`}
                         />
                         <Tooltip 
                           contentStyle={{
@@ -389,7 +401,7 @@ export default function RiskManagement() {
                             color: '#F9FAFB'
                           }}
                           formatter={(value: number, name: string) => [
-                            name === 'balance' ? `$${value.toFixed(2)}` : `+$${value.toFixed(2)}`,
+                            name === 'balance' ? `${currency.symbol}${value.toFixed(2)}` : `+${currency.symbol}${value.toFixed(2)}`,
                             name === 'balance' ? 'Saldo Projetado' : 'Ganho Acumulado'
                           ]}
                           labelFormatter={(day) => `Dia ${day}`}
@@ -463,7 +475,7 @@ export default function RiskManagement() {
                               {days} dias ({tradingDays}d úteis)
                             </span>
                             <span className="text-sm md:text-base text-white font-medium">
-                              ${projectedBalance.toFixed(2)} ({gainPercentage >= 0 ? '+' : ''}{gainPercentage.toFixed(1)}%)
+                              {currency.symbol}{projectedBalance.toFixed(2)} ({gainPercentage >= 0 ? '+' : ''}{gainPercentage.toFixed(1)}%)
                             </span>
                           </div>
                           <Progress 
@@ -471,7 +483,7 @@ export default function RiskManagement() {
                             className="h-3"
                           />
                           <div className="text-xs text-zinc-500">
-                            {totalGain >= 0 ? 'Ganho esperado' : 'Perda possível'}: {totalGain >= 0 ? '+' : ''}${totalGain.toFixed(2)} (~{totalTrades.toFixed(0)} trades)
+                            {totalGain >= 0 ? 'Ganho esperado' : 'Perda possível'}: {totalGain >= 0 ? '+' : ''}{currency.symbol}{totalGain.toFixed(2)} (~{totalTrades.toFixed(0)} trades)
                           </div>
                         </div>
                       );
