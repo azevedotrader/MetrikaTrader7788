@@ -950,7 +950,7 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.overview": "Overview",
     "dashboard.total_balance": "Total Balance",
     "dashboard.monthly_result": "Monthly Result",
-    "dashboard.win_rate": "Acertividade",
+    "dashboard.win_rate": "Win Rate",
     "dashboard.total_trades": "Total Trades",
     "dashboard.avg_rr": "Avg R/R",
     "dashboard.best_setup": "Best Setup",
@@ -1088,7 +1088,7 @@ const translations: Record<Language, Record<string, string>> = {
     "calendar.week": "Week",
     "calendar.trading_days": "Trading Days",
     "calendar.total_trades": "Total Trades",
-    "calendar.win_rate": "Acertividade",
+    "calendar.win_rate": "Win Rate",
 
     // New Trade and CSV
     "trade.manual": "Manual",
@@ -1210,7 +1210,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.how_felt": "How did you feel?",
     "journal.number_trades": "Number of Trades",
     "journal.pnl": "P&L ($)",
-    "journal.win_rate": "Acertividade (%)",
+    "journal.win_rate": "Win Rate (%)",
     "journal.lessons_learned": "Lessons Learned",
     "journal.lessons_placeholder": "What did you learn today?",
     "journal.improvements": "Improvement Points",
@@ -1288,7 +1288,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.live": "Live",
     "landing.dashboard.total_pnl": "Total P&L",
     "landing.dashboard.monthly_growth": "+12.4% this month",
-    "landing.dashboard.win_rate": "Acertividade",
+    "landing.dashboard.win_rate": "Win Rate",
     "landing.dashboard.trades_count": "156/199 trades",
     "landing.dashboard.capital_evolution": "Capital Evolution",
     "landing.dashboard.connected_brokers": "Connected Brokers",
@@ -1600,7 +1600,7 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.general_risk_return": "Overall Risk/Return",
     "metrics.sum_all_brokers": "Sum of all brokers",
     "metrics.weighted_average": "Weighted Average",
-    "metrics.win_rate": "Acertividade",
+    "metrics.win_rate": "Win Rate",
 
     // Placeholders and hints
     "placeholder.select_month": "Select month",
