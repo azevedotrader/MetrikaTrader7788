@@ -474,7 +474,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.live": "Live",
     "landing.dashboard.total_pnl": "P&L Total",
     "landing.dashboard.monthly_growth": "+12.4% este mês",
-    "landing.dashboard.win_rate": "Win Rate",
+    "landing.dashboard.win_rate": "Acertividade",
     "landing.dashboard.trades_count": "156/199 trades",
     "landing.dashboard.capital_evolution": "Evolução do Capital",
     "landing.dashboard.connected_brokers": "Corretoras Conectadas",
@@ -590,7 +590,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.testimonials.ana_role": "Swing Trader • Rio de Janeiro",
     "landing.testimonials.ana_content":
       "A integração com Gate.io foi um divisor de águas. Todos os meus trades crypto são importados automaticamente. O analytics revelou padrões que eu nunca tinha notado.",
-    "landing.testimonials.ana_improvement": "Win rate: 65% → 81%",
+    "landing.testimonials.ana_improvement": "Acertividade: 65% → 81%",
     "landing.testimonials.pedro_name": "Pedro Santos",
     "landing.testimonials.pedro_role": "Forex Trader • Belo Horizonte",
     "landing.testimonials.pedro_content":
@@ -792,7 +792,7 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.general_risk_return": "Risco/Retorno geral",
     "metrics.sum_all_brokers": "Soma de todas as corretoras",
     "metrics.weighted_average": "Média ponderada",
-    "metrics.win_rate": "Win Rate",
+    "metrics.win_rate": "Acertividade",
 
     // Placeholders e dicas
     "placeholder.select_month": "Selecione o mês",
@@ -950,7 +950,7 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.overview": "Overview",
     "dashboard.total_balance": "Total Balance",
     "dashboard.monthly_result": "Monthly Result",
-    "dashboard.win_rate": "Win Rate",
+    "dashboard.win_rate": "Acertividade",
     "dashboard.total_trades": "Total Trades",
     "dashboard.avg_rr": "Avg R/R",
     "dashboard.best_setup": "Best Setup",
@@ -1088,7 +1088,7 @@ const translations: Record<Language, Record<string, string>> = {
     "calendar.week": "Week",
     "calendar.trading_days": "Trading Days",
     "calendar.total_trades": "Total Trades",
-    "calendar.win_rate": "Win Rate",
+    "calendar.win_rate": "Acertividade",
 
     // New Trade and CSV
     "trade.manual": "Manual",
@@ -1210,7 +1210,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.how_felt": "How did you feel?",
     "journal.number_trades": "Number of Trades",
     "journal.pnl": "P&L ($)",
-    "journal.win_rate": "Win Rate (%)",
+    "journal.win_rate": "Acertividade (%)",
     "journal.lessons_learned": "Lessons Learned",
     "journal.lessons_placeholder": "What did you learn today?",
     "journal.improvements": "Improvement Points",
@@ -1288,7 +1288,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.live": "Live",
     "landing.dashboard.total_pnl": "Total P&L",
     "landing.dashboard.monthly_growth": "+12.4% this month",
-    "landing.dashboard.win_rate": "Win Rate",
+    "landing.dashboard.win_rate": "Acertividade",
     "landing.dashboard.trades_count": "156/199 trades",
     "landing.dashboard.capital_evolution": "Capital Evolution",
     "landing.dashboard.connected_brokers": "Connected Brokers",
@@ -1402,7 +1402,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.testimonials.ana_role": "Swing Trader • Rio de Janeiro",
     "landing.testimonials.ana_content":
       "The Gate.io integration was a game changer. All my crypto trades are imported automatically. Analytics revealed patterns I had never noticed.",
-    "landing.testimonials.ana_improvement": "Win rate: 65% → 81%",
+    "landing.testimonials.ana_improvement": "Acertividade: 65% → 81%",
     "landing.testimonials.pedro_name": "Pedro Santos",
     "landing.testimonials.pedro_role": "Forex Trader • Belo Horizonte",
     "landing.testimonials.pedro_content":
@@ -1600,7 +1600,7 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.general_risk_return": "Overall Risk/Return",
     "metrics.sum_all_brokers": "Sum of all brokers",
     "metrics.weighted_average": "Weighted Average",
-    "metrics.win_rate": "Win Rate",
+    "metrics.win_rate": "Acertividade",
 
     // Placeholders and hints
     "placeholder.select_month": "Select month",
