@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTour } from '@/contexts/TourContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,9 @@ export function TourOverlay() {
     isMobile: window.innerWidth < 768,
     isTablet: window.innerWidth >= 768 && window.innerWidth < 1024
   });
+  
+  // Ref para controlar timeouts e evitar vazamentos
+  const retryTimeoutRef = useRef<number | null>(null);
 
   const currentTourStep = steps[currentStep];
   const isCurrentPage = currentTourStep?.page === location;
@@ -72,6 +75,12 @@ export function TourOverlay() {
 
   // Encontrar e posicionar elemento alvo
   const findAndPositionElement = () => {
+    // Limpar timeout anterior se existir
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = null;
+    }
+
     if (!isActive || !isCurrentPage || !currentTourStep?.targetSelector) {
       setTargetElement(null);
       setElementPosition(null);
@@ -86,21 +95,20 @@ export function TourOverlay() {
       // Scroll suave para o elemento
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else if (currentTourStep.waitForElement) {
-      // Tentar novamente após delay para elementos dinâmicos
-      return setTimeout(findAndPositionElement, 500);
+      // Tentar novamente após delay para elementos dinâmicos (máximo 10 tentativas)
+      retryTimeoutRef.current = window.setTimeout(findAndPositionElement, 500);
     }
-    
-    return null;
   };
 
   // Encontrar elemento quando mudar de passo ou página
   useEffect(() => {
-    const timeoutId = findAndPositionElement();
+    findAndPositionElement();
     
     // Limpar timeout se o componente for desmontado ou passo mudar
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
       }
     };
   }, [isActive, isCurrentPage, currentStep, currentTourStep?.targetSelector, currentTourStep?.waitForElement]);
@@ -267,51 +275,25 @@ export function TourOverlay() {
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
-      {/* Overlay escuro */}
-      <div className="absolute inset-0 bg-black/60" />
       
       {/* Destaque do elemento com múltiplas camadas */}
       {elementPosition && (
         <>
-          {/* Camada externa com glow intenso */}
+          {/* Spotlight principal com overlay escuro ao redor */}
           <div
-            className="absolute rounded-lg bg-transparent animate-pulse"
-            style={{
-              top: elementPosition.top - (viewport.isMobile ? 12 : 8),
-              left: elementPosition.left - (viewport.isMobile ? 12 : 8),
-              width: elementPosition.width + (viewport.isMobile ? 24 : 16),
-              height: elementPosition.height + (viewport.isMobile ? 24 : 16),
-              zIndex: 49,
-              boxShadow: `
-                0 0 0 9999px rgba(0,0,0,0.75),
-                inset 0 0 0 3px rgba(59, 130, 246, 0.3),
-                0 0 20px rgba(59, 130, 246, 0.6),
-                0 0 40px rgba(59, 130, 246, 0.4),
-                0 0 60px rgba(59, 130, 246, 0.2)
-              `,
-              border: '2px solid rgba(59, 130, 246, 0.5)'
-            }}
-          />
-          
-          {/* Camada do meio com borda brilhante */}
-          <div
-            className="absolute rounded-lg bg-transparent animate-pulse"
+            className="absolute rounded-lg bg-transparent"
             style={{
               top: elementPosition.top - (viewport.isMobile ? 8 : 6),
               left: elementPosition.left - (viewport.isMobile ? 8 : 6),
               width: elementPosition.width + (viewport.isMobile ? 16 : 12),
               height: elementPosition.height + (viewport.isMobile ? 16 : 12),
-              zIndex: 50,
-              border: '2px solid rgb(59, 130, 246)',
-              boxShadow: `
-                0 0 15px rgba(59, 130, 246, 0.8),
-                inset 0 0 10px rgba(255, 255, 255, 0.1)
-              `,
-              animationDuration: '1.5s'
+              zIndex: 49,
+              boxShadow: `0 0 0 9999px rgba(0,0,0,0.75)`,
+              border: '2px solid rgba(59, 130, 246, 0.7)'
             }}
           />
           
-          {/* Camada interna principal com destaque máximo */}
+          {/* Destaque principal com animação otimizada */}
           <div
             className="absolute rounded-lg bg-transparent"
             style={{
@@ -319,35 +301,10 @@ export function TourOverlay() {
               left: elementPosition.left - (viewport.isMobile ? 4 : 3),
               width: elementPosition.width + (viewport.isMobile ? 8 : 6),
               height: elementPosition.height + (viewport.isMobile ? 8 : 6),
-              zIndex: 51,
+              zIndex: 50,
               border: '3px solid rgb(34, 197, 94)',
-              boxShadow: `
-                0 0 25px rgba(34, 197, 94, 1),
-                0 0 50px rgba(34, 197, 94, 0.6),
-                inset 0 0 0 2px rgba(255, 255, 255, 0.2)
-              `,
+              filter: 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))',
               animation: 'tourHighlight 2s ease-in-out infinite'
-            }}
-          />
-          
-          {/* Efeito de canto brilhante */}
-          <div
-            className="absolute rounded-lg"
-            style={{
-              top: elementPosition.top - 2,
-              left: elementPosition.left - 2,
-              width: elementPosition.width + 4,
-              height: elementPosition.height + 4,
-              zIndex: 52,
-              background: `
-                linear-gradient(45deg, 
-                  rgba(34, 197, 94, 0.3) 0%, 
-                  transparent 20%, 
-                  transparent 80%, 
-                  rgba(34, 197, 94, 0.3) 100%
-                )
-              `,
-              animation: 'tourCorners 3s ease-in-out infinite'
             }}
           />
           
