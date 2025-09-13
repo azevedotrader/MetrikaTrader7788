@@ -500,7 +500,7 @@ export default function RiskManagement() {
             <CardContent className="p-6 md:p-8 text-center">
               <Calculator className="w-12 h-12 md:w-16 md:h-16 text-zinc-600 mx-auto mb-3 md:mb-4" />
               <p className="text-sm md:text-base text-zinc-400">
-                Insira o saldo da conta para ver projecões realísticas baseadas em dados do mercado
+                Insira o saldo da conta para ver projeções realísticas baseadas em dados do mercado
               </p>
               <p className="text-xs text-zinc-500 mt-2">
                 ⚠️ Lembre-se: trading envolve riscos reais. Estas são apenas estimativas baseadas em probabilidades.
