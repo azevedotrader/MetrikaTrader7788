@@ -326,10 +326,10 @@ export default function RiskManagement() {
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="text-lg md:text-xl text-white flex items-center gap-2">
                     <BarChart3 className="w-5 h-5" />
-                    Simulação de Crescimento (90 dias)
+                    {t('risk_management.growth_simulation_title')}
                   </CardTitle>
                   <CardDescription className="text-sm md:text-base text-zinc-400">
-                    Projeção baseada em probabilidades realísticas com volatilidade
+                    {t('risk_management.growth_simulation_description')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
@@ -415,7 +415,7 @@ export default function RiskManagement() {
                           }}
                           formatter={(value: number, name: string) => [
                             name === 'balance' ? `${currency.symbol}${value.toFixed(2)}` : `+${currency.symbol}${value.toFixed(2)}`,
-                            name === 'balance' ? 'Saldo Projetado' : 'Ganho Acumulado'
+                            name === 'balance' ? t('risk_management.projected_balance') : t('risk_management.accumulated_gain')
                           ]}
                           labelFormatter={(day) => `Dia ${day}`}
                         />
@@ -444,11 +444,11 @@ export default function RiskManagement() {
                   <div className="flex justify-center gap-6 mt-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-1 bg-blue-500 rounded"></div>
-                      <span className="text-zinc-400">Saldo Projetado</span>
+                      <span className="text-zinc-400">{t('risk_management.projected_balance')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-4 h-1 bg-green-500 rounded border-2 border-dashed border-green-500"></div>
-                      <span className="text-zinc-400">Ganho Acumulado</span>
+                      <span className="text-zinc-400">{t('risk_management.accumulated_gain')}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -458,10 +458,10 @@ export default function RiskManagement() {
               <Card className="bg-zinc-900/50 border-zinc-800">
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="text-lg md:text-xl text-white">
-                    Metas Realísticas
+                    {t('risk_management.realistic_goals')}
                   </CardTitle>
                   <CardDescription className="text-sm md:text-base text-zinc-400">
-                    Crescimento esperado baseado em desempenho consistente
+                    {t('risk_management.expected_growth_based')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6">
@@ -486,7 +486,7 @@ export default function RiskManagement() {
                         <div key={days} className="space-y-3 p-4 bg-zinc-800/30 rounded-lg border border-zinc-700">
                           <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                             <span className="text-sm md:text-base text-zinc-400">
-                              {days} dias ({tradingDays}d úteis)
+                              {t('risk_management.days_business_days').replace('{days}', days.toString()).replace('{tradingDays}', tradingDays.toString())}
                             </span>
                             <span className="text-sm md:text-base text-white font-medium">
                               {currency.symbol}{projectedBalance.toFixed(2)} ({gainPercentage >= 0 ? '+' : ''}{gainPercentage.toFixed(1)}%)
@@ -497,7 +497,7 @@ export default function RiskManagement() {
                             className="h-3"
                           />
                           <div className="text-xs text-zinc-500">
-                            {totalGain >= 0 ? 'Ganho esperado' : 'Perda possível'}: {totalGain >= 0 ? '+' : ''}{currency.symbol}{totalGain.toFixed(2)} (~{totalTrades.toFixed(0)} trades)
+                            {totalGain >= 0 ? t('risk_management.expected_gain') : t('risk_management.possible_loss')}: {totalGain >= 0 ? '+' : ''}{currency.symbol}{totalGain.toFixed(2)} (~{totalTrades.toFixed(0)} {t('risk_management.trades')})
                           </div>
                         </div>
                       );
