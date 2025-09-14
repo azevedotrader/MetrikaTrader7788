@@ -95,9 +95,9 @@ const translations: Record<Language, Record<string, string>> = {
     "risk_management.steps_to_use": "Passos para usar:",
     "risk_management.step1": "Insira o saldo real da sua conta",
     "risk_management.step2": "Escolha seu perfil de risco",
-    "risk_management.conservative_desc": "Conservador: Mantenha sempre 1% por operação para preservar capital a longo prazo.",
-    "risk_management.moderate_desc": "Moderado: Use 2-3% por operação, equilibrando crescimento e segurança.",
-    "risk_management.high_risk_desc": "Alto Risco: Até 5% por operação para traders experientes com alta tolerância ao risco.",
+    "risk_management.conservative_desc": "Conservador: Mantenha sempre 0.25% por operação para preservar capital a longo prazo. Máximo 1% de risco diário.",
+    "risk_management.moderate_desc": "Moderado: Use 0.6% por operação, equilibrando crescimento e segurança. Máximo 2.4% de risco diário.",
+    "risk_management.high_risk_desc": "Alto Risco: Até 2.5% por operação para traders experientes com alta tolerância ao risco. Máximo 10% de risco diário.",
     "risk_management.no_profile_desc": "Selecione um perfil para ver recomendações específicas de risco por operação.",
 
     // Suporte
