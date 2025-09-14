@@ -306,13 +306,13 @@ export default function RiskManagement() {
                       icon={Target}
                     />
                     <ProjectionCard
-                      title="Lucro Esperado/Trade"
+                      title={t('risk_management.expected_profit_per_trade')}
                       value={results.potentialProfit >= 0 ? `+${currency.symbol}${results.potentialProfit.toFixed(2)}` : `-${currency.symbol}${Math.abs(results.potentialProfit).toFixed(2)}`}
                       color={results.potentialProfit >= 0 ? "bg-green-600" : "bg-orange-600"}
                       icon={TrendingUp}
                     />
                     <ProjectionCard
-                      title="Crescimento Diário Esperado"
+                      title={t('risk_management.daily_growth_expected')}
                       value={`${results.dailyGrowthProjection >= 0 ? '+' : ''}${results.dailyGrowthProjection.toFixed(2)}%`}
                       color={results.dailyGrowthProjection >= 0 ? "bg-purple-600" : "bg-orange-600"}
                       icon={TrendingUp}
