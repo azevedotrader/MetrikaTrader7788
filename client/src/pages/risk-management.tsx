@@ -36,41 +36,51 @@ export default function RiskManagement() {
   const [accountBalance, setAccountBalance] = useState<string>("");
   const [riskProfile, setRiskProfile] = useState<string>("moderado");
   
-  // Map risk profiles to percentages
+  // Map risk profiles to percentages (máximo risco diário)
   const getRiskPercentage = (profile: string): number => {
     switch (profile) {
-      case "conservador": return 1;
-      case "moderado": return 2.5;
-      case "alto_risco": return 5;
-      default: return 2.5;
+      case "conservador": return 1; // Máximo 1% risco diário
+      case "moderado": return 2.4; // Máximo 2.4% risco diário
+      case "alto_risco": return 10; // Máximo 10% risco diário
+      default: return 2.4;
+    }
+  };
+
+  // Risco por trade específico para cada perfil
+  const getRiskPerTrade = (profile: string): number => {
+    switch (profile) {
+      case "conservador": return 0.25; // 0.25% por trade
+      case "moderado": return 0.6; // 0.6% por trade
+      case "alto_risco": return 2.5; // 2.5% por trade
+      default: return 0.6;
     }
   };
 
   // Configuração realística por perfil de risco
   const PROFILE_CONFIG = {
     conservador: {
-      expectedMonthlyReturn: 0.05, // 5% ao mês
-      winRate: 0.58, // 58% de trades positivos
-      winRange: [0.008, 0.025], // +0.8% a +2.5% por trade
-      lossRange: [-0.005, -0.015], // -0.5% a -1.5% por trade
-      driftAdjustStrength: 0.1,
-      description: "Meta: ~5% ao mês, Win rate: ~58%"
+      riskPerTrade: 0.0025, // 0.25% por trade
+      maxDailyRisk: 0.01, // 1% risco máximo diário
+      expectedRiskReward: 3, // 3x o risco = lucro esperado
+      winRate: 0.6, // 60% de trades positivos
+      expectedMonthlyReturn: 0.045, // ~4.5% ao mês
+      description: "Conservador: 0.25% por trade, máx 1% diário"
     },
     moderado: {
-      expectedMonthlyReturn: 0.08, // 8% ao mês
+      riskPerTrade: 0.006, // 0.6% por trade
+      maxDailyRisk: 0.024, // 2.4% risco máximo diário
+      expectedRiskReward: 3, // 3x o risco = lucro esperado
       winRate: 0.55, // 55% de trades positivos
-      winRange: [0.015, 0.035], // +1.5% a +3.5% por trade
-      lossRange: [-0.01, -0.025], // -1% a -2.5% por trade
-      driftAdjustStrength: 0.08,
-      description: "Meta: ~8% ao mês, Win rate: ~55%"
+      expectedMonthlyReturn: 0.072, // ~7.2% ao mês
+      description: "Moderado: 0.6% por trade, máx 2.4% diário"
     },
     alto_risco: {
-      expectedMonthlyReturn: 0.12, // 12% ao mês
-      winRate: 0.52, // 52% de trades positivos
-      winRange: [0.025, 0.06], // +2.5% a +6% por trade
-      lossRange: [-0.02, -0.045], // -2% a -4.5% por trade
-      driftAdjustStrength: 0.05,
-      description: "Meta: ~12% ao mês, Win rate: ~52%"
+      riskPerTrade: 0.025, // 2.5% por trade
+      maxDailyRisk: 0.10, // 10% risco máximo diário
+      expectedRiskReward: 3, // 3x o risco = lucro esperado
+      winRate: 0.5, // 50% de trades positivos
+      expectedMonthlyReturn: 0.15, // ~15% ao mês
+      description: "Agressivo: 2.5% por trade, máx 10% diário"
     }
   };
 
@@ -81,30 +91,35 @@ export default function RiskManagement() {
 
   const calculateRisk = () => {
     const balance = parseFloat(accountBalance) || 0;
-    const risk = getRiskPercentage(riskProfile);
+    const maxDailyRisk = getRiskPercentage(riskProfile);
+    const riskPerTrade = getRiskPerTrade(riskProfile);
 
     if (balance <= 0) return;
 
-    const riskAmount = (balance * risk) / 100;
+    const riskAmountPerTrade = (balance * riskPerTrade) / 100;
+    const maxDailyRiskAmount = (balance * maxDailyRisk) / 100;
     
-    // Cálculo mais realístico baseado no perfil de risco
+    // Cálculo baseado no perfil de risco atualizado
     const profileConfig = getProfileConfig(riskProfile);
-    const avgWin = (profileConfig.winRange[0] + profileConfig.winRange[1]) / 2;
-    const avgLoss = Math.abs((profileConfig.lossRange[0] + profileConfig.lossRange[1]) / 2);
     
-    // Expectativa realística: considerando win rate e tamanhos médios de ganho/perda
-    const expectedReturn = (profileConfig.winRate * avgWin) - ((1 - profileConfig.winRate) * avgLoss);
-    const potentialProfit = riskAmount * (avgWin / Math.abs(avgLoss)) * 2; // Potencial baseado no risco
+    // Lucro esperado = 3x o valor em risco por trade
+    const potentialProfit = riskAmountPerTrade * profileConfig.expectedRiskReward;
     
-    const positionSize = riskAmount / 50; // Tamanho da posição baseado no risco
-    const dailyGrowthProjection = expectedReturn * 100; // Crescimento esperado por trade
+    // Expectativa líquida considerando win rate
+    const expectedReturn = (profileConfig.winRate * potentialProfit) - ((1 - profileConfig.winRate) * riskAmountPerTrade);
+    
+    // Número máximo de trades por dia baseado no risco diário
+    const maxTradesPerDay = Math.floor(maxDailyRiskAmount / riskAmountPerTrade);
+    
+    // Crescimento diário projetado
+    const dailyGrowthProjection = (expectedReturn / balance) * 100 * Math.min(maxTradesPerDay, 4); // Limitando a 4 trades/dia
 
     setResults({
       accountBalance: balance,
-      riskPercentage: risk,
-      riskAmount,
+      riskPercentage: riskPerTrade,
+      riskAmount: riskAmountPerTrade,
       potentialProfit,
-      positionSize,
+      positionSize: riskAmountPerTrade, // Tamanho da posição = risco por trade
       dailyGrowthProjection,
     });
   };
@@ -349,20 +364,18 @@ export default function RiskManagement() {
                             // Taxa de sucesso específica do perfil
                             const isWin = random1 < config.winRate;
                             
-                            // Variação do retorno diário baseada no perfil
+                            // Variação do retorno diário baseada no perfil atualizado
                             let dailyReturn;
                             if (isWin) {
-                              // Ganhos dentro do range do perfil
-                              const [minWin, maxWin] = config.winRange;
-                              dailyReturn = minWin + (random2 * (maxWin - minWin));
+                              // Ganhos = 3x o risco por trade (conforme especificado)
+                              dailyReturn = config.riskPerTrade * config.expectedRiskReward * (0.8 + random2 * 0.4); // Variação de ±20%
                             } else {
-                              // Perdas dentro do range do perfil
-                              const [minLoss, maxLoss] = config.lossRange;
-                              dailyReturn = minLoss + (random2 * (maxLoss - minLoss));
+                              // Perdas = risco por trade
+                              dailyReturn = -config.riskPerTrade * (0.8 + random2 * 0.4); // Variação de ±20%
                             }
                             
-                            // Ajustar para tender à meta mensal (força específica do perfil)
-                            const adjustment = (targetDailyReturn * d - cumulativeReturn) * config.driftAdjustStrength;
+                            // Ajustar para tender à meta mensal com força moderada
+                            const adjustment = (targetDailyReturn * d - cumulativeReturn) * 0.1;
                             dailyReturn += adjustment;
                             
                             cumulativeReturn += dailyReturn;
@@ -460,9 +473,10 @@ export default function RiskManagement() {
                       const avgTradesPerDay = 1.2; // Média realística de trades por dia
                       const totalTrades = tradingDays * avgTradesPerDay;
                       
-                      // Crescimento composto mais conservador
-                      const expectedReturn = (config.winRate * ((config.winRange[0] + config.winRange[1]) / 2)) - 
-                                           ((1 - config.winRate) * Math.abs((config.lossRange[0] + config.lossRange[1]) / 2));
+                      // Crescimento baseado no novo sistema (risco por trade vs lucro esperado 3x)
+                      const expectedWin = config.riskPerTrade * config.expectedRiskReward; // 3x o risco
+                      const expectedLoss = config.riskPerTrade; // 1x o risco
+                      const expectedReturn = (config.winRate * expectedWin) - ((1 - config.winRate) * expectedLoss);
                       
                       const projectedBalance = results.accountBalance * Math.pow(1 + expectedReturn, totalTrades);
                       const totalGain = projectedBalance - results.accountBalance;
