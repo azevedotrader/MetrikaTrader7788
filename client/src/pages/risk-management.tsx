@@ -208,13 +208,13 @@ export default function RiskManagement() {
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700">
                       <SelectItem value="conservador" className="text-white">
-                        🛡️ Conservador (1% por operação)
+                        🛡️ Conservador (0.25% por operação)
                       </SelectItem>
                       <SelectItem value="moderado" className="text-white">
-                        ⚖️ Moderado (2.5% por operação)
+                        ⚖️ Moderado (0.6% por operação)
                       </SelectItem>
                       <SelectItem value="alto_risco" className="text-white">
-                        🚀 Alto Risco (5% por operação)
+                        🚀 Alto Risco (2.5% por operação)
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -312,7 +312,7 @@ export default function RiskManagement() {
                       icon={TrendingUp}
                     />
                     <ProjectionCard
-                      title="Retorno Esperado/Trade"
+                      title="Crescimento Diário Esperado"
                       value={`${results.dailyGrowthProjection >= 0 ? '+' : ''}${results.dailyGrowthProjection.toFixed(2)}%`}
                       color={results.dailyGrowthProjection >= 0 ? "bg-purple-600" : "bg-orange-600"}
                       icon={TrendingUp}
