@@ -528,7 +528,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.dashboard.live": "Live",
     "landing.dashboard.total_pnl": "P&L Total",
     "landing.dashboard.monthly_growth": "+12.4% este mês",
-    "landing.dashboard.win_rate": "Acertividade",
+    "landing.dashboard.win_rate": "Assertividade",
     "landing.dashboard.trades_count": "156/199 trades",
     "landing.dashboard.capital_evolution": "Evolução do Capital",
     "landing.dashboard.connected_brokers": "Corretoras Conectadas",
