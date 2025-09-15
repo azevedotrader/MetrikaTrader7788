@@ -491,7 +491,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
           {/* Seção de imagens */}
           <div className="space-y-4">
-            <Label>{t('journal.images') || 'Imagens'}</Label>
+            <Label>{t('journal.images')}</Label>
             
             {/* Upload de nova imagem (só se estiver editando uma entrada existente) */}
             {entry && (

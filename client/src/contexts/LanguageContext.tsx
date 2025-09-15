@@ -452,6 +452,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.improvements": "Pontos de Melhoria",
     "journal.improvements_placeholder":
       "O que você pode melhorar na próxima sessão?",
+    "journal.images": "Imagens",
     "journal.saving": "Salvando...",
     "journal.update": "Atualizar",
     "journal.delete_confirm": "Tem certeza que deseja deletar esta entrada?",
@@ -1309,6 +1310,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.improvements": "Improvement Points",
     "journal.improvements_placeholder":
       "What can you improve in the next session?",
+    "journal.images": "Images",
     "journal.saving": "Saving...",
     "journal.update": "Update",
     "journal.delete_confirm": "Are you sure you want to delete this entry?",
@@ -2207,6 +2209,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.improvements": "Puntos de Mejora",
     "journal.improvements_placeholder":
       "¿Qué puedes mejorar en la próxima sesión?",
+    "journal.images": "Imágenes",
     "journal.saving": "Guardando...",
     "journal.update": "Actualizar",
     "journal.delete_confirm":
