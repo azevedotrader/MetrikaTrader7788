@@ -462,16 +462,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               />
             </div>
 
-            {/* Taxa de acerto */}
-            <div className="space-y-2">
-              <Label htmlFor="winRate">{t('journal.win_rate')}</Label>
-              <Input
-                id="winRate"
-                placeholder="0.0"
-                {...form.register("winRate")}
-                data-testid="input-win-rate"
-              />
-            </div>
+            
           </div>
 
           {/* Lições aprendidas */}
