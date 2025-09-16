@@ -695,13 +695,6 @@ export default function Landing() {
                 {t('landing.cta.main_button')}
                 <ArrowRight className="w-7 h-7 ml-4" />
               </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-8 lg:px-12 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-semibold backdrop-blur-sm"
-              >
-                {t('landing.cta.demo_button')}
-              </Button>
             </div>
 
             <div className="text-center">
