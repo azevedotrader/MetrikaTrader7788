@@ -454,92 +454,100 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                   </div>
                 )}
 
-                {/* Seção de imagens */}
-                <div>
-                  {/* Upload de imagem */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <ImageIcon className="h-4 w-4 text-zinc-400" />
-                      <h4 className="font-medium text-white">
-                        {dayImages.length > 0 ? `${dayImages.length === 1 ? 'Imagem' : 'Imagens'} (${dayImages.length})` : 'Imagens'}
-                      </h4>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploadingImage}
-                        className="hidden"
-                        id="day-image-upload"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => document.getElementById('day-image-upload')?.click()}
-                        disabled={uploadingImage}
-                        className="flex items-center gap-2"
-                        data-testid="button-upload-day-image"
-                      >
-                        <Upload className="h-3 w-3" />
-                        {uploadingImage ? "Enviando..." : "Adicionar"}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Grid de imagens */}
-                  {dayImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
-                      {dayImages.slice(0, 8).map((image) => (
-                        <div key={image.id} className="relative group aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-500 transition-all hover:shadow-lg">
-                          <img
-                            src={`/api/images/${image.id}`}
-                            alt={image.originalName}
-                            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                            title={image.originalName}
-                            onClick={() => setSelectedImage(image)}
-                            onError={(e) => {
-                              e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
-                            }}
-                            data-testid={`calendar-image-${image.id}`}
-                          />
-                          {/* Botão de deletar - visível no hover */}
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleImageDelete(image.id)}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
-                            data-testid={`button-delete-day-image-${image.id}`}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                      {dayImages.length > 8 && (
-                        <div className="aspect-square rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                          <span className="text-sm text-zinc-400">
-                            +{dayImages.length - 8}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Mensagem quando não há imagens */}
-                  {dayImages.length === 0 && !loadingImages && (
-                    <div className="text-center py-6 text-zinc-400 text-sm border border-zinc-700 rounded-lg border-dashed">
-                      <ImageIcon className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
-                      Nenhuma imagem adicionada
-                    </div>
-                  )}
-                </div>
 
               </CardContent>
             </Card>
           )}
+
+          {/* Seção de Imagens - Card independente */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ImageIcon className="w-5 h-5" />
+                {dayImages.length > 0 ? `${dayImages.length === 1 ? 'Imagem' : 'Imagens'} (${dayImages.length})` : 'Imagens'}
+              </CardTitle>
+              
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="hidden"
+                  id="day-image-upload"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('day-image-upload')?.click()}
+                  disabled={uploadingImage}
+                  className="flex items-center gap-2"
+                  data-testid="button-upload-day-image"
+                >
+                  <Upload className="h-3 w-3" />
+                  {uploadingImage ? "Enviando..." : "Adicionar"}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Grid de imagens */}
+              {dayImages.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {dayImages.slice(0, 8).map((image) => (
+                    <div key={image.id} className="relative group aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-500 transition-all hover:shadow-lg">
+                      <img
+                        src={`/api/images/${image.id}`}
+                        alt={image.originalName}
+                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                        title={image.originalName}
+                        onClick={() => setSelectedImage(image)}
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
+                        }}
+                        data-testid={`calendar-image-${image.id}`}
+                      />
+                      {/* Botão de deletar - visível no hover */}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleImageDelete(image.id)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
+                        data-testid={`button-delete-day-image-${image.id}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  {dayImages.length > 8 && (
+                    <div className="aspect-square rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                      <span className="text-sm text-zinc-400">
+                        +{dayImages.length - 8}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Mensagem quando não há imagens */}
+              {dayImages.length === 0 && !loadingImages && (
+                <div className="text-center py-6 text-zinc-400 text-sm border border-zinc-700 rounded-lg border-dashed">
+                  <ImageIcon className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
+                  <span className="block mb-2">Nenhuma imagem adicionada</span>
+                  <span className="text-xs text-zinc-500">Clique em "Adicionar" para enviar imagens</span>
+                </div>
+              )}
+
+              {/* Loading de imagens */}
+              {loadingImages && (
+                <div className="flex items-center justify-center gap-2 text-zinc-400 py-4">
+                  <ImageIcon className="h-4 w-4 animate-pulse" />
+                  <span className="text-sm">Carregando imagens...</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Lista de Trades */}
           {dayTrades.length > 0 && (
