@@ -1356,23 +1356,25 @@ export default function Dashboard() {
   // Calcular métricas com base nos trades filtrados
   const metrics = calculateMetrics(filteredTrades, t);
 
+  // Funções para manipular CSVs
+  const handleCsvToggle = (csvId: string) => {
+    setSelectedCsvIds((prev) =>
+      prev.includes(csvId)
+        ? prev.filter((id) => id !== csvId)
+        : [...prev, csvId],
+    );
+  };
+
+  const handleSelectAllCsvs = () => {
+    if (selectedCsvIds.length === (csvImports as any[]).length) {
+      setSelectedCsvIds([]);
+    } else {
+      setSelectedCsvIds((csvImports as any[]).map((csv: any) => csv.id));
+    }
+  };
+
   // Componente de Filtros Avançados
   const AdvancedFilters = () => {
-    const handleCsvToggle = (csvId: string) => {
-      setSelectedCsvIds((prev) =>
-        prev.includes(csvId)
-          ? prev.filter((id) => id !== csvId)
-          : [...prev, csvId],
-      );
-    };
-
-    const handleSelectAllCsvs = () => {
-      if (selectedCsvIds.length === (csvImports as any[]).length) {
-        setSelectedCsvIds([]);
-      } else {
-        setSelectedCsvIds((csvImports as any[]).map((csv: any) => csv.id));
-      }
-    };
 
     const startRenaming = (csv: any) => {
       setEditingCsv({
