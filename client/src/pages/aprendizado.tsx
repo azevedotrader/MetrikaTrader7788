@@ -168,31 +168,7 @@ export default function Aprendizado() {
           </div>
         </div>
 
-        {/* Estatísticas de Progresso */}
-        <Card className="bg-zinc-900/90 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Users className="h-5 w-5 text-green-400" />
-              {t('learning.progress')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                <div className="text-2xl font-bold text-green-400 mb-1">0 / 12</div>
-                <div className="text-sm text-zinc-400">{t('learning.stats.videos_watched')}</div>
-              </div>
-              <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-400 mb-1">0%</div>
-                <div className="text-sm text-zinc-400">{t('learning.stats.general_progress')}</div>
-              </div>
-              <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-400 mb-1">--:--</div>
-                <div className="text-sm text-zinc-400">{t('learning.stats.time_watched')}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   );
