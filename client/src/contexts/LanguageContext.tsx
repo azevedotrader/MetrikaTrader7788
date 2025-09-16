@@ -149,7 +149,7 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.overview": "Visão Geral",
     "dashboard.total_balance": "Saldo Total",
     "dashboard.monthly_result": "Resultado Mensal",
-    "dashboard.win_rate": "Acertividade",
+    "dashboard.win_rate": "Assertividade",
     "dashboard.total_trades": "Total de Trades",
     "dashboard.avg_rr": "R/R Médio",
     "dashboard.best_setup": "Melhor Setup",
@@ -287,7 +287,7 @@ const translations: Record<Language, Record<string, string>> = {
     "calendar.week": "Semana",
     "calendar.trading_days": "Dias de Trading",
     "calendar.total_trades": "Total de Trades",
-    "calendar.win_rate": "Acertividade",
+    "calendar.win_rate": "Assertividade",
 
     // Aprendizado
     "learning.title": "Centro de Aprendizado", 
@@ -446,7 +446,7 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.how_felt": "Como você se sentiu?",
     "journal.number_trades": "Número de Trades",
     "journal.pnl": "P&L (R$)",
-    "journal.win_rate": "Acertividade (%)",
+    "journal.win_rate": "Assertividade (%)",
     "journal.lessons_learned": "Lições Aprendidas",
     "journal.lessons_placeholder": "O que você aprendeu hoje?",
     "journal.improvements": "Pontos de Melhoria",
@@ -654,7 +654,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.testimonials.ana_role": "Swing Trader • Rio de Janeiro",
     "landing.testimonials.ana_content":
       "A integração com Gate.io foi um divisor de águas. Todos os meus trades crypto são importados automaticamente. O analytics revelou padrões que eu nunca tinha notado.",
-    "landing.testimonials.ana_improvement": "Acertividade: 65% → 81%",
+    "landing.testimonials.ana_improvement": "Assertividade: 65% → 81%",
     "landing.testimonials.pedro_name": "Pedro Santos",
     "landing.testimonials.pedro_role": "Forex Trader • Belo Horizonte",
     "landing.testimonials.pedro_content":
@@ -856,7 +856,7 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.general_risk_return": "Risco/Retorno geral",
     "metrics.sum_all_brokers": "Soma de todas as corretoras",
     "metrics.weighted_average": "Média ponderada",
-    "metrics.win_rate": "Acertividade",
+    "metrics.win_rate": "Assertividade",
 
     // Placeholders e dicas
     "placeholder.select_month": "Selecione o mês",
@@ -1510,7 +1510,7 @@ const translations: Record<Language, Record<string, string>> = {
     "landing.testimonials.ana_role": "Swing Trader • Rio de Janeiro",
     "landing.testimonials.ana_content":
       "The Gate.io integration was a game changer. All my crypto trades are imported automatically. Analytics revealed patterns I had never noticed.",
-    "landing.testimonials.ana_improvement": "Acertividade: 65% → 81%",
+    "landing.testimonials.ana_improvement": "Assertividade: 65% → 81%",
     "landing.testimonials.pedro_name": "Pedro Santos",
     "landing.testimonials.pedro_role": "Forex Trader • Belo Horizonte",
     "landing.testimonials.pedro_content":
