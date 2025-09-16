@@ -263,15 +263,7 @@ export default function RiskManagement() {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 p-3 bg-red-900/20 rounded-lg border border-red-800/30">
-                    <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <h4 className="text-sm font-semibold text-red-300 mb-1">{t('risk_management.important')}</h4>
-                      <p className="text-xs text-red-100">
-                        {t('risk_management.disclaimer')}
-                      </p>
-                    </div>
-                  </div>
+                  
 
                   <div className="pt-2 border-t border-zinc-700">
                     <h5 className="text-sm font-medium text-white mb-2">{t('risk_management.steps_to_use')}</h5>
