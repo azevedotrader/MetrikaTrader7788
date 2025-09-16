@@ -672,12 +672,6 @@ export default function Landing() {
                 </div>  
                 <span className="text-xl font-medium">{t('landing.cta.feature2')}</span>
               </div>
-              <div className="flex items-center space-x-4 text-slate-200">
-                <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center">
-                  <Shield className="w-8 h-8 text-teal-400" />
-                </div>
-                <span className="text-xl font-medium">{t('landing.cta.feature3')}</span>
-              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
