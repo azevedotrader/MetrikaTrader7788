@@ -62,19 +62,32 @@ function parseRealValue(value: string): number {
  * Converte data da Clear (DD/MM/AAAA HH:MM:SS)
  */
 function parseClearDate(dateStr: string): Date {
-  // Formato: 03/06/2025 11:57:00
-  const [date, time] = dateStr.split(' ');
-  const [day, month, year] = date.split('/');
-  const [hour, minute, second] = time?.split(':') || ['12', '00', '00'];
-  
-  return new Date(
-    parseInt(year),
-    parseInt(month) - 1,
-    parseInt(day),
-    parseInt(hour),
-    parseInt(minute),
-    parseInt(second)
-  );
+  try {
+    // Formato: 03/06/2025 11:57:00
+    const [date, time] = dateStr.split(' ');
+    const [day, month, year] = date.split('/');
+    const [hour, minute, second] = time?.split(':') || ['12', '00', '00'];
+    
+    const parsedDate = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hour),
+      parseInt(minute),
+      parseInt(second || '0')
+    );
+    
+    // Verificar se a data é válida
+    if (isNaN(parsedDate.getTime())) {
+      console.log(`⚠️ Data inválida parseada de "${dateStr}" - usando data atual`);
+      return new Date();
+    }
+    
+    return parsedDate;
+  } catch (error) {
+    console.log(`❌ Erro ao parsear data "${dateStr}":`, error);
+    return new Date();
+  }
 }
 
 /**
@@ -152,6 +165,12 @@ export function processClearTradeRow(
     dataHora = new Date(); // Data atual se não conseguir parsear
   }
   
+  // Verificar se a data é válida antes de prosseguir
+  if (isNaN(dataHora.getTime())) {
+    console.log(`❌ Data inválida: "${dataHoraStr}" - usando data atual`);
+    dataHora = new Date();
+  }
+  
   // Quantidade (usar o campo Qnt. ou a maior entre compra e venda)
   const qtdCampo = parseFloat(quantidade || '0');
   const qtdCompraNum = parseFloat(qtdCompra || '0');
@@ -187,6 +206,12 @@ export function processClearTradeRow(
   const tipo: 'compra' | 'venda' = lado?.toUpperCase() === 'C' ? 'compra' : 'venda';
   
   console.log(`✅ Clear: ${ativo} ${tipo} ${qtdFinal} contratos, resultado = R$ ${resultado.toFixed(2)} (${fonteCampo})`);
+  
+  // Verificar novamente se a data é válida antes do toISOString()
+  if (isNaN(dataHora.getTime())) {
+    console.log(`❌ Data ainda inválida após correção - criando nova data atual`);
+    dataHora = new Date();
+  }
   
   return {
     userId,
