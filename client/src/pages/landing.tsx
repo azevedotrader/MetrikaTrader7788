@@ -131,13 +131,6 @@ export default function Landing() {
                   {t('landing.hero.start_free')}
                   <ArrowRight className="w-6 h-6 ml-3" />
                 </Button>
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className="border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/30 hover:border-emerald-400 transition-all duration-300 px-6 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-semibold backdrop-blur-sm"
-                >
-                  {t('landing.hero.watch_demo')}
-                </Button>
               </div>
               
               
