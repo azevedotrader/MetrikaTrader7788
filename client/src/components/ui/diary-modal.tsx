@@ -28,6 +28,12 @@ interface DiaryImage {
   createdAt: string;
 }
 
+interface PendingImage {
+  file: File;
+  id: string; // ID temporário
+  preview: string; // URL de preview
+}
+
 interface DiaryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -39,6 +45,7 @@ interface DiaryModalProps {
 export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: DiaryModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<DiaryImage[]>([]);
+  const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -95,6 +102,12 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     }
   }, [entry, selectedDate, form]);
 
+  // Limpar URLs de preview para evitar memory leaks
+  const clearPendingImages = () => {
+    pendingImages.forEach(img => URL.revokeObjectURL(img.preview));
+    setPendingImages([]);
+  };
+
   // Carregar imagens quando a entrada existir
   useEffect(() => {
     if (entry?.id) {
@@ -102,7 +115,16 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     } else {
       setImages([]);
     }
+    // Limpar imagens pendentes quando trocar de entrada
+    clearPendingImages();
   }, [entry]);
+
+  // Cleanup quando o modal fecha
+  useEffect(() => {
+    if (!isOpen) {
+      clearPendingImages();
+    }
+  }, [isOpen]);
 
   const loadImages = async (diaryEntryId: string) => {
     try {
@@ -128,7 +150,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !entry?.id) return;
+    if (!file) return;
 
     // Validação do arquivo
     if (!file.type.startsWith('image/')) {
@@ -149,49 +171,86 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
       return;
     }
 
-    setUploadingImage(true);
-    try {
-      const userId = localStorage.getItem('user-id');
-      if (!userId) throw new Error('Usuário não autenticado');
+    // Se já existe uma entrada, fazer upload direto
+    if (entry?.id) {
+      setUploadingImage(true);
+      try {
+        const userId = localStorage.getItem('user-id');
+        if (!userId) throw new Error('Usuário não autenticado');
 
-      const formData = new FormData();
-      formData.append('image', file);
+        const formData = new FormData();
+        formData.append('image', file);
 
-      const response = await fetch(`/api/diary/${entry.id}/images`, {
-        method: 'POST',
-        headers: {
-          "user-id": userId,
-          "X-User-ID": userId
-        },
-        body: formData,
-        credentials: "include"
-      });
+        const response = await fetch(`/api/diary/${entry.id}/images`, {
+          method: 'POST',
+          headers: {
+            "user-id": userId,
+            "X-User-ID": userId
+          },
+          body: formData,
+          credentials: "include"
+        });
 
-      if (!response.ok) throw new Error('Erro ao fazer upload');
+        if (!response.ok) throw new Error('Erro ao fazer upload');
 
-      const result = await response.json();
-      setImages(prev => [...prev, result.image]);
+        const result = await response.json();
+        setImages(prev => [...prev, result.image]);
+        
+        toast({
+          title: "Sucesso!",
+          description: "Imagem adicionada com sucesso.",
+        });
+      } catch (error) {
+        console.error('Erro no upload:', error);
+        toast({
+          title: "Erro no upload",
+          description: "Não foi possível fazer upload da imagem.",
+          variant: "destructive",
+        });
+      } finally {
+        setUploadingImage(false);
+      }
+    } else {
+      // Se não existe entrada ainda, adicionar como imagem pendente
+      const preview = URL.createObjectURL(file);
+      const pendingImage: PendingImage = {
+        file,
+        id: `pending-${Date.now()}-${Math.random()}`,
+        preview
+      };
       
+      setPendingImages(prev => [...prev, pendingImage]);
       toast({
-        title: "Sucesso!",
-        description: "Imagem adicionada com sucesso.",
+        title: t('journal.image_added_pending'),
+        description: t('journal.image_added_pending_desc'),
       });
-
-      // Limpar o input
-      event.target.value = '';
-    } catch (error) {
-      console.error('Erro no upload:', error);
-      toast({
-        title: "Erro no upload",
-        description: "Não foi possível fazer upload da imagem.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingImage(false);
     }
+
+    // Limpar o input
+    event.target.value = '';
   };
 
   const handleImageDelete = async (imageId: string) => {
+    // Verificar se é uma imagem pendente
+    if (imageId.startsWith('pending-')) {
+      if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
+      
+      setPendingImages(prev => {
+        const imageToRemove = prev.find(img => img.id === imageId);
+        if (imageToRemove) {
+          URL.revokeObjectURL(imageToRemove.preview); // Limpar URL de preview
+        }
+        return prev.filter(img => img.id !== imageId);
+      });
+      
+      toast({
+        title: "Sucesso!",
+        description: "Imagem removida.",
+      });
+      return;
+    }
+
+    // Imagem já salva
     if (!entry?.id) return;
 
     if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
@@ -276,6 +335,50 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
         if (!response.ok) {
           throw new Error("Erro ao criar entrada");
         }
+        
+        const newEntry = await response.json();
+        
+        // Fazer upload das imagens pendentes
+        if (pendingImages.length > 0) {
+          let uploadErrors = 0;
+          
+          for (const pendingImage of pendingImages) {
+            try {
+              const formData = new FormData();
+              formData.append('image', pendingImage.file);
+
+              const uploadResponse = await fetch(`/api/diary/${newEntry.id}/images`, {
+                method: 'POST',
+                headers: {
+                  "user-id": userId,
+                  "X-User-ID": userId
+                },
+                body: formData,
+                credentials: "include"
+              });
+              
+              if (!uploadResponse.ok) {
+                uploadErrors++;
+              }
+            } catch (error) {
+              console.error('Erro no upload de imagem:', error);
+              uploadErrors++;
+            }
+          }
+          
+          // Limpar todas as imagens pendentes (URLs e estado)
+          clearPendingImages();
+          
+          // Informar sobre erros de upload se houve
+          if (uploadErrors > 0) {
+            toast({
+              title: "Atenção",
+              description: `${uploadErrors} imagem(ns) não puderam ser enviadas. Tente adicionar novamente.`,
+              variant: "destructive",
+            });
+          }
+        }
+        
         toast({
           title: t('journal.toast.created'),
           description: t('journal.toast.created_desc'),
@@ -493,45 +596,44 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
           <div className="space-y-4">
             <Label>{t('journal.images')}</Label>
             
-            {/* Upload de nova imagem (só se estiver editando uma entrada existente) */}
-            {entry && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById('image-upload')?.click()}
-                  disabled={uploadingImage}
-                  className="flex items-center gap-2"
-                  data-testid="button-upload-image"
-                >
-                  <Upload className="h-4 w-4" />
-                  {uploadingImage ? "Enviando..." : "Adicionar Imagem"}
-                </Button>
-                <span className="text-sm text-slate-400">
-                  PNG, JPG até 5MB
-                </span>
-              </div>
-            )}
-
-            {/* Mensagem quando não há entrada ainda */}
-            {!entry && (
+            {/* Upload de imagem - sempre disponível */}
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+                className="hidden"
+                id="image-upload"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('image-upload')?.click()}
+                disabled={uploadingImage || isLoading}
+                className="flex items-center gap-2"
+                data-testid="button-upload-image"
+              >
+                <Upload className="h-4 w-4" />
+                {uploadingImage ? "Enviando..." : "Adicionar Imagem"}
+              </Button>
+              <span className="text-sm text-slate-400">
+                PNG, JPG até 5MB
+              </span>
+            </div>
+            
+            {/* Mensagem informativa quando não há entrada ainda */}
+            {!entry && pendingImages.length === 0 && (
               <div className="text-sm text-slate-400 p-4 border border-slate-700 rounded-lg text-center">
                 <ImageIcon className="h-8 w-8 mx-auto mb-2 text-slate-500" />
-                Salve a entrada do diário primeiro para adicionar imagens
+                {t('journal.add_images_message')}
               </div>
             )}
 
-            {/* Grid de imagens existentes */}
-            {images.length > 0 && (
+            {/* Grid de imagens (existentes + pendentes) */}
+            {(images.length > 0 || pendingImages.length > 0) && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {/* Imagens já salvas */}
                 {images.map((image) => (
                   <div key={image.id} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
@@ -544,7 +646,6 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
                         }}
                       />
                     </div>
-                    {/* Botão de remover */}
                     <Button
                       type="button"
                       variant="destructive"
@@ -555,9 +656,38 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
                     >
                       <X className="h-3 w-3" />
                     </Button>
-                    {/* Nome do arquivo */}
                     <p className="mt-2 text-xs text-slate-400 truncate" title={image.originalName}>
                       {image.originalName}
+                    </p>
+                  </div>
+                ))}
+                
+                {/* Imagens pendentes */}
+                {pendingImages.map((pendingImage) => (
+                  <div key={pendingImage.id} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700 border-dashed">
+                      <img
+                        src={pendingImage.preview}
+                        alt={pendingImage.file.name}
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                      {/* Indicador de pendente */}
+                      <div className="absolute top-1 left-1 bg-yellow-500 text-black text-xs px-1 rounded">
+                        {t('journal.pending_status')}
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleImageDelete(pendingImage.id)}
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
+                      data-testid={`button-delete-image-${pendingImage.id}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                    <p className="mt-2 text-xs text-slate-400 truncate" title={pendingImage.file.name}>
+                      {pendingImage.file.name}
                     </p>
                   </div>
                 ))}
@@ -579,7 +709,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
             </Button>
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || uploadingImage}
               className="flex-1"
               data-testid="button-save"
             >

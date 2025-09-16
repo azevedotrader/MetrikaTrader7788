@@ -453,6 +453,10 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.improvements_placeholder":
       "O que você pode melhorar na próxima sessão?",
     "journal.images": "Imagens",
+    "journal.image_added_pending": "Imagem adicionada!",
+    "journal.image_added_pending_desc": "A imagem será enviada quando você salvar a entrada.",
+    "journal.pending_status": "Pendente",
+    "journal.add_images_message": "Adicione imagens que serão salvas junto com a entrada",
     "journal.saving": "Salvando...",
     "journal.update": "Atualizar",
     "journal.delete_confirm": "Tem certeza que deseja deletar esta entrada?",
@@ -1311,6 +1315,10 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.improvements_placeholder":
       "What can you improve in the next session?",
     "journal.images": "Images",
+    "journal.image_added_pending": "Image added!",
+    "journal.image_added_pending_desc": "The image will be uploaded when you save the entry.",
+    "journal.pending_status": "Pending",
+    "journal.add_images_message": "Add images that will be saved with the entry",
     "journal.saving": "Saving...",
     "journal.update": "Update",
     "journal.delete_confirm": "Are you sure you want to delete this entry?",
@@ -2210,6 +2218,10 @@ const translations: Record<Language, Record<string, string>> = {
     "journal.improvements_placeholder":
       "¿Qué puedes mejorar en la próxima sesión?",
     "journal.images": "Imágenes",
+    "journal.image_added_pending": "¡Imagen añadida!",
+    "journal.image_added_pending_desc": "La imagen se subirá cuando guardes la entrada.",
+    "journal.pending_status": "Pendiente",
+    "journal.add_images_message": "Añade imágenes que se guardarán junto con la entrada",
     "journal.saving": "Guardando...",
     "journal.update": "Actualizar",
     "journal.delete_confirm":
