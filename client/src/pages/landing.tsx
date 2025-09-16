@@ -560,13 +560,7 @@ export default function Landing() {
             </Card>
           </div>
 
-          {/* Garantia */}
-          <div className="text-center mt-12">
-            <div className="inline-flex items-center space-x-2 text-slate-300 bg-slate-800/50 rounded-full px-6 py-3">
-              <Shield className="w-5 h-5 text-green-400" />
-              <span>{t('landing.pricing.guarantee')}</span>
-            </div>
-          </div>
+          
         </div>
       </section>
       {/* Features Grid Section */}
