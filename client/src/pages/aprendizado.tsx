@@ -18,7 +18,11 @@ import {
 } from "lucide-react";
 
 // Componente Tour Interativo - Nova versão global
-export function PlatformTour() {
+interface PlatformTourProps {
+  t: (key: string) => string;
+}
+
+export function PlatformTour({ t }: PlatformTourProps) {
   const { startTour } = useTour();
 
   return (
@@ -26,35 +30,35 @@ export function PlatformTour() {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <Route className="h-5 w-5 text-blue-400" />
-          Tour Interativo pela Plataforma
+          {t('learning.tour_interactive')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <p className="text-zinc-300">
-            Faça um tour completo e interativo pela plataforma! O sistema irá navegar automaticamente por cada seção, destacando elementos importantes e explicando como usar cada funcionalidade.
+            {t('learning.tour_description')}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-400">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-400" />
-              <span>Navegação automática entre páginas</span>
+              <span>{t('learning.tour_features.auto_nav')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-400" />
-              <span>Destaques visuais em elementos</span>
+              <span>{t('learning.tour_features.highlights')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-400" />
-              <span>Explicações contextuais detalhadas</span>
+              <span>{t('learning.tour_features.explanations')}</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-400" />
-              <span>13 passos completos</span>
+              <span>{t('learning.tour_features.steps')}</span>
             </div>
           </div>
           <Button onClick={startTour} className="bg-blue-600 hover:bg-blue-700 w-full">
             <Play className="h-4 w-4 mr-2" />
-            Iniciar Tour Interativo
+            {t('learning.tour_start')}
           </Button>
         </div>
       </CardContent>
@@ -68,30 +72,30 @@ export default function Aprendizado() {
 
   const videoSections = [
     {
-      title: "Primeiros Passos",
-      description: "Aprenda o básico para começar a usar a plataforma",
+      title: t("learning.sections.basics"),
+      description: t("learning.sections.basics_desc"),
       videos: [
-        { title: "Como registrar seu primeiro trade", duration: "5:30", completed: false },
-        { title: "Importando dados via CSV", duration: "8:45", completed: false },
-        { title: "Configurando suas metas", duration: "4:20", completed: false },
+        { title: t("learning.videos.first_trade"), duration: "5:30", completed: false },
+        { title: t("learning.videos.csv_import"), duration: "8:45", completed: false },
+        { title: t("learning.videos.goals"), duration: "4:20", completed: false },
       ]
     },
     {
-      title: "Análise e Relatórios", 
-      description: "Domine as ferramentas de análise da plataforma",
+      title: t("learning.sections.analysis"), 
+      description: t("learning.sections.analysis_desc"),
       videos: [
-        { title: "Lendo métricas do dashboard", duration: "12:15", completed: false },
-        { title: "Usando o calendário de trading", duration: "9:30", completed: false },
-        { title: "Interpretando gráficos de performance", duration: "15:45", completed: false },
+        { title: t("learning.videos.dashboard"), duration: "12:15", completed: false },
+        { title: t("learning.videos.calendar"), duration: "9:30", completed: false },
+        { title: t("learning.videos.charts"), duration: "15:45", completed: false },
       ]
     },
     {
-      title: "Recursos Avançados",
-      description: "Aproveite ao máximo as funcionalidades premium", 
+      title: t("learning.sections.advanced"),
+      description: t("learning.sections.advanced_desc"), 
       videos: [
-        { title: "IA para análise de CSV", duration: "10:20", completed: false },
-        { title: "Gestão avançada de risco", duration: "13:10", completed: false },
-        { title: "Diário de trading e insights", duration: "11:50", completed: false },
+        { title: t("learning.videos.ai_csv"), duration: "10:20", completed: false },
+        { title: t("learning.videos.risk"), duration: "13:10", completed: false },
+        { title: t("learning.videos.journal"), duration: "11:50", completed: false },
       ]
     }
   ];
@@ -104,22 +108,22 @@ export default function Aprendizado() {
           <div className="flex items-center justify-center gap-3">
             <GraduationCap className="h-8 w-8 text-blue-400" />
             <h1 className="text-3xl md:text-4xl font-bold text-white">
-              Centro de Aprendizado
+              {t('learning.title')}
             </h1>
           </div>
           <p className="text-zinc-300 text-lg max-w-2xl mx-auto">
-            Domine a plataforma de trading com nossos tutoriais e faça um tour guiado por todas as funcionalidades
+            {t('learning.description')}
           </p>
         </div>
 
         {/* Tour da Plataforma */}
-        <PlatformTour />
+        <PlatformTour t={t} />
 
         {/* Videoaulas */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <Video className="h-6 w-6 text-purple-400" />
-            Videoaulas
+            {t('learning.videos')}
           </h2>
           
           <div className="grid gap-6">
@@ -169,22 +173,22 @@ export default function Aprendizado() {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Users className="h-5 w-5 text-green-400" />
-              Seu Progresso
+              {t('learning.progress')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
                 <div className="text-2xl font-bold text-green-400 mb-1">0 / 12</div>
-                <div className="text-sm text-zinc-400">Vídeos Assistidos</div>
+                <div className="text-sm text-zinc-400">{t('learning.stats.videos_watched')}</div>
               </div>
               <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-400 mb-1">0%</div>
-                <div className="text-sm text-zinc-400">Progresso Geral</div>
+                <div className="text-sm text-zinc-400">{t('learning.stats.general_progress')}</div>
               </div>
               <div className="text-center p-4 bg-zinc-800/50 rounded-lg">
                 <div className="text-2xl font-bold text-purple-400 mb-1">--:--</div>
-                <div className="text-sm text-zinc-400">Tempo Assistido</div>
+                <div className="text-sm text-zinc-400">{t('learning.stats.time_watched')}</div>
               </div>
             </div>
           </CardContent>
