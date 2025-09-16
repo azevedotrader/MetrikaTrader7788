@@ -534,7 +534,7 @@ export default function Landing() {
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    t('landing.pricing.black_feature1'),
+                    'Tudo do PRO +',
                     t('landing.pricing.black_feature2'),
                     t('landing.pricing.black_feature3'),
                     t('landing.pricing.black_feature4'),
