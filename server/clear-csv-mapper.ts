@@ -207,10 +207,17 @@ export function processClearTradeRow(
   
   console.log(`✅ Clear: ${ativo} ${tipo} ${qtdFinal} contratos, resultado = R$ ${resultado.toFixed(2)} (${fonteCampo})`);
   
-  // Verificar novamente se a data é válida antes do toISOString()
-  if (isNaN(dataHora.getTime())) {
-    console.log(`❌ Data ainda inválida após correção - criando nova data atual`);
-    dataHora = new Date();
+  // Garantir data válida com try-catch robusto
+  let dataHoraISO: string;
+  try {
+    if (isNaN(dataHora.getTime())) {
+      console.log(`❌ Data inválida detectada - usando data atual`);
+      dataHora = new Date();
+    }
+    dataHoraISO = dataHora.toISOString();
+  } catch (error) {
+    console.log(`❌ Erro no toISOString() - usando data atual:`, error);
+    dataHoraISO = new Date().toISOString();
   }
   
   return {
@@ -219,7 +226,7 @@ export function processClearTradeRow(
     origem: 'csv',
     mercado: 'b3',
     setup: 'Clear CSV Import',
-    dataHora: dataHora.toISOString(),
+    dataHora: dataHoraISO,
     ativo: ativo.toUpperCase(),
     tipo,
     quantidade: qtdFinal.toString(),
