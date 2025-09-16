@@ -459,6 +459,69 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
             </Card>
           )}
 
+          {/* Lista de Trades */}
+          {dayTrades.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Trades do Dia ({dayTrades.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {dayTrades.map((trade, index) => {
+                    const resultado = parseFloat(trade.resultado) || 0;
+                    const isProfit = resultado > 0;
+                    
+                    return (
+                      <div
+                        key={trade.id || index}
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-lg border",
+                          isProfit 
+                            ? "bg-green-950/20 border-green-800/30" 
+                            : "bg-red-950/20 border-red-800/30"
+                        )}
+                        data-testid={`trade-item-${index}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-zinc-400" />
+                            <span className="text-sm text-zinc-400">
+                              {trade.dataHora ? formatTime(trade.dataHora) : "Horário não disponível"}
+                            </span>
+                          </div>
+                          
+                          <div className="flex flex-col">
+                            <span className="font-medium text-white">{trade.ativo}</span>
+                            <div className="flex items-center gap-2 text-xs text-zinc-400">
+                              {trade.tipo && <span>{trade.tipo}</span>}
+                              {trade.quantidade && <span>• {trade.quantidade} unidades</span>}
+                              {trade.broker && <span>• {trade.broker}</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className={cn(
+                            "font-bold text-lg",
+                            isProfit ? "text-green-400" : "text-red-400"
+                          )}>
+                            {formatCurrency(resultado)}
+                          </div>
+                          <div className="text-xs text-zinc-400">
+                            Res Op
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Seção de Imagens - Card independente */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -548,69 +611,6 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
               )}
             </CardContent>
           </Card>
-
-          {/* Lista de Trades */}
-          {dayTrades.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Trades do Dia ({dayTrades.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {dayTrades.map((trade, index) => {
-                    const resultado = parseFloat(trade.resultado) || 0;
-                    const isProfit = resultado > 0;
-                    
-                    return (
-                      <div
-                        key={trade.id || index}
-                        className={cn(
-                          "flex items-center justify-between p-3 rounded-lg border",
-                          isProfit 
-                            ? "bg-green-950/20 border-green-800/30" 
-                            : "bg-red-950/20 border-red-800/30"
-                        )}
-                        data-testid={`trade-item-${index}`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-zinc-400" />
-                            <span className="text-sm text-zinc-400">
-                              {trade.dataHora ? formatTime(trade.dataHora) : "Horário não disponível"}
-                            </span>
-                          </div>
-                          
-                          <div className="flex flex-col">
-                            <span className="font-medium text-white">{trade.ativo}</span>
-                            <div className="flex items-center gap-2 text-xs text-zinc-400">
-                              {trade.tipo && <span>{trade.tipo}</span>}
-                              {trade.quantidade && <span>• {trade.quantidade} unidades</span>}
-                              {trade.broker && <span>• {trade.broker}</span>}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <div className={cn(
-                            "font-bold text-lg",
-                            isProfit ? "text-green-400" : "text-red-400"
-                          )}>
-                            {formatCurrency(resultado)}
-                          </div>
-                          <div className="text-xs text-zinc-400">
-                            Res Op
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Mensagem quando não há dados */}
           {!dayDiaryEntry && dayTrades.length === 0 && (
