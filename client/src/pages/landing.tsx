@@ -22,7 +22,8 @@ import {
   Activity,
   Database,
   Download,
-  LineChart
+  LineChart,
+  Upload
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { LoginModal } from "@/components/ui/login-modal";
@@ -620,10 +621,10 @@ export default function Landing() {
                 color: "from-rose-500 to-pink-500"
               },
               {
-                icon: Download,
-                titleKey: 'landing.features.export_title',
-                descriptionKey: 'landing.features.export_description',
-                color: "from-slate-500 to-gray-500"
+                icon: Upload,
+                titleKey: 'Importação CSV',
+                descriptionKey: 'Importe seus trades de qualquer corretora via CSV e receba insights inteligentes automáticos',
+                color: "from-emerald-500 to-teal-500"
               }
             ].map((feature, index) => (
               <Card key={index} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all group">
