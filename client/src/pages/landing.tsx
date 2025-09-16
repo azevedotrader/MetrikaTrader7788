@@ -501,7 +501,6 @@ export default function Landing() {
                     t('landing.pricing.pro_feature2'),
                     t('landing.pricing.pro_feature3'),
                     t('landing.pricing.pro_feature4'),
-                    t('landing.pricing.pro_feature5'),
                     t('landing.pricing.pro_feature6')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
