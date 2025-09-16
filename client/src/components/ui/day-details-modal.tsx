@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, BookOpen, TrendingUp, TrendingDown, Clock, Edit, Image as ImageIcon } from "lucide-react";
+import { Calendar, BookOpen, TrendingUp, TrendingDown, Clock, Edit, Image as ImageIcon, Upload, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DiaryEntry } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { ImageModal } from "./image-modal";
+import { useToast } from "@/hooks/use-toast";
 
 interface DiaryImage {
   id: string;
@@ -33,6 +34,9 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   const [dayImages, setDayImages] = useState<DiaryImage[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
   const [selectedImage, setSelectedImage] = useState<DiaryImage | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Buscar entradas do diário
   const { data: diaryEntries = [] } = useQuery<DiaryEntry[]>({
@@ -142,6 +146,178 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
       console.error('Erro ao carregar imagens do dia:', error);
     } finally {
       setLoadingImages(false);
+    }
+  };
+
+  // Criar entrada básica do diário se não existir
+  const createBasicDiaryEntry = async (date: Date): Promise<string | null> => {
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) throw new Error('Usuário não autenticado');
+
+      const formatDateForInput = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const basicEntry = {
+        date: formatDateForInput(date),
+        title: `Entrada de ${format(date, "d 'de' MMMM", { locale: ptBR })}`,
+        content: "Entrada criada para adicionar imagens.",
+        emotion: undefined,
+        trades: 0,
+        pnl: "0",
+        winRate: "0",
+        lessons: "",
+        improvements: "",
+      };
+
+      const response = await fetch("/api/diary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        body: JSON.stringify(basicEntry),
+        credentials: "include"
+      });
+
+      if (!response.ok) throw new Error("Erro ao criar entrada");
+
+      const newEntry = await response.json();
+      
+      // Atualizar cache das entradas do diário
+      queryClient.invalidateQueries({ queryKey: ["/api/diary"] });
+      
+      return newEntry.id;
+    } catch (error) {
+      console.error('Erro ao criar entrada básica:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar entrada do diário.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
+  // Handle upload de imagem
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validação do arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione apenas arquivos de imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) throw new Error('Usuário não autenticado');
+
+      // Verificar se já existe entrada para o dia ou criar uma nova
+      let targetDiaryEntryId = dayDiaryEntry?.id;
+      
+      if (!targetDiaryEntryId && selectedDate) {
+        targetDiaryEntryId = await createBasicDiaryEntry(selectedDate);
+        if (!targetDiaryEntryId) {
+          throw new Error('Não foi possível criar entrada do diário');
+        }
+      }
+
+      if (!targetDiaryEntryId) {
+        throw new Error('Não foi possível determinar entrada do diário');
+      }
+
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`/api/diary/${targetDiaryEntryId}/images`, {
+        method: 'POST',
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        body: formData,
+        credentials: "include"
+      });
+
+      if (!response.ok) throw new Error('Erro ao fazer upload');
+
+      const result = await response.json();
+      setDayImages(prev => [...prev, result.image]);
+      
+      toast({
+        title: "Sucesso!",
+        description: "Imagem adicionada com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro no upload:', error);
+      toast({
+        title: "Erro no upload",
+        description: "Não foi possível fazer upload da imagem.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+
+    // Limpar o input
+    event.target.value = '';
+  };
+
+  // Handle deletar imagem
+  const handleImageDelete = async (imageId: string) => {
+    if (!dayDiaryEntry?.id) return;
+
+    if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
+
+    try {
+      const userId = localStorage.getItem('user-id');
+      if (!userId) throw new Error('Usuário não autenticado');
+
+      const response = await fetch(`/api/diary/${dayDiaryEntry.id}/images/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          "user-id": userId,
+          "X-User-ID": userId
+        },
+        credentials: "include"
+      });
+
+      if (!response.ok) throw new Error('Erro ao deletar imagem');
+
+      setDayImages(prev => prev.filter(img => img.id !== imageId));
+      
+      toast({
+        title: "Sucesso!",
+        description: "Imagem removida com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao deletar imagem:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a imagem.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -279,17 +455,45 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                 )}
 
                 {/* Seção de imagens */}
-                {dayImages.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
+                <div>
+                  {/* Upload de imagem */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
                       <ImageIcon className="h-4 w-4 text-zinc-400" />
                       <h4 className="font-medium text-white">
-                        {dayImages.length === 1 ? 'Imagem' : 'Imagens'} ({dayImages.length})
+                        {dayImages.length > 0 ? `${dayImages.length === 1 ? 'Imagem' : 'Imagens'} (${dayImages.length})` : 'Imagens'}
                       </h4>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="hidden"
+                        id="day-image-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('day-image-upload')?.click()}
+                        disabled={uploadingImage}
+                        className="flex items-center gap-2"
+                        data-testid="button-upload-day-image"
+                      >
+                        <Upload className="h-3 w-3" />
+                        {uploadingImage ? "Enviando..." : "Adicionar"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Grid de imagens */}
+                  {dayImages.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
                       {dayImages.slice(0, 8).map((image) => (
-                        <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-500 transition-all hover:shadow-lg">
+                        <div key={image.id} className="relative group aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-500 transition-all hover:shadow-lg">
                           <img
                             src={`/api/images/${image.id}`}
                             alt={image.originalName}
@@ -301,6 +505,17 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                             }}
                             data-testid={`calendar-image-${image.id}`}
                           />
+                          {/* Botão de deletar - visível no hover */}
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleImageDelete(image.id)}
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
+                            data-testid={`button-delete-day-image-${image.id}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
                       ))}
                       {dayImages.length > 8 && (
@@ -311,15 +526,17 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {loadingImages && (
-                  <div className="flex items-center gap-2 text-zinc-400">
-                    <ImageIcon className="h-4 w-4 animate-pulse" />
-                    <span className="text-sm">Carregando imagens...</span>
-                  </div>
-                )}
+                  {/* Mensagem quando não há imagens */}
+                  {dayImages.length === 0 && !loadingImages && (
+                    <div className="text-center py-6 text-zinc-400 text-sm border border-zinc-700 rounded-lg border-dashed">
+                      <ImageIcon className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
+                      Nenhuma imagem adicionada
+                    </div>
+                  )}
+                </div>
+
               </CardContent>
             </Card>
           )}
