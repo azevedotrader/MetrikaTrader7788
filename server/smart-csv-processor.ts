@@ -24,8 +24,10 @@ export interface SmartCSVResult {
     dateRange: { start: string; end: string } | null;
     detectedBroker: string;
     detectedMarket: string;
+    hasDatesWarning?: boolean; // Indica se o CSV não tinha datas específicas
   };
   errors: string[];
+  warnings?: string[]; // Avisos sobre limitações sem datas
 }
 
 /**
@@ -90,8 +92,8 @@ function validateTradeRow(row: any, index: number): ValidatedTradeRow | null {
   const valores = extractAndValidatePrices(row);
   const tipo = extractOperationType(row);
   
-  // Schema mínimo: precisa ter data válida, ativo não vazio, quantidade > 0
-  // e pelo menos um valor monetário válido
+  // Schema mínimo atualizado: ativo não vazio, quantidade > 0 e pelo menos um valor monetário válido
+  // Data agora é opcional, mas importante para estatísticas completas
   const hasValidDate = dataHora !== null;
   const hasValidSymbol = ativo !== null && ativo !== '';
   const hasValidQuantity = quantidade !== null && quantidade > 0;
@@ -100,12 +102,13 @@ function validateTradeRow(row: any, index: number): ValidatedTradeRow | null {
                        valores.capitalUtilizado !== null;
   
   console.log(`  📋 Validação:`);
-  console.log(`     Data: ${hasValidDate ? '✅' : '❌'} ${dataHora ? dataHora.toISOString() : 'null'}`);
+  console.log(`     Data: ${hasValidDate ? '✅' : '⚠️ opcional'} ${dataHora ? dataHora.toISOString() : 'null'}`);
   console.log(`     Ativo: ${hasValidSymbol ? '✅' : '❌'} ${ativo}`);
   console.log(`     Quantidade: ${hasValidQuantity ? '✅' : '❌'} ${quantidade}`);
   console.log(`     Preços: ${hasValidPrice ? '✅' : '❌'} entrada=${valores.precoEntrada}, saída=${valores.precoSaida}, capital=${valores.capitalUtilizado}`);
   
-  const isValid = hasValidDate && hasValidSymbol && hasValidQuantity && hasValidPrice;
+  // Data não é mais obrigatória para validação básica
+  const isValid = hasValidSymbol && hasValidQuantity && hasValidPrice;
   
   if (isValid) {
     console.log(`  ✅ Linha ${index} ACEITA - passa no schema de trade`);
@@ -126,12 +129,13 @@ function validateTradeRow(row: any, index: number): ValidatedTradeRow | null {
 }
 
 /**
- * Valida se o arquivo contém trades reais com datas específicas
+ * Valida se o arquivo contém trades reais e detecta se há datas específicas
  */
-function validateTradesWithRealDates(data: any[]): { isValid: boolean; reason?: string } {
-  console.log(`🔍 Validando se arquivo contém trades reais com datas específicas...`);
+function validateTradesWithRealDates(data: any[]): { isValid: boolean; reason?: string; hasNoDates?: boolean } {
+  console.log(`🔍 Validando se arquivo contém trades reais...`);
   
   let realTradesFound = 0;
+  let tradesWithDates = 0;
   let statisticsFound = 0;
   
   for (const row of data.slice(0, 20)) { // Verificar primeiras 20 linhas
@@ -162,18 +166,21 @@ function validateTradesWithRealDates(data: any[]): { isValid: boolean; reason?: 
       continue;
     }
     
-    // Verificar se tem data específica válida
-    const hasValidDate = extractAndValidateDate(row) !== null;
-    
     // Verificar se tem símbolo de trading válido
     const hasValidSymbol = extractAndValidateSymbol(row) !== null;
     
-    if (hasValidDate && hasValidSymbol) {
+    // Verificar se tem data específica válida
+    const hasValidDate = extractAndValidateDate(row) !== null;
+    
+    if (hasValidSymbol) {
       realTradesFound++;
+      if (hasValidDate) {
+        tradesWithDates++;
+      }
     }
   }
   
-  console.log(`📊 Análise do arquivo: ${realTradesFound} trades reais, ${statisticsFound} estatísticas detectadas`);
+  console.log(`📊 Análise do arquivo: ${realTradesFound} trades encontrados, ${tradesWithDates} com datas, ${statisticsFound} estatísticas detectadas`);
   
   // Se mais de 50% são estatísticas, rejeitar
   if (statisticsFound > realTradesFound && statisticsFound > 3) {
@@ -187,11 +194,49 @@ function validateTradesWithRealDates(data: any[]): { isValid: boolean; reason?: 
   if (realTradesFound === 0) {
     return { 
       isValid: false, 
-      reason: 'Nenhum trade com data específica encontrado. O calendário requer trades com datas reais de execução.' 
+      reason: 'Nenhum trade válido encontrado no arquivo.' 
     };
   }
   
-  return { isValid: true };
+  // Se encontrou trades mas poucos têm datas, permite mas marca como aviso
+  const hasNoDates = tradesWithDates === 0;
+  
+  return { isValid: true, hasNoDates };
+}
+
+/**
+ * Função helper para pós-processamento de trades (dateRange e warnings)
+ */
+function postProcessTrades(result: SmartCSVResult): void {
+  // Coletar datas válidas dos trades processados
+  const dates = result.trades
+    .map(t => new Date(t.dataHora))
+    .filter(d => !isNaN(d.getTime()));
+    
+  if (dates.length > 0) {
+    dates.sort((a, b) => a.getTime() - b.getTime());
+    result.summary.dateRange = {
+      start: dates[0].toISOString().split('T')[0],
+      end: dates[dates.length - 1].toISOString().split('T')[0]
+    };
+  } else if (result.trades.length > 0) {
+    // Há trades mas sem datas específicas - adicionar aviso
+    console.log(`⚠️ Trades processados sem datas específicas - adicionando aviso`);
+    result.summary.hasDatesWarning = true;
+    result.warnings = result.warnings || [];
+    result.warnings.push(
+      '⚠️ ATENÇÃO: Seu CSV não contém datas específicas dos trades!',
+      '📊 LIMITAÇÕES IMPORTANTES:',
+      '• As estatísticas não ficarão bem elaboradas',
+      '• As projeções do calendário não funcionarão corretamente',
+      '• Os gráficos de evolução temporal terão precisão limitada',
+      '',
+      '💡 RECOMENDAÇÃO: Para análises completas, use um CSV com:',
+      '• Data/hora de cada operação',
+      '• Preços de entrada e saída específicos',
+      '• Timestamps de abertura e fechamento'
+    );
+  }
 }
 
 /**
@@ -257,14 +302,17 @@ export async function processSmartCSV(
       transform: (value: string) => value.trim()
     });
     
-    // 4.5. VALIDAÇÃO CRÍTICA: Verificar se contém trades reais com datas específicas
-    const validation = validateTradesWithRealDates(parseResult.data);
-    if (!validation.isValid) {
-      console.log(`❌ Arquivo rejeitado: ${validation.reason}`);
-      result.errors.push(`❌ ${validation.reason}`);
+    // 4.5. VALIDAÇÃO CRÍTICA: Verificar se contém trades reais e detectar se há datas
+    const dateValidation = validateTradesWithRealDates(parseResult.data);
+    if (!dateValidation.isValid) {
+      console.log(`❌ Arquivo rejeitado: ${dateValidation.reason}`);
+      result.errors.push(`❌ ${dateValidation.reason}`);
       return result;
     }
-    console.log(`✅ Arquivo validado: contém trades reais com datas específicas`);
+    
+    // Aviso sobre datas será determinado após o processamento baseado nas datas realmente coletadas
+    
+    console.log(`✅ Arquivo validado: contém trades reais${dateValidation.hasNoDates ? ' (sem datas específicas)' : ' com datas específicas'}`);
 
     if (parseResult.errors.length > 0) {
       console.warn('⚠️ Erros no parse:', parseResult.errors);
@@ -290,6 +338,9 @@ export async function processSmartCSV(
       result.summary.detectedBroker = 'clear';
       result.summary.detectedMarket = 'b3';
       
+      // Aplicar pós-processamento (dateRange e warnings)
+      postProcessTrades(result);
+      
       return result;
     }
     
@@ -301,6 +352,9 @@ export async function processSmartCSV(
       result.summary.tradesFound = tickmillTrades.length;
       result.summary.detectedBroker = 'tickmill';
       result.summary.detectedMarket = 'forex';
+      
+      // Aplicar pós-processamento (dateRange e warnings)
+      postProcessTrades(result);
       
       return result;
     }
@@ -362,6 +416,7 @@ export async function processSmartCSV(
         if (trade) {
           result.trades.push(trade);
           result.summary.tradesFound++;
+          // Sempre coletar datas quando presentes
           const tradeDate = new Date(trade.dataHora);
           if (!isNaN(tradeDate.getTime())) {
             dates.push(tradeDate);
@@ -412,6 +467,7 @@ export async function processSmartCSV(
             if (trade) {
               result.trades.push(trade);
               result.summary.tradesFound++;
+              // Sempre coletar datas quando presentes
               const tradeDate = new Date(trade.dataHora);
               if (!isNaN(tradeDate.getTime())) {
                 dates.push(tradeDate);
@@ -444,21 +500,17 @@ export async function processSmartCSV(
         result.summary.statisticsSkipped = parseResult.data.length;
         result.errors.push('ℹ️ Arquivo interpretado como estatísticas/relatório');
         
-        // Calcular range de datas
-        dates = statisticsTrades.map(t => new Date(t.dataHora));
+        // Coletar apenas datas válidas dos trades interpretados
+        dates = statisticsTrades
+          .map(t => new Date(t.dataHora))
+          .filter(d => !isNaN(d.getTime()));
       } else {
         result.errors.push('⚠️ Interpretador de estatísticas não conseguiu extrair dados válidos');
       }
     }
 
-    // 6. Calcular range de datas
-    if (dates.length > 0) {
-      dates.sort((a, b) => a.getTime() - b.getTime());
-      result.summary.dateRange = {
-        start: dates[0].toISOString().split('T')[0],
-        end: dates[dates.length - 1].toISOString().split('T')[0]
-      };
-    }
+    // 6. Aplicar pós-processamento unificado (dateRange e warnings)
+    postProcessTrades(result);
 
     // 7. Verificar tipo de arquivo e dar feedback específico
     if (result.trades.length === 0) {
@@ -1140,8 +1192,10 @@ function extractTradeFromRow(
   lineIndex: number
 ): InsertTrade | null {
   try {
-    // 1. Extrair data
-    const date = extractDate(row);
+    // 1. Extrair data (pode ser null se não encontrar)
+    const extractedDate = extractDate(row);
+    // Usar data atual como fallback apenas para o trade (não para estatísticas)
+    const date = extractedDate || new Date();
     
     // 2. Extrair símbolo
     const symbol = extractSymbol(row, market);
@@ -1204,9 +1258,9 @@ function extractTradeFromRow(
 }
 
 /**
- * Extrai data da linha
+ * Extrai data da linha (retorna null se não encontrar)
  */
-function extractDate(row: any): Date {
+function extractDate(row: any): Date | null {
   const datePatterns = [
     /\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{4}/,  // DD/MM/YYYY
     /\d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}/,  // YYYY-MM-DD
@@ -1247,8 +1301,8 @@ function extractDate(row: any): Date {
     }
   }
   
-  console.log('⚠️ Data não encontrada, usando hoje');
-  return new Date();
+  console.log('⚠️ Data não encontrada no CSV');
+  return null;
 }
 
 /**
