@@ -634,7 +634,7 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
         <div className="relative">
           <ResponsiveContainer
             width="100%"
-            height={300}
+            height={450}
           >
           {(() => {
             // Calcular yMin e yMax dos dados reais
