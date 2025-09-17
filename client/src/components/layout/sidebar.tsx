@@ -62,7 +62,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const handleLinkClick = (href: string, e?: React.MouseEvent) => {
     // Verificar se é suporte e se o usuário tem acesso
     if (href === '/suporte') {
-      if (planType === 'free' || planType === 'starter') {
+      if (planType === 'free') {
         e?.preventDefault();
         setShowUpgradeModal(true);
         return;
@@ -236,7 +236,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
-                🎯 Upgrade Necessário - Suporte Exclusivo
+                🚀 Upgrade para Acessar Recursos Premium
               </DialogTitle>
             </DialogHeader>
             
@@ -244,11 +244,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               {/* Descrição */}
               <div className="text-center space-y-3">
                 <p className="text-zinc-300 text-sm md:text-base leading-relaxed">
-                  O <strong className="text-purple-300">suporte exclusivo</strong> está disponível apenas para usuários dos 
-                  planos <strong className="text-purple-300">Pro</strong> e <strong className="text-purple-300">Black</strong>.
+                  O <strong className="text-purple-300">suporte completo</strong> está disponível para usuários dos 
+                  planos <strong className="text-purple-300">Starter</strong>, <strong className="text-purple-300">Pro</strong> e <strong className="text-purple-300">Black</strong>.
                 </p>
                 <p className="text-zinc-400 text-sm">
-                  Tenha acesso a atendimento prioritário e suporte especializado para maximizar seus resultados no trading.
+                  Faça upgrade para ter acesso ao suporte especializado e recursos avançados da Métrika.
                 </p>
               </div>
 
