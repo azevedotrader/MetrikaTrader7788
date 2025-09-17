@@ -69,6 +69,7 @@ import {
   Filter,
   CheckSquare,
   ChevronDown,
+  X,
 } from "lucide-react";
 import {
   LineChart as RechartsLineChart,
