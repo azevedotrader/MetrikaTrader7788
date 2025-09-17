@@ -2277,7 +2277,18 @@ export default function Dashboard() {
       {/* Dialog de Edição de Trade Manual */}
       <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
         <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md">
-          <DialogHeader>
+          <DialogHeader className="relative">
+            <button
+              onClick={() => {
+                setShowEditTradeDialog(false);
+                setEditingTrade(null);
+              }}
+              className="absolute right-0 top-0 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 h-6 w-6 flex items-center justify-center"
+              data-testid="button-close-dialog"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
             <DialogTitle>{t('trades.edit_manual_trade')}</DialogTitle>
             <DialogDescription className="text-zinc-400">
               {t('trades.edit_trade_description')}
