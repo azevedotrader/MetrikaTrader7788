@@ -62,7 +62,7 @@ export default function Landing() {
               <a href="#precos" className="text-slate-300 hover:text-white transition-colors">
                 {t('landing.header.pricing')}
               </a>
-              <a href="#contato" className="text-slate-300 hover:text-white transition-colors">
+              <a href="mailto:suporte@appmetrika.com.br" className="text-slate-300 hover:text-white transition-colors">
                 {t('landing.header.contact')}
               </a>
             </nav>
@@ -719,7 +719,7 @@ export default function Landing() {
             <div>
               <h4 className="text-white font-semibold mb-4">{t('landing.footer.support')}</h4>
               <div className="space-y-2">
-                <a href="#contato" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.contact')}</a>
+                <a href="mailto:suporte@appmetrika.com.br" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.contact')}</a>
                 <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.documentation')}</a>
                 <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.tutorials')}</a>
                 <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.status')}</a>
