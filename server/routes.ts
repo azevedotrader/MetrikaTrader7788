@@ -20,8 +20,8 @@ import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 
 // Admin credentials (in production, this should be in environment variables)
 const ADMIN_CREDENTIALS = {
-  email: 'admin@metrika.com',
-  password: 'admin123',
+  email: 'admin@metrika.com.br',
+  password: 'metrika777',
   name: 'Administrador Métrika'
 };
 
