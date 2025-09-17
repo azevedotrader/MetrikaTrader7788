@@ -2323,12 +2323,49 @@ export async function registerRoutes(app: Express): Promise<void> {
   // AI advice endpoint - ISOLADO POR USUÁRIO
   app.get("/api/ai/advice", requireAuth, async (req, res) => {
     try {
-      res.json({ advice: "Continue operando com disciplina e seguindo seu plano de trading." });
+      const userId = req.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      // Verificar plano do usuário
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Para usuários FREE, retornar conselho básico
+      if (user.planType === 'free') {
+        const basicAdvices = [
+          "Continue operando com disciplina e seguindo seu plano de trading.",
+          "Mantenha um diário de trading para acompanhar sua evolução.",
+          "Defina sempre seu stop loss antes de entrar em uma operação.",
+          "Foque na consistência ao invés de trades únicos de alto lucro.",
+          "Estude o mercado todos os dias para aprimorar suas análises."
+        ];
+        const randomAdvice = basicAdvices[Math.floor(Math.random() * basicAdvices.length)];
+        return res.json({ advice: randomAdvice });
+      }
+
+      // Para usuários STARTER, PRO e BLACK, usar IA real
+      const { aiService } = await import('./ai-service');
+      
+      // Buscar dados do usuário para contextualizar a IA
+      const trades = await storage.getTrades(userId);
+      const csvImports = await storage.getCsvImports(userId);
+      
+      // Gerar conselho personalizado usando IA
+      const advice = await aiService.generateDailyAdvice(userId, trades, csvImports);
+      
+      res.json({ advice });
     } catch (error) {
       console.error("Error fetching AI advice:", error);
-      res.status(500).json({ message: "Erro interno do servidor" });
+      // Fallback para erro
+      res.json({ advice: "Continue operando com disciplina e seguindo seu plano de trading." });
     }
   });
+
 
   // AI CSV Analysis endpoint - ISOLADO POR USUÁRIO
   app.post('/api/ai/analyze-csv-tips', requireAuth, async (req, res) => {

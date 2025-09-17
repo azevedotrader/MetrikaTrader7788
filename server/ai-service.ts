@@ -296,6 +296,53 @@ export class AITradingService {
     }
   }
 
+  async generateDailyAdvice(userId: string, trades: any[], csvImports: any[]): Promise<string> {
+    await this.checkUserPlan(userId, "Conselho Diário de IA");
+    
+    try {
+      const totalTrades = trades.length;
+      const recentTrades = trades.slice(-5); // Últimos 5 trades
+      const totalProfit = trades.reduce((acc, t) => acc + (t.resultadoNum || 0), 0);
+      const winRate = totalTrades > 0 ? (trades.filter(t => (t.resultadoNum || 0) > 0).length / totalTrades) * 100 : 0;
+      
+      const prompt = `
+        Como especialista em trading, analise estes dados e forneça UM conselho prático:
+        
+        Estatísticas:
+        - Total de trades: ${totalTrades}
+        - Resultado total: R$ ${totalProfit.toFixed(2)}
+        - Taxa de acerto: ${winRate.toFixed(1)}%
+        - Trades recentes: ${recentTrades.length}
+        
+        ${recentTrades.length > 0 ? `Últimos trades:
+        ${recentTrades.map(t => `- ${t.ativo}: ${t.resultadoNum > 0 ? 'GAIN' : 'LOSS'} R$ ${t.resultadoNum?.toFixed(2) || '0.00'}`).join('\n')}` : ''}
+        
+        Forneça apenas UM conselho personalizado em português (máximo 120 caracteres), focando na situação atual do trader.
+      `;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "Você é um mentor de trading. Seja direto, prático e motivacional. Responda apenas com o conselho, sem introdução."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 50
+      });
+
+      const advice = response.choices[0].message.content?.trim() || "Continue operando com disciplina e seguindo seu plano.";
+      return advice;
+    } catch (error) {
+      console.error('Erro na geração de conselho diário:', error);
+      return "Continue operando com disciplina e seguindo seu plano de trading.";
+    }
+  }
+
   async analyzeTradingPerformance(userId: string, trades: any[]): Promise<{
     summary: string;
     insights: string[];
