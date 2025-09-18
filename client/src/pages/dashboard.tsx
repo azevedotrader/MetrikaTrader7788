@@ -1592,116 +1592,177 @@ export default function Dashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 md:space-y-6">
-          {/* TradeZella-Style Dashboard Grid */}
-          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
+          {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
+          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 mb-4">
             {/* Net PnL */}
-            <SquareCard
-              title="Net PnL"
-              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
-              icon={DollarSign}
-              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
-              data-testid="card-net-pnl"
-            />
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-xs text-zinc-400 font-medium">Net PnL</div>
+                  <DollarSign className="h-4 w-4 text-zinc-400" />
+                </div>
+                <div className={`text-2xl font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  R$ {metrics.rentabilidadeTotal.toFixed(2)}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Trade Win % */}
-            <SquareCard
-              title="Trade win %"
-              value=""
-              icon={Target}
-              color="text-green-400"
-              data-testid="card-trade-win"
-            >
-              <div className="flex flex-col items-center justify-center">
-                <CircularProgress 
-                  percentage={metrics.taxaAcerto} 
-                  color={metrics.taxaAcerto >= 60 ? "#22c55e" : metrics.taxaAcerto >= 40 ? "#f59e0b" : "#ef4444"}
-                />
-                <div className="text-xs text-zinc-400 mt-1">{metrics.totalTrades} trades</div>
-              </div>
-            </SquareCard>
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-xs text-zinc-400 font-medium">Trade win %</div>
+                  <Target className="h-4 w-4 text-zinc-400" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <CircularProgress 
+                    percentage={metrics.taxaAcerto} 
+                    size={50}
+                    color={metrics.taxaAcerto >= 60 ? "#22c55e" : metrics.taxaAcerto >= 40 ? "#f59e0b" : "#ef4444"}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Profit Factor */}
-            <SquareCard
-              title="Profit factor"
-              value=""
-              icon={TrendingUp}
-              color="text-blue-400"
-              data-testid="card-profit-factor"
-            >
-              <div className="flex flex-col items-center justify-center">
-                {(() => {
-                  const profitFactor = (() => {
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-xs text-zinc-400 font-medium">Profit factor</div>
+                  <TrendingUp className="h-4 w-4 text-zinc-400" />
+                </div>
+                <div className="flex items-center justify-center">
+                  {(() => {
                     const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
                     const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
                     const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
-                    return totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
-                  })();
-                  return (
-                    <>
+                    const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
+                    return (
                       <CircularProgress 
                         percentage={Math.min(profitFactor * 20, 100)} 
+                        size={50}
                         color={profitFactor >= 2 ? "#22c55e" : profitFactor >= 1 ? "#f59e0b" : "#ef4444"}
                       />
-                      <div className="text-xs text-zinc-400 mt-1">{profitFactor.toFixed(2)}</div>
-                    </>
-                  );
-                })()}
-              </div>
-            </SquareCard>
+                    );
+                  })()}
+                </div>
+                <div className="text-center mt-1">
+                  <div className="text-xs text-zinc-400">
+                    {(() => {
+                      const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
+                      const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
+                      const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
+                      const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
+                      return profitFactor.toFixed(2);
+                    })()}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Day Win % */}
-            <SquareCard
-              title="Day win %"
-              value=""
-              icon={Calendar}
-              color="text-purple-400"
-              data-testid="card-day-win"
-            >
-              <div className="flex flex-col items-center justify-center">
-                {(() => {
-                  // Calculate day win percentage
-                  const dailyMap = new Map<string, number>();
-                  filteredTrades.forEach(trade => {
-                    const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
-                    const result = parseFloat(trade.resultado || '0');
-                    dailyMap.set(date, (dailyMap.get(date) || 0) + result);
-                  });
-                  const totalDays = dailyMap.size;
-                  const winningDays = Array.from(dailyMap.values()).filter(pnl => pnl > 0).length;
-                  const dayWinRate = totalDays > 0 ? (winningDays / totalDays) * 100 : 0;
-                  return (
-                    <>
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-xs text-zinc-400 font-medium">Day win %</div>
+                  <Calendar className="h-4 w-4 text-zinc-400" />
+                </div>
+                <div className="flex items-center justify-center">
+                  {(() => {
+                    // Calculate day win percentage
+                    const dailyMap = new Map<string, number>();
+                    filteredTrades.forEach(trade => {
+                      const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
+                      const result = parseFloat(trade.resultado || '0');
+                      dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                    });
+                    const totalDays = dailyMap.size;
+                    const winningDays = Array.from(dailyMap.values()).filter(pnl => pnl > 0).length;
+                    const dayWinRate = totalDays > 0 ? (winningDays / totalDays) * 100 : 0;
+                    return (
                       <CircularProgress 
                         percentage={dayWinRate} 
+                        size={50}
                         color={dayWinRate >= 60 ? "#22c55e" : dayWinRate >= 40 ? "#f59e0b" : "#ef4444"}
                       />
-                      <div className="text-xs text-zinc-400 mt-1">{totalDays} dias</div>
-                    </>
-                  );
-                })()}
-              </div>
-            </SquareCard>
+                    );
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* RR Médio */}
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-xs text-zinc-400 font-medium">Avg RR</div>
+                  <TrendingUp className="h-4 w-4 text-zinc-400" />
+                </div>
+                <div className="text-2xl font-bold text-white">
+                  {metrics.riscoRetornoMedio.toFixed(2)}
+                </div>
+                <div className="text-xs text-zinc-500 mt-1">
+                  Risk/Reward
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Average Win/Loss */}
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="text-xs text-zinc-400 font-medium">Avg win/loss</div>
+                  <Activity className="h-4 w-4 text-zinc-400" />
+                </div>
+                <div className="text-lg font-bold text-green-400">
+                  R$ {(() => {
+                    const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                      .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
+                    return avgWin.toFixed(0);
+                  })()}
+                </div>
+                <div className="text-sm font-semibold text-red-400">
+                  -R$ {(() => {
+                    const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                      .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
+                    return avgLoss.toFixed(0);
+                  })()}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Bottom Row - Square Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {/* Progress Tracker */}
             <SquareCard
-              title="Avg win/loss trade"
-              value={`R$ ${(() => {
-                const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
-                  .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
-                const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
-                  .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
-                return avgWin.toFixed(0);
-              })()}`}
-              icon={Activity}
-              color="text-white"
-              subtitle={`-R$ ${(() => {
-                const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
-                  .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
-                return avgLoss.toFixed(0);
-              })()}`}
-              data-testid="card-avg-trade"
-            />
+              title="Progress tracker"
+              value=""
+              icon={Calendar}
+              color="text-blue-400"
+              className="lg:col-span-2"
+              data-testid="card-progress-tracker"
+            >
+              <div className="h-full">
+                <div className="grid grid-cols-7 gap-1 text-xs">
+                  {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
+                    <div key={day} className="text-center text-zinc-400 p-1">{day}</div>
+                  ))}
+                  {Array.from({ length: 35 }, (_, i) => {
+                    const isActive = Math.random() > 0.7;
+                    const isPositive = Math.random() > 0.5;
+                    return (
+                      <div
+                        key={i}
+                        className={`aspect-square rounded ${isActive ? (isPositive ? 'bg-blue-600' : 'bg-zinc-600') : 'bg-zinc-800'}`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </SquareCard>
 
             {/* Net Daily PnL Chart */}
             <SquareCard
@@ -1709,28 +1770,10 @@ export default function Dashboard() {
               value=""
               icon={BarChart3}
               color="text-green-400"
-              className="md:col-span-2"
               data-testid="card-daily-pnl-chart"
             >
               <div className="h-full">
                 <NetDailyPnLBarChart trades={filteredTrades} />
-              </div>
-            </SquareCard>
-          </div>
-
-          {/* Second Row - Progress Tracker and Recent Trades */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
-            {/* Progress Tracker (Heatmap placeholder) */}
-            <SquareCard
-              title="Progress tracker"
-              value=""
-              icon={Calendar}
-              color="text-blue-400"
-              className="xl:col-span-2"
-              data-testid="card-progress-tracker"
-            >
-              <div className="h-full flex items-center justify-center">
-                <TradingCalendar trades={filteredTrades} />
               </div>
             </SquareCard>
 
