@@ -90,16 +90,13 @@ function AppContent() {
                 isOpen={isSidebarOpen} 
                 onClose={() => setIsSidebarOpen(false)}
               />
-              <div className={`min-h-screen transition-all duration-300 ${
+              <div className={`min-h-screen transition-all duration-300 pt-20 ${
                 isMobile ? 'ml-0' : 'ml-16'
               }`}>
                 <Switch>
                   <Route path="/dashboard">
-                    <TopBar 
-                      title={t(pageTitleKeys["/dashboard"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <Dashboard />
+                    {/* Dashboard will handle its own TopBar with filters */}
+                    <Dashboard onMenuClick={() => setIsSidebarOpen(true)} />
                   </Route>
                   <Route path="/novo-trade">
                     <TopBar 
@@ -173,11 +170,8 @@ function AppContent() {
                   </Route>
                   {/* Admin route moved to standalone section */}
                   <Route path="/">
-                    <TopBar 
-                      title={t(pageTitleKeys["/dashboard"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <Dashboard />
+                    {/* Dashboard will handle its own TopBar with filters */}
+                    <Dashboard onMenuClick={() => setIsSidebarOpen(true)} />
                   </Route>
                   <Route component={NotFound} />
                 </Switch>

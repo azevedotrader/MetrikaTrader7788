@@ -91,6 +91,7 @@ import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TopBar } from "@/components/layout/top-bar";
 import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 import {
   format,
@@ -1287,7 +1288,11 @@ function RecentTrades({ trades }: { trades: Trade[] }) {
   );
 }
 
-export default function Dashboard() {
+interface DashboardProps {
+  onMenuClick: () => void;
+}
+
+export default function Dashboard({ onMenuClick }: DashboardProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
@@ -1547,7 +1552,13 @@ export default function Dashboard() {
 
 
   return (
-    <div data-testid="dashboard-overview" className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
+    <>
+      <TopBar 
+        title={t("nav.dashboard")} 
+        onMenuClick={onMenuClick}
+        showDashboardFilter={false}
+      />
+      <div data-testid="dashboard-overview" className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex flex-wrap gap-2">
           {/* Smart Reprocess Button */}
@@ -2366,6 +2377,7 @@ export default function Dashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </>
   );
 }
