@@ -1711,8 +1711,8 @@ export default function Dashboard() {
           </div>
 
           {/* Bottom Row - Square Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {/* Progress Tracker */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
+            {/* Progress Tracker - Expanded */}
             <SquareCard
               title={t('metrics.progress_tracker')}
               value=""
@@ -1726,59 +1726,21 @@ export default function Dashboard() {
               </div>
             </SquareCard>
 
-            {/* Net Daily PnL Chart */}
-            <SquareCard
-              title={t('metrics.daily_net_pnl')}
-              value=""
-              icon={BarChart3}
-              color="text-green-400"
-              data-testid="card-daily-pnl-chart"
-            >
-              <div className="h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={(() => {
-                      // Calculate daily net PnL data
-                      const dailyMap = new Map<string, number>();
-                      filteredTrades.forEach(trade => {
-                        const date = format(new Date(trade.dataHora), 'MM/dd');
-                        const result = parseFloat(trade.resultado || '0');
-                        dailyMap.set(date, (dailyMap.get(date) || 0) + result);
-                      });
-                      return Array.from(dailyMap.entries())
-                        .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                        .slice(-14) // Last 14 days
-                        .map(([date, pnl]) => ({ date, pnl }));
-                    })()}
-                    margin={{ top: 8, right: 8, left: 8, bottom: 20 }}
-                  >
-                    <XAxis 
-                      dataKey="date" 
-                      axisLine={false} 
-                      tickLine={false}
-                      tick={{ fontSize: 10, fill: '#9ca3af' }}
-                      interval={0}
-                      angle={-45}
-                      textAnchor="end"
-                      height={40}
-                    />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#27272a',
-                        border: '1px solid #3f3f46',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                      }}
-                      formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'PnL']}
-                      labelStyle={{ color: '#d4d4d8' }}
-                    />
-                    <Bar 
-                      dataKey="pnl" 
-                      radius={[2, 2, 0, 0]}
-                      fill={(entry: any) => entry.pnl >= 0 ? '#22c55e' : '#ef4444'}
-                    >
-                      {(() => {
+            {/* Right Column - Net Daily PnL Chart and Recent Trades */}
+            <div className="grid grid-cols-1 gap-3 md:gap-4">
+              {/* Net Daily PnL Chart */}
+              <SquareCard
+                title={t('metrics.daily_net_pnl')}
+                value=""
+                icon={BarChart3}
+                color="text-green-400"
+                data-testid="card-daily-pnl-chart"
+              >
+                <div className="h-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={(() => {
+                        // Calculate daily net PnL data
                         const dailyMap = new Map<string, number>();
                         filteredTrades.forEach(trade => {
                           const date = format(new Date(trade.dataHora), 'MM/dd');
@@ -1787,29 +1749,70 @@ export default function Dashboard() {
                         });
                         return Array.from(dailyMap.entries())
                           .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                          .slice(-14)
-                          .map(([date, pnl], index) => (
-                            <Cell key={index} fill={pnl >= 0 ? '#22c55e' : '#ef4444'} />
-                          ));
+                          .slice(-14) // Last 14 days
+                          .map(([date, pnl]) => ({ date, pnl }));
                       })()}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </SquareCard>
+                      margin={{ top: 8, right: 8, left: 8, bottom: 20 }}
+                    >
+                      <XAxis 
+                        dataKey="date" 
+                        axisLine={false} 
+                        tickLine={false}
+                        tick={{ fontSize: 10, fill: '#9ca3af' }}
+                        interval={0}
+                        angle={-45}
+                        textAnchor="end"
+                        height={40}
+                      />
+                      <YAxis hide />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#27272a',
+                          border: '1px solid #3f3f46',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                        }}
+                        formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'PnL']}
+                        labelStyle={{ color: '#d4d4d8' }}
+                      />
+                      <Bar 
+                        dataKey="pnl" 
+                        radius={[2, 2, 0, 0]}
+                        fill={(entry: any) => entry.pnl >= 0 ? '#22c55e' : '#ef4444'}
+                      >
+                        {(() => {
+                          const dailyMap = new Map<string, number>();
+                          filteredTrades.forEach(trade => {
+                            const date = format(new Date(trade.dataHora), 'MM/dd');
+                            const result = parseFloat(trade.resultado || '0');
+                            dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                          });
+                          return Array.from(dailyMap.entries())
+                            .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
+                            .slice(-14)
+                            .map(([date, pnl], index) => (
+                              <Cell key={index} fill={pnl >= 0 ? '#22c55e' : '#ef4444'} />
+                            ));
+                        })()}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </SquareCard>
 
-            {/* Recent Trades */}
-            <SquareCard
-              title={t('dashboard.recent_trades')}
-              value=""
-              icon={FileText}
-              color="text-zinc-400"
-              data-testid="card-recent-trades"
-            >
-              <div className="h-full">
-                <RecentTrades trades={filteredTrades} />
-              </div>
-            </SquareCard>
+              {/* Recent Trades - Below Net Daily PnL */}
+              <SquareCard
+                title={t('dashboard.recent_trades')}
+                value=""
+                icon={FileText}
+                color="text-zinc-400"
+                data-testid="card-recent-trades"
+              >
+                <div className="h-full">
+                  <RecentTrades trades={filteredTrades} />
+                </div>
+              </SquareCard>
+            </div>
           </div>
 
           {/* Performance Summary Cards */}
