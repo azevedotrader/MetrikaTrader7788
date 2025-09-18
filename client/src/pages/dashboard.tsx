@@ -1721,8 +1721,111 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               className="lg:col-span-2"
               data-testid="card-progress-tracker"
             >
-              <div className="h-full">
-                <TradingCalendar trades={filteredTrades} />
+              <div className="h-full flex flex-col">
+                <div className="flex-1">
+                  <TradingCalendar trades={filteredTrades} />
+                </div>
+                
+                {/* Análise Temporal Detalhada - no espaço vazio abaixo do calendário */}
+                <div className="mt-4 pt-4 border-t border-zinc-700">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                    <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                      <div className="text-lg font-bold text-white mb-1">
+                        {(() => {
+                          const hoje = new Date();
+                          const tradesHoje = filteredTrades.filter((t: Trade) => {
+                            const tradeDate = new Date(t.dataHora);
+                            return tradeDate.toDateString() === hoje.toDateString();
+                          });
+                          return tradesHoje.length;
+                        })()}
+                      </div>
+                      <div className="text-xs text-zinc-400 mb-1">
+                        {t('time.trades_today')}
+                      </div>
+                      <div
+                        className={`text-xs font-semibold ${(() => {
+                          const hoje = new Date();
+                          const resultadoHoje = filteredTrades
+                            .filter((t: Trade) => {
+                              const tradeDate = new Date(t.dataHora);
+                              return (
+                                tradeDate.toDateString() === hoje.toDateString()
+                              );
+                            })
+                            .reduce(
+                              (sum: number, t: Trade) =>
+                                sum + parseFloat(t.resultado || "0"),
+                              0,
+                            );
+                          return resultadoHoje >= 0
+                            ? "text-green-400"
+                            : "text-red-400";
+                        })()}`}
+                      >
+                        R${" "}
+                        {(() => {
+                          const hoje = new Date();
+                          const resultadoHoje = filteredTrades
+                            .filter((t: Trade) => {
+                              const tradeDate = new Date(t.dataHora);
+                              return (
+                                tradeDate.toDateString() === hoje.toDateString()
+                              );
+                            })
+                            .reduce(
+                              (sum: number, t: Trade) =>
+                                sum + parseFloat(t.resultado || "0"),
+                              0,
+                            );
+                          return resultadoHoje.toFixed(2);
+                        })()}
+                      </div>
+                    </div>
+
+                    <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                      <div className="text-lg font-bold text-white mb-1">
+                        {metrics.rentabilidadeSemana.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-zinc-400 mb-1">
+                        Esta Semana
+                      </div>
+                      <div
+                        className={`text-xs font-semibold ${metrics.rentabilidadeSemana >= 0 ? "text-green-400" : "text-red-400"}`}
+                      >
+                        R$ {metrics.rentabilidadeSemana.toFixed(2)}
+                      </div>
+                    </div>
+
+                    <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                      <div className="text-lg font-bold text-white mb-1">
+                        {metrics.rentabilidadeMes.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-zinc-400 mb-1">
+                        Este Mês
+                      </div>
+                      <div
+                        className={`text-xs font-semibold ${metrics.rentabilidadeMes >= 0 ? "text-green-400" : "text-red-400"}`}
+                      >
+                        R$ {metrics.rentabilidadeMes.toFixed(2)}
+                      </div>
+                    </div>
+
+                    <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                      <div className="text-lg font-bold text-white mb-1">
+                        {metrics.rentabilidadeAno.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-zinc-400 mb-1">
+                        Este Ano
+                      </div>
+                      <div
+                        className={`text-xs font-semibold ${metrics.rentabilidadeAno >= 0 ? "text-green-400" : "text-red-400"}`}
+                      >
+                        R$ {metrics.rentabilidadeAno.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </SquareCard>
 
@@ -1871,188 +1974,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </CardContent>
           </Card>
 
-          {/* Distribuição por Mercado e Análise Temporal */}
-          <Card className="bg-zinc-900/90 border-zinc-800">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-green-400" />
-                Rastreamento de Progresso
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Distribuição por Mercado */}
-              <div>
-                <h3 className="text-sm font-medium text-zinc-300 mb-3">{t('dashboard.market_distribution')}</h3>
-                <div className="space-y-3">
-                  {Object.entries(brokerInfo).map(([broker, info]) => {
-                    const brokerTrades = filteredTrades.filter(
-                      (t: Trade) => t.corretora === broker,
-                    );
-                    const brokerResult = brokerTrades.reduce(
-                      (sum: number, t: Trade) =>
-                        sum + parseFloat(t.resultado || "0"),
-                      0,
-                    );
-                    const percentage =
-                      filteredTrades.length > 0
-                        ? (brokerTrades.length / filteredTrades.length) * 100
-                        : 0;
-
-                    return (
-                      <div
-                        key={broker}
-                        className="flex justify-between items-center"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-3 h-3 rounded-full ${info.color}`}
-                          ></div>
-                          <span className="text-slate-300 text-sm">{info.name}</span>
-                        </div>
-                        <div className="text-right">
-                          <div
-                            className={`font-semibold text-sm ${brokerResult >= 0 ? "text-green-400" : "text-red-400"}`}
-                          >
-                            R$ {brokerResult.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-zinc-500">
-                            {brokerTrades.length} trades ({percentage.toFixed(1)}%)
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Análise Temporal Detalhada */}
-              <div>
-                <h3 className="text-sm font-medium text-zinc-300 mb-3">{t('dashboard.detailed_temporal_performance')}</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                    <div className="text-lg font-bold text-white mb-1">
-                      {(() => {
-                        const hoje = new Date();
-                        const tradesHoje = filteredTrades.filter((t: Trade) => {
-                          const tradeDate = new Date(t.dataHora);
-                          return tradeDate.toDateString() === hoje.toDateString();
-                        });
-                        return tradesHoje.length;
-                      })()}
-                    </div>
-                    <div className="text-xs text-zinc-400 mb-1">
-                      {t('time.trades_today')}
-                    </div>
-                    <div
-                      className={`text-xs font-semibold ${(() => {
-                        const hoje = new Date();
-                        const resultadoHoje = filteredTrades
-                          .filter((t: Trade) => {
-                            const tradeDate = new Date(t.dataHora);
-                            return (
-                              tradeDate.toDateString() === hoje.toDateString()
-                            );
-                          })
-                          .reduce(
-                            (sum: number, t: Trade) =>
-                              sum + parseFloat(t.resultado || "0"),
-                            0,
-                          );
-                        return resultadoHoje >= 0
-                          ? "text-green-400"
-                          : "text-red-400";
-                      })()}`}
-                    >
-                      R${" "}
-                      {(() => {
-                        const hoje = new Date();
-                        const resultadoHoje = filteredTrades
-                          .filter((t: Trade) => {
-                            const tradeDate = new Date(t.dataHora);
-                            return (
-                              tradeDate.toDateString() === hoje.toDateString()
-                            );
-                          })
-                          .reduce(
-                            (sum: number, t: Trade) =>
-                              sum + parseFloat(t.resultado || "0"),
-                            0,
-                          );
-                        return resultadoHoje.toFixed(2);
-                      })()}
-                    </div>
-                  </div>
-
-                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                    <div className="text-lg font-bold text-white mb-1">
-                      {metrics.rentabilidadeSemana.toFixed(2)}
-                    </div>
-                    <div className="text-xs text-zinc-400 mb-1">
-                      Esta Semana
-                    </div>
-                    <div
-                      className={`text-xs font-semibold ${metrics.rentabilidadeSemana >= 0 ? "text-green-400" : "text-red-400"}`}
-                    >
-                      R$ {metrics.rentabilidadeSemana.toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                    <div className="text-lg font-bold text-white mb-1">
-                      {metrics.rentabilidadeMes.toFixed(2)}
-                    </div>
-                    <div className="text-xs text-zinc-400 mb-1">
-                      Este Mês
-                    </div>
-                    <div
-                      className={`text-xs font-semibold ${metrics.rentabilidadeMes >= 0 ? "text-green-400" : "text-red-400"}`}
-                    >
-                      R$ {metrics.rentabilidadeMes.toFixed(2)}
-                    </div>
-                  </div>
-
-                  <div className="text-center p-3 bg-zinc-800/50 rounded-lg">
-                    <div className="text-lg font-bold text-white mb-1">
-                      {metrics.rentabilidadeAno.toFixed(2)}
-                    </div>
-                    <div className="text-xs text-zinc-400 mb-1">
-                      Este Ano
-                    </div>
-                    <div
-                      className={`text-xs font-semibold ${metrics.rentabilidadeAno >= 0 ? "text-green-400" : "text-red-400"}`}
-                    >
-                      R$ {metrics.rentabilidadeAno.toFixed(2)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Trading Calendar */}
-          <div className="relative">
-            <TradingCalendar trades={filteredTrades} />
-            
-            {/* Logo watermark grande no centro do calendário */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-              <div className="opacity-[0.05] hover:opacity-[0.12] transition-opacity duration-300 flex items-center justify-center w-full h-full">
-                <img 
-                  src={metrikaLogo} 
-                  alt="METRIKA" 
-                  style={{
-                    height: '800px',
-                    width: 'auto',
-                    objectFit: 'contain',
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                  className="block"
-                />
-              </div>
-            </div>
-          </div>
 
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
