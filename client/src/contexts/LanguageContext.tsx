@@ -166,6 +166,9 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.imports_and_trades": "Histórico de Importações e Trades",
     "dashboard.consolidated_total": "Resultado Total Consolidado",
     "dashboard.market_distribution": "Distribuição por Mercado",
+    "dashboard.your_metrika_score": "Seu Métrika Score",
+    "dashboard.insufficient_data_for_score": "Sem dados suficientes para calcular o score",
+    "dashboard.register_trades_for_score": "Registre trades para ver seu Métrika Score",
 
     // Tabs
     "tabs.imports": "Importações",
@@ -197,6 +200,12 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.general_result": "Resultado geral",
     "metrics.profitability_chart": "Gráfico de Rentabilidade ao Longo do Tempo",
     "metrics.result": "Resultado",
+    "metrics.win_rate": "Win %",
+    "metrics.profit_factor": "Profit Factor",
+    "metrics.avg_win_loss": "Avg Win/Loss",
+    "metrics.max_drawdown": "Max Drawdown",
+    "metrics.recovery_factor": "Recovery Factor",
+    "metrics.consistency": "Consistency",
 
     // Trades
     "trades.title": "Trades",
@@ -773,9 +782,6 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.average_loss": "Perda Média",
     "metrics.best_month": "Melhor Mês",
     "metrics.worst_month": "Pior Mês",
-    "metrics.recovery_factor": "Fator de Recuperação",
-    "metrics.max_drawdown": "Drawdown Máximo",
-    "metrics.profit_factor": "Fator de Lucro",
 
     // Períodos e datas
     "period.daily": "Diário",

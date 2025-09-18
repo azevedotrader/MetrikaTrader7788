@@ -87,6 +87,11 @@ import {
   ComposedChart,
   ReferenceLine,
   Cell,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
 } from "recharts";
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
@@ -518,6 +523,221 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
             <div className="w-3 h-0.5 bg-red-500"></div>
             <span className="text-slate-300">Drawdown %</span>
           </div>
+        </div>
+      </CardContent>
+    </div>
+  );
+}
+
+// Métrika Score - Hexagonal radar chart similar to Zella Score
+function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+  const metricsData = useMemo(() => {
+    if (!trades.length) return [];
+
+    const winningTrades = trades.filter(t => parseFloat(t.resultado || "0") > 0);
+    const losingTrades = trades.filter(t => parseFloat(t.resultado || "0") < 0);
+    
+    const totalWins = winningTrades.length;
+    const totalLosses = losingTrades.length;
+    const totalTrades = trades.length;
+    
+    // 1. Win % (0-100)
+    const winRate = totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
+    
+    // 2. Profit Factor (0-10, normalizado para 0-100)
+    const totalProfits = winningTrades.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+    const totalLosses_amount = Math.abs(losingTrades.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0));
+    const profitFactor = totalLosses_amount > 0 ? totalProfits / totalLosses_amount : totalProfits > 0 ? 10 : 0;
+    const profitFactorScore = Math.min((profitFactor / 3) * 100, 100); // Normalizar para 0-100
+    
+    // 3. Avg Win/Loss Ratio (0-10, normalizado para 0-100)
+    const avgWin = totalWins > 0 ? totalProfits / totalWins : 0;
+    const avgLoss = totalLosses > 0 ? totalLosses_amount / totalLosses : 0;
+    const winLossRatio = avgLoss > 0 ? avgWin / avgLoss : avgWin > 0 ? 10 : 0;
+    const winLossScore = Math.min((winLossRatio / 3) * 100, 100);
+    
+    // 4. Max Drawdown em R$ (invertido - quanto menor melhor, 0-100)
+    const totalEquity = trades.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+    let peak = 0;
+    let maxDrawdownValue = 0; // Máximo drawdown em R$
+    let currentEquity = 0;
+    
+    const sortedTrades = [...trades].sort((a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime());
+    sortedTrades.forEach(trade => {
+      currentEquity += parseFloat(trade.resultado || "0");
+      if (currentEquity > peak) peak = currentEquity;
+      const drawdownValue = peak - currentEquity; // Drawdown em R$
+      if (drawdownValue > maxDrawdownValue) maxDrawdownValue = drawdownValue;
+    });
+    
+    // Normalizar drawdown em R$ para score 0-100 (assumindo max R$ 10000 como referência)
+    const drawdownScore = Math.max(100 - (maxDrawdownValue / 100), 0);
+    
+    // 5. Recovery Factor (0-100) = Net Profit / |Max Drawdown em R$|
+    let recoveryFactor = 0;
+    if (maxDrawdownValue > 0) {
+      recoveryFactor = Math.abs(totalEquity) / maxDrawdownValue;
+    } else if (totalEquity > 0) {
+      recoveryFactor = 10; // Score alto se há lucro sem drawdown
+    }
+    // Normalizar e cappar para 0-100
+    const recoveryScore = Math.min(Math.max((recoveryFactor / 3) * 100, 0), 100);
+    
+    // 6. Consistency (baseado na variabilidade dos resultados, 0-100)
+    const results = trades.map(t => parseFloat(t.resultado || "0"));
+    const absResults = results.map(r => Math.abs(r)).filter(r => r > 0);
+    let consistencyScore = 0;
+    
+    if (absResults.length > 1) {
+      const avgAbsResult = absResults.reduce((sum, r) => sum + r, 0) / absResults.length;
+      const variance = absResults.reduce((sum, r) => sum + Math.pow(r - avgAbsResult, 2), 0) / absResults.length;
+      const stdDev = Math.sqrt(variance);
+      const coefficientOfVariation = avgAbsResult > 0 ? stdDev / avgAbsResult : 1;
+      consistencyScore = Math.max(100 - (coefficientOfVariation * 100), 0);
+    } else if (results.length === 1) {
+      consistencyScore = 100; // Um trade é "consistente"
+    }
+    
+    return [
+      { metric: t('metrics.win_rate'), value: Math.round(winRate), fullMark: 100 },
+      { metric: t('metrics.profit_factor'), value: Math.round(profitFactorScore), fullMark: 100 },
+      { metric: t('metrics.avg_win_loss'), value: Math.round(winLossScore), fullMark: 100 },
+      { metric: t('metrics.max_drawdown'), value: Math.round(drawdownScore), fullMark: 100 },
+      { metric: t('metrics.recovery_factor'), value: Math.round(recoveryScore), fullMark: 100 },
+      { metric: t('metrics.consistency'), value: Math.round(consistencyScore), fullMark: 100 },
+    ];
+  }, [trades]);
+
+  const overallScore = useMemo(() => {
+    if (!metricsData.length) return 0;
+    const average = metricsData.reduce((sum, m) => sum + m.value, 0) / metricsData.length;
+    return Math.round(average);
+  }, [metricsData]);
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "#22c55e"; // Verde
+    if (score >= 60) return "#eab308"; // Amarelo
+    if (score >= 40) return "#f97316"; // Laranja
+    return "#ef4444"; // Vermelho
+  };
+
+  const getGradientId = (score: number) => {
+    if (score >= 80) return "greenGradient";
+    if (score >= 60) return "yellowGradient";
+    if (score >= 40) return "orangeGradient";
+    return "redGradient";
+  };
+
+  return (
+    <div className="w-full">
+      <CardContent className="p-6">
+        {/* Pontuação */}
+        <div className="text-center mb-6">
+          
+          {metricsData.length > 0 ? (
+            <>
+              {/* Pontuação Principal */}
+              <div className="mb-4">
+                <div className="text-3xl font-bold text-slate-100 mb-2" data-testid="metrika-score">
+                  {overallScore}/100
+                </div>
+                <div className="text-sm text-slate-400">{t('dashboard.your_metrika_score')}</div>
+              </div>
+              
+              {/* Barra de Progresso Colorida */}
+              <div className="relative w-full h-2 bg-slate-700 rounded-full overflow-hidden mb-6">
+                <div 
+                  className="h-full transition-all duration-1000 ease-out"
+                  data-testid="metrika-progress-bar"
+                  style={{
+                    width: `${overallScore}%`,
+                    background: `linear-gradient(90deg, 
+                      #ef4444 0%, 
+                      #f97316 25%, 
+                      #eab308 50%, 
+                      #22c55e 75%, 
+                      #22c55e 100%
+                    )`,
+                    backgroundSize: '400% 100%',
+                    backgroundPosition: `${100 - (overallScore / 100) * 100}% 0`
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="text-slate-400 text-sm mb-6">
+              {t('dashboard.insufficient_data_for_score')}
+            </div>
+          )}
+        </div>
+
+        {/* Radar Chart */}
+        <div className="h-80 w-full flex justify-center">
+          {metricsData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={metricsData}>
+                <defs>
+                  <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <PolarGrid 
+                  stroke="#374151" 
+                  strokeWidth={1}
+                />
+                <PolarAngleAxis 
+                  dataKey="metric" 
+                  tick={{ 
+                    fontSize: 12, 
+                    fill: "#9CA3AF",
+                    textAnchor: "middle"
+                  }}
+                  className="text-xs"
+                />
+                <PolarRadiusAxis 
+                  angle={90} 
+                  domain={[0, 100]} 
+                  tick={{ 
+                    fontSize: 10, 
+                    fill: "#6B7280" 
+                  }}
+                  tickCount={6}
+                />
+                <Radar
+                  dataKey="value"
+                  stroke="#22c55e"
+                  fill="url(#radarGradient)"
+                  strokeWidth={2}
+                  dot={{ 
+                    fill: "#22c55e", 
+                    strokeWidth: 2, 
+                    r: 4 
+                  }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1E293B",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#F1F5F9",
+                  }}
+                  formatter={(value: number, name: string) => [
+                    `${value}/100`,
+                    name
+                  ]}
+                  labelStyle={{ color: "#CBD5E1" }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-slate-400">
+              <div className="text-center">
+                <div className="text-4xl mb-4">📊</div>
+                <p>{t('dashboard.register_trades_for_score')}</p>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </div>
@@ -2091,7 +2311,16 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </CardContent>
           </Card>
 
-
+          {/* Métrika Score */}
+          <Card className="bg-zinc-900/90 border-zinc-800">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-zinc-400" />
+                Métrika Score
+              </CardTitle>
+            </CardHeader>
+            <MetrikaScore trades={filteredTrades} t={t} />
+          </Card>
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
