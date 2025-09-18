@@ -452,17 +452,9 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
     <div className="w-full">
       <CardContent className="p-6">
 
-        {/* Métricas de Drawdown */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
-          <div className="text-slate-400 text-center sm:text-left">
-            <div>Drawdown Atual:</div>
-            <div className={`font-semibold text-lg ${
-              currentDrawdown.value === 0 ? 'text-green-400' : 'text-red-400'
-            }`}>
-              R$ {currentDrawdown.value.toFixed(2)}
-            </div>
-          </div>
-          <div className="text-slate-400 text-center sm:text-right">
+        {/* Métrica de Drawdown */}
+        <div className="flex justify-center mb-4 text-sm">
+          <div className="text-slate-400 text-center">
             <div>Max Drawdown:</div>
             <div className="text-red-500 font-semibold text-lg">
               R$ {maxDrawdown.toFixed(2)}
