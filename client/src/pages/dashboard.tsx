@@ -51,6 +51,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useTour } from "@/contexts/TourContext";
 import {
   TrendingUp,
+  TrendingDown,
   Target,
   Calendar,
   DollarSign,
@@ -309,6 +310,193 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-green-500 border-dashed"></div>
             <span className="text-slate-300">{t('metrics.period_result')}</span>
+          </div>
+        </div>
+      </CardContent>
+    </div>
+  );
+}
+
+// Drawdown Chart - Shows the drawdown percentage over time
+function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+  const [timeFilter, setTimeFilter] = useState<"dia" | "semana" | "mes" | "ano">("mes");
+
+  const chartData = useMemo(() => {
+    if (!trades.length) return [];
+
+    // Ordenar trades por data
+    const sortedTrades = [...trades].sort(
+      (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime(),
+    );
+
+    // Função para agrupar dados baseado no filtro
+    const groupDataByPeriod = () => {
+      const groups = new Map();
+      let cumulativeProfit = 0;
+      let peak = 0;
+
+      sortedTrades.forEach((trade) => {
+        const tradeDate = new Date(trade.dataHora);
+        const profit = parseFloat(trade.resultado || "0");
+        cumulativeProfit += profit;
+        
+        // Atualizar o pico se o lucro acumulado for maior
+        if (cumulativeProfit > peak) {
+          peak = cumulativeProfit;
+        }
+
+        // Calcular drawdown como porcentagem do pico
+        const drawdown = peak > 0 ? ((peak - cumulativeProfit) / peak) * 100 : 0;
+
+        let periodKey: string;
+        let periodLabel: string;
+
+        switch (timeFilter) {
+          case "dia":
+            periodKey = format(startOfDay(tradeDate), "yyyy-MM-dd");
+            periodLabel = format(tradeDate, "dd/MM", { locale: ptBR });
+            break;
+          case "semana":
+            periodKey = format(
+              startOfWeek(tradeDate, { weekStartsOn: 1 }),
+              "yyyy-MM-dd",
+            );
+            periodLabel = format(
+              startOfWeek(tradeDate, { weekStartsOn: 1 }),
+              "dd/MM",
+              { locale: ptBR },
+            );
+            break;
+          case "mes":
+            periodKey = format(startOfMonth(tradeDate), "yyyy-MM");
+            periodLabel = format(tradeDate, "MMM/yy", { locale: ptBR });
+            break;
+          case "ano":
+            periodKey = format(startOfYear(tradeDate), "yyyy");
+            periodLabel = format(tradeDate, "yyyy", { locale: ptBR });
+            break;
+        }
+
+        groups.set(periodKey, {
+          period: periodLabel,
+          date: periodKey,
+          drawdown: drawdown,
+          equity: cumulativeProfit,
+          peak: peak,
+        });
+      });
+
+      return Array.from(groups.values()).sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      ).slice(-20); // Últimos 20 períodos
+    };
+
+    return groupDataByPeriod();
+  }, [trades, timeFilter]);
+
+  const maxDrawdown = useMemo(() => {
+    if (!chartData.length) return 0;
+    return Math.max(...chartData.map(d => d.drawdown));
+  }, [chartData]);
+
+  const currentDrawdown = useMemo(() => {
+    if (!chartData.length) return 0;
+    return chartData[chartData.length - 1]?.drawdown || 0;
+  }, [chartData]);
+
+  const formatTooltipValue = (value: number, name: string) => {
+    if (name === 'drawdown') {
+      return [`${value.toFixed(2)}%`, 'Drawdown'];
+    }
+    return [`${value.toFixed(2)}%`, 'Drawdown'];
+  };
+
+  return (
+    <div className="w-full">
+      <CardContent className="p-6">
+        {/* Filtros de Tempo */}
+        <div className="flex justify-end gap-2 mb-4">
+          {[
+            { key: "dia", label: "Dia" },
+            { key: "semana", label: "Semana" },
+            { key: "mes", label: "Mês" },
+            { key: "ano", label: "Ano" },
+          ].map((filter) => (
+            <Button
+              key={filter.key}
+              variant={timeFilter === filter.key ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTimeFilter(filter.key as any)}
+              className={
+                timeFilter === filter.key
+                  ? "bg-purple-600 hover:bg-purple-700"
+                  : "border-slate-600 text-slate-300 hover:bg-slate-800"
+              }
+            >
+              {filter.label}
+            </Button>
+          ))}
+        </div>
+
+        {/* Métricas de Drawdown */}
+        <div className="flex justify-between items-center mb-4 text-sm">
+          <div className="text-slate-400">
+            Drawdown Atual: <span className="text-red-400 font-semibold">{currentDrawdown.toFixed(2)}%</span>
+          </div>
+          <div className="text-slate-400">
+            Max Drawdown: <span className="text-red-500 font-semibold">{maxDrawdown.toFixed(2)}%</span>
+          </div>
+        </div>
+
+        {/* Gráfico */}
+        <div className="h-80 w-full">
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsLineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  dataKey="period" 
+                  stroke="#9CA3AF"
+                  fontSize={12}
+                />
+                <YAxis 
+                  stroke="#9CA3AF"
+                  fontSize={12}
+                  tickFormatter={(value) => `${value.toFixed(1)}%`}
+                  domain={[0, 'dataMax']}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1E293B",
+                    border: "1px solid #475569",
+                    borderRadius: "8px",
+                    color: "#F1F5F9",
+                  }}
+                  formatter={formatTooltipValue}
+                  labelStyle={{ color: "#CBD5E1" }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="drawdown"
+                  stroke="#ef4444"
+                  strokeWidth={3}
+                  dot={{ fill: "#ef4444", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "#ef4444", strokeWidth: 2 }}
+                />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-slate-400">
+              Sem dados de trades para exibir
+            </div>
+          )}
+        </div>
+        
+        {/* Legenda */}
+        <div className="flex justify-center gap-6 mt-4 text-xs">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-0.5 bg-red-500"></div>
+            <span className="text-slate-300">Drawdown %</span>
           </div>
         </div>
       </CardContent>
@@ -1887,8 +2075,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* {t('metrics.profitability_chart')} */}
-            <Card className="bg-zinc-900/90 border-zinc-800 lg:col-span-1">
+            {/* Curva de Capital */}
+            <Card className="bg-zinc-900/90 border-zinc-800">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <LineChart className="h-5 w-5 text-zinc-400" />
@@ -1896,6 +2084,17 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </CardTitle>
               </CardHeader>
               <CapitalCurveChart trades={filteredTrades} t={t} />
+            </Card>
+
+            {/* Gráfico de Drawdown */}
+            <Card className="bg-zinc-900/90 border-zinc-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <TrendingDown className="h-5 w-5 text-zinc-400" />
+                  Drawdown
+                </CardTitle>
+              </CardHeader>
+              <DrawdownChart trades={filteredTrades} t={t} />
             </Card>
           </div>
       </div>
