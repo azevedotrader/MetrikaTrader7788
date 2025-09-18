@@ -332,10 +332,10 @@ export function TradingCalendar({
               {tradeDay.pnl !== 0 && (
                 <div
                   className={cn(
-                    "font-bold leading-tight",
+                    "font-extrabold leading-tight text-white px-1 py-0.5 rounded bg-black/30 text-center shadow-sm",
                     isMobile ? "text-xs" : "text-sm",
-                    isProfit ? "text-white font-bold" : "text-white font-bold",
                   )}
+                  style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}
                 >
                   {isMobile
                     ? `${isProfit ? "+" : ""}${
@@ -350,8 +350,9 @@ export function TradingCalendar({
               {/* Quantidade de trades */}
               <div
                 className={cn(
-                  "text-zinc-500 leading-tight",
+                  "leading-tight font-medium px-1 py-0.5 rounded text-center",
                   isMobile ? "text-[9px]" : "text-[10px]",
+                  hasData ? "bg-black/40 text-white" : "text-zinc-500"
                 )}
               >
                 {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
@@ -361,11 +362,12 @@ export function TradingCalendar({
               {tradeDay.trades > 0 && tradeDay.winRate !== undefined && (
                 <div
                   className={cn(
-                    "text-zinc-400 leading-tight font-medium",
+                    "leading-tight font-semibold px-1 py-0.5 rounded text-center",
                     isMobile ? "text-[9px]" : "text-[10px]",
+                    hasData ? "bg-black/40 text-white" : "text-zinc-400"
                   )}
                 >
-                  {tradeDay.winRate.toFixed(0)}% acerto
+                  {tradeDay.winRate.toFixed(0)}% win
                 </div>
               )}
             </div>
