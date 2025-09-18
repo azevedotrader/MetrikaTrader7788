@@ -1865,52 +1865,52 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     }
 
                     return (
-                      <div className="grid grid-cols-2 gap-1">
+                      <div className="grid grid-cols-2 gap-0.5 max-w-32">
                         {/* Total de Lucros */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-1.5 aspect-square flex flex-col justify-center items-center text-center">
-                          <div className="text-xs text-zinc-400 mb-0.5">{t('metrics.total_profits')}</div>
+                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                          <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
                           <div className="text-xs font-bold text-green-400 truncate">
                             R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-xs text-zinc-500">
-                            {chartData.reduce((sum, d) => sum + d.positiveCount, 0)} trades
+                          <div className="text-xs text-zinc-500 leading-tight">
+                            {chartData.reduce((sum, d) => sum + d.positiveCount, 0)}
                           </div>
                         </div>
 
                         {/* Total de Perdas */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-1.5 aspect-square flex flex-col justify-center items-center text-center">
-                          <div className="text-xs text-zinc-400 mb-0.5">{t('metrics.total_losses')}</div>
+                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                          <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
                           <div className="text-xs font-bold text-red-400 truncate">
                             -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-xs text-zinc-500">
-                            {chartData.reduce((sum, d) => sum + d.negativeCount, 0)} trades
+                          <div className="text-xs text-zinc-500 leading-tight">
+                            {chartData.reduce((sum, d) => sum + d.negativeCount, 0)}
                           </div>
                         </div>
 
                         {/* Resultado do Período */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-1.5 aspect-square flex flex-col justify-center items-center text-center">
-                          <div className="text-xs text-zinc-400 mb-0.5">Resultado</div>
+                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                          <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
                           <div className={`text-xs font-bold truncate ${
                             chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'
                           }`}>
                             R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) || '0'}
                           </div>
-                          <div className="text-xs text-zinc-500">
-                            {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(0)}% acerto
+                          <div className="text-xs text-zinc-500 leading-tight">
+                            {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(0)}%
                           </div>
                         </div>
 
                         {/* Média por Dia */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-1.5 aspect-square flex flex-col justify-center items-center text-center">
-                          <div className="text-xs text-zinc-400 mb-0.5">Média/Dia</div>
+                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                          <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
                           <div className={`text-xs font-bold truncate ${
                             (chartData[chartData.length - 1]?.accumulated || 0) / chartData.length >= 0 ? 'text-blue-400' : 'text-orange-400'
                           }`}>
                             R$ {((chartData[chartData.length - 1]?.accumulated || 0) / chartData.length || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-xs text-zinc-500">
-                            {chartData.length} períodos
+                          <div className="text-xs text-zinc-500 leading-tight">
+                            {chartData.length}d
                           </div>
                         </div>
                       </div>
