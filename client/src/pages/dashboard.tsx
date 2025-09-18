@@ -630,7 +630,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
 
   return (
     <div className="w-full">
-      <CardContent className="p-4 bg-[#1a2743]">
+      <CardContent className="p-4 bg-[#171719]">
         {/* Pontuação */}
         <div className="text-center mb-4">
           
