@@ -1567,18 +1567,7 @@ export default function Dashboard() {
       </div>
 
 
-      <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <TabsList className="grid w-full grid-cols-1 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1 h-auto">
-          <TabsTrigger
-            value="overview"
-            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
-          >
-            <span className="hidden sm:inline">{t('dashboard.overview')}</span>
-            <span className="sm:hidden">Geral</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4 md:space-y-6">
+      <div className="space-y-4 md:space-y-6">
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
           <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 mb-4">
             {/* Net PnL */}
@@ -2105,9 +2094,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="insights" className="space-y-6">
           {/* Main Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <SquareCard
@@ -2268,10 +2255,7 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-
-      </Tabs>
+      </div>
 
       {/* Dialog de Edição de Trade Manual */}
       <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
