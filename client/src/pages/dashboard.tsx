@@ -317,9 +317,9 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
   );
 }
 
-// Drawdown Chart - Shows the drawdown percentage over time
+// Drawdown Chart - Shows the drawdown values in R$ over time (daily view)
 function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
-  const [timeFilter, setTimeFilter] = useState<"dia" | "semana" | "mes" | "ano">("mes");
+  const timeFilter = "dia"; // Fixo em dia para melhor expressividade
 
   const chartData = useMemo(() => {
     if (!trades.length) return [];
@@ -351,23 +351,8 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
       equityPoints.forEach((point) => {
         let periodKey: string;
         
-        switch (timeFilter) {
-          case "dia":
-            periodKey = format(startOfDay(point.date), "yyyy-MM-dd");
-            break;
-          case "semana":
-            periodKey = format(
-              startOfWeek(point.date, { weekStartsOn: 1 }),
-              "yyyy-MM-dd",
-            );
-            break;
-          case "mes":
-            periodKey = format(startOfMonth(point.date), "yyyy-MM");
-            break;
-          case "ano":
-            periodKey = format(startOfYear(point.date), "yyyy");
-            break;
-        }
+        // Sempre agrupado por dia
+        periodKey = format(startOfDay(point.date), "yyyy-MM-dd");
 
         if (!periodGroups.has(periodKey)) {
           periodGroups.set(periodKey, []);
@@ -414,28 +399,9 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
           }
         });
 
-        // Gerar label do período
-        let periodLabel: string;
+        // Gerar label do período (sempre formato de dia)
         const firstDate = points[0].date;
-        
-        switch (timeFilter) {
-          case "dia":
-            periodLabel = format(firstDate, "dd/MM", { locale: ptBR });
-            break;
-          case "semana":
-            periodLabel = format(
-              startOfWeek(firstDate, { weekStartsOn: 1 }),
-              "dd/MM",
-              { locale: ptBR },
-            );
-            break;
-          case "mes":
-            periodLabel = format(firstDate, "MMM/yy", { locale: ptBR });
-            break;
-          case "ano":
-            periodLabel = format(firstDate, "yyyy", { locale: ptBR });
-            break;
-        }
+        const periodLabel = format(firstDate, "dd/MM", { locale: ptBR });
 
         results.push({
           period: periodLabel,
@@ -485,29 +451,6 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
   return (
     <div className="w-full">
       <CardContent className="p-6">
-        {/* Filtros de Tempo */}
-        <div className="flex justify-end gap-2 mb-4">
-          {[
-            { key: "dia", label: "Dia" },
-            { key: "semana", label: "Semana" },
-            { key: "mes", label: "Mês" },
-            { key: "ano", label: "Ano" },
-          ].map((filter) => (
-            <Button
-              key={filter.key}
-              variant={timeFilter === filter.key ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTimeFilter(filter.key as any)}
-              className={
-                timeFilter === filter.key
-                  ? "bg-purple-600 hover:bg-purple-700"
-                  : "border-slate-600 text-slate-300 hover:bg-slate-800"
-              }
-            >
-              {filter.label}
-            </Button>
-          ))}
-        </div>
 
         {/* Métricas de Drawdown */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
@@ -536,13 +479,18 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                 <XAxis 
                   dataKey="period" 
                   stroke="#9CA3AF"
-                  fontSize={12}
+                  fontSize={11}
+                  height={60}
+                  angle={-45}
+                  textAnchor="end"
+                  interval={Math.max(Math.floor(chartData.length / 8), 1)}
                 />
                 <YAxis 
                   stroke="#9CA3AF"
-                  fontSize={12}
+                  fontSize={11}
                   tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
                   domain={['dataMin', 0]}
+                  width={80}
                 />
                 <Tooltip
                   contentStyle={{
