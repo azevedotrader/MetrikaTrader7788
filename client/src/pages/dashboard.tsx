@@ -2281,28 +2281,33 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
                         data={(() => {
-                          const dailyMap = new Map<string, number>();
+                          const dailyMap = new Map<string, { pnl: number, fullDate: string }>();
                           filteredTrades.forEach(trade => {
-                            const date = format(new Date(trade.dataHora), 'MM/dd');
+                            const fullDate = format(new Date(trade.dataHora), 'yyyy-MM-dd');
+                            const displayDate = format(new Date(trade.dataHora), 'dd/MM');
                             const result = parseFloat(trade.resultado || '0');
-                            dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                            const existing = dailyMap.get(fullDate);
+                            dailyMap.set(fullDate, { 
+                              pnl: (existing?.pnl || 0) + result, 
+                              fullDate: displayDate 
+                            });
                           });
                           return Array.from(dailyMap.entries())
-                            .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                            .slice(-14)
-                            .map(([date, pnl]) => ({ date, pnl }));
+                            .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+                            .slice(-7)
+                            .map(([, data]) => ({ date: data.fullDate, pnl: data.pnl }));
                         })()}
-                        margin={{ top: 8, right: 8, left: 8, bottom: 25 }}
+                        margin={{ top: 8, right: 8, left: 8, bottom: 35 }}
                       >
                         <XAxis 
                           dataKey="date" 
                           axisLine={false} 
                           tickLine={false}
-                          tick={{ fontSize: 8, fill: '#9ca3af' }}
+                          tick={{ fontSize: 10, fill: '#9ca3af' }}
                           interval={0}
                           angle={-45}
                           textAnchor="end"
-                          height={30}
+                          height={40}
                         />
                         <YAxis hide />
                         <Tooltip
@@ -2320,17 +2325,22 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           radius={[2, 2, 0, 0]}
                         >
                           {(() => {
-                            const dailyMap = new Map<string, number>();
+                            const dailyMap = new Map<string, { pnl: number, fullDate: string }>();
                             filteredTrades.forEach(trade => {
-                              const date = format(new Date(trade.dataHora), 'MM/dd');
+                              const fullDate = format(new Date(trade.dataHora), 'yyyy-MM-dd');
+                              const displayDate = format(new Date(trade.dataHora), 'dd/MM');
                               const result = parseFloat(trade.resultado || '0');
-                              dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                              const existing = dailyMap.get(fullDate);
+                              dailyMap.set(fullDate, { 
+                                pnl: (existing?.pnl || 0) + result, 
+                                fullDate: displayDate 
+                              });
                             });
                             return Array.from(dailyMap.entries())
-                              .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                              .slice(-14)
-                              .map(([date, pnl], index) => (
-                                <Cell key={index} fill={pnl >= 0 ? '#22c55e' : '#ef4444'} />
+                              .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+                              .slice(-7)
+                              .map(([, data], index) => (
+                                <Cell key={index} fill={data.pnl >= 0 ? '#22c55e' : '#ef4444'} />
                               ));
                           })()}
                         </Bar>
