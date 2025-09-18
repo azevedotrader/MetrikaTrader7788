@@ -434,12 +434,12 @@ export function TradingCalendar({
       >
         {/* Logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="opacity-[0.03] hover:opacity-[0.08] transition-opacity duration-300 flex items-center justify-center w-full h-full">
+          <div className="opacity-[0.05] hover:opacity-[0.12] transition-opacity duration-300 flex items-center justify-center w-full h-full">
             <img 
               src={metrikaLogo} 
               alt="METRIKA" 
               style={{
-                height: '200px',
+                height: '500px',
                 width: 'auto',
                 objectFit: 'contain',
                 position: 'absolute',
