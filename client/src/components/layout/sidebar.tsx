@@ -62,11 +62,11 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   };
 
   const handleManageImports = () => {
-    // Redirecionar para a aba de importações no dashboard
+    // Navegar para a página dedicada de importações
     if (isMobile && onClose) {
       onClose();
     }
-    window.location.href = '/dashboard?tab=imports';
+    window.location.href = '/importacoes';
   };
 
   const handleLinkClick = (href: string, e?: React.MouseEvent) => {

@@ -26,6 +26,7 @@ import Perfil from "@/pages/perfil";
 import Calendario from "@/pages/calendario";
 import Suporte from "@/pages/suporte";
 import Aprendizado from "@/pages/aprendizado";
+import Importacoes from "@/pages/importacoes";
 import TesteGateIO from "@/pages/teste-gateio";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
@@ -42,6 +43,7 @@ const pageTitleKeys: Record<string, string> = {
   "/diario": "journal.title",
   "/calendario": "calendar.title",
   "/aprendizado": "learning.title",
+  "/importacoes": "dashboard.imports_and_trades",
   "/perfil": "profile.title",
   "/suporte": "support.title",
   "/admin": "nav.admin",
@@ -161,6 +163,13 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Aprendizado />
+                  </Route>
+                  <Route path="/importacoes">
+                    <TopBar 
+                      title={t(pageTitleKeys["/importacoes"])} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <Importacoes />
                   </Route>
                   {/* Admin route moved to standalone section */}
                   <Route path="/">
