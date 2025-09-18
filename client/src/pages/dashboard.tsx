@@ -397,18 +397,17 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
             periodPeak = point.equity;
           }
           
-          // Calcular drawdown atual
+          // Calcular drawdown atual em R$
           if (periodPeak > 0) {
             const equityDiff = periodPeak - point.equity;
             if (equityDiff > 0) {
-              // Há drawdown (equity abaixo do pico)
-              const currentDrawdown = -(equityDiff / periodPeak) * 100;
-              const currentDrawdownValue = equityDiff;
+              // Há drawdown (equity abaixo do pico) - valor negativo em R$
+              const currentDrawdownValue = -equityDiff;
               
               // Manter o pior drawdown (mais negativo)
-              if (currentDrawdown < maxDrawdown) {
-                maxDrawdown = currentDrawdown;
-                maxDrawdownValue = currentDrawdownValue;
+              if (currentDrawdownValue < maxDrawdown) {
+                maxDrawdown = currentDrawdownValue;
+                maxDrawdownValue = equityDiff; // Valor absoluto para exibição
               }
             }
             // Se equityDiff <= 0, estamos no pico ou acima, então drawdown permanece 0
@@ -441,8 +440,8 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
         results.push({
           period: periodLabel,
           date: periodKey,
-          drawdown: maxDrawdown,
-          drawdownValue: maxDrawdownValue,
+          drawdown: maxDrawdown, // Valor negativo em R$
+          drawdownValue: maxDrawdownValue, // Valor absoluto
           equity: finalEquity,
           peak: periodPeak,
         });
@@ -456,33 +455,31 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
     return groupDataByPeriod();
   }, [trades, timeFilter]);
 
+  const maxDrawdownValue = useMemo(() => {
+    if (!chartData.length) return 0;
+    return Math.max(...chartData.map(d => d.drawdownValue || 0));
+  }, [chartData]);
+
   const maxDrawdown = useMemo(() => {
     if (!chartData.length) return 0;
     return Math.min(...chartData.map(d => d.drawdown));
   }, [chartData]);
 
   const currentDrawdown = useMemo(() => {
-    if (!chartData.length) return { percentage: 0, value: 0 };
+    if (!chartData.length) return { value: 0, absoluteValue: 0 };
     const lastPoint = chartData[chartData.length - 1];
     return {
-      percentage: lastPoint?.drawdown || 0,
-      value: lastPoint?.drawdownValue || 0
+      value: lastPoint?.drawdown || 0, // Valor negativo em R$
+      absoluteValue: lastPoint?.drawdownValue || 0 // Valor absoluto
     };
   }, [chartData]);
 
-  const maxDrawdownValue = useMemo(() => {
-    if (!chartData.length) return 0;
-    return Math.max(...chartData.map(d => d.drawdownValue));
-  }, [chartData]);
 
   const formatTooltipValue = (value: number, name: string, props: any) => {
     if (name === 'drawdown') {
-      const dataPoint = props.payload;
-      const percentage = value.toFixed(2);
-      const valueInReais = Math.abs(dataPoint?.drawdownValue || 0).toFixed(2);
-      return [`${percentage}% (R$ ${valueInReais})`, 'Drawdown'];
+      return [`R$ ${value.toFixed(2)}`, 'Drawdown'];
     }
-    return [`${value.toFixed(2)}%`, 'Drawdown'];
+    return [`R$ ${value.toFixed(2)}`, 'Drawdown'];
   };
 
   return (
@@ -516,24 +513,16 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
           <div className="text-slate-400 text-center sm:text-left">
             <div>Drawdown Atual:</div>
-            <div className={`font-semibold ${
-              currentDrawdown.percentage === 0 ? 'text-green-400' : 'text-red-400'
+            <div className={`font-semibold text-lg ${
+              currentDrawdown.value === 0 ? 'text-green-400' : 'text-red-400'
             }`}>
-              {currentDrawdown.percentage.toFixed(2)}%
-            </div>
-            <div className={`text-xs ${
-              currentDrawdown.percentage === 0 ? 'text-green-300' : 'text-red-300'
-            }`}>
-              R$ {Math.abs(currentDrawdown.value).toFixed(2)}
+              R$ {currentDrawdown.value.toFixed(2)}
             </div>
           </div>
           <div className="text-slate-400 text-center sm:text-right">
             <div>Max Drawdown:</div>
-            <div className="text-red-500 font-semibold">
-              {maxDrawdown.toFixed(2)}%
-            </div>
-            <div className="text-red-400 text-xs">
-              R$ {Math.abs(maxDrawdownValue).toFixed(2)}
+            <div className="text-red-500 font-semibold text-lg">
+              R$ {maxDrawdown.toFixed(2)}
             </div>
           </div>
         </div>
@@ -552,7 +541,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                 <YAxis 
                   stroke="#9CA3AF"
                   fontSize={12}
-                  tickFormatter={(value) => `${value.toFixed(1)}%`}
+                  tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
                   domain={['dataMin', 0]}
                 />
                 <Tooltip
