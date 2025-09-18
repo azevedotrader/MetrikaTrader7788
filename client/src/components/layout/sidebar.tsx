@@ -14,7 +14,8 @@ import {
   X,
   MessageCircle,
   Calculator,
-  GraduationCap
+  GraduationCap,
+  Upload
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/lib/auth";
@@ -47,6 +48,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
+  const [showImportsModal, setShowImportsModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isMobile = useIsMobile();
   const { planType } = useUserPlan();
@@ -57,6 +59,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   const handleAnalyzeCsv = () => {
     setShowCsvModal(true);
+  };
+
+  const handleManageImports = () => {
+    // Redirecionar para a aba de importações no dashboard
+    if (isMobile && onClose) {
+      onClose();
+    }
+    window.location.href = '/dashboard?tab=imports';
   };
 
   const handleLinkClick = (href: string, e?: React.MouseEvent) => {
@@ -163,8 +173,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               ))}
             </ul>
 
-            {/* Análise CSV com IA */}
-            <div className="px-2 py-3 border-t border-zinc-800/50">
+            {/* Botões de Importação */}
+            <div className="px-2 py-3 border-t border-zinc-800/50 space-y-2">
+              {/* Análise CSV com IA */}
               <Button
                 onClick={handleAnalyzeCsv}
                 className={cn(
@@ -185,6 +196,30 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   )}
                 >
                   {t('brokers.csv_import')}
+                </span>
+              </Button>
+
+              {/* Gerenciar Importações */}
+              <Button
+                onClick={handleManageImports}
+                className={cn(
+                  "w-full text-zinc-300 hover:bg-blue-700 hover:text-white transition-all duration-200 bg-blue-600/20 border border-blue-600/30",
+                  sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
+                )}
+                title={!sidebarExpanded ? t('imports.manage_description') : undefined}
+                data-testid="manage-imports-sidebar-button"
+              >
+                <Upload className={cn(
+                  "w-5 h-5 flex-shrink-0",
+                  sidebarExpanded && "mr-3"
+                )} />
+                <span 
+                  className={cn(
+                    "transition-all duration-300 whitespace-nowrap",
+                    sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
+                  )}
+                >
+                  {t('tabs.imports')}
                 </span>
               </Button>
             </div>
