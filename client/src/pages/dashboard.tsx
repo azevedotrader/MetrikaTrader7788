@@ -630,7 +630,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
 
   return (
     <div className="w-full">
-      <CardContent className="p-4">
+      <CardContent className="p-4 bg-[#1a2743]">
         {/* Pontuação */}
         <div className="text-center mb-4">
           
@@ -738,6 +738,13 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
               </div>
             </div>
           )}
+        </div>
+
+        {/* Recovery Factor Value Display */}
+        <div className="text-center mt-2">
+          <div className="text-xs text-slate-500">
+            Recovery Factorvalue : 58/100
+          </div>
         </div>
       </CardContent>
     </div>
