@@ -1876,15 +1876,133 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             
           </div>
 
-          {/* Performance por Período - Gráfico Visual */}
+          {/* Performance por Período - Gráfico com Métricas Laterais */}
           <Card className="bg-zinc-900/90 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-white">
                 {t('dashboard.performance_chart')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="pl-0 pr-2 md:px-6">
-              <PerformancePeriodChart trades={filteredTrades} t={t} />
+            <CardContent className="p-0">
+              <div className="flex flex-col lg:flex-row gap-4 p-4">
+                {/* Gráfico - Área Principal */}
+                <div className="flex-1 lg:w-2/3">
+                  <div className="h-80 lg:h-96">
+                    <PerformancePeriodChart trades={filteredTrades} t={t} />
+                  </div>
+                </div>
+
+                {/* Métricas Laterais */}
+                <div className="lg:w-1/3 space-y-3">
+                  {(() => {
+                    // Calcular métricas do gráfico sem useMemo para evitar erro de hooks
+                    if (!filteredTrades.length) {
+                      return (
+                        <div className="text-center py-8 text-zinc-400">
+                          <p className="text-sm">Nenhum dado disponível</p>
+                        </div>
+                      );
+                    }
+
+                    const dailyData = filteredTrades.reduce((acc, trade) => {
+                      const date = format(new Date(trade.dataHora), 'dd/MM');
+                      const result = parseFloat(trade.resultado || '0');
+                      
+                      if (!acc[date]) {
+                        acc[date] = { positive: 0, negative: 0, positiveCount: 0, negativeCount: 0, totalCount: 0 };
+                      }
+                      
+                      if (result > 0) {
+                        acc[date].positive += result;
+                        acc[date].positiveCount += 1;
+                      } else if (result < 0) {
+                        acc[date].negative += Math.abs(result);
+                        acc[date].negativeCount += 1;
+                      }
+                      acc[date].totalCount += 1;
+                      
+                      return acc;
+                    }, {} as Record<string, any>);
+
+                    let accumulated = 0;
+                    const chartData = Object.entries(dailyData)
+                      .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
+                      .slice(-14)
+                      .map(([date, data]) => {
+                        accumulated += data.positive - data.negative;
+                        return {
+                          date,
+                          accumulated,
+                          positive: data.positive,
+                          negative: data.negative,
+                          positiveCount: data.positiveCount,
+                          negativeCount: data.negativeCount,
+                          totalCount: data.totalCount
+                        };
+                      });
+
+                    if (chartData.length === 0) {
+                      return (
+                        <div className="text-center py-8 text-zinc-400">
+                          <p className="text-sm">Nenhum dado disponível</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <>
+                        {/* Total de Lucros */}
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
+                          <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_profits')}</div>
+                          <div className="text-lg font-bold text-green-400 truncate">
+                            R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {chartData.reduce((sum, d) => sum + d.positiveCount, 0)} trades
+                          </div>
+                        </div>
+
+                        {/* Total de Perdas */}
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
+                          <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_losses')}</div>
+                          <div className="text-lg font-bold text-red-400 truncate">
+                            -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {chartData.reduce((sum, d) => sum + d.negativeCount, 0)} trades
+                          </div>
+                        </div>
+
+                        {/* Resultado do Período */}
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
+                          <div className="text-xs text-zinc-400 mb-1">{t('metrics.period_result_short')}</div>
+                          <div className={`text-lg font-bold truncate ${
+                            chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                          </div>
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(1)}% acerto
+                          </div>
+                        </div>
+
+                        {/* Média por Dia */}
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
+                          <div className="text-xs text-zinc-400 mb-1">Média por Dia</div>
+                          <div className={`text-lg font-bold truncate ${
+                            (chartData[chartData.length - 1]?.accumulated || 0) / chartData.length >= 0 ? 'text-blue-400' : 'text-orange-400'
+                          }`}>
+                            R$ {((chartData[chartData.length - 1]?.accumulated || 0) / chartData.length || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </div>
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {chartData.length} períodos
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
