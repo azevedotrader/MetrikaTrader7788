@@ -1865,9 +1865,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     }
 
                     return (
-                      <div className="grid grid-cols-2 gap-2 h-full">
+                      <div className="grid grid-cols-1 gap-1.5">
                         {/* Total de Lucros */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 flex flex-col">
                           <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_profits')}</div>
                           <div className="text-sm font-bold text-green-400 truncate">
                             R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
@@ -1878,7 +1878,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         </div>
 
                         {/* Total de Perdas */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 flex flex-col">
                           <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_losses')}</div>
                           <div className="text-sm font-bold text-red-400 truncate">
                             -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
@@ -1889,7 +1889,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         </div>
 
                         {/* Resultado do Período */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 flex flex-col">
                           <div className="text-xs text-zinc-400 mb-1">Resultado</div>
                           <div className={`text-sm font-bold truncate ${
                             chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'
@@ -1902,7 +1902,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         </div>
 
                         {/* Média por Dia */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 flex flex-col">
                           <div className="text-xs text-zinc-400 mb-1">Média/Dia</div>
                           <div className={`text-sm font-bold truncate ${
                             (chartData[chartData.length - 1]?.accumulated || 0) / chartData.length >= 0 ? 'text-blue-400' : 'text-orange-400'
