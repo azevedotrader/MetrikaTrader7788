@@ -396,12 +396,12 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
             periodPeak = point.equity;
           }
           
-          // Calcular drawdown atual
-          const currentDrawdown = periodPeak > 0 ? ((periodPeak - point.equity) / periodPeak) * 100 : 0;
+          // Calcular drawdown atual (negativo quando abaixo do pico)
+          const currentDrawdown = periodPeak > 0 ? -((periodPeak - point.equity) / periodPeak) * 100 : 0;
           const currentDrawdownValue = periodPeak - point.equity;
           
-          // Manter o maior drawdown do período
-          if (currentDrawdown > maxDrawdown) {
+          // Manter o menor drawdown do período (mais negativo)
+          if (currentDrawdown < maxDrawdown) {
             maxDrawdown = currentDrawdown;
             maxDrawdownValue = currentDrawdownValue;
           }
@@ -450,7 +450,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
 
   const maxDrawdown = useMemo(() => {
     if (!chartData.length) return 0;
-    return Math.max(...chartData.map(d => d.drawdown));
+    return Math.min(...chartData.map(d => d.drawdown));
   }, [chartData]);
 
   const currentDrawdown = useMemo(() => {
@@ -471,7 +471,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
     if (name === 'drawdown') {
       const dataPoint = props.payload;
       const percentage = value.toFixed(2);
-      const valueInReais = dataPoint?.drawdownValue?.toFixed(2) || '0.00';
+      const valueInReais = Math.abs(dataPoint?.drawdownValue || 0).toFixed(2);
       return [`${percentage}% (R$ ${valueInReais})`, 'Drawdown'];
     }
     return [`${value.toFixed(2)}%`, 'Drawdown'];
@@ -508,11 +508,15 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
           <div className="text-slate-400 text-center sm:text-left">
             <div>Drawdown Atual:</div>
-            <div className="text-red-400 font-semibold">
+            <div className={`font-semibold ${
+              currentDrawdown.percentage === 0 ? 'text-green-400' : 'text-red-400'
+            }`}>
               {currentDrawdown.percentage.toFixed(2)}%
             </div>
-            <div className="text-red-300 text-xs">
-              R$ {currentDrawdown.value.toFixed(2)}
+            <div className={`text-xs ${
+              currentDrawdown.percentage === 0 ? 'text-green-300' : 'text-red-300'
+            }`}>
+              R$ {Math.abs(currentDrawdown.value).toFixed(2)}
             </div>
           </div>
           <div className="text-slate-400 text-center sm:text-right">
@@ -521,7 +525,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
               {maxDrawdown.toFixed(2)}%
             </div>
             <div className="text-red-400 text-xs">
-              R$ {maxDrawdownValue.toFixed(2)}
+              R$ {Math.abs(maxDrawdownValue).toFixed(2)}
             </div>
           </div>
         </div>
@@ -541,7 +545,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                   stroke="#9CA3AF"
                   fontSize={12}
                   tickFormatter={(value) => `${value.toFixed(1)}%`}
-                  domain={[0, 'dataMax']}
+                  domain={['dataMin', 0]}
                 />
                 <Tooltip
                   contentStyle={{
@@ -560,6 +564,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                   strokeWidth={3}
                   dot={{ fill: "#ef4444", strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: "#ef4444", strokeWidth: 2 }}
+                  connectNulls={false}
                 />
               </RechartsLineChart>
             </ResponsiveContainer>
