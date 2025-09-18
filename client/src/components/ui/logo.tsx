@@ -29,14 +29,14 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
       case "modal":
         return "h-14 w-14 md:h-12 md:w-12 sm:h-10 sm:w-10";
       case "sidebar":
-        return expanded ? "h-10 w-10" : "h-8 w-8";
+        return expanded ? "h-12 w-12" : "h-10 w-10";
       default:
         return "h-8 w-8";
     }
   };
 
   return (
-    <div className="flex items-center gap-1" data-testid={`logo-container-${variant}`}>
+    <div className="flex items-center gap-0" data-testid={`logo-container-${variant}`}>
       <img 
         src={metrikaIcon} 
         alt="Métrika Icon" 
