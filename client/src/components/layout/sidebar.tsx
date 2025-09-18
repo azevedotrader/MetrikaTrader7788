@@ -123,9 +123,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           <div className="p-4 border-b border-zinc-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center">
-                {sidebarExpanded && (
-                  <Logo variant="sidebar" expanded />
-                )}
+                <Logo variant="sidebar" expanded={sidebarExpanded} />
               </div>
               
               {/* Close button for mobile */}
