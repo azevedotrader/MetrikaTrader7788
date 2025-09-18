@@ -634,10 +634,10 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
           </div>
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative h-[350px]">
           <ResponsiveContainer
             width="100%"
-            height={450}
+            height="100%"
           >
           {(() => {
             // Calcular yMin e yMax dos dados reais
@@ -1904,9 +1904,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
               {/* Gráfico - Área Principal */}
               <div className="w-full">
-                <div className="h-80 lg:h-96">
-                  <PerformancePeriodChart trades={filteredTrades} t={t} />
-                </div>
+                <PerformancePeriodChart trades={filteredTrades} t={t} />
               </div>
             </CardContent>
           </Card>
