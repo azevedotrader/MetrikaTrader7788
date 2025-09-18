@@ -345,81 +345,102 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
         });
       });
 
-      // Agrupar por período e calcular métricas
-      const groups = new Map();
-      let runningPeak = 0;
-
+      // Agrupar pontos por período primeiro
+      const periodGroups = new Map<string, Array<{date: Date, equity: number, profit: number}>>();
+      
       equityPoints.forEach((point) => {
-        // Atualizar pico global
-        if (point.equity > runningPeak) {
-          runningPeak = point.equity;
-        }
-
         let periodKey: string;
-        let periodLabel: string;
-
+        
         switch (timeFilter) {
           case "dia":
             periodKey = format(startOfDay(point.date), "yyyy-MM-dd");
-            periodLabel = format(point.date, "dd/MM", { locale: ptBR });
             break;
           case "semana":
             periodKey = format(
               startOfWeek(point.date, { weekStartsOn: 1 }),
               "yyyy-MM-dd",
             );
+            break;
+          case "mes":
+            periodKey = format(startOfMonth(point.date), "yyyy-MM");
+            break;
+          case "ano":
+            periodKey = format(startOfYear(point.date), "yyyy");
+            break;
+        }
+
+        if (!periodGroups.has(periodKey)) {
+          periodGroups.set(periodKey, []);
+        }
+        periodGroups.get(periodKey)!.push(point);
+      });
+
+      // Agora calcular métricas para cada período
+      const results = [];
+      
+      for (const [periodKey, points] of periodGroups) {
+        if (points.length === 0) continue;
+        
+        // Ordenar pontos do período por data
+        points.sort((a, b) => a.date.getTime() - b.date.getTime());
+        
+        // Calcular pico e drawdown específico para este período
+        let periodPeak = points[0].equity;
+        let maxDrawdown = 0;
+        let maxDrawdownValue = 0;
+        let finalEquity = points[points.length - 1].equity;
+        
+        points.forEach((point) => {
+          // Atualizar pico do período
+          if (point.equity > periodPeak) {
+            periodPeak = point.equity;
+          }
+          
+          // Calcular drawdown atual
+          const currentDrawdown = periodPeak > 0 ? ((periodPeak - point.equity) / periodPeak) * 100 : 0;
+          const currentDrawdownValue = periodPeak - point.equity;
+          
+          // Manter o maior drawdown do período
+          if (currentDrawdown > maxDrawdown) {
+            maxDrawdown = currentDrawdown;
+            maxDrawdownValue = currentDrawdownValue;
+          }
+        });
+
+        // Gerar label do período
+        let periodLabel: string;
+        const firstDate = points[0].date;
+        
+        switch (timeFilter) {
+          case "dia":
+            periodLabel = format(firstDate, "dd/MM", { locale: ptBR });
+            break;
+          case "semana":
             periodLabel = format(
-              startOfWeek(point.date, { weekStartsOn: 1 }),
+              startOfWeek(firstDate, { weekStartsOn: 1 }),
               "dd/MM",
               { locale: ptBR },
             );
             break;
           case "mes":
-            periodKey = format(startOfMonth(point.date), "yyyy-MM");
-            periodLabel = format(point.date, "MMM/yy", { locale: ptBR });
+            periodLabel = format(firstDate, "MMM/yy", { locale: ptBR });
             break;
           case "ano":
-            periodKey = format(startOfYear(point.date), "yyyy");
-            periodLabel = format(point.date, "yyyy", { locale: ptBR });
+            periodLabel = format(firstDate, "yyyy", { locale: ptBR });
             break;
         }
 
-        // Calcular drawdown para este ponto específico
-        const currentDrawdown = runningPeak > 0 ? ((runningPeak - point.equity) / runningPeak) * 100 : 0;
-        const currentDrawdownValue = runningPeak - point.equity;
+        results.push({
+          period: periodLabel,
+          date: periodKey,
+          drawdown: maxDrawdown,
+          drawdownValue: maxDrawdownValue,
+          equity: finalEquity,
+          peak: periodPeak,
+        });
+      }
 
-        // Se o período já existe, atualizar com o pior drawdown do período
-        const existing = groups.get(periodKey);
-        if (existing) {
-          if (currentDrawdown > existing.drawdown) {
-            groups.set(periodKey, {
-              ...existing,
-              drawdown: currentDrawdown,
-              drawdownValue: currentDrawdownValue,
-              equity: point.equity,
-              peak: runningPeak,
-            });
-          } else {
-            // Manter o equity mais recente do período
-            groups.set(periodKey, {
-              ...existing,
-              equity: point.equity,
-              peak: runningPeak,
-            });
-          }
-        } else {
-          groups.set(periodKey, {
-            period: periodLabel,
-            date: periodKey,
-            drawdown: currentDrawdown,
-            drawdownValue: currentDrawdownValue,
-            equity: point.equity,
-            peak: runningPeak,
-          });
-        }
-      });
-
-      return Array.from(groups.values()).sort(
+      return results.sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       ).slice(-20); // Últimos 20 períodos
     };
