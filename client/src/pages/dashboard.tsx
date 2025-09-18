@@ -2345,7 +2345,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Performance por Período - Gráfico (2/3 da largura) */}
             <div className="lg:col-span-2">
-              <Card className="border-zinc-800 h-full bg-[#1a2743]">
+              <Card className="border-zinc-800 h-full bg-[#171719]">
                 <CardHeader>
                   <CardTitle className="text-white">
                     {t('dashboard.performance_chart')}
