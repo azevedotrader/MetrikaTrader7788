@@ -2058,6 +2058,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className={`text-2xl font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                   R$ {metrics.rentabilidadeTotal.toFixed(2)}
                 </div>
+                <div className="text-xs text-zinc-500 mt-1">
+                  {filteredTrades.length} trades
+                </div>
               </CardContent>
             </Card>
 
