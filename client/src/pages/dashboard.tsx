@@ -1798,17 +1798,17 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 {t('dashboard.performance_chart')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="flex flex-col lg:flex-row gap-4 p-4">
-                {/* Gráfico - Área Principal */}
-                <div className="flex-1 lg:w-3/4">
+            <CardContent className="p-0 relative">
+              <div className="p-4">
+                {/* Gráfico - Ocupa toda a largura */}
+                <div className="w-full">
                   <div className="h-80 lg:h-96">
                     <PerformancePeriodChart trades={filteredTrades} t={t} />
                   </div>
                 </div>
 
-                {/* Métricas Laterais - Grid 2x2 */}
-                <div className="lg:w-1/4">
+                {/* Métricas no canto superior direito como overlay */}
+                <div className="absolute top-6 right-6 z-10">
                   {(() => {
                     // Calcular métricas do gráfico sem useMemo para evitar erro de hooks
                     if (!filteredTrades.length) {
@@ -1865,9 +1865,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     }
 
                     return (
-                      <div className="grid grid-cols-2 gap-0.5 max-w-32">
+                      <div className="grid grid-cols-2 gap-1 w-44">
                         {/* Total de Lucros */}
-                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                        <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center items-center text-center backdrop-blur-sm">
                           <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
                           <div className="text-xs font-bold text-green-400 truncate">
                             R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
@@ -1878,7 +1878,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         </div>
 
                         {/* Total de Perdas */}
-                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                        <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center items-center text-center backdrop-blur-sm">
                           <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
                           <div className="text-xs font-bold text-red-400 truncate">
                             -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
@@ -1889,7 +1889,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         </div>
 
                         {/* Resultado do Período */}
-                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                        <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center items-center text-center backdrop-blur-sm">
                           <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
                           <div className={`text-xs font-bold truncate ${
                             chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'
@@ -1902,7 +1902,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         </div>
 
                         {/* Média por Dia */}
-                        <div className="bg-zinc-800/50 rounded border border-zinc-700 p-1 aspect-square flex flex-col justify-center items-center text-center">
+                        <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center items-center text-center backdrop-blur-sm">
                           <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
                           <div className={`text-xs font-bold truncate ${
                             (chartData[chartData.length - 1]?.accumulated || 0) / chartData.length >= 0 ? 'text-blue-400' : 'text-orange-400'
