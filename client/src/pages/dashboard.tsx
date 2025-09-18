@@ -1891,8 +1891,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   </div>
                 </div>
 
-                {/* Métricas Laterais */}
-                <div className="lg:w-1/4 space-y-3">
+                {/* Métricas Laterais - Grid 2x2 */}
+                <div className="lg:w-1/4">
                   {(() => {
                     // Calcular métricas do gráfico sem useMemo para evitar erro de hooks
                     if (!filteredTrades.length) {
@@ -1949,55 +1949,55 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     }
 
                     return (
-                      <>
+                      <div className="grid grid-cols-2 gap-2 h-full">
                         {/* Total de Lucros */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
                           <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_profits')}</div>
-                          <div className="text-lg font-bold text-green-400 truncate">
-                            R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          <div className="text-sm font-bold text-green-400 truncate">
+                            R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-xs text-zinc-500 mt-1">
+                          <div className="text-xs text-zinc-500">
                             {chartData.reduce((sum, d) => sum + d.positiveCount, 0)} trades
                           </div>
                         </div>
 
                         {/* Total de Perdas */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
                           <div className="text-xs text-zinc-400 mb-1">{t('metrics.total_losses')}</div>
-                          <div className="text-lg font-bold text-red-400 truncate">
-                            -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          <div className="text-sm font-bold text-red-400 truncate">
+                            -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-xs text-zinc-500 mt-1">
+                          <div className="text-xs text-zinc-500">
                             {chartData.reduce((sum, d) => sum + d.negativeCount, 0)} trades
                           </div>
                         </div>
 
                         {/* Resultado do Período */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
-                          <div className="text-xs text-zinc-400 mb-1">{t('metrics.period_result_short')}</div>
-                          <div className={`text-lg font-bold truncate ${
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
+                          <div className="text-xs text-zinc-400 mb-1">Resultado</div>
+                          <div className={`text-sm font-bold truncate ${
                             chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'
                           }`}>
-                            R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
+                            R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) || '0'}
                           </div>
-                          <div className="text-xs text-zinc-500 mt-1">
-                            {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(1)}% acerto
+                          <div className="text-xs text-zinc-500">
+                            {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(0)}% acerto
                           </div>
                         </div>
 
                         {/* Média por Dia */}
-                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-3">
-                          <div className="text-xs text-zinc-400 mb-1">Média por Dia</div>
-                          <div className={`text-lg font-bold truncate ${
+                        <div className="bg-zinc-800/50 rounded-lg border border-zinc-700 p-2 aspect-square flex flex-col justify-center">
+                          <div className="text-xs text-zinc-400 mb-1">Média/Dia</div>
+                          <div className={`text-sm font-bold truncate ${
                             (chartData[chartData.length - 1]?.accumulated || 0) / chartData.length >= 0 ? 'text-blue-400' : 'text-orange-400'
                           }`}>
-                            R$ {((chartData[chartData.length - 1]?.accumulated || 0) / chartData.length || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            R$ {((chartData[chartData.length - 1]?.accumulated || 0) / chartData.length || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                           </div>
-                          <div className="text-xs text-zinc-500 mt-1">
+                          <div className="text-xs text-zinc-500">
                             {chartData.length} períodos
                           </div>
                         </div>
-                      </>
+                      </div>
                     );
                   })()}
                 </div>
@@ -2083,44 +2083,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </div>
           </div>
 
-          {/* Main Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            <SquareCard
-              title={t('metrics.total_profitability')}
-              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
-              icon={DollarSign}
-              color={
-                metrics.rentabilidadeTotal >= 0
-                  ? "text-green-400"
-                  : "text-red-400"
-              }
-            />
-
-            <SquareCard
-              title={t('dashboard.total_trades')}
-              value={metrics.totalTrades}
-              icon={BarChart3}
-              color="text-zinc-300"
-            />
-
-            <SquareCard
-              title={t('dashboard.win_rate')}
-              value={`${metrics.taxaAcerto.toFixed(1)}%`}
-              icon={Target}
-              color={
-                metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"
-              }
-            />
-
-            <SquareCard
-              title={t('dashboard.avg_rr')}
-              value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
-              icon={TrendingUp}
-              color={
-                metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-white"
-              }
-            />
-          </div>
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
