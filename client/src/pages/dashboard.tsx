@@ -469,6 +469,73 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   const lineColor = isNegative ? "#ef4444" : "#22c55e"; // Vermelho se negativo, verde se positivo
   const fillGradient = isNegative ? "url(#negativeGradient)" : "url(#positiveGradient)";
 
+  // Função para renderizar métricas no container
+  const renderMetrics = () => {
+    const container = document.getElementById('performance-metrics-container');
+    if (!container || chartData.length === 0) return;
+
+    const totalPositive = chartData.reduce((sum, d) => sum + d.positive, 0);
+    const totalNegative = chartData.reduce((sum, d) => sum + d.negative, 0);
+    const totalPositiveCount = chartData.reduce((sum, d) => sum + d.positiveCount, 0);
+    const totalNegativeCount = chartData.reduce((sum, d) => sum + d.negativeCount, 0);
+    const totalTrades = chartData.reduce((sum, d) => sum + d.totalCount, 0);
+    const winRate = totalTrades > 0 ? (totalPositiveCount / totalTrades * 100) : 0;
+    const avgPerPeriod = chartData.length > 0 ? finalAccumulated / chartData.length : 0;
+
+    container.innerHTML = `
+      <div class="flex gap-1">
+        <!-- Total de Lucros -->
+        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+          <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
+          <div class="text-xs font-bold text-green-400 truncate">
+            R$ ${totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+          </div>
+          <div class="text-xs text-zinc-500 leading-tight">
+            ${totalPositiveCount}
+          </div>
+        </div>
+
+        <!-- Total de Perdas -->
+        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+          <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
+          <div class="text-xs font-bold text-red-400 truncate">
+            -R$ ${totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+          </div>
+          <div class="text-xs text-zinc-500 leading-tight">
+            ${totalNegativeCount}
+          </div>
+        </div>
+
+        <!-- Resultado do Período -->
+        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+          <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
+          <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-green-400' : 'text-red-400'}">
+            R$ ${finalAccumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+          </div>
+          <div class="text-xs text-zinc-500 leading-tight">
+            ${winRate.toFixed(0)}%
+          </div>
+        </div>
+
+        <!-- Média por Período -->
+        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+          <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
+          <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-blue-400' : 'text-orange-400'}">
+            R$ ${avgPerPeriod.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+          </div>
+          <div class="text-xs text-zinc-500 leading-tight">
+            ${chartData.length}d
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  // Renderizar métricas quando chartData muda
+  useEffect(() => {
+    renderMetrics();
+  }, [chartData, selectedPeriod, selectedMonth, selectedStartDay, selectedEndDay]);
+
   return (
     <div data-testid="performance-chart" className="w-full">
       {/* Filtros de Período */}
@@ -1792,107 +1859,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
-              {/* Métricas Resumidas - Acima do gráfico */}
-              <div className="mb-4 flex justify-end">
-                {(() => {
-                  // Calcular métricas do gráfico sem useMemo para evitar erro de hooks
-                  if (!filteredTrades.length) {
-                    return null;
-                  }
-
-                  const dailyData = filteredTrades.reduce((acc, trade) => {
-                    const date = format(new Date(trade.dataHora), 'dd/MM');
-                    const result = parseFloat(trade.resultado || '0');
-                    
-                    if (!acc[date]) {
-                      acc[date] = { positive: 0, negative: 0, positiveCount: 0, negativeCount: 0, totalCount: 0 };
-                    }
-                    
-                    if (result > 0) {
-                      acc[date].positive += result;
-                      acc[date].positiveCount += 1;
-                    } else if (result < 0) {
-                      acc[date].negative += Math.abs(result);
-                      acc[date].negativeCount += 1;
-                    }
-                    acc[date].totalCount += 1;
-                    
-                    return acc;
-                  }, {} as Record<string, any>);
-
-                  let accumulated = 0;
-                  const chartData = Object.entries(dailyData)
-                    .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                    .slice(-14)
-                    .map(([date, data]) => {
-                      accumulated += data.positive - data.negative;
-                      return {
-                        date,
-                        accumulated,
-                        positive: data.positive,
-                        negative: data.negative,
-                        positiveCount: data.positiveCount,
-                        negativeCount: data.negativeCount,
-                        totalCount: data.totalCount
-                      };
-                    });
-
-                  if (chartData.length === 0) {
-                    return null;
-                  }
-
-                  return (
-                    <div className="flex gap-1">
-                      {/* Total de Lucros */}
-                      <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
-                        <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
-                        <div className="text-xs font-bold text-green-400 truncate">
-                          R$ {chartData.reduce((sum, d) => sum + d.positive, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                        </div>
-                        <div className="text-xs text-zinc-500 leading-tight">
-                          {chartData.reduce((sum, d) => sum + d.positiveCount, 0)}
-                        </div>
-                      </div>
-
-                      {/* Total de Perdas */}
-                      <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
-                        <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
-                        <div className="text-xs font-bold text-red-400 truncate">
-                          -R$ {chartData.reduce((sum, d) => sum + d.negative, 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                        </div>
-                        <div className="text-xs text-zinc-500 leading-tight">
-                          {chartData.reduce((sum, d) => sum + d.negativeCount, 0)}
-                        </div>
-                      </div>
-
-                      {/* Resultado do Período */}
-                      <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
-                        <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
-                        <div className={`text-xs font-bold truncate ${
-                          chartData[chartData.length - 1]?.accumulated >= 0 ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          R$ {chartData[chartData.length - 1]?.accumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) || '0'}
-                        </div>
-                        <div className="text-xs text-zinc-500 leading-tight">
-                          {((chartData.reduce((sum, d) => sum + d.positiveCount, 0) / chartData.reduce((sum, d) => sum + d.totalCount, 0)) * 100).toFixed(0)}%
-                        </div>
-                      </div>
-
-                      {/* Média por Dia */}
-                      <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
-                        <div className="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
-                        <div className={`text-xs font-bold truncate ${
-                          (chartData[chartData.length - 1]?.accumulated || 0) / chartData.length >= 0 ? 'text-blue-400' : 'text-orange-400'
-                        }`}>
-                          R$ {((chartData[chartData.length - 1]?.accumulated || 0) / chartData.length || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                        </div>
-                        <div className="text-xs text-zinc-500 leading-tight">
-                          {chartData.length}d
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
+              {/* Métricas Resumidas - Estas serão atualizadas dinamicamente pelo componente do gráfico */}
+              <div className="mb-4 flex justify-end" id="performance-metrics-container">
+                {/* Placeholder - será preenchido pelo PerformancePeriodChart */}
               </div>
 
               {/* Gráfico - Área Principal */}
