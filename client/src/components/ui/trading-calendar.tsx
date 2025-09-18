@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, isSameDay } from "date-fns";
 import type { DiaryEntry } from "@shared/schema";
 import { useLanguage } from "@/contexts/LanguageContext";
+import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 
 interface TradeDay {
   date: number;
@@ -425,12 +426,32 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900 border-zinc-700",
+          "bg-zinc-900 border-zinc-700 relative",
           isMobile ? "mb-10" : "mb-8",
           className,
         )}
         style={{ marginBottom: "50px" }}
       >
+        {/* Logo watermark */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <div className="opacity-[0.03] hover:opacity-[0.08] transition-opacity duration-300 flex items-center justify-center w-full h-full">
+            <img 
+              src={metrikaLogo} 
+              alt="METRIKA" 
+              style={{
+                height: '200px',
+                width: 'auto',
+                objectFit: 'contain',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+              }}
+              className="block"
+            />
+          </div>
+        </div>
+
         <CardHeader className={cn(isMobile ? "pb-2" : "pb-4")}>
           <div className="flex items-center justify-between">
             <CardTitle
@@ -474,7 +495,7 @@ export function TradingCalendar({
           </div>
         </CardHeader>
 
-        <CardContent className="p-0">
+        <CardContent className="p-0 relative">
           {/* Calendário */}
           <div
             className={cn(
