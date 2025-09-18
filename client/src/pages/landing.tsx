@@ -648,41 +648,41 @@ export default function Landing() {
         <div className="absolute bottom-10 right-10 w-48 h-48 gradient-teal rounded-full opacity-10 blur-3xl animate-float" style={{ animationDelay: '3s' }}></div>
         
         <div className="relative max-w-6xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-emerald-600/30 rounded-3xl p-16 shadow-2xl animate-glow">
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-8 sm:mb-10 leading-tight">
+          <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border border-emerald-600/30 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 lg:p-16 shadow-2xl animate-glow">
+            <h2 className="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold mb-6 sm:mb-8 lg:mb-10 leading-tight break-words">
               <span className="text-white">{t('landing.cta.title1')}</span>
               <span className="gradient-text block animate-pulse-slow">{t('landing.cta.title2')}</span>
               <span className="text-white">{t('landing.cta.title3')}</span>
             </h2>
             
-            <p className="font-body text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 mb-8 sm:mb-12 max-w-4xl mx-auto">
+            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-200 mb-6 sm:mb-8 md:mb-12 max-w-4xl mx-auto break-words">
               {t('landing.cta.subtitle1')} 
               <span className="text-emerald-400 font-bold">{t('landing.cta.subtitle2')}</span>
             </p>
 
-            <div className="flex flex-col lg:flex-row gap-8 justify-center mb-16">
-              <div className="flex items-center space-x-4 text-slate-200">
-                <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-8 h-8 text-emerald-400" />
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 justify-center mb-8 sm:mb-12 lg:mb-16">
+              <div className="flex items-center space-x-3 sm:space-x-4 text-slate-200">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-emerald-400" />
                 </div>
-                <span className="text-xl font-medium">{t('landing.cta.feature1')}</span>
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-medium break-words">{t('landing.cta.feature1')}</span>
               </div>
-              <div className="flex items-center space-x-4 text-slate-200">
-                <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center">
-                  <Zap className="w-8 h-8 text-indigo-400" />
+              <div className="flex items-center space-x-3 sm:space-x-4 text-slate-200">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-indigo-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Zap className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-indigo-400" />
                 </div>  
-                <span className="text-xl font-medium">{t('landing.cta.feature2')}</span>
+                <span className="text-sm sm:text-base md:text-lg lg:text-xl font-medium break-words">{t('landing.cta.feature2')}</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-8 sm:mb-12">
               <Button 
                 size="lg"
                 onClick={() => setShowRegister(true)}
-                className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-8 sm:px-12 lg:px-16 py-5 sm:py-6 text-lg sm:text-xl lg:text-2xl font-bold animate-glow"
+                className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-4 sm:px-6 md:px-8 lg:px-12 py-3 sm:py-4 md:py-5 text-sm sm:text-base md:text-lg lg:text-xl font-bold animate-glow w-full sm:w-auto break-words"
               >
-                {t('landing.cta.main_button')}
-                <ArrowRight className="w-7 h-7 ml-4" />
+                <span className="break-words">{t('landing.cta.main_button')}</span>
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 ml-2 sm:ml-3 md:ml-4 flex-shrink-0" />
               </Button>
             </div>
 
@@ -692,46 +692,45 @@ export default function Landing() {
         </div>
       </section>
       {/* Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-12">
+      <footer className="bg-slate-900 border-t border-slate-800 py-8 sm:py-10 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-20 h-20 gradient-purple-blue rounded-lg flex items-center justify-center">
-                  <Logo variant="header" className="w-16 h-12" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            <div className="sm:col-span-2 md:col-span-2">
+              <div className="flex items-center space-x-2 mb-3 sm:mb-4 justify-center sm:justify-start">
+                <div className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 gradient-purple-blue rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Logo variant="header" className="w-12 h-9 sm:w-14 sm:h-10 md:w-16 md:h-12" />
                 </div>
-                
               </div>
-              <p className="text-slate-400 max-w-md">
+              <p className="text-slate-400 max-w-md text-sm sm:text-base break-words text-center sm:text-left">
                 {t('landing.footer.description')}
               </p>
             </div>
             
-            <div>
-              <h4 className="text-white font-semibold mb-4">{t('landing.footer.product')}</h4>
+            <div className="text-center sm:text-left">
+              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base break-words">{t('landing.footer.product')}</h4>
               <div className="space-y-2">
-                <a href="#recursos" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.features')}</a>
-                <a href="#precos" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.pricing')}</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.integrations')}</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.api')}</a>
+                <a href="#recursos" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.features')}</a>
+                <a href="#precos" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.pricing')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.integrations')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.api')}</a>
               </div>
             </div>
             
-            <div>
-              <h4 className="text-white font-semibold mb-4">{t('landing.footer.support')}</h4>
+            <div className="text-center sm:text-left">
+              <h4 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base break-words">{t('landing.footer.support')}</h4>
               <div className="space-y-2">
-                <a href="mailto:suporte@appmetrika.com.br" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.contact')}</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.documentation')}</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.tutorials')}</a>
-                <a href="#" className="text-slate-400 hover:text-white transition-colors block">{t('landing.footer.status')}</a>
+                <a href="mailto:suporte@appmetrika.com.br" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.contact')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.documentation')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.tutorials')}</a>
+                <a href="#" className="text-slate-400 hover:text-white transition-colors block text-xs sm:text-sm break-words">{t('landing.footer.status')}</a>
               </div>
             </div>
           </div>
           
-          <div className="border-t border-slate-800 mt-8 pt-8 text-center">
-            <p className="text-slate-400">
+          <div className="border-t border-slate-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center">
+            <p className="text-slate-400 text-xs sm:text-sm break-words">
               {t('landing.footer.copyright')} 
-              <span className="mx-2">•</span>
+              <span className="mx-1 sm:mx-2">•</span>
               {t('landing.footer.made_with_love')}
             </p>
           </div>
