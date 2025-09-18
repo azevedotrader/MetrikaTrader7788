@@ -2367,7 +2367,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Métrika Score - Quadrado (1/3 da largura) */}
             <div className="lg:col-span-1">
-              <Card className="border-zinc-800 h-full bg-[#1a2743]">
+              <Card className="border-zinc-800 h-full bg-[#171719]">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-zinc-400" />
