@@ -739,13 +739,56 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
             </div>
           )}
         </div>
-
-        {/* Recovery Factor Value Display */}
-        <div className="text-center mt-2">
-          <div className="text-xs text-slate-500">
-            Recovery Factorvalue : 58/100
+        
+        {/* Distribuição por Mercado */}
+        {metricsData.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-slate-700">
+            <h4 className="text-sm font-medium text-slate-300 mb-3 text-center">
+              {t('dashboard.market_distribution')}
+            </h4>
+            <div className="space-y-2">
+              {(() => {
+                // Calcular distribuição por mercado a partir dos trades
+                const marketData = {
+                  'Forex': { total: 0, count: 0 },
+                  'B3': { total: 0, count: 0 },
+                  'Crypto': { total: 0, count: 0 }
+                };
+                
+                trades.forEach(trade => {
+                  const result = parseFloat(trade.resultado || "0");
+                  const market = trade.mercado || 'Forex'; // Padrão para Forex se não especificado
+                  
+                  if (market in marketData) {
+                    marketData[market as keyof typeof marketData].total += result;
+                    marketData[market as keyof typeof marketData].count += 1;
+                  }
+                });
+                
+                const totalTrades = trades.length;
+                
+                return Object.entries(marketData).map(([market, data]) => {
+                  const percentage = totalTrades > 0 ? (data.count / totalTrades * 100) : 0;
+                  return (
+                    <div key={market} className="flex justify-between items-center text-xs">
+                      <span className="text-slate-300 font-medium">{market}</span>
+                      <div className="text-right">
+                        <div className={`font-bold ${
+                          data.total >= 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          R$ {data.total.toFixed(2)}
+                        </div>
+                        <div className="text-slate-500">
+                          {data.count} trades ({percentage.toFixed(1)}%)
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </div>
   );
@@ -2302,7 +2345,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Performance por Período - Gráfico (2/3 da largura) */}
             <div className="lg:col-span-2">
-              <Card className="bg-zinc-900/90 border-zinc-800 h-full">
+              <Card className="border-zinc-800 h-full bg-[#1a2743]">
                 <CardHeader>
                   <CardTitle className="text-white">
                     {t('dashboard.performance_chart')}
