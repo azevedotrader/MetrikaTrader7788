@@ -1666,6 +1666,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     );
                   })()}
                 </div>
+                <div className="text-center mt-1">
+                  <div className="text-xs text-zinc-400">
+                    {(() => {
+                      const dailyMap = new Map<string, number>();
+                      filteredTrades.forEach(trade => {
+                        const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
+                        const result = parseFloat(trade.resultado || '0');
+                        dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                      });
+                      const totalDays = dailyMap.size;
+                      const winningDays = Array.from(dailyMap.values()).filter(pnl => pnl > 0).length;
+                      return `${winningDays} de ${totalDays} dias`;
+                    })()}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
