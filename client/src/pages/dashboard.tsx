@@ -1583,13 +1583,7 @@ export default function Dashboard() {
             <span className="hidden sm:inline">{t('tabs.imports')}</span>
             <span className="sm:hidden">Import</span>
           </TabsTrigger>
-          <TabsTrigger
-            value="consolidated"
-            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
-          >
-            <span className="hidden sm:inline">{t('tabs.consolidated')}</span>
-            <span className="sm:hidden">Consol</span>
-          </TabsTrigger>
+          
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 md:space-y-6">
