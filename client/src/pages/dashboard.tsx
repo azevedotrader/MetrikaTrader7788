@@ -472,12 +472,11 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   return (
     <div data-testid="performance-chart" className="w-full">
       {/* Filtros de Período */}
-      <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap">
+      <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap items-center">
         {[
           { key: "week", label: t('time.7_days') },
           { key: "month", label: t('chart.all_months') },
           { key: "year", label: t('time.1_year') },
-          { key: "specific-month", label: t('chart.specific_month') },
         ].map((filter) => (
           <Button
             key={filter.key}
@@ -497,134 +496,128 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
             {filter.label}
           </Button>
         ))}
-      </div>
 
-      {/* Seletor de Mês Específico e Range de Dias */}
-      {selectedPeriod === "specific-month" && (
-        <div className="space-y-4 mb-4 md:mb-6">
-          {/* Seletor de Mês */}
-          <div className="flex justify-center">
-            <Select value={selectedMonth} onValueChange={(value) => {
-              setSelectedMonth(value);
-              // Reset day range when month changes
-              const [year, month] = value.split('-');
-              const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-              setSelectedStartDay(1);
-              setSelectedEndDay(lastDay);
-            }}>
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-36 md:w-48 text-sm">
-                <SelectValue placeholder={t('placeholder.select_month')} />
+        {/* Seletor de Mês Específico */}
+        <Select value={selectedMonth} onValueChange={(value) => {
+          setSelectedMonth(value);
+          setSelectedPeriod("specific-month");
+          // Reset day range when month changes
+          const [year, month] = value.split('-');
+          const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+          setSelectedStartDay(1);
+          setSelectedEndDay(lastDay);
+        }}>
+          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-32 md:w-40 text-xs md:text-sm">
+            <SelectValue placeholder="Mês Específico" />
+          </SelectTrigger>
+          <SelectContent className="bg-zinc-800 border-zinc-700">
+            {(() => {
+              const months = [];
+              const now = new Date();
+
+              // Criar lista dos últimos 24 meses
+              for (let i = 0; i < 24; i++) {
+                const date = new Date(
+                  now.getFullYear(),
+                  now.getMonth() - i,
+                  1,
+                );
+                const value = format(date, "yyyy-MM");
+                const label = format(date, "MMM/yy", { locale: ptBR });
+                months.push({ value, label });
+              }
+
+              return months.map((month) => (
+                <SelectItem
+                  key={month.value}
+                  value={month.value}
+                  className="text-white hover:bg-zinc-700 text-xs md:text-sm"
+                >
+                  {month.label}
+                </SelectItem>
+              ));
+            })()}
+          </SelectContent>
+        </Select>
+
+        {/* Filtros de Dias - aparecem ao lado quando mês específico está selecionado */}
+        {selectedPeriod === "specific-month" && (
+          <>
+            <span className="text-zinc-400 text-xs md:text-sm">Do dia</span>
+            <Select 
+              value={selectedStartDay.toString()} 
+              onValueChange={(value) => {
+                const day = parseInt(value);
+                setSelectedStartDay(day);
+                if (day > selectedEndDay) {
+                  setSelectedEndDay(day);
+                }
+              }}
+            >
+              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
+                <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700">
+              <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
                 {(() => {
-                  const months = [];
-                  const now = new Date();
-
-                  // Criar lista dos últimos 24 meses
-                  for (let i = 0; i < 24; i++) {
-                    const date = new Date(
-                      now.getFullYear(),
-                      now.getMonth() - i,
-                      1,
+                  const [year, month] = selectedMonth.split('-');
+                  const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+                  const days = [];
+                  for (let i = 1; i <= lastDay; i++) {
+                    days.push(
+                      <SelectItem key={i} value={i.toString()} className="text-white hover:bg-zinc-700 text-xs md:text-sm">
+                        {i}
+                      </SelectItem>
                     );
-                    const value = format(date, "yyyy-MM");
-                    const label = format(date, "MMMM yyyy", { locale: ptBR });
-                    months.push({ value, label });
                   }
-
-                  return months.map((month) => (
-                    <SelectItem
-                      key={month.value}
-                      value={month.value}
-                      className="text-white hover:bg-zinc-700 text-sm"
-                    >
-                      {month.label}
-                    </SelectItem>
-                  ));
+                  return days;
                 })()}
               </SelectContent>
             </Select>
-          </div>
-          
-          {/* Seletor de Range de Dias */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-zinc-300">Do dia</span>
-              <Select 
-                value={selectedStartDay.toString()} 
-                onValueChange={(value) => {
-                  const day = parseInt(value);
+            
+            <span className="text-zinc-400 text-xs md:text-sm">ao dia</span>
+            
+            <Select 
+              value={selectedEndDay.toString()} 
+              onValueChange={(value) => {
+                const day = parseInt(value);
+                setSelectedEndDay(day);
+                if (day < selectedStartDay) {
                   setSelectedStartDay(day);
-                  if (day > selectedEndDay) {
-                    setSelectedEndDay(day);
-                  }
-                }}
-              >
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-16 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
-                  {(() => {
-                    const [year, month] = selectedMonth.split('-');
-                    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-                    const days = [];
-                    for (let i = 1; i <= lastDay; i++) {
-                      days.push(
-                        <SelectItem key={i} value={i.toString()} className="text-white hover:bg-zinc-700 text-sm">
-                          {i}
-                        </SelectItem>
-                      );
-                    }
-                    return days;
-                  })()}
-                </SelectContent>
-              </Select>
-              
-              <span className="text-zinc-300">ao dia</span>
-              
-              <Select 
-                value={selectedEndDay.toString()} 
-                onValueChange={(value) => {
-                  const day = parseInt(value);
-                  setSelectedEndDay(day);
-                  if (day < selectedStartDay) {
-                    setSelectedStartDay(day);
-                  }
-                }}
-              >
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-16 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
-                  {(() => {
-                    const [year, month] = selectedMonth.split('-');
-                    const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-                    const days = [];
-                    for (let i = 1; i <= lastDay; i++) {
-                      days.push(
-                        <SelectItem key={i} value={i.toString()} className="text-white hover:bg-zinc-700 text-sm">
-                          {i}
-                        </SelectItem>
-                      );
-                    }
-                    return days;
-                  })()}
-                </SelectContent>
-              </Select>
-              
-              <div className="text-xs text-zinc-400 ml-2">
+                }
+              }}
+            >
+              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
                 {(() => {
                   const [year, month] = selectedMonth.split('-');
-                  const startDate = new Date(parseInt(year), parseInt(month) - 1, selectedStartDay);
-                  const endDate = new Date(parseInt(year), parseInt(month) - 1, selectedEndDay);
-                  const dayCount = Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
-                  return `(${dayCount} dia${dayCount !== 1 ? 's' : ''})`;
+                  const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+                  const days = [];
+                  for (let i = 1; i <= lastDay; i++) {
+                    days.push(
+                      <SelectItem key={i} value={i.toString()} className="text-white hover:bg-zinc-700 text-xs md:text-sm">
+                        {i}
+                      </SelectItem>
+                    );
+                  }
+                  return days;
                 })()}
-              </div>
+              </SelectContent>
+            </Select>
+            
+            <div className="text-xs text-zinc-500">
+              {(() => {
+                const [year, month] = selectedMonth.split('-');
+                const startDate = new Date(parseInt(year), parseInt(month) - 1, selectedStartDay);
+                const endDate = new Date(parseInt(year), parseInt(month) - 1, selectedEndDay);
+                const dayCount = Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+                return `(${dayCount}d)`;
+              })()}
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
 
       {chartData.length === 0 ? (
         <div className="h-[550px] md:h-[380px] flex items-center justify-center text-zinc-400">
