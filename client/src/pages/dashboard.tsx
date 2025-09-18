@@ -378,32 +378,40 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
       // Agora calcular métricas para cada período
       const results = [];
       
-      for (const [periodKey, points] of periodGroups) {
+      for (const [periodKey, points] of Array.from(periodGroups.entries())) {
         if (points.length === 0) continue;
         
         // Ordenar pontos do período por data
-        points.sort((a, b) => a.date.getTime() - b.date.getTime());
+        points.sort((a: {date: Date, equity: number, profit: number}, b: {date: Date, equity: number, profit: number}) => a.date.getTime() - b.date.getTime());
         
         // Calcular pico e drawdown específico para este período
-        let periodPeak = points[0].equity;
-        let maxDrawdown = 0;
+        let periodPeak = points[0].equity; // Começar com o primeiro valor
+        let maxDrawdown = 0; // Começa em 0 (sem drawdown)
         let maxDrawdownValue = 0;
         let finalEquity = points[points.length - 1].equity;
         
-        points.forEach((point) => {
-          // Atualizar pico do período
+        // Percorrer todos os pontos para encontrar o maior drawdown
+        points.forEach((point: {date: Date, equity: number, profit: number}) => {
+          // Atualizar pico se necessário
           if (point.equity > periodPeak) {
             periodPeak = point.equity;
           }
           
-          // Calcular drawdown atual (negativo quando abaixo do pico)
-          const currentDrawdown = periodPeak > 0 ? -((periodPeak - point.equity) / periodPeak) * 100 : 0;
-          const currentDrawdownValue = periodPeak - point.equity;
-          
-          // Manter o menor drawdown do período (mais negativo)
-          if (currentDrawdown < maxDrawdown) {
-            maxDrawdown = currentDrawdown;
-            maxDrawdownValue = currentDrawdownValue;
+          // Calcular drawdown atual
+          if (periodPeak > 0) {
+            const equityDiff = periodPeak - point.equity;
+            if (equityDiff > 0) {
+              // Há drawdown (equity abaixo do pico)
+              const currentDrawdown = -(equityDiff / periodPeak) * 100;
+              const currentDrawdownValue = equityDiff;
+              
+              // Manter o pior drawdown (mais negativo)
+              if (currentDrawdown < maxDrawdown) {
+                maxDrawdown = currentDrawdown;
+                maxDrawdownValue = currentDrawdownValue;
+              }
+            }
+            // Se equityDiff <= 0, estamos no pico ou acima, então drawdown permanece 0
           }
         });
 
