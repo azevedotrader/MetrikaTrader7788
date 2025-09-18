@@ -630,22 +630,22 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
 
   return (
     <div className="w-full">
-      <CardContent className="p-6">
+      <CardContent className="p-4">
         {/* Pontuação */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-4">
           
           {metricsData.length > 0 ? (
             <>
               {/* Pontuação Principal */}
-              <div className="mb-4">
-                <div className="text-3xl font-bold text-slate-100 mb-2" data-testid="metrika-score">
+              <div className="mb-3">
+                <div className="text-2xl font-bold text-slate-100 mb-1" data-testid="metrika-score">
                   {overallScore}/100
                 </div>
-                <div className="text-sm text-slate-400">{t('dashboard.your_metrika_score')}</div>
+                <div className="text-xs text-slate-400">{t('dashboard.your_metrika_score')}</div>
               </div>
               
               {/* Barra de Progresso Colorida */}
-              <div className="relative w-full h-2 bg-slate-700 rounded-full overflow-hidden mb-6">
+              <div className="relative w-full h-1.5 bg-slate-700 rounded-full overflow-hidden mb-4">
                 <div 
                   className="h-full transition-all duration-1000 ease-out"
                   data-testid="metrika-progress-bar"
@@ -665,14 +665,14 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
               </div>
             </>
           ) : (
-            <div className="text-slate-400 text-sm mb-6">
+            <div className="text-slate-400 text-xs mb-4">
               {t('dashboard.insufficient_data_for_score')}
             </div>
           )}
         </div>
 
         {/* Radar Chart */}
-        <div className="h-80 w-full flex justify-center">
+        <div className="h-52 w-full flex justify-center">
           {metricsData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={metricsData}>
@@ -2291,36 +2291,43 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           </div>
 
 
-          {/* Performance por Período - Gráfico com Métricas Laterais */}
-          <Card className="bg-zinc-900/90 border-zinc-800">
-            <CardHeader>
-              <CardTitle className="text-white">
-                {t('dashboard.performance_chart')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              {/* Métricas Resumidas - Estas serão atualizadas dinamicamente pelo componente do gráfico */}
-              <div className="mb-4 flex justify-end" id="performance-metrics-container">
-                {/* Placeholder - será preenchido pelo PerformancePeriodChart */}
-              </div>
+          {/* Performance Chart + Métrika Score - Layout lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Performance por Período - Gráfico (2/3 da largura) */}
+            <div className="lg:col-span-2">
+              <Card className="bg-zinc-900/90 border-zinc-800 h-full">
+                <CardHeader>
+                  <CardTitle className="text-white">
+                    {t('dashboard.performance_chart')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {/* Métricas Resumidas - Estas serão atualizadas dinamicamente pelo componente do gráfico */}
+                  <div className="mb-4 flex justify-end" id="performance-metrics-container">
+                    {/* Placeholder - será preenchido pelo PerformancePeriodChart */}
+                  </div>
 
-              {/* Gráfico - Área Principal */}
-              <div className="w-full">
-                <PerformancePeriodChart trades={filteredTrades} t={t} />
-              </div>
-            </CardContent>
-          </Card>
+                  {/* Gráfico - Área Principal */}
+                  <div className="w-full">
+                    <PerformancePeriodChart trades={filteredTrades} t={t} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-          {/* Métrika Score */}
-          <Card className="bg-zinc-900/90 border-zinc-800">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-zinc-400" />
-                Métrika Score
-              </CardTitle>
-            </CardHeader>
-            <MetrikaScore trades={filteredTrades} t={t} />
-          </Card>
+            {/* Métrika Score - Quadrado (1/3 da largura) */}
+            <div className="lg:col-span-1">
+              <Card className="bg-zinc-900/90 border-zinc-800 h-full">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-zinc-400" />
+                    Métrika Score
+                  </CardTitle>
+                </CardHeader>
+                <MetrikaScore trades={filteredTrades} t={t} />
+              </Card>
+            </div>
+          </div>
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

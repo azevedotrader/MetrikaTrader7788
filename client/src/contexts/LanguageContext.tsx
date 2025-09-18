@@ -892,7 +892,6 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.net_pnl": "PnL Líquido",
     "metrics.day_win_rate": "Dias Lucrativos %",
     "metrics.risk_reward": "Risco/Retorno",
-    "metrics.avg_win_loss": "Ganho/Perda Médio",
     "metrics.daily_net_pnl": "PnL Diário Líquido",
     "metrics.progress_tracker": "Rastreamento de Progresso",
 
