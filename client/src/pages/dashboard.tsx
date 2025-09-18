@@ -1726,7 +1726,36 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <TradingCalendar trades={filteredTrades} />
                 </div>
                 
-                
+                {/* Métricas adicionais no espaço vazio */}
+                <div className="mt-4 pt-4 border-t border-zinc-700">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-zinc-800/50 rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-zinc-400 text-xs">{t('dashboard.best_trade')}</p>
+                          <p className="text-lg font-bold text-green-400">
+                            R$ {metrics.melhorTrade.toFixed(2)}
+                          </p>
+                        </div>
+                        <TrendingUp className="h-6 w-6 text-green-400" />
+                      </div>
+                    </div>
+
+                    <div className="bg-zinc-800/50 rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-zinc-400 text-xs">{t('dashboard.frequent_emotion')}</p>
+                          <p className="text-sm font-bold text-white">
+                            {(metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).charAt(0).toUpperCase() + (metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).slice(1)}
+                          </p>
+                          <p className="text-xs text-zinc-500">
+                            {metrics.emocaoMaisRecorrente.count} {t('time.times')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </SquareCard>
 
@@ -1818,42 +1847,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </div>
           </div>
 
-          {/* Performance Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-zinc-400 text-sm">{t('dashboard.best_trade')}</p>
-                    <p className="text-2xl font-bold text-green-400">
-                      R$ {metrics.melhorTrade.toFixed(2)}
-                    </p>
-                  </div>
-                  <TrendingUp className="h-8 w-8 text-green-400" />
-                </div>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-zinc-400 text-sm">{t('dashboard.frequent_emotion')}</p>
-                    <p className="text-lg font-bold text-white">
-                      {(metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).charAt(0).toUpperCase() + (metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).slice(1)}
-                    </p>
-                    <p className="text-sm text-zinc-500">
-                      {metrics.emocaoMaisRecorrente.count} {t('time.times')}
-                    </p>
-                  </div>
-                  <div className="h-8 w-8"></div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            
-          </div>
 
           {/* Performance por Período - Gráfico com Métricas Laterais */}
           <Card className="bg-zinc-900/90 border-zinc-800">
