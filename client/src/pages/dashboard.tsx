@@ -2223,16 +2223,19 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               value=""
               icon={Calendar}
               color="text-blue-400"
-              className="lg:col-span-2"
+              className="lg:col-span-2 h-auto"
               data-testid="card-progress-tracker"
             >
               <div className="h-full flex flex-col">
-                <div className="flex-1">
-                  <TradingCalendar trades={filteredTrades} />
+                <div className="flex-1 overflow-hidden">
+                  <TradingCalendar 
+                    trades={filteredTrades} 
+                    className="compact-mobile"
+                  />
                 </div>
                 
                 {/* Métricas adicionais no espaço vazio */}
-                <div className="mt-3 pt-3 border-t border-zinc-700">
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-zinc-700">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-full">
                     <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
@@ -2265,7 +2268,94 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </SquareCard>
 
             {/* Right Column - Net Daily PnL Chart and Recent Trades */}
-            <div className="grid grid-cols-1 gap-3 md:gap-4">
+            {/* Mobile: Cards separados em grid */}
+            <div className="lg:hidden grid grid-cols-1 gap-3">
+              {/* PnL Chart Mobile - Card separado */}
+              <Card className="bg-zinc-900/90 border-zinc-800">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-zinc-400">{t('metrics.daily_net_pnl')}</h3>
+                    <BarChart3 className="h-4 w-4 text-green-400" />
+                  </div>
+                  <div className="h-48 overflow-hidden">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={(() => {
+                          const dailyMap = new Map<string, number>();
+                          filteredTrades.forEach(trade => {
+                            const date = format(new Date(trade.dataHora), 'MM/dd');
+                            const result = parseFloat(trade.resultado || '0');
+                            dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                          });
+                          return Array.from(dailyMap.entries())
+                            .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
+                            .slice(-14)
+                            .map(([date, pnl]) => ({ date, pnl }));
+                        })()}
+                        margin={{ top: 8, right: 8, left: 8, bottom: 25 }}
+                      >
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false} 
+                          tickLine={false}
+                          tick={{ fontSize: 8, fill: '#9ca3af' }}
+                          interval={0}
+                          angle={-45}
+                          textAnchor="end"
+                          height={30}
+                        />
+                        <YAxis hide />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#27272a',
+                            border: '1px solid #3f3f46',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                          }}
+                          formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'PnL']}
+                          labelStyle={{ color: '#d4d4d8' }}
+                        />
+                        <Bar 
+                          dataKey="pnl" 
+                          radius={[2, 2, 0, 0]}
+                        >
+                          {(() => {
+                            const dailyMap = new Map<string, number>();
+                            filteredTrades.forEach(trade => {
+                              const date = format(new Date(trade.dataHora), 'MM/dd');
+                              const result = parseFloat(trade.resultado || '0');
+                              dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                            });
+                            return Array.from(dailyMap.entries())
+                              .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
+                              .slice(-14)
+                              .map(([date, pnl], index) => (
+                                <Cell key={index} fill={pnl >= 0 ? '#22c55e' : '#ef4444'} />
+                              ));
+                          })()}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Trades Mobile - Card separado */}
+              <Card className="bg-zinc-900/90 border-zinc-800">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-zinc-400">{t('dashboard.recent_trades')}</h3>
+                    <FileText className="h-4 w-4 text-zinc-400" />
+                  </div>
+                  <div className="h-48 overflow-hidden">
+                    <RecentTrades trades={filteredTrades} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Desktop: Layout original em SquareCards */}
+            <div className="hidden lg:grid grid-cols-1 gap-3 md:gap-4">
               {/* Net Daily PnL Chart */}
               <SquareCard
                 title={t('metrics.daily_net_pnl')}
@@ -2279,7 +2369,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={(() => {
-                        // Calculate daily net PnL data
                         const dailyMap = new Map<string, number>();
                         filteredTrades.forEach(trade => {
                           const date = format(new Date(trade.dataHora), 'MM/dd');
@@ -2288,7 +2377,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         });
                         return Array.from(dailyMap.entries())
                           .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                          .slice(-14) // Last 14 days
+                          .slice(-14)
                           .map(([date, pnl]) => ({ date, pnl }));
                       })()}
                       margin={{ top: 8, right: 8, left: 8, bottom: 30 }}
