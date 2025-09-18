@@ -750,14 +750,14 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
               {(() => {
                 // Calcular distribuição por mercado a partir dos trades
                 const marketData = {
-                  'Forex': { total: 0, count: 0 },
-                  'B3': { total: 0, count: 0 },
-                  'Crypto': { total: 0, count: 0 }
+                  'forex': { total: 0, count: 0, displayName: 'Forex' },
+                  'b3': { total: 0, count: 0, displayName: 'B3' },
+                  'crypto': { total: 0, count: 0, displayName: 'Crypto' }
                 };
                 
                 trades.forEach(trade => {
                   const result = parseFloat(trade.resultado || "0");
-                  const market = trade.mercado || 'Forex'; // Padrão para Forex se não especificado
+                  const market = trade.mercado || 'forex'; // Padrão para forex se não especificado
                   
                   if (market in marketData) {
                     marketData[market as keyof typeof marketData].total += result;
@@ -771,7 +771,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
                   const percentage = totalTrades > 0 ? (data.count / totalTrades * 100) : 0;
                   return (
                     <div key={market} className="flex justify-between items-center text-xs">
-                      <span className="text-slate-300 font-medium">{market}</span>
+                      <span className="text-slate-300 font-medium">{data.displayName}</span>
                       <div className="text-right">
                         <div className={`font-bold ${
                           data.total >= 0 ? 'text-green-400' : 'text-red-400'
