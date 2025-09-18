@@ -1886,14 +1886,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             <CardContent className="p-0">
               <div className="flex flex-col lg:flex-row gap-4 p-4">
                 {/* Gráfico - Área Principal */}
-                <div className="flex-1 lg:w-2/3">
+                <div className="flex-1 lg:w-3/4">
                   <div className="h-80 lg:h-96">
                     <PerformancePeriodChart trades={filteredTrades} t={t} />
                   </div>
                 </div>
 
                 {/* Métricas Laterais */}
-                <div className="lg:w-1/3 space-y-3">
+                <div className="lg:w-1/4 space-y-3">
                   {(() => {
                     // Calcular métricas do gráfico sem useMemo para evitar erro de hooks
                     if (!filteredTrades.length) {
