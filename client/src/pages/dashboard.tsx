@@ -1556,7 +1556,20 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
       <TopBar 
         title={t("nav.dashboard")} 
         onMenuClick={onMenuClick}
-        showDashboardFilter={false}
+        showDashboardFilter={true}
+        viewMode={viewMode}
+        onViewModeChange={(mode) => {
+          setViewMode(mode);
+          if (mode !== "broker") setSelectedBrokerFilter(null);
+          if (mode !== "csv") setSelectedCsvIds([]);
+        }}
+        selectedBrokerFilter={selectedBrokerFilter}
+        onSelectedBrokerFilterChange={setSelectedBrokerFilter}
+        selectedCsvIds={selectedCsvIds}
+        onSelectedCsvIdsChange={setSelectedCsvIds}
+        csvImports={csvImports}
+        onCsvToggle={handleCsvToggle}
+        onSelectAllCsvs={handleSelectAllCsvs}
       />
       <div data-testid="dashboard-overview" className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
       <div className="flex flex-col gap-3 md:gap-4">
