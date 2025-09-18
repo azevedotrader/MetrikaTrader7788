@@ -1567,7 +1567,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
         onSelectedBrokerFilterChange={setSelectedBrokerFilter}
         selectedCsvIds={selectedCsvIds}
         onSelectedCsvIdsChange={setSelectedCsvIds}
-        csvImports={csvImports}
+        csvImports={Array.isArray(csvImports) ? csvImports : []}
         onCsvToggle={handleCsvToggle}
         onSelectAllCsvs={handleSelectAllCsvs}
       />
@@ -1802,7 +1802,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       <Bar 
                         dataKey="pnl" 
                         radius={[2, 2, 0, 0]}
-                        fill={(entry: any) => entry.pnl >= 0 ? '#22c55e' : '#ef4444'}
                       >
                         {(() => {
                           const dailyMap = new Map<string, number>();
