@@ -883,6 +883,12 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.sum_all_brokers": "Soma de todas as corretoras",
     "metrics.weighted_average": "Média ponderada",
     "metrics.win_rate": "Assertividade",
+    "metrics.net_pnl": "PnL Líquido",
+    "metrics.day_win_rate": "Dias Lucrativos %",
+    "metrics.risk_reward": "Risco/Retorno",
+    "metrics.avg_win_loss": "Ganho/Perda Médio",
+    "metrics.daily_net_pnl": "PnL Diário Líquido",
+    "metrics.progress_tracker": "Rastreamento de Progresso",
 
     // Placeholders e dicas
     "placeholder.select_month": "Selecione o mês",
@@ -1761,6 +1767,12 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.sum_all_brokers": "Sum of all brokers",
     "metrics.weighted_average": "Weighted Average",
     "metrics.win_rate": "Win Rate",
+    "metrics.net_pnl": "Net PnL",
+    "metrics.day_win_rate": "Day Win %",
+    "metrics.risk_reward": "Risk/Reward",
+    "metrics.avg_win_loss": "Avg Win/Loss",
+    "metrics.daily_net_pnl": "Daily Net PnL",
+    "metrics.progress_tracker": "Progress Tracker",
 
     // Risk Management
     "risk_management.title": "Risk Management",
@@ -2658,6 +2670,12 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.sum_all_brokers": "Suma de todos los brokers",
     "metrics.weighted_average": "Promedio ponderado",
     "metrics.win_rate": "Tasa de Éxito",
+    "metrics.net_pnl": "PnL Neto",
+    "metrics.day_win_rate": "Días Ganadores %",
+    "metrics.risk_reward": "Riesgo/Recompensa",
+    "metrics.avg_win_loss": "Ganancia/Pérdida Promedio",
+    "metrics.daily_net_pnl": "PnL Diario Neto",
+    "metrics.progress_tracker": "Seguimiento de Progreso",
 
     // Gestión de Riesgo
     "risk_management.title": "Gestión de Riesgo",

@@ -85,6 +85,7 @@ import {
   Bar,
   ComposedChart,
   ReferenceLine,
+  Cell,
 } from "recharts";
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
@@ -1595,10 +1596,10 @@ export default function Dashboard() {
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
           <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 mb-4">
             {/* Net PnL */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-xs text-zinc-400 font-medium">Net PnL</div>
+                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className={`text-2xl font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -1608,10 +1609,10 @@ export default function Dashboard() {
             </Card>
 
             {/* Trade Win % */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-trade-win">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-xs text-zinc-400 font-medium">Trade win %</div>
+                  <div className="text-xs text-zinc-400 font-medium">{t('dashboard.win_rate')}</div>
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-center">
@@ -1625,10 +1626,10 @@ export default function Dashboard() {
             </Card>
 
             {/* Profit Factor */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-profit-factor">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-xs text-zinc-400 font-medium">Profit factor</div>
+                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.profit_factor')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-center">
@@ -1663,10 +1664,10 @@ export default function Dashboard() {
             </Card>
 
             {/* Day Win % */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-day-win">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-xs text-zinc-400 font-medium">Day win %</div>
+                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.day_win_rate')}</div>
                   <Calendar className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-center">
@@ -1694,26 +1695,26 @@ export default function Dashboard() {
             </Card>
 
             {/* RR Médio */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-rr">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-xs text-zinc-400 font-medium">Avg RR</div>
+                  <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="text-2xl font-bold text-white">
                   {metrics.riscoRetornoMedio.toFixed(2)}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
-                  Risk/Reward
+                  {t('metrics.risk_reward')}
                 </div>
               </CardContent>
             </Card>
 
             {/* Average Win/Loss */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors">
+            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-win-loss">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="text-xs text-zinc-400 font-medium">Avg win/loss</div>
+                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.avg_win_loss')}</div>
                   <Activity className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="text-lg font-bold text-green-400">
@@ -1738,7 +1739,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
             {/* Progress Tracker */}
             <SquareCard
-              title="Progress tracker"
+              title={t('metrics.progress_tracker')}
               value=""
               icon={Calendar}
               color="text-blue-400"
@@ -1746,40 +1747,85 @@ export default function Dashboard() {
               data-testid="card-progress-tracker"
             >
               <div className="h-full">
-                <div className="grid grid-cols-7 gap-1 text-xs">
-                  {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-                    <div key={day} className="text-center text-zinc-400 p-1">{day}</div>
-                  ))}
-                  {Array.from({ length: 35 }, (_, i) => {
-                    const isActive = Math.random() > 0.7;
-                    const isPositive = Math.random() > 0.5;
-                    return (
-                      <div
-                        key={i}
-                        className={`aspect-square rounded ${isActive ? (isPositive ? 'bg-blue-600' : 'bg-zinc-600') : 'bg-zinc-800'}`}
-                      />
-                    );
-                  })}
-                </div>
+                <TradingCalendar trades={filteredTrades} />
               </div>
             </SquareCard>
 
             {/* Net Daily PnL Chart */}
             <SquareCard
-              title="Daily net cumulative PnL"
+              title={t('metrics.daily_net_pnl')}
               value=""
               icon={BarChart3}
               color="text-green-400"
               data-testid="card-daily-pnl-chart"
             >
               <div className="h-full">
-                <NetDailyPnLBarChart trades={filteredTrades} />
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={(() => {
+                      // Calculate daily net PnL data
+                      const dailyMap = new Map<string, number>();
+                      filteredTrades.forEach(trade => {
+                        const date = format(new Date(trade.dataHora), 'MM/dd');
+                        const result = parseFloat(trade.resultado || '0');
+                        dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                      });
+                      return Array.from(dailyMap.entries())
+                        .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
+                        .slice(-14) // Last 14 days
+                        .map(([date, pnl]) => ({ date, pnl }));
+                    })()}
+                    margin={{ top: 8, right: 8, left: 8, bottom: 20 }}
+                  >
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false} 
+                      tickLine={false}
+                      tick={{ fontSize: 10, fill: '#9ca3af' }}
+                      interval={0}
+                      angle={-45}
+                      textAnchor="end"
+                      height={40}
+                    />
+                    <YAxis hide />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#27272a',
+                        border: '1px solid #3f3f46',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'PnL']}
+                      labelStyle={{ color: '#d4d4d8' }}
+                    />
+                    <Bar 
+                      dataKey="pnl" 
+                      radius={[2, 2, 0, 0]}
+                      fill={(entry: any) => entry.pnl >= 0 ? '#22c55e' : '#ef4444'}
+                    >
+                      {(() => {
+                        const dailyMap = new Map<string, number>();
+                        filteredTrades.forEach(trade => {
+                          const date = format(new Date(trade.dataHora), 'MM/dd');
+                          const result = parseFloat(trade.resultado || '0');
+                          dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                        });
+                        return Array.from(dailyMap.entries())
+                          .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
+                          .slice(-14)
+                          .map(([date, pnl], index) => (
+                            <Cell key={index} fill={pnl >= 0 ? '#22c55e' : '#ef4444'} />
+                          ));
+                      })()}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </SquareCard>
 
             {/* Recent Trades */}
             <SquareCard
-              title="Recent trades"
+              title={t('dashboard.recent_trades')}
               value=""
               icon={FileText}
               color="text-zinc-400"
