@@ -48,7 +48,7 @@ export function TopBar({
   const { t } = useLanguage();
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-4">
+    <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-4 ${isMobile ? 'left-0' : 'left-16'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Mobile menu button */}
