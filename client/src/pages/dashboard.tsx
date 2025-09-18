@@ -331,60 +331,92 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
 
     // Função para agrupar dados baseado no filtro
     const groupDataByPeriod = () => {
-      const groups = new Map();
+      // Primeiro, calcular todos os pontos de equity
+      const equityPoints: Array<{date: Date, equity: number, profit: number}> = [];
       let cumulativeProfit = 0;
-      let peak = 0;
-
+      
       sortedTrades.forEach((trade) => {
-        const tradeDate = new Date(trade.dataHora);
         const profit = parseFloat(trade.resultado || "0");
         cumulativeProfit += profit;
-        
-        // Atualizar o pico se o lucro acumulado for maior
-        if (cumulativeProfit > peak) {
-          peak = cumulativeProfit;
-        }
+        equityPoints.push({
+          date: new Date(trade.dataHora),
+          equity: cumulativeProfit,
+          profit: profit
+        });
+      });
 
-        // Calcular drawdown como porcentagem do pico
-        const drawdown = peak > 0 ? ((peak - cumulativeProfit) / peak) * 100 : 0;
+      // Agrupar por período e calcular métricas
+      const groups = new Map();
+      let runningPeak = 0;
+
+      equityPoints.forEach((point) => {
+        // Atualizar pico global
+        if (point.equity > runningPeak) {
+          runningPeak = point.equity;
+        }
 
         let periodKey: string;
         let periodLabel: string;
 
         switch (timeFilter) {
           case "dia":
-            periodKey = format(startOfDay(tradeDate), "yyyy-MM-dd");
-            periodLabel = format(tradeDate, "dd/MM", { locale: ptBR });
+            periodKey = format(startOfDay(point.date), "yyyy-MM-dd");
+            periodLabel = format(point.date, "dd/MM", { locale: ptBR });
             break;
           case "semana":
             periodKey = format(
-              startOfWeek(tradeDate, { weekStartsOn: 1 }),
+              startOfWeek(point.date, { weekStartsOn: 1 }),
               "yyyy-MM-dd",
             );
             periodLabel = format(
-              startOfWeek(tradeDate, { weekStartsOn: 1 }),
+              startOfWeek(point.date, { weekStartsOn: 1 }),
               "dd/MM",
               { locale: ptBR },
             );
             break;
           case "mes":
-            periodKey = format(startOfMonth(tradeDate), "yyyy-MM");
-            periodLabel = format(tradeDate, "MMM/yy", { locale: ptBR });
+            periodKey = format(startOfMonth(point.date), "yyyy-MM");
+            periodLabel = format(point.date, "MMM/yy", { locale: ptBR });
             break;
           case "ano":
-            periodKey = format(startOfYear(tradeDate), "yyyy");
-            periodLabel = format(tradeDate, "yyyy", { locale: ptBR });
+            periodKey = format(startOfYear(point.date), "yyyy");
+            periodLabel = format(point.date, "yyyy", { locale: ptBR });
             break;
         }
 
-        groups.set(periodKey, {
-          period: periodLabel,
-          date: periodKey,
-          drawdown: drawdown,
-          drawdownValue: peak - cumulativeProfit,
-          equity: cumulativeProfit,
-          peak: peak,
-        });
+        // Calcular drawdown para este ponto específico
+        const currentDrawdown = runningPeak > 0 ? ((runningPeak - point.equity) / runningPeak) * 100 : 0;
+        const currentDrawdownValue = runningPeak - point.equity;
+
+        // Se o período já existe, atualizar com o pior drawdown do período
+        const existing = groups.get(periodKey);
+        if (existing) {
+          if (currentDrawdown > existing.drawdown) {
+            groups.set(periodKey, {
+              ...existing,
+              drawdown: currentDrawdown,
+              drawdownValue: currentDrawdownValue,
+              equity: point.equity,
+              peak: runningPeak,
+            });
+          } else {
+            // Manter o equity mais recente do período
+            groups.set(periodKey, {
+              ...existing,
+              equity: point.equity,
+              peak: runningPeak,
+            });
+          }
+        } else {
+          groups.set(periodKey, {
+            period: periodLabel,
+            date: periodKey,
+            drawdown: currentDrawdown,
+            drawdownValue: currentDrawdownValue,
+            equity: point.equity,
+            peak: runningPeak,
+          });
+        }
       });
 
       return Array.from(groups.values()).sort(
