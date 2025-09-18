@@ -25,18 +25,18 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
   const getIconSize = () => {
     switch (variant) {
       case "header":
-        return "h-8 w-8 lg:h-10 lg:w-10 md:h-8 md:w-8 sm:h-6 sm:w-6";
+        return "h-12 w-12 lg:h-14 lg:w-14 md:h-12 md:w-12 sm:h-10 sm:w-10";
       case "modal":
-        return "h-10 w-10 md:h-8 md:w-8 sm:h-7 sm:w-7";
+        return "h-14 w-14 md:h-12 md:w-12 sm:h-10 sm:w-10";
       case "sidebar":
-        return expanded ? "h-7 w-7" : "h-5 w-5";
+        return expanded ? "h-10 w-10" : "h-8 w-8";
       default:
-        return "h-5 w-5";
+        return "h-8 w-8";
     }
   };
 
   return (
-    <div className="flex items-center gap-2" data-testid={`logo-container-${variant}`}>
+    <div className="flex items-center gap-1" data-testid={`logo-container-${variant}`}>
       <img 
         src={metrikaIcon} 
         alt="Métrika Icon" 
