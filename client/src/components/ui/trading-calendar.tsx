@@ -294,7 +294,7 @@ export function TradingCalendar({
           "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer",
           isMobile ? "h-[85px] p-1.5" : "h-24 p-1",
           isToday && "bg-zinc-800/50 border-zinc-600",
-          hasData && (isProfit ? "bg-green-950/20" : "bg-red-950/20"),
+          hasData && (isProfit ? "bg-green-600/90" : "bg-red-600/90"),
         )}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
@@ -334,7 +334,7 @@ export function TradingCalendar({
                   className={cn(
                     "font-bold leading-tight",
                     isMobile ? "text-xs" : "text-sm",
-                    isProfit ? "text-green-400" : "text-red-400",
+                    isProfit ? "text-white font-bold" : "text-white font-bold",
                   )}
                 >
                   {isMobile
@@ -385,14 +385,17 @@ export function TradingCalendar({
     const isProfit = week.pnl > 0;
 
     return (
-      <div className="bg-zinc-800/50 border-l border-zinc-700 p-3 min-h-[96px] flex flex-col justify-center">
+      <div className={cn(
+        "border-l border-zinc-700 p-3 min-h-[96px] flex flex-col justify-center",
+        isProfit ? "bg-green-600/90" : week.pnl < 0 ? "bg-red-600/90" : "bg-zinc-800/50"
+      )}>
         <div className="text-xs text-zinc-400 mb-1">
           Semana {week.weekNumber}
         </div>
         <div
           className={cn(
             "font-bold text-sm mb-1",
-            isProfit ? "text-green-400" : "text-red-400",
+            isProfit ? "text-white font-bold" : "text-white font-bold",
           )}
         >
           {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale)}
