@@ -1568,20 +1568,13 @@ export default function Dashboard() {
 
 
       <Tabs defaultValue="overview" className="space-y-4 md:space-y-6">
-        <TabsList className="grid w-full grid-cols-2 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1 h-auto">
+        <TabsList className="grid w-full grid-cols-1 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1 h-auto">
           <TabsTrigger
             value="overview"
             className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
           >
             <span className="hidden sm:inline">{t('dashboard.overview')}</span>
             <span className="sm:hidden">Geral</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="consolidated"
-            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white text-xs md:text-sm py-3 px-2 md:px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50"
-          >
-            <span className="hidden sm:inline">{t('tabs.consolidated')}</span>
-            <span className="sm:hidden">Consol</span>
           </TabsTrigger>
         </TabsList>
 
@@ -2278,124 +2271,6 @@ export default function Dashboard() {
         </TabsContent>
 
 
-        <TabsContent value="consolidated" className="space-y-6">
-          {/* {t('consolidated.summary')} */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            <SquareCard
-              title={t('dashboard.consolidated_total')}
-              value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
-              icon={DollarSign}
-              color={
-                metrics.rentabilidadeTotal >= 0
-                  ? "text-green-400"
-                  : "text-red-400"
-              }
-              subtitle={t('metrics.sum_all_brokers')}
-            />
-
-            <SquareCard
-              title={t('dashboard.total_trades')}
-              value={metrics.totalTrades}
-              icon={BarChart3}
-              color="text-zinc-300"
-              subtitle="Crypto + Forex + B3"
-            />
-
-            <SquareCard
-              title={t('dashboard.win_rate')}
-              value={`${metrics.taxaAcerto.toFixed(1)}%`}
-              icon={Target}
-              color={
-                metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"
-              }
-              subtitle={t('metrics.weighted_average')}
-            />
-          </div>
-
-          {/* Distribuição por Mercado */}
-          <Card className="bg-zinc-900/90 border-zinc-800">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-green-400" />
-                {t('dashboard.market_distribution')}
-              </CardTitle>
-              <CardDescription>
-                {t('consolidated.market_analysis')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {["crypto", "forex", "b3"].map((mercado) => {
-                  const tradesMercado = trades.filter(
-                    (trade: Trade) => trade.mercado === mercado,
-                  );
-                  const totalMercado = tradesMercado.reduce(
-                    (sum: number, trade: Trade) =>
-                      sum + parseFloat(trade.resultado || "0"),
-                    0,
-                  );
-                  const countMercado = tradesMercado.length;
-                  const winRateMercado =
-                    countMercado > 0
-                      ? (tradesMercado.filter(
-                          (trade: Trade) =>
-                            parseFloat(trade.resultado || "0") > 0,
-                        ).length /
-                          countMercado) *
-                        100
-                      : 0;
-
-                  const mercadoInfo = {
-                    crypto: { name: "Crypto", color: "text-white" },
-                    forex: { name: "Forex", color: "text-blue-400" },
-                    b3: { name: "B3", color: "text-green-400" },
-                  };
-
-                  const info = mercadoInfo[mercado as keyof typeof mercadoInfo];
-
-                  return (
-                    <div
-                      key={mercado}
-                      className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className={`w-4 h-4 rounded-full ${info.color.replace("text-", "bg-")}`}
-                        ></div>
-                        <div>
-                          <div className="text-white font-medium">
-                            {info.name}
-                          </div>
-                          <div className="text-zinc-400 text-sm">
-                            {countMercado} trades
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-6">
-                        <div className="text-center">
-                          <div
-                            className={`text-lg font-bold ${totalMercado >= 0 ? "text-green-400" : "text-red-400"}`}
-                          >
-                            {totalMercado >= 0 ? "+" : ""}R${" "}
-                            {totalMercado.toFixed(2)}
-                          </div>
-                          <div className="text-xs text-zinc-400">{t('metrics.result')}</div>
-                        </div>
-                        <div className="text-center">
-                          <div className={`text-lg font-bold ${info.color}`}>
-                            {winRateMercado.toFixed(1)}%
-                          </div>
-                          <div className="text-xs text-zinc-400">{t('metrics.win_rate')}</div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Dialog de Edição de Trade Manual */}
