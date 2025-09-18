@@ -1727,28 +1727,28 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 
                 {/* Métricas adicionais no espaço vazio */}
-                <div className="mt-4 pt-4 border-t border-zinc-700">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-zinc-800/50 rounded-lg p-3">
+                <div className="mt-3 pt-3 border-t border-zinc-700">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-full">
+                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-zinc-400 text-xs">{t('dashboard.best_trade')}</p>
-                          <p className="text-lg font-bold text-green-400">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
+                          <p className="text-sm sm:text-lg font-bold text-green-400 truncate">
                             R$ {metrics.melhorTrade.toFixed(2)}
                           </p>
                         </div>
-                        <TrendingUp className="h-6 w-6 text-green-400" />
+                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-green-400 flex-shrink-0 ml-2" />
                       </div>
                     </div>
 
-                    <div className="bg-zinc-800/50 rounded-lg p-3">
+                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-zinc-400 text-xs">{t('dashboard.frequent_emotion')}</p>
-                          <p className="text-sm font-bold text-white">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-zinc-400 text-xs truncate">{t('dashboard.frequent_emotion')}</p>
+                          <p className="text-xs sm:text-sm font-bold text-white truncate">
                             {(metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).charAt(0).toUpperCase() + (metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).slice(1)}
                           </p>
-                          <p className="text-xs text-zinc-500">
+                          <p className="text-xs text-zinc-500 truncate">
                             {metrics.emocaoMaisRecorrente.count} {t('time.times')}
                           </p>
                         </div>
