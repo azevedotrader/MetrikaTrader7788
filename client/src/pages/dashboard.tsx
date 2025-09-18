@@ -1561,7 +1561,7 @@ function SquareCard({
   children,
 }: SquareCardProps) {
   return (
-    <Card className={`bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors aspect-square ${className}`}>
+    <Card className={`bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors ${className.includes('h-') ? '' : 'aspect-square'} ${className}`}>
       <CardContent className="p-4 h-full flex flex-col justify-between">
         <div className="flex items-start justify-between mb-2">
           <div className="text-xs text-zinc-400 font-medium truncate pr-2">
@@ -2273,8 +2273,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 icon={BarChart3}
                 color="text-green-400"
                 data-testid="card-daily-pnl-chart"
+                className="h-64 md:h-80"
               >
-                <div className="h-full">
+                <div className="h-full overflow-hidden">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={(() => {
@@ -2290,17 +2291,17 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           .slice(-14) // Last 14 days
                           .map(([date, pnl]) => ({ date, pnl }));
                       })()}
-                      margin={{ top: 8, right: 8, left: 8, bottom: 20 }}
+                      margin={{ top: 8, right: 8, left: 8, bottom: 30 }}
                     >
                       <XAxis 
                         dataKey="date" 
                         axisLine={false} 
                         tickLine={false}
-                        tick={{ fontSize: 10, fill: '#9ca3af' }}
+                        tick={{ fontSize: 9, fill: '#9ca3af' }}
                         interval={0}
                         angle={-45}
                         textAnchor="end"
-                        height={40}
+                        height={35}
                       />
                       <YAxis hide />
                       <Tooltip

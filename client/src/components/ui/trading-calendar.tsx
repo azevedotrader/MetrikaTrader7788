@@ -57,7 +57,7 @@ export function TradingCalendar({
   const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<
     DiaryEntry | undefined
   >(undefined);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  // Remover detecção JS de mobile - usar breakpoints Tailwind CSS
   const queryClient = useQueryClient();
 
   // Buscar entradas do diário
@@ -267,12 +267,8 @@ export function TradingCalendar({
   ) => {
     if (!dayNumber || !isCurrentMonth) {
       return (
-        <div
-          className={cn(
-            "p-1 border-r border-b border-zinc-700",
-            isMobile ? "h-[85px]" : "h-24",
-          )}
-        ></div>
+        <div className="p-1 border-r border-b border-zinc-700 h-[70px] md:h-24">
+        </div>
       );
     }
 
@@ -292,8 +288,7 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer",
-          isMobile ? "h-[85px] p-1.5" : "h-24 p-1",
+          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer h-[70px] md:h-24 p-1 md:p-1.5",
           isToday && "bg-zinc-800/50 border-zinc-600",
           hasData && (isProfit ? "bg-green-600/90" : "bg-red-600/90"),
         )}
@@ -301,14 +296,10 @@ export function TradingCalendar({
         data-testid={`calendar-day-${dayNumber}`}
       >
         <div className="flex flex-col h-full">
-          <div className={cn(
-            "flex items-center justify-between",
-            isMobile ? "mb-0.5" : "mb-1"
-          )}>
+          <div className="flex items-center justify-between mb-0.5 md:mb-1">
             <div
               className={cn(
-                "font-medium",
-                isMobile ? "text-xs" : "text-sm",
+                "font-medium text-xs md:text-sm",
                 isToday ? "text-white" : "text-zinc-400",
               )}
             >
@@ -325,34 +316,26 @@ export function TradingCalendar({
           </div>
 
           {hasData && tradeDay && (
-            <div className={cn(
-              "flex-1 flex flex-col justify-start",
-              isMobile ? "space-y-0" : "space-y-0.5"
-            )}>
+            <div className="flex-1 flex flex-col justify-start space-y-0 md:space-y-0.5">
               {/* P&L Principal - só mostrar se não for zero */}
               {tradeDay.pnl !== 0 && (
                 <div
-                  className={cn(
-                    "font-extrabold leading-tight text-white px-1 py-0.5 rounded bg-black/30 text-center shadow-sm",
-                    isMobile ? "text-xs" : "text-sm",
-                  )}
+                  className="font-extrabold leading-tight text-white px-1 py-0.5 rounded bg-black/30 text-center shadow-sm text-xs md:text-sm"
                   style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}
                 >
-                  {isMobile
-                    ? `${isProfit ? "+" : ""}${
-                        Math.abs(tradeDay.pnl) >= 1000
-                          ? `${(tradeDay.pnl / 1000).toFixed(1)}k`
-                          : tradeDay.pnl.toFixed(0)
-                      }`
-                    : `${isProfit ? "+" : ""}R$ ${Math.abs(tradeDay.pnl).toLocaleString(locale)}`}
+                  <span className="md:hidden">
+                    {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                  </span>
+                  <span className="hidden md:inline">
+                    {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale)}
+                  </span>
                 </div>
               )}
 
               {/* Quantidade de trades */}
               <div
                 className={cn(
-                  "leading-tight font-medium px-1 py-0.5 rounded text-center",
-                  isMobile ? "text-[9px]" : "text-[10px]",
+                  "leading-tight font-medium px-1 py-0.5 rounded text-center text-[9px] md:text-[10px]",
                   hasData ? "bg-black/40 text-white" : "text-zinc-500"
                 )}
               >
@@ -363,8 +346,7 @@ export function TradingCalendar({
               {tradeDay.trades > 0 && tradeDay.winRate !== undefined && (
                 <div
                   className={cn(
-                    "leading-tight font-semibold px-1 py-0.5 rounded text-center",
-                    isMobile ? "text-[9px]" : "text-[10px]",
+                    "leading-tight font-semibold px-1 py-0.5 rounded text-center text-[9px] md:text-[10px]",
                     hasData ? "bg-black/40 text-white" : "text-zinc-400"
                   )}
                 >
@@ -426,8 +408,7 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900 border-zinc-700 relative",
-          isMobile ? "mb-10" : "mb-8",
+          "bg-zinc-900 border-zinc-700 relative mb-8 md:mb-10",
           className,
         )}
         style={{ marginBottom: "50px" }}
@@ -452,15 +433,10 @@ export function TradingCalendar({
           </div>
         </div>
 
-        <CardHeader className={cn(isMobile ? "pb-2" : "pb-4")}>
+        <CardHeader className="pb-2 md:pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle
-              className={cn(
-                "text-white flex items-center gap-2",
-                isMobile ? "text-base" : "text-lg",
-              )}
-            >
-              <Calendar className={cn(isMobile ? "w-4 h-4" : "w-5 h-5")} />
+            <CardTitle className="text-base md:text-lg text-white flex items-center gap-2">
+              <Calendar className="w-4 h-4 md:w-5 md:h-5" />
               <span className="hidden md:inline">{t("calendar.title")}</span>
               <span className="md:hidden">Trading</span>
             </CardTitle>
@@ -471,14 +447,9 @@ export function TradingCalendar({
                 onClick={() => navigateMonth("prev")}
                 className="text-zinc-400 hover:text-white p-1"
               >
-                <ChevronLeft className={cn(isMobile ? "w-3 h-3" : "w-4 h-4")} />
+                <ChevronLeft className="w-3 h-3 md:w-4 md:h-4" />
               </Button>
-              <span
-                className={cn(
-                  "text-white font-medium capitalize text-center",
-                  isMobile ? "min-w-[120px] text-sm" : "min-w-[160px]",
-                )}
-              >
+              <span className="text-sm md:text-base text-white font-medium capitalize text-center min-w-[100px] md:min-w-[160px]">
                 {monthName} {year}
               </span>
               <Button
@@ -487,9 +458,7 @@ export function TradingCalendar({
                 onClick={() => navigateMonth("next")}
                 className="text-zinc-400 hover:text-white p-1"
               >
-                <ChevronRight
-                  className={cn(isMobile ? "w-3 h-3" : "w-4 h-4")}
-                />
+                <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
               </Button>
             </div>
           </div>
@@ -497,29 +466,19 @@ export function TradingCalendar({
 
         <CardContent className="p-0 relative">
           {/* Calendário */}
-          <div
-            className={cn(
-              "grid",
-              isMobile ? "grid-cols-7" : "grid-cols-8", // 8 colunas no desktop (incluindo resumos semanais)
-            )}
-          >
+          <div className="grid grid-cols-7 md:grid-cols-8">
             {/* Cabeçalho dos dias da semana */}
             {weekDays.map((day) => (
               <div
                 key={day}
-                className={cn(
-                  "text-center font-medium text-zinc-400 border-r border-b border-zinc-700",
-                  isMobile ? "py-2 text-xs" : "py-3 text-sm",
-                )}
+                className="text-center font-medium text-zinc-400 border-r border-b border-zinc-700 py-2 md:py-3 text-xs md:text-sm"
               >
                 {day}
               </div>
             ))}
-            {!isMobile && (
-              <div className="text-center font-medium text-zinc-400 border-b border-zinc-700 py-3 text-sm">
-                {t("calendar.week")}
-              </div>
-            )}
+            <div className="hidden md:block text-center font-medium text-zinc-400 border-b border-zinc-700 py-3 text-sm">
+              {t("calendar.week")}
+            </div>
 
             {/* Dias do calendário */}
             {Array.from({
@@ -541,71 +500,69 @@ export function TradingCalendar({
                     );
                   }),
                   // Resumo semanal - apenas desktop
-                  !isMobile && weekSummaries[weekIndex] ? (
-                    <div key={`week-summary-${weekIndex}`}>
+                  weekSummaries[weekIndex] ? (
+                    <div key={`week-summary-${weekIndex}`} className="hidden md:block">
                       {renderWeekSummary(weekSummaries[weekIndex])}
                     </div>
-                  ) : !isMobile ? (
+                  ) : (
                     <div
                       key={`week-empty-${weekIndex}`}
-                      className="border-l border-zinc-700 min-h-[96px]"
+                      className="hidden md:block border-l border-zinc-700 min-h-[96px]"
                     ></div>
-                  ) : null,
+                  ),
                 ].filter(Boolean),
               )
               .flat()}
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
-          {isMobile && (
-            <div className="border-t border-zinc-700 p-4">
-              <div className="text-center text-white font-medium mb-3">
-                {t("calendar.summary_of")} {monthName}
+          <div className="md:hidden border-t border-zinc-700 p-4">
+            <div className="text-center text-white font-medium mb-3">
+              {t("calendar.summary_of")} {monthName}
+            </div>
+            <div className="grid grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">
+                  {monthlyStats.tradingDays}
+                </div>
+                <div className="text-sm text-zinc-400">
+                  {t("calendar.trading_days")}
+                </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    {monthlyStats.tradingDays}
-                  </div>
-                  <div className="text-sm text-zinc-400">
-                    {t("calendar.trading_days")}
-                  </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">
+                  {monthlyStats.totalTrades}
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    {monthlyStats.totalTrades}
-                  </div>
-                  <div className="text-sm text-zinc-400">
-                    {t("calendar.total_trades")}
-                  </div>
+                <div className="text-sm text-zinc-400">
+                  {t("calendar.total_trades")}
                 </div>
-                <div className="text-center">
-                  <div
-                    className={cn(
-                      "text-2xl font-bold",
-                      monthlyStats.totalPnl > 0
-                        ? "text-green-400"
-                        : "text-red-400",
-                    )}
-                  >
-                    {monthlyStats.totalPnl > 0 ? "+" : ""}
-                    R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale)}
-                  </div>
-                  <div className="text-sm text-zinc-400">
-                    {t("calendar.pnl_total")}
-                  </div>
+              </div>
+              <div className="text-center">
+                <div
+                  className={cn(
+                    "text-2xl font-bold",
+                    monthlyStats.totalPnl > 0
+                      ? "text-green-400"
+                      : "text-red-400",
+                  )}
+                >
+                  {monthlyStats.totalPnl > 0 ? "+" : ""}
+                  R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale)}
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    {monthlyStats.winRate}%
-                  </div>
-                  <div className="text-sm text-zinc-400">
-                    {t("calendar.win_rate")}
-                  </div>
+                <div className="text-sm text-zinc-400">
+                  {t("calendar.pnl_total")}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white">
+                  {monthlyStats.winRate}%
+                </div>
+                <div className="text-sm text-zinc-400">
+                  {t("calendar.win_rate")}
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
