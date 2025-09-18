@@ -381,6 +381,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
           period: periodLabel,
           date: periodKey,
           drawdown: drawdown,
+          drawdownValue: peak - cumulativeProfit,
           equity: cumulativeProfit,
           peak: peak,
         });
@@ -400,13 +401,25 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
   }, [chartData]);
 
   const currentDrawdown = useMemo(() => {
-    if (!chartData.length) return 0;
-    return chartData[chartData.length - 1]?.drawdown || 0;
+    if (!chartData.length) return { percentage: 0, value: 0 };
+    const lastPoint = chartData[chartData.length - 1];
+    return {
+      percentage: lastPoint?.drawdown || 0,
+      value: lastPoint?.drawdownValue || 0
+    };
   }, [chartData]);
 
-  const formatTooltipValue = (value: number, name: string) => {
+  const maxDrawdownValue = useMemo(() => {
+    if (!chartData.length) return 0;
+    return Math.max(...chartData.map(d => d.drawdownValue));
+  }, [chartData]);
+
+  const formatTooltipValue = (value: number, name: string, props: any) => {
     if (name === 'drawdown') {
-      return [`${value.toFixed(2)}%`, 'Drawdown'];
+      const dataPoint = props.payload;
+      const percentage = value.toFixed(2);
+      const valueInReais = dataPoint?.drawdownValue?.toFixed(2) || '0.00';
+      return [`${percentage}% (R$ ${valueInReais})`, 'Drawdown'];
     }
     return [`${value.toFixed(2)}%`, 'Drawdown'];
   };
@@ -439,12 +452,24 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
         </div>
 
         {/* Métricas de Drawdown */}
-        <div className="flex justify-between items-center mb-4 text-sm">
-          <div className="text-slate-400">
-            Drawdown Atual: <span className="text-red-400 font-semibold">{currentDrawdown.toFixed(2)}%</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
+          <div className="text-slate-400 text-center sm:text-left">
+            <div>Drawdown Atual:</div>
+            <div className="text-red-400 font-semibold">
+              {currentDrawdown.percentage.toFixed(2)}%
+            </div>
+            <div className="text-red-300 text-xs">
+              R$ {currentDrawdown.value.toFixed(2)}
+            </div>
           </div>
-          <div className="text-slate-400">
-            Max Drawdown: <span className="text-red-500 font-semibold">{maxDrawdown.toFixed(2)}%</span>
+          <div className="text-slate-400 text-center sm:text-right">
+            <div>Max Drawdown:</div>
+            <div className="text-red-500 font-semibold">
+              {maxDrawdown.toFixed(2)}%
+            </div>
+            <div className="text-red-400 text-xs">
+              R$ {maxDrawdownValue.toFixed(2)}
+            </div>
           </div>
         </div>
 
