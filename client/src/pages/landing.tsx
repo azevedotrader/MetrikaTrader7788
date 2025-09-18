@@ -47,13 +47,13 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-slate-900 text-white overflow-x-hidden">
       {/* Header */}
       <header className="relative z-50 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <Logo variant="header" className="!h-32 lg:!h-32 md:!h-28 sm:!h-24 max-w-fit" />
+          <div className="flex justify-between items-center py-2">
+            <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
+              <Logo variant="header" className="!h-16 sm:!h-20 md:!h-24 lg:!h-28 max-w-fit" />
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
@@ -66,21 +66,22 @@ export default function Landing() {
                 {t('landing.header.contact')}
               </a>
             </nav>
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-shrink-0">
               <LanguageSelector />
               <Button 
                 variant="ghost" 
                 onClick={() => setShowLogin(true)}
-                className="text-slate-300 hover:text-white text-sm sm:text-base px-2 sm:px-4"
+                className="text-slate-300 hover:text-white text-xs sm:text-sm md:text-base px-1 sm:px-2 md:px-4 py-1 sm:py-2"
               >
-                {t('landing.header.login')}
+                <span className="hidden sm:inline">{t('landing.header.login')}</span>
+                <span className="sm:hidden">Login</span>
               </Button>
               <Button 
                 onClick={() => setShowRegister(true)}
-                className="gradient-purple-blue hover:opacity-90 transition-opacity text-sm sm:text-base px-2 sm:px-4"
+                className="gradient-purple-blue hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base px-1 sm:px-2 md:px-4 py-1 sm:py-2"
               >
                 <span className="hidden sm:inline">{t('landing.header.start')}</span>
-                <span className="sm:hidden">{t('landing.header.start_short')}</span>
+                <span className="sm:hidden">Start</span>
               </Button>
             </div>
           </div>
@@ -101,36 +102,36 @@ export default function Landing() {
 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="text-center lg:text-left">
-              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-6 sm:mb-8 lg:mb-10 leading-tight">
+              <h1 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-8xl font-bold mb-4 sm:mb-6 md:mb-8 lg:mb-10 leading-tight">
                 <span className="text-white">{t('landing.hero.title1')}</span>
                 <span className="gradient-text block animate-pulse-slow">{t('landing.hero.title2')}</span>
                 <span className="text-white">{t('landing.hero.title3')}</span>
               </h1>
               
-              <p className="font-body text-lg sm:text-xl md:text-2xl lg:text-3xl text-slate-200 mb-6 sm:mb-8 leading-relaxed">
+              <p className="font-body text-sm sm:text-lg md:text-xl lg:text-2xl text-slate-200 mb-4 sm:mb-6 md:mb-8 leading-relaxed">
                 {t('landing.hero.subtitle')} 
                 <span className="text-emerald-400 font-bold"> {t('landing.hero.subtitle_highlight')}</span>
               </p>
               
-              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8 justify-center lg:justify-start">
-                <div className="flex items-center space-x-2 text-slate-300">
-                  <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span>{t('landing.hero.feature1')}</span>
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8 justify-center lg:justify-start">
+                <div className="flex items-center space-x-2 text-slate-300 text-sm sm:text-base">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                  <span className="break-words">{t('landing.hero.feature1')}</span>
                 </div>
-                <div className="flex items-center space-x-2 text-slate-300">
-                  <CheckCircle className="w-5 h-5 text-green-400" />
-                  <span>{t('landing.hero.feature2')}</span>
+                <div className="flex items-center space-x-2 text-slate-300 text-sm sm:text-base">
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                  <span className="break-words">{t('landing.hero.feature2')}</span>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-12 sm:mb-16 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12 md:mb-16 justify-center lg:justify-start">
                 <Button 
                   size="lg"
                   onClick={() => setShowRegister(true)}
-                  className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-6 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-bold animate-glow"
+                  className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-4 sm:px-6 md:px-10 py-3 sm:py-4 md:py-5 text-base sm:text-lg md:text-xl font-bold animate-glow w-full sm:w-auto"
                 >
-                  {t('landing.hero.start_free')}
-                  <ArrowRight className="w-6 h-6 ml-3" />
+                  <span className="break-words">{t('landing.hero.start_free')}</span>
+                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2 sm:ml-3 flex-shrink-0" />
                 </Button>
               </div>
               
@@ -143,13 +144,13 @@ export default function Landing() {
               <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border-emerald-600/30 shadow-2xl transform hover:scale-105 transition-all duration-500 animate-glow">
                 <CardHeader className="pb-6">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-24 sm:w-20 sm:h-20 gradient-emerald-blue rounded-xl flex items-center justify-center">
-                        <TrendingUp className="w-12 h-12 text-white" />
+                    <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 gradient-emerald-blue rounded-xl flex items-center justify-center flex-shrink-0">
+                        <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
                       </div>
-                      <span className="text-xl font-bold text-white ml-[75px] mr-[75px]">{t('landing.dashboard.main_title')}</span>
+                      <span className="text-sm sm:text-lg md:text-xl font-bold text-white break-words min-w-0">{t('landing.dashboard.main_title')}</span>
                     </div>
-                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-3 py-1">
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0">
                       {t('landing.dashboard.live')}
                     </Badge>
                   </div>
@@ -158,53 +159,53 @@ export default function Landing() {
                   {/* Performance Metrics */}
                   <div className="grid grid-cols-2 gap-4">
                     <Card className="bg-gradient-to-br from-emerald-500/25 to-teal-500/25 border-emerald-500/40 hover:border-emerald-400/60 transition-all duration-300">
-                      <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-medium text-slate-200">{t('landing.dashboard.total_pnl')}</span>
-                          <TrendingUp className="w-5 h-5 text-emerald-400" />
+                      <CardContent className="p-3 sm:p-4 md:p-5">
+                        <div className="flex items-center justify-between mb-2 sm:mb-3">
+                          <span className="text-xs sm:text-sm font-medium text-slate-200 break-words">{t('landing.dashboard.total_pnl')}</span>
+                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
                         </div>
-                        <div className="text-3xl font-bold text-emerald-400">{t('landing.dashboard.demo_total_pnl')}</div>
-                        <div className="text-sm text-emerald-300">{t('landing.dashboard.monthly_growth')}</div>
+                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-400 break-words">{t('landing.dashboard.demo_total_pnl')}</div>
+                        <div className="text-xs sm:text-sm text-emerald-300 break-words">{t('landing.dashboard.monthly_growth')}</div>
                       </CardContent>
                     </Card>
                     
                     <Card className="bg-gradient-to-br from-indigo-500/25 to-blue-500/25 border-indigo-500/40 hover:border-indigo-400/60 transition-all duration-300">
-                      <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-medium text-slate-200">{t('landing.dashboard.win_rate')}</span>
-                          <Target className="w-5 h-5 text-indigo-400" />
+                      <CardContent className="p-3 sm:p-4 md:p-5">
+                        <div className="flex items-center justify-between mb-2 sm:mb-3">
+                          <span className="text-xs sm:text-sm font-medium text-slate-200 break-words">{t('landing.dashboard.win_rate')}</span>
+                          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 flex-shrink-0" />
                         </div>
-                        <div className="text-3xl font-bold text-indigo-400">78.5%</div>
-                        <div className="text-sm text-indigo-300">{t('landing.dashboard.trades_count')}</div>
+                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-indigo-400">78.5%</div>
+                        <div className="text-xs sm:text-sm text-indigo-300 break-words">{t('landing.dashboard.trades_count')}</div>
                       </CardContent>
                     </Card>
                   </div>
 
                   {/* Chart Visualization */}
                   <Card className="bg-slate-800/50 border-slate-700">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-slate-300">{t('landing.dashboard.capital_evolution')}</span>
-                        <div className="flex space-x-1">
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <span className="text-xs sm:text-sm font-medium text-slate-300 break-words min-w-0">{t('landing.dashboard.capital_evolution')}</span>
+                        <div className="flex space-x-1 flex-shrink-0">
                           <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                           <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                           <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                         </div>
                       </div>
-                      <div className="h-32 bg-gradient-to-r from-slate-900/50 to-slate-800/50 rounded-lg p-2 flex items-end justify-between">
+                      <div className="h-24 sm:h-32 bg-gradient-to-r from-slate-900/50 to-slate-800/50 rounded-lg p-2 flex items-end justify-between overflow-hidden">
                         {[
-                          { height: 20, color: "from-red-500 to-red-400" },
-                          { height: 25, color: "from-yellow-500 to-yellow-400" },
+                          { height: 15, color: "from-red-500 to-red-400" },
+                          { height: 20, color: "from-yellow-500 to-yellow-400" },
+                          { height: 25, color: "from-green-500 to-green-400" },
                           { height: 35, color: "from-green-500 to-green-400" },
-                          { height: 45, color: "from-green-500 to-green-400" },
-                          { height: 55, color: "from-blue-500 to-blue-400" },
-                          { height: 48, color: "from-blue-500 to-blue-400" },
-                          { height: 65, color: "from-purple-500 to-purple-400" },
-                          { height: 72, color: "from-purple-500 to-purple-400" }
+                          { height: 40, color: "from-blue-500 to-blue-400" },
+                          { height: 35, color: "from-blue-500 to-blue-400" },
+                          { height: 45, color: "from-purple-500 to-purple-400" },
+                          { height: 50, color: "from-purple-500 to-purple-400" }
                         ].map((bar, i) => (
                           <div 
                             key={i}
-                            className={`w-3 bg-gradient-to-t ${bar.color} rounded-t opacity-80 hover:opacity-100 transition-opacity`}
+                            className={`flex-1 max-w-[8px] bg-gradient-to-t ${bar.color} rounded-t opacity-80 hover:opacity-100 transition-opacity mx-[1px]`}
                             style={{ height: `${bar.height}px` }}
                           />
                         ))}
@@ -228,17 +229,17 @@ export default function Landing() {
       <section className="py-24 bg-gradient-to-r from-slate-800/50 to-slate-900/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 break-words">
               <span className="text-red-400">{t('landing.problem.title1')}</span>
               <span className="text-white block">{t('landing.problem.title2')}</span>
               <span className="gradient-text">{t('landing.problem.title3')}</span>
             </h2>
-            <p className="text-xl text-slate-300 max-w-4xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-4xl mx-auto break-words">
               {t('landing.problem.subtitle')}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {[
               {
                 problem: t('landing.problem.outdated_sheets'),
@@ -260,12 +261,12 @@ export default function Landing() {
               }
             ].map((item, index) => (
               <Card key={index} className="bg-slate-800/80 border-slate-700 hover:border-slate-600 transition-all">
-                <CardContent className="p-8 text-center">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${item.color} rounded-full flex items-center justify-center mx-auto mb-6 opacity-20`}>
-                    <item.icon className="w-8 h-8 text-white" />
+                <CardContent className="p-4 sm:p-6 md:p-8 text-center">
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r ${item.color} rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 opacity-20`}>
+                    <item.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-4">{item.problem}</h3>
-                  <p className="text-slate-400">{item.description}</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 break-words">{item.problem}</h3>
+                  <p className="text-sm sm:text-base text-slate-400 break-words">{item.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -279,11 +280,11 @@ export default function Landing() {
             <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 text-sm font-medium mb-6">
               {t('landing.solution.badge')}
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 break-words">
               <span className="gradient-text">{t('landing.solution.title1')}</span>
               <span className="text-white block">{t('landing.solution.title2')}</span>
             </h2>
-            <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto break-words">
               {t('landing.solution.subtitle')}
             </p>
           </div>
@@ -380,7 +381,7 @@ export default function Landing() {
 
             {/* Features List */}
             <div className="order-1 lg:order-2">
-              <h3 className="text-3xl font-bold text-white mb-8">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-6 sm:mb-8 break-words">
                 {t('landing.solution.features_title1')}
                 <span className="gradient-text block">{t('landing.solution.features_title2')}</span>
               </h3>
@@ -412,13 +413,13 @@ export default function Landing() {
                     color: "text-green-400"
                   }
                 ].map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div className={`w-12 h-12 ${feature.color} bg-current/10 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                  <div key={index} className="flex items-start space-x-3 sm:space-x-4">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${feature.color} bg-current/10 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <feature.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${feature.color}`} />
                     </div>
-                    <div>
-                      <h4 className="text-xl font-semibold text-white mb-2">{feature.title}</h4>
-                      <p className="text-slate-300">{feature.description}</p>
+                    <div className="min-w-0">
+                      <h4 className="text-lg sm:text-xl font-semibold text-white mb-2 break-words">{feature.title}</h4>
+                      <p className="text-sm sm:text-base text-slate-300 break-words">{feature.description}</p>
                     </div>
                   </div>
                 ))}
@@ -438,19 +439,19 @@ export default function Landing() {
             <Badge className="gradient-emerald-blue text-white px-6 py-3 text-base font-semibold mb-8 animate-glow">
               {t('landing.pricing.badge')}
             </Badge>
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-6 sm:mb-8">
+            <h2 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl font-bold mb-4 sm:mb-6 md:mb-8 break-words">
               <span className="text-white">{t('landing.pricing.title1')}</span>
               <span className="gradient-text block animate-pulse-slow">{t('landing.pricing.title2')}</span>
             </h2>
-            <p className="font-body text-lg sm:text-xl lg:text-2xl text-slate-200 max-w-4xl mx-auto">
+            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-slate-200 max-w-4xl mx-auto break-words">
               {t('landing.pricing.subtitle')}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {/* Plano Starter */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
-              <CardContent className="p-6 sm:p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="text-center mb-8">
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.starter_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
@@ -486,7 +487,7 @@ export default function Landing() {
 
             {/* Plano Pro - Destaque */}
             <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative sm:transform sm:scale-110 shadow-2xl animate-glow">
-              <CardContent className="p-6 sm:p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="text-center mb-8">
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.pro_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
@@ -523,7 +524,7 @@ export default function Landing() {
 
             {/* Plano Black */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
-              <CardContent className="p-6 sm:p-8">
+              <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="text-center mb-8">
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.black_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
