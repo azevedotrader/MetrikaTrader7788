@@ -1075,44 +1075,214 @@ function calculateBrokerStats(trades: Trade[]): BrokerStats {
   return { totalTrades, totalProfit, winRate };
 }
 
-interface MetricCardProps {
+// Square Card Component for TradeZella-like layout
+interface SquareCardProps {
   title: string;
   value: string | number;
   icon: any;
   color?: string;
   subtitle?: string;
+  className?: string;
+  children?: React.ReactNode;
 }
 
-function MetricCard({
+function SquareCard({
   title,
   value,
   icon: Icon,
   color = "text-white",
   subtitle,
-}: MetricCardProps) {
+  className = "",
+  children,
+}: SquareCardProps) {
   return (
-    <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors min-w-0">
-      <CardHeader className="pb-3 md:pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm md:text-sm font-medium text-zinc-400 pr-2">
+    <Card className={`bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors aspect-square ${className}`}>
+      <CardContent className="p-4 h-full flex flex-col justify-between">
+        <div className="flex items-start justify-between mb-2">
+          <div className="text-xs text-zinc-400 font-medium truncate pr-2">
             {title}
-          </CardTitle>
-          <Icon
-            className={`h-5 w-5 md:h-4 md:w-4 flex-shrink-0 ${color || "text-zinc-400"}`}
-          />
+          </div>
+          <Icon className={`h-4 w-4 flex-shrink-0 ${color || "text-zinc-400"}`} />
         </div>
-      </CardHeader>
-      <CardContent className="pt-0 pb-4 md:pb-4">
-        <div
-          className={`text-lg md:text-2xl font-bold ${color} break-words leading-tight`}
-        >
-          {value}
+        
+        <div className="flex-1 flex flex-col justify-center">
+          {children ? (
+            children
+          ) : (
+            <>
+              <div className={`text-xl md:text-2xl font-bold ${color} mb-1`}>
+                {value}
+              </div>
+              {subtitle && (
+                <div className="text-xs text-zinc-500">{subtitle}</div>
+              )}
+            </>
+          )}
         </div>
-        {subtitle && (
-          <p className="text-xs text-zinc-500 mt-2 block">{subtitle}</p>
-        )}
       </CardContent>
     </Card>
+  );
+}
+
+// Circular Progress Component
+interface CircularProgressProps {
+  percentage: number;
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+}
+
+function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#22c55e" }: CircularProgressProps) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#374151"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-300"
+        />
+      </svg>
+      <div className="absolute text-sm font-bold text-white">
+        {percentage.toFixed(0)}%
+      </div>
+    </div>
+  );
+}
+
+// Net Daily PnL Bar Chart Component
+function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
+  const dailyData = useMemo(() => {
+    if (!trades.length) return [];
+
+    // Group trades by date and calculate daily PnL
+    const dailyMap = new Map<string, number>();
+    
+    trades.forEach(trade => {
+      const date = format(new Date(trade.dataHora), 'dd/MM');
+      const result = parseFloat(trade.resultado || '0');
+      dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+    });
+
+    return Array.from(dailyMap.entries())
+      .map(([date, pnl]) => ({ date, pnl }))
+      .slice(-15); // Last 15 days
+  }, [trades]);
+
+  if (!dailyData.length) {
+    return (
+      <div className="h-full flex items-center justify-center text-zinc-400">
+        <div className="text-center">
+          <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-xs">Sem dados</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={dailyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <XAxis 
+          dataKey="date" 
+          axisLine={false}
+          tickLine={false}
+          tick={{ fontSize: 10, fill: '#9CA3AF' }}
+        />
+        <YAxis hide />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: '#1E293B',
+            border: '1px solid #475569',
+            borderRadius: '8px',
+            fontSize: '12px'
+          }}
+          formatter={(value: any) => [`R$ ${value.toFixed(2)}`, 'PnL']}
+        />
+        <Bar 
+          dataKey="pnl" 
+          radius={[2, 2, 0, 0]}
+        >
+          {dailyData.map((entry, index) => (
+            <Bar key={index} fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} dataKey="pnl" />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Recent Trades Component
+function RecentTrades({ trades }: { trades: Trade[] }) {
+  const recentTrades = useMemo(() => {
+    return [...trades]
+      .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
+      .slice(0, 8); // Last 8 trades
+  }, [trades]);
+
+  if (!recentTrades.length) {
+    return (
+      <div className="h-full flex items-center justify-center text-zinc-400">
+        <div className="text-center">
+          <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+          <p className="text-xs">Sem trades</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full overflow-hidden">
+      <div className="grid grid-cols-4 gap-2 text-xs text-zinc-400 mb-2 px-1">
+        <div>Data</div>
+        <div>Ativo</div>
+        <div>Qtd</div>
+        <div>PnL</div>
+      </div>
+      <div className="space-y-1 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent">
+        {recentTrades.map((trade, index) => {
+          const result = parseFloat(trade.resultado || '0');
+          return (
+            <div 
+              key={trade.id} 
+              className="grid grid-cols-4 gap-2 text-xs px-1 py-1 hover:bg-zinc-800/50 rounded transition-colors"
+              data-testid={`recent-trade-${index}`}
+            >
+              <div className="text-zinc-300 truncate">
+                {format(new Date(trade.dataHora), 'dd/MM')}
+              </div>
+              <div className="text-white truncate font-medium">
+                {trade.ativo}
+              </div>
+              <div className="text-zinc-300">
+                {parseFloat(trade.quantidade || '0').toFixed(0)}
+              </div>
+              <div className={`font-medium ${result >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                {result >= 0 ? '+' : ''}R${result.toFixed(0)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -1422,43 +1592,160 @@ export default function Dashboard() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 md:space-y-6">
-          {/* Main Metrics Overview */}
-          <div data-testid="metrics-cards" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <MetricCard
-              title={t('metrics.total_profitability')}
+          {/* TradeZella-Style Dashboard Grid */}
+          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
+            {/* Net PnL */}
+            <SquareCard
+              title="Net PnL"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
-              color={
-                metrics.rentabilidadeTotal >= 0
-                  ? "text-green-400"
-                  : "text-red-400"
-              }
-              subtitle={t('metrics.general_result')}
+              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
+              data-testid="card-net-pnl"
             />
 
-            <MetricCard
-              title={t('dashboard.total_trades')}
-              value={metrics.totalTrades}
-              icon={BarChart3}
-              color="text-zinc-300"
-              subtitle={t('metrics.operations_performed')}
-            />
-
-            <MetricCard
-              title={t('dashboard.win_rate')}
-              value={`${metrics.taxaAcerto.toFixed(1)}%`}
+            {/* Trade Win % */}
+            <SquareCard
+              title="Trade win %"
+              value=""
               icon={Target}
+              color="text-green-400"
+              data-testid="card-trade-win"
+            >
+              <div className="flex flex-col items-center justify-center">
+                <CircularProgress 
+                  percentage={metrics.taxaAcerto} 
+                  color={metrics.taxaAcerto >= 60 ? "#22c55e" : metrics.taxaAcerto >= 40 ? "#f59e0b" : "#ef4444"}
+                />
+                <div className="text-xs text-zinc-400 mt-1">{metrics.totalTrades} trades</div>
+              </div>
+            </SquareCard>
+
+            {/* Profit Factor */}
+            <SquareCard
+              title="Profit factor"
+              value=""
+              icon={TrendingUp}
+              color="text-blue-400"
+              data-testid="card-profit-factor"
+            >
+              <div className="flex flex-col items-center justify-center">
+                {(() => {
+                  const profitFactor = (() => {
+                    const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
+                    const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
+                    const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
+                    return totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
+                  })();
+                  return (
+                    <>
+                      <CircularProgress 
+                        percentage={Math.min(profitFactor * 20, 100)} 
+                        color={profitFactor >= 2 ? "#22c55e" : profitFactor >= 1 ? "#f59e0b" : "#ef4444"}
+                      />
+                      <div className="text-xs text-zinc-400 mt-1">{profitFactor.toFixed(2)}</div>
+                    </>
+                  );
+                })()}
+              </div>
+            </SquareCard>
+
+            {/* Day Win % */}
+            <SquareCard
+              title="Day win %"
+              value=""
+              icon={Calendar}
+              color="text-purple-400"
+              data-testid="card-day-win"
+            >
+              <div className="flex flex-col items-center justify-center">
+                {(() => {
+                  // Calculate day win percentage
+                  const dailyMap = new Map<string, number>();
+                  filteredTrades.forEach(trade => {
+                    const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
+                    const result = parseFloat(trade.resultado || '0');
+                    dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                  });
+                  const totalDays = dailyMap.size;
+                  const winningDays = Array.from(dailyMap.values()).filter(pnl => pnl > 0).length;
+                  const dayWinRate = totalDays > 0 ? (winningDays / totalDays) * 100 : 0;
+                  return (
+                    <>
+                      <CircularProgress 
+                        percentage={dayWinRate} 
+                        color={dayWinRate >= 60 ? "#22c55e" : dayWinRate >= 40 ? "#f59e0b" : "#ef4444"}
+                      />
+                      <div className="text-xs text-zinc-400 mt-1">{totalDays} dias</div>
+                    </>
+                  );
+                })()}
+              </div>
+            </SquareCard>
+
+            {/* Average Win/Loss */}
+            <SquareCard
+              title="Avg win/loss trade"
+              value={`R$ ${(() => {
+                const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                  .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
+                const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                  .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
+                return avgWin.toFixed(0);
+              })()}`}
+              icon={Activity}
               color="text-white"
-              subtitle={t('metrics.operations_precision')}
+              subtitle={`-R$ ${(() => {
+                const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                  .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
+                return avgLoss.toFixed(0);
+              })()}`}
+              data-testid="card-avg-trade"
             />
 
-            <MetricCard
-              title={t('dashboard.avg_rr')}
-              value={`${metrics.riscoRetornoMedio.toFixed(2)}`}
-              icon={TrendingUp}
-              color="text-white"
-              subtitle={t('metrics.risk_vs_return')}
-            />
+            {/* Net Daily PnL Chart */}
+            <SquareCard
+              title="Daily net cumulative PnL"
+              value=""
+              icon={BarChart3}
+              color="text-green-400"
+              className="md:col-span-2"
+              data-testid="card-daily-pnl-chart"
+            >
+              <div className="h-full">
+                <NetDailyPnLBarChart trades={filteredTrades} />
+              </div>
+            </SquareCard>
+          </div>
+
+          {/* Second Row - Progress Tracker and Recent Trades */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
+            {/* Progress Tracker (Heatmap placeholder) */}
+            <SquareCard
+              title="Progress tracker"
+              value=""
+              icon={Calendar}
+              color="text-blue-400"
+              className="xl:col-span-2"
+              data-testid="card-progress-tracker"
+            >
+              <div className="h-full flex items-center justify-center">
+                <TradingCalendar trades={filteredTrades} />
+              </div>
+            </SquareCard>
+
+            {/* Recent Trades */}
+            <SquareCard
+              title="Recent trades"
+              value=""
+              icon={FileText}
+              color="text-zinc-400"
+              data-testid="card-recent-trades"
+            >
+              <div className="h-full">
+                <RecentTrades trades={filteredTrades} />
+              </div>
+            </SquareCard>
           </div>
 
           {/* Performance Summary Cards */}
@@ -1747,8 +2034,8 @@ export default function Dashboard() {
 
         <TabsContent value="insights" className="space-y-6">
           {/* Main Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <MetricCard
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <SquareCard
               title={t('metrics.total_profitability')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
@@ -1759,14 +2046,14 @@ export default function Dashboard() {
               }
             />
 
-            <MetricCard
+            <SquareCard
               title={t('dashboard.total_trades')}
               value={metrics.totalTrades}
               icon={BarChart3}
               color="text-zinc-300"
             />
 
-            <MetricCard
+            <SquareCard
               title={t('dashboard.win_rate')}
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
@@ -1775,7 +2062,7 @@ export default function Dashboard() {
               }
             />
 
-            <MetricCard
+            <SquareCard
               title={t('dashboard.avg_rr')}
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
@@ -2157,8 +2444,8 @@ export default function Dashboard() {
 
         <TabsContent value="consolidated" className="space-y-6">
           {/* {t('consolidated.summary')} */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <MetricCard
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+            <SquareCard
               title={t('dashboard.consolidated_total')}
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
@@ -2170,7 +2457,7 @@ export default function Dashboard() {
               subtitle={t('metrics.sum_all_brokers')}
             />
 
-            <MetricCard
+            <SquareCard
               title={t('dashboard.total_trades')}
               value={metrics.totalTrades}
               icon={BarChart3}
@@ -2178,7 +2465,7 @@ export default function Dashboard() {
               subtitle="Crypto + Forex + B3"
             />
 
-            <MetricCard
+            <SquareCard
               title={t('dashboard.win_rate')}
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
