@@ -888,7 +888,6 @@ const translations: Record<Language, Record<string, string>> = {
     "metrics.general_risk_return": "Risco/Retorno geral",
     "metrics.sum_all_brokers": "Soma de todas as corretoras",
     "metrics.weighted_average": "Média ponderada",
-    "metrics.win_rate": "Assertividade",
     "metrics.net_pnl": "PnL Líquido",
     "metrics.day_win_rate": "Dias Lucrativos %",
     "metrics.risk_reward": "Risco/Retorno",

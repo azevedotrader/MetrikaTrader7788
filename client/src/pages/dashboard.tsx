@@ -228,9 +228,9 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
 
   return (
     <div className="w-full">
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-4 md:p-6">
         {/* Filtros de Tempo */}
-        <div className="flex justify-end gap-2 mb-4">
+        <div className="flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2 mb-4">
           {[
             { key: "dia", label: t('time.day') },
             { key: "semana", label: t('time.week') },
@@ -254,15 +254,24 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
         </div>
 
         {/* Gráfico */}
-        <div className="h-80 w-full">
+        <div className="h-60 sm:h-72 md:h-80 w-full">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="period" stroke="#9CA3AF" fontSize={12} />
+                <XAxis 
+                  dataKey="period" 
+                  stroke="#9CA3AF" 
+                  fontSize={10}
+                  height={40}
+                  angle={-45}
+                  textAnchor="end"
+                  interval={Math.max(Math.floor(chartData.length / 6), 1)}
+                />
                 <YAxis
                   stroke="#9CA3AF"
-                  fontSize={12}
+                  fontSize={10}
+                  width={60}
                   tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
                 />
                 <Tooltip
@@ -307,7 +316,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
         </div>
 
         {/* Legenda */}
-        <div className="flex justify-center gap-6 mt-4 text-sm">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-green-500"></div>
             <span className="text-slate-300">{t('metrics.accumulated_profitability')}</span>
@@ -455,20 +464,20 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
 
   return (
     <div className="w-full">
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-4 md:p-6">
 
         {/* Métrica de Drawdown */}
-        <div className="flex justify-center mb-4 text-sm">
+        <div className="flex justify-center mb-4 text-xs sm:text-sm">
           <div className="text-slate-400 text-center">
             <div>Max Drawdown:</div>
-            <div className="text-red-500 font-semibold text-lg">
+            <div className="text-red-500 font-semibold text-base sm:text-lg">
               R$ {maxDrawdown.toFixed(2)}
             </div>
           </div>
         </div>
 
         {/* Gráfico */}
-        <div className="h-80 w-full">
+        <div className="h-60 sm:h-72 md:h-80 w-full">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <RechartsLineChart data={chartData}>
@@ -476,18 +485,18 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                 <XAxis 
                   dataKey="period" 
                   stroke="#9CA3AF"
-                  fontSize={11}
-                  height={60}
+                  fontSize={10}
+                  height={50}
                   angle={-45}
                   textAnchor="end"
-                  interval={Math.max(Math.floor(chartData.length / 8), 1)}
+                  interval={Math.max(Math.floor(chartData.length / 6), 1)}
                 />
                 <YAxis 
                   stroke="#9CA3AF"
-                  fontSize={11}
+                  fontSize={10}
                   tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
                   domain={['dataMin', 0]}
-                  width={80}
+                  width={65}
                 />
                 <Tooltip
                   contentStyle={{
@@ -518,7 +527,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
         </div>
         
         {/* Legenda */}
-        <div className="flex justify-center gap-6 mt-4 text-xs">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-red-500"></div>
             <span className="text-slate-300">Drawdown %</span>
@@ -2025,7 +2034,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
         onCsvToggle={handleCsvToggle}
         onSelectAllCsvs={handleSelectAllCsvs}
       />
-      <div data-testid="dashboard-overview" className="space-y-3 md:space-y-4 lg:space-y-6 p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
+      <div data-testid="dashboard-overview" className="space-y-4 p-2 sm:p-3 md:p-4 lg:p-6 pb-6 md:pb-8">
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex flex-wrap gap-2">
           {/* Smart Reprocess Button */}
@@ -2047,15 +2056,15 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
       <div className="space-y-4 md:space-y-6">
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
-          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-6 gap-3 md:gap-4 mb-4">
+          <div data-testid="metrics-cards" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4 mb-4">
             {/* Net PnL */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-2xl font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <div className={`text-xl sm:text-2xl font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'} break-words`}>
                   R$ {metrics.rentabilidadeTotal.toFixed(2)}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
@@ -2066,7 +2075,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Trade Win % */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-trade-win">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.win_rate')}</div>
                   <Target className="h-4 w-4 text-zinc-400" />
@@ -2074,7 +2083,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="flex items-center justify-center">
                   <CircularProgress 
                     percentage={metrics.taxaAcerto} 
-                    size={50}
+                    size={45}
                     color={metrics.taxaAcerto >= 60 ? "#22c55e" : metrics.taxaAcerto >= 40 ? "#f59e0b" : "#ef4444"}
                   />
                 </div>
@@ -2083,7 +2092,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Profit Factor */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-profit-factor">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.profit_factor')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
@@ -2098,7 +2107,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <CircularProgress 
                         percentage={Math.min(profitFactor * 20, 100)} 
-                        size={50}
+                        size={45}
                         color={profitFactor >= 2 ? "#22c55e" : profitFactor >= 1 ? "#f59e0b" : "#ef4444"}
                       />
                     );
@@ -2121,7 +2130,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Day Win % */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-day-win">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.day_win_rate')}</div>
                   <Calendar className="h-4 w-4 text-zinc-400" />
@@ -2141,7 +2150,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <CircularProgress 
                         percentage={dayWinRate} 
-                        size={50}
+                        size={45}
                         color={dayWinRate >= 60 ? "#22c55e" : dayWinRate >= 40 ? "#f59e0b" : "#ef4444"}
                       />
                     );
@@ -2167,12 +2176,12 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* RR Médio */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-rr">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-xl sm:text-2xl font-bold text-white break-words">
                   {metrics.riscoRetornoMedio.toFixed(2)}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
@@ -2183,19 +2192,19 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Average Win/Loss */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-win-loss">
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.avg_win_loss')}</div>
                   <Activity className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className="text-lg font-bold text-green-400">
+                <div className="text-base sm:text-lg font-bold text-green-400 break-words">
                   R$ {(() => {
                     const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                       .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
                     return avgWin.toFixed(0);
                   })()}
                 </div>
-                <div className="text-sm font-semibold text-red-400">
+                <div className="text-sm font-semibold text-red-400 break-words">
                   -R$ {(() => {
                     const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                       .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
