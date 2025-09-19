@@ -2449,10 +2449,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           </div>
 
 
-          {/* Performance Chart + Métrika Score - Layout lado a lado */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Performance por Período - Gráfico (2/3 da largura) */}
-            <div className="lg:col-span-2">
+          {/* Performance Chart + 4 Metric Blocks - Layout lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Performance por Período - Gráfico (3/4 da largura) */}
+            <div className="lg:col-span-3">
               <Card className="border-zinc-800 h-full bg-[#171719]">
                 <CardHeader>
                   <CardTitle className="text-white">
@@ -2460,11 +2460,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  {/* Métricas Resumidas - Estas serão atualizadas dinamicamente pelo componente do gráfico */}
-                  <div className="mb-4 flex justify-end" id="performance-metrics-container">
-                    {/* Placeholder - será preenchido pelo PerformancePeriodChart */}
-                  </div>
-
                   {/* Gráfico - Área Principal */}
                   <div className="w-full">
                     <PerformancePeriodChart trades={filteredTrades} t={t} />
@@ -2473,18 +2468,80 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </Card>
             </div>
 
-            {/* Métrika Score - Quadrado (1/3 da largura) */}
+            {/* 4 Metric Blocks - À direita (1/4 da largura) */}
             <div className="lg:col-span-1">
-              <Card className="border-zinc-800 h-full bg-[#171719]">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-zinc-400" />
-                    Métrika Score
-                  </CardTitle>
-                </CardHeader>
-                <MetrikaScore trades={filteredTrades} t={t} />
-              </Card>
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 h-full">
+                {/* Lucros */}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
+                  <div className="text-xs text-zinc-400 mb-1">Lucros</div>
+                  <div className="text-sm font-bold text-green-400">
+                    R$ {(() => {
+                      const totalPositive = filteredTrades
+                        .filter(t => parseFloat(t.resultado || '0') > 0)
+                        .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      return totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                    })()}
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    {filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length}
+                  </div>
+                </div>
+
+                {/* Perdas */}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
+                  <div className="text-xs text-zinc-400 mb-1">Perdas</div>
+                  <div className="text-sm font-bold text-red-400">
+                    -R$ {(() => {
+                      const totalNegative = Math.abs(filteredTrades
+                        .filter(t => parseFloat(t.resultado || '0') < 0)
+                        .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
+                      return totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                    })()}
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    {filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length}
+                  </div>
+                </div>
+
+                {/* Resultado */}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
+                  <div className="text-xs text-zinc-400 mb-1">Resultado</div>
+                  <div className={`text-sm font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    R$ {metrics.rentabilidadeTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    {filteredTrades.length}
+                  </div>
+                </div>
+
+                {/* Média */}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
+                  <div className="text-xs text-zinc-400 mb-1">Média</div>
+                  <div className={`text-sm font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    R$ {(() => {
+                      const avgResult = filteredTrades.length > 0 ? metrics.rentabilidadeTotal / filteredTrades.length : 0;
+                      return avgResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                    })()}
+                  </div>
+                  <div className="text-xs text-zinc-500">
+                    por trade
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          {/* Métrika Score - Abaixo, ocupando largura completa */}
+          <div className="w-full">
+            <Card className="border-zinc-800 bg-[#171719]">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-zinc-400" />
+                  Métrika Score
+                </CardTitle>
+              </CardHeader>
+              <MetrikaScore trades={filteredTrades} t={t} />
+            </Card>
           </div>
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
