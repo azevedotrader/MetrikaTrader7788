@@ -2066,8 +2066,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-lg md:text-xl lg:text-2xl font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'} break-words`}>
-                  R$ {metrics.rentabilidadeTotal.toFixed(2)}
+                <div className={`text-lg md:text-xl lg:text-2xl font-bold ${(() => {
+                  const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                  return totalResult >= 0 ? 'text-green-400' : 'text-red-400';
+                })()} break-words`}>
+                  R$ {(() => {
+                    const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    return totalResult.toFixed(2);
+                  })()}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
                   {filteredTrades.length} trades
@@ -2083,14 +2089,33 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${metrics.taxaAcerto >= 60 ? 'text-green-400' : metrics.taxaAcerto >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                    {metrics.taxaAcerto % 1 === 0 ? metrics.taxaAcerto.toFixed(0) : metrics.taxaAcerto.toFixed(1)}%
+                  <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${(() => {
+                    const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                    const totalTrades = filteredTrades.length;
+                    const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                    return winRate >= 60 ? 'text-green-400' : winRate >= 40 ? 'text-yellow-400' : 'text-red-400';
+                  })()}`}>
+                    {(() => {
+                      const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                      const totalTrades = filteredTrades.length;
+                      const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                      return winRate % 1 === 0 ? winRate.toFixed(0) : winRate.toFixed(1);
+                    })()}%
                   </div>
                   <div className="shrink-0 min-w-[35px]">
                     <CircularProgress 
-                      percentage={metrics.taxaAcerto} 
+                      percentage={(() => {
+                        const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = filteredTrades.length;
+                        return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                      })()} 
                       size={35}
-                      color={metrics.taxaAcerto >= 60 ? "#22c55e" : metrics.taxaAcerto >= 40 ? "#f59e0b" : "#ef4444"}
+                      color={(() => {
+                        const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = filteredTrades.length;
+                        const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        return winRate >= 60 ? "#22c55e" : winRate >= 40 ? "#f59e0b" : "#ef4444";
+                      })()}
                     />
                   </div>
                 </div>
@@ -2544,15 +2569,22 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 {/* Resultado */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">Resultado</div>
-                  <div className={`text-lg md:text-xl font-bold mb-2 ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    R$ {metrics.rentabilidadeTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                  <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
+                    const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    return totalResult >= 0 ? 'text-green-400' : 'text-red-400';
+                  })()}`}>
+                    R$ {(() => {
+                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      return totalResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                    })()}
                   </div>
                   <div className="flex flex-col items-center">
                     {(() => {
                       const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                       const totalTrades = filteredTrades.length;
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                      const isPositive = metrics.rentabilidadeTotal >= 0;
+                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const isPositive = totalResult >= 0;
                       return (
                         <>
                           <CircularProgress 
@@ -2575,15 +2607,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 {/* Média */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">Média</div>
-                  <div className={`text-lg md:text-xl font-bold mb-2 ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
+                    const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    const avgResult = filteredTrades.length > 0 ? totalResult / filteredTrades.length : 0;
+                    return avgResult >= 0 ? 'text-green-400' : 'text-red-400';
+                  })()}`}>
                     R$ {(() => {
-                      const avgResult = filteredTrades.length > 0 ? metrics.rentabilidadeTotal / filteredTrades.length : 0;
+                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const avgResult = filteredTrades.length > 0 ? totalResult / filteredTrades.length : 0;
                       return avgResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
                     {(() => {
-                      const avgResult = filteredTrades.length > 0 ? metrics.rentabilidadeTotal / filteredTrades.length : 0;
+                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const avgResult = filteredTrades.length > 0 ? totalResult / filteredTrades.length : 0;
                       const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100);
                       const isPositive = avgResult >= 0;
                       return (
