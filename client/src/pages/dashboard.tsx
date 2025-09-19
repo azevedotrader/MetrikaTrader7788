@@ -1892,34 +1892,69 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={dailyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
-        <XAxis 
-          dataKey="date" 
-          axisLine={false}
-          tickLine={false}
-          tick={{ fontSize: 10, fill: '#9CA3AF' }}
-        />
-        <YAxis hide />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: '#1E293B',
-            border: '1px solid #475569',
-            borderRadius: '8px',
-            fontSize: '12px'
-          }}
-          formatter={(value: any) => [`R$ ${value.toFixed(2)}`, 'PnL']}
-        />
-        <Bar 
-          dataKey="pnl" 
-          radius={[2, 2, 0, 0]}
+    <div className="w-full h-full min-h-[180px]">
+      <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+        <BarChart 
+          data={dailyData} 
+          margin={{ top: 10, right: 8, left: 8, bottom: 20 }}
+          barCategoryGap="20%"
         >
-          {dailyData.map((entry, index) => (
-            <Bar key={index} fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} dataKey="pnl" />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+          <XAxis 
+            dataKey="date" 
+            axisLine={false}
+            tickLine={false}
+            tick={{ 
+              fontSize: 10, 
+              fill: '#9CA3AF',
+              textAnchor: 'middle'
+            }}
+            height={20}
+          />
+          <YAxis hide />
+          <Tooltip
+            cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload || !payload.length) return null;
+              
+              const value = payload[0].value as number;
+              const isPositive = value >= 0;
+              
+              return (
+                <div className="bg-zinc-900/95 backdrop-blur-sm border border-zinc-700 rounded-lg p-3 shadow-xl">
+                  <div className="text-xs text-zinc-400 mb-1">
+                    {label}
+                  </div>
+                  <div className={`text-sm font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                    {isPositive ? '+' : ''}R$ {Math.abs(value).toFixed(2)}
+                  </div>
+                  <div className="text-xs text-zinc-500 mt-1">
+                    PnL Diário
+                  </div>
+                </div>
+              );
+            }}
+            wrapperStyle={{ 
+              outline: 'none',
+              zIndex: 1000
+            }}
+          />
+          <Bar 
+            dataKey="pnl" 
+            radius={[3, 3, 0, 0]}
+            maxBarSize={30}
+          >
+            {dailyData.map((entry, index) => (
+              <Bar 
+                key={index} 
+                fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} 
+                dataKey="pnl"
+                className="transition-opacity hover:opacity-80"
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -2527,74 +2562,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <BarChart3 className="h-4 w-4 text-green-400" />
                   </div>
                   <div className="h-48 overflow-hidden">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={(() => {
-                          const dailyMap = new Map<string, { pnl: number, fullDate: string }>();
-                          filteredTrades.forEach(trade => {
-                            const fullDate = format(new Date(trade.dataHora), 'yyyy-MM-dd');
-                            const displayDate = format(new Date(trade.dataHora), 'dd/MM');
-                            const result = parseFloat(trade.resultado || '0');
-                            const existing = dailyMap.get(fullDate);
-                            dailyMap.set(fullDate, { 
-                              pnl: (existing?.pnl || 0) + result, 
-                              fullDate: displayDate 
-                            });
-                          });
-                          return Array.from(dailyMap.entries())
-                            .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-                            .slice(-7)
-                            .map(([, data]) => ({ date: data.fullDate, pnl: data.pnl }));
-                        })()}
-                        margin={{ top: 8, right: 8, left: 8, bottom: 35 }}
-                      >
-                        <XAxis 
-                          dataKey="date" 
-                          axisLine={false} 
-                          tickLine={false}
-                          tick={{ fontSize: 10, fill: '#9ca3af' }}
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                          height={40}
-                        />
-                        <YAxis hide />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: '#27272a',
-                            border: '1px solid #3f3f46',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                          }}
-                          formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'PnL']}
-                          labelStyle={{ color: '#d4d4d8' }}
-                        />
-                        <Bar 
-                          dataKey="pnl" 
-                          radius={[2, 2, 0, 0]}
-                        >
-                          {(() => {
-                            const dailyMap = new Map<string, { pnl: number, fullDate: string }>();
-                            filteredTrades.forEach(trade => {
-                              const fullDate = format(new Date(trade.dataHora), 'yyyy-MM-dd');
-                              const displayDate = format(new Date(trade.dataHora), 'dd/MM');
-                              const result = parseFloat(trade.resultado || '0');
-                              const existing = dailyMap.get(fullDate);
-                              dailyMap.set(fullDate, { 
-                                pnl: (existing?.pnl || 0) + result, 
-                                fullDate: displayDate 
-                              });
-                            });
-                            return Array.from(dailyMap.entries())
-                              .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-                              .slice(-7)
-                              .map(([, data], index) => (
-                                <Cell key={index} fill={data.pnl >= 0 ? '#22c55e' : '#ef4444'} />
-                              ));
-                          })()}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <NetDailyPnLBarChart trades={filteredTrades} />
                   </div>
                 </CardContent>
               </Card>
@@ -2624,65 +2592,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 data-testid="card-daily-pnl-chart"
                 className="h-64 md:h-80"
               >
-                <div className="h-full overflow-hidden">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={(() => {
-                        const dailyMap = new Map<string, number>();
-                        filteredTrades.forEach(trade => {
-                          const date = format(new Date(trade.dataHora), 'MM/dd');
-                          const result = parseFloat(trade.resultado || '0');
-                          dailyMap.set(date, (dailyMap.get(date) || 0) + result);
-                        });
-                        return Array.from(dailyMap.entries())
-                          .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                          .slice(-14)
-                          .map(([date, pnl]) => ({ date, pnl }));
-                      })()}
-                      margin={{ top: 8, right: 8, left: 8, bottom: 30 }}
-                    >
-                      <XAxis 
-                        dataKey="date" 
-                        axisLine={false} 
-                        tickLine={false}
-                        tick={{ fontSize: 9, fill: '#9ca3af' }}
-                        interval={0}
-                        angle={-45}
-                        textAnchor="end"
-                        height={35}
-                      />
-                      <YAxis hide />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#27272a',
-                          border: '1px solid #3f3f46',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                        }}
-                        formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'PnL']}
-                        labelStyle={{ color: '#d4d4d8' }}
-                      />
-                      <Bar 
-                        dataKey="pnl" 
-                        radius={[2, 2, 0, 0]}
-                      >
-                        {(() => {
-                          const dailyMap = new Map<string, number>();
-                          filteredTrades.forEach(trade => {
-                            const date = format(new Date(trade.dataHora), 'MM/dd');
-                            const result = parseFloat(trade.resultado || '0');
-                            dailyMap.set(date, (dailyMap.get(date) || 0) + result);
-                          });
-                          return Array.from(dailyMap.entries())
-                            .sort(([a], [b]) => new Date(`2024/${a}`).getTime() - new Date(`2024/${b}`).getTime())
-                            .slice(-14)
-                            .map(([date, pnl], index) => (
-                              <Cell key={index} fill={pnl >= 0 ? '#22c55e' : '#ef4444'} />
-                            ));
-                        })()}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="h-full overflow-hidden min-h-[180px]">
+                  <NetDailyPnLBarChart trades={filteredTrades} />
                 </div>
               </SquareCard>
 
