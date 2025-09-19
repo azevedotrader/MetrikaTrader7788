@@ -18,6 +18,7 @@ import { useState } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
+import ImportarCSV from "@/pages/importar-csv";
 import Graficos from "@/pages/graficos";
 import Analises from "@/pages/analises";
 import RiskManagement from "@/pages/risk-management";
@@ -37,6 +38,7 @@ import NotFound from "@/pages/not-found";
 const pageTitleKeys: Record<string, string> = {
   "/dashboard": "nav.dashboard",
   "/novo-trade": "trades.add_new",
+  "/importar-csv": "trade.import_csv",
   "/graficos": "charts.title",
   "/analises": "nav.trades",
   "/gestao": "risk_management.title",
@@ -104,6 +106,13 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <NovoTrade />
+                  </Route>
+                  <Route path="/importar-csv">
+                    <TopBar 
+                      title={t(pageTitleKeys["/importar-csv"])} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <ImportarCSV />
                   </Route>
                   <Route path="/gestao">
                     <TopBar 

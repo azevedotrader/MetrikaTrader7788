@@ -29,6 +29,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const navigation = [
   { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { nameKey: "trades.add_new", href: "/novo-trade", icon: PlusCircle },
+  { nameKey: "trade.import_csv", href: "/importar-csv", icon: Upload },
   { nameKey: "risk_management.title", href: "/gestao", icon: Calculator },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
   { nameKey: "journal.title", href: "/diario", icon: Book },

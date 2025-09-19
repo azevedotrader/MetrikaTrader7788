@@ -33,28 +33,12 @@ import {
   Target,
   TrendingUp,
   TrendingDown,
-  Upload,
-  FileText,
   Calculator,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
-
-
-// Mover setupOptions para dentro do componente para acessar t()
-
-// Mover emocaoOptions para dentro do componente para acessar t()
 
 export default function NovoTrade() {
   const { toast } = useToast();
@@ -73,29 +57,23 @@ export default function NovoTrade() {
     t('setup.divergencia'),
     t('setup.scalping'),
     t('setup.swing'),
+    t('setup.outros'),
   ];
 
-  // Emotion options with translations
+  // Emoção options with translations
   const emocaoOptions = [
-    { value: "confiante", label: `● ${t('emotion.confiante')}`, icon: "●" },
-    { value: "ansioso", label: `▲ ${t('emotion.ansioso')}`, icon: "▲" },
-    { value: "impulsivo", label: `♦ ${t('emotion.impulsivo')}`, icon: "♦" },
-    { value: "calmo", label: `◆ ${t('emotion.calmo')}`, icon: "◆" },
-    { value: "eufórico", label: `★ ${t('emotion.euforico')}`, icon: "★" },
-    { value: "frustrado", label: `■ ${t('emotion.frustrado')}`, icon: "■" },
-    { value: "neutro", label: `○ ${t('emotion.neutro')}`, icon: "○" },
+    { value: "confiante", label: t('emotions.confident') },
+    { value: "ansioso", label: t('emotions.anxious') },
+    { value: "medo", label: t('emotions.fear') },
+    { value: "ganancioso", label: t('emotions.greedy') },
+    { value: "calmo", label: t('emotions.calm') },
+    { value: "empolgado", label: t('emotions.excited') },
+    { value: "frustrado", label: t('emotions.frustrated') },
+    { value: "neutro", label: t('emotions.neutral') },
   ];
-  const [selectedBroker, setSelectedBroker] = useState<string>("");
-  const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [csvName, setCsvName] = useState<string>("");
-  const [csvDescription, setCsvDescription] = useState<string>("");
-  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  
-  // Usando apenas análise MetrikAI (recomendada)
-  const analysisMethod = "traditional";
 
-  // Take/Stop calculation state
-  const [tradeResult, setTradeResult] = useState<"take" | "loss" | "">("");
+  // State para resultado do trade e cálculos
+  const [tradeResult, setTradeResult] = useState<"take" | "loss" | null>(null);
   const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
   const [finalResult, setFinalResult] = useState<number | null>(null);
 
@@ -104,834 +82,453 @@ export default function NovoTrade() {
     defaultValues: {
       dataHora: new Date().toISOString().slice(0, 16),
       ativo: "",
-      mercado: "crypto",
-      setup: undefined,
-      capitalUtilizado: "1", // Default value for backend compatibility
-      quantidade: "1", // Default value for backend compatibility
       tipo: "compra",
-      stop: "", // Stop Loss (valor de perda)
-      alvo: "", // Take Profit
-      resultado: "", // Result
-      risco: "0",
+      resultado: "",
+      alvo: "",
+      stop: "",
+      setup: setupOptions[0] || "",
+      emocao: "",
       comentario: "",
-      emocao: "neutro",
-      precoEntrada: "0",
-      precoSaida: "0",
+      mercado: "crypto",
       corretora: "crypto",
-      status: "fechado",
     },
   });
 
-  // Calculate Risk/Reward Ratio and Final Result based on form values
-  const calculateRiskReward = () => {
-    const takeValue = form.watch("alvo");
-    const stopValue = form.watch("stop");
+  // Watch values for calculations
+  const alvoValue = form.watch("alvo");
+  const stopValue = form.watch("stop");
 
-    const takeNum = parseFloat(takeValue || "0");
-    const stopNum = parseFloat(stopValue || "0");
+  // Calcular Risk/Reward e resultado final
+  useEffect(() => {
+    const alvo = parseFloat(alvoValue || "0");
+    const stop = parseFloat(stopValue || "0");
 
-    if (takeNum > 0 && stopNum > 0) {
-      const rrr = takeNum / stopNum;
-      setRiskRewardRatio(rrr);
+    if (alvo > 0 && stop > 0) {
+      const ratio = alvo / stop;
+      setRiskRewardRatio(ratio);
 
+      // Calcular resultado baseado na seleção
       if (tradeResult === "take") {
-        setFinalResult(takeNum);
+        setFinalResult(alvo);
+        form.setValue("resultado", alvo.toString());
       } else if (tradeResult === "loss") {
-        setFinalResult(-stopNum);
-      } else {
-        setFinalResult(null);
+        setFinalResult(-stop);
+        form.setValue("resultado", (-stop).toString());
       }
     } else {
       setRiskRewardRatio(null);
       setFinalResult(null);
     }
-  };
-
-  // Auto-calculate when values change
-  useEffect(() => {
-    calculateRiskReward();
-  }, [form.watch("alvo"), form.watch("stop"), tradeResult]);
+  }, [alvoValue, stopValue, tradeResult, form]);
 
   const createTradeMutation = useMutation({
-    mutationFn: async (data: InsertTrade) => {
-      // Get user from localStorage correctly
-      const userId = localStorage.getItem("user-id");
-      if (!userId) {
-        throw new Error("Usuário não autenticado");
-      }
-
-      const response = await fetch("/api/trades", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-          "user-id": userId,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao salvar trade");
-      }
-
-      return response.json();
-    },
+    mutationFn: (data: InsertTrade) => apiRequest("POST", "/api/trades", data),
     onSuccess: () => {
       toast({
-        title: "Trade registrado!",
-        description: "Seu trade foi salvo com sucesso.",
+        title: t('form.trade_saved'),
+        description: t('form.trade_saved_desc'),
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
-      form.reset();
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Erro",
-        description: error.message || "Erro ao salvar trade",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // CSV upload mutation
-  const uploadMutation = useMutation({
-    mutationFn: ({
-      file,
-      broker,
-      name,
-      description,
-      useTraditional,
-    }: {
-      file: File;
-      broker: string;
-      name: string;
-      description: string;
-      useTraditional: boolean;
-    }) => {
-      const userId = localStorage.getItem("user-id");
-      if (!userId) {
-        throw new Error("Usuário não autenticado");
-      }
-
-      const formData = new FormData();
-      formData.append("csvFile", file);
-      formData.append("broker", broker);
-      formData.append("useTraditional", useTraditional.toString());
-      formData.append("csvName", name || file.name);
-      formData.append(
-        "csvDescription",
-        description || "Importação sem descrição",
-      );
-
-      return fetch("/api/trades/upload-csv", {
-        method: "POST",
-        body: formData,
-        headers: {
-          "x-user-id": userId,
-        },
-      }).then(async (res) => {
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Erro ao importar CSV");
-        }
-        return res.json();
-      });
-    },
-    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
       queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/csv-imports"] });
-      setIsUploadDialogOpen(false);
-      setCsvFile(null);
-      setSelectedBroker("");
-      setCsvName("");
-      setCsvDescription("");
-
-      toast({
-        title: "Importação concluída com sucesso!",
-        description: `🎉 ${data.tradesImported} trades importados\n📊 Método: ${data.methodUsed || data.processingMethod || "MetrikAI"}`,
-      });
+      form.reset();
+      setTradeResult(null);
+      setRiskRewardRatio(null);
+      setFinalResult(null);
     },
     onError: (error: any) => {
-      console.log("CSV Upload Error:", error);
-
-      // Parse da resposta de erro do servidor
-      let errorData = error;
-      if (typeof error === 'string') {
-        try {
-          errorData = JSON.parse(error);
-        } catch {
-          errorData = { message: error };
-        }
-      }
-
-      // Detectar erro específico de arquivos sem datas
-      if (
-        errorData.errorCode === "NO_TRADE_DATES" ||
-        errorData.errorCode === "NO_VALID_TRADES" ||
-        errorData.message?.includes("sem datas específicas") ||
-        errorData.message?.includes("Nenhum trade válido encontrado")
-      ) {
-        const title = errorData.errorCode === "NO_TRADE_DATES" ? 
-          "📅 Arquivo Sem Datas de Trades" : 
-          "🚫 Trades Não Encontrados";
-
-        let description = `${errorData.message}\n\n`;
-        
-        if (errorData.details) {
-          description += `${errorData.details}\n\n`;
-        }
-        
-        if (errorData.suggestion) {
-          description += `${errorData.suggestion}`;
-        }
-
-        toast({
-          title,
-          description,
-          variant: "destructive",
-          duration: 12000, // Mais tempo para ler a explicação completa
-        });
-        return;
-      }
-
-      // Detectar erro de validação de datas (código legado)
-      if (
-        error.message?.includes("não contém datas de trades válidas") ||
-        error.message?.includes(
-          "ARQUIVO DE RELATÓRIO DE PERFORMANCE DETECTADO",
-        ) ||
-        error.details?.reason === "MISSING_VALID_DATES"
-      ) {
-        const errorDetails = error.details || {};
-        let description = `${t('trade.csv_rejected')}\n\n`;
-
-        if (!errorDetails.dateColumn) {
-          description += "📅 Nenhuma coluna de data encontrada.\n\n";
-          description += "Colunas obrigatórias aceitas:\n";
-          description += "• Data, Data/Hora, Date, Trade Date\n\n";
-          description +=
-            "💡 Solução: Renomeie uma coluna para 'Data' e tente novamente.";
-        } else {
-          description += `📅 Coluna "${errorDetails.dateColumn}" encontrada, mas sem datas válidas.\n\n`;
-          description += "📊 Formatos aceitos:\n";
-          description += "• dd/MM/yyyy (25/12/2024)\n";
-          description += "• dd/MM/yyyy HH:mm (25/12/2024 14:30)\n";
-          description += "• yyyy-MM-dd (2024-12-25)\n";
-          description += "• dd-MM-yyyy (25-12-2024)\n\n";
-
-          if (errorDetails.sampleDates?.length > 0) {
-            description += `🔍 Exemplos encontrados:\n`;
-            description += errorDetails.sampleDates
-              .slice(0, 3)
-              .map((date: string) => `• "${date}"`)
-              .join("\n");
-            description += "\n\n";
-          }
-
-          description += "💡 Verifique o formato das datas e tente novamente.";
-        }
-
-        toast({
-          title: "Validação de Datas Falhada",
-          description,
-          variant: "destructive",
-          duration: 8000, // Mais tempo para ler
-        });
-      } else {
-        // Outros tipos de erro
-        toast({
-          title: "Erro na importação",
-          description: error.message || "Erro ao importar arquivo CSV",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: t('form.error_saving'),
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
   const onSubmit = (data: InsertTrade) => {
-    // Validate required fields for calculation
-    if (!data.alvo || !data.stop || parseFloat(data.alvo) <= 0 || parseFloat(data.stop) <= 0) {
-      toast({
-        title: "Valores obrigatórios",
-        description: "Preencha os valores de Take Profit e Stop Loss para calcular o resultado.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!tradeResult) {
       toast({
-        title: "Resultado obrigatório",
-        description: "Selecione se o trade foi 'Take' ou 'Loss' para registrar o resultado.",
+        title: t('form.select_result'),
+        description: t('form.select_result_desc'),
         variant: "destructive",
       });
       return;
     }
 
-    // Calculate result based on take/stop and trade result selection
-    let calculatedResult = data.resultado;
+    // Ensure resultado is set correctly
+    data.resultado = finalResult?.toString() || "0";
 
-    if (data.alvo && data.stop && tradeResult) {
-      const takeNum = parseFloat(data.alvo);
-      const stopNum = parseFloat(data.stop);
-
-      if (tradeResult === "take") {
-        calculatedResult = takeNum.toString();
-      } else if (tradeResult === "loss") {
-        calculatedResult = (-stopNum).toString();
-      }
-
-      // Add RRR info to comment
-      if (takeNum > 0 && stopNum > 0) {
-        const rrr = (takeNum / stopNum).toFixed(2);
-        const rrrInfo = `RRR: 1:${rrr} | Resultado: ${tradeResult === "take" ? "Take" : "Loss"}`;
-        data.comentario = data.comentario
-          ? `${data.comentario}\n\n${rrrInfo}`
-          : rrrInfo;
-      }
-    }
-
-    // Ensure required backend fields have values
-    const processedData = {
-      ...data,
-      resultado: calculatedResult,
-      capitalUtilizado: data.capitalUtilizado || "1", // Backend requires this
-      quantidade: data.quantidade || "1", // Backend requires this
-      precoEntrada: data.precoEntrada || "0", // Backend compatibility
-      precoSaida: data.precoSaida || "0", // Backend compatibility
-      risco: data.risco || "0", // Backend compatibility
-    };
-
-    createTradeMutation.mutate(processedData);
-
-    // Reset result selection after submit
-    setTradeResult("");
-    setRiskRewardRatio(null);
-    setFinalResult(null);
-  };
-
-  const handleUpload = () => {
-    if (!csvFile || !selectedBroker) {
-      toast({
-        title: "Dados incompletos",
-        description: "Selecione um arquivo e uma corretora",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    uploadMutation.mutate({
-      file: csvFile,
-      broker: selectedBroker,
-      name: csvName,
-      description: csvDescription,
-      useTraditional: analysisMethod === "traditional",
-    });
+    createTradeMutation.mutate(data);
   };
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
-      <Tabs defaultValue="manual" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="manual">{t('trade.manual')}</TabsTrigger>
-          <TabsTrigger value="csv">{t('trade.import_csv')}</TabsTrigger>
-        </TabsList>
+      <Card className="bg-graphite/50 border-charcoal-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-neutral-400" />
+            {t('form.trade_data')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form
+              data-testid="trade-form"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6"
+            >
+              {/* Linha 1 - Data/Hora, Ativo, Mercado */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
+                <FormField
+                  control={form.control}
+                  name="dataHora"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.date_time')} *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="datetime-local"
+                          className="bg-charcoal-800 border-charcoal-600 text-white"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-        <TabsContent value="manual">
-          <Card className="bg-graphite/50 border-charcoal-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-neutral-400" />
-                {t('form.trade_data')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form
-                  data-testid="trade-form"
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
-                >
-                  {/* Linha 1 - Data/Hora, Ativo, Mercado */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
-                    <FormField
-                      control={form.control}
-                      name="dataHora"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.date_time')} *
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              type="datetime-local"
-                              className="bg-charcoal-800 border-charcoal-600 text-white"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                <FormField
+                  control={form.control}
+                  name="ativo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.asset')} *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex: BTCUSDT, EURUSD, PETR4"
+                          className="bg-charcoal-800 border-charcoal-600 text-white"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                    <FormField
-                      control={form.control}
-                      name="ativo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.asset')} *
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Ex: BTCUSDT, EURUSD, PETR4"
-                              className="bg-charcoal-800 border-charcoal-600 text-white"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="mercado"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.market')} *
-                          </FormLabel>
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              // Atualizar corretora automaticamente quando o mercado mudar
-                              form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
-                            }}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder={t('form.select_market')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                              <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
-                              <SelectItem value="forex">{t('form.forex')}</SelectItem>
-                              <SelectItem value="b3">{t('form.b3')}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Linha 2 - Tipo e Emoção */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
-                    <FormField
-                      control={form.control}
-                      name="tipo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.type')} *
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder={t('form.buy_or_sell')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                              <SelectItem value="compra">
-                                <span className="flex items-center gap-2">
-                                  <TrendingUp className="h-4 w-4 text-green-400" />
-                                  {t('form.buy')}
-                                </span>
-                              </SelectItem>
-                              <SelectItem value="venda">
-                                <span className="flex items-center gap-2">
-                                  <TrendingDown className="h-4 w-4 text-red-400" />
-                                  {t('form.sell')}
-                                </span>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="emocao"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.emotion')}
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                                <SelectValue placeholder={t('form.how_felt')} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                              {emocaoOptions.map((emocao) => (
-                                <SelectItem
-                                  key={emocao.value}
-                                  value={emocao.value}
-                                >
-                                  {emocao.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Linha 3 - Take/Stop com Resultado */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="alvo"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.take_profit')} *
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="1000.00"
-                                className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="stop"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-charcoal-300">
-                            {t('form.stop_loss')} *
-                          </FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
-                              <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="200.00"
-                                className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
-                                {...field}
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Resultado da Operação e Cálculos */}
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-3 text-charcoal-300">
-                        {t('form.trade_result')} *
-                      </label>
-                      {!tradeResult && (
-                        <p className="text-xs text-red-400 mb-2">
-                          {t('form.select_result_warning')}
-                        </p>
-                      )}
-                      <div className="grid grid-cols-2 gap-3">
-                        <Button
-                          type="button"
-                          variant={
-                            tradeResult === "take" ? "default" : "outline"
-                          }
-                          onClick={() => setTradeResult("take")}
-                          className={`${
-                            tradeResult === "take"
-                              ? "bg-green-600 hover:bg-green-700 text-white"
-                              : "border-charcoal-600 text-charcoal-300 hover:bg-green-600/20"
-                          }`}
-                        >
-                          {t('form.take')}
-                        </Button>
-                        <Button
-                          type="button"
-                          variant={
-                            tradeResult === "loss" ? "default" : "outline"
-                          }
-                          onClick={() => setTradeResult("loss")}
-                          className={`${
-                            tradeResult === "loss"
-                              ? "bg-red-600 hover:bg-red-700 text-white"
-                              : "border-charcoal-600 text-charcoal-300 hover:bg-red-600/20"
-                          }`}
-                        >
-                          {t('form.loss')}
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Calculations Display */}
-                    {(riskRewardRatio || finalResult !== null) && (
-                      <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
-                        <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                          <Calculator className="w-4 h-4 text-neutral-400" />
-                          {t('form.auto_calculations')}
-                        </h4>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="text-center">
-                            <div className="text-charcoal-300 text-sm mb-1">
-                              {t('form.risk_reward_ratio')}
-                            </div>
-                            <div className="text-neutral-400 font-semibold text-lg">
-                              {riskRewardRatio
-                                ? `1:${riskRewardRatio.toFixed(2)}`
-                                : "--"}
-                            </div>
-                          </div>
-
-                          <div className="text-center">
-                            <div className="text-charcoal-300 text-sm mb-1">
-                              {t('form.financial_result')}
-                            </div>
-                            <div
-                              className={`font-semibold text-lg ${
-                                finalResult === null
-                                  ? "text-charcoal-400"
-                                  : finalResult >= 0
-                                    ? "text-green-400"
-                                    : "text-red-400"
-                              }`}
-                            >
-                              {finalResult === null
-                                ? "--"
-                                : finalResult >= 0
-                                  ? `+R$ ${finalResult.toFixed(2)}`
-                                  : `R$ ${finalResult.toFixed(2)}`}
-                            </div>
-                          </div>
-                        </div>
-
-                        {riskRewardRatio && (
-                          <div className="mt-3 p-2 bg-charcoal-700/50 rounded text-center">
-                            <div
-                              className={`text-sm font-medium ${
-                                riskRewardRatio >= 3
-                                  ? "text-green-400"
-                                  : riskRewardRatio >= 2
-                                    ? "text-yellow-400"
-                                    : "text-red-400"
-                              }`}
-                            >
-                              {riskRewardRatio >= 3
-                                ? t('form.excellent_ratio')
-                                : riskRewardRatio >= 2
-                                  ? t('form.good_ratio')
-                                  : t('form.risky_ratio')}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-
-                  {/* Comentário */}
-                  <FormField
-                    control={form.control}
-                    name="comentario"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-charcoal-300">
-                          {t('form.trade_comment')}
-                        </FormLabel>
+                <FormField
+                  control={form.control}
+                  name="mercado"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.market')} *
+                      </FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Atualizar corretora automaticamente quando o mercado mudar
+                          form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
+                        }}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <Textarea
-                            placeholder={t('form.comment_placeholder')}
-                            className="bg-charcoal-800 border-charcoal-600 text-white min-h-[100px]"
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                            <SelectValue placeholder={t('form.select_market')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                          <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
+                          <SelectItem value="forex">{t('form.forex')}</SelectItem>
+                          <SelectItem value="b3">{t('form.b3')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Linha 2 - Tipo e Emoção */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
+                <FormField
+                  control={form.control}
+                  name="tipo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.type')} *
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                            <SelectValue placeholder={t('form.buy_or_sell')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                          <SelectItem value="compra">
+                            <span className="flex items-center gap-2">
+                              <TrendingUp className="h-4 w-4 text-green-400" />
+                              {t('form.buy')}
+                            </span>
+                          </SelectItem>
+                          <SelectItem value="venda">
+                            <span className="flex items-center gap-2">
+                              <TrendingDown className="h-4 w-4 text-red-400" />
+                              {t('form.sell')}
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="emocao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.emotion')}
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                            <SelectValue placeholder={t('form.how_felt')} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                          {emocaoOptions.map((emocao) => (
+                            <SelectItem
+                              key={emocao.value}
+                              value={emocao.value}
+                            >
+                              {emocao.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Linha 3 - Take/Stop com Resultado */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="alvo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.take_profit')} *
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="1000.00"
+                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
                             {...field}
                           />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <div className="flex gap-4">
+                <FormField
+                  control={form.control}
+                  name="stop"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-charcoal-300">
+                        {t('form.stop_loss')} *
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="200.00"
+                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Resultado da Operação e Cálculos */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-3 text-charcoal-300">
+                    {t('form.trade_result')} *
+                  </label>
+                  {!tradeResult && (
+                    <p className="text-xs text-red-400 mb-2">
+                      {t('form.select_result_warning')}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
-                      type="submit"
-                      disabled={createTradeMutation.isPending}
-                      className="gradient-purple-blue hover:opacity-90 transition-opacity"
+                      type="button"
+                      variant={
+                        tradeResult === "take" ? "default" : "outline"
+                      }
+                      onClick={() => setTradeResult("take")}
+                      className={`${
+                        tradeResult === "take"
+                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-green-600/20"
+                      }`}
                     >
-                      {createTradeMutation.isPending
-                        ? t('form.saving')
-                        : t('form.save_trade')}
+                      {t('form.take')}
                     </Button>
                     <Button
                       type="button"
-                      variant="outline"
-                      onClick={() => form.reset()}
-                      className="border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
+                      variant={
+                        tradeResult === "loss" ? "default" : "outline"
+                      }
+                      onClick={() => setTradeResult("loss")}
+                      className={`${
+                        tradeResult === "loss"
+                          ? "bg-red-600 hover:bg-red-700 text-white"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-red-600/20"
+                      }`}
                     >
-                      {t('form.clear')}
+                      {t('form.loss')}
                     </Button>
                   </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+                </div>
 
-          
-        </TabsContent>
+                {/* Calculations Display */}
+                {(riskRewardRatio || finalResult !== null) && (
+                  <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
+                    <h4 className="text-white font-medium mb-3 flex items-center gap-2">
+                      <Calculator className="w-4 h-4 text-neutral-400" />
+                      {t('form.auto_calculations')}
+                    </h4>
 
-        <TabsContent value="csv">
-          <Card className="bg-graphite/50 border-charcoal-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Upload className="h-5 w-5 text-neutral-400" />
-                {t('trade.import_trades_csv')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent data-testid="csv-import-section" className="space-y-6">
-              <div className="space-y-4">
-                {/* Linha 1: Mercado e Método de Análise lado a lado */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                      {t('form.select_market_label')}
-                    </label>
-                    <Select
-                      value={selectedBroker}
-                      onValueChange={setSelectedBroker}
-                    >
-                      <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                        <SelectValue placeholder={t('form.crypto_b3_forex')} />
-                      </SelectTrigger>
-                      <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                        <SelectItem value="crypto">{t('form.crypto_icon')}</SelectItem>
-                        <SelectItem value="b3">{t('form.b3_icon')}</SelectItem>
-                        <SelectItem value="forex">{t('form.forex_icon')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-charcoal-300 text-sm mb-1">
+                          {t('form.risk_reward_ratio')}
+                        </div>
+                        <div className="text-neutral-400 font-semibold text-lg">
+                          {riskRewardRatio
+                            ? `1:${riskRewardRatio.toFixed(2)}`
+                            : "--"}
+                        </div>
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                      Método de Análise
-                    </label>
-                    <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600 h-[42px] flex items-center">
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400">⚡</div>
-                        <span className="text-white font-medium text-sm">MetrikAI Tradicional</span>
+                      <div className="text-center">
+                        <div className="text-charcoal-300 text-sm mb-1">
+                          {t('form.financial_result')}
+                        </div>
+                        <div
+                          className={`font-semibold text-lg ${
+                            finalResult === null
+                              ? "text-charcoal-400"
+                              : finalResult >= 0
+                                ? "text-green-400"
+                                : "text-red-400"
+                          }`}
+                        >
+                          {finalResult === null
+                            ? "--"
+                            : finalResult >= 0
+                              ? `+R$ ${finalResult.toFixed(2)}`
+                              : `R$ ${finalResult.toFixed(2)}`}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-charcoal-300">
-                    Arquivo CSV (Os CSVS devem conter a data específica de cada trade para melhor performance).
-                  </label>
-                  <Input
-                    type="file"
-                    accept=".csv"
-                    onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                    className="bg-charcoal-800 border-charcoal-600 text-white file:bg-charcoal-700 file:text-white file:border-0 file:rounded-md file:px-4 file:py-2 file:mr-4"
-                  />
-                  <p className="text-sm text-charcoal-400 mt-2">
-                    {t('trade.select_csv_exported')}
-                  </p>
-                </div>
-
-                <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
-                  <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-neutral-400" />
-                    {t('trade.csv_format_by_market')}
-                  </h4>
-                  {/* Layout responsivo: vertical no mobile, grid no desktop */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm text-charcoal-400">
-                    <div className="space-y-1">
-                      <strong className="text-white block">Forex:</strong>
-                      <span className="text-xs leading-relaxed">Data, Ativo, Tipo, Volume, Preço Entrada, Stop Loss, Take Profit, Resultado</span>
-                    </div>
-                    <div className="space-y-1">
-                      <strong className="text-white block">B3:</strong>
-                      <span className="text-xs leading-relaxed">Data, Código, Operação, Quantidade, Preço, Total, Resultado</span>
-                    </div>
-                    <div className="space-y-1">
-                      <strong className="text-white block">Crypto:</strong>
-                      <span className="text-xs leading-relaxed">Time, Symbol, Side, Amount, Price, Fee, Total, PnL</span>
-                    </div>
+                    {riskRewardRatio && (
+                      <div className="mt-3 p-2 bg-charcoal-700/50 rounded text-center">
+                        <div
+                          className={`text-sm font-medium ${
+                            riskRewardRatio >= 3
+                              ? "text-green-400"
+                              : riskRewardRatio >= 2
+                                ? "text-yellow-400"
+                                : "text-red-400"
+                          }`}
+                        >
+                          {riskRewardRatio >= 3
+                            ? t('form.excellent_ratio')
+                            : riskRewardRatio >= 2
+                              ? t('form.good_ratio')
+                              : t('form.risky_ratio')}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                {/* Layout responsivo: botão e info do arquivo */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
-                  <div className="lg:col-span-2">
-                    <Button
-                      onClick={handleUpload}
-                      className="w-full gradient-purple-blue hover:opacity-90 transition-opacity"
-                      disabled={
-                        uploadMutation.isPending || !csvFile || !selectedBroker
-                      }
-                    >
-                      {uploadMutation.isPending ? (
-                        <>
-                          <Upload className="w-4 h-4 mr-2 animate-spin" />
-                          {t('trade.processing')}
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 mr-2" />
-                          {t('trade.import_fast')}
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  
-                  {csvFile && (
-                    <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600 lg:col-span-1">
-                      <p className="text-sm text-charcoal-300 truncate">
-                        <strong>Arquivo:</strong> {csvFile.name}
-                      </p>
-                      <p className="text-xs text-charcoal-400">
-                        {(csvFile.size / 1024).toFixed(2)} KB
-                      </p>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+              {/* Comentário */}
+              <FormField
+                control={form.control}
+                name="comentario"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-charcoal-300">
+                      {t('form.trade_comment')}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={t('form.comment_placeholder')}
+                        className="bg-charcoal-800 border-charcoal-600 text-white min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={createTradeMutation.isPending}
+                  className="gradient-purple-blue hover:opacity-90 transition-opacity"
+                >
+                  {createTradeMutation.isPending
+                    ? t('form.saving')
+                    : t('form.save_trade')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.reset()}
+                  className="border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
+                >
+                  {t('form.clear')}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
