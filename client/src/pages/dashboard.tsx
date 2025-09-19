@@ -624,33 +624,37 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
   };
 
   return (
-    <div className="p-3 md:p-4 lg:p-6">
-      <div className="h-48 md:h-56 lg:h-64 w-full">
+    <div className="p-4 md:p-5 lg:p-6">
+      <div className="h-64 sm:h-72 md:h-80 lg:h-96 xl:h-[400px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={timeData} margin={{ 
-            top: 10, 
-            right: window.innerWidth < 768 ? 10 : 20, 
-            bottom: window.innerWidth < 768 ? 40 : 60, 
-            left: window.innerWidth < 768 ? 10 : 20 
+            top: 15, 
+            right: window.innerWidth < 640 ? 15 : window.innerWidth < 1024 ? 20 : 30, 
+            bottom: window.innerWidth < 640 ? 50 : window.innerWidth < 1024 ? 60 : 70, 
+            left: window.innerWidth < 640 ? 15 : window.innerWidth < 1024 ? 20 : 30 
           }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.6} />
             <XAxis
               dataKey="time"
               stroke="#aaa"
-              fontSize={window.innerWidth < 768 ? 8 : 10}
+              fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
               angle={-45}
               textAnchor="end"
-              height={window.innerWidth < 768 ? 40 : 60}
-              interval={window.innerWidth < 768 ? 'preserveStartEnd' : 0}
+              height={window.innerWidth < 640 ? 50 : window.innerWidth < 1024 ? 60 : 70}
+              interval={window.innerWidth < 640 ? 'preserveStartEnd' : 0}
+              tickMargin={5}
             />
             <YAxis
               stroke="#aaa"
-              fontSize={window.innerWidth < 768 ? 8 : 10}
+              fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
               tickFormatter={(value) => 
-                window.innerWidth < 768
+                window.innerWidth < 640
                   ? `${(value / 1000).toFixed(1)}k`
+                  : window.innerWidth < 1024
+                  ? `R$ ${(value / 1000).toFixed(1)}k`
                   : `R$ ${(value / 1000).toFixed(1)}k`
               }
+              width={window.innerWidth < 640 ? 40 : window.innerWidth < 1024 ? 50 : 60}
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} strokeDasharray="2 2" />
@@ -660,7 +664,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
               type="monotone"
               dataKey="value"
               stroke="#6366f1"
-              strokeWidth={2}
+              strokeWidth={window.innerWidth < 640 ? 1.5 : 2}
               dot={false}
               connectNulls={false}
               strokeDasharray="2 4"
@@ -673,11 +677,11 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
       </div>
       
       {timeData.length > 0 && (
-        <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-slate-700">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm">
+        <div className="mt-4 md:mt-5 lg:mt-6 pt-4 md:pt-5 lg:pt-6 border-t border-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div className="text-center">
-              <div className="text-zinc-400 mb-1 text-xs">Melhor Horário</div>
-              <div className="text-green-400 font-medium text-xs md:text-sm">
+              <div className="text-zinc-400 mb-2 text-xs md:text-sm">Melhor Horário</div>
+              <div className="text-green-400 font-medium text-sm md:text-base lg:text-lg">
                 {(() => {
                   const best = timeData.reduce((prev, current) => 
                     prev.value > current.value ? prev : current
@@ -687,8 +691,8 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
               </div>
             </div>
             <div className="text-center">
-              <div className="text-zinc-400 mb-1 text-xs">Pior Horário</div>
-              <div className="text-red-400 font-medium text-xs md:text-sm">
+              <div className="text-zinc-400 mb-2 text-xs md:text-sm">Pior Horário</div>
+              <div className="text-red-400 font-medium text-sm md:text-base lg:text-lg">
                 {(() => {
                   const worst = timeData.reduce((prev, current) => 
                     prev.value < current.value ? prev : current
