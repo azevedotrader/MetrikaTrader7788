@@ -1174,14 +1174,14 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
       </div>
 
       {chartData.length === 0 ? (
-        <div className="h-[600px] md:h-[700px] flex items-center justify-center text-zinc-400">
+        <div className="h-[500px] md:h-[550px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
             <BarChart3 className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">{t('empty.no_trades_period')}</p>
           </div>
         </div>
       ) : (
-        <div className="relative h-[600px] md:h-[700px]">
+        <div className="relative h-[500px] md:h-[550px]">
           <ResponsiveContainer
             width="100%"
             height="100%"
