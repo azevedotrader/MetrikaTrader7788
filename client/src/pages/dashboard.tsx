@@ -2472,59 +2472,132 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             <div className="lg:col-span-1">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 h-full">
                 {/* Lucros */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-1">Lucros</div>
-                  <div className="text-sm font-bold text-green-400">
-                    R$ {(() => {
-                      const totalPositive = filteredTrades
-                        .filter(t => parseFloat(t.resultado || '0') > 0)
-                        .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      return totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
-                    })()}
-                  </div>
-                  <div className="text-xs text-zinc-500">
-                    {filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <div className="text-xs text-zinc-400 mb-1">Lucros</div>
+                      <div className="text-sm font-bold text-green-400">
+                        R$ {(() => {
+                          const totalPositive = filteredTrades
+                            .filter(t => parseFloat(t.resultado || '0') > 0)
+                            .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                          return totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                        })()}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length}
+                      </div>
+                    </div>
+                    <div className="ml-2">
+                      {(() => {
+                        const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = filteredTrades.length;
+                        const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        return (
+                          <CircularProgress 
+                            percentage={winPercentage} 
+                            size={30}
+                            color="#22c55e"
+                          />
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
 
                 {/* Perdas */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-1">Perdas</div>
-                  <div className="text-sm font-bold text-red-400">
-                    -R$ {(() => {
-                      const totalNegative = Math.abs(filteredTrades
-                        .filter(t => parseFloat(t.resultado || '0') < 0)
-                        .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
-                      return totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
-                    })()}
-                  </div>
-                  <div className="text-xs text-zinc-500">
-                    {filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <div className="text-xs text-zinc-400 mb-1">Perdas</div>
+                      <div className="text-sm font-bold text-red-400">
+                        -R$ {(() => {
+                          const totalNegative = Math.abs(filteredTrades
+                            .filter(t => parseFloat(t.resultado || '0') < 0)
+                            .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
+                          return totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                        })()}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length}
+                      </div>
+                    </div>
+                    <div className="ml-2">
+                      {(() => {
+                        const lossTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                        const totalTrades = filteredTrades.length;
+                        const lossPercentage = totalTrades > 0 ? (lossTrades / totalTrades) * 100 : 0;
+                        return (
+                          <CircularProgress 
+                            percentage={lossPercentage} 
+                            size={30}
+                            color="#ef4444"
+                          />
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
 
                 {/* Resultado */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-1">Resultado</div>
-                  <div className={`text-sm font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    R$ {metrics.rentabilidadeTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
-                  </div>
-                  <div className="text-xs text-zinc-500">
-                    {filteredTrades.length}
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <div className="text-xs text-zinc-400 mb-1">Resultado</div>
+                      <div className={`text-sm font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        R$ {metrics.rentabilidadeTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {filteredTrades.length}
+                      </div>
+                    </div>
+                    <div className="ml-2">
+                      {(() => {
+                        const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = filteredTrades.length;
+                        const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        const isPositive = metrics.rentabilidadeTotal >= 0;
+                        return (
+                          <CircularProgress 
+                            percentage={winRate} 
+                            size={30}
+                            color={isPositive ? "#22c55e" : "#ef4444"}
+                          />
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
 
                 {/* Média */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col justify-center items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-1">Média</div>
-                  <div className={`text-sm font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    R$ {(() => {
-                      const avgResult = filteredTrades.length > 0 ? metrics.rentabilidadeTotal / filteredTrades.length : 0;
-                      return avgResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
-                    })()}
-                  </div>
-                  <div className="text-xs text-zinc-500">
-                    por trade
+                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <div className="text-xs text-zinc-400 mb-1">Média</div>
+                      <div className={`text-sm font-bold ${metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        R$ {(() => {
+                          const avgResult = filteredTrades.length > 0 ? metrics.rentabilidadeTotal / filteredTrades.length : 0;
+                          return avgResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                        })()}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        por trade
+                      </div>
+                    </div>
+                    <div className="ml-2">
+                      {(() => {
+                        const avgResult = filteredTrades.length > 0 ? metrics.rentabilidadeTotal / filteredTrades.length : 0;
+                        const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100); // Normalize based on average result
+                        const isPositive = avgResult >= 0;
+                        return (
+                          <CircularProgress 
+                            percentage={normalizedPercentage} 
+                            size={30}
+                            color={isPositive ? "#22c55e" : "#ef4444"}
+                          />
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
               </div>
