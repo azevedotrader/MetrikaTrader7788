@@ -92,6 +92,8 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Radar,
+  ScatterChart,
+  Scatter,
 } from "recharts";
 import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
@@ -534,6 +536,147 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
           </div>
         </div>
       </CardContent>
+    </div>
+  );
+}
+
+// Trade Time Performance - Scatter plot showing performance by time of day
+function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+  const timeData = useMemo(() => {
+    if (!trades.length) return [];
+
+    // Agrupar trades por horário (hora e minuto)
+    const timeGroups: Record<string, number[]> = {};
+    
+    trades.forEach(trade => {
+      const tradeDate = new Date(trade.dataHora);
+      const timeKey = `${tradeDate.getHours().toString().padStart(2, '0')}:${tradeDate.getMinutes().toString().padStart(2, '0')}`;
+      const resultado = parseFloat(trade.resultado || "0");
+      
+      if (!timeGroups[timeKey]) {
+        timeGroups[timeKey] = [];
+      }
+      timeGroups[timeKey].push(resultado);
+    });
+
+    // Converter para formato do gráfico
+    const data = Object.entries(timeGroups).map(([time, results]) => {
+      const total = results.reduce((sum, r) => sum + r, 0);
+      const avg = total / results.length;
+      
+      return {
+        time,
+        value: total,
+        average: avg,
+        count: results.length,
+        color: total >= 0 ? '#22c55e' : '#ef4444'
+      };
+    }).sort((a, b) => a.time.localeCompare(b.time));
+
+    return data;
+  }, [trades]);
+
+  if (!trades.length) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-48 text-slate-400">
+          <div className="text-center">
+            <div className="text-4xl mb-4">⏰</div>
+            <p>{t('dashboard.register_trades_for_time_analysis')}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const CustomDot = (props: any) => {
+    const { cx, cy, payload } = props;
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={Math.max(3, Math.min(payload.count * 1.5, 8))}
+        fill={payload.color}
+        fillOpacity={0.8}
+        stroke={payload.color}
+        strokeWidth={1}
+      />
+    );
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-black border border-zinc-700 rounded-lg p-3 text-white">
+          <p className="font-medium mb-1">⏰ {label}</p>
+          <p className={`${data.value >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            💰 Total: R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+          <p className={`${data.average >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            📊 Média: R$ {data.average.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+          <p className="text-zinc-300">📈 Trades: {data.count}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="p-6">
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <ScatterChart data={timeData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+            <XAxis
+              dataKey="time"
+              stroke="#aaa"
+              fontSize={10}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis
+              stroke="#aaa"
+              fontSize={10}
+              tickFormatter={(value) => `R$ ${(value / 1000).toFixed(1)}k`}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={0} stroke="gray" strokeWidth={1} strokeDasharray="2 2" />
+            <Scatter dataKey="value" shape={<CustomDot />} />
+          </ScatterChart>
+        </ResponsiveContainer>
+      </div>
+      
+      {timeData.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-slate-700">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="text-center">
+              <div className="text-zinc-400 mb-1">Melhor Horário</div>
+              <div className="text-green-400 font-medium">
+                {(() => {
+                  const best = timeData.reduce((prev, current) => 
+                    prev.value > current.value ? prev : current
+                  );
+                  return `${best.time} (R$ ${best.value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`;
+                })()}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-zinc-400 mb-1">Pior Horário</div>
+              <div className="text-red-400 font-medium">
+                {(() => {
+                  const worst = timeData.reduce((prev, current) => 
+                    prev.value < current.value ? prev : current
+                  );
+                  return `${worst.time} (R$ ${worst.value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`;
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1973,6 +2116,27 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     },
   });
 
+  // Lógica de filtragem avançada (mover para antes de usar)
+  const filteredTrades = useMemo(() => {
+    let filtered = [...trades];
+
+    if (viewMode === "broker" && selectedBrokerFilter) {
+      filtered = filtered.filter(
+        (trade) => trade.corretora === selectedBrokerFilter,
+      );
+    }
+
+    if (viewMode === "csv" && selectedCsvIds.length > 0) {
+      // Filtrar por trades que vieram dos CSVs selecionados usando csvImportId
+      filtered = filtered.filter(
+        (trade) =>
+          trade.csvImportId && selectedCsvIds.includes(trade.csvImportId),
+      );
+    }
+
+    return filtered;
+  }, [trades, viewMode, selectedBrokerFilter, selectedCsvIds, csvImports]);
+
   // Mutation para editar trade manual
   const editTradeMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
@@ -1996,27 +2160,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
       });
     },
   });
-
-  // Lógica de filtragem avançada
-  const filteredTrades = useMemo(() => {
-    let filtered = [...trades];
-
-    if (viewMode === "broker" && selectedBrokerFilter) {
-      filtered = filtered.filter(
-        (trade) => trade.corretora === selectedBrokerFilter,
-      );
-    }
-
-    if (viewMode === "csv" && selectedCsvIds.length > 0) {
-      // Filtrar por trades que vieram dos CSVs selecionados usando csvImportId
-      filtered = filtered.filter(
-        (trade) =>
-          trade.csvImportId && selectedCsvIds.includes(trade.csvImportId),
-      );
-    }
-
-    return filtered;
-  }, [trades, viewMode, selectedBrokerFilter, selectedCsvIds, csvImports]);
 
   // Reset dashboard mutation
   const resetDashboardMutation = useMutation({
@@ -2708,8 +2851,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </div>
           </div>
 
-          {/* Métrika Score - Abaixo, ocupando largura completa */}
-          <div className="w-full">
+          {/* Métrika Score e Trade Time Performance - Lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="border-zinc-800 bg-[#171719]">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
@@ -2718,6 +2861,16 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </CardTitle>
               </CardHeader>
               <MetrikaScore trades={filteredTrades} t={t} />
+            </Card>
+            
+            <Card className="border-zinc-800 bg-[#171719]">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-zinc-400" />
+                  Trade Time Performance
+                </CardTitle>
+              </CardHeader>
+              <TradeTimePerformance trades={filteredTrades} t={t} />
             </Card>
           </div>
 
