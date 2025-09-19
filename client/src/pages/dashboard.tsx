@@ -803,8 +803,12 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
   );
 }
 
-// Performance Period Chart Component
-function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+// Performance Period Chart Component  
+function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: { 
+  trades: Trade[]; 
+  t: (key: string) => string;
+  onPeriodFilterChange?: (filteredTrades: Trade[]) => void;
+}) {
   const [selectedPeriod, setSelectedPeriod] = useState<
     "week" | "month" | "year" | "specific-month"
   >("month");
@@ -1022,6 +1026,58 @@ function PerformancePeriodChart({ trades, t }: { trades: Trade[]; t: (key: strin
   useEffect(() => {
     renderMetrics();
   }, [chartData, selectedPeriod, selectedMonth, selectedStartDay, selectedEndDay]);
+
+  // Notificar mudanças no filtro de período
+  useEffect(() => {
+    if (onPeriodFilterChange) {
+      if (!trades.length) {
+        onPeriodFilterChange([]);
+        return;
+      }
+
+      let periodFilteredTrades = trades;
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date;
+
+      switch (selectedPeriod) {
+        case "week":
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          endDate = now;
+          break;
+        case "year":
+          startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          endDate = now;
+          break;
+        case "specific-month":
+          const [yearStr, monthStr] = selectedMonth.split("-");
+          const yearNum = parseInt(yearStr, 10);
+          const monthNum = parseInt(monthStr, 10);
+          
+          const lastDayOfMonth = new Date(yearNum, monthNum, 0).getDate();
+          const actualEndDay = Math.min(selectedEndDay, lastDayOfMonth);
+          
+          startDate = new Date(yearNum, monthNum - 1, selectedStartDay);
+          endDate = new Date(yearNum, monthNum - 1, actualEndDay, 23, 59, 59);
+          break;
+        case "month":
+        default:
+          // Para "month", usar o mês atual completo
+          const currentDate = new Date();
+          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+          endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
+          break;
+      }
+
+      // Aplicar filtro de período
+      periodFilteredTrades = trades.filter((trade) => {
+        const tradeDate = new Date(trade.dataHora);
+        return tradeDate >= startDate && tradeDate <= endDate;
+      });
+      
+      onPeriodFilterChange(periodFilteredTrades);
+    }
+  }, [selectedPeriod, selectedMonth, selectedStartDay, selectedEndDay, trades, onPeriodFilterChange]);
 
   return (
     <div data-testid="performance-chart" className="w-full">
@@ -1817,6 +1873,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
   const [newCsvName, setNewCsvName] = useState("");
   const [editingTrade, setEditingTrade] = useState<any>(null);
   const [showEditTradeDialog, setShowEditTradeDialog] = useState(false);
+  const [periodFilteredTrades, setPeriodFilteredTrades] = useState<Trade[]>([]);
+
 
   // Fetch trades data
   const { data: trades = [], isLoading } = useQuery<Trade[]>({
@@ -1995,8 +2053,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     );
   }
 
-  // Calcular métricas com base nos trades filtrados
-  const metrics = calculateMetrics(filteredTrades, t);
+  // Calcular métricas com base nos trades filtrados (inicialmente os mesmos trades filtrados)
+  const metrics = calculateMetrics(periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades, t);
 
   // Funções para manipular CSVs
   const handleCsvToggle = (csvId: string) => {
@@ -2487,7 +2545,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <CardContent className="p-4">
                   {/* Gráfico - Área Principal */}
                   <div className="w-full">
-                    <PerformancePeriodChart trades={filteredTrades} t={t} />
+                    <PerformancePeriodChart 
+                      trades={filteredTrades} 
+                      t={t}
+                      onPeriodFilterChange={setPeriodFilteredTrades}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -2501,7 +2563,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 mb-2">Lucros</div>
                   <div className="text-lg md:text-xl font-bold text-green-400 mb-2">
                     R$ {(() => {
-                      const totalPositive = filteredTrades
+                      const totalPositive = periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') > 0)
                         .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       return totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
@@ -2509,8 +2571,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   </div>
                   <div className="flex flex-col items-center">
                     {(() => {
-                      const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = filteredTrades.length;
+                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                      const totalTrades = periodFilteredTrades.length;
                       const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       return (
                         <>
@@ -2527,7 +2589,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     })()}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length} trades
+                    {periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length} trades
                   </div>
                 </div>
 
@@ -2536,7 +2598,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 mb-2">Perdas</div>
                   <div className="text-lg md:text-xl font-bold text-red-400 mb-2">
                     -R$ {(() => {
-                      const totalNegative = Math.abs(filteredTrades
+                      const totalNegative = Math.abs(periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') < 0)
                         .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
                       return totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
@@ -2544,8 +2606,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   </div>
                   <div className="flex flex-col items-center">
                     {(() => {
-                      const lossTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
-                      const totalTrades = filteredTrades.length;
+                      const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                      const totalTrades = periodFilteredTrades.length;
                       const lossPercentage = totalTrades > 0 ? (lossTrades / totalTrades) * 100 : 0;
                       return (
                         <>
@@ -2562,7 +2624,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     })()}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length} trades
+                    {periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length} trades
                   </div>
                 </div>
 
@@ -2570,20 +2632,20 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">Resultado</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
-                    const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     return totalResult >= 0 ? 'text-green-400' : 'text-red-400';
                   })()}`}>
                     R$ {(() => {
-                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       return totalResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
                     {(() => {
-                      const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = filteredTrades.length;
+                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                      const totalTrades = periodFilteredTrades.length;
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       const isPositive = totalResult >= 0;
                       return (
                         <>
@@ -2600,7 +2662,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     })()}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {filteredTrades.length} trades
+                    {periodFilteredTrades.length} trades
                   </div>
                 </div>
 
@@ -2608,20 +2670,20 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">Média</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
-                    const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                    const avgResult = filteredTrades.length > 0 ? totalResult / filteredTrades.length : 0;
+                    const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
                     return avgResult >= 0 ? 'text-green-400' : 'text-red-400';
                   })()}`}>
                     R$ {(() => {
-                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      const avgResult = filteredTrades.length > 0 ? totalResult / filteredTrades.length : 0;
+                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
                       return avgResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
                     {(() => {
-                      const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      const avgResult = filteredTrades.length > 0 ? totalResult / filteredTrades.length : 0;
+                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
                       const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100);
                       const isPositive = avgResult >= 0;
                       return (
