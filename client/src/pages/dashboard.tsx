@@ -2080,7 +2080,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.win_rate')}</div>
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-lg md:text-xl lg:text-2xl font-bold text-center ${metrics.taxaAcerto >= 60 ? 'text-green-400' : metrics.taxaAcerto >= 40 ? 'text-yellow-400' : 'text-red-400'} break-words`}>
+                <div className="flex items-center justify-center mb-2">
+                  <CircularProgress 
+                    percentage={metrics.taxaAcerto} 
+                    size={45}
+                    color={metrics.taxaAcerto >= 60 ? "#22c55e" : metrics.taxaAcerto >= 40 ? "#f59e0b" : "#ef4444"}
+                  />
+                </div>
+                <div className={`text-sm md:text-base font-bold text-center ${metrics.taxaAcerto >= 60 ? 'text-green-400' : metrics.taxaAcerto >= 40 ? 'text-yellow-400' : 'text-red-400'} break-words`}>
                   {metrics.taxaAcerto % 1 === 0 ? metrics.taxaAcerto.toFixed(0) : metrics.taxaAcerto.toFixed(1)}%
                 </div>
               </CardContent>
@@ -2093,7 +2100,23 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.profit_factor')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-lg md:text-xl lg:text-2xl font-bold text-center break-words ${(() => {
+                <div className="flex items-center justify-center mb-2">
+                  {(() => {
+                    const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
+                    const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
+                    const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
+                    const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
+                    return (
+                      <CircularProgress 
+                        percentage={Math.min(profitFactor * 20, 100)} 
+                        size={45}
+                        color={profitFactor >= 2 ? "#22c55e" : profitFactor >= 1 ? "#f59e0b" : "#ef4444"}
+                      />
+                    );
+                  })()}
+                </div>
+                <div className={`text-sm md:text-base font-bold text-center break-words ${(() => {
                   const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
                   const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
                   const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -2120,7 +2143,27 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.day_win_rate')}</div>
                   <Calendar className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-lg md:text-xl lg:text-2xl font-bold text-center break-words ${(() => {
+                <div className="flex items-center justify-center mb-2">
+                  {(() => {
+                    const dailyMap = new Map<string, number>();
+                    filteredTrades.forEach(trade => {
+                      const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
+                      const result = parseFloat(trade.resultado || '0');
+                      dailyMap.set(date, (dailyMap.get(date) || 0) + result);
+                    });
+                    const totalDays = dailyMap.size;
+                    const winningDays = Array.from(dailyMap.values()).filter(pnl => pnl > 0).length;
+                    const dayWinRate = totalDays > 0 ? (winningDays / totalDays) * 100 : 0;
+                    return (
+                      <CircularProgress 
+                        percentage={dayWinRate} 
+                        size={45}
+                        color={dayWinRate >= 60 ? "#22c55e" : dayWinRate >= 40 ? "#f59e0b" : "#ef4444"}
+                      />
+                    );
+                  })()}
+                </div>
+                <div className={`text-sm md:text-base font-bold text-center break-words ${(() => {
                   const dailyMap = new Map<string, number>();
                   filteredTrades.forEach(trade => {
                     const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
@@ -2145,7 +2188,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return `${dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)}%`;
                   })()}
                 </div>
-                <div className="text-xs text-zinc-500 mt-1">
+                <div className="text-xs text-zinc-500 mt-1 text-center">
                   {(() => {
                     const dailyMap = new Map<string, number>();
                     filteredTrades.forEach(trade => {
