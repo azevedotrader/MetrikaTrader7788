@@ -1924,7 +1924,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
                   <div className="text-xs text-zinc-400 mb-1">
                     {label}
                   </div>
-                  <div className={`text-sm font-semibold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-sm font-semibold ${isPositive ? 'text-blue-400' : 'text-red-400'}`}>
                     {isPositive ? '+' : ''}R$ {Math.abs(value).toFixed(2)}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
@@ -1946,7 +1946,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
             {dailyData.map((entry, index) => (
               <Bar 
                 key={index} 
-                fill={entry.pnl >= 0 ? '#22c55e' : '#ef4444'} 
+                fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'} 
                 dataKey="pnl"
                 className="transition-opacity hover:opacity-80"
               />
