@@ -624,37 +624,60 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
   };
 
   return (
-    <div className="p-6">
-      <div className="h-64 w-full">
+    <div className="p-3 md:p-4 lg:p-6">
+      <div className="h-48 md:h-56 lg:h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart data={timeData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <ComposedChart data={timeData} margin={{ 
+            top: 10, 
+            right: window.innerWidth < 768 ? 10 : 20, 
+            bottom: window.innerWidth < 768 ? 40 : 60, 
+            left: window.innerWidth < 768 ? 10 : 20 
+          }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#444" />
             <XAxis
               dataKey="time"
               stroke="#aaa"
-              fontSize={10}
+              fontSize={window.innerWidth < 768 ? 8 : 10}
               angle={-45}
               textAnchor="end"
-              height={60}
+              height={window.innerWidth < 768 ? 40 : 60}
+              interval={window.innerWidth < 768 ? 'preserveStartEnd' : 0}
             />
             <YAxis
               stroke="#aaa"
-              fontSize={10}
-              tickFormatter={(value) => `R$ ${(value / 1000).toFixed(1)}k`}
+              fontSize={window.innerWidth < 768 ? 8 : 10}
+              tickFormatter={(value) => 
+                window.innerWidth < 768
+                  ? `${(value / 1000).toFixed(1)}k`
+                  : `R$ ${(value / 1000).toFixed(1)}k`
+              }
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} strokeDasharray="2 2" />
+            
+            {/* Linha conectando os pontos */}
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#6366f1"
+              strokeWidth={2}
+              dot={false}
+              connectNulls={false}
+              strokeDasharray="2 4"
+            />
+            
+            {/* Pontos do scatter */}
             <Scatter dataKey="value" shape={<CustomDot />} />
-          </ScatterChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
       
       {timeData.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-slate-700">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm">
             <div className="text-center">
-              <div className="text-zinc-400 mb-1">Melhor Horário</div>
-              <div className="text-green-400 font-medium">
+              <div className="text-zinc-400 mb-1 text-xs">Melhor Horário</div>
+              <div className="text-green-400 font-medium text-xs md:text-sm">
                 {(() => {
                   const best = timeData.reduce((prev, current) => 
                     prev.value > current.value ? prev : current
@@ -664,8 +687,8 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
               </div>
             </div>
             <div className="text-center">
-              <div className="text-zinc-400 mb-1">Pior Horário</div>
-              <div className="text-red-400 font-medium">
+              <div className="text-zinc-400 mb-1 text-xs">Pior Horário</div>
+              <div className="text-red-400 font-medium text-xs md:text-sm">
                 {(() => {
                   const worst = timeData.reduce((prev, current) => 
                     prev.value < current.value ? prev : current
