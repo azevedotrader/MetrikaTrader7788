@@ -2058,7 +2058,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
       <div className="space-y-4 md:space-y-6">
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
-          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3 lg:gap-4 mb-4">
+          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 lg:gap-4 mb-4">
             {/* Net PnL */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
               <CardContent className="p-2 md:p-3 lg:p-4">
@@ -2097,50 +2097,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </CardContent>
             </Card>
 
-            {/* Profit Factor */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-profit-factor">
-              <CardContent className="p-2 md:p-3 lg:p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.profit_factor')}</div>
-                  <TrendingUp className="h-4 w-4 text-zinc-400" />
-                </div>
-                <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${(() => {
-                    const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
-                    const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
-                    const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                    const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
-                    const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
-                    return profitFactor >= 2 ? 'text-green-400' : profitFactor >= 1 ? 'text-yellow-400' : 'text-red-400';
-                  })()}`}>
-                    {(() => {
-                      const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
-                      const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
-                      const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
-                      const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
-                      return profitFactor.toFixed(2);
-                    })()}
-                  </div>
-                  <div className="shrink-0 min-w-[35px]">
-                    {(() => {
-                      const winners = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0);
-                      const losers = filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0);
-                      const totalProfit = winners.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      const totalLoss = Math.abs(losers.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
-                      const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 999 : 0;
-                      return (
-                        <CircularProgress 
-                          percentage={Math.min(profitFactor * 20, 100)} 
-                          size={35}
-                          color={profitFactor >= 2 ? "#22c55e" : profitFactor >= 1 ? "#f59e0b" : "#ef4444"}
-                        />
-                      );
-                    })()}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            
 
             {/* Day Win % */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-day-win">
