@@ -2407,7 +2407,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${dayWinRate >= 60 ? 'text-green-400' : dayWinRate >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                          <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${dayWinRate >= 60 ? 'text-blue-400' : dayWinRate >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
                             {dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)}%
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
@@ -2418,7 +2418,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={dayWinRate} 
                             size={35}
-                            color={dayWinRate >= 60 ? "#22c55e" : dayWinRate >= 40 ? "#f59e0b" : "#ef4444"}
+                            color={dayWinRate >= 60 ? "#3b82f6" : dayWinRate >= 40 ? "#f59e0b" : "#ef4444"}
                           />
                         </div>
                       </>
