@@ -1944,11 +1944,9 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
             maxBarSize={30}
           >
             {dailyData.map((entry, index) => (
-              <Bar 
+              <Cell 
                 key={index} 
                 fill={entry.pnl >= 0 ? '#3b82f6' : '#ef4444'} 
-                dataKey="pnl"
-                className="transition-opacity hover:opacity-80"
               />
             ))}
           </Bar>
