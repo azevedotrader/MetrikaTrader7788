@@ -2208,19 +2208,47 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.avg_win_loss')}</div>
                   <Activity className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className="text-sm md:text-base lg:text-lg font-bold text-green-400 break-words">
-                  R$ {(() => {
-                    const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
-                      .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
-                    return avgWin.toFixed(0);
-                  })()}
-                </div>
-                <div className="text-xs md:text-sm font-semibold text-red-400 break-words">
-                  -R$ {(() => {
-                    const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
-                      .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
-                    return avgLoss.toFixed(0);
-                  })()}
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <div className="text-sm md:text-base lg:text-lg font-bold text-green-400 break-words">
+                      +R$ {(() => {
+                        const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                          .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
+                        return avgWin.toFixed(0);
+                      })()}
+                    </div>
+                    <div className="text-xs md:text-sm font-semibold text-red-400 break-words">
+                      -R$ {(() => {
+                        const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                          .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
+                        return avgLoss.toFixed(0);
+                      })()}
+                    </div>
+                  </div>
+                  <div className="ml-2 flex items-center">
+                    {(() => {
+                      const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                        .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
+                      const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                        .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
+                      const maxValue = Math.max(avgWin, avgLoss);
+                      const winHeight = maxValue > 0 ? (avgWin / maxValue) * 35 : 0;
+                      const lossHeight = maxValue > 0 ? (avgLoss / maxValue) * 35 : 0;
+                      
+                      return (
+                        <div className="flex items-end gap-1 h-10">
+                          <div 
+                            className="bg-green-400 rounded-sm w-2 transition-all duration-300"
+                            style={{ height: `${winHeight}px` }}
+                          />
+                          <div 
+                            className="bg-red-400 rounded-sm w-2 transition-all duration-300"
+                            style={{ height: `${lossHeight}px` }}
+                          />
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               </CardContent>
             </Card>
