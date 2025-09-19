@@ -1603,8 +1603,13 @@ function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#22
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="relative inline-flex items-center justify-center">
-      <svg width={size} height={size} className="transform -rotate-90">
+    <div className="relative inline-flex items-center justify-center w-[35px] h-[35px] sm:w-[40px] sm:h-[40px]">
+      <svg 
+        width={size} 
+        height={size} 
+        className="transform -rotate-90"
+        viewBox={`0 0 ${size} ${size}`}
+      >
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -1626,9 +1631,6 @@ function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#22
           className="transition-all duration-300"
         />
       </svg>
-      <div className="absolute text-sm font-bold text-white">
-        {percentage.toFixed(0)}%
-      </div>
     </div>
   );
 }
