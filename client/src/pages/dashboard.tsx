@@ -1036,6 +1036,13 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
       }
 
       let periodFilteredTrades = trades;
+
+      // Para "month" (Todos), não aplicar filtro - mostrar todos os trades
+      if (selectedPeriod === "month") {
+        onPeriodFilterChange(trades);
+        return;
+      }
+
       const now = new Date();
       let startDate: Date;
       let endDate: Date;
@@ -1059,13 +1066,6 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
           
           startDate = new Date(yearNum, monthNum - 1, selectedStartDay);
           endDate = new Date(yearNum, monthNum - 1, actualEndDay, 23, 59, 59);
-          break;
-        case "month":
-        default:
-          // Para "month", usar o mês atual completo
-          const currentDate = new Date();
-          startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-          endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59);
           break;
       }
 
