@@ -68,9 +68,8 @@ export default function Importacoes() {
   // Rename CSV mutation
   const renameCsvMutation = useMutation({
     mutationFn: async (data: { csvId: string; displayName: string }) => {
-      return apiRequest(`/api/csv-imports/${data.csvId}`, {
-        method: "PATCH",
-        body: { displayName: data.displayName },
+      return apiRequest("PATCH", `/api/csv-imports/${data.csvId}`, { 
+        displayName: data.displayName 
       });
     },
     onSuccess: () => {
@@ -94,9 +93,7 @@ export default function Importacoes() {
   // Delete CSV mutation
   const deleteCsvMutation = useMutation({
     mutationFn: async (csvId: string) => {
-      return apiRequest(`/api/csv-imports/${csvId}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/csv-imports/${csvId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/csv-imports"] });
@@ -118,9 +115,7 @@ export default function Importacoes() {
   // Delete manual trade mutation
   const deleteManualTradeMutation = useMutation({
     mutationFn: async (tradeId: string) => {
-      return apiRequest(`/api/trades/${tradeId}`, {
-        method: "DELETE",
-      });
+      return apiRequest("DELETE", `/api/trades/${tradeId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
