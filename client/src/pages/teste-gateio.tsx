@@ -80,7 +80,7 @@ export default function TesteGateIO() {
                 href="https://www.gate.io/myaccount/apiv4keys" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 ml-2 inline-flex items-center gap-1"
+                className="text-blue-600 hover:text-blue-600 ml-2 inline-flex items-center gap-1"
               >
                 Obter API Keys <ExternalLink className="w-3 h-3" />
               </a>
@@ -191,7 +191,7 @@ export default function TesteGateIO() {
             Como Obter suas Credenciais Gate.io:
           </h3>
           <ol className="text-slate-300 text-sm space-y-1 list-decimal list-inside">
-            <li>Acesse <a href="https://www.gate.io" className="text-blue-400 hover:text-blue-300">Gate.io</a> e faça login</li>
+            <li>Acesse <a href="https://www.gate.io" className="text-blue-600 hover:text-blue-600">Gate.io</a> e faça login</li>
             <li>Vá em Profile → API Management → APIv4 Keys</li>
             <li>Clique em "Create API Key"</li>
             <li>Configure as permissões necessárias (Spot Trading recomendado)</li>

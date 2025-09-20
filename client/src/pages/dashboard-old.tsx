@@ -52,14 +52,14 @@ const brokerInfo = {
   "crypto": {
     name: "Crypto",
     type: "Criptomoedas",
-    color: "bg-purple-500",
+    color: "bg-purple-600",
     icon: Activity,
     description: "Trading de criptomoedas com importação CSV"
   },
   "forex": {
     name: "Forex",
     type: "Câmbio",
-    color: "bg-blue-500", 
+    color: "bg-blue-600", 
     icon: TrendingUp,
     description: "Trading Forex com importação CSV"
   },
@@ -257,7 +257,7 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
         {/* Legenda */}
         <div className="flex justify-center gap-6 mt-4 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-purple-500"></div>
+            <div className="w-3 h-0.5 bg-purple-600"></div>
             <span className="text-slate-300">Rentabilidade Acumulada</span>
           </div>
           <div className="flex items-center gap-2">
@@ -395,7 +395,7 @@ function MetricCard({ title, value, icon: Icon, color = "text-white", badge, sub
     <Card className="bg-slate-900/50 border-slate-700">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-slate-300">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-purple-400" />
+        <Icon className="h-4 w-4 text-purple-600" />
       </CardHeader>
       <CardContent>
         <div className={`text-2xl font-bold ${color}`}>
@@ -759,19 +759,19 @@ export default function Dashboard() {
                       {/* Informações da conta autenticada */}
                       {gateAccountInfo && gateAccountInfo.connected && gateAccountInfo.accountInfo && (
                         <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
-                          <h4 className="text-purple-800 dark:text-purple-300 font-medium mb-3 flex items-center">
+                          <h4 className="text-purple-800 dark:text-purple-600 font-medium mb-3 flex items-center">
                             🔐 Conta Gate.io Autenticada
                           </h4>
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div>
                               <span className="text-slate-600 dark:text-slate-400">Email:</span>
-                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                              <p className="text-purple-700 dark:text-purple-600 font-medium">
                                 {gateAccountInfo.accountInfo.email}
                               </p>
                             </div>
                             <div>
                               <span className="text-slate-600 dark:text-slate-400">Nível:</span>
-                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                              <p className="text-purple-700 dark:text-purple-600 font-medium">
                                 {gateAccountInfo.accountInfo.level}
                               </p>
                             </div>
@@ -783,7 +783,7 @@ export default function Dashboard() {
                             </div>
                             <div>
                               <span className="text-slate-600 dark:text-slate-400">Saldos:</span>
-                              <p className="text-purple-700 dark:text-purple-300 font-medium">
+                              <p className="text-purple-700 dark:text-purple-600 font-medium">
                                 {gateAccountInfo.balanceCount} moedas
                               </p>
                             </div>
@@ -806,7 +806,7 @@ export default function Dashboard() {
                   )}
                   
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <p className="text-sm text-blue-700 dark:text-blue-600">
                       ℹ️ Configure suas credenciais da Gate.io para sincronização automática dos trades
                     </p>
                   </div>
@@ -827,7 +827,7 @@ export default function Dashboard() {
             <DialogTrigger asChild>
               <Button 
                 variant="outline"
-                className={`border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white ${
+                className={`border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white ${
                   selectedBrokerFilter === 'tickmill' ? 'ring-2 ring-blue-400 bg-blue-600 text-white' : ''
                 }`}
                 onClick={() => {
@@ -991,7 +991,7 @@ export default function Dashboard() {
           title="🔍 Setup Mais Lucrativo"
           value={metrics.setupMaisLucrativo.setup || "Nenhum"}
           icon={Target}
-          color="text-purple-400"
+          color="text-purple-600"
           subtitle={metrics.setupMaisLucrativo.total > 0 ? 
             `R$ ${metrics.setupMaisLucrativo.total.toFixed(2)} (${metrics.setupMaisLucrativo.percent.toFixed(1)}%)` : 
             "Nenhum trade registrado"
@@ -1004,7 +1004,7 @@ export default function Dashboard() {
             metrics.emocaoMaisRecorrente.emocao || 'Neutro'
           }`}
           icon={Brain}
-          color="text-blue-400"
+          color="text-blue-600"
           subtitle={`${metrics.emocaoMaisRecorrente.count} trades`}
         />
       </div>
@@ -1016,7 +1016,7 @@ export default function Dashboard() {
       <Card className="bg-slate-900/50 border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-400" />
+            <BarChart3 className="h-5 w-5 text-purple-600" />
             📊 Lucro/Prejuízo por Dia da Semana
           </CardTitle>
         </CardHeader>
@@ -1052,7 +1052,7 @@ export default function Dashboard() {
       <Card className="bg-slate-900/50 border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <Timer className="h-5 w-5 text-purple-400" />
+            <Timer className="h-5 w-5 text-purple-600" />
             Últimos Trades
           </CardTitle>
         </CardHeader>
@@ -1061,7 +1061,7 @@ export default function Dashboard() {
             <p className="text-slate-400 text-center py-8">
               Nenhum trade registrado ainda. 
               <br />
-              <span className="text-purple-400">Comece registrando seu primeiro trade!</span>
+              <span className="text-purple-600">Comece registrando seu primeiro trade!</span>
             </p>
           ) : (
             <div className="space-y-3">
@@ -1131,7 +1131,7 @@ export default function Dashboard() {
             <Card className="bg-slate-900/50 border-slate-700 lg:col-span-1">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <LineChart className="h-5 w-5 text-purple-400" />
+                  <LineChart className="h-5 w-5 text-purple-600" />
                   📈 Rentabilidade ao Longo do Tempo
                 </CardTitle>
               </CardHeader>
@@ -1142,7 +1142,7 @@ export default function Dashboard() {
             <Card className="bg-slate-900/50 border-slate-700">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-purple-400" />
+                  <DollarSign className="h-5 w-5 text-purple-600" />
                   💰 Análise de Volume
                 </CardTitle>
               </CardHeader>
@@ -1150,13 +1150,13 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Capital Total Investido</span>
-                    <span className="text-blue-400 font-semibold">
+                    <span className="text-blue-600 font-semibold">
                       R$ {filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0).toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">Ticket Médio</span>
-                    <span className="text-purple-400 font-semibold">
+                    <span className="text-purple-600 font-semibold">
                       R$ {filteredTrades.length > 0 ? (filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0) / filteredTrades.length).toFixed(2) : "0.00"}
                     </span>
                   </div>
@@ -1178,7 +1178,7 @@ export default function Dashboard() {
           <Card className="bg-slate-900/50 border-slate-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-purple-400" />
+                <Calendar className="h-5 w-5 text-purple-600" />
                 📅 Performance Temporal Detalhada
               </CardTitle>
             </CardHeader>
@@ -1296,7 +1296,7 @@ export default function Dashboard() {
                         <div className="text-xs text-slate-400">Resultado</div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                        <div className="text-2xl font-bold text-blue-600">{stats.winRate.toFixed(1)}%</div>
                         <div className="text-xs text-slate-400">Win Rate</div>
                       </div>
                     </div>
@@ -1408,7 +1408,7 @@ export default function Dashboard() {
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Building className="h-5 w-5 text-purple-400" />
+                <Building className="h-5 w-5 text-purple-600" />
                 📈 Performance por Corretora
               </CardTitle>
               <CardDescription>Comparativo de resultados entre as corretoras</CardDescription>
@@ -1444,7 +1444,7 @@ export default function Dashboard() {
                           <div className="text-xs text-slate-400">Resultado</div>
                         </div>
                         <div>
-                          <div className="text-lg font-bold text-blue-400">{stats.winRate.toFixed(1)}%</div>
+                          <div className="text-lg font-bold text-blue-600">{stats.winRate.toFixed(1)}%</div>
                           <div className="text-xs text-slate-400">Win Rate</div>
                         </div>
                       </div>
@@ -1459,7 +1459,7 @@ export default function Dashboard() {
           <Card className="bg-slate-800/50 border-slate-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-purple-400" />
+                <BarChart3 className="h-5 w-5 text-purple-600" />
                 🌍 Distribuição por Mercado
               </CardTitle>
               <CardDescription>Análise consolidada dos diferentes mercados</CardDescription>
@@ -1475,7 +1475,7 @@ export default function Dashboard() {
                   
                   const mercadoInfo = {
                     crypto: { name: 'Crypto', emoji: '🪙', color: 'text-orange-400' },
-                    forex: { name: 'Forex', emoji: '💱', color: 'text-blue-400' },
+                    forex: { name: 'Forex', emoji: '💱', color: 'text-blue-600' },
                     b3: { name: 'B3', emoji: '📈', color: 'text-green-600' }
                   };
                   

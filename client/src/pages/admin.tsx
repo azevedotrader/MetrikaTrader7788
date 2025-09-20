@@ -434,7 +434,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-blue-500 rounded" 
+                        className="h-full bg-blue-600 rounded" 
                         style={{ 
                           width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.proUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
@@ -448,7 +448,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-purple-500 rounded" 
+                        className="h-full bg-purple-600 rounded" 
                         style={{ 
                           width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.blackUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
@@ -1053,7 +1053,7 @@ function SupportAdminPanel({
                             <div
                               className={`px-3 lg:px-4 py-2 rounded-lg ${
                                 message.isFromAdmin
-                                  ? 'bg-blue-500 text-white rounded-br-sm'
+                                  ? 'bg-blue-600 text-white rounded-br-sm'
                                   : 'bg-gray-100 text-gray-900 rounded-bl-sm'
                               }`}
                             >

@@ -60,8 +60,8 @@ export default function Importacoes() {
 
   // Broker info for display
   const brokerInfo = {
-    crypto: { name: "Gate.io", color: "bg-purple-500" },
-    forex: { name: "Tickmill", color: "bg-blue-500" },
+    crypto: { name: "Gate.io", color: "bg-purple-600" },
+    forex: { name: "Tickmill", color: "bg-blue-600" },
     b3: { name: "Clear", color: "bg-green-600" },
   };
 

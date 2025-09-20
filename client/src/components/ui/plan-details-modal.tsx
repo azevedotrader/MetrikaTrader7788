@@ -30,14 +30,14 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
       case 'starter':
         return {
           name: 'Starter',
-          color: 'bg-blue-500',
+          color: 'bg-blue-600',
           icon: <Zap className="w-5 h-5" />,
           description: 'Plano ideal para traders iniciantes'
         };
       case 'pro':
         return {
           name: 'Pro',
-          color: 'bg-purple-500',
+          color: 'bg-purple-600',
           icon: <Crown className="w-5 h-5" />,
           description: 'Plano avançado para traders profissionais'
         };

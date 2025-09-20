@@ -62,7 +62,7 @@ export function AIMarketInsights() {
       <Card className="bg-slate-900/50 border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-purple-400" />
+            <TrendingUp className="h-5 w-5 text-purple-600" />
             Insights de Mercado IA
           </CardTitle>
         </CardHeader>
@@ -109,7 +109,7 @@ export function AIMarketInsights() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg text-white flex items-center gap-2">
-                      <Target className="h-4 w-4 text-purple-400" />
+                      <Target className="h-4 w-4 text-purple-600" />
                       {insight.asset}
                     </CardTitle>
                     <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ export function AIMarketInsights() {
                 <CardContent className="space-y-3">
                   <div>
                     <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-blue-400" />
+                      <AlertCircle className="h-4 w-4 text-blue-600" />
                       Análise
                     </h4>
                     <p className="text-slate-300 text-sm leading-relaxed">

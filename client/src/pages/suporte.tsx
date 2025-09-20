@@ -168,7 +168,7 @@ export default function Suporte() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'open': return <AlertCircle className="h-4 w-4 text-blue-500" />;
+      case 'open': return <AlertCircle className="h-4 w-4 text-blue-600" />;
       case 'in_progress': return <Clock className="h-4 w-4 text-yellow-600" />;
       case 'resolved': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'closed': return <XCircle className="h-4 w-4 text-gray-500" />;
@@ -280,12 +280,12 @@ export default function Suporte() {
                     </div>
                     <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
                       <div className="flex items-start gap-2 sm:gap-3">
-                        <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-600 mt-0.5 flex-shrink-0" />
                         <div>
                           <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-1 text-sm sm:text-base">
                             Chat Direto com Admin
                           </h4>
-                          <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300 leading-relaxed">
+                          <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-600 leading-relaxed">
                             Após criar este ticket, você poderá enviar mensagens diretamente para nossa equipe de suporte através do chat. 
                             Responderemos o mais rápido possível de acordo com a prioridade selecionada.
                           </p>

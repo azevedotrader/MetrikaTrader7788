@@ -16,7 +16,7 @@ export function MetricCard({
   subtitle, 
   icon: Icon, 
   trend = "neutral",
-  iconColor = "text-purple-400"
+  iconColor = "text-purple-600"
 }: MetricCardProps) {
   const getValueColor = () => {
     if (trend === "up") return "text-green-600";

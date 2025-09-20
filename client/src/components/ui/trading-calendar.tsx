@@ -308,7 +308,7 @@ export function TradingCalendar({
             {hasDiary && (
               <div title="Entrada de diário disponível">
                 <BookOpen
-                  className="w-3 h-3 text-blue-400 opacity-70"
+                  className="w-3 h-3 text-blue-600 opacity-70"
                   data-testid={`diary-indicator-${dayNumber}`}
                 />
               </div>

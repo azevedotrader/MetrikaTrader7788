@@ -206,7 +206,7 @@ export default function ResetPassword() {
                 <Button
                   type="button"
                   variant="link"
-                  className="text-purple-400 hover:text-purple-300"
+                  className="text-purple-600 hover:text-purple-600"
                   onClick={() => navigate("/")}
                 >
                   Voltar para o Login

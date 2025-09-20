@@ -1181,7 +1181,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <!-- Média por Período -->
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
-          <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-blue-400' : 'text-orange-400'}">
+          <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-blue-600' : 'text-orange-400'}">
             R$ ${avgPerPeriod.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -2040,7 +2040,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     forex: {
       name: t('broker.forex.name'),
       type: t('broker.forex.type'),
-      color: "bg-blue-500",
+      color: "bg-blue-600",
       icon: TrendingUp,
       description: t('broker.forex.description'),
     },
@@ -2407,7 +2407,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${dayWinRate >= 60 ? 'text-blue-400' : dayWinRate >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+                          <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${dayWinRate >= 60 ? 'text-blue-600' : dayWinRate >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
                             {dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)}%
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
@@ -2418,7 +2418,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={dayWinRate} 
                             size={35}
-                            color={dayWinRate >= 60 ? "#3b82f6" : dayWinRate >= 40 ? "#ca8a04" : "#dc2626"}
+                            color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#ca8a04" : "#dc2626"}
                           />
                         </div>
                       </>
@@ -2504,7 +2504,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               title={t('metrics.progress_tracker')}
               value=""
               icon={Calendar}
-              color="text-blue-400"
+              color="text-blue-600"
               className="lg:col-span-2 h-auto"
               data-testid="card-progress-tracker"
             >

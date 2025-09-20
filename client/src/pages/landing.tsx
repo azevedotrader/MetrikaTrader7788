@@ -200,8 +200,8 @@ export default function Landing() {
                           { height: 35, color: "from-green-500 to-green-400" },
                           { height: 40, color: "from-blue-500 to-blue-400" },
                           { height: 35, color: "from-blue-500 to-blue-400" },
-                          { height: 45, color: "from-purple-500 to-purple-400" },
-                          { height: 50, color: "from-purple-500 to-purple-400" }
+                          { height: 45, color: "from-purple-600 to-purple-400" },
+                          { height: 50, color: "from-purple-600 to-purple-400" }
                         ].map((bar, i) => (
                           <div 
                             key={i}
@@ -313,13 +313,13 @@ export default function Landing() {
                       <div className="text-2xl font-bold text-green-600">{t('landing.solution.demo_total_profit')}</div>
                       <div className="text-xs text-green-600">{t('landing.solution.monthly_growth')}</div>
                     </div>
-                    <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-4">
+                    <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-600/30 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-slate-300">{t('landing.solution.winning_trades')}</span>
-                        <Target className="w-4 h-4 text-blue-400" />
+                        <Target className="w-4 h-4 text-blue-600" />
                       </div>
-                      <div className="text-2xl font-bold text-blue-400">82.3%</div>
-                      <div className="text-xs text-blue-300">{t('landing.solution.trades_stats')}</div>
+                      <div className="text-2xl font-bold text-blue-600">82.3%</div>
+                      <div className="text-xs text-blue-600">{t('landing.solution.trades_stats')}</div>
                     </div>
                   </div>
 
@@ -398,13 +398,13 @@ export default function Landing() {
                     icon: Brain,
                     title: t('landing.solution.ai_analytics'),
                     description: t('landing.solution.ai_analytics_desc'),
-                    color: "text-purple-400"
+                    color: "text-purple-600"
                   },
                   {
                     icon: Shield,
                     title: t('landing.solution.risk_management'),
                     description: t('landing.solution.risk_management_desc'),
-                    color: "text-blue-400"
+                    color: "text-blue-600"
                   },
                   {
                     icon: Calendar,
@@ -589,7 +589,7 @@ export default function Landing() {
                 icon: Brain,
                 titleKey: 'landing.features.ai_title',
                 descriptionKey: 'landing.features.ai_description',
-                color: "from-purple-500 to-pink-500"  
+                color: "from-purple-600 to-pink-500"  
               },
               {
                 icon: Target,
@@ -607,7 +607,7 @@ export default function Landing() {
                 icon: PieChart,
                 titleKey: 'landing.features.charts_title',
                 descriptionKey: 'landing.features.charts_description',
-                color: "from-indigo-500 to-purple-500"
+                color: "from-indigo-500 to-purple-600"
               },
               {
                 icon: Clock,

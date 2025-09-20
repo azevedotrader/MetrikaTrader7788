@@ -407,7 +407,7 @@ export function TourOverlay() {
             viewport.isMobile ? 'h-1.5' : 'h-2'
           }`}>
             <div 
-              className={`bg-blue-500 rounded-full transition-all duration-300 ${
+              className={`bg-blue-600 rounded-full transition-all duration-300 ${
                 viewport.isMobile ? 'h-1.5' : 'h-2'
               }`}
               style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}

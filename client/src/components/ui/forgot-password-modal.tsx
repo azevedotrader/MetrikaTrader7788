@@ -57,8 +57,8 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-16 h-16 bg-purple-500/20 rounded-xl flex items-center justify-center mx-auto">
-            <Mail className="w-8 h-8 text-purple-400" />
+          <div className="w-16 h-16 bg-purple-600/20 rounded-xl flex items-center justify-center mx-auto">
+            <Mail className="w-8 h-8 text-purple-600" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">

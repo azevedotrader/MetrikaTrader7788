@@ -231,7 +231,7 @@ export default function RiskManagement() {
             <Card className="bg-gradient-to-br from-blue-900/20 to-purple-900/20 border-blue-800/50">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-blue-400" />
+                  <BookOpen className="w-5 h-5 text-blue-600" />
                   {t('risk_management.how_to_use')}
                 </CardTitle>
                 <CardDescription className="text-blue-200">
@@ -435,7 +435,7 @@ export default function RiskManagement() {
                   {/* Legenda */}
                   <div className="flex justify-center gap-6 mt-4 text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-1 bg-blue-500 rounded"></div>
+                      <div className="w-4 h-1 bg-blue-600 rounded"></div>
                       <span className="text-zinc-400">{t('risk_management.projected_balance')}</span>
                     </div>
                     <div className="flex items-center gap-2">

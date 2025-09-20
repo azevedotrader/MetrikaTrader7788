@@ -59,13 +59,13 @@ export function PlanStatus() {
       case 'starter':
         return {
           name: 'Starter',
-          color: 'bg-blue-500',
+          color: 'bg-blue-600',
           icon: <Zap className="w-3 h-3" />
         };
       case 'pro':
         return {
           name: 'Pro',
-          color: 'bg-purple-500',
+          color: 'bg-purple-600',
           icon: <Crown className="w-3 h-3" />
         };
       case 'black':

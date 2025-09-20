@@ -171,7 +171,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
             {t('register.already_have_account')}{" "}
             <Button 
               variant="link" 
-              className="text-purple-400 hover:text-purple-300 p-0"
+              className="text-purple-600 hover:text-purple-600 p-0"
               onClick={onSwitchToLogin}
             >
               {t('register.login_link')}

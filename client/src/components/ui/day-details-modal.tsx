@@ -391,7 +391,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                     variant="ghost"
                     size="sm"
                     onClick={onEditDiary}
-                    className="text-blue-400 hover:text-blue-300"
+                    className="text-blue-600 hover:text-blue-600"
                     data-testid="button-edit-diary"
                   >
                     <Edit className="w-4 h-4 mr-1" />

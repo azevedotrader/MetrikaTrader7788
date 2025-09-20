@@ -86,9 +86,9 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
       case 'success':
         return <CheckCircle className="h-5 w-5 text-green-600" />;
       case 'info':
-        return <Info className="h-5 w-5 text-blue-400" />;
+        return <Info className="h-5 w-5 text-blue-600" />;
       default:
-        return <FileSpreadsheet className="h-5 w-5 text-purple-400" />;
+        return <FileSpreadsheet className="h-5 w-5 text-purple-600" />;
     }
   };
 
@@ -128,7 +128,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="animate-spin">
-                <FileSpreadsheet className="h-5 w-5 text-purple-400" />
+                <FileSpreadsheet className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-white font-medium">Analisando dados CSV...</p>
@@ -185,7 +185,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
           </div>
           
           <div className="bg-purple-900/20 p-3 rounded mb-4">
-            <h4 className="text-purple-300 font-medium text-xs mb-1">Ação sugerida:</h4>
+            <h4 className="text-purple-600 font-medium text-xs mb-1">Ação sugerida:</h4>
             <p className="text-purple-200 text-xs">{currentTip.action}</p>
           </div>
           
@@ -202,7 +202,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
               size="sm"
               onClick={handleAnalyzeCsv}
               variant="outline"
-              className="border-purple-600 text-purple-300 hover:bg-purple-900/20 text-xs"
+              className="border-purple-600 text-purple-600 hover:bg-purple-900/20 text-xs"
               data-testid="reanalyze-csv"
             >
               Nova Análise

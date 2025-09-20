@@ -54,7 +54,7 @@ export function AiAnalysisResultsModal({
       case 'opportunity':
         return 'bg-green-600/20 text-green-600 border-green-600/30';
       case 'suggestion':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+        return 'bg-blue-600/20 text-blue-600 border-blue-600/30';
       default:
         return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
     }
@@ -84,12 +84,12 @@ export function AiAnalysisResultsModal({
         <DialogHeader className="flex-shrink-0 pb-4 border-b border-slate-700">
           <div className="flex-1 min-w-0">
             <DialogTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
-              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 flex-shrink-0" />
+              <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 flex-shrink-0" />
               <span className="truncate">Análise Profunda de Trading</span>
             </DialogTitle>
             {csvFileName && (
               <p className="text-slate-400 mt-1 text-sm break-all">
-                Análise baseada no arquivo: <span className="text-purple-300">{csvFileName}</span>
+                Análise baseada no arquivo: <span className="text-purple-600">{csvFileName}</span>
               </p>
             )}
           </div>
@@ -103,7 +103,7 @@ export function AiAnalysisResultsModal({
             </h3>
             <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
               <div className="p-2">
-                <p className="text-xl sm:text-2xl font-bold text-purple-400">{tips.length}</p>
+                <p className="text-xl sm:text-2xl font-bold text-purple-600">{tips.length}</p>
                 <p className="text-xs sm:text-sm text-slate-400">Insights Gerados</p>
               </div>
               <div className="p-2">
@@ -165,7 +165,7 @@ export function AiAnalysisResultsModal({
                   <div className="space-y-4">
                     {/* Análise Detalhada */}
                     <div>
-                      <h5 className="text-sm font-semibold text-purple-300 mb-2">
+                      <h5 className="text-sm font-semibold text-purple-600 mb-2">
                         🔍 Análise Detalhada
                       </h5>
                       <p className="text-slate-300 leading-relaxed whitespace-pre-wrap break-words">
@@ -177,7 +177,7 @@ export function AiAnalysisResultsModal({
 
                     {/* Baseado Em */}
                     <div>
-                      <h5 className="text-sm font-semibold text-blue-300 mb-2">
+                      <h5 className="text-sm font-semibold text-blue-600 mb-2">
                         📈 Baseado nos Dados
                       </h5>
                       <p className="text-slate-400 text-sm whitespace-pre-wrap break-words">

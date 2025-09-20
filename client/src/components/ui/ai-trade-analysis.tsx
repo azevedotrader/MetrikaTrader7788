@@ -94,7 +94,7 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
       <Card className="bg-slate-900/50 border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-400" />
+            <BarChart3 className="h-5 w-5 text-purple-600" />
             Análise IA do Trade
           </CardTitle>
         </CardHeader>
@@ -120,7 +120,7 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
       <Card className="bg-slate-900/50 border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <Loader2 className="h-5 w-5 text-purple-400 animate-spin" />
+            <Loader2 className="h-5 w-5 text-purple-600 animate-spin" />
             Analisando Trade...
           </CardTitle>
         </CardHeader>
@@ -139,7 +139,7 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
     <Card className="bg-slate-900/50 border-slate-700">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-purple-400" />
+          <BarChart3 className="h-5 w-5 text-purple-600" />
           Análise IA do Trade
         </CardTitle>
       </CardHeader>

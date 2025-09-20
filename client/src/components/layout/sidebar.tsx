@@ -278,8 +278,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               {/* Descrição */}
               <div className="text-center space-y-3">
                 <p className="text-zinc-300 text-sm md:text-base leading-relaxed">
-                  O <strong className="text-purple-300">suporte completo</strong> está disponível para usuários dos 
-                  planos <strong className="text-purple-300">Starter</strong>, <strong className="text-purple-300">Pro</strong> e <strong className="text-purple-300">Black</strong>.
+                  O <strong className="text-purple-600">suporte completo</strong> está disponível para usuários dos 
+                  planos <strong className="text-purple-600">Starter</strong>, <strong className="text-purple-600">Pro</strong> e <strong className="text-purple-600">Black</strong>.
                 </p>
                 <p className="text-zinc-400 text-sm">
                   Faça upgrade para ter acesso ao suporte especializado e recursos avançados da Métrika.
@@ -292,12 +292,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg p-4 md:p-6">
                   <div className="text-center space-y-3">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-bold">★</span>
                       </div>
                       <h3 className="text-lg md:text-xl font-bold text-white">Pro</h3>
                     </div>
-                    <p className="text-2xl md:text-3xl font-bold text-purple-300">R$ 49,90</p>
+                    <p className="text-2xl md:text-3xl font-bold text-purple-600">R$ 49,90</p>
                     <p className="text-zinc-400 text-xs md:text-sm">por mês</p>
                   </div>
                   

@@ -26,10 +26,10 @@ export function PlatformTour({ t }: PlatformTourProps) {
   const { startTour } = useTour();
 
   return (
-    <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-500/30">
+    <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-600/30">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
-          <Route className="h-5 w-5 text-blue-400" />
+          <Route className="h-5 w-5 text-blue-600" />
           {t('learning.tour_interactive')}
         </CardTitle>
       </CardHeader>
@@ -106,7 +106,7 @@ export default function Aprendizado() {
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <GraduationCap className="h-8 w-8 text-blue-400" />
+            <GraduationCap className="h-8 w-8 text-blue-600" />
             <h1 className="text-3xl md:text-4xl font-bold text-white">
               {t('learning.title')}
             </h1>
@@ -122,7 +122,7 @@ export default function Aprendizado() {
         {/* Videoaulas */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Video className="h-6 w-6 text-purple-400" />
+            <Video className="h-6 w-6 text-purple-600" />
             {t('learning.videos')}
           </h2>
           
@@ -131,7 +131,7 @@ export default function Aprendizado() {
               <Card key={sectionIndex} className="bg-zinc-900/90 border-zinc-800">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-purple-400" />
+                    <BookOpen className="h-5 w-5 text-purple-600" />
                     {section.title}
                   </CardTitle>
                   <p className="text-zinc-400">{section.description}</p>
@@ -150,7 +150,7 @@ export default function Aprendizado() {
                             <Circle className="h-5 w-5 text-zinc-500 group-hover:text-zinc-300" />
                           )}
                           <div>
-                            <h4 className="text-white font-medium group-hover:text-blue-300 transition-colors">
+                            <h4 className="text-white font-medium group-hover:text-blue-600 transition-colors">
                               {video.title}
                             </h4>
                             <span className="text-sm text-zinc-500">{video.duration}</span>

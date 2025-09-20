@@ -20,7 +20,7 @@ export default function CalendarioPage() {
       <Card className="rounded-lg border text-card-foreground shadow-sm border-slate-700 bg-[#141313c4]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-blue-400" />
+            <BarChart3 className="w-5 h-5 text-blue-600" />
             {t('calendar.how_to_use')}
           </CardTitle>
         </CardHeader>
@@ -71,7 +71,7 @@ export default function CalendarioPage() {
       <Card className="bg-[#070b12] border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-400" />
+            <BarChart3 className="w-5 h-5 text-purple-600" />
             {t('calendar.analysis_tips')}
           </CardTitle>
         </CardHeader>

@@ -45,7 +45,7 @@ export function UpgradeModal({
         t('pricing.plans.starter.features.emailSupport')
       ],
       icon: <TrendingUp className="h-5 w-5" />,
-      color: 'bg-blue-500'
+      color: 'bg-blue-600'
     },
     black: {
       name: t('pricing.plans.black.name'),
@@ -97,7 +97,7 @@ export function UpgradeModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-upgrade">
         <DialogHeader className="text-center space-y-4">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-2xl font-bold" data-testid="text-upgrade-title">
@@ -153,7 +153,7 @@ export function UpgradeModal({
                 <h3 className="text-xl font-bold" data-testid={`text-plan-name-${key}`}>
                   {plan.name}
                 </h3>
-                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2" data-testid={`text-plan-price-${key}`}>
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-600 mt-2" data-testid={`text-plan-price-${key}`}>
                   {plan.price}
                   <span className="text-sm font-normal text-muted-foreground">/{t('upgrade.plans.perMonth')}</span>
                 </div>

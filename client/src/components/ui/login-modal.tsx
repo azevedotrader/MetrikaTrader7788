@@ -105,7 +105,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
             <Button 
               type="button"
               variant="link" 
-              className="text-purple-400 hover:text-purple-300 p-0"
+              className="text-purple-600 hover:text-purple-600 p-0"
               onClick={() => {
                 onOpenChange(false);
                 setShowForgotPassword(true);
@@ -129,7 +129,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
             {t('login.no_account')}{" "}
             <Button 
               variant="link" 
-              className="text-purple-400 hover:text-purple-300 p-0"
+              className="text-purple-600 hover:text-purple-600 p-0"
               onClick={onSwitchToRegister}
             >
               {t('login.create_account')}

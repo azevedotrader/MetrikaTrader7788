@@ -23,9 +23,9 @@ export default function UserSelector() {
   };
 
   const quickUsers = [
-    { id: 'usuario-a', name: 'Usuário A', color: 'bg-blue-500' },
+    { id: 'usuario-a', name: 'Usuário A', color: 'bg-blue-600' },
     { id: 'usuario-b', name: 'Usuário B', color: 'bg-green-600' },
-    { id: 'usuario-c', name: 'Usuário C', color: 'bg-purple-500' },
+    { id: 'usuario-c', name: 'Usuário C', color: 'bg-purple-600' },
   ];
 
   return (
@@ -46,7 +46,7 @@ export default function UserSelector() {
           <div className="flex items-center gap-2 text-sm font-medium">
             <User className="w-4 h-4" />
             Usuário Atual: 
-            <span className="text-blue-600 dark:text-blue-400">
+            <span className="text-blue-600 dark:text-blue-600">
               {currentUserId || 'Nenhum'}
             </span>
           </div>
