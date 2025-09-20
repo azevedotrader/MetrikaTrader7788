@@ -2317,17 +2317,17 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
       </div>
 
 
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-6 md:space-y-8">
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
-          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3 lg:gap-4 mb-4">
+          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6">
             {/* Net PnL */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
-              <CardContent className="p-2 md:p-3 lg:p-4">
-                <div className="flex items-start justify-between mb-2">
+              <CardContent className="p-3 md:p-4 lg:p-5">
+                <div className="flex items-start justify-between mb-3">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-lg md:text-xl lg:text-2xl font-bold ${(() => {
+                <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${(() => {
                   const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                   return totalResult >= 0 ? 'text-green-600' : 'text-red-500';
                 })()} break-words`}>
@@ -2344,13 +2344,13 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Trade Win % */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-trade-win">
-              <CardContent className="p-2 md:p-3 lg:p-4">
+              <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.win_rate')}</div>
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${(() => {
+                  <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${(() => {
                     const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                     const totalTrades = filteredTrades.length;
                     const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
@@ -2387,7 +2387,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Day Win % */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-day-win">
-              <CardContent className="p-2 md:p-3 lg:p-4">
+              <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.day_win_rate')}</div>
                   <Calendar className="h-4 w-4 text-zinc-400" />
@@ -2407,7 +2407,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className={`text-2xl md:text-3xl lg:text-4xl font-bold ${dayWinRate >= 60 ? 'text-blue-600' : dayWinRate >= 40 ? 'text-yellow-500' : 'text-red-500'}`}>
+                          <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${dayWinRate >= 60 ? 'text-blue-600' : dayWinRate >= 40 ? 'text-yellow-500' : 'text-red-500'}`}>
                             {dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)}%
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
@@ -2430,12 +2430,12 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* RR Médio */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-rr">
-              <CardContent className="p-2 md:p-3 lg:p-4">
-                <div className="flex items-start justify-between mb-2">
+              <CardContent className="p-3 md:p-4 lg:p-5">
+                <div className="flex items-start justify-between mb-3">
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className="text-lg md:text-xl lg:text-2xl font-bold text-white break-words">
+                <div className="text-xl md:text-2xl lg:text-3xl font-bold text-white break-words">
                   {metrics.riscoRetornoMedio.toFixed(2)}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
@@ -2446,21 +2446,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Average Win/Loss */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-win-loss">
-              <CardContent className="p-2 md:p-3 lg:p-4">
-                <div className="flex items-start justify-between mb-2">
+              <CardContent className="p-3 md:p-4 lg:p-5">
+                <div className="flex items-start justify-between mb-3">
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.avg_win_loss')}</div>
                   <Activity className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <div className="text-sm md:text-base lg:text-lg font-bold text-green-600 break-words">
+                    <div className="text-base md:text-lg lg:text-xl font-bold text-green-600 break-words">
                       +R$ {(() => {
                         const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
                         return avgWin.toFixed(0);
                       })()}
                     </div>
-                    <div className="text-xs md:text-sm font-semibold text-red-500 break-words">
+                    <div className="text-sm md:text-base font-semibold text-red-500 break-words">
                       -R$ {(() => {
                         const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
@@ -2498,7 +2498,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           </div>
 
           {/* Bottom Row - Square Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             {/* Progress Tracker - Expanded */}
             <SquareCard
               title={t('metrics.progress_tracker')}

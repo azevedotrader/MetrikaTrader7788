@@ -48,7 +48,7 @@ export function TopBar({
   const { t } = useLanguage();
   
   return (
-    <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-4 ${isMobile ? 'left-0' : 'left-16'}`}>
+    <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-3 ${isMobile ? 'left-0' : 'left-16'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Mobile menu button */}
@@ -62,7 +62,7 @@ export function TopBar({
               <Menu className="w-5 h-5" />
             </Button>
           )}
-          <h1 className="text-lg lg:text-2xl font-bold text-white truncate ml-[394px] mr-[394px]">{title}</h1>
+          <h1 className="text-xl lg:text-2xl font-bold text-white truncate">{title}</h1>
         </div>
         
         <div className="flex items-center space-x-3">
