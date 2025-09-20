@@ -214,7 +214,7 @@ export default function Diario() {
                         className={
                           isProfitable(entry.pnl)
                             ? "bg-green-600/20 text-green-600 hover:bg-green-600/30" 
-                            : "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                            : "bg-red-600/20 text-red-600 hover:bg-red-600/30"
                         }
                         data-testid={`badge-pnl-${entry.id}`}
                       >

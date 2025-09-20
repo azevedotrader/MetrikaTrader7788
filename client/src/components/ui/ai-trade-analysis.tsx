@@ -32,9 +32,9 @@ const getSentimentIcon = (sentiment: string) => {
     case 'bullish':
       return <TrendingUp className="h-4 w-4 text-green-600" />;
     case 'bearish':
-      return <TrendingDown className="h-4 w-4 text-red-400" />;
+      return <TrendingDown className="h-4 w-4 text-red-600" />;
     default:
-      return <BarChart3 className="h-4 w-4 text-yellow-400" />;
+      return <BarChart3 className="h-4 w-4 text-yellow-600" />;
   }
 };
 
@@ -176,7 +176,7 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
         {/* Sugestão */}
         <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
           <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-yellow-400" />
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
             Sugestão
           </h4>
           <p className="text-slate-300 text-sm leading-relaxed">

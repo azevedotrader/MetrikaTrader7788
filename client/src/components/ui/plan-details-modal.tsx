@@ -179,13 +179,13 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
             <h3 className="text-sm font-medium text-zinc-300 mb-3">Recursos Disponíveis</h3>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <CheckCircle className={`w-4 h-4 ${planInfo.hasUnlimitedTrades ? 'text-green-600' : 'text-red-500'}`} />
+                <CheckCircle className={`w-4 h-4 ${planInfo.hasUnlimitedTrades ? 'text-green-600' : 'text-red-600'}`} />
                 <span className="text-sm text-zinc-300">
                   {planInfo.hasUnlimitedTrades ? 'Trades ilimitados' : 'Máximo 10 trades'}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <CheckCircle className={`w-4 h-4 ${planInfo.isAiEnabled ? 'text-green-600' : 'text-red-500'}`} />
+                <CheckCircle className={`w-4 h-4 ${planInfo.isAiEnabled ? 'text-green-600' : 'text-red-600'}`} />
                 <span className="text-sm text-zinc-300">
                   {planInfo.isAiEnabled ? 'Análise com IA' : 'Sem acesso à IA'}
                 </span>

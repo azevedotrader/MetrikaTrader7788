@@ -322,21 +322,21 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 </div>
 
                 {/* Plano Black */}
-                <div className="bg-gradient-to-br from-black/40 to-zinc-900/40 border border-yellow-500/50 rounded-lg p-4 md:p-6 relative">
+                <div className="bg-gradient-to-br from-black/40 to-zinc-900/40 border border-yellow-600/50 rounded-lg p-4 md:p-6 relative">
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
+                    <span className="bg-yellow-600 text-black text-xs font-bold px-2 py-1 rounded-full">
                       MAIS POPULAR
                     </span>
                   </div>
                   
                   <div className="text-center space-y-3 mt-2">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-8 h-8 bg-black border border-yellow-500 rounded-full flex items-center justify-center">
-                        <span className="text-yellow-500 text-sm font-bold">♥</span>
+                      <div className="w-8 h-8 bg-black border border-yellow-600 rounded-full flex items-center justify-center">
+                        <span className="text-yellow-600 text-sm font-bold">♥</span>
                       </div>
                       <h3 className="text-lg md:text-xl font-bold text-white">Black</h3>
                     </div>
-                    <p className="text-2xl md:text-3xl font-bold text-yellow-300">R$ 97,00</p>
+                    <p className="text-2xl md:text-3xl font-bold text-yellow-600">R$ 97,00</p>
                     <p className="text-zinc-400 text-xs md:text-sm">por mês</p>
                   </div>
                   

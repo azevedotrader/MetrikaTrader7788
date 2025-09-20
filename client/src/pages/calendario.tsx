@@ -37,8 +37,8 @@ export default function CalendarioPage() {
             </div>
             
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+              <div className="w-8 h-8 bg-red-600/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-red-600 rounded-full"></div>
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.loss_days')}</div>

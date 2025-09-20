@@ -279,7 +279,7 @@ export default function NovoTrade() {
                           </SelectItem>
                           <SelectItem value="venda">
                             <span className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-red-400" />
+                              <TrendingDown className="h-4 w-4 text-red-600" />
                               {t('form.sell')}
                             </span>
                           </SelectItem>
@@ -384,7 +384,7 @@ export default function NovoTrade() {
                     {t('form.trade_result')} *
                   </label>
                   {!tradeResult && (
-                    <p className="text-xs text-red-400 mb-2">
+                    <p className="text-xs text-red-600 mb-2">
                       {t('form.select_result_warning')}
                     </p>
                   )}
@@ -450,7 +450,7 @@ export default function NovoTrade() {
                               ? "text-charcoal-400"
                               : finalResult >= 0
                                 ? "text-green-600"
-                                : "text-red-400"
+                                : "text-red-600"
                           }`}
                         >
                           {finalResult === null
@@ -469,8 +469,8 @@ export default function NovoTrade() {
                             riskRewardRatio >= 3
                               ? "text-green-600"
                               : riskRewardRatio >= 2
-                                ? "text-yellow-400"
-                                : "text-red-400"
+                                ? "text-yellow-600"
+                                : "text-red-600"
                           }`}
                         >
                           {riskRewardRatio >= 3

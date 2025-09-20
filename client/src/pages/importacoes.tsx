@@ -208,7 +208,7 @@ export default function Importacoes() {
                     >
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
-                          className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-600" : "bg-yellow-500"}`}
+                          className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-600" : "bg-yellow-600"}`}
                         />
                         <div className="min-w-0 flex-1">
                           {editingCsv?.id === importItem.id ? (
@@ -310,7 +310,7 @@ export default function Importacoes() {
                                 }
                               }}
                               disabled={deleteCsvMutation.isPending}
-                              className="h-7 w-7 p-0 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300 flex items-center justify-center"
+                              className="h-7 w-7 p-0 text-red-600 hover:text-red-600 border-red-400 hover:border-red-300 flex items-center justify-center"
                               data-testid={`button-delete-csv-${importItem.id}`}
                             >
                               <Trash2 className="w-3 h-3" />
@@ -359,7 +359,7 @@ export default function Importacoes() {
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
                           className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                            parseFloat(trade.resultado || "0") >= 0 ? "bg-green-600" : "bg-red-500"
+                            parseFloat(trade.resultado || "0") >= 0 ? "bg-green-600" : "bg-red-600"
                           }`}
                         />
                         <div className="min-w-0 flex-1">
@@ -377,7 +377,7 @@ export default function Importacoes() {
                       <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-2 flex-shrink-0">
                         <div className="text-left sm:text-right">
                           <div className={`text-sm font-medium ${
-                            parseFloat(trade.resultado || "0") >= 0 ? "text-green-600" : "text-red-400"
+                            parseFloat(trade.resultado || "0") >= 0 ? "text-green-600" : "text-red-600"
                           }`}>
                             R$ {parseFloat(trade.resultado || "0").toFixed(2)}
                           </div>
@@ -413,7 +413,7 @@ export default function Importacoes() {
                               }
                             }}
                             disabled={deleteManualTradeMutation.isPending}
-                            className="h-7 w-7 p-0 text-red-400 hover:text-red-300 border-red-400 hover:border-red-300 flex items-center justify-center"
+                            className="h-7 w-7 p-0 text-red-600 hover:text-red-600 border-red-400 hover:border-red-300 flex items-center justify-center"
                             data-testid={`button-delete-trade-${trade.id}`}
                           >
                             <Trash2 className="w-3 h-3" />

@@ -75,7 +75,7 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
         {!isSuccess ? (
           <form onSubmit={handleSubmit} className="space-y-6 mt-6">
             {error && (
-              <div className="text-red-400 text-sm text-center bg-red-500/10 p-3 rounded">
+              <div className="text-red-600 text-sm text-center bg-red-600/10 p-3 rounded">
                 {error}
               </div>
             )}

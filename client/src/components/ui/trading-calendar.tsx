@@ -543,7 +543,7 @@ export function TradingCalendar({
                     "text-2xl font-bold",
                     monthlyStats.totalPnl > 0
                       ? "text-green-600"
-                      : "text-red-400",
+                      : "text-red-600",
                   )}
                 >
                   {monthlyStats.totalPnl > 0 ? "+" : ""}

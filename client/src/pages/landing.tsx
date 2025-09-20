@@ -95,7 +95,7 @@ export default function Landing() {
         {/* Floating geometric elements */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-xl animate-float"></div>
         <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-gradient-to-r from-gold-400/20 to-yellow-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-gradient-to-r from-gold-400/20 to-yellow-600/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -194,8 +194,8 @@ export default function Landing() {
                       </div>
                       <div className="h-24 sm:h-32 bg-gradient-to-r from-slate-900/50 to-slate-800/50 rounded-lg p-2 flex items-end justify-between overflow-hidden">
                         {[
-                          { height: 15, color: "from-red-500 to-red-400" },
-                          { height: 20, color: "from-yellow-500 to-yellow-400" },
+                          { height: 15, color: "from-red-600 to-red-600" },
+                          { height: 20, color: "from-yellow-600 to-yellow-600" },
                           { height: 25, color: "from-green-500 to-green-400" },
                           { height: 35, color: "from-green-500 to-green-400" },
                           { height: 40, color: "from-blue-500 to-blue-400" },
@@ -230,7 +230,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 break-words">
-              <span className="text-red-400">{t('landing.problem.title1')}</span>
+              <span className="text-red-600">{t('landing.problem.title1')}</span>
               <span className="text-white block">{t('landing.problem.title2')}</span>
               <span className="gradient-text">{t('landing.problem.title3')}</span>
             </h2>
@@ -245,7 +245,7 @@ export default function Landing() {
                 problem: t('landing.problem.outdated_sheets'),
                 description: t('landing.problem.outdated_sheets_desc'),
                 icon: FileText,
-                color: "from-red-500 to-red-400"
+                color: "from-red-600 to-red-600"
               },
               {
                 problem: t('landing.problem.imprecise_data'),
@@ -257,7 +257,7 @@ export default function Landing() {
                 problem: t('landing.problem.limited_analysis'),
                 description: t('landing.problem.limited_analysis_desc'),
                 icon: Brain,
-                color: "from-yellow-500 to-yellow-400"
+                color: "from-yellow-600 to-yellow-600"
               }
             ].map((item, index) => (
               <Card key={index} className="bg-slate-800/80 border-slate-700 hover:border-slate-600 transition-all">
@@ -345,7 +345,7 @@ export default function Landing() {
                           className={`flex-1 rounded-t transition-all hover:opacity-80 ${
                             bar.profit 
                               ? 'bg-gradient-to-t from-green-500 to-green-400' 
-                              : 'bg-gradient-to-t from-red-500 to-red-400'
+                              : 'bg-gradient-to-t from-red-600 to-red-600'
                           }`}
                           style={{ height: `${bar.height}px` }}
                         />
@@ -363,11 +363,11 @@ export default function Landing() {
                     ].map((trade, i) => (
                       <div key={i} className="flex items-center justify-between py-2 px-3 bg-slate-800/30 rounded">
                         <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${trade.positive ? 'bg-green-600' : 'bg-red-400'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${trade.positive ? 'bg-green-600' : 'bg-red-600'}`}></div>
                           <span className="text-sm text-slate-300">{trade.pair}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-sm font-medium ${trade.positive ? 'text-green-600' : 'text-red-400'}`}>
+                          <span className={`text-sm font-medium ${trade.positive ? 'text-green-600' : 'text-red-600'}`}>
                             {trade.result}
                           </span>
                           <span className="text-xs text-slate-400">{trade.time}</span>
@@ -392,7 +392,7 @@ export default function Landing() {
                     icon: Zap,
                     title: t('landing.solution.auto_import'),
                     description: t('landing.solution.auto_import_desc'),
-                    color: "text-yellow-400"
+                    color: "text-yellow-600"
                   },
                   {
                     icon: Brain,
@@ -583,7 +583,7 @@ export default function Landing() {
                 icon: Zap,
                 titleKey: 'landing.features.sync_title',
                 descriptionKey: 'landing.features.sync_description',
-                color: "from-yellow-500 to-orange-500"
+                color: "from-yellow-600 to-orange-500"
               },
               {
                 icon: Brain,

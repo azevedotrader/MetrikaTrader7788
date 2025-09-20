@@ -82,7 +82,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
   const getIcon = (type: string) => {
     switch (type) {
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-400" />;
+        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
       case 'success':
         return <CheckCircle className="h-5 w-5 text-green-600" />;
       case 'info':

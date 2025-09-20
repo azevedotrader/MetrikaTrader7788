@@ -48,9 +48,9 @@ export function AiAnalysisResultsModal({
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'critical':
-        return 'bg-red-500/20 text-red-300 border-red-500/30';
+        return 'bg-red-600/20 text-red-600 border-red-600/30';
       case 'warning':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+        return 'bg-yellow-600/20 text-yellow-600 border-yellow-600/30';
       case 'opportunity':
         return 'bg-green-600/20 text-green-600 border-green-600/30';
       case 'suggestion':
@@ -63,9 +63,9 @@ export function AiAnalysisResultsModal({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-500 text-white';
+        return 'bg-red-600 text-white';
       case 'medium':
-        return 'bg-yellow-500 text-white';
+        return 'bg-yellow-600 text-white';
       case 'low':
         return 'bg-green-600 text-white';
       default:
@@ -107,7 +107,7 @@ export function AiAnalysisResultsModal({
                 <p className="text-xs sm:text-sm text-slate-400">Insights Gerados</p>
               </div>
               <div className="p-2">
-                <p className="text-xl sm:text-2xl font-bold text-red-400">
+                <p className="text-xl sm:text-2xl font-bold text-red-600">
                   {tips.filter(t => t.priority === 'high').length}
                 </p>
                 <p className="text-xs sm:text-sm text-slate-400">Alta Prioridade</p>
@@ -207,7 +207,7 @@ export function AiAnalysisResultsModal({
                       <>
                         <Separator className="bg-slate-700" />
                         <div>
-                          <h5 className="text-sm font-semibold text-yellow-300 mb-2">
+                          <h5 className="text-sm font-semibold text-yellow-600 mb-2">
                             ⚡ Impacto Esperado
                           </h5>
                           <p className="text-slate-400 text-sm whitespace-pre-wrap break-words">

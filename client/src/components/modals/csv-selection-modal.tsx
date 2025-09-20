@@ -137,7 +137,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
   const getBrokerColor = (broker: string) => {
     switch (broker) {
       case 'forex': return 'bg-green-600/20 text-green-600 border-green-600/30';
-      case 'crypto': return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+      case 'crypto': return 'bg-yellow-600/20 text-yellow-600 border-yellow-600/30';
       case 'b3': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
     }
@@ -193,7 +193,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                               {csvImport.status === 'completed' ? (
                                 <CheckCircle className="w-4 h-4 text-green-600" />
                               ) : (
-                                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                                <AlertCircle className="w-4 h-4 text-yellow-600" />
                               )}
                             </div>
                             
@@ -263,7 +263,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
         <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
-              <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
+              <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" />
               <span className="text-sm md:text-base">Upgrade Necessário para Análise de CSV com IA</span>
             </DialogTitle>
           </DialogHeader>

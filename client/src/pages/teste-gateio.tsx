@@ -134,16 +134,16 @@ export default function TesteGateIO() {
           <Alert className={`border-2 ${
             testResult.connected 
               ? 'border-green-600 bg-green-600/10' 
-              : 'border-red-500 bg-red-500/10'
+              : 'border-red-500 bg-red-600/10'
           }`}>
             <div className="flex items-center gap-2">
               {testResult.connected ? (
                 <CheckCircle className="w-5 h-5 text-green-600" />
               ) : (
-                <XCircle className="w-5 h-5 text-red-500" />
+                <XCircle className="w-5 h-5 text-red-600" />
               )}
               <AlertDescription className={`text-lg font-medium ${
-                testResult.connected ? 'text-green-600' : 'text-red-400'
+                testResult.connected ? 'text-green-600' : 'text-red-600'
               }`}>
                 {testResult.connected ? '✅ Conexão Bem-sucedida!' : '❌ Falha na Conexão'}
               </AlertDescription>
@@ -178,7 +178,7 @@ export default function TesteGateIO() {
             )}
 
             {testResult.error && (
-              <div className="mt-3 p-2 bg-red-900/20 rounded text-red-400 text-sm">
+              <div className="mt-3 p-2 bg-red-900/20 rounded text-red-600 text-sm">
                 <strong>Erro técnico:</strong> {testResult.error}
               </div>
             )}
@@ -187,7 +187,7 @@ export default function TesteGateIO() {
 
         <div className="bg-slate-800 p-4 rounded-lg border border-slate-700">
           <h3 className="text-white font-medium mb-2 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-yellow-400" />
+            <AlertTriangle className="w-4 h-4 text-yellow-600" />
             Como Obter suas Credenciais Gate.io:
           </h3>
           <ol className="text-slate-300 text-sm space-y-1 list-decimal list-inside">
@@ -200,7 +200,7 @@ export default function TesteGateIO() {
           </ol>
           
           <div className="mt-4 p-3 bg-yellow-900/20 rounded border border-yellow-600">
-            <p className="text-yellow-300 text-sm">
+            <p className="text-yellow-600 text-sm">
               <strong>⚠️ Importante:</strong> Certifique-se de que suas credenciais estão corretas. 
               Se você está usando credenciais de teste ou demo, elas podem não funcionar com a API de produção.
               Use apenas credenciais reais da sua conta Gate.io verificada.

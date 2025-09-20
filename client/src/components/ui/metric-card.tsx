@@ -20,7 +20,7 @@ export function MetricCard({
 }: MetricCardProps) {
   const getValueColor = () => {
     if (trend === "up") return "text-green-600";
-    if (trend === "down") return "text-red-400";
+    if (trend === "down") return "text-red-600";
     return "text-white";
   };
 
