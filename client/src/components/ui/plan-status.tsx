@@ -17,35 +17,26 @@ export function PlanStatus() {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  const { data: planInfo, isLoading, error } = useQuery({
+  const { data: planInfo, isLoading, error } = useQuery<PlanInfo>({
     queryKey: ['/api/user/plan'],
-    queryFn: async () => {
-      const userId = localStorage.getItem('user-id');
-      
-      if (!userId || userId === '' || userId === 'null') {
-        throw new Error('Usuário não autenticado');
-      }
-      
-      const response = await fetch('/api/user/plan', {
-        credentials: "include",
-        headers: {
-          "user-id": userId,
-          "X-User-ID": userId,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch plan info');
-      }
-      return response.json() as PlanInfo;
-    },
     refetchInterval: 60000, // Atualiza a cada minuto
     enabled: !!user, // Só executa se o usuário estiver logado
   });
 
-  // Se não há usuário logado ou dados carregando
+  // Se não há usuário logado ou dados carregando, mostrar plano padrão
   if (!user || isLoading || error || !planInfo) {
-    return null;
+    // Mostrar badge básico enquanto carrega ou se há erro
+    return (
+      <div className="flex items-center space-x-2" data-testid="plan-status">
+        <Badge 
+          className="bg-gray-500 text-white hover:bg-gray-600 flex items-center space-x-1 px-2 py-1 text-xs cursor-pointer transition-colors"
+          data-testid="badge-plan-loading"
+        >
+          <Zap className="w-3 h-3" />
+          <span>Free</span>
+        </Badge>
+      </div>
+    );
   }
 
   const getPlanInfo = () => {
