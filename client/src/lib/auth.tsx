@@ -65,6 +65,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('user', JSON.stringify(userWithInitials));
       localStorage.setItem('user-id', userData.id);
       
+      // Store JWT token for authentication
+      if (userData.token) {
+        localStorage.setItem('user-token', userData.token);
+      }
+      
       // Store first login flag for tour triggering
       if (userData.isFirstLogin) {
         localStorage.setItem('should-start-tour', 'true');
@@ -93,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('user-id');
+    localStorage.removeItem('user-token');
     // Limpar todo o cache para garantir isolamento total
     clearUserDataCache();
   };
