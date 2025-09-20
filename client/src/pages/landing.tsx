@@ -230,7 +230,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 break-words">
-              <span className="text-red-600">{t('landing.problem.title1')}</span>
+              <span className="text-red-500">{t('landing.problem.title1')}</span>
               <span className="text-white block">{t('landing.problem.title2')}</span>
               <span className="gradient-text">{t('landing.problem.title3')}</span>
             </h2>
@@ -363,11 +363,11 @@ export default function Landing() {
                     ].map((trade, i) => (
                       <div key={i} className="flex items-center justify-between py-2 px-3 bg-slate-800/30 rounded">
                         <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${trade.positive ? 'bg-green-600' : 'bg-red-600'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${trade.positive ? 'bg-green-600' : 'bg-red-500'}`}></div>
                           <span className="text-sm text-slate-300">{trade.pair}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-sm font-medium ${trade.positive ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`text-sm font-medium ${trade.positive ? 'text-green-600' : 'text-red-500'}`}>
                             {trade.result}
                           </span>
                           <span className="text-xs text-slate-400">{trade.time}</span>

@@ -134,16 +134,16 @@ export default function TesteGateIO() {
           <Alert className={`border-2 ${
             testResult.connected 
               ? 'border-green-600 bg-green-600/10' 
-              : 'border-red-500 bg-red-600/10'
+              : 'border-red-500 bg-red-500/10'
           }`}>
             <div className="flex items-center gap-2">
               {testResult.connected ? (
                 <CheckCircle className="w-5 h-5 text-green-600" />
               ) : (
-                <XCircle className="w-5 h-5 text-red-600" />
+                <XCircle className="w-5 h-5 text-red-500" />
               )}
               <AlertDescription className={`text-lg font-medium ${
-                testResult.connected ? 'text-green-600' : 'text-red-600'
+                testResult.connected ? 'text-green-600' : 'text-red-500'
               }`}>
                 {testResult.connected ? '✅ Conexão Bem-sucedida!' : '❌ Falha na Conexão'}
               </AlertDescription>
@@ -178,7 +178,7 @@ export default function TesteGateIO() {
             )}
 
             {testResult.error && (
-              <div className="mt-3 p-2 bg-red-900/20 rounded text-red-600 text-sm">
+              <div className="mt-3 p-2 bg-red-900/20 rounded text-red-500 text-sm">
                 <strong>Erro técnico:</strong> {testResult.error}
               </div>
             )}

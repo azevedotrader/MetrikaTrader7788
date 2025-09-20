@@ -97,7 +97,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
             {form.formState.errors.name && (
-              <p className="text-red-600 text-sm">{form.formState.errors.name.message}</p>
+              <p className="text-red-500 text-sm">{form.formState.errors.name.message}</p>
             )}
           </div>
 
@@ -111,7 +111,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
             {form.formState.errors.email && (
-              <p className="text-red-600 text-sm">{form.formState.errors.email.message}</p>
+              <p className="text-red-500 text-sm">{form.formState.errors.email.message}</p>
             )}
           </div>
 
@@ -125,7 +125,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
             {form.formState.errors.phone && (
-              <p className="text-red-600 text-sm">{form.formState.errors.phone.message}</p>
+              <p className="text-red-500 text-sm">{form.formState.errors.phone.message}</p>
             )}
           </div>
           
@@ -139,7 +139,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
             {form.formState.errors.password && (
-              <p className="text-red-600 text-sm">{form.formState.errors.password.message}</p>
+              <p className="text-red-500 text-sm">{form.formState.errors.password.message}</p>
             )}
           </div>
 
@@ -153,7 +153,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
               className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
             />
             {form.formState.errors.confirmPassword && (
-              <p className="text-red-600 text-sm">{form.formState.errors.confirmPassword.message}</p>
+              <p className="text-red-500 text-sm">{form.formState.errors.confirmPassword.message}</p>
             )}
           </div>
 

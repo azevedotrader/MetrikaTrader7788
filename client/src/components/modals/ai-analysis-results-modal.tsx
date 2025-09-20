@@ -48,7 +48,7 @@ export function AiAnalysisResultsModal({
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'critical':
-        return 'bg-red-600/20 text-red-600 border-red-600/30';
+        return 'bg-red-500/20 text-red-500 border-red-500/30';
       case 'warning':
         return 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30';
       case 'opportunity':
@@ -63,7 +63,7 @@ export function AiAnalysisResultsModal({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-600 text-white';
+        return 'bg-red-500 text-white';
       case 'medium':
         return 'bg-yellow-500 text-white';
       case 'low':
@@ -107,7 +107,7 @@ export function AiAnalysisResultsModal({
                 <p className="text-xs sm:text-sm text-slate-400">Insights Gerados</p>
               </div>
               <div className="p-2">
-                <p className="text-xl sm:text-2xl font-bold text-red-600">
+                <p className="text-xl sm:text-2xl font-bold text-red-500">
                   {tips.filter(t => t.priority === 'high').length}
                 </p>
                 <p className="text-xs sm:text-sm text-slate-400">Alta Prioridade</p>

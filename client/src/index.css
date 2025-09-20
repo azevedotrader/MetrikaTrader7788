@@ -55,7 +55,7 @@
   
   /* Professional Trading Colors - Neutral Gray Theme (FX Replay Style) */
   --profit: hsl(120, 40%, 35%);
-  --loss: hsl(0, 60%, 45%);
+  --loss: hsl(0, 70%, 50%);
   --neutral-primary: hsl(0, 0%, 35%);
   --neutral-secondary: hsl(0, 0%, 25%);
   --graphite-dark: hsl(0, 0%, 6%);

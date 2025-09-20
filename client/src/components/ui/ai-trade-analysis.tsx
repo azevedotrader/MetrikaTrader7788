@@ -32,7 +32,7 @@ const getSentimentIcon = (sentiment: string) => {
     case 'bullish':
       return <TrendingUp className="h-4 w-4 text-green-600" />;
     case 'bearish':
-      return <TrendingDown className="h-4 w-4 text-red-600" />;
+      return <TrendingDown className="h-4 w-4 text-red-500" />;
     default:
       return <BarChart3 className="h-4 w-4 text-yellow-500" />;
   }
@@ -43,7 +43,7 @@ const getSentimentColor = (sentiment: string) => {
     case 'bullish':
       return 'bg-green-600';
     case 'bearish':
-      return 'bg-red-600';
+      return 'bg-red-500';
     default:
       return 'bg-yellow-500';
   }
@@ -56,7 +56,7 @@ const getRiskColor = (riskLevel: string) => {
     case 'medium':
       return 'bg-yellow-500';
     case 'high':
-      return 'bg-red-600';
+      return 'bg-red-500';
     default:
       return 'bg-gray-600';
   }

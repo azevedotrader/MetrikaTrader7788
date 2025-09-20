@@ -105,7 +105,7 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
               maximumFractionDigits: symbol.includes('WIN') ? 0 : 4
             })}
           </p>
-          <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-500'}`}>
             {isPositive ? '+' : ''}{priceChange.toFixed(2)} ({priceChangePercent}%)
           </p>
         </div>

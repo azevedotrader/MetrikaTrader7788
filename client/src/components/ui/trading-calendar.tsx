@@ -290,7 +290,7 @@ export function TradingCalendar({
         className={cn(
           "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer h-[70px] md:h-24 p-1 md:p-1.5",
           isToday && "bg-zinc-800/50 border-zinc-600",
-          hasData && (isProfit ? "bg-green-600/90" : "bg-red-600/90"),
+          hasData && (isProfit ? "bg-green-600/90" : "bg-red-500/90"),
         )}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
@@ -372,7 +372,7 @@ export function TradingCalendar({
     return (
       <div className={cn(
         "border-l border-zinc-700 p-3 min-h-[96px] flex flex-col justify-center",
-        isProfit ? "bg-green-600/90" : week.pnl < 0 ? "bg-red-600/90" : "bg-zinc-800/50"
+        isProfit ? "bg-green-600/90" : week.pnl < 0 ? "bg-red-500/90" : "bg-zinc-800/50"
       )}>
         <div className="text-xs text-zinc-400 mb-1">
           Semana {week.weekNumber}
@@ -543,7 +543,7 @@ export function TradingCalendar({
                     "text-2xl font-bold",
                     monthlyStats.totalPnl > 0
                       ? "text-green-600"
-                      : "text-red-600",
+                      : "text-red-500",
                   )}
                 >
                   {monthlyStats.totalPnl > 0 ? "+" : ""}

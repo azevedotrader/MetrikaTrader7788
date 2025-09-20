@@ -466,7 +466,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               size="sm"
               onClick={handleDelete}
               disabled={isLoading}
-              className="text-red-600 hover:text-red-800"
+              className="text-red-500 hover:text-red-800"
               data-testid="button-delete-entry"
             >
               <Trash2 className="h-4 w-4" />
@@ -486,7 +486,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               data-testid="input-date"
             />
             {form.formState.errors.date && (
-              <p className="text-sm text-red-600">{form.formState.errors.date.message}</p>
+              <p className="text-sm text-red-500">{form.formState.errors.date.message}</p>
             )}
           </div>
 
@@ -500,7 +500,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               data-testid="input-title"
             />
             {form.formState.errors.title && (
-              <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
+              <p className="text-sm text-red-500">{form.formState.errors.title.message}</p>
             )}
           </div>
 
@@ -515,7 +515,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               data-testid="textarea-content"
             />
             {form.formState.errors.content && (
-              <p className="text-sm text-red-600">{form.formState.errors.content.message}</p>
+              <p className="text-sm text-red-500">{form.formState.errors.content.message}</p>
             )}
           </div>
 

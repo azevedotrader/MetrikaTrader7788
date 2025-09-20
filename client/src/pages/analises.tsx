@@ -98,7 +98,7 @@ export default function Analises() {
                   className="flex items-center justify-between p-3 bg-slate-700/50 rounded"
                 >
                   <span className="text-white">{setup.name}</span>
-                  <span className={setup.trend === "positive" ? "text-green-600" : "text-red-600"}>
+                  <span className={setup.trend === "positive" ? "text-green-600" : "text-red-500"}>
                     {setup.value}
                   </span>
                 </div>

@@ -95,7 +95,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-600';
+        return 'bg-red-500';
       case 'medium':
         return 'bg-yellow-500';
       default:

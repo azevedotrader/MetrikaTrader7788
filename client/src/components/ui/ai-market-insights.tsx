@@ -50,7 +50,7 @@ export function AIMarketInsights() {
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 0.8) return 'bg-green-600';
     if (confidence >= 0.6) return 'bg-yellow-500';
-    return 'bg-red-600';
+    return 'bg-red-500';
   };
 
   const formatConfidence = (confidence: number) => {

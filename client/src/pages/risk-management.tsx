@@ -294,7 +294,7 @@ export default function RiskManagement() {
                     <ProjectionCard
                       title={t('risk_management.risk_amount')}
                       value={`${currency.symbol}${results.riskAmount.toFixed(2)}`}
-                      color="bg-red-600"
+                      color="bg-red-500"
                       icon={Target}
                     />
                     <ProjectionCard

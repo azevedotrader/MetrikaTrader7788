@@ -279,7 +279,7 @@ export default function NovoTrade() {
                           </SelectItem>
                           <SelectItem value="venda">
                             <span className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-red-600" />
+                              <TrendingDown className="h-4 w-4 text-red-500" />
                               {t('form.sell')}
                             </span>
                           </SelectItem>
@@ -384,7 +384,7 @@ export default function NovoTrade() {
                     {t('form.trade_result')} *
                   </label>
                   {!tradeResult && (
-                    <p className="text-xs text-red-600 mb-2">
+                    <p className="text-xs text-red-500 mb-2">
                       {t('form.select_result_warning')}
                     </p>
                   )}
@@ -411,8 +411,8 @@ export default function NovoTrade() {
                       onClick={() => setTradeResult("loss")}
                       className={`${
                         tradeResult === "loss"
-                          ? "bg-red-600 hover:bg-red-700 text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-red-600/20"
+                          ? "bg-red-500 hover:bg-red-700 text-white"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-red-500/20"
                       }`}
                     >
                       {t('form.loss')}
@@ -450,7 +450,7 @@ export default function NovoTrade() {
                               ? "text-charcoal-400"
                               : finalResult >= 0
                                 ? "text-green-600"
-                                : "text-red-600"
+                                : "text-red-500"
                           }`}
                         >
                           {finalResult === null
@@ -470,7 +470,7 @@ export default function NovoTrade() {
                               ? "text-green-600"
                               : riskRewardRatio >= 2
                                 ? "text-yellow-500"
-                                : "text-red-600"
+                                : "text-red-500"
                           }`}
                         >
                           {riskRewardRatio >= 3

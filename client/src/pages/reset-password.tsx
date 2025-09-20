@@ -145,7 +145,7 @@ export default function ResetPassword() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="flex items-start space-x-2 text-red-600 bg-red-600/10 p-3 rounded">
+                <div className="flex items-start space-x-2 text-red-500 bg-red-500/10 p-3 rounded">
                   <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
                   <p className="text-sm">{error}</p>
                 </div>
