@@ -273,7 +273,7 @@ export default function NovoTrade() {
                         <SelectContent className="bg-charcoal-800 border-charcoal-600">
                           <SelectItem value="compra">
                             <span className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-green-400" />
+                              <TrendingUp className="h-4 w-4 text-green-600" />
                               {t('form.buy')}
                             </span>
                           </SelectItem>
@@ -449,7 +449,7 @@ export default function NovoTrade() {
                             finalResult === null
                               ? "text-charcoal-400"
                               : finalResult >= 0
-                                ? "text-green-400"
+                                ? "text-green-600"
                                 : "text-red-400"
                           }`}
                         >
@@ -467,7 +467,7 @@ export default function NovoTrade() {
                         <div
                           className={`text-sm font-medium ${
                             riskRewardRatio >= 3
-                              ? "text-green-400"
+                              ? "text-green-600"
                               : riskRewardRatio >= 2
                                 ? "text-yellow-400"
                                 : "text-red-400"

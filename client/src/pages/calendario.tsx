@@ -27,8 +27,8 @@ export default function CalendarioPage() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <div className="w-8 h-8 bg-green-600/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.profitable_days')}</div>

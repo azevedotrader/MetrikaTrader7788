@@ -302,7 +302,7 @@ export function TourOverlay() {
               width: elementPosition.width + (viewport.isMobile ? 8 : 6),
               height: elementPosition.height + (viewport.isMobile ? 8 : 6),
               zIndex: 50,
-              border: '3px solid rgb(34, 197, 94)',
+              border: '3px solid rgb(22, 163, 74)',
               filter: 'drop-shadow(0 0 20px rgba(34, 197, 94, 0.8))',
               animation: 'tourHighlight 2s ease-in-out infinite'
             }}

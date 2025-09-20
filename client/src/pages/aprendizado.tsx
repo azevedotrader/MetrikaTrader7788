@@ -40,19 +40,19 @@ export function PlatformTour({ t }: PlatformTourProps) {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-400">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
               <span>{t('learning.tour_features.auto_nav')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
               <span>{t('learning.tour_features.highlights')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
               <span>{t('learning.tour_features.explanations')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
+              <CheckCircle className="h-4 w-4 text-green-600" />
               <span>{t('learning.tour_features.steps')}</span>
             </div>
           </div>
@@ -145,7 +145,7 @@ export default function Aprendizado() {
                       >
                         <div className="flex items-center gap-3">
                           {video.completed ? (
-                            <CheckCircle className="h-5 w-5 text-green-400" />
+                            <CheckCircle className="h-5 w-5 text-green-600" />
                           ) : (
                             <Circle className="h-5 w-5 text-zinc-500 group-hover:text-zinc-300" />
                           )}

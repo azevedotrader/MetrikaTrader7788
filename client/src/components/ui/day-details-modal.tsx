@@ -355,7 +355,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                   <div className="text-center">
                     <div className={cn(
                       "text-2xl font-bold",
-                      dayStats.totalPnl > 0 ? "text-green-400" : "text-red-400"
+                      dayStats.totalPnl > 0 ? "text-green-600" : "text-red-400"
                     )}>
                       {formatCurrency(dayStats.totalPnl)}
                     </div>
@@ -368,7 +368,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                     <div className="text-sm text-zinc-400">Taxa de Acerto</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-400">
+                    <div className="text-2xl font-bold text-green-600">
                       {dayStats.winningTrades}
                     </div>
                     <div className="text-sm text-zinc-400">Trades Positivos</div>
@@ -426,7 +426,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                       <span className="text-zinc-400">P&L registrado:</span>
                       <div className={cn(
                         "font-semibold",
-                        parseFloat(dayDiaryEntry.pnl) > 0 ? "text-green-400" : "text-red-400"
+                        parseFloat(dayDiaryEntry.pnl) > 0 ? "text-green-600" : "text-red-400"
                       )}>
                         {formatCurrency(parseFloat(dayDiaryEntry.pnl))}
                       </div>
@@ -506,7 +506,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                         <div className="text-right">
                           <div className={cn(
                             "font-bold text-lg",
-                            isProfit ? "text-green-400" : "text-red-400"
+                            isProfit ? "text-green-600" : "text-red-400"
                           )}>
                             {formatCurrency(resultado)}
                           </div>

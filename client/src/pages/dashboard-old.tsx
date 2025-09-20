@@ -66,7 +66,7 @@ const brokerInfo = {
   "b3": {
     name: "B3",
     type: "Ações BR",
-    color: "bg-green-500",
+    color: "bg-green-600",
     icon: BarChart3,
     description: "Ações brasileiras B3 com importação CSV"
   }
@@ -236,9 +236,9 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
                 <Line
                   type="monotone"
                   dataKey="profit"
-                  stroke="#10B981"
+                  stroke="#16a34a"
                   strokeWidth={2}
-                  dot={{ fill: '#10B981', strokeWidth: 2, r: 3 }}
+                  dot={{ fill: '#16a34a', strokeWidth: 2, r: 3 }}
                   strokeDasharray="5 5"
                 />
               </RechartsLineChart>
@@ -261,7 +261,7 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
             <span className="text-slate-300">Rentabilidade Acumulada</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-green-500 border-dashed"></div>
+            <div className="w-3 h-0.5 bg-green-600 border-dashed"></div>
             <span className="text-slate-300">Resultado do Período</span>
           </div>
         </div>
@@ -731,7 +731,7 @@ export default function Dashboard() {
                   {getBrokerConfig('gate.io') && (
                     <div className="space-y-3">
                       <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                        <p className="text-sm text-green-700 dark:text-green-300">
+                        <p className="text-sm text-green-700 dark:text-green-600">
                           ✅ API configurada e ativa. Última sincronização: {getBrokerConfig('gate.io')?.lastSync ? new Date(getBrokerConfig('gate.io').lastSync).toLocaleString() : 'Nunca'}
                         </p>
                       </div>
@@ -777,7 +777,7 @@ export default function Dashboard() {
                             </div>
                             <div>
                               <span className="text-slate-600 dark:text-slate-400">Status:</span>
-                              <p className="text-green-600 dark:text-green-400 font-medium">
+                              <p className="text-green-600 dark:text-green-600 font-medium">
                                 {gateAccountInfo.accountInfo.state}
                               </p>
                             </div>
@@ -882,7 +882,7 @@ export default function Dashboard() {
             <DialogTrigger asChild>
               <Button 
                 variant="outline"
-                className={`border-green-600 text-green-400 hover:bg-green-600 hover:text-white ${
+                className={`border-green-600 text-green-600 hover:bg-green-600 hover:text-white ${
                   selectedBrokerFilter === 'clear' ? 'ring-2 ring-green-400 bg-green-600 text-white' : ''
                 }`}
                 onClick={() => {
@@ -948,21 +948,21 @@ export default function Dashboard() {
           title="📈 Rentabilidade (Semana)"
           value={`R$ ${metrics.rentabilidadeSemana.toFixed(2)}`}
           icon={Calendar}
-          color={metrics.rentabilidadeSemana >= 0 ? "text-green-400" : "text-red-400"}
+          color={metrics.rentabilidadeSemana >= 0 ? "text-green-600" : "text-red-400"}
         />
         
         <MetricCard
           title="📈 Rentabilidade (Mês)"
           value={`R$ ${metrics.rentabilidadeMes.toFixed(2)}`}
           icon={Calendar}
-          color={metrics.rentabilidadeMes >= 0 ? "text-green-400" : "text-red-400"}
+          color={metrics.rentabilidadeMes >= 0 ? "text-green-600" : "text-red-400"}
         />
         
         <MetricCard
           title="📈 Rentabilidade (Ano)"
           value={`R$ ${metrics.rentabilidadeAno.toFixed(2)}`}
           icon={Calendar}
-          color={metrics.rentabilidadeAno >= 0 ? "text-green-400" : "text-red-400"}
+          color={metrics.rentabilidadeAno >= 0 ? "text-green-600" : "text-red-400"}
         />
       </div>
 
@@ -972,7 +972,7 @@ export default function Dashboard() {
           title="💥 Melhor Trade"
           value={`R$ ${metrics.melhorTrade.toFixed(2)}`}
           icon={Trophy}
-          color="text-green-400"
+          color="text-green-600"
           subtitle="Maior lucro em uma operação"
         />
         
@@ -1029,7 +1029,7 @@ export default function Dashboard() {
                   <div className={`w-32 h-6 bg-slate-800 rounded-full overflow-hidden`}>
                     <div 
                       className={`h-full transition-all duration-300 ${
-                        valor >= 0 ? 'bg-green-500' : 'bg-red-500'
+                        valor >= 0 ? 'bg-green-600' : 'bg-red-500'
                       }`}
                       style={{ 
                         width: `${Math.min(Math.abs(valor) / Math.max(...metrics.lucroPorDiaSemana.map(d => Math.abs(d.valor))) * 100, 100)}%` 
@@ -1037,7 +1037,7 @@ export default function Dashboard() {
                     />
                   </div>
                   <span className={`text-sm font-medium min-w-[80px] text-right ${
-                    valor >= 0 ? 'text-green-400' : 'text-red-400'
+                    valor >= 0 ? 'text-green-600' : 'text-red-400'
                   }`}>
                     R$ {valor.toFixed(2)}
                   </span>
@@ -1069,7 +1069,7 @@ export default function Dashboard() {
                 <div key={trade.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
-                      parseFloat(trade.resultado || "0") >= 0 ? 'bg-green-400' : 'bg-red-400'
+                      parseFloat(trade.resultado || "0") >= 0 ? 'bg-green-600' : 'bg-red-400'
                     }`} />
                     <div>
                       <p className="text-white font-medium">{trade.ativo}</p>
@@ -1080,7 +1080,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right">
                     <p className={`font-medium ${
-                      parseFloat(trade.resultado || "0") >= 0 ? 'text-green-400' : 'text-red-400'
+                      parseFloat(trade.resultado || "0") >= 0 ? 'text-green-600' : 'text-red-400'
                     }`}>
                       R$ {parseFloat(trade.resultado || "0").toFixed(2)}
                     </p>
@@ -1101,7 +1101,7 @@ export default function Dashboard() {
               title="✅ Rentabilidade Total"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
-              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
+              color={metrics.rentabilidadeTotal >= 0 ? "text-green-600" : "text-red-400"}
             />
             
             <MetricCard
@@ -1114,14 +1114,14 @@ export default function Dashboard() {
               title="🎯 Taxa de Acerto"
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
-              color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
+              color={metrics.taxaAcerto >= 50 ? "text-green-600" : "text-red-400"}
             />
             
             <MetricCard
               title="🔁 R/R Médio"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-600" : "text-yellow-400"}
             />
           </div>
 
@@ -1163,7 +1163,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <span className="text-slate-300">ROI Total</span>
                     <span className={`font-semibold ${
-                      metrics.rentabilidadeTotal >= 0 ? 'text-green-400' : 'text-red-400'
+                      metrics.rentabilidadeTotal >= 0 ? 'text-green-600' : 'text-red-400'
                     }`}>
                       {filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0) > 0 ? 
                         ((metrics.rentabilidadeTotal / filteredTrades.reduce((sum, t) => sum + parseFloat(t.capitalUtilizado || "0"), 0)) * 100).toFixed(2) : "0.00"}%
@@ -1203,7 +1203,7 @@ export default function Dashboard() {
                         const tradeDate = new Date(t.dataHora);
                         return tradeDate.toDateString() === hoje.toDateString();
                       }).reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
-                      return resultadoHoje >= 0 ? 'text-green-400' : 'text-red-400';
+                      return resultadoHoje >= 0 ? 'text-green-600' : 'text-red-400';
                     })()
                   }`}>
                     R$ {(() => {
@@ -1222,7 +1222,7 @@ export default function Dashboard() {
                     {metrics.rentabilidadeSemana.toFixed(2)}
                   </div>
                   <div className="text-xs text-slate-400 mb-2">Esta Semana</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeSemana >= 0 ? 'text-green-600' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeSemana.toFixed(2)}
                   </div>
                 </div>
@@ -1232,7 +1232,7 @@ export default function Dashboard() {
                     {metrics.rentabilidadeMes.toFixed(2)}
                   </div>
                   <div className="text-xs text-slate-400 mb-2">Este Mês</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeMes >= 0 ? 'text-green-600' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeMes.toFixed(2)}
                   </div>
                 </div>
@@ -1242,7 +1242,7 @@ export default function Dashboard() {
                     {metrics.rentabilidadeAno.toFixed(2)}
                   </div>
                   <div className="text-xs text-slate-400 mb-2">Este Ano</div>
-                  <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`text-sm font-semibold ${metrics.rentabilidadeAno >= 0 ? 'text-green-600' : 'text-red-400'}`}>
                     R$ {metrics.rentabilidadeAno.toFixed(2)}
                   </div>
                 </div>
@@ -1274,7 +1274,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center space-x-2">
                         {config?.isActive && (
-                          <Badge variant="default" className="bg-green-500">
+                          <Badge variant="default" className="bg-green-600">
                             Ativo
                           </Badge>
                         )}
@@ -1290,7 +1290,7 @@ export default function Dashboard() {
                         <div className="text-xs text-slate-400">Trades</div>
                       </div>
                       <div>
-                        <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-2xl font-bold ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
                           {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                         </div>
                         <div className="text-xs text-slate-400">Resultado</div>
@@ -1347,7 +1347,7 @@ export default function Dashboard() {
                   {(csvImports as any[]).map((importItem: any) => (
                     <div key={importItem.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
                       <div className="flex items-center space-x-4">
-                        <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                        <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-600' : 'bg-yellow-500'}`} />
                         <div>
                           <div className="font-medium text-white">{importItem.fileName}</div>
                           <div className="text-sm text-slate-400">
@@ -1376,7 +1376,7 @@ export default function Dashboard() {
               title="💰 Resultado Total Consolidado"
               value={`R$ ${metrics.rentabilidadeTotal.toFixed(2)}`}
               icon={DollarSign}
-              color={metrics.rentabilidadeTotal >= 0 ? "text-green-400" : "text-red-400"}
+              color={metrics.rentabilidadeTotal >= 0 ? "text-green-600" : "text-red-400"}
               subtitle="Soma de todas as corretoras"
             />
             
@@ -1391,7 +1391,7 @@ export default function Dashboard() {
               title="🎯 Taxa de Acerto Geral"
               value={`${metrics.taxaAcerto.toFixed(1)}%`}
               icon={Target}
-              color={metrics.taxaAcerto >= 50 ? "text-green-400" : "text-red-400"}
+              color={metrics.taxaAcerto >= 50 ? "text-green-600" : "text-red-400"}
               subtitle="Média ponderada"
             />
             
@@ -1399,7 +1399,7 @@ export default function Dashboard() {
               title="⚖️ R/R Médio Consolidado"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-400" : "text-yellow-400"}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-600" : "text-yellow-400"}
               subtitle="Risco/Retorno geral"
             />
           </div>
@@ -1438,7 +1438,7 @@ export default function Dashboard() {
                           <div className="text-xs text-slate-400">Trades</div>
                         </div>
                         <div>
-                          <div className={`text-lg font-bold ${stats.totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          <div className={`text-lg font-bold ${stats.totalProfit >= 0 ? 'text-green-600' : 'text-red-400'}`}>
                             {stats.totalProfit >= 0 ? '+' : ''}R$ {stats.totalProfit.toFixed(2)}
                           </div>
                           <div className="text-xs text-slate-400">Resultado</div>
@@ -1476,7 +1476,7 @@ export default function Dashboard() {
                   const mercadoInfo = {
                     crypto: { name: 'Crypto', emoji: '🪙', color: 'text-orange-400' },
                     forex: { name: 'Forex', emoji: '💱', color: 'text-blue-400' },
-                    b3: { name: 'B3', emoji: '📈', color: 'text-green-400' }
+                    b3: { name: 'B3', emoji: '📈', color: 'text-green-600' }
                   };
                   
                   const info = mercadoInfo[mercado as keyof typeof mercadoInfo];
@@ -1493,7 +1493,7 @@ export default function Dashboard() {
                       
                       <div className="flex items-center space-x-6">
                         <div className="text-center">
-                          <div className={`text-lg font-bold ${totalMercado >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          <div className={`text-lg font-bold ${totalMercado >= 0 ? 'text-green-600' : 'text-red-400'}`}>
                             {totalMercado >= 0 ? '+' : ''}R$ {totalMercado.toFixed(2)}
                           </div>
                           <div className="text-xs text-slate-400">Resultado</div>

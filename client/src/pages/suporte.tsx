@@ -170,7 +170,7 @@ export default function Suporte() {
     switch (status) {
       case 'open': return <AlertCircle className="h-4 w-4 text-blue-500" />;
       case 'in_progress': return <Clock className="h-4 w-4 text-yellow-500" />;
-      case 'resolved': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'resolved': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'closed': return <XCircle className="h-4 w-4 text-gray-500" />;
       default: return <MessageCircle className="h-4 w-4" />;
     }
@@ -366,15 +366,15 @@ export default function Suporte() {
                 {typedConversations.find((c: Conversation) => c.id === selectedConversation)?.status === 'resolved' && (
                   <div className="mb-3 sm:mb-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-3 sm:p-4">
                     <div className="flex items-start gap-2 sm:gap-3">
-                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium text-green-800 dark:text-green-200 mb-1 text-sm sm:text-base">
                           💚 Problema Resolvido
                         </h4>
-                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 leading-relaxed mb-2">
+                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-600 leading-relaxed mb-2">
                           Este suporte foi marcado como resolvido por nossa equipe. Você não pode mais enviar mensagens nesta conversa.
                         </p>
-                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-300 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-green-700 dark:text-green-600 leading-relaxed">
                           <strong>Precisa de mais ajuda?</strong> Clique em "Novo Suporte" acima para reportar um novo problema.
                         </p>
                       </div>

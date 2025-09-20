@@ -62,7 +62,7 @@ export default function Importacoes() {
   const brokerInfo = {
     crypto: { name: "Gate.io", color: "bg-purple-500" },
     forex: { name: "Tickmill", color: "bg-blue-500" },
-    b3: { name: "Clear", color: "bg-green-500" },
+    b3: { name: "Clear", color: "bg-green-600" },
   };
 
   // Rename CSV mutation
@@ -208,7 +208,7 @@ export default function Importacoes() {
                     >
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
-                          className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-500" : "bg-yellow-500"}`}
+                          className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-600" : "bg-yellow-500"}`}
                         />
                         <div className="min-w-0 flex-1">
                           {editingCsv?.id === importItem.id ? (
@@ -359,7 +359,7 @@ export default function Importacoes() {
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
                           className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                            parseFloat(trade.resultado || "0") >= 0 ? "bg-green-500" : "bg-red-500"
+                            parseFloat(trade.resultado || "0") >= 0 ? "bg-green-600" : "bg-red-500"
                           }`}
                         />
                         <div className="min-w-0 flex-1">
@@ -377,7 +377,7 @@ export default function Importacoes() {
                       <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-2 flex-shrink-0">
                         <div className="text-left sm:text-right">
                           <div className={`text-sm font-medium ${
-                            parseFloat(trade.resultado || "0") >= 0 ? "text-green-400" : "text-red-400"
+                            parseFloat(trade.resultado || "0") >= 0 ? "text-green-600" : "text-red-400"
                           }`}>
                             R$ {parseFloat(trade.resultado || "0").toFixed(2)}
                           </div>

@@ -139,7 +139,7 @@ export function AIMarketInsights() {
                   
                   <div className="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
                     <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-green-400" />
+                      <TrendingUp className="h-4 w-4 text-green-600" />
                       Sugestão
                     </h4>
                     <p className="text-slate-300 text-sm leading-relaxed">

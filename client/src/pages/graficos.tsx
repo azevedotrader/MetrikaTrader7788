@@ -105,7 +105,7 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
               maximumFractionDigits: symbol.includes('WIN') ? 0 : 4
             })}
           </p>
-          <p className={`text-sm font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+          <p className={`text-sm font-medium ${isPositive ? 'text-green-600' : 'text-red-400'}`}>
             {isPositive ? '+' : ''}{priceChange.toFixed(2)} ({priceChangePercent}%)
           </p>
         </div>
@@ -117,8 +117,8 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                <stop offset="5%" stopColor="#16a34a" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#16a34a" stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
@@ -156,7 +156,7 @@ function AlternativeChart({ symbol, interval }: { symbol: string; interval: stri
             <Area 
               type="monotone" 
               dataKey="price" 
-              stroke="#22c55e" 
+              stroke="#16a34a" 
               strokeWidth={2}
               fill="url(#priceGradient)"
               name="price"

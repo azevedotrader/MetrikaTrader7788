@@ -52,7 +52,7 @@ export function AiAnalysisResultsModal({
       case 'warning':
         return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
       case 'opportunity':
-        return 'bg-green-500/20 text-green-300 border-green-500/30';
+        return 'bg-green-600/20 text-green-600 border-green-600/30';
       case 'suggestion':
         return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       default:
@@ -67,7 +67,7 @@ export function AiAnalysisResultsModal({
       case 'medium':
         return 'bg-yellow-500 text-white';
       case 'low':
-        return 'bg-green-500 text-white';
+        return 'bg-green-600 text-white';
       default:
         return 'bg-gray-500 text-white';
     }
@@ -113,7 +113,7 @@ export function AiAnalysisResultsModal({
                 <p className="text-xs sm:text-sm text-slate-400">Alta Prioridade</p>
               </div>
               <div className="p-2">
-                <p className="text-xl sm:text-2xl font-bold text-green-400">
+                <p className="text-xl sm:text-2xl font-bold text-green-600">
                   {tips.filter(t => t.type === 'opportunity').length}
                 </p>
                 <p className="text-xs sm:text-sm text-slate-400">Oportunidades</p>
@@ -194,7 +194,7 @@ export function AiAnalysisResultsModal({
 
                     {/* Ação Recomendada */}
                     <div>
-                      <h5 className="text-sm font-semibold text-green-300 mb-2">
+                      <h5 className="text-sm font-semibold text-green-600 mb-2">
                         🎯 Ação Recomendada
                       </h5>
                       <p className="text-slate-300 text-sm whitespace-pre-wrap break-words">

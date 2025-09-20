@@ -124,8 +124,8 @@ export default function ResetPassword() {
           {success ? (
             <div className="space-y-6">
               <div className="flex justify-center">
-                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-10 h-10 text-green-400" />
+                <div className="w-20 h-20 bg-green-600/20 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-10 h-10 text-green-600" />
                 </div>
               </div>
               

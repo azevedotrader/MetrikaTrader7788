@@ -133,17 +133,17 @@ export default function TesteGateIO() {
         {testResult && (
           <Alert className={`border-2 ${
             testResult.connected 
-              ? 'border-green-500 bg-green-500/10' 
+              ? 'border-green-600 bg-green-600/10' 
               : 'border-red-500 bg-red-500/10'
           }`}>
             <div className="flex items-center gap-2">
               {testResult.connected ? (
-                <CheckCircle className="w-5 h-5 text-green-500" />
+                <CheckCircle className="w-5 h-5 text-green-600" />
               ) : (
                 <XCircle className="w-5 h-5 text-red-500" />
               )}
               <AlertDescription className={`text-lg font-medium ${
-                testResult.connected ? 'text-green-400' : 'text-red-400'
+                testResult.connected ? 'text-green-600' : 'text-red-400'
               }`}>
                 {testResult.connected ? '✅ Conexão Bem-sucedida!' : '❌ Falha na Conexão'}
               </AlertDescription>
@@ -167,7 +167,7 @@ export default function TesteGateIO() {
                   </div>
                   <div>
                     <span className="text-slate-400">Estado:</span>
-                    <span className="text-green-400 ml-2">{testResult.accountInfo.state || 'ativo'}</span>
+                    <span className="text-green-600 ml-2">{testResult.accountInfo.state || 'ativo'}</span>
                   </div>
                   <div>
                     <span className="text-slate-400">Saldos:</span>

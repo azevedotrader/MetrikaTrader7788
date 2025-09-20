@@ -302,20 +302,20 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   </div>
                   
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Suporte exclusivo prioritário</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Análise com IA ilimitada</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Trades ilimitados</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Relatórios avançados</span>
                     </div>
                   </div>
@@ -341,20 +341,20 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   </div>
                   
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Suporte VIP 24/7</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Tudo do Pro +</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Consultoria personalizada</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-300 text-sm">
-                      <span className="text-green-500">✓</span>
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <span className="text-green-600">✓</span>
                       <span>Acesso antecipado</span>
                     </div>
                   </div>

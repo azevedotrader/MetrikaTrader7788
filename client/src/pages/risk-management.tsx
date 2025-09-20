@@ -241,9 +241,9 @@ export default function RiskManagement() {
               <CardContent className="space-y-4 p-4 md:p-6">
                 <div className="space-y-4">
                   <div className="flex items-start gap-3 p-3 bg-green-900/20 rounded-lg border border-green-800/30">
-                    <Shield className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                    <Shield className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-sm font-semibold text-green-300 mb-1">{t('risk_management.risk_by_profile')}</h4>
+                      <h4 className="text-sm font-semibold text-green-600 mb-1">{t('risk_management.risk_by_profile')}</h4>
                       <p className="text-xs text-green-100">
                         {riskProfile === "conservador" && t('risk_management.conservative_desc')}
                         {riskProfile === "moderado" && t('risk_management.moderate_desc')}
@@ -422,11 +422,11 @@ export default function RiskManagement() {
                         <Line 
                           type="monotone" 
                           dataKey="gain" 
-                          stroke="#10B981" 
+                          stroke="#16a34a" 
                           strokeWidth={2}
                           strokeDasharray="5 5"
                           dot={false}
-                          activeDot={{ r: 4, stroke: '#10B981', strokeWidth: 2 }}
+                          activeDot={{ r: 4, stroke: '#16a34a', strokeWidth: 2 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
@@ -439,7 +439,7 @@ export default function RiskManagement() {
                       <span className="text-zinc-400">{t('risk_management.projected_balance')}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-1 bg-green-500 rounded border-2 border-dashed border-green-500"></div>
+                      <div className="w-4 h-1 bg-green-600 rounded border-2 border-dashed border-green-600"></div>
                       <span className="text-zinc-400">{t('risk_management.accumulated_gain')}</span>
                     </div>
                   </div>

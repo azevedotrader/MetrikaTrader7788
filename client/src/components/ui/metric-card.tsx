@@ -19,7 +19,7 @@ export function MetricCard({
   iconColor = "text-purple-400"
 }: MetricCardProps) {
   const getValueColor = () => {
-    if (trend === "up") return "text-green-400";
+    if (trend === "up") return "text-green-600";
     if (trend === "down") return "text-red-400";
     return "text-white";
   };

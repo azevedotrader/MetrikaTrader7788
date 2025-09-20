@@ -542,7 +542,7 @@ export function TradingCalendar({
                   className={cn(
                     "text-2xl font-bold",
                     monthlyStats.totalPnl > 0
-                      ? "text-green-400"
+                      ? "text-green-600"
                       : "text-red-400",
                   )}
                 >

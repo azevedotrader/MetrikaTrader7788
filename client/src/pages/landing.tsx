@@ -115,11 +115,11 @@ export default function Landing() {
               
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8 justify-center lg:justify-start">
                 <div className="flex items-center space-x-2 text-slate-300 text-sm sm:text-base">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                   <span className="break-words">{t('landing.hero.feature1')}</span>
                 </div>
                 <div className="flex items-center space-x-2 text-slate-300 text-sm sm:text-base">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                   <span className="break-words">{t('landing.hero.feature2')}</span>
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function Landing() {
                       <div className="flex items-center justify-between mb-2 sm:mb-3">
                         <span className="text-xs sm:text-sm font-medium text-slate-300 break-words min-w-0">{t('landing.dashboard.capital_evolution')}</span>
                         <div className="flex space-x-1 flex-shrink-0">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                           <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                           <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                         </div>
@@ -299,19 +299,19 @@ export default function Landing() {
                       <PieChart className="w-5 h-5" />
                       {t('landing.solution.dashboard_analytics')}
                     </CardTitle>
-                    <Badge className="bg-green-500/20 text-green-400">{t('landing.solution.realtime')}</Badge>
+                    <Badge className="bg-green-600/20 text-green-600">{t('landing.solution.realtime')}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   {/* Performance Grid */}
                   <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-lg p-4">
+                    <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-600/30 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-slate-300">{t('landing.solution.total_profit')}</span>
-                        <DollarSign className="w-4 h-4 text-green-400" />
+                        <DollarSign className="w-4 h-4 text-green-600" />
                       </div>
-                      <div className="text-2xl font-bold text-green-400">{t('landing.solution.demo_total_profit')}</div>
-                      <div className="text-xs text-green-300">{t('landing.solution.monthly_growth')}</div>
+                      <div className="text-2xl font-bold text-green-600">{t('landing.solution.demo_total_profit')}</div>
+                      <div className="text-xs text-green-600">{t('landing.solution.monthly_growth')}</div>
                     </div>
                     <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -363,11 +363,11 @@ export default function Landing() {
                     ].map((trade, i) => (
                       <div key={i} className="flex items-center justify-between py-2 px-3 bg-slate-800/30 rounded">
                         <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${trade.positive ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${trade.positive ? 'bg-green-600' : 'bg-red-400'}`}></div>
                           <span className="text-sm text-slate-300">{trade.pair}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-sm font-medium ${trade.positive ? 'text-green-400' : 'text-red-400'}`}>
+                          <span className={`text-sm font-medium ${trade.positive ? 'text-green-600' : 'text-red-400'}`}>
                             {trade.result}
                           </span>
                           <span className="text-xs text-slate-400">{trade.time}</span>
@@ -410,7 +410,7 @@ export default function Landing() {
                     icon: Calendar,
                     title: t('landing.solution.smart_journal'),
                     description: t('landing.solution.smart_journal_desc'),
-                    color: "text-green-400"
+                    color: "text-green-600"
                   }
                 ].map((feature, index) => (
                   <div key={index} className="flex items-start space-x-3 sm:space-x-4">
@@ -469,7 +469,7 @@ export default function Landing() {
                     t('landing.pricing.starter_feature4')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                       <span className="text-slate-300">{feature}</span>
                     </div>
                   ))}
@@ -544,7 +544,7 @@ export default function Landing() {
                     t('landing.pricing.black_feature6')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                       <span className="text-slate-300">{feature}</span>
                     </div>
                   ))}

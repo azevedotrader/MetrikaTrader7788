@@ -30,7 +30,7 @@ interface AITradeAnalysisProps {
 const getSentimentIcon = (sentiment: string) => {
   switch (sentiment) {
     case 'bullish':
-      return <TrendingUp className="h-4 w-4 text-green-400" />;
+      return <TrendingUp className="h-4 w-4 text-green-600" />;
     case 'bearish':
       return <TrendingDown className="h-4 w-4 text-red-400" />;
     default:

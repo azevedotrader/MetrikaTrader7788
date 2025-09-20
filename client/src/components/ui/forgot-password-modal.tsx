@@ -119,8 +119,8 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
           </form>
         ) : (
           <div className="space-y-6 mt-6">
-            <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-lg">
-              <p className="text-green-400 text-sm">
+            <div className="bg-green-600/10 border border-green-600/20 p-4 rounded-lg">
+              <p className="text-green-600 text-sm">
                 Se o email estiver cadastrado, você receberá as instruções de recuperação em alguns minutos.
               </p>
             </div>
