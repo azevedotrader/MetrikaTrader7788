@@ -25,14 +25,22 @@ export async function apiRequest(
     'X-User-ID': userId, // Header alternativo
   };
   
+  let body: string | FormData | undefined = undefined;
+  
   if (data) {
-    headers["Content-Type"] = "application/json";
+    if (data instanceof FormData) {
+      // For FormData, don't set Content-Type (browser will set it with boundary)
+      body = data;
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(data);
+    }
   }
 
   const res = await fetch(url, {
     method,
     headers,
-    body: data ? JSON.stringify(data) : undefined,
+    body,
     credentials: "include",
   });
 

@@ -39,10 +39,10 @@ export default function ImportarCSV() {
       }
 
       const formData = new FormData();
-      formData.append("file", csvFile);
+      formData.append("csvFile", csvFile);
       formData.append("broker", selectedBroker);
 
-      return apiRequest("POST", "/api/csv/upload", formData);
+      return apiRequest("POST", "/api/trades/upload-csv", formData);
     },
     onSuccess: (data: any) => {
       toast({
