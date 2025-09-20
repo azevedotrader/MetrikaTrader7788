@@ -10,6 +10,7 @@ import fs from "fs";
 import path from "path";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
@@ -18,14 +19,15 @@ import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 
-// Admin credentials (in production, this should be in environment variables)
-const ADMIN_CREDENTIALS = {
-  email: 'admin@metrika.com.br',
-  password: 'metrika777',
-  name: 'Administrador Métrika'
-};
+// JWT Secret - must be provided in production
+const JWT_SECRET = process.env.JWT_SECRET || (
+  process.env.NODE_ENV === 'production' 
+    ? (() => { throw new Error('JWT_SECRET is required in production'); })()
+    : 'dev_secret_change_in_production'
+);
 
-const JWT_SECRET = process.env.JWT_SECRET || 'metrika_admin_secret_key_2025';
+// Admin credentials - now fetched from database
+const ADMIN_EMAIL = 'admin@metrika.com.br';
 
 // Função para processar arquivos Excel da Clear
 async function processExcelFile(filePath: string, userId: string): Promise<InsertTrade[]> {
@@ -225,43 +227,24 @@ const uploadImage = multer({
   }
 });
 
-// Middleware para obter userId autenticado
+// Secure JWT-only middleware for user authentication
 function getUserId(req: any): string {
-  // Primeiro, tentar obter do token JWT
+  // Only accept JWT tokens for security
   const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    try {
-      const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, JWT_SECRET) as any;
-      if (decoded.userId) {
-        return decoded.userId;
-      }
-    } catch (error) {
-      // Token inválido, continuar com métodos alternativos
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error("Token JWT obrigatório - acesso negado");
+  }
+  
+  try {
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (!decoded.userId) {
+      throw new Error("Token JWT inválido - userId não encontrado");
     }
+    return decoded.userId;
+  } catch (error) {
+    throw new Error("Token JWT inválido ou expirado");
   }
-  
-  // Método alternativo: header X-User-ID (Replit automaticamente define para usuário logado)
-  if (req.headers['x-user-id']) {
-    return req.headers['x-user-id'] as string;
-  }
-  
-  // Método alternativo: header user-id (enviado pelo frontend)
-  if (req.headers['user-id']) {
-    return req.headers['user-id'] as string;
-  }
-  
-  // Método alternativo: localStorage do frontend (enviado como header)
-  if (req.headers['x-session-user-id']) {
-    return req.headers['x-session-user-id'] as string;
-  }
-  
-  // Como último recurso, verificar se foi passado no body
-  if (req.body?.userId) {
-    return req.body.userId;
-  }
-  
-  throw new Error("Usuário não autenticado - userId é obrigatório para isolamento de dados");
 }
 
 // Middleware de autenticação obrigatória - ISOLAMENTO TOTAL
@@ -286,35 +269,24 @@ function requireAuth(req: any, res: any, next: any) {
   }
 }
 
-// Middleware de autenticação mais flexível para uploads de arquivo
+// Secure authentication middleware for file uploads (JWT only)
 function requireAuthFlexible(req: any, res: any, next: any) {
   try {
-    let userId = null;
+    // Even for file uploads, require JWT authentication
+    const userId = getUserId(req);
     
-    // Try to get userId using multiple methods
-    try {
-      userId = getUserId(req);
-    } catch (error) {
-      // If no userId found, try to get from body (for multipart uploads)
-      if (req.body && req.body.userId) {
-        userId = req.body.userId;
-      }
-    }
-    
-    // If still no userId, provide a default for testing
     if (!userId || userId.trim() === '') {
-      // NUNCA usar usuário padrão - isolamento obrigatório
-      throw new Error('Usuário não autenticado - userId é obrigatório para isolamento de dados');
+      throw new Error("UserId vazio ou inválido");
     }
     
     req.userId = userId;
-    console.log(`🔐 Usuário autenticado (flexível): ${userId} para ${req.method} ${req.path}`);
+    console.log(`🔐 Usuário autenticado (upload): ${userId} para ${req.method} ${req.path}`);
     next();
   } catch (error) {
     console.warn(`🚫 Acesso negado para ${req.method} ${req.path}:`, error instanceof Error ? error.message : error);
     res.status(401).json({ 
       error: "Acesso negado",
-      message: "Erro de autenticação",
+      message: "Token JWT obrigatório para autenticação",
       details: error instanceof Error ? error.message : "Erro de autenticação"
     });
   }
@@ -1195,9 +1167,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(400).json({ message: "Email já está em uso" });
       }
       
-      // Create user (remove confirmPassword from data)
+      // Hash password before storing
       const { confirmPassword, ...userData } = validatedData;
-      const user = await storage.createUser(userData);
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const user = await storage.createUser({ ...userData, password: hashedPassword });
 
       // Send welcome email (don't wait for it to complete)
       sendWelcomeEmail(user.email, user.name).catch(error => {
@@ -1229,7 +1202,13 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       const user = await storage.getUserByEmail(email);
-      if (!user || user.password !== password) {
+      if (!user) {
+        return res.status(401).json({ message: "Credenciais inválidas" });
+      }
+      
+      // Use bcrypt to compare passwords
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
         return res.status(401).json({ message: "Credenciais inválidas" });
       }
 
@@ -2537,33 +2516,46 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
 
   // ADMIN AUTHENTICATION ROUTES
   
-  // Admin login
+  // Admin login with database authentication and bcrypt
   app.post("/api/admin/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
       
-      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        const token = jwt.sign(
-          { 
-            email: ADMIN_CREDENTIALS.email, 
-            name: ADMIN_CREDENTIALS.name, 
-            role: 'admin' 
-          },
-          JWT_SECRET,
-          { expiresIn: '24h' }
-        );
-        
-        res.json({
-          token,
-          admin: {
-            email: ADMIN_CREDENTIALS.email,
-            name: ADMIN_CREDENTIALS.name,
-            role: 'admin'
-          }
-        });
-      } else {
-        res.status(401).json({ message: 'Credenciais inválidas' });
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email e senha são obrigatórios' });
       }
+      
+      // Get admin user from database
+      const adminUser = await storage.getUserByEmail(email);
+      if (!adminUser || adminUser.role !== 'admin') {
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+      
+      // Compare password with bcrypt
+      const isValidPassword = await bcrypt.compare(password, adminUser.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+      
+      const token = jwt.sign(
+        { 
+          email: adminUser.email, 
+          name: adminUser.name, 
+          role: 'admin',
+          userId: adminUser.id
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+      
+      res.json({
+        token,
+        admin: {
+          email: adminUser.email,
+          name: adminUser.name,
+          role: 'admin'
+        }
+      });
     } catch (error) {
       console.error('Admin login error:', error);
       res.status(500).json({ message: 'Erro interno do servidor' });
@@ -3502,18 +3494,19 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       let [adminUser] = await db
         .select({ id: users.id })
         .from(users)
-        .where(eq(users.email, ADMIN_CREDENTIALS.email));
+        .where(eq(users.email, ADMIN_EMAIL));
 
       // Se o usuário admin não existir, criar ele
       if (!adminUser) {
         const [createdAdmin] = await db
           .insert(users)
           .values({
-            name: ADMIN_CREDENTIALS.name,
-            email: ADMIN_CREDENTIALS.email,
-            password: ADMIN_CREDENTIALS.password, // Idealmente seria hasheado
+            name: 'Administrador Métrika',
+            email: ADMIN_EMAIL,
+            password: await bcrypt.hash('metrika777', 10),
             planType: 'black',
             isActive: true,
+            role: 'admin'
           })
           .returning({ id: users.id });
 
