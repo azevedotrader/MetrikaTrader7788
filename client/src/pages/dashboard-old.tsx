@@ -1121,7 +1121,7 @@ export default function Dashboard() {
               title="🔁 R/R Médio"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-600" : "text-yellow-600"}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-600" : "text-yellow-500"}
             />
           </div>
 
@@ -1347,7 +1347,7 @@ export default function Dashboard() {
                   {(csvImports as any[]).map((importItem: any) => (
                     <div key={importItem.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
                       <div className="flex items-center space-x-4">
-                        <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-600' : 'bg-yellow-600'}`} />
+                        <div className={`w-3 h-3 rounded-full ${importItem.status === 'completed' ? 'bg-green-600' : 'bg-yellow-500'}`} />
                         <div>
                           <div className="font-medium text-white">{importItem.fileName}</div>
                           <div className="text-sm text-slate-400">
@@ -1399,7 +1399,7 @@ export default function Dashboard() {
               title="⚖️ R/R Médio Consolidado"
               value={`${metrics.riscoRetornoMedio.toFixed(2)}:1`}
               icon={TrendingUp}
-              color={metrics.riscoRetornoMedio >= 2 ? "text-green-600" : "text-yellow-600"}
+              color={metrics.riscoRetornoMedio >= 2 ? "text-green-600" : "text-yellow-500"}
               subtitle="Risco/Retorno geral"
             />
           </div>

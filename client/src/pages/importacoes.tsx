@@ -208,7 +208,7 @@ export default function Importacoes() {
                     >
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
-                          className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-600" : "bg-yellow-600"}`}
+                          className={`w-3 h-3 rounded-full flex-shrink-0 ${importItem.status === "completed" ? "bg-green-600" : "bg-yellow-500"}`}
                         />
                         <div className="min-w-0 flex-1">
                           {editingCsv?.id === importItem.id ? (

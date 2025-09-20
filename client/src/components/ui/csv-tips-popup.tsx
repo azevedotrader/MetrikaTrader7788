@@ -82,7 +82,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
   const getIcon = (type: string) => {
     switch (type) {
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
+        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
       case 'success':
         return <CheckCircle className="h-5 w-5 text-green-600" />;
       case 'info':
@@ -97,7 +97,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
       case 'high':
         return 'bg-red-600';
       case 'medium':
-        return 'bg-yellow-600';
+        return 'bg-yellow-500';
       default:
         return 'bg-blue-600';
     }
@@ -106,7 +106,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'warning':
-        return 'border-yellow-600';
+        return 'border-yellow-500';
       case 'success':
         return 'border-green-600';
       case 'info':

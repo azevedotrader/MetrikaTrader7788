@@ -34,7 +34,7 @@ const getSentimentIcon = (sentiment: string) => {
     case 'bearish':
       return <TrendingDown className="h-4 w-4 text-red-600" />;
     default:
-      return <BarChart3 className="h-4 w-4 text-yellow-600" />;
+      return <BarChart3 className="h-4 w-4 text-yellow-500" />;
   }
 };
 
@@ -45,7 +45,7 @@ const getSentimentColor = (sentiment: string) => {
     case 'bearish':
       return 'bg-red-600';
     default:
-      return 'bg-yellow-600';
+      return 'bg-yellow-500';
   }
 };
 
@@ -54,7 +54,7 @@ const getRiskColor = (riskLevel: string) => {
     case 'low':
       return 'bg-green-600';
     case 'medium':
-      return 'bg-yellow-600';
+      return 'bg-yellow-500';
     case 'high':
       return 'bg-red-600';
     default:
@@ -176,7 +176,7 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
         {/* Sugestão */}
         <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
           <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertTriangle className="h-4 w-4 text-yellow-500" />
             Sugestão
           </h4>
           <p className="text-slate-300 text-sm leading-relaxed">

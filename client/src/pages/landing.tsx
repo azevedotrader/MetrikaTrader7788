@@ -95,7 +95,7 @@ export default function Landing() {
         {/* Floating geometric elements */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-emerald-400/20 to-teal-400/20 rounded-full blur-xl animate-float"></div>
         <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-indigo-400/20 to-blue-400/20 rounded-full blur-xl animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-gradient-to-r from-gold-400/20 to-yellow-600/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
+        <div className="absolute bottom-20 left-1/4 w-20 h-20 bg-gradient-to-r from-gold-400/20 to-yellow-500/20 rounded-full blur-xl animate-float" style={{ animationDelay: '4s' }}></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
@@ -392,7 +392,7 @@ export default function Landing() {
                     icon: Zap,
                     title: t('landing.solution.auto_import'),
                     description: t('landing.solution.auto_import_desc'),
-                    color: "text-yellow-600"
+                    color: "text-yellow-500"
                   },
                   {
                     icon: Brain,

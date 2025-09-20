@@ -469,7 +469,7 @@ export default function NovoTrade() {
                             riskRewardRatio >= 3
                               ? "text-green-600"
                               : riskRewardRatio >= 2
-                                ? "text-yellow-600"
+                                ? "text-yellow-500"
                                 : "text-red-600"
                           }`}
                         >

@@ -254,9 +254,9 @@ export default function RiskManagement() {
                   </div>
 
                   <div className="flex items-start gap-3 p-3 bg-yellow-900/20 rounded-lg border border-yellow-800/30">
-                    <Lightbulb className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                    <Lightbulb className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <h4 className="text-sm font-semibold text-yellow-600 mb-1">{t('risk_management.position_size_title')}</h4>
+                      <h4 className="text-sm font-semibold text-yellow-500 mb-1">{t('risk_management.position_size_title')}</h4>
                       <p className="text-xs text-yellow-100">
                         {t('risk_management.position_size_desc')}
                       </p>

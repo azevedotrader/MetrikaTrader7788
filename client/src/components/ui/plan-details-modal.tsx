@@ -100,7 +100,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
     if (isExpiringSoon) {
       return {
         message: `Expira em ${planInfo.daysRemaining} dias`,
-        color: "text-yellow-600",
+        color: "text-yellow-500",
         icon: <Clock className="w-4 h-4" />
       };
     }

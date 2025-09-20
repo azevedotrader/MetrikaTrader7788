@@ -672,7 +672,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
                         className="w-full h-full object-cover opacity-80"
                       />
                       {/* Indicador de pendente */}
-                      <div className="absolute top-1 left-1 bg-yellow-600 text-black text-xs px-1 rounded">
+                      <div className="absolute top-1 left-1 bg-yellow-500 text-black text-xs px-1 rounded">
                         {t('journal.pending_status')}
                       </div>
                     </div>

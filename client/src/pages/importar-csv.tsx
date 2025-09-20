@@ -131,7 +131,7 @@ export default function ImportarCSV() {
                 </label>
                 <div className="bg-charcoal-800/50 p-3 rounded-lg border border-charcoal-600 h-[42px] flex items-center">
                   <div className="flex items-center gap-2">
-                    <div className="text-yellow-600">⚡</div>
+                    <div className="text-yellow-500">⚡</div>
                     <span className="text-white font-medium text-sm">MetrikAI Tradicional</span>
                   </div>
                 </div>
