@@ -2407,7 +2407,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${dayWinRate >= 60 ? 'text-blue-600' : dayWinRate >= 40 ? 'text-yellow-500' : 'text-red-500'}`}>
+                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#fafafa]">
                             {dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)}%
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
