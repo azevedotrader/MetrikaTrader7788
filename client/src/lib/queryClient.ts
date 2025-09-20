@@ -12,17 +12,16 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Obter o userId do localStorage
-  const userId = localStorage.getItem('user-id');
+  // Obter o token JWT do localStorage
+  const token = localStorage.getItem('user-token');
   
-  // ISOLAMENTO CRÍTICO: Rejeitar requisições sem userId válido
-  if (!userId || userId === '' || userId === 'null') {
+  // ISOLAMENTO CRÍTICO: Rejeitar requisições sem token válido
+  if (!token || token === '' || token === 'null') {
     throw new Error('Usuário não autenticado - faça login para acessar os dados');
   }
   
   const headers: Record<string, string> = {
-    'user-id': userId, // Header usado pelo servidor
-    'X-User-ID': userId, // Header alternativo
+    'Authorization': `Bearer ${token}`, // Header JWT obrigatório
   };
   
   let body: string | FormData | undefined = undefined;
@@ -54,11 +53,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Obter o userId do localStorage
-    const userId = localStorage.getItem('user-id');
+    // Obter o token JWT do localStorage
+    const token = localStorage.getItem('user-token');
     
-    // ISOLAMENTO CRÍTICO: Rejeitar queries sem userId válido
-    if (!userId || userId === '' || userId === 'null') {
+    // ISOLAMENTO CRÍTICO: Rejeitar queries sem token válido
+    if (!token || token === '' || token === 'null') {
       if (unauthorizedBehavior === "returnNull") {
         return null;
       }
@@ -68,8 +67,7 @@ export const getQueryFn: <T>(options: {
     const res = await fetch(queryKey.join("/") as string, {
       credentials: "include",
       headers: {
-        "user-id": userId, // Header usado pelo servidor
-        "X-User-ID": userId, // Header alternativo
+        "Authorization": `Bearer ${token}`, // Header JWT obrigatório
       },
     });
 
