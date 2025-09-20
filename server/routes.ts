@@ -1218,11 +1218,23 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Update lastLoginAt timestamp
       await storage.updateLastLogin(user.id);
 
+      // Generate JWT token for the user
+      const token = jwt.sign(
+        { 
+          email: user.email, 
+          name: user.name, 
+          userId: user.id
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
       // Remove password from response and add first login flag
       const { password: _, ...userResponse } = user;
       res.json({
         ...userResponse,
-        isFirstLogin
+        isFirstLogin,
+        token
       });
     } catch (error) {
       console.error("Login error:", error);
