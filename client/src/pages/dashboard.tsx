@@ -2623,12 +2623,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${(() => {
-                    const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                    const totalTrades = filteredTrades.length;
-                    const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                    return winRate >= 60 ? 'text-[#2FA87A]' : winRate >= 40 ? 'text-yellow-500' : 'text-[#F06363]';
-                  })()}`}>
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#ffffff]">
                     {(() => {
                       const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                       const totalTrades = filteredTrades.length;
