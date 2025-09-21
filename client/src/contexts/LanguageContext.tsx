@@ -948,7 +948,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ai.chat_title": "Assistente IA",
     "ai.chat_title_short": "IA",
     "ai.welcome_message":
-      "Olá! Sou seu assistente de trading. Como posso ajudá-lo hoje? Posso analisar seus trades, dar sugerências de mercado ou tirar dúvidas sobre estratégias.",
+      "Olá! Sou seu assistente de trading inteligente. Como posso potencializar seus resultados hoje? Posso analisar suas métricas de performance, identificar padrões nos seus trades, sugerir melhorias em estratégias ou responder qualquer dúvida sobre análise técnica e gestão de risco.",
     "ai.error_message":
       "Desculpe, ocorreu um erro. Tente novamente em alguns instantes.",
     "ai.input_placeholder": "Digite sua mensagem...",
@@ -1901,7 +1901,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ai.chat_title": "AI Assistant",
     "ai.chat_title_short": "AI",
     "ai.welcome_message":
-      "Hello! I'm your trading assistant. How can I help you today? I can analyze your trades, provide market suggestions, or answer questions about strategies.",
+      "Hello! I'm your intelligent trading assistant. How can I help boost your performance today? I can analyze your performance metrics, identify patterns in your trades, suggest strategy improvements, or answer any questions about technical analysis and risk management.",
     "ai.error_message":
       "Sorry, an error occurred. Please try again in a few moments.",
     "ai.input_placeholder": "Type your message...",
@@ -2791,7 +2791,7 @@ const translations: Record<Language, Record<string, string>> = {
     "ai.chat_title": "Asistente IA",
     "ai.chat_title_short": "IA",
     "ai.welcome_message":
-      "¡Hola! Soy tu asistente de trading. ¿Cómo puedo ayudarte hoy? Puedo analizar tus operaciones, dar sugerencias de mercado o resolver dudas sobre estrategias.",
+      "¡Hola! Soy tu asistente inteligente de trading. ¿Cómo puedo potenciar tus resultados hoy? Puedo analizar tus métricas de rendimiento, identificar patrones en tus operaciones, sugerir mejoras en estrategias o responder cualquier duda sobre análisis técnico y gestión de riesgo.",
     "ai.error_message":
       "Lo siento, ocurrió un error. Inténtalo de nuevo en unos momentos.",
     "ai.input_placeholder": "Escribe tu mensaje...",
