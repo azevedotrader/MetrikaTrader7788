@@ -50,7 +50,7 @@ export function TopBar({
   return (
     <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-3 ${isMobile ? 'left-0' : 'left-16'}`}>
       <div className="flex items-center justify-between">
-        {/* Left Section - Menu + Title + Filters */}
+        {/* Left Section - Menu + Filters */}
         <div className="flex items-center space-x-3 lg:space-x-4 flex-1 min-w-0">
           {/* Mobile menu button */}
           {isMobile && (
@@ -64,14 +64,9 @@ export function TopBar({
             </Button>
           )}
           
-          {/* Page Title */}
-          <div className="flex-shrink-0">
-            <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-white truncate">{title}</h1>
-          </div>
-          
           {/* Dashboard Filter - only show on dashboard */}
           {showDashboardFilter && (
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-3 ml-4 lg:ml-6">
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               <Select
                 value={viewMode}
                 onValueChange={(value: "all" | "broker" | "csv") => {
@@ -186,8 +181,13 @@ export function TopBar({
           )}
         </div>
         
+        {/* Center Section - Title */}
+        <div className="flex justify-center flex-1 min-w-0">
+          <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-white truncate text-center">{title}</h1>
+        </div>
+        
         {/* Right Section */}
-        <div className="flex items-center space-x-3 lg:space-x-4 justify-end">
+        <div className="flex items-center space-x-3 lg:space-x-4 justify-end flex-1 min-w-0">
           <PlanStatus />
           <LanguageSelector />
         </div>
