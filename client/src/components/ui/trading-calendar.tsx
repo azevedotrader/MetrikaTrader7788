@@ -324,8 +324,11 @@ export function TradingCalendar({
             <div className="flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5">
               {/* P&L Principal - sempre mostrar */}
               <div
-                className="font-bold leading-tight text-white px-1.5 py-1 rounded-md bg-black/50 text-center shadow-lg text-xs sm:text-sm md:text-base backdrop-blur-sm border border-white/20"
-                style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.9)' }}
+                className="font-bold leading-tight text-white px-2 py-1.5 rounded-lg bg-black/80 text-center shadow-xl text-xs sm:text-sm md:text-base backdrop-blur-md border border-white/30"
+                style={{ 
+                  textShadow: '0 0 8px rgba(255,255,255,0.8), 2px 2px 4px rgba(0,0,0,0.9)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.4)'
+                }}
               >
                 <span className="sm:hidden">
                   {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
@@ -343,9 +346,17 @@ export function TradingCalendar({
                 {/* Quantidade de trades */}
                 <div
                   className={cn(
-                    "leading-tight font-medium px-1.5 py-0.5 rounded text-center text-[10px] sm:text-xs border",
-                    isBreakEven ? "bg-white/70 text-zinc-900 border-zinc-900/20" : "bg-black/40 text-white border-white/10"
+                    "leading-tight font-semibold px-2 py-1 rounded-lg text-center text-[10px] sm:text-xs border shadow-lg backdrop-blur-sm",
+                    isBreakEven 
+                      ? "bg-white/85 text-zinc-900 border-zinc-900/30" 
+                      : "bg-black/75 text-white border-white/25"
                   )}
+                  style={!isBreakEven ? {
+                    textShadow: '0 0 6px rgba(255,255,255,0.6), 1px 1px 2px rgba(0,0,0,0.8)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.3)'
+                  } : {
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 6px rgba(0,0,0,0.2)'
+                  }}
                 >
                   {tradeDay.trades} {tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
                 </div>
@@ -354,9 +365,17 @@ export function TradingCalendar({
                 {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
                   <div
                     className={cn(
-                      "leading-tight font-medium px-1.5 py-0.5 rounded text-center text-[9px] sm:text-[10px] border",
-                      isBreakEven ? "bg-white/70 text-zinc-900 border-zinc-900/20" : "bg-black/40 text-white border-white/10"
+                      "leading-tight font-semibold px-2 py-1 rounded-lg text-center text-[9px] sm:text-[10px] border shadow-lg backdrop-blur-sm",
+                      isBreakEven 
+                        ? "bg-white/85 text-zinc-900 border-zinc-900/30" 
+                        : "bg-black/75 text-white border-white/25"
                     )}
+                    style={!isBreakEven ? {
+                      textShadow: '0 0 6px rgba(255,255,255,0.6), 1px 1px 2px rgba(0,0,0,0.8)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.3)'
+                    } : {
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 6px rgba(0,0,0,0.2)'
+                    }}
                   >
                     {tradeDay.winRate.toFixed(0)}% {t("calendar.win")}
                   </div>
@@ -380,22 +399,25 @@ export function TradingCalendar({
 
     return (
       <div className={cn(
-        "border-l border-zinc-700 p-3 min-h-[105px] lg:min-h-[115px] flex flex-col justify-center transition-colors",
-        isProfit ? "bg-green-600/85 hover:bg-green-600/95" : week.pnl < 0 ? "bg-red-500/85 hover:bg-red-500/95" : "bg-zinc-800/50 hover:bg-zinc-800/60"
+        "border-l border-zinc-700 p-3 min-h-[105px] lg:min-h-[115px] flex flex-col justify-center transition-colors shadow-lg",
+        isProfit ? "bg-green-600/95 hover:bg-green-600/100 border-green-500/50" : week.pnl < 0 ? "bg-red-500/95 hover:bg-red-500/100 border-red-400/50" : "bg-zinc-800/70 hover:bg-zinc-800/80 border-zinc-600/50"
       )}>
-        <div className="text-xs text-zinc-300 mb-1.5 font-medium">
+        <div className="text-xs text-zinc-200 mb-1.5 font-semibold"
+          style={{ textShadow: '0 0 4px rgba(255,255,255,0.5), 1px 1px 2px rgba(0,0,0,0.8)' }}>
           {t("calendar.week")} {week.weekNumber}
         </div>
         <div
           className="font-bold text-sm md:text-base mb-1.5 text-white"
-          style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}
+          style={{ textShadow: '0 0 8px rgba(255,255,255,0.8), 2px 2px 4px rgba(0,0,0,0.9)' }}
         >
           {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
         </div>
-        <div className="text-xs text-zinc-300 font-medium">
+        <div className="text-xs text-zinc-200 font-semibold"
+          style={{ textShadow: '0 0 4px rgba(255,255,255,0.4), 1px 1px 2px rgba(0,0,0,0.7)' }}>
           {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")}
         </div>
-        <div className="text-[10px] text-zinc-400 mt-0.5">
+        <div className="text-[10px] text-zinc-200 mt-0.5 font-medium"
+          style={{ textShadow: '0 0 4px rgba(255,255,255,0.4), 1px 1px 2px rgba(0,0,0,0.7)' }}>
           {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
         </div>
       </div>
