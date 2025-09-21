@@ -300,7 +300,7 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
 }
 
 // Componente AdvancedMetrics
-function AdvancedMetrics({ trades }: { trades: Trade[] }) {
+function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
   const metrics = calculateAdvancedMetrics(trades);
 
   const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi' | 'expectancy') => {
@@ -351,7 +351,7 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           >
             {metrics.iqt.toFixed(1)}
           </div>
-          <div className="text-xs text-zinc-500">Índice Qualidade</div>
+          <div className="text-xs text-zinc-500">{t('metrics.quality_index')}</div>
         </div>
 
         {/* Eficiência de Risco */}
@@ -363,7 +363,7 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           >
             {metrics.eficienciaRisco.toFixed(2)}
           </div>
-          <div className="text-xs text-zinc-500">Risco %</div>
+          <div className="text-xs text-zinc-500">{t('metrics.risk_percentage')}</div>
         </div>
 
         {/* Score de Consistência */}
@@ -375,7 +375,7 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           >
             {metrics.scoreConsistencia.toFixed(2)}
           </div>
-          <div className="text-xs text-zinc-500">Score</div>
+          <div className="text-xs text-zinc-500">{t('metrics.score')}</div>
         </div>
       </div>
 
@@ -390,7 +390,7 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           >
             {metrics.retornoAjustadoPrecisao.toFixed(2)}
           </div>
-          <div className="text-xs text-zinc-500">Precisão</div>
+          <div className="text-xs text-zinc-500">{t('metrics.precision')}</div>
         </div>
 
         {/* IPI */}
@@ -402,7 +402,7 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           >
             {metrics.ipi.toFixed(3)}
           </div>
-          <div className="text-xs text-zinc-500">Performance</div>
+          <div className="text-xs text-zinc-500">{t('metrics.performance')}</div>
         </div>
 
         {/* Expectancy - Van Tharp */}
@@ -414,7 +414,7 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           >
             R$ {metrics.expectancy.toFixed(2)}
           </div>
-          <div className="text-xs text-zinc-500">Van Tharp</div>
+          <div className="text-xs text-zinc-500">{t('metrics.van_tharp')}</div>
         </div>
       </div>
     </div>
@@ -2824,7 +2824,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Métricas Avançadas de Performance - Ao lado do calendário */}
             <SquareCard
-              title="Métricas Avançadas"
+              title={t('metrics.advanced_metrics')}
               value=""
               icon={BarChart3}
               color="text-[#2FA87A]"
@@ -2834,14 +2834,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               <div className="h-full p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-auto">
                 {/* Seção 1: Métricas Matemáticas */}
                 <div>
-                  <AdvancedMetrics trades={filteredTrades} />
+                  <AdvancedMetrics trades={filteredTrades} t={t} />
                 </div>
                 
                 {/* Seção 2: Métrika Score */}
                 <div className="border-t border-zinc-700 pt-3 sm:pt-4">
                   <div className="text-sm font-semibold text-zinc-300 mb-2 sm:mb-3 flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
-                    Métrika Score
+                    {t('metrics.metrika_score')}
                   </div>
                   <div className="scale-90 sm:scale-100 origin-top">
                     <MetrikaScore trades={filteredTrades} t={t} />
@@ -2910,7 +2910,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 h-full">
                 {/* Lucros */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-2">Lucros</div>
+                  <div className="text-xs text-zinc-400 mb-2">{t('metrics.profits_short')}</div>
                   <div className="text-lg md:text-xl font-bold text-[#2FA87A] mb-2">
                     R$ {(() => {
                       const totalPositive = periodFilteredTrades
@@ -2945,7 +2945,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
                 {/* Perdas */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-2">Perdas</div>
+                  <div className="text-xs text-zinc-400 mb-2">{t('metrics.losses_short')}</div>
                   <div className="text-lg md:text-xl font-bold text-[#F06363] mb-2">
                     -R$ {(() => {
                       const totalNegative = Math.abs(periodFilteredTrades
@@ -2980,7 +2980,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
                 {/* Resultado */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-2">Resultado</div>
+                  <div className="text-xs text-zinc-400 mb-2">{t('metrics.result')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
@@ -3018,7 +3018,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
                 {/* Média */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
-                  <div className="text-xs text-zinc-400 mb-2">Média</div>
+                  <div className="text-xs text-zinc-400 mb-2">{t('metrics.average')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
@@ -3051,7 +3051,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     })()}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    por trade
+                    {t('metrics.per_trade')}
                   </div>
                 </div>
               </div>
@@ -3066,7 +3066,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Activity className="h-5 w-5 text-zinc-400" />
-                    Trade Time Performance
+                    {t('metrics.trade_time_performance')}
                   </CardTitle>
                 </CardHeader>
                 <TradeTimePerformance trades={filteredTrades} t={t} />
@@ -3125,7 +3125,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <TrendingDown className="h-5 w-5 text-zinc-400" />
-                  Drawdown
+                  {t('metrics.drawdown')}
                 </CardTitle>
               </CardHeader>
               <DrawdownChart trades={filteredTrades} t={t} />
