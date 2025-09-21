@@ -139,6 +139,7 @@ interface AdvancedMetricsData {
   eficienciaRisco: number;
   scoreConsistencia: number;
   retornoAjustadoPrecisao: number;
+  ipi: number;
 }
 
 const simbolosEmocoes = {
@@ -159,6 +160,7 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
       eficienciaRisco: 0,
       scoreConsistencia: 0,
       retornoAjustadoPrecisao: 0,
+      ipi: 0,
     };
   }
 
@@ -238,12 +240,54 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
   // 4. RAP = Rentabilidade / Assertividade
   const retornoAjustadoPrecisao = assertividade > 0 ? rentabilidade / assertividade : 0;
 
+  // Cálculos adicionais para IPI
+
+  // Estabilidade: % de dias lucrativos no período
+  const tradesPorDia = trades.reduce((acc, trade) => {
+    const data = trade.dataHora ? new Date(trade.dataHora).toDateString() : 'unknown';
+    if (!acc[data]) {
+      acc[data] = 0;
+    }
+    acc[data] += parseFloat(trade.resultado || "0");
+    return acc;
+  }, {} as Record<string, number>);
+
+  const diasLucrativos = Object.values(tradesPorDia).filter(valor => valor > 0).length;
+  const totalDias = Object.keys(tradesPorDia).length;
+  const estabilidade = totalDias > 0 ? diasLucrativos / totalDias : 0;
+
+  // Drawdown: maior queda percentual do capital
+  let capitalAcumulado = 0;
+  let pico = 0;
+  let maiorDrawdown = 0;
+
+  trades.forEach(trade => {
+    capitalAcumulado += parseFloat(trade.resultado || "0");
+    if (capitalAcumulado > pico) {
+      pico = capitalAcumulado;
+    }
+    if (pico > 0) {
+      const drawdownAtual = (pico - capitalAcumulado) / pico;
+      if (drawdownAtual > maiorDrawdown) {
+        maiorDrawdown = drawdownAtual;
+      }
+    }
+  });
+
+  // Converter rentabilidade para percentual (assumindo uma base de capital)
+  const rentabilidadePercentual = rentabilidade / 1000; // Normalização simples
+
+  // 5. IPI = ((Rentabilidade × Fator de Lucro) × (Assertividade + Estabilidade)) ÷ (RR Médio × (1 + Drawdown))
+  const numeradorIPI = (rentabilidadePercentual * fatorDeLucro) * (assertividade + estabilidade);
+  const denominadorIPI = rrMedio * (1 + maiorDrawdown);
+  const ipi = denominadorIPI > 0 ? numeradorIPI / denominadorIPI : 0;
 
   return {
     iqt: Math.max(0, iqt),
     eficienciaRisco,
     scoreConsistencia: Math.max(0, scoreConsistencia),
     retornoAjustadoPrecisao,
+    ipi: Math.max(0, ipi),
   };
 }
 
@@ -251,7 +295,7 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
 function AdvancedMetrics({ trades }: { trades: Trade[] }) {
   const metrics = calculateAdvancedMetrics(trades);
 
-  const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap') => {
+  const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi') => {
     switch (type) {
       case 'iqt':
         // IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
@@ -273,57 +317,80 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
         if (value >= 10) return 'text-[#2FA87A]';
         if (value >= 5) return 'text-yellow-500';
         return 'text-[#F06363]';
+      case 'ipi':
+        // IPI - Índice de Performance Integrado
+        if (value >= 2.0) return 'text-[#2FA87A]'; // Estratégia de qualidade
+        if (value >= 1.0) return 'text-yellow-500'; // Estratégia razoável
+        return 'text-[#F06363]'; // Estratégia fraca
     }
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3 h-full">
-      {/* IQT */}
-      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-        <div className="text-xs text-zinc-400 mb-2">IQT</div>
-        <div 
-          className={`text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}
-          data-testid="text-iqt"
-        >
-          {metrics.iqt.toFixed(1)}
+    <div className="flex flex-col gap-3 h-full">
+      {/* Primeira linha: 3 métricas */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* IQT */}
+        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-2">IQT</div>
+          <div 
+            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}
+            data-testid="text-iqt"
+          >
+            {metrics.iqt.toFixed(1)}
+          </div>
+          <div className="text-xs text-zinc-500">Índice Qualidade</div>
         </div>
-        <div className="text-xs text-zinc-500">Índice Qualidade</div>
+
+        {/* Eficiência de Risco */}
+        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-2">Eficiência</div>
+          <div 
+            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}
+            data-testid="text-eficiencia"
+          >
+            {metrics.eficienciaRisco.toFixed(2)}
+          </div>
+          <div className="text-xs text-zinc-500">Risco %</div>
+        </div>
+
+        {/* Score de Consistência */}
+        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-2">Consistência</div>
+          <div 
+            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}
+            data-testid="text-consistencia"
+          >
+            {metrics.scoreConsistencia.toFixed(2)}
+          </div>
+          <div className="text-xs text-zinc-500">Score</div>
+        </div>
       </div>
 
-      {/* Eficiência de Risco */}
-      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-        <div className="text-xs text-zinc-400 mb-2">Eficiência</div>
-        <div 
-          className={`text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}
-          data-testid="text-eficiencia"
-        >
-          {metrics.eficienciaRisco.toFixed(2)}
+      {/* Segunda linha: 2 métricas */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* RAP */}
+        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-2">RAP</div>
+          <div 
+            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}
+            data-testid="text-rap"
+          >
+            {metrics.retornoAjustadoPrecisao.toFixed(2)}
+          </div>
+          <div className="text-xs text-zinc-500">Precisão</div>
         </div>
-        <div className="text-xs text-zinc-500">Risco %</div>
-      </div>
 
-      {/* Score de Consistência */}
-      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-        <div className="text-xs text-zinc-400 mb-2">Consistência</div>
-        <div 
-          className={`text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}
-          data-testid="text-consistencia"
-        >
-          {metrics.scoreConsistencia.toFixed(2)}
+        {/* IPI - Novo */}
+        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-2">IPI</div>
+          <div 
+            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.ipi, 'ipi')}`}
+            data-testid="text-ipi"
+          >
+            {metrics.ipi.toFixed(3)}
+          </div>
+          <div className="text-xs text-zinc-500">Performance</div>
         </div>
-        <div className="text-xs text-zinc-500">Score</div>
-      </div>
-
-      {/* RAP */}
-      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-        <div className="text-xs text-zinc-400 mb-2">RAP</div>
-        <div 
-          className={`text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}
-          data-testid="text-rap"
-        >
-          {metrics.retornoAjustadoPrecisao.toFixed(2)}
-        </div>
-        <div className="text-xs text-zinc-500">Precisão</div>
       </div>
     </div>
   );
@@ -2762,14 +2829,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
             {/* Desktop: Layout original em SquareCards */}
             <div className="hidden lg:flex lg:flex-col gap-4 h-full">
-              {/* Métricas Avançadas de Performance - Primeiro */}
+              {/* Métricas Avançadas de Performance - Primeiro e Maior */}
               <SquareCard
                 title="Métricas Avançadas"
                 value=""
                 icon={BarChart3}
                 color="text-[#2FA87A]"
                 data-testid="card-advanced-metrics"
-                className="h-[280px] flex-shrink-0"
+                className="h-[380px] flex-shrink-0"
               >
                 <div className="h-full p-4">
                   <AdvancedMetrics trades={filteredTrades} />
