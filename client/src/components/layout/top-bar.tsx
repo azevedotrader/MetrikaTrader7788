@@ -50,22 +50,28 @@ export function TopBar({
   return (
     <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-3 ${isMobile ? 'left-0' : 'left-16'}`}>
       <div className="flex items-center justify-between">
-        {/* Left Section */}
-        <div className="flex items-center space-x-2 flex-1">
+        {/* Left Section - Menu + Title + Filters */}
+        <div className="flex items-center space-x-3 lg:space-x-4 flex-1 min-w-0">
           {/* Mobile menu button */}
           {isMobile && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-zinc-400 hover:text-white lg:hidden"
+              className="text-zinc-400 hover:text-white lg:hidden flex-shrink-0"
               onClick={onMenuClick}
             >
               <Menu className="w-5 h-5" />
             </Button>
           )}
+          
+          {/* Page Title */}
+          <div className="flex-shrink-0">
+            <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-white truncate">{title}</h1>
+          </div>
+          
           {/* Dashboard Filter - only show on dashboard */}
           {showDashboardFilter && (
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-2 lg:space-x-3 ml-4 lg:ml-6">
               <Select
                 value={viewMode}
                 onValueChange={(value: "all" | "broker" | "csv") => {
@@ -74,7 +80,7 @@ export function TopBar({
                   if (value !== "csv") onSelectedCsvIdsChange?.([]);
                 }}
               >
-                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm w-36">
+                <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm w-40 lg:w-44">
                   <SelectValue placeholder="Filtrar visualização" />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -96,7 +102,7 @@ export function TopBar({
                   value={selectedBrokerFilter || ""}
                   onValueChange={onSelectedBrokerFilterChange}
                 >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm w-36">
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm w-36 lg:w-40">
                     <SelectValue placeholder="Selecionar mercado" />
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-800 border-zinc-700">
@@ -119,7 +125,7 @@ export function TopBar({
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="justify-between bg-zinc-800 border-zinc-700 text-white h-8 text-sm hover:bg-zinc-700 w-36"
+                      className="justify-between bg-zinc-800 border-zinc-700 text-white h-8 text-sm hover:bg-zinc-700 w-36 lg:w-40"
                     >
                       <span className="text-xs truncate">
                         {selectedCsvIds.length === 0
@@ -180,13 +186,8 @@ export function TopBar({
           )}
         </div>
         
-        {/* Center Section - Title */}
-        <div className="flex justify-center flex-1 min-w-0">
-          <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-white truncate text-center">{title}</h1>
-        </div>
-        
         {/* Right Section */}
-        <div className="flex items-center space-x-2 lg:space-x-3 flex-1 justify-end">
+        <div className="flex items-center space-x-3 lg:space-x-4 justify-end">
           <PlanStatus />
           <LanguageSelector />
         </div>

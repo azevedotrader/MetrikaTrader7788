@@ -89,9 +89,9 @@ export function PlanStatus() {
 
   return (
     <>
-      <div className="flex items-center space-x-2" data-testid="plan-status">
+      <div className="flex items-center space-x-2 lg:space-x-3" data-testid="plan-status">
         <Badge 
-          className={`${planDetails.color} text-white hover:${planDetails.color}/80 flex items-center space-x-1 px-2 py-1 text-xs cursor-pointer transition-colors`}
+          className={`${planDetails.color} text-white hover:${planDetails.color}/80 flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium cursor-pointer transition-all duration-200 hover:scale-105`}
           data-testid={`badge-plan-${planInfo.planType}`}
           onClick={() => setIsModalOpen(true)}
         >
@@ -100,9 +100,9 @@ export function PlanStatus() {
         </Badge>
         
         {showDuration && (
-          <div className="flex items-center space-x-1 text-xs text-zinc-400" data-testid="plan-duration">
-            <Clock className="w-3 h-3" />
-            <span>
+          <div className="flex items-center space-x-1.5 text-xs text-zinc-400 bg-zinc-800/50 rounded-md px-2 py-1" data-testid="plan-duration">
+            <Clock className="w-3 h-3 text-zinc-500" />
+            <span className="font-medium">
               {planInfo.daysRemaining !== undefined 
                 ? formatDaysRemaining(planInfo.daysRemaining)
                 : ''
