@@ -289,17 +289,17 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                 <Line
                   type="monotone"
                   dataKey="cumulativeProfit"
-                  stroke="#16a34a"
+                  stroke="#2FA87A"
                   strokeWidth={3}
-                  dot={{ fill: "#16a34a", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#16a34a", strokeWidth: 2 }}
+                  dot={{ fill: "#2FA87A", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: "#2FA87A", strokeWidth: 2 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="profit"
-                  stroke="#16a34a"
+                  stroke="#2FA87A"
                   strokeWidth={2}
-                  dot={{ fill: "#16a34a", strokeWidth: 2, r: 3 }}
+                  dot={{ fill: "#2FA87A", strokeWidth: 2, r: 3 }}
                   strokeDasharray="5 5"
                 />
               </ComposedChart>
@@ -320,11 +320,11 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
         {/* Legenda */}
         <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-green-600"></div>
+            <div className="w-3 h-0.5 bg-[#2FA87A]"></div>
             <span className="text-slate-300">{t('metrics.accumulated_profitability')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-green-600 border-dashed"></div>
+            <div className="w-3 h-0.5 bg-[#2FA87A] border-dashed"></div>
             <span className="text-slate-300">{t('metrics.period_result')}</span>
           </div>
         </div>
@@ -569,7 +569,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
         value: total,
         average: avg,
         count: results.length,
-        color: total >= 0 ? '#16a34a' : '#ef4444'
+        color: total >= 0 ? '#2FA87A' : '#ef4444'
       };
     }).sort((a, b) => a.time.localeCompare(b.time));
 
@@ -610,10 +610,10 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
       return (
         <div className="bg-black border border-zinc-700 rounded-lg p-3 text-white">
           <p className="font-medium mb-1">⏰ {label}</p>
-          <p className={`${data.value >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+          <p className={`${data.value >= 0 ? 'text-[#2FA87A]' : 'text-red-500'}`}>
             💰 Total: R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <p className={`${data.average >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+          <p className={`${data.average >= 0 ? 'text-[#2FA87A]' : 'text-red-500'}`}>
             📊 Média: R$ {data.average.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
           <p className="text-zinc-300">📈 Trades: {data.count}</p>
@@ -681,7 +681,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div className="text-center">
               <div className="text-zinc-400 mb-2 text-xs md:text-sm">Melhor Horário</div>
-              <div className="text-green-600 font-medium text-sm md:text-base lg:text-lg">
+              <div className="text-[#2FA87A] font-medium text-sm md:text-base lg:text-lg">
                 {(() => {
                   const best = timeData.reduce((prev, current) => 
                     prev.value > current.value ? prev : current
@@ -794,7 +794,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
   }, [metricsData]);
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "#16a34a"; // Verde
+    if (score >= 80) return "#2FA87A"; // Verde
     if (score >= 60) return "#eab308"; // Amarelo
     if (score >= 40) return "#f97316"; // Laranja
     return "#ef4444"; // Vermelho
@@ -834,8 +834,8 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
                       #ef4444 0%, 
                       #f97316 25%, 
                       #eab308 50%, 
-                      #16a34a 75%, 
-                      #16a34a 100%
+                      #2FA87A 75%, 
+                      #2FA87A 100%
                     )`,
                     backgroundSize: '400% 100%',
                     backgroundPosition: `${100 - (overallScore / 100) * 100}% 0`
@@ -857,8 +857,8 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
               <RadarChart data={metricsData}>
                 <defs>
                   <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#16a34a" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity={0.1} />
+                    <stop offset="0%" stopColor="#2FA87A" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#2FA87A" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <PolarGrid 
@@ -885,11 +885,11 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
                 />
                 <Radar
                   dataKey="value"
-                  stroke="#16a34a"
+                  stroke="#2FA87A"
                   fill="url(#radarGradient)"
                   strokeWidth={2}
                   dot={{ 
-                    fill: "#16a34a", 
+                    fill: "#2FA87A", 
                     strokeWidth: 2, 
                     r: 4 
                   }}
@@ -953,7 +953,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
                       <span className="text-slate-300 font-medium">{data.displayName}</span>
                       <div className="text-right">
                         <div className={`font-bold ${
-                          data.total >= 0 ? 'text-green-600' : 'text-red-500'
+                          data.total >= 0 ? 'text-[#2FA87A]' : 'text-red-500'
                         }`}>
                           R$ {data.total.toFixed(2)}
                         </div>
@@ -1127,7 +1127,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
   // Cor da linha baseada no valor acumulado final
   const finalAccumulated = chartData.length > 0 ? chartData[chartData.length - 1].accumulated : 0;
   const isNegative = finalAccumulated < 0;
-  const lineColor = isNegative ? "#ef4444" : "#16a34a"; // Vermelho se negativo, verde se positivo
+  const lineColor = isNegative ? "#ef4444" : "#2FA87A"; // Vermelho se negativo, verde se positivo
   const fillGradient = isNegative ? "url(#negativeGradient)" : "url(#positiveGradient)";
 
   // Função para renderizar métricas no container
@@ -1148,7 +1148,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <!-- Total de Lucros -->
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
-          <div class="text-xs font-bold text-green-600 truncate">
+          <div class="text-xs font-bold text-[#2FA87A] truncate">
             R$ ${totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -1170,7 +1170,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <!-- Resultado do Período -->
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
-          <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-green-600' : 'text-red-500'}">
+          <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-[#2FA87A]' : 'text-red-500'}">
             R$ ${finalAccumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -1269,7 +1269,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
             }
             className={`text-xs md:text-sm ${
               selectedPeriod === filter.key
-                ? "bg-green-600 hover:bg-green-700 text-white"
+                ? "bg-[#2FA87A] hover:bg-[#279169] text-white"
                 : "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
             }`}
           >
@@ -1439,11 +1439,11 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
                     <p style={{ margin: 0, fontWeight: "bold", marginBottom: "4px" }}>
                       {label}
                     </p>
-                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#16a34a" : "#ef4444" }}>
+                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#2FA87A" : "#ef4444" }}>
                       💰 Acumulado: R$ {data.accumulated.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </p>
                     {data.positive > 0 && (
-                      <p style={{ margin: 0, color: "#16a34a" }}>
+                      <p style={{ margin: 0, color: "#2FA87A" }}>
                         📈 Lucro: R$ {data.positive.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                       </p>
                     )}
@@ -1472,8 +1472,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
                 <defs>
                   <linearGradient id="dynamicGradient" x1="0" y1="0" x2="0" y2="1">
                     {/* Verde acima de 0 */}
-                    <stop offset="0%" stopColor="#16a34a" />
-                    <stop offset={`${zeroPosition}%`} stopColor="#16a34a" />
+                    <stop offset="0%" stopColor="#2FA87A" />
+                    <stop offset={`${zeroPosition}%`} stopColor="#2FA87A" />
                     {/* Vermelho abaixo de 0 */}
                     <stop offset={`${zeroPosition}%`} stopColor="#ef4444" />
                     <stop offset="100%" stopColor="#ef4444" />
@@ -1823,7 +1823,7 @@ interface CircularProgressProps {
   color?: string;
 }
 
-function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#16a34a" }: CircularProgressProps) {
+function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#2FA87A" }: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -1924,7 +1924,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
                   <div className="text-xs text-zinc-400 mb-1">
                     {label}
                   </div>
-                  <div className={`text-sm font-semibold ${isPositive ? 'text-green-600' : 'text-red-500'}`}>
+                  <div className={`text-sm font-semibold ${isPositive ? 'text-[#2FA87A]' : 'text-red-500'}`}>
                     {isPositive ? '+' : ''}R$ {Math.abs(value).toFixed(2)}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
@@ -1946,7 +1946,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
             {dailyData.map((entry, index) => (
               <Cell 
                 key={index} 
-                fill={entry.pnl >= 0 ? '#16a34a' : '#ef4444'} 
+                fill={entry.pnl >= 0 ? '#2FA87A' : '#ef4444'} 
               />
             ))}
           </Bar>
@@ -2001,7 +2001,7 @@ function RecentTrades({ trades }: { trades: Trade[] }) {
               <div className="text-zinc-300">
                 {parseFloat(trade.quantidade || '0').toFixed(0)}
               </div>
-              <div className={`font-medium ${result >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+              <div className={`font-medium ${result >= 0 ? 'text-[#2FA87A]' : 'text-red-500'}`}>
                 {result >= 0 ? '+' : ''}R${result.toFixed(0)}
               </div>
             </div>
@@ -2047,14 +2047,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     b3: {
       name: t('broker.b3.name'),
       type: t('broker.b3.type'),
-      color: "bg-green-600",
+      color: "bg-[#2FA87A]",
       icon: BarChart3,
       description: t('broker.b3.description'),
     },
     crypto: {
       name: t('broker.crypto.name'),
       type: t('broker.crypto.type'),
-      color: "bg-green-600",
+      color: "bg-[#2FA87A]",
       icon: Activity,
       description: t('broker.crypto.description'),
     },
@@ -2329,7 +2329,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${(() => {
                   const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                  return totalResult >= 0 ? 'text-green-600' : 'text-red-500';
+                  return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-red-500';
                 })()} break-words`}>
                   R$ {(() => {
                     const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -2354,7 +2354,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                     const totalTrades = filteredTrades.length;
                     const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                    return winRate >= 60 ? 'text-green-600' : winRate >= 40 ? 'text-yellow-500' : 'text-red-500';
+                    return winRate >= 60 ? 'text-[#2FA87A]' : winRate >= 40 ? 'text-yellow-500' : 'text-red-500';
                   })()}`}>
                     {(() => {
                       const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
@@ -2375,7 +2375,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                         const totalTrades = filteredTrades.length;
                         const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                        return winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#eab308" : "#ef4444";
+                        return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#ef4444";
                       })()}
                     />
                   </div>
@@ -2453,7 +2453,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <div className="text-base md:text-lg lg:text-xl font-bold text-green-600 break-words">
+                    <div className="text-base md:text-lg lg:text-xl font-bold text-[#2FA87A] break-words">
                       +R$ {(() => {
                         const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
@@ -2481,7 +2481,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       return (
                         <div className="flex items-end gap-1 h-10">
                           <div 
-                            className="bg-green-600 rounded-sm w-2 transition-all duration-300"
+                            className="bg-[#2FA87A] rounded-sm w-2 transition-all duration-300"
                             style={{ height: `${winHeight}px` }}
                           />
                           <div 
@@ -2523,11 +2523,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
-                          <p className="text-sm sm:text-lg font-bold text-green-600 truncate">
+                          <p className="text-sm sm:text-lg font-bold text-[#2FA87A] truncate">
                             R$ {metrics.melhorTrade.toFixed(2)}
                           </p>
                         </div>
-                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-green-600 flex-shrink-0 ml-2" />
+                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
                       </div>
                     </div>
 
@@ -2557,7 +2557,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-medium text-zinc-400">{t('metrics.daily_net_pnl')}</h3>
-                    <BarChart3 className="h-4 w-4 text-green-600" />
+                    <BarChart3 className="h-4 w-4 text-[#2FA87A]" />
                   </div>
                   <div className="h-48 overflow-hidden">
                     <NetDailyPnLBarChart trades={filteredTrades} />
@@ -2586,7 +2586,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 title={t('metrics.daily_net_pnl')}
                 value=""
                 icon={BarChart3}
-                color="text-green-600"
+                color="text-[#2FA87A]"
                 data-testid="card-daily-pnl-chart"
                 className="h-64 md:h-80"
               >
@@ -2640,7 +2640,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 {/* Lucros */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">Lucros</div>
-                  <div className="text-lg md:text-xl font-bold text-green-600 mb-2">
+                  <div className="text-lg md:text-xl font-bold text-[#2FA87A] mb-2">
                     R$ {(() => {
                       const totalPositive = periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') > 0)
@@ -2658,7 +2658,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={winPercentage} 
                             size={35}
-                            color="#16a34a"
+                            color="#2FA87A"
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {winPercentage.toFixed(1)}%
@@ -2712,7 +2712,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 mb-2">Resultado</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                    return totalResult >= 0 ? 'text-green-600' : 'text-red-500';
+                    return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-red-500';
                   })()}`}>
                     R$ {(() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -2731,7 +2731,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={winRate} 
                             size={35}
-                            color={isPositive ? "#16a34a" : "#ef4444"}
+                            color={isPositive ? "#2FA87A" : "#ef4444"}
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {winRate.toFixed(1)}%
@@ -2751,7 +2751,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
-                    return avgResult >= 0 ? 'text-green-600' : 'text-red-500';
+                    return avgResult >= 0 ? 'text-[#2FA87A]' : 'text-red-500';
                   })()}`}>
                     R$ {(() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -2770,7 +2770,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={normalizedPercentage} 
                             size={35}
-                            color={isPositive ? "#16a34a" : "#ef4444"}
+                            color={isPositive ? "#2FA87A" : "#ef4444"}
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {normalizedPercentage.toFixed(1)}%
