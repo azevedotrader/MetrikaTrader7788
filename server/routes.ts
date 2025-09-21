@@ -20,9 +20,9 @@ import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 
 // JWT Secret - must be provided in production
-const JWT_SECRET = process.env.JWT_SECRET || (
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || (
   process.env.NODE_ENV === 'production' 
-    ? (() => { throw new Error('JWT_SECRET is required in production'); })()
+    ? (() => { throw new Error('JWT_SECRET or SESSION_SECRET is required in production'); })()
     : 'dev_secret_change_in_production'
 );
 
