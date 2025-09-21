@@ -2747,13 +2747,13 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
           {/* Bottom Row - Square Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Progress Tracker - Expanded */}
+            {/* Progress Tracker - 1 coluna */}
             <SquareCard
               title={t('metrics.progress_tracker')}
               value=""
               icon={Calendar}
               color="text-blue-600"
-              className="lg:col-span-2 h-auto"
+              className="lg:col-span-1 h-auto"
               data-testid="card-progress-tracker"
             >
               <div className="h-full flex flex-col">
@@ -2797,6 +2797,20 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </div>
             </SquareCard>
 
+            {/* Métricas Avançadas de Performance - Ao lado do calendário */}
+            <SquareCard
+              title="Métricas Avançadas"
+              value=""
+              icon={BarChart3}
+              color="text-[#2FA87A]"
+              data-testid="card-advanced-metrics"
+              className="lg:col-span-1 h-auto"
+            >
+              <div className="h-full p-4">
+                <AdvancedMetrics trades={filteredTrades} />
+              </div>
+            </SquareCard>
+
             {/* Right Column - Net Daily PnL Chart and Recent Trades */}
             {/* Mobile: Cards separados em grid */}
             <div className="lg:hidden grid grid-cols-1 gap-3">
@@ -2827,23 +2841,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </Card>
             </div>
 
-            {/* Desktop: Layout original em SquareCards */}
+            {/* Desktop: Layout PnL e Trades Recentes */}
             <div className="hidden lg:flex lg:flex-col gap-4 h-full">
-              {/* Métricas Avançadas de Performance - Primeiro e Maior */}
-              <SquareCard
-                title="Métricas Avançadas"
-                value=""
-                icon={BarChart3}
-                color="text-[#2FA87A]"
-                data-testid="card-advanced-metrics"
-                className="h-[380px] flex-shrink-0"
-              >
-                <div className="h-full p-4">
-                  <AdvancedMetrics trades={filteredTrades} />
-                </div>
-              </SquareCard>
-
-              {/* Net Daily PnL Chart - Segundo */}
+              {/* Net Daily PnL Chart - Primeiro */}
               <SquareCard
                 title={t('metrics.daily_net_pnl')}
                 value=""
@@ -2857,7 +2857,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
               </SquareCard>
 
-              {/* Recent Trades - Terceiro */}
+              {/* Recent Trades - Segundo */}
               <SquareCard
                 title={t('dashboard.recent_trades')}
                 value=""
