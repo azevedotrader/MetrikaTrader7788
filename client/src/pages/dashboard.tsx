@@ -172,10 +172,9 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
     return acc + parseFloat(trade.capitalUtilizado || "0");
   }, 0);
 
-  // Rentabilidade como percentual do capital utilizado
-  const rentabilidadePercentual = capitalTotalUtilizado > 0 
-    ? (rentabilidadeTotalR$ / capitalTotalUtilizado) * 100 
-    : 0;
+  // Usar rentabilidade total como a métrica base (conforme fórmulas originais)
+  // Para comparabilidade, vamos normalizar por um fator ou usar diretamente
+  const rentabilidade = Math.abs(rentabilidadeTotalR$); // Valor absoluto para as fórmulas
 
   const tradesLucrativos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
   const tradesNegativo = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
@@ -223,25 +222,22 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
     rrMedio = mediaPerdas > 0 ? mediaGanhos / mediaPerdas : 1;
   }
 
-  // Cálculo das 4 métricas avançadas (agora com rentabilidade percentual)
+  // Cálculo das 4 métricas avançadas (conforme fórmulas originais)
   
-  // 1. IQT = (Rentabilidade% × FatorDeLucro × Assertividade) / RR_médio
-  // Limitado a 100 para evitar valores excessivos
+  // 1. IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
   const iqt = rrMedio > 0 
-    ? Math.min(Math.abs((rentabilidadePercentual * fatorDeLucro * assertividade) / rrMedio), 100)
+    ? (rentabilidade * fatorDeLucro * assertividade) / rrMedio
     : 0;
   
-  // 2. Eficiência de Risco = Rentabilidade% / RR_médio
-  // Remove a multiplicação por 100 arbitrária
-  const eficienciaRisco = rrMedio > 0 ? rentabilidadePercentual / rrMedio : 0;
+  // 2. Eficiência de Risco = Rentabilidade / (RR_médio × 100)
+  const eficienciaRisco = rrMedio > 0 ? rentabilidade / (rrMedio * 100) : 0;
   
   // 3. Score de Consistência = √(Assertividade × FatorDeLucro)
-  // Limitado a 10 para evitar valores excessivos
-  const scoreConsistencia = Math.min(Math.sqrt(assertividade * fatorDeLucro), 10);
+  const scoreConsistencia = Math.sqrt(assertividade * fatorDeLucro);
   
-  // 4. RAP = Rentabilidade% / Assertividade
-  // Representa retorno percentual por ponto de assertividade
-  const retornoAjustadoPrecisao = assertividade > 0 ? rentabilidadePercentual / assertividade : 0;
+  // 4. RAP = Rentabilidade / Assertividade
+  const retornoAjustadoPrecisao = assertividade > 0 ? rentabilidade / assertividade : 0;
+
 
   return {
     iqt: Math.max(0, iqt),
@@ -258,24 +254,24 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
   const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap') => {
     switch (type) {
       case 'iqt':
-        // IQT de 0-100, considerando que valores altos são melhores
-        if (value >= 20) return 'text-[#2FA87A]'; // Verde
-        if (value >= 10) return 'text-yellow-500'; // Amarelo
+        // IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
+        if (value >= 5) return 'text-[#2FA87A]'; // Verde
+        if (value >= 1) return 'text-yellow-500'; // Amarelo
         return 'text-[#F06363]'; // Vermelho
       case 'eficiencia':
-        // Eficiência de Risco - valores positivos são bons
-        if (value >= 2) return 'text-[#2FA87A]';
-        if (value >= 0) return 'text-yellow-500';
+        // Eficiência = Rentabilidade / (RR_médio × 100)
+        if (value >= 0.05) return 'text-[#2FA87A]';
+        if (value >= 0.01) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'consistencia':
-        // Score de Consistência limitado a 10, valores altos são melhores
-        if (value >= 2) return 'text-[#2FA87A]';
+        // Score de Consistência = √(Assertividade × FatorDeLucro)
+        if (value >= 1.5) return 'text-[#2FA87A]';
         if (value >= 1) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'rap':
-        // RAP - retorno percentual por assertividade, valores positivos são bons
-        if (value >= 5) return 'text-[#2FA87A]';
-        if (value >= 0) return 'text-yellow-500';
+        // RAP = Rentabilidade / Assertividade
+        if (value >= 10) return 'text-[#2FA87A]';
+        if (value >= 5) return 'text-yellow-500';
         return 'text-[#F06363]';
     }
   };
