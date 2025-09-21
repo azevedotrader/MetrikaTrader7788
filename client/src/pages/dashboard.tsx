@@ -2576,30 +2576,31 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </div>
 
             {/* Desktop: Layout original em SquareCards */}
-            <div className="hidden lg:grid grid-cols-1 gap-3 md:gap-4">
-              {/* Net Daily PnL Chart */}
+            <div className="hidden lg:flex lg:flex-col gap-4 h-full">
+              {/* Net Daily PnL Chart - Menor */}
               <SquareCard
                 title={t('metrics.daily_net_pnl')}
                 value=""
                 icon={BarChart3}
                 color="text-[#2FA87A]"
                 data-testid="card-daily-pnl-chart"
-                className="h-64 md:h-80"
+                className="h-[280px] flex-shrink-0"
               >
-                <div className="h-full overflow-hidden min-h-[180px]">
+                <div className="h-full overflow-hidden min-h-[200px]">
                   <NetDailyPnLBarChart trades={filteredTrades} />
                 </div>
               </SquareCard>
 
-              {/* Recent Trades - Below Net Daily PnL */}
+              {/* Recent Trades - Maior, ocupando o resto do espaço */}
               <SquareCard
                 title={t('dashboard.recent_trades')}
                 value=""
                 icon={FileText}
                 color="text-zinc-400"
                 data-testid="card-recent-trades"
+                className="flex-1 min-h-[380px]"
               >
-                <div className="h-full">
+                <div className="h-full overflow-auto">
                   <RecentTrades trades={filteredTrades} />
                 </div>
               </SquareCard>
