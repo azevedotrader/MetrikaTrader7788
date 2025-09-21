@@ -2853,36 +2853,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </Card>
             </div>
 
-            {/* Desktop: Layout PnL e Trades Recentes */}
-            <div className="hidden lg:flex lg:flex-col gap-4 h-full">
-              {/* Net Daily PnL Chart - Primeiro */}
-              <SquareCard
-                title={t('metrics.daily_net_pnl')}
-                value=""
-                icon={BarChart3}
-                color="text-[#2FA87A]"
-                data-testid="card-daily-pnl-chart"
-                className="h-[280px] flex-shrink-0"
-              >
-                <div className="h-full overflow-hidden min-h-[200px]">
-                  <NetDailyPnLBarChart trades={filteredTrades} />
-                </div>
-              </SquareCard>
-
-              {/* Recent Trades - Segundo */}
-              <SquareCard
-                title={t('dashboard.recent_trades')}
-                value=""
-                icon={FileText}
-                color="text-zinc-400"
-                data-testid="card-recent-trades"
-                className="flex-1 min-h-[280px]"
-              >
-                <div className="h-full overflow-auto">
-                  <RecentTrades trades={filteredTrades} />
-                </div>
-              </SquareCard>
-            </div>
           </div>
 
 
@@ -3062,17 +3032,53 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </div>
           </div>
 
-          {/* Trade Time Performance - Largura completa */}
-          <div className="grid grid-cols-1 gap-6">
-            <Card className="border-zinc-800 bg-[#171719]">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-zinc-400" />
-                  Trade Time Performance
-                </CardTitle>
-              </CardHeader>
-              <TradeTimePerformance trades={filteredTrades} t={t} />
-            </Card>
+          {/* Trade Time Performance + PnL e Trades Recentes - Lado a lado */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Trade Time Performance - 2 colunas */}
+            <div className="lg:col-span-2">
+              <Card className="border-zinc-800 bg-[#171719] h-full">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-zinc-400" />
+                    Trade Time Performance
+                  </CardTitle>
+                </CardHeader>
+                <TradeTimePerformance trades={filteredTrades} t={t} />
+              </Card>
+            </div>
+
+            {/* PnL e Trades Recentes - 1 coluna à direita */}
+            <div className="lg:col-span-1">
+              <div className="flex flex-col gap-4 h-full">
+                {/* Net Daily PnL Chart */}
+                <SquareCard
+                  title={t('metrics.daily_net_pnl')}
+                  value=""
+                  icon={BarChart3}
+                  color="text-[#2FA87A]"
+                  data-testid="card-daily-pnl-chart"
+                  className="h-[280px] flex-shrink-0"
+                >
+                  <div className="h-full overflow-hidden min-h-[200px]">
+                    <NetDailyPnLBarChart trades={filteredTrades} />
+                  </div>
+                </SquareCard>
+
+                {/* Recent Trades */}
+                <SquareCard
+                  title={t('dashboard.recent_trades')}
+                  value=""
+                  icon={FileText}
+                  color="text-zinc-400"
+                  data-testid="card-recent-trades"
+                  className="flex-1 min-h-[280px]"
+                >
+                  <div className="h-full overflow-auto">
+                    <RecentTrades trades={filteredTrades} />
+                  </div>
+                </SquareCard>
+              </div>
+            </div>
           </div>
 
           {/* Gráfico de Rentabilidade e Análise de Volume */}
