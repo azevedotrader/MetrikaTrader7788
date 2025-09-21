@@ -140,6 +140,7 @@ interface AdvancedMetricsData {
   scoreConsistencia: number;
   retornoAjustadoPrecisao: number;
   ipi: number;
+  expectancy: number;
 }
 
 const simbolosEmocoes = {
@@ -161,6 +162,7 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
       scoreConsistencia: 0,
       retornoAjustadoPrecisao: 0,
       ipi: 0,
+      expectancy: 0,
     };
   }
 
@@ -282,12 +284,18 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
   const denominadorIPI = rrMedio * (1 + maiorDrawdown);
   const ipi = denominadorIPI > 0 ? numeradorIPI / denominadorIPI : 0;
 
+  // 6. Expectancy (Van Tharp) = (Taxa de Acerto × Ganho Médio) − ((1 − Taxa de Acerto) × Perda Média)
+  const ganhoMedio = tradesLucrativos.length > 0 ? totalLucros / tradesLucrativos.length : 0;
+  const perdaMedia = tradesNegativo.length > 0 ? Math.abs(totalPerdas / tradesNegativo.length) : 0;
+  const expectancy = (assertividade * ganhoMedio) - ((1 - assertividade) * perdaMedia);
+
   return {
     iqt: Math.max(0, iqt),
     eficienciaRisco,
     scoreConsistencia: Math.max(0, scoreConsistencia),
     retornoAjustadoPrecisao,
     ipi: Math.max(0, ipi),
+    expectancy,
   };
 }
 
@@ -295,7 +303,7 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
 function AdvancedMetrics({ trades }: { trades: Trade[] }) {
   const metrics = calculateAdvancedMetrics(trades);
 
-  const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi') => {
+  const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi' | 'expectancy') => {
     switch (type) {
       case 'iqt':
         // IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
@@ -322,18 +330,23 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
         if (value >= 2.0) return 'text-[#2FA87A]'; // Estratégia de qualidade
         if (value >= 1.0) return 'text-yellow-500'; // Estratégia razoável
         return 'text-[#F06363]'; // Estratégia fraca
+      case 'expectancy':
+        // Expectancy (Van Tharp) - Lucro esperado por trade em R$
+        if (value >= 50) return 'text-[#2FA87A]'; // Estratégia muito lucrativa
+        if (value > 0) return 'text-yellow-500'; // Estratégia lucrativa
+        return 'text-[#F06363]'; // Estratégia não lucrativa
     }
   };
 
   return (
     <div className="flex flex-col gap-3 h-full">
       {/* Primeira linha: 3 métricas */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* IQT */}
-        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-2">IQT</div>
+        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">IQT</div>
           <div 
-            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}
+            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}
             data-testid="text-iqt"
           >
             {metrics.iqt.toFixed(1)}
@@ -342,10 +355,10 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
         </div>
 
         {/* Eficiência de Risco */}
-        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-2">Eficiência</div>
+        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">Eficiência</div>
           <div 
-            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}
+            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}
             data-testid="text-eficiencia"
           >
             {metrics.eficienciaRisco.toFixed(2)}
@@ -354,10 +367,10 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
         </div>
 
         {/* Score de Consistência */}
-        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-2">Consistência</div>
+        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">Consistência</div>
           <div 
-            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}
+            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}
             data-testid="text-consistencia"
           >
             {metrics.scoreConsistencia.toFixed(2)}
@@ -366,13 +379,13 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
         </div>
       </div>
 
-      {/* Segunda linha: 2 métricas */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Segunda linha: 3 métricas */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {/* RAP */}
-        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-2">RAP</div>
+        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">RAP</div>
           <div 
-            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}
+            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}
             data-testid="text-rap"
           >
             {metrics.retornoAjustadoPrecisao.toFixed(2)}
@@ -380,16 +393,28 @@ function AdvancedMetrics({ trades }: { trades: Trade[] }) {
           <div className="text-xs text-zinc-500">Precisão</div>
         </div>
 
-        {/* IPI - Novo */}
-        <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-2">IPI</div>
+        {/* IPI */}
+        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">IPI</div>
           <div 
-            className={`text-lg font-bold mb-1 ${getScoreColor(metrics.ipi, 'ipi')}`}
+            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.ipi, 'ipi')}`}
             data-testid="text-ipi"
           >
             {metrics.ipi.toFixed(3)}
           </div>
           <div className="text-xs text-zinc-500">Performance</div>
+        </div>
+
+        {/* Expectancy - Van Tharp */}
+        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">Expectancy</div>
+          <div 
+            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.expectancy, 'expectancy')}`}
+            data-testid="text-expectancy"
+          >
+            R$ {metrics.expectancy.toFixed(2)}
+          </div>
+          <div className="text-xs text-zinc-500">Van Tharp</div>
         </div>
       </div>
     </div>
