@@ -625,7 +625,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
 
   return (
     <div className="p-4 md:p-5 lg:p-6">
-      <div className="h-64 sm:h-72 md:h-80 lg:h-96 xl:h-[400px] w-full">
+      <div className="h-80 sm:h-96 md:h-[420px] lg:h-[480px] xl:h-[520px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={timeData} margin={{ 
             top: 15, 
@@ -2784,8 +2784,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           </div>
 
           {/* Métrika Score e Trade Time Performance - Lado a lado */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-zinc-800 bg-[#171719]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="border-zinc-800 bg-[#171719] lg:col-span-1">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-zinc-400" />
@@ -2795,7 +2795,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               <MetrikaScore trades={filteredTrades} t={t} />
             </Card>
             
-            <Card className="border-zinc-800 bg-[#171719]">
+            <Card className="border-zinc-800 bg-[#171719] lg:col-span-2">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Activity className="h-5 w-5 text-zinc-400" />
