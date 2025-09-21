@@ -290,105 +290,80 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-all duration-200 overflow-hidden cursor-pointer h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px] p-1.5 sm:p-2 md:p-2.5",
-          isToday && "bg-zinc-800/60 border-zinc-500 ring-1 ring-zinc-600/50",
-          hasData && isProfit && "bg-green-600/90 hover:bg-green-600/95 border-green-500/50 shadow-sm shadow-green-900/10",
-          hasData && isLoss && "bg-red-500/90 hover:bg-red-500/95 border-red-400/50 shadow-sm shadow-red-900/10",
-          hasData && isBreakEven && "bg-yellow-500/90 hover:bg-yellow-500/95 border-yellow-400/50 shadow-sm shadow-yellow-900/10",
+          "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px] p-2 md:p-2.5",
+          isToday && "bg-zinc-800/60 ring-1 ring-zinc-600/50",
+          hasData && isProfit && "bg-gradient-to-b from-green-600 to-green-700 hover:brightness-105",
+          hasData && isLoss && "bg-gradient-to-b from-red-500 to-red-600 hover:brightness-105",
+          hasData && isBreakEven && "bg-gradient-to-b from-amber-500 to-amber-600 hover:brightness-105",
           !hasData && "hover:bg-zinc-800/30",
         )}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
       >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+        {/* Número do dia - canto superior esquerdo */}
+        <div
+          className={cn(
+            "absolute top-1.5 left-1.5 text-[11px] sm:text-xs font-semibold",
+            hasData && isBreakEven ? "text-zinc-900/90" : "text-white/80",
+          )}
+        >
+          {dayNumber}
+        </div>
+        
+        {/* Ícone do diário - canto superior direito */}
+        {hasDiary && (
+          <div title={t("calendar.diary_entry_available")} className="absolute top-1.5 right-1.5">
+            <BookOpen
+              className={cn(
+                "w-4 h-4",
+                hasData && isBreakEven ? "text-zinc-900/80" : "text-white/80"
+              )}
+              data-testid={`diary-indicator-${dayNumber}`}
+            />
+          </div>
+        )}
+
+        {/* P&L centralizado */}
+        {hasData && tradeDay && (
+          <div className="flex h-full items-center justify-center">
             <div
               className={cn(
-                "font-semibold text-sm sm:text-base md:text-lg",
-                hasData && isBreakEven ? "text-zinc-900" : isToday ? "text-white" : hasData ? "text-white/90" : "text-zinc-400",
+                "font-extrabold tracking-tight tabular-nums leading-none text-center",
+                "text-lg sm:text-xl md:text-2xl",
+                hasData && isBreakEven ? "text-zinc-900" : "text-white"
               )}
+              style={{ 
+                textShadow: hasData && isBreakEven ? 'none' : '0 1px 2px rgba(0,0,0,0.6)'
+              }}
             >
-              {dayNumber}
+              <span className="sm:hidden">
+                {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+              </span>
+              <span className="hidden sm:inline md:hidden">
+                {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+              </span>
+              <span className="hidden md:inline">
+                {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+              </span>
             </div>
-            {hasDiary && (
-              <div title={t("calendar.diary_entry_available")} className="flex-shrink-0">
-                <BookOpen
-                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 opacity-80 hover:opacity-100 transition-opacity"
-                  data-testid={`diary-indicator-${dayNumber}`}
-                />
-              </div>
+          </div>
+        )}
+
+        {/* Métricas secundárias - parte inferior */}
+        {hasData && tradeDay && (
+          <div className={cn(
+            "absolute bottom-1.5 left-2 right-2 flex items-center justify-center gap-2 text-[10px] sm:text-xs",
+            hasData && isBreakEven ? "text-zinc-900/90" : "text-white/85"
+          )}>
+            <span>{tradeDay.trades} {tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}</span>
+            {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
+              <>
+                <span>•</span>
+                <span>{tradeDay.winRate.toFixed(0)}% {t("calendar.win")}</span>
+              </>
             )}
           </div>
-
-          {hasData && tradeDay && (
-            <div className="flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5">
-              {/* P&L Principal - sempre mostrar */}
-              <div
-                className="font-bold leading-tight text-white px-2 py-1.5 rounded-lg bg-black/80 text-center shadow-xl text-xs sm:text-sm md:text-base backdrop-blur-md border border-white/30"
-                style={{ 
-                  textShadow: '0 0 8px rgba(255,255,255,0.8), 2px 2px 4px rgba(0,0,0,0.9)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.4)'
-                }}
-              >
-                <span className="sm:hidden">
-                  {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
-                </span>
-                <span className="hidden sm:inline md:hidden">
-                  {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
-                </span>
-                <span className="hidden md:inline">
-                  {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
-                </span>
-              </div>
-
-              {/* Informações secundárias */}
-              <div className="space-y-0.5 sm:space-y-1">
-                {/* Quantidade de trades */}
-                <div
-                  className={cn(
-                    "leading-tight font-semibold px-2 py-1 rounded-lg text-center text-[10px] sm:text-xs border shadow-lg backdrop-blur-sm",
-                    isBreakEven 
-                      ? "bg-white/85 text-zinc-900 border-zinc-900/30" 
-                      : "bg-black/75 text-white border-white/25"
-                  )}
-                  style={!isBreakEven ? {
-                    textShadow: '0 0 6px rgba(255,255,255,0.6), 1px 1px 2px rgba(0,0,0,0.8)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.3)'
-                  } : {
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 6px rgba(0,0,0,0.2)'
-                  }}
-                >
-                  {tradeDay.trades} {tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
-                </div>
-
-                {/* Taxa de acerto - só mostrar se houver múltiplos trades */}
-                {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
-                  <div
-                    className={cn(
-                      "leading-tight font-semibold px-2 py-1 rounded-lg text-center text-[9px] sm:text-[10px] border shadow-lg backdrop-blur-sm",
-                      isBreakEven 
-                        ? "bg-white/85 text-zinc-900 border-zinc-900/30" 
-                        : "bg-black/75 text-white border-white/25"
-                    )}
-                    style={!isBreakEven ? {
-                      textShadow: '0 0 6px rgba(255,255,255,0.6), 1px 1px 2px rgba(0,0,0,0.8)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.3)'
-                    } : {
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.3), 0 2px 6px rgba(0,0,0,0.2)'
-                    }}
-                  >
-                    {tradeDay.winRate.toFixed(0)}% {t("calendar.win")}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Indicador de hover para adicionar entrada */}
-          <div className="absolute inset-0 bg-zinc-900/70 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center backdrop-blur-sm">
-            <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-200 drop-shadow-md" />
-          </div>
-        </div>
+        )}
       </div>
     );
   };
@@ -399,26 +374,22 @@ export function TradingCalendar({
 
     return (
       <div className={cn(
-        "border-l border-zinc-700 p-3 min-h-[155px] lg:min-h-[170px] flex flex-col justify-center transition-colors shadow-lg",
-        isProfit ? "bg-green-600/95 hover:bg-green-600/100 border-green-500/50" : week.pnl < 0 ? "bg-red-500/95 hover:bg-red-500/100 border-red-400/50" : "bg-zinc-800/70 hover:bg-zinc-800/80 border-zinc-600/50"
+        "min-h-[155px] lg:min-h-[170px] grid place-items-center transition-colors",
+        isProfit ? "bg-gradient-to-b from-green-600 to-green-700 hover:brightness-105" : week.pnl < 0 ? "bg-gradient-to-b from-red-500 to-red-600 hover:brightness-105" : "bg-gradient-to-b from-zinc-700 to-zinc-800 hover:brightness-105"
       )}>
-        <div className="text-xs text-zinc-200 mb-1.5 font-semibold"
-          style={{ textShadow: '0 0 4px rgba(255,255,255,0.5), 1px 1px 2px rgba(0,0,0,0.8)' }}>
-          {t("calendar.week")} {week.weekNumber}
-        </div>
-        <div
-          className="font-bold text-sm md:text-base mb-1.5 text-white"
-          style={{ textShadow: '0 0 8px rgba(255,255,255,0.8), 2px 2px 4px rgba(0,0,0,0.9)' }}
-        >
-          {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
-        </div>
-        <div className="text-xs text-zinc-200 font-semibold"
-          style={{ textShadow: '0 0 4px rgba(255,255,255,0.4), 1px 1px 2px rgba(0,0,0,0.7)' }}>
-          {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")}
-        </div>
-        <div className="text-[10px] text-zinc-200 mt-0.5 font-medium"
-          style={{ textShadow: '0 0 4px rgba(255,255,255,0.4), 1px 1px 2px rgba(0,0,0,0.7)' }}>
-          {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
+        <div className="text-center">
+          <div className="text-xs text-white/80 mb-1">
+            {t("calendar.week")} {week.weekNumber}
+          </div>
+          <div
+            className="text-white font-extrabold text-base md:text-lg tabular-nums mb-1"
+            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
+          >
+            {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+          </div>
+          <div className="text-[10px] text-white/80">
+            {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")} • {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
+          </div>
         </div>
       </div>
     );
