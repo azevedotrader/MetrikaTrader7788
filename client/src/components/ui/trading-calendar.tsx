@@ -291,20 +291,34 @@ export function TradingCalendar({
       <div
         className={cn(
           "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px] p-2 md:p-2.5",
-          isToday && "bg-zinc-800/60 ring-1 ring-zinc-600/50",
+          "backdrop-blur-[2px] md:backdrop-blur-[3px] bg-black/10 ring-1 ring-white/5 shadow-sm",
+          isToday && "ring-zinc-600/50",
           hasData && isProfit && "hover:brightness-105",
           hasData && isLoss && "hover:brightness-105",
-          hasData && isBreakEven && "bg-gradient-to-b from-amber-500 to-amber-600 hover:brightness-105",
+          hasData && isBreakEven && "hover:brightness-105",
           !hasData && "hover:bg-zinc-800/30",
         )}
-        style={hasData && isLoss ? {
-          background: 'linear-gradient(to bottom, #631919, #5a1717)'
-        } : hasData && isProfit ? {
-          background: 'linear-gradient(to bottom, #032E23, #02251d)'
-        } : undefined}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
       >
+        {/* Overlay de cor translúcido para efeito fosco */}
+        {hasData && (
+          <div 
+            aria-hidden="true" 
+            className={cn(
+              "absolute inset-0 pointer-events-none",
+              isLoss && "bg-gradient-to-b from-[rgba(99,25,25,0.55)] to-[rgba(90,23,23,0.35)]",
+              isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.55)] to-[rgba(2,37,29,0.35)]",
+              isBreakEven && "bg-gradient-to-b from-amber-500/50 to-amber-600/30"
+            )} 
+          />
+        )}
+        
+        {/* Efeito de brilho fosco sutil */}
+        <div 
+          aria-hidden="true" 
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/5 to-transparent" 
+        />
         {/* Número do dia - canto superior esquerdo */}
         <div
           className={cn(
@@ -338,7 +352,7 @@ export function TradingCalendar({
                 hasData && isBreakEven ? "text-zinc-900" : "text-white"
               )}
               style={{ 
-                textShadow: hasData && isBreakEven ? 'none' : '0 1px 2px rgba(0,0,0,0.6)'
+                textShadow: hasData && isBreakEven ? 'none' : '0 2px 4px rgba(0,0,0,0.8)'
               }}
             >
               <span className="sm:hidden">
@@ -380,22 +394,35 @@ export function TradingCalendar({
     return (
       <div 
         className={cn(
-          "min-h-[155px] lg:min-h-[170px] grid place-items-center transition-colors",
-          isProfit ? "hover:brightness-105" : week.pnl < 0 ? "hover:brightness-105" : "bg-gradient-to-b from-zinc-700 to-zinc-800 hover:brightness-105"
+          "min-h-[155px] lg:min-h-[170px] grid place-items-center transition-colors relative",
+          "backdrop-blur-[2px] md:backdrop-blur-[3px] bg-black/10 ring-1 ring-white/5 shadow-sm",
+          "hover:brightness-105"
         )}
-        style={week.pnl < 0 ? {
-          background: 'linear-gradient(to bottom, #631919, #5a1717)'
-        } : isProfit ? {
-          background: 'linear-gradient(to bottom, #032E23, #02251d)'
-        } : undefined}
       >
-        <div className="text-center">
+        {/* Overlay de cor translúcido para resumo semanal */}
+        <div 
+          aria-hidden="true" 
+          className={cn(
+            "absolute inset-0 pointer-events-none",
+            week.pnl < 0 && "bg-gradient-to-b from-[rgba(99,25,25,0.55)] to-[rgba(90,23,23,0.35)]",
+            isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.55)] to-[rgba(2,37,29,0.35)]",
+            week.pnl === 0 && "bg-gradient-to-b from-zinc-700/50 to-zinc-800/30"
+          )} 
+        />
+        
+        {/* Efeito de brilho fosco sutil */}
+        <div 
+          aria-hidden="true" 
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/5 to-transparent" 
+        />
+        
+        <div className="text-center relative z-10">
           <div className="text-xs text-white/80 mb-1">
             {t("calendar.week")} {week.weekNumber}
           </div>
           <div
             className="text-white font-extrabold text-base md:text-lg tabular-nums mb-1"
-            style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
+            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
           >
             {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
           </div>
