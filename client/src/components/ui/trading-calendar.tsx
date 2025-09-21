@@ -292,9 +292,9 @@ export function TradingCalendar({
         className={cn(
           "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-all duration-200 overflow-hidden cursor-pointer h-[85px] sm:h-[95px] md:h-[105px] lg:h-[115px] p-1.5 sm:p-2 md:p-2.5",
           isToday && "bg-zinc-800/60 border-zinc-500 ring-1 ring-zinc-600/50",
-          hasData && isProfit && "bg-green-600/85 hover:bg-green-600/95",
-          hasData && isLoss && "bg-red-500/85 hover:bg-red-500/95",
-          hasData && isBreakEven && "bg-yellow-500/85 hover:bg-yellow-500/95",
+          hasData && isProfit && "bg-green-600/90 hover:bg-green-600/95 border-green-500/50 shadow-sm shadow-green-900/10",
+          hasData && isLoss && "bg-red-500/90 hover:bg-red-500/95 border-red-400/50 shadow-sm shadow-red-900/10",
+          hasData && isBreakEven && "bg-yellow-500/90 hover:bg-yellow-500/95 border-yellow-400/50 shadow-sm shadow-yellow-900/10",
           !hasData && "hover:bg-zinc-800/30",
         )}
         onClick={() => handleDateClick(dayDate)}
@@ -305,7 +305,7 @@ export function TradingCalendar({
             <div
               className={cn(
                 "font-semibold text-sm sm:text-base md:text-lg",
-                isToday ? "text-white" : hasData ? "text-white/90" : "text-zinc-400",
+                hasData && isBreakEven ? "text-zinc-900" : isToday ? "text-white" : hasData ? "text-white/90" : "text-zinc-400",
               )}
             >
               {dayNumber}
@@ -324,8 +324,8 @@ export function TradingCalendar({
             <div className="flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5">
               {/* P&L Principal - sempre mostrar */}
               <div
-                className="font-bold leading-tight text-white px-1.5 py-1 rounded-md bg-black/40 text-center shadow-md text-xs sm:text-sm md:text-base backdrop-blur-sm"
-                style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
+                className="font-bold leading-tight text-white px-1.5 py-1 rounded-md bg-black/50 text-center shadow-lg text-xs sm:text-sm md:text-base backdrop-blur-sm border border-white/20"
+                style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.9)' }}
               >
                 <span className="sm:hidden">
                   {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
@@ -342,7 +342,10 @@ export function TradingCalendar({
               <div className="space-y-0.5 sm:space-y-1">
                 {/* Quantidade de trades */}
                 <div
-                  className="leading-tight font-medium px-1 py-0.5 rounded bg-black/30 text-white text-center text-[10px] sm:text-xs backdrop-blur-sm"
+                  className={cn(
+                    "leading-tight font-medium px-1.5 py-0.5 rounded text-center text-[10px] sm:text-xs border",
+                    isBreakEven ? "bg-white/70 text-zinc-900 border-zinc-900/20" : "bg-black/40 text-white border-white/10"
+                  )}
                 >
                   {tradeDay.trades} {tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
                 </div>
@@ -350,7 +353,10 @@ export function TradingCalendar({
                 {/* Taxa de acerto - só mostrar se houver múltiplos trades */}
                 {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
                   <div
-                    className="leading-tight font-medium px-1 py-0.5 rounded bg-black/30 text-white text-center text-[9px] sm:text-[10px] backdrop-blur-sm"
+                    className={cn(
+                      "leading-tight font-medium px-1.5 py-0.5 rounded text-center text-[9px] sm:text-[10px] border",
+                      isBreakEven ? "bg-white/70 text-zinc-900 border-zinc-900/20" : "bg-black/40 text-white border-white/10"
+                    )}
                   >
                     {tradeDay.winRate.toFixed(0)}% {t("calendar.win")}
                   </div>
@@ -412,32 +418,33 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
+          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm group",
           className,
         )}
         style={{ marginBottom: "50px" }}
       >
-        {/* Logo watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="opacity-[0.05] hover:opacity-[0.12] transition-opacity duration-300 flex items-center justify-center w-full h-full">
+        {/* Logo watermark - mais visível, atrás do conteúdo */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <div className="opacity-[0.10] sm:opacity-[0.12] md:opacity-[0.15] lg:opacity-[0.18] group-hover:opacity-[0.22] transition-opacity duration-300 flex items-center justify-center w-full h-full">
             <img 
               src={metrikaLogo} 
               alt="METRIKA" 
               style={{
-                height: '500px',
+                height: '450px',
                 width: 'auto',
                 objectFit: 'contain',
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
+                filter: 'brightness(1.2) contrast(1.1)',
               }}
               className="block"
             />
           </div>
         </div>
 
-        <CardHeader className="pb-3 sm:pb-4 md:pb-5">
+        <CardHeader className="pb-3 sm:pb-4 md:pb-5 relative z-10">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base sm:text-lg md:text-xl text-white flex items-center gap-2 sm:gap-3">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-600" />
@@ -468,7 +475,7 @@ export function TradingCalendar({
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 relative">
+        <CardContent className="p-0 relative z-10">
           {/* Calendário */}
           <div className="grid grid-cols-7 md:grid-cols-8">
             {/* Cabeçalho dos dias da semana */}
