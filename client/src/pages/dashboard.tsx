@@ -630,19 +630,15 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
           <ComposedChart data={timeData} margin={{ 
             top: 15, 
             right: window.innerWidth < 640 ? 15 : window.innerWidth < 1024 ? 20 : 30, 
-            bottom: window.innerWidth < 640 ? 50 : window.innerWidth < 1024 ? 60 : 70, 
+            bottom: 25, 
             left: window.innerWidth < 640 ? 15 : window.innerWidth < 1024 ? 20 : 30 
           }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.6} />
             <XAxis
               dataKey="time"
               stroke="#aaa"
-              fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
-              angle={-45}
-              textAnchor="end"
-              height={window.innerWidth < 640 ? 50 : window.innerWidth < 1024 ? 60 : 70}
-              interval={window.innerWidth < 640 ? 'preserveStartEnd' : 0}
-              tickMargin={5}
+              tick={false}
+              height={20}
             />
             <YAxis
               stroke="#aaa"
