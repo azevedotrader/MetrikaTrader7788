@@ -418,14 +418,14 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm group",
+          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
           className,
         )}
         style={{ marginBottom: "50px" }}
       >
         {/* Logo watermark - mais visível, atrás do conteúdo */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="opacity-[0.10] sm:opacity-[0.12] md:opacity-[0.15] lg:opacity-[0.18] group-hover:opacity-[0.22] transition-opacity duration-300 flex items-center justify-center w-full h-full">
+          <div className="opacity-[0.10] sm:opacity-[0.12] md:opacity-[0.15] lg:opacity-[0.18] flex items-center justify-center w-full h-full">
             <img 
               src={metrikaLogo} 
               alt="METRIKA" 
