@@ -260,14 +260,14 @@ export function TradingCalendar({
 
   const weekSummaries = calculateWeekSummaries();
 
-  // Renderizar célula do dia - versão mobile otimizada
+  // Renderizar célula do dia - versão responsiva otimizada
   const renderDayCell = (
     dayNumber: number | null,
     isCurrentMonth: boolean = true,
   ) => {
     if (!dayNumber || !isCurrentMonth) {
       return (
-        <div className="p-1 border-r border-b border-zinc-700 h-[70px] md:h-24">
+        <div className="p-1 border-r border-b border-zinc-700 h-[85px] sm:h-[95px] md:h-[105px] lg:h-[115px]">
         </div>
       );
     }
@@ -275,6 +275,8 @@ export function TradingCalendar({
     const tradeDay = tradeDays.find((td) => td.date === dayNumber);
     const hasData = !!tradeDay;
     const isProfit = tradeDay && tradeDay.pnl > 0;
+    const isBreakEven = tradeDay && tradeDay.pnl === 0;
+    const isLoss = tradeDay && tradeDay.pnl < 0;
     const isToday =
       new Date().getDate() === dayNumber &&
       new Date().getMonth() === month &&
@@ -288,27 +290,30 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-colors overflow-hidden cursor-pointer h-[70px] md:h-24 p-1 md:p-1.5",
-          isToday && "bg-zinc-800/50 border-zinc-600",
-          hasData && (isProfit ? "bg-green-600/90" : "bg-red-500/90"),
+          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-all duration-200 overflow-hidden cursor-pointer h-[85px] sm:h-[95px] md:h-[105px] lg:h-[115px] p-1.5 sm:p-2 md:p-2.5",
+          isToday && "bg-zinc-800/60 border-zinc-500 ring-1 ring-zinc-600/50",
+          hasData && isProfit && "bg-green-600/85 hover:bg-green-600/95",
+          hasData && isLoss && "bg-red-500/85 hover:bg-red-500/95",
+          hasData && isBreakEven && "bg-yellow-500/85 hover:bg-yellow-500/95",
+          !hasData && "hover:bg-zinc-800/30",
         )}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-0.5 md:mb-1">
+          <div className="flex items-center justify-between mb-1 sm:mb-1.5">
             <div
               className={cn(
-                "font-medium text-xs md:text-sm",
-                isToday ? "text-white" : "text-zinc-400",
+                "font-semibold text-sm sm:text-base md:text-lg",
+                isToday ? "text-white" : hasData ? "text-white/90" : "text-zinc-400",
               )}
             >
               {dayNumber}
             </div>
             {hasDiary && (
-              <div title="Entrada de diário disponível">
+              <div title={t("calendar.diary_entry_available")} className="flex-shrink-0">
                 <BookOpen
-                  className="w-3 h-3 text-blue-600 opacity-70"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 opacity-80 hover:opacity-100 transition-opacity"
                   data-testid={`diary-indicator-${dayNumber}`}
                 />
               </div>
@@ -316,49 +321,47 @@ export function TradingCalendar({
           </div>
 
           {hasData && tradeDay && (
-            <div className="flex-1 flex flex-col justify-start space-y-0 md:space-y-0.5">
-              {/* P&L Principal - só mostrar se não for zero */}
-              {tradeDay.pnl !== 0 && (
-                <div
-                  className="font-extrabold leading-tight text-white px-1 py-0.5 rounded bg-black/30 text-center shadow-sm text-xs md:text-sm"
-                  style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}
-                >
-                  <span className="md:hidden">
-                    {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
-                  </span>
-                  <span className="hidden md:inline">
-                    {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale)}
-                  </span>
-                </div>
-              )}
-
-              {/* Quantidade de trades */}
+            <div className="flex-1 flex flex-col justify-between space-y-1 sm:space-y-1.5">
+              {/* P&L Principal - sempre mostrar */}
               <div
-                className={cn(
-                  "leading-tight font-medium px-1 py-0.5 rounded text-center text-[9px] md:text-[10px]",
-                  hasData ? "bg-black/40 text-white" : "text-zinc-500"
-                )}
+                className="font-bold leading-tight text-white px-1.5 py-1 rounded-md bg-black/40 text-center shadow-md text-xs sm:text-sm md:text-base backdrop-blur-sm"
+                style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.8)' }}
               >
-                {tradeDay.trades} trade{tradeDay.trades !== 1 ? "s" : ""}
+                <span className="sm:hidden">
+                  {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                </span>
+                <span className="hidden sm:inline md:hidden">
+                  {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                </span>
+                <span className="hidden md:inline">
+                  {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+                </span>
               </div>
 
-              {/* Taxa de acerto - só mostrar se houver trades */}
-              {tradeDay.trades > 0 && tradeDay.winRate !== undefined && (
+              {/* Informações secundárias */}
+              <div className="space-y-0.5 sm:space-y-1">
+                {/* Quantidade de trades */}
                 <div
-                  className={cn(
-                    "leading-tight font-semibold px-1 py-0.5 rounded text-center text-[9px] md:text-[10px]",
-                    hasData ? "bg-black/40 text-white" : "text-zinc-400"
-                  )}
+                  className="leading-tight font-medium px-1 py-0.5 rounded bg-black/30 text-white text-center text-[10px] sm:text-xs backdrop-blur-sm"
                 >
-                  {tradeDay.winRate.toFixed(0)}% win
+                  {tradeDay.trades} {tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
                 </div>
-              )}
+
+                {/* Taxa de acerto - só mostrar se houver múltiplos trades */}
+                {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
+                  <div
+                    className="leading-tight font-medium px-1 py-0.5 rounded bg-black/30 text-white text-center text-[9px] sm:text-[10px] backdrop-blur-sm"
+                  >
+                    {tradeDay.winRate.toFixed(0)}% {t("calendar.win")}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Indicador de hover para adicionar entrada */}
-          <div className="absolute inset-0 bg-zinc-800/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Plus className="w-4 h-4 text-zinc-300" />
+          <div className="absolute inset-0 bg-zinc-900/70 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center backdrop-blur-sm">
+            <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-200 drop-shadow-md" />
           </div>
         </div>
       </div>
@@ -371,22 +374,23 @@ export function TradingCalendar({
 
     return (
       <div className={cn(
-        "border-l border-zinc-700 p-3 min-h-[96px] flex flex-col justify-center",
-        isProfit ? "bg-green-600/90" : week.pnl < 0 ? "bg-red-500/90" : "bg-zinc-800/50"
+        "border-l border-zinc-700 p-3 min-h-[105px] lg:min-h-[115px] flex flex-col justify-center transition-colors",
+        isProfit ? "bg-green-600/85 hover:bg-green-600/95" : week.pnl < 0 ? "bg-red-500/85 hover:bg-red-500/95" : "bg-zinc-800/50 hover:bg-zinc-800/60"
       )}>
-        <div className="text-xs text-zinc-400 mb-1">
-          Semana {week.weekNumber}
+        <div className="text-xs text-zinc-300 mb-1.5 font-medium">
+          {t("calendar.week")} {week.weekNumber}
         </div>
         <div
-          className={cn(
-            "font-bold text-sm mb-1",
-            isProfit ? "text-white font-bold" : "text-white font-bold",
-          )}
+          className="font-bold text-sm md:text-base mb-1.5 text-white"
+          style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.7)' }}
         >
-          {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale)}
+          {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
         </div>
-        <div className="text-xs text-zinc-400">
+        <div className="text-xs text-zinc-300 font-medium">
           {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")}
+        </div>
+        <div className="text-[10px] text-zinc-400 mt-0.5">
+          {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
         </div>
       </div>
     );
@@ -408,7 +412,7 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900 border-zinc-700 relative mb-8 md:mb-10",
+          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
           className,
         )}
         style={{ marginBottom: "50px" }}
@@ -433,32 +437,32 @@ export function TradingCalendar({
           </div>
         </div>
 
-        <CardHeader className="pb-2 md:pb-4">
+        <CardHeader className="pb-3 sm:pb-4 md:pb-5">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base md:text-lg text-white flex items-center gap-2">
-              <Calendar className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="hidden md:inline">{t("calendar.title")}</span>
-              <span className="md:hidden">Trading</span>
+            <CardTitle className="text-base sm:text-lg md:text-xl text-white flex items-center gap-2 sm:gap-3">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-600" />
+              <span className="hidden sm:inline">{t("calendar.title")}</span>
+              <span className="sm:hidden">{t("calendar.title_short")}</span>
             </CardTitle>
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 sm:space-x-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigateMonth("prev")}
-                className="text-zinc-400 hover:text-white p-1"
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 p-1.5 sm:p-2 rounded-md transition-all"
               >
-                <ChevronLeft className="w-3 h-3 md:w-4 md:h-4" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
-              <span className="text-sm md:text-base text-white font-medium capitalize text-center min-w-[100px] md:min-w-[160px]">
+              <span className="text-sm sm:text-base md:text-lg text-white font-semibold capitalize text-center min-w-[120px] sm:min-w-[140px] md:min-w-[180px] px-2">
                 {monthName} {year}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigateMonth("next")}
-                className="text-zinc-400 hover:text-white p-1"
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 p-1.5 sm:p-2 rounded-md transition-all"
               >
-                <ChevronRight className="w-3 h-3 md:w-4 md:h-4" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
           </div>
@@ -471,12 +475,12 @@ export function TradingCalendar({
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center font-medium text-zinc-400 border-r border-b border-zinc-700 py-2 md:py-3 text-xs md:text-sm"
+                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm bg-zinc-800/30"
               >
                 {day}
               </div>
             ))}
-            <div className="hidden md:block text-center font-medium text-zinc-400 border-b border-zinc-700 py-3 text-sm">
+            <div className="hidden md:block text-center font-semibold text-zinc-300 border-b border-zinc-700 py-3.5 text-sm bg-zinc-800/30">
               {t("calendar.week")}
             </div>
 
@@ -516,48 +520,48 @@ export function TradingCalendar({
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
-          <div className="md:hidden border-t border-zinc-700 p-4">
-            <div className="text-center text-white font-medium mb-3">
+          <div className="md:hidden border-t border-zinc-700 p-4 bg-zinc-900/50">
+            <div className="text-center text-white font-semibold mb-4 text-base">
               {t("calendar.summary_of")} {monthName}
             </div>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.tradingDays}
                 </div>
-                <div className="text-sm text-zinc-400">
+                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
                   {t("calendar.trading_days")}
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">
+              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.totalTrades}
                 </div>
-                <div className="text-sm text-zinc-400">
+                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
                   {t("calendar.total_trades")}
                 </div>
               </div>
-              <div className="text-center">
+              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
                 <div
                   className={cn(
-                    "text-2xl font-bold",
+                    "text-xl sm:text-2xl font-bold mb-1",
                     monthlyStats.totalPnl > 0
                       ? "text-green-600"
                       : "text-red-500",
                   )}
                 >
                   {monthlyStats.totalPnl > 0 ? "+" : ""}
-                  R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale)}
+                  R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
                 </div>
-                <div className="text-sm text-zinc-400">
+                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
                   {t("calendar.pnl_total")}
                 </div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">
+              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+                <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.winRate}%
                 </div>
-                <div className="text-sm text-zinc-400">
+                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
                   {t("calendar.win_rate")}
                 </div>
               </div>

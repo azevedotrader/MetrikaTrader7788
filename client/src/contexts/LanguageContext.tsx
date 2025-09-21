@@ -252,9 +252,13 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Calendário
     "calendar.title": "Calendário de Trading",
+    "calendar.title_short": "Calendário",
+    "calendar.trade": "trade",
+    "calendar.trades": "trades",
     "calendar.trades_count": "trades",
     "calendar.win": "win",
     "calendar.diary_entry": "Entrada do Diário",
+    "calendar.diary_entry_available": "Entrada de diário disponível",
     "calendar.add_diary": "Adicionar ao Diário",
     "calendar.edit_diary": "Editar Diário",
     "calendar.how_to_use": "Como Usar o Calendário",
@@ -1144,9 +1148,13 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Calendar
     "calendar.title": "Trading Calendar",
+    "calendar.title_short": "Calendar",
+    "calendar.trade": "trade",
+    "calendar.trades": "trades",
     "calendar.trades_count": "trades",
     "calendar.win": "win",
     "calendar.diary_entry": "Diary Entry",
+    "calendar.diary_entry_available": "Diary entry available",
     "calendar.add_diary": "Add to Diary",
     "calendar.edit_diary": "Edit Diary",
     "calendar.how_to_use": "How to Use Calendar",
@@ -2074,9 +2082,13 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Calendario
     "calendar.title": "Calendario de Trading",
+    "calendar.title_short": "Calendario",
+    "calendar.trade": "operación",
+    "calendar.trades": "operaciones",
     "calendar.trades_count": "operaciones",
     "calendar.win": "acierto",
     "calendar.diary_entry": "Entrada del Diario",
+    "calendar.diary_entry_available": "Entrada de diario disponible",
     "calendar.add_diary": "Agregar al Diario",
     "calendar.edit_diary": "Editar Diario",
     "calendar.how_to_use": "Cómo Usar el Calendario",
