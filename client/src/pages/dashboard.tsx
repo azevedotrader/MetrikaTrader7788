@@ -2746,21 +2746,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           </div>
 
           {/* Bottom Row - Square Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Progress Tracker - 1 coluna */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {/* Progress Tracker - Maior para dar mais espaço ao calendário */}
             <SquareCard
               title={t('metrics.progress_tracker')}
               value=""
               icon={Calendar}
               color="text-blue-600"
-              className="lg:col-span-1 h-auto"
+              className="md:col-span-2 lg:col-span-2 min-h-[500px] lg:min-h-[600px]"
               data-testid="card-progress-tracker"
             >
               <div className="h-full flex flex-col">
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden min-h-[400px] lg:min-h-[500px]">
                   <TradingCalendar 
                     trades={filteredTrades} 
-                    className="compact-mobile"
+                    className="scale-110 sm:scale-125 lg:scale-100"
                   />
                 </div>
                 
@@ -2804,28 +2804,29 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               icon={BarChart3}
               color="text-[#2FA87A]"
               data-testid="card-advanced-metrics"
-              className="lg:col-span-1 h-auto"
+              className="md:col-span-2 lg:col-span-1 min-h-[500px] lg:min-h-[600px]"
             >
-              <div className="h-full p-4 space-y-4">
+              <div className="h-full p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-auto">
                 {/* Seção 1: Métricas Matemáticas */}
                 <div>
                   <AdvancedMetrics trades={filteredTrades} />
                 </div>
                 
                 {/* Seção 2: Métrika Score */}
-                <div className="border-t border-zinc-700 pt-4">
-                  <div className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
+                <div className="border-t border-zinc-700 pt-3 sm:pt-4">
+                  <div className="text-sm font-semibold text-zinc-300 mb-2 sm:mb-3 flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
                     Métrika Score
                   </div>
-                  <MetrikaScore trades={filteredTrades} t={t} />
+                  <div className="scale-90 sm:scale-100 origin-top">
+                    <MetrikaScore trades={filteredTrades} t={t} />
+                  </div>
                 </div>
               </div>
             </SquareCard>
 
-            {/* Right Column - Net Daily PnL Chart and Recent Trades */}
-            {/* Mobile: Cards separados em grid */}
-            <div className="lg:hidden grid grid-cols-1 gap-3">
+            {/* Mobile: Cards PnL e Trades em layout responsivo */}
+            <div className="md:hidden grid grid-cols-1 gap-3">
               {/* PnL Chart Mobile - Card separado */}
               <Card className="bg-zinc-900/90 border-zinc-800">
                 <CardContent className="p-3">
