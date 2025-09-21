@@ -307,9 +307,9 @@ export function TradingCalendar({
             aria-hidden="true" 
             className={cn(
               "absolute inset-0 pointer-events-none",
-              isLoss && "bg-gradient-to-b from-[rgba(99,25,25,0.55)] to-[rgba(90,23,23,0.35)]",
-              isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.55)] to-[rgba(2,37,29,0.35)]",
-              isBreakEven && "bg-gradient-to-b from-amber-500/50 to-amber-600/30"
+              isLoss && "bg-gradient-to-b from-[rgba(99,25,25,0.35)] to-[rgba(90,23,23,0.20)]",
+              isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.35)] to-[rgba(2,37,29,0.20)]",
+              isBreakEven && "bg-gradient-to-b from-amber-500/30 to-amber-600/15"
             )} 
           />
         )}
@@ -317,7 +317,7 @@ export function TradingCalendar({
         {/* Efeito de brilho fosco sutil */}
         <div 
           aria-hidden="true" 
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/5 to-transparent" 
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/12 via-white/8 to-transparent" 
         />
         {/* Número do dia - canto superior esquerdo */}
         <div
@@ -404,16 +404,16 @@ export function TradingCalendar({
           aria-hidden="true" 
           className={cn(
             "absolute inset-0 pointer-events-none",
-            week.pnl < 0 && "bg-gradient-to-b from-[rgba(99,25,25,0.55)] to-[rgba(90,23,23,0.35)]",
-            isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.55)] to-[rgba(2,37,29,0.35)]",
-            week.pnl === 0 && "bg-gradient-to-b from-zinc-700/50 to-zinc-800/30"
+            week.pnl < 0 && "bg-gradient-to-b from-[rgba(99,25,25,0.35)] to-[rgba(90,23,23,0.20)]",
+            isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.35)] to-[rgba(2,37,29,0.20)]",
+            week.pnl === 0 && "bg-gradient-to-b from-zinc-700/30 to-zinc-800/15"
           )} 
         />
         
         {/* Efeito de brilho fosco sutil */}
         <div 
           aria-hidden="true" 
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/5 to-transparent" 
+          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/12 via-white/8 to-transparent" 
         />
         
         <div className="text-center relative z-10">
