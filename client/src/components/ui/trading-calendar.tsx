@@ -293,10 +293,13 @@ export function TradingCalendar({
           "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px] p-2 md:p-2.5",
           isToday && "bg-zinc-800/60 ring-1 ring-zinc-600/50",
           hasData && isProfit && "bg-gradient-to-b from-green-600 to-green-700 hover:brightness-105",
-          hasData && isLoss && "bg-gradient-to-b from-red-500 to-red-600 hover:brightness-105",
+          hasData && isLoss && "hover:brightness-105",
           hasData && isBreakEven && "bg-gradient-to-b from-amber-500 to-amber-600 hover:brightness-105",
           !hasData && "hover:bg-zinc-800/30",
         )}
+        style={hasData && isLoss ? {
+          background: 'linear-gradient(to bottom, #631919, #5a1717)'
+        } : undefined}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
       >
@@ -373,10 +376,15 @@ export function TradingCalendar({
     const isProfit = week.pnl > 0;
 
     return (
-      <div className={cn(
-        "min-h-[155px] lg:min-h-[170px] grid place-items-center transition-colors",
-        isProfit ? "bg-gradient-to-b from-green-600 to-green-700 hover:brightness-105" : week.pnl < 0 ? "bg-gradient-to-b from-red-500 to-red-600 hover:brightness-105" : "bg-gradient-to-b from-zinc-700 to-zinc-800 hover:brightness-105"
-      )}>
+      <div 
+        className={cn(
+          "min-h-[155px] lg:min-h-[170px] grid place-items-center transition-colors",
+          isProfit ? "bg-gradient-to-b from-green-600 to-green-700 hover:brightness-105" : week.pnl < 0 ? "hover:brightness-105" : "bg-gradient-to-b from-zinc-700 to-zinc-800 hover:brightness-105"
+        )}
+        style={week.pnl < 0 ? {
+          background: 'linear-gradient(to bottom, #631919, #5a1717)'
+        } : undefined}
+      >
         <div className="text-center">
           <div className="text-xs text-white/80 mb-1">
             {t("calendar.week")} {week.weekNumber}
@@ -547,7 +555,7 @@ export function TradingCalendar({
                     "text-xl sm:text-2xl font-bold mb-1",
                     monthlyStats.totalPnl > 0
                       ? "text-green-600"
-                      : "text-red-500",
+                      : "text-[#631919]",
                   )}
                 >
                   {monthlyStats.totalPnl > 0 ? "+" : ""}
