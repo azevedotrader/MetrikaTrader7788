@@ -2806,8 +2806,20 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               data-testid="card-advanced-metrics"
               className="lg:col-span-1 h-auto"
             >
-              <div className="h-full p-4">
-                <AdvancedMetrics trades={filteredTrades} />
+              <div className="h-full p-4 space-y-4">
+                {/* Seção 1: Métricas Matemáticas */}
+                <div>
+                  <AdvancedMetrics trades={filteredTrades} />
+                </div>
+                
+                {/* Seção 2: Métrika Score */}
+                <div className="border-t border-zinc-700 pt-4">
+                  <div className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Métrika Score
+                  </div>
+                  <MetrikaScore trades={filteredTrades} t={t} />
+                </div>
               </div>
             </SquareCard>
 
@@ -3050,19 +3062,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </div>
           </div>
 
-          {/* Métrika Score e Trade Time Performance - Lado a lado */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="border-zinc-800 bg-[#171719] lg:col-span-1">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-zinc-400" />
-                  Métrika Score
-                </CardTitle>
-              </CardHeader>
-              <MetrikaScore trades={filteredTrades} t={t} />
-            </Card>
-            
-            <Card className="border-zinc-800 bg-[#171719] lg:col-span-2">
+          {/* Trade Time Performance - Largura completa */}
+          <div className="grid grid-cols-1 gap-6">
+            <Card className="border-zinc-800 bg-[#171719]">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Activity className="h-5 w-5 text-zinc-400" />
