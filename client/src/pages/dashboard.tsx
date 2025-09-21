@@ -134,6 +134,13 @@ interface TradeMetrics {
   lucroPorDiaSemana: Array<{ dia: string; valor: number }>;
 }
 
+interface AdvancedMetricsData {
+  iqt: number;
+  eficienciaRisco: number;
+  scoreConsistencia: number;
+  retornoAjustadoPrecisao: number;
+}
+
 const simbolosEmocoes = {
   confiante: "●",
   ansioso: "▲",
@@ -143,6 +150,157 @@ const simbolosEmocoes = {
   frustrado: "■",
   neutro: "○",
 };
+
+// Função para calcular métricas avançadas
+function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
+  if (!trades.length) {
+    return {
+      iqt: 0,
+      eficienciaRisco: 0,
+      scoreConsistencia: 0,
+      retornoAjustadoPrecisao: 0,
+    };
+  }
+
+  // Cálculos base
+  const rentabilidadeTotal = trades.reduce((acc, trade) => {
+    return acc + parseFloat(trade.resultado || "0");
+  }, 0);
+
+  const tradesLucrativos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
+  const tradesNegativo = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
+  
+  // Assertividade (Taxa de Acerto)
+  const assertividade = trades.length > 0 ? (tradesLucrativos.length / trades.length) : 0;
+  
+  // Fator de Lucro
+  const totalLucros = tradesLucrativos.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0);
+  const totalPerdas = Math.abs(tradesNegativo.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0));
+  const fatorDeLucro = totalPerdas > 0 ? totalLucros / totalPerdas : totalLucros > 0 ? 999 : 0;
+  
+  // RR Médio - baseado nos valores de Take e Stop dos trades
+  const tradesComTakeStop = trades.filter(trade => 
+    trade.alvo && trade.stop && 
+    parseFloat(trade.alvo) > 0 && parseFloat(trade.stop) > 0
+  );
+  
+  let rrMedio = 0;
+  if (tradesComTakeStop.length > 0) {
+    const totalRRR = tradesComTakeStop.reduce((acc, trade) => {
+      const takeValue = parseFloat(trade.alvo!);
+      const stopValue = parseFloat(trade.stop!);
+      const precoEntrada = parseFloat(trade.precoEntrada || "0");
+      
+      if (precoEntrada > 0) {
+        const potencialGanho = Math.abs(takeValue - precoEntrada);
+        const potencialPerda = Math.abs(precoEntrada - stopValue);
+        return acc + (potencialPerda > 0 ? potencialGanho / potencialPerda : 0);
+      }
+      return acc;
+    }, 0);
+    rrMedio = totalRRR / tradesComTakeStop.length;
+  } else {
+    // Fallback: calcular baseado na média de ganhos/perdas
+    const mediaGanhos = tradesLucrativos.length > 0 
+      ? totalLucros / tradesLucrativos.length 
+      : 0;
+    const mediaPerdas = tradesNegativo.length > 0 
+      ? totalPerdas / tradesNegativo.length 
+      : 0;
+    rrMedio = mediaPerdas > 0 ? mediaGanhos / mediaPerdas : mediaGanhos > 0 ? 999 : 1;
+  }
+
+  // Rentabilidade em percentual (assumindo capital inicial base)
+  const rentabilidadePercentual = rentabilidadeTotal; // Pode ser ajustado conforme necessário
+
+  // Cálculo das 4 métricas avançadas
+  
+  // 1. IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
+  const iqt = rrMedio > 0 
+    ? Math.min((rentabilidadePercentual * fatorDeLucro * assertividade) / rrMedio, 100)
+    : 0;
+  
+  // 2. Eficiência de Risco = Rentabilidade / (RR_médio × 100)
+  const eficienciaRisco = rrMedio > 0 ? rentabilidadePercentual / (rrMedio * 100) : 0;
+  
+  // 3. Score de Consistência = √(Assertividade × FatorDeLucro)
+  const scoreConsistencia = Math.sqrt(assertividade * fatorDeLucro);
+  
+  // 4. RAP = Rentabilidade / Assertividade
+  const retornoAjustadoPrecisao = assertividade > 0 ? rentabilidadePercentual / assertividade : 0;
+
+  return {
+    iqt: Math.max(0, iqt),
+    eficienciaRisco: Math.max(0, eficienciaRisco),
+    scoreConsistencia: Math.max(0, scoreConsistencia),
+    retornoAjustadoPrecisao,
+  };
+}
+
+// Componente AdvancedMetrics
+function AdvancedMetrics({ trades }: { trades: Trade[] }) {
+  const metrics = calculateAdvancedMetrics(trades);
+
+  const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap') => {
+    switch (type) {
+      case 'iqt':
+        if (value >= 70) return 'text-[#2FA87A]'; // Verde
+        if (value >= 40) return 'text-yellow-500'; // Amarelo
+        return 'text-[#F06363]'; // Vermelho
+      case 'eficiencia':
+        if (value >= 1) return 'text-[#2FA87A]';
+        if (value >= 0.5) return 'text-yellow-500';
+        return 'text-[#F06363]';
+      case 'consistencia':
+        if (value >= 2) return 'text-[#2FA87A]';
+        if (value >= 1) return 'text-yellow-500';
+        return 'text-[#F06363]';
+      case 'rap':
+        if (value >= 0) return 'text-[#2FA87A]';
+        return 'text-[#F06363]';
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-2 gap-3 h-full">
+      {/* IQT */}
+      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+        <div className="text-xs text-zinc-400 mb-2">IQT</div>
+        <div className={`text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}>
+          {metrics.iqt.toFixed(1)}
+        </div>
+        <div className="text-xs text-zinc-500">Índice Qualidade</div>
+      </div>
+
+      {/* Eficiência de Risco */}
+      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+        <div className="text-xs text-zinc-400 mb-2">Eficiência</div>
+        <div className={`text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}>
+          {metrics.eficienciaRisco.toFixed(2)}
+        </div>
+        <div className="text-xs text-zinc-500">Risco %</div>
+      </div>
+
+      {/* Score de Consistência */}
+      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+        <div className="text-xs text-zinc-400 mb-2">Consistência</div>
+        <div className={`text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}>
+          {metrics.scoreConsistencia.toFixed(2)}
+        </div>
+        <div className="text-xs text-zinc-500">Score</div>
+      </div>
+
+      {/* RAP */}
+      <div className="bg-zinc-800/50 rounded-lg p-3 flex flex-col">
+        <div className="text-xs text-zinc-400 mb-2">RAP</div>
+        <div className={`text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}>
+          {metrics.retornoAjustadoPrecisao.toFixed(2)}
+        </div>
+        <div className="text-xs text-zinc-500">Precisão</div>
+      </div>
+    </div>
+  );
+}
 
 // Capital Curve Chart - Professional Trading Analytics
 function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
@@ -2591,17 +2749,31 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
               </SquareCard>
 
-              {/* Recent Trades - Maior, ocupando o resto do espaço */}
+              {/* Recent Trades - Tamanho reduzido */}
               <SquareCard
                 title={t('dashboard.recent_trades')}
                 value=""
                 icon={FileText}
                 color="text-zinc-400"
                 data-testid="card-recent-trades"
-                className="flex-1 min-h-[380px]"
+                className="h-[280px] flex-shrink-0"
               >
                 <div className="h-full overflow-auto">
                   <RecentTrades trades={filteredTrades} />
+                </div>
+              </SquareCard>
+
+              {/* Métricas Avançadas de Performance */}
+              <SquareCard
+                title="Métricas Avançadas"
+                value=""
+                icon={BarChart3}
+                color="text-[#2FA87A]"
+                data-testid="card-advanced-metrics"
+                className="flex-1 min-h-[280px]"
+              >
+                <div className="h-full p-4">
+                  <AdvancedMetrics trades={filteredTrades} />
                 </div>
               </SquareCard>
             </div>
