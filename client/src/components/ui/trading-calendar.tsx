@@ -267,7 +267,7 @@ export function TradingCalendar({
   ) => {
     if (!dayNumber || !isCurrentMonth) {
       return (
-        <div className="p-1 border-r border-b border-zinc-700 h-[85px] sm:h-[95px] md:h-[105px] lg:h-[115px]">
+        <div className="p-1 border-r border-b border-zinc-700 h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px]">
         </div>
       );
     }
@@ -290,7 +290,7 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-all duration-200 overflow-hidden cursor-pointer h-[85px] sm:h-[95px] md:h-[105px] lg:h-[115px] p-1.5 sm:p-2 md:p-2.5",
+          "border-r border-b border-zinc-700 relative group hover:bg-zinc-800/50 transition-all duration-200 overflow-hidden cursor-pointer h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px] p-1.5 sm:p-2 md:p-2.5",
           isToday && "bg-zinc-800/60 border-zinc-500 ring-1 ring-zinc-600/50",
           hasData && isProfit && "bg-green-600/90 hover:bg-green-600/95 border-green-500/50 shadow-sm shadow-green-900/10",
           hasData && isLoss && "bg-red-500/90 hover:bg-red-500/95 border-red-400/50 shadow-sm shadow-red-900/10",
@@ -399,7 +399,7 @@ export function TradingCalendar({
 
     return (
       <div className={cn(
-        "border-l border-zinc-700 p-3 min-h-[105px] lg:min-h-[115px] flex flex-col justify-center transition-colors shadow-lg",
+        "border-l border-zinc-700 p-3 min-h-[155px] lg:min-h-[170px] flex flex-col justify-center transition-colors shadow-lg",
         isProfit ? "bg-green-600/95 hover:bg-green-600/100 border-green-500/50" : week.pnl < 0 ? "bg-red-500/95 hover:bg-red-500/100 border-red-400/50" : "bg-zinc-800/70 hover:bg-zinc-800/80 border-zinc-600/50"
       )}>
         <div className="text-xs text-zinc-200 mb-1.5 font-semibold"
@@ -540,7 +540,7 @@ export function TradingCalendar({
                   ) : (
                     <div
                       key={`week-empty-${weekIndex}`}
-                      className="hidden md:block border-l border-zinc-700 min-h-[96px]"
+                      className="hidden md:block border-l border-zinc-700 min-h-[155px] lg:min-h-[170px]"
                     ></div>
                   ),
                 ].filter(Boolean),
