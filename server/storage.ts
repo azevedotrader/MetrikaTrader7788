@@ -471,6 +471,9 @@ export class DatabaseStorage implements IStorage {
     if (updates.telefone) {
       updateData.phone = updates.telefone;
     }
+    if (updates.whatsappNumber) {
+      updateData.whatsappNumber = updates.whatsappNumber;
+    }
     if (updates.senha) {
       // Em uma implementação real, você deveria fazer hash da senha
       updateData.password = updates.senha;

@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users, whatsappMessages, InsertWhatsappMessage, trades } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -18,6 +18,7 @@ import { eq, and, ne } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
+import WhatsApp from "whatsapp";
 
 // JWT Secret - must be provided in production
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || (
@@ -2685,7 +2686,8 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           id: updatedUser.id,
           name: updatedUser.name,
           email: updatedUser.email,
-          phone: updatedUser.phone
+          phone: updatedUser.phone,
+          whatsappNumber: updatedUser.whatsappNumber
         }
       });
     } catch (error) {
@@ -3627,6 +3629,392 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       res.json(conversation);
     } catch (error) {
       console.error('Erro ao alterar status da conversa:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Função para verificar assinatura do Meta
+  function verifyMetaSignature(payload: string, signature: string, appSecret: string): boolean {
+    if (!signature || !appSecret) {
+      return false;
+    }
+    
+    try {
+      // Remover o prefixo 'sha256=' se presente
+      const cleanSignature = signature.replace('sha256=', '');
+      
+      // Calcular HMAC-SHA256
+      const expectedSignature = crypto
+        .createHmac('sha256', appSecret)
+        .update(payload, 'utf8')
+        .digest('hex');
+      
+      // Comparação segura contra timing attacks
+      return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(cleanSignature, 'hex')
+      );
+    } catch (error) {
+      console.error('❌ Error verifying Meta signature:', error);
+      return false;
+    }
+  }
+
+  // WhatsApp webhook verification (GET)
+  app.get('/webhook', (req: any, res: any) => {
+    try {
+      const mode = req.query['hub.mode'];
+      const token = req.query['hub.verify_token'];
+      const challenge = req.query['hub.challenge'];
+      
+      const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+      
+      if (!VERIFY_TOKEN) {
+        console.error('❌ WHATSAPP_VERIFY_TOKEN não configurado');
+        res.sendStatus(500);
+        return;
+      }
+      
+      if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+        console.log('✅ WhatsApp webhook verified successfully');
+        res.status(200).send(challenge);
+      } else {
+        console.log('❌ WhatsApp webhook verification failed');
+        res.sendStatus(403);
+      }
+    } catch (error) {
+      console.error('❌ Error in webhook verification:', error);
+      res.sendStatus(500);
+    }
+  });
+
+  // WhatsApp webhook para receber mensagens (POST)
+  app.post('/webhook', async (req: any, res: any) => {
+    try {
+      // Verificar assinatura do Meta para autenticidade
+      const signature = req.headers['x-hub-signature-256'];
+      const APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+      
+      if (!APP_SECRET) {
+        console.error('❌ WHATSAPP_APP_SECRET não configurado');
+        res.sendStatus(500);
+        return;
+      }
+      
+      // Verificar assinatura antes de processar
+      const payload = JSON.stringify(req.body);
+      if (!verifyMetaSignature(payload, signature, APP_SECRET)) {
+        console.error('❌ Assinatura inválida do Meta - possível tentativa de forge');
+        res.sendStatus(403);
+        return;
+      }
+      
+      const body = req.body;
+      console.log('📱 WhatsApp webhook verified and received:', JSON.stringify(body, null, 2));
+      
+      if (body.object === 'whatsapp_business_account') {
+        // Processar todas as entradas
+        for (const entry of body.entry) {
+          const changes = entry.changes;
+          
+          for (const change of changes) {
+            if (change.field === 'messages') {
+              const messages = change.value.messages;
+              
+              if (messages) {
+                for (const message of messages) {
+                  await processWhatsAppMessage(message);
+                }
+              }
+            }
+          }
+        }
+        
+        res.status(200).send('EVENT_RECEIVED');
+      } else {
+        res.sendStatus(404);
+      }
+    } catch (error) {
+      console.error('❌ Error processing WhatsApp webhook:', error);
+      res.status(500).send('ERROR_PROCESSING');
+    }
+  });
+
+  // Função para processar mensagem do WhatsApp
+  async function processWhatsAppMessage(message: any) {
+    try {
+      console.log('🔄 Processing WhatsApp message:', {
+        from: message.from,
+        text: message.text?.body,
+        type: message.type,
+        timestamp: message.timestamp
+      });
+
+      // Só processar mensagens de texto
+      if (message.type !== 'text' || !message.text?.body) {
+        console.log('⏭️ Ignoring non-text message');
+        return;
+      }
+
+      const fromNumber = message.from;
+      const messageText = message.text.body;
+      const messageId = message.id;
+
+      // Buscar usuário pelo número do WhatsApp
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.whatsappNumber, fromNumber))
+        .limit(1);
+
+      // Salvar mensagem no banco
+      const [savedMessage] = await db
+        .insert(whatsappMessages)
+        .values({
+          messageId,
+          fromNumber,
+          userId: user?.id || null,
+          messageText,
+          messageType: message.type,
+          status: 'received'
+        } as InsertWhatsappMessage)
+        .returning();
+
+      if (!user) {
+        console.log('❌ User not found for WhatsApp number:', fromNumber);
+        await db
+          .update(whatsappMessages)
+          .set({ 
+            status: 'ignored',
+            errorMessage: 'Usuário não encontrado para este número'
+          })
+          .where(eq(whatsappMessages.id, savedMessage.id));
+        return;
+      }
+
+      console.log('👤 Found user:', user.name, 'for number:', fromNumber);
+
+      // Tentar extrair informações do trade da mensagem
+      const tradeData = parseTradeFromMessage(messageText, user.id);
+      
+      if (tradeData) {
+        try {
+          // Validar dados do trade
+          const validatedTrade = insertTradeSchema.parse(tradeData);
+          
+          // Criar objeto trade para inserção
+          const insertData = {
+            userId: user.id,
+            dataHora: new Date(validatedTrade.dataHora!),
+            ativo: validatedTrade.ativo!,
+            mercado: validatedTrade.mercado!,
+            setup: validatedTrade.setup || 'WhatsApp',
+            capitalUtilizado: validatedTrade.capitalUtilizado || '100',
+            quantidade: validatedTrade.quantidade || '1',
+            tipo: validatedTrade.tipo!,
+            precoEntrada: validatedTrade.precoEntrada || '0',
+            precoSaida: validatedTrade.precoSaida || '0',
+            resultado: validatedTrade.resultado || '0',
+            corretora: validatedTrade.corretora!,
+            origem: 'whatsapp',
+            comentario: validatedTrade.comentario || ''
+          };
+
+          // Salvar trade no banco
+          const [newTrade] = await db
+            .insert(trades)
+            .values(insertData)
+            .returning();
+
+          // Atualizar mensagem como processada
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'processed',
+              tradeId: newTrade.id,
+              processedAt: new Date()
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+
+          console.log('✅ Trade created from WhatsApp:', {
+            tradeId: newTrade.id,
+            ativo: newTrade.ativo,
+            resultado: newTrade.resultado
+          });
+
+          // TODO: Enviar confirmação via WhatsApp
+          await sendWhatsAppConfirmation(fromNumber, newTrade);
+
+        } catch (error) {
+          console.error('❌ Error creating trade:', error);
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'failed',
+              errorMessage: error instanceof Error ? error.message : 'Erro ao criar trade'
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+        }
+      } else {
+        console.log('❌ Could not parse trade from message');
+        await db
+          .update(whatsappMessages)
+          .set({ 
+            status: 'failed',
+            errorMessage: 'Não foi possível extrair dados do trade da mensagem'
+          })
+          .where(eq(whatsappMessages.id, savedMessage.id));
+      }
+
+    } catch (error) {
+      console.error('❌ Error in processWhatsAppMessage:', error);
+    }
+  }
+
+  // Função para extrair dados do trade da mensagem
+  function parseTradeFromMessage(messageText: string, userId: string): InsertTrade | null {
+    try {
+      console.log('🔍 Parsing trade from message:', messageText);
+      
+      // Normalizar texto
+      const text = messageText.toLowerCase().trim();
+      
+      // Padrões para detectar informações do trade
+      const patterns = {
+        // Ativo: WIN, WDO, BTCUSDT, etc.
+        ativo: /(?:ativo|symbol|par)[:\s]*([a-z0-9]+)/i,
+        // Tipo: compra/venda, buy/sell, long/short
+        tipo: /(?:tipo|side|direction)[:\s]*(compra|venda|buy|sell|long|short)/i,
+        // Quantidade
+        quantidade: /(?:qtd|quantidade|qty|size)[:\s]*([0-9.,]+)/i,
+        // Preço de entrada
+        entrada: /(?:entrada|entry|pre[cç]o)[:\s]*([0-9.,]+)/i,
+        // Preço de saída
+        saida: /(?:saida|sa[íi]da|exit|close)[:\s]*([0-9.,]+)/i,
+        // Resultado
+        resultado: /(?:resultado|result|pnl|profit|loss)[:\s]*([+-]?[0-9.,]+)/i,
+        // Capital
+        capital: /(?:capital|size|valor)[:\s]*([0-9.,]+)/i,
+        // Setup/Estratégia
+        setup: /(?:setup|estrategia|strategy)[:\s]*([a-z0-9\s]+)/i
+      };
+
+      // Extrair valores usando patterns
+      const extracted: any = {};
+      
+      for (const [key, pattern] of Object.entries(patterns)) {
+        const match = text.match(pattern);
+        if (match) {
+          extracted[key] = match[1].trim();
+        }
+      }
+
+      console.log('🎯 Extracted data:', extracted);
+
+      // Validar se tem informações suficientes
+      if (!extracted.ativo) {
+        console.log('❌ No asset found in message');
+        return null;
+      }
+
+      // Normalizar tipo
+      let tipo = 'compra';
+      if (extracted.tipo) {
+        const tipoText = extracted.tipo.toLowerCase();
+        if (['venda', 'sell', 'short'].includes(tipoText)) {
+          tipo = 'venda';
+        }
+      }
+
+      // Normalizar valores numéricos
+      const normalizeNumber = (value: string | undefined, defaultValue: string = '0'): string => {
+        if (!value) return defaultValue;
+        return value.replace(/,/g, '.').replace(/[^\d.-]/g, '') || defaultValue;
+      };
+
+      // Calcular resultado se não fornecido
+      let resultado = normalizeNumber(extracted.resultado, '0');
+      if (resultado === '0' && extracted.entrada && extracted.saida) {
+        const entrada = parseFloat(normalizeNumber(extracted.entrada));
+        const saida = parseFloat(normalizeNumber(extracted.saida));
+        const qtd = parseFloat(normalizeNumber(extracted.quantidade, '1'));
+        
+        if (!isNaN(entrada) && !isNaN(saida)) {
+          const diff = tipo === 'compra' ? (saida - entrada) : (entrada - saida);
+          resultado = (diff * qtd).toString();
+        }
+      }
+
+      const tradeData: InsertTrade = {
+        userId,
+        ativo: extracted.ativo.toUpperCase(),
+        tipo: tipo as 'compra' | 'venda',
+        quantidade: normalizeNumber(extracted.quantidade, '1'),
+        precoEntrada: normalizeNumber(extracted.entrada, '0'),
+        precoSaida: normalizeNumber(extracted.saida, extracted.entrada || '0'),
+        resultado,
+        capitalUtilizado: normalizeNumber(extracted.capital, '100'),
+        setup: extracted.setup || 'WhatsApp',
+        mercado: 'b3', // Assumir B3 por padrão
+        corretora: 'b3',
+        dataHora: new Date().toISOString(),
+        comentario: `Importado via WhatsApp: ${messageText.substring(0, 100)}...`
+      };
+
+      console.log('✅ Parsed trade:', tradeData);
+      return tradeData;
+
+    } catch (error) {
+      console.error('❌ Error parsing trade:', error);
+      return null;
+    }
+  }
+
+  // Função para enviar confirmação via WhatsApp
+  async function sendWhatsAppConfirmation(toNumber: string, trade: any) {
+    try {
+      // TODO: Implementar envio de mensagem via WhatsApp API
+      console.log('📤 Would send WhatsApp confirmation to:', toNumber, 'for trade:', trade.ativo);
+      
+      const message = `✅ Trade registrado com sucesso!\n\n` +
+        `🎯 Ativo: ${trade.ativo}\n` +
+        `📊 Tipo: ${trade.tipo}\n` +
+        `💰 Resultado: R$ ${trade.resultado}\n` +
+        `📅 Data: ${new Date(trade.dataHora).toLocaleString('pt-BR')}`;
+      
+      // Aqui você implementaria o envio real usando a API do WhatsApp
+      // await whatsappAPI.sendMessage(toNumber, message);
+      
+    } catch (error) {
+      console.error('❌ Error sending WhatsApp confirmation:', error);
+    }
+  }
+
+  // Rota para testar o parser de mensagens (apenas desenvolvimento)
+  app.post('/api/admin/test-whatsapp-parser', requireAdmin, async (req: any, res: any) => {
+    try {
+      const { messageText, userId } = req.body;
+      
+      if (!messageText || !userId) {
+        return res.status(400).json({ error: "messageText e userId são obrigatórios" });
+      }
+
+      const parsedTrade = parseTradeFromMessage(messageText, userId);
+      
+      if (parsedTrade) {
+        res.json({ 
+          success: true, 
+          parsedTrade,
+          message: "Trade parsed successfully" 
+        });
+      } else {
+        res.json({ 
+          success: false, 
+          message: "Could not parse trade from message" 
+        });
+      }
+    } catch (error) {
+      console.error('Error in test parser:', error);
       res.status(500).json({ error: "Erro interno do servidor" });
     }
   });

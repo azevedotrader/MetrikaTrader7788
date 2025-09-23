@@ -17,6 +17,7 @@ export default function Perfil() {
     nome: user?.name || "",
     email: user?.email || "",
     telefone: (user as any)?.phone || "",
+    whatsappNumber: (user as any)?.whatsappNumber || "",
     senha: "",
     confirmarSenha: ""
   });
@@ -75,6 +76,10 @@ export default function Perfil() {
         updateData.telefone = formData.telefone.trim();
       }
       
+      if (formData.whatsappNumber.trim()) {
+        updateData.whatsappNumber = formData.whatsappNumber.trim();
+      }
+      
       if (formData.senha.trim()) {
         updateData.senha = formData.senha;
       }
@@ -87,7 +92,8 @@ export default function Perfil() {
       updateUser({
         name: updateData.nome,
         email: updateData.email,
-        ...(updateData.telefone && { phone: updateData.telefone })
+        ...(updateData.telefone && { phone: updateData.telefone }),
+        ...(updateData.whatsappNumber && { whatsappNumber: updateData.whatsappNumber })
       });
       
       // Atualizar o formulário com os novos dados (exceto senhas)
@@ -96,6 +102,7 @@ export default function Perfil() {
         nome: updateData.nome,
         email: updateData.email,
         telefone: updateData.telefone || "",
+        whatsappNumber: updateData.whatsappNumber || "",
         senha: "",
         confirmarSenha: ""
       }));
@@ -181,6 +188,20 @@ export default function Perfil() {
                     onChange={(e) => handleInputChange("telefone", e.target.value)}
                     className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsappNumber" className="text-zinc-300">WhatsApp para Trades</Label>
+                  <Input
+                    id="whatsappNumber"
+                    type="tel"
+                    placeholder="5511999999999 (com código do país)"
+                    value={formData.whatsappNumber}
+                    onChange={(e) => handleInputChange("whatsappNumber", e.target.value)}
+                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
+                  />
+                  <p className="text-xs text-zinc-400 mt-1">
+                    💡 Configure seu WhatsApp para enviar trades por mensagem
+                  </p>
                 </div>
               </div>
 
