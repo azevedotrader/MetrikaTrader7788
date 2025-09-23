@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   phone: varchar("phone"),
+  whatsappNumber: varchar("whatsapp_number"), // Número do WhatsApp para receber trades
   capitalInicial: decimal("capital_inicial", { precision: 12, scale: 2 }).default("0"),
   metaMensal: decimal("meta_mensal", { precision: 5, scale: 2 }).default("5"),
   perfilRisco: text("perfil_risco").default("moderado"),
@@ -280,6 +281,7 @@ export const updateProfileSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").optional(),
   email: z.string().email("Email deve ser válido").optional(),
   telefone: z.string().optional(),
+  whatsappNumber: z.string().optional(),
   senha: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional(),
 });
 
@@ -434,3 +436,32 @@ export const insertSupportMessageSchema = createInsertSchema(supportMessages).om
   id: true,
   createdAt: true,
 });
+
+// Tabela para mensagens WhatsApp recebidas
+export const whatsappMessages = pgTable("whatsapp_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: text("message_id").notNull().unique(), // ID da mensagem do WhatsApp
+  fromNumber: text("from_number").notNull(), // Número que enviou
+  userId: varchar("user_id").references(() => users.id), // Usuário associado (pode ser null se não encontrado)
+  messageText: text("message_text").notNull(), // Texto da mensagem
+  messageType: text("message_type").default("text"), // "text", "image", "document", etc.
+  status: text("status").default("received"), // "received", "processed", "failed", "ignored"
+  tradeId: varchar("trade_id").references(() => trades.id), // Trade criado a partir desta mensagem
+  errorMessage: text("error_message"), // Erro durante processamento
+  processedAt: timestamp("processed_at"), // Quando foi processado
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const whatsappMessagesRelations = relations(whatsappMessages, ({ one }) => ({
+  user: one(users, {
+    fields: [whatsappMessages.userId],
+    references: [users.id],
+  }),
+  trade: one(trades, {
+    fields: [whatsappMessages.tradeId],
+    references: [trades.id],
+  }),
+}));
+
+export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
+export type InsertWhatsappMessage = typeof whatsappMessages.$inferInsert;
