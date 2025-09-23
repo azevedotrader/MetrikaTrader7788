@@ -14,7 +14,7 @@ import bcrypt from "bcrypt";
 import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
-import { eq, and, ne } from "drizzle-orm";
+import { eq, and, ne, desc } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
@@ -3666,13 +3666,24 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       const mode = req.query['hub.mode'];
       const token = req.query['hub.verify_token'];
       const challenge = req.query['hub.challenge'];
+      const isDevelopment = process.env.NODE_ENV === 'development';
       
-      const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+      // Em produção, exigir WHATSAPP_VERIFY_TOKEN
+      let VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
       
       if (!VERIFY_TOKEN) {
-        console.error('❌ WHATSAPP_VERIFY_TOKEN não configurado');
-        res.sendStatus(500);
-        return;
+        if (isDevelopment) {
+          VERIFY_TOKEN = 'metrika_webhook_dev_token_2025';
+          console.log('⚠️ Usando token padrão de desenvolvimento');
+        } else {
+          console.error('❌ WHATSAPP_VERIFY_TOKEN obrigatório em produção');
+          res.sendStatus(500);
+          return;
+        }
+      }
+      
+      if (isDevelopment) {
+        console.log('🔍 Webhook verification attempt:', { mode, hasToken: !!token });
       }
       
       if (mode === 'subscribe' && token === VERIFY_TOKEN) {
@@ -3691,28 +3702,41 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
   // WhatsApp webhook para receber mensagens (POST)
   app.post('/webhook', async (req: any, res: any) => {
     try {
-      // Verificar assinatura do Meta para autenticidade
       const signature = req.headers['x-hub-signature-256'];
       const APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+      const isDevelopment = process.env.NODE_ENV === 'development';
       
-      if (!APP_SECRET) {
-        console.error('❌ WHATSAPP_APP_SECRET não configurado');
-        res.sendStatus(500);
-        return;
-      }
+      console.log('📱 WhatsApp webhook received:', { 
+        hasSignature: !!signature, 
+        hasAppSecret: !!APP_SECRET,
+        isDevelopment,
+        bodyObject: req.body?.object 
+      });
       
-      // Verificar assinatura antes de processar
-      const payload = JSON.stringify(req.body);
-      if (!verifyMetaSignature(payload, signature, APP_SECRET)) {
-        console.error('❌ Assinatura inválida do Meta - possível tentativa de forge');
-        res.sendStatus(403);
-        return;
+      // Em produção, exigir verificação de assinatura
+      if (!isDevelopment) {
+        if (!APP_SECRET) {
+          console.error('❌ WHATSAPP_APP_SECRET obrigatório em produção');
+          res.sendStatus(500);
+          return;
+        }
+        
+        const payload = JSON.stringify(req.body);
+        if (!verifyMetaSignature(payload, signature, APP_SECRET)) {
+          console.error('❌ Assinatura inválida do Meta - acesso negado');
+          res.sendStatus(403);
+          return;
+        }
+        console.log('✅ Assinatura Meta verificada com sucesso');
+      } else {
+        console.log('⚠️ Modo desenvolvimento - verificação de assinatura opcional');
       }
       
       const body = req.body;
-      console.log('📱 WhatsApp webhook verified and received:', JSON.stringify(body, null, 2));
       
       if (body.object === 'whatsapp_business_account') {
+        console.log('📱 Processando webhook do WhatsApp Business...');
+        
         // Processar todas as entradas
         for (const entry of body.entry) {
           const changes = entry.changes;
@@ -3722,6 +3746,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
               const messages = change.value.messages;
               
               if (messages) {
+                console.log(`📨 Processando ${messages.length} mensagens`);
                 for (const message of messages) {
                   await processWhatsAppMessage(message);
                 }
@@ -3732,6 +3757,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         
         res.status(200).send('EVENT_RECEIVED');
       } else {
+        console.log('❌ Objeto webhook inválido:', body.object);
         res.sendStatus(404);
       }
     } catch (error) {
@@ -3990,7 +4016,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   }
 
-  // Rota para testar o parser de mensagens (apenas desenvolvimento)
+  // Rota para testar o parser de mensagens (desenvolvimento e admin)
   app.post('/api/admin/test-whatsapp-parser', requireAdmin, async (req: any, res: any) => {
     try {
       const { messageText, userId } = req.body;
@@ -4015,6 +4041,58 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       }
     } catch (error) {
       console.error('Error in test parser:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Rota para simular webhook do WhatsApp (apenas desenvolvimento)
+  app.post('/api/admin/test-whatsapp-webhook', requireAdmin, async (req: any, res: any) => {
+    try {
+      const { fromNumber, messageText } = req.body;
+      
+      if (!fromNumber || !messageText) {
+        return res.status(400).json({ error: "fromNumber e messageText são obrigatórios" });
+      }
+
+      // Simular mensagem do WhatsApp
+      const simulatedMessage = {
+        id: `test_${Date.now()}`,
+        from: fromNumber,
+        timestamp: Math.floor(Date.now() / 1000).toString(),
+        type: 'text',
+        text: {
+          body: messageText
+        }
+      };
+
+      console.log('🧪 Simulando webhook do WhatsApp:', simulatedMessage);
+      
+      // Processar a mensagem
+      await processWhatsAppMessage(simulatedMessage);
+      
+      res.json({ 
+        success: true, 
+        message: "Webhook simulado com sucesso",
+        simulatedMessage 
+      });
+    } catch (error) {
+      console.error('Error in test webhook:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Rota para listar mensagens WhatsApp recebidas (admin)
+  app.get('/api/admin/whatsapp-messages', requireAdmin, async (req: any, res: any) => {
+    try {
+      const messages = await db
+        .select()
+        .from(whatsappMessages)
+        .orderBy(desc(whatsappMessages.createdAt))
+        .limit(50);
+      
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching WhatsApp messages:', error);
       res.status(500).json({ error: "Erro interno do servidor" });
     }
   });
