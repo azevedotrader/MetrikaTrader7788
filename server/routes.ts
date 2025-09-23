@@ -19,6 +19,7 @@ import { validateAndParseCSV } from "./csvValidator";
 import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 import WhatsApp from "whatsapp";
+import axios from "axios";
 
 // JWT Secret - must be provided in production
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || (
@@ -3815,10 +3816,61 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             errorMessage: 'Usuário não encontrado para este número'
           })
           .where(eq(whatsappMessages.id, savedMessage.id));
+        
+        // Enviar mensagem educativa para usuário não cadastrado
+        const userNotFoundMessage = `⚠️ *Número não cadastrado*\n\nEste número WhatsApp não está associado a nenhuma conta Métrika.\n\n🔗 **Para usar o bot:**\n1. Faça login na plataforma Métrika\n2. Vá em "Perfil"\n3. Configure seu número WhatsApp\n4. Volte aqui e envie seus trades!\n\n📱 Número detectado: ${fromNumber}`;
+        await sendWhatsAppMessage(fromNumber, userNotFoundMessage);
         return;
       }
 
       console.log('👤 Found user:', user.name, 'for number:', fromNumber);
+
+      // Verificar se é comando especial antes de tentar extrair trade
+      const messageTextLower = messageText.toLowerCase().trim();
+      
+      // Responder a comandos de ajuda
+      if (messageTextLower === 'ajuda' || messageTextLower === 'help') {
+        const helpMessage = getHelpMessage();
+        await sendWhatsAppMessage(fromNumber, helpMessage);
+        await db
+          .update(whatsappMessages)
+          .set({ 
+            status: 'help_sent',
+            processedAt: new Date()
+          })
+          .where(eq(whatsappMessages.id, savedMessage.id));
+        return;
+      }
+      
+      // Responder a comandos de exemplo
+      if (messageTextLower === 'exemplo' || messageTextLower === 'exemplos' || messageTextLower === 'examples') {
+        const examplesMessage = getExamplesMessage();
+        await sendWhatsAppMessage(fromNumber, examplesMessage);
+        await db
+          .update(whatsappMessages)
+          .set({ 
+            status: 'examples_sent',
+            processedAt: new Date()
+          })
+          .where(eq(whatsappMessages.id, savedMessage.id));
+        return;
+      }
+      
+      // Responder a saudações
+      if (messageTextLower === 'oi' || messageTextLower === 'olá' || messageTextLower === 'ola' || 
+          messageTextLower === 'hi' || messageTextLower === 'hello' || messageTextLower === 'bom dia' ||
+          messageTextLower === 'boa tarde' || messageTextLower === 'boa noite') {
+        const welcomeMessage = getWelcomeMessage();
+        await sendWhatsAppMessage(fromNumber, welcomeMessage);
+        await db
+          .update(whatsappMessages)
+          .set({ 
+            status: 'welcome_sent',
+            processedAt: new Date()
+          })
+          .where(eq(whatsappMessages.id, savedMessage.id));
+        return;
+      }
 
       // Tentar extrair informações do trade da mensagem
       const tradeData = parseTradeFromMessage(messageText, user.id);
@@ -3868,8 +3920,9 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             resultado: newTrade.resultado
           });
 
-          // TODO: Enviar confirmação via WhatsApp
-          await sendWhatsAppConfirmation(fromNumber, newTrade);
+          // Enviar confirmação de sucesso via WhatsApp
+          const successMessage = `✅ *Trade salvo com sucesso!*\n\n📊 **Detalhes:**\n• Ativo: ${newTrade.ativo}\n• Tipo: ${newTrade.tipo === 'compra' ? 'COMPRA' : 'VENDA'}\n• Quantidade: ${newTrade.quantidade}\n• Entrada: ${newTrade.precoEntrada}\n• Saída: ${newTrade.precoSaida}\n• P&L: ${parseFloat(newTrade.resultado) >= 0 ? '+' : ''}R$ ${newTrade.resultado}\n\n🚀 Acesse sua conta Métrika para ver mais detalhes!`;
+          await sendWhatsAppMessage(fromNumber, successMessage);
 
         } catch (error) {
           console.error('❌ Error creating trade:', error);
@@ -3880,6 +3933,10 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
               errorMessage: error instanceof Error ? error.message : 'Erro ao criar trade'
             })
             .where(eq(whatsappMessages.id, savedMessage.id));
+          
+          // Enviar mensagem de erro
+          const errorMessage = `❌ *Erro ao salvar trade*\n\nDesculpe, houve um problema ao salvar seu trade. Tente novamente ou digite "ajuda" para ver o formato correto.\n\n🔧 **Erro técnico:** ${error instanceof Error ? error.message : 'Erro desconhecido'}`;
+          await sendWhatsAppMessage(fromNumber, errorMessage);
         }
       } else {
         console.log('❌ Could not parse trade from message');
@@ -3890,11 +3947,129 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             errorMessage: 'Não foi possível extrair dados do trade da mensagem'
           })
           .where(eq(whatsappMessages.id, savedMessage.id));
+        
+        // Enviar mensagem educativa quando não conseguir compreender
+        const parseFailedMessage = `🤔 *Não consegui entender esta mensagem*\n\nParece que você tentou enviar um trade, mas não consegui extrair as informações necessárias.\n\n💡 **Digite "exemplo" para ver formatos corretos**\n\n📝 **Lembre-se de incluir:**\n• Tipo: COMPRA ou VENDA\n• Ativo: Ex: EURUSD, BTCUSDT\n• Quantidade: Volume\n• Preços de entrada e saída\n\n❓ Digite "ajuda" para mais informações`;
+        await sendWhatsAppMessage(fromNumber, parseFailedMessage);
       }
 
     } catch (error) {
       console.error('❌ Error in processWhatsAppMessage:', error);
     }
+  }
+
+  // Função para enviar mensagem WhatsApp
+  async function sendWhatsAppMessage(to: string, message: string) {
+    try {
+      const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '106540352242922';
+      
+      if (!accessToken) {
+        console.error('❌ WHATSAPP_ACCESS_TOKEN não configurado');
+        return false;
+      }
+
+      const response = await axios.post(
+        `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
+        {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: to,
+          type: 'text',
+          text: {
+            preview_url: false,
+            body: message
+          }
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      console.log('✅ Mensagem WhatsApp enviada:', response.data);
+      return true;
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar mensagem WhatsApp:', error.response?.data || error.message);
+      return false;
+    }
+  }
+
+  // Funções para gerar mensagens educativas
+  function getWelcomeMessage() {
+    return `📊 *Métrika Trading Bot*
+
+Olá! Eu sou seu assistente para salvar trades automaticamente.
+
+📝 *Como enviar um trade:*
+
+Envie uma mensagem com estas informações:
+• **Tipo**: COMPRA ou VENDA
+• **Ativo**: Ex: EURUSD, BTCUSDT, PETR4
+• **Quantidade**: Volume negociado
+• **Preço de entrada**: Preço que entrou
+• **Preço de saída**: Preço que saiu
+
+📝 *Exemplos:*
+
+COMPRA EURUSD 0.1 lotes entrada 1.0850 saída 1.0890
+
+VENDA BTCUSDT 0.05 entrada 45000 saída 44500 profit 250
+
+COMPRA PETR4 100 ações por 28.50 vendeu 29.20
+
+⚙️ *Comandos:*
+• Digite "ajuda" para ver esta mensagem
+• Digite "exemplo" para ver mais exemplos
+
+Vamos começar! 🚀`;
+  }
+
+  function getExamplesMessage() {
+    return `📝 *Exemplos de Trades:*
+
+**Forex:**
+• COMPRA EURUSD 0.1 entrada 1.0850 saída 1.0890
+• VENDA GBPUSD 0.2 lotes entrada 1.2650 saiu 1.2620
+• Comprei AUDJPY 0.15 por 98.50 fechei 99.20
+
+**Crypto:**
+• COMPRA BTCUSDT 0.01 entrada 45000 saída 46500
+• Vendi ETHUSDT 0.1 por 3200 fechou 3150
+• BTC long 0.005 entrada 44000 tp 45000
+
+**Ações (B3):**
+• COMPRA PETR4 100 ações 28.50 vendeu 29.20
+• Vendi VALE3 200 por 62.80 fechei 61.90
+• ITUB4 compra 500 entrada 25.30 saída 26.10
+
+💡 *Dicas:*
+• Use palavras como: compra/venda, entrada/saída, lotes/ações
+• Inclua sempre o ativo, quantidade e preços
+• Pode usar linguagem natural, eu entendo! 🤖`;
+  }
+
+  function getHelpMessage() {
+    return `🆘 *Ajuda - Métrika Trading Bot*
+
+📊 **Como funciona:**
+Envie seus trades por WhatsApp e eu salvo automaticamente na sua conta Métrika!
+
+📝 **Formato básico:**
+[TIPO] [ATIVO] [QUANTIDADE] entrada [PREÇO1] saída [PREÇO2]
+
+🔄 **Comandos:**
+• "ajuda" - Esta mensagem
+• "exemplo" - Ver exemplos detalhados
+• "oi" ou "olá" - Mensagem de boas-vindas
+
+⚙️ **Configuração:**
+Certifique-se de ter configurado seu WhatsApp no seu perfil Métrika.
+
+🚀 **Vamos começar!**
+Envie seu primeiro trade ou digite "exemplo" para ver formatos!`;
   }
 
   // Função para extrair dados do trade da mensagem
@@ -4077,6 +4252,46 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       });
     } catch (error) {
       console.error('Error in test webhook:', error);
+      res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // Rota simples para testar mensagens WhatsApp (desenvolvimento)
+  app.post('/api/test-whatsapp-message', async (req: any, res: any) => {
+    try {
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(403).json({ error: "Apenas disponível em desenvolvimento" });
+      }
+      
+      const { fromNumber, messageText } = req.body;
+      
+      if (!fromNumber || !messageText) {
+        return res.status(400).json({ error: "fromNumber e messageText são obrigatórios" });
+      }
+
+      // Simular mensagem do WhatsApp
+      const simulatedMessage = {
+        id: `test_${Date.now()}`,
+        from: fromNumber,
+        timestamp: Math.floor(Date.now() / 1000).toString(),
+        type: 'text',
+        text: {
+          body: messageText
+        }
+      };
+
+      console.log('🧪 Testando mensagem WhatsApp:', simulatedMessage);
+      
+      // Processar a mensagem
+      await processWhatsAppMessage(simulatedMessage);
+      
+      res.json({ 
+        success: true, 
+        message: "Mensagem processada com sucesso",
+        simulatedMessage 
+      });
+    } catch (error) {
+      console.error('Error in test message:', error);
       res.status(500).json({ error: "Erro interno do servidor" });
     }
   });
