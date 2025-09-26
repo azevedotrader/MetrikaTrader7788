@@ -231,6 +231,17 @@ export default function Perfil() {
               </div>
 
 
+              {/* Links úteis */}
+              <div className="flex justify-center pt-4 border-t border-zinc-700">
+                <a 
+                  href="/politica-privacidade" 
+                  className="text-sm text-zinc-400 hover:text-white transition-colors underline"
+                  data-testid="link-privacy-policy-profile"
+                >
+                  Política de Privacidade
+                </a>
+              </div>
+
               <Button 
                 type="submit" 
                 disabled={isLoading}
