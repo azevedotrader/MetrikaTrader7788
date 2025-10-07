@@ -235,7 +235,6 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </div>
                 
               </div>
-            </div>
           </CardContent>
         </Card>
       </div>
