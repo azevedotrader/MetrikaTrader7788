@@ -1,5 +1,7 @@
-import { TopBar } from "@/components/layout/top-bar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PrivacyPageProps {
@@ -8,31 +10,44 @@ interface PrivacyPageProps {
 
 export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
   const { t } = useLanguage();
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen bg-background">
-      <TopBar 
-        title="Política de Privacidade" 
-        onMenuClick={onMenuClick}
-      />
+      {/* Header simplificado com botão voltar */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-7xl">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/")}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Voltar para Home</span>
+            <span className="sm:hidden">Voltar</span>
+          </Button>
+          <h1 className="text-lg sm:text-xl font-semibold text-foreground">Política de Privacidade</h1>
+          <div className="w-20 sm:w-32"></div> {/* Spacer para centralizar o título */}
+        </div>
+      </div>
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-4xl lg:max-w-5xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary leading-tight">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-5xl">
+        <Card className="border-border/50 shadow-lg">
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-primary leading-tight">
               Política de Privacidade - Métrika Trading
             </CardTitle>
-            <p className="text-sm sm:text-base text-muted-foreground">
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-2">
               Última atualização: {new Date().toLocaleDateString('pt-BR')}
             </p>
           </CardHeader>
           
-          <CardContent className="px-4 sm:px-6">
-            <div className="md:max-h-[calc(100vh-200px)] md:overflow-y-auto md:pr-4">
-              <div className="space-y-4 sm:space-y-6 text-sm sm:text-base lg:text-lg leading-relaxed">
+          <CardContent className="px-3 sm:px-4 md:px-6 lg:px-8">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed max-h-[calc(100vh-250px)] overflow-y-auto pr-2 sm:pr-4">
                 
                 <section data-testid="section-introducao">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">1. Introdução</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">1. Introdução</h2>
                   <p className="mb-3">
                     A Métrika Trading ("nós", "nosso" ou "empresa") está comprometida em proteger e 
                     respeitar sua privacidade. Esta Política de Privacidade explica como coletamos, 
@@ -46,9 +61,9 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-informacoes-coletadas">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">2. Informações que Coletamos</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">2. Informações que Coletamos</h2>
                   
-                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">2.1. Informações Pessoais</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-medium text-foreground mb-2 sm:mb-3">2.1. Informações Pessoais</h3>
                   <ul className="list-disc pl-4 sm:pl-6 mb-4 space-y-1 sm:space-y-2">
                     <li>Nome completo e endereço de e-mail</li>
                     <li>Número de telefone (quando fornecido)</li>
@@ -56,7 +71,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                     <li>Número do WhatsApp (para funcionalidade de bot)</li>
                   </ul>
 
-                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">2.2. Dados de Trading</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-medium text-foreground mb-2 sm:mb-3">2.2. Dados de Trading</h3>
                   <ul className="list-disc pl-4 sm:pl-6 mb-4 space-y-1 sm:space-y-2">
                     <li>Registros de trades e operações</li>
                     <li>Configurações de corretoras e APIs</li>
@@ -65,7 +80,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                     <li>Entradas do diário de trading</li>
                   </ul>
 
-                  <h3 className="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">2.3. Dados Técnicos</h3>
+                  <h3 className="text-sm sm:text-base md:text-lg font-medium text-foreground mb-2 sm:mb-3">2.3. Dados Técnicos</h3>
                   <ul className="list-disc pl-4 sm:pl-6 mb-4 space-y-1 sm:space-y-2">
                     <li>Endereço IP e informações do dispositivo</li>
                     <li>Dados de uso e navegação</li>
@@ -75,7 +90,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-uso-informacoes">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">3. Como Usamos suas Informações</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">3. Como Usamos suas Informações</h2>
                   <ul className="list-disc pl-4 sm:pl-6 space-y-1 sm:space-y-2">
                     <li>Fornecer e manter nossos serviços de análise de trading</li>
                     <li>Processar e analisar seus dados de trading</li>
@@ -89,7 +104,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-whatsapp">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">4. Funcionalidade WhatsApp Bot</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">4. Funcionalidade WhatsApp Bot</h2>
                   <p className="mb-3">
                     Nossa plataforma oferece integração com WhatsApp para facilitar o registro de trades:
                   </p>
@@ -103,7 +118,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-compartilhamento">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">5. Compartilhamento de Informações</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">5. Compartilhamento de Informações</h2>
                   <p className="mb-3">
                     <strong>Não vendemos, alugamos ou compartilhamos suas informações pessoais com terceiros</strong>, 
                     exceto nas seguintes circunstâncias:
@@ -117,7 +132,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-seguranca">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">6. Segurança dos Dados</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">6. Segurança dos Dados</h2>
                   <p className="mb-3">
                     Implementamos medidas de segurança adequadas para proteger suas informações:
                   </p>
@@ -131,7 +146,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-direitos">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">7. Seus Direitos</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">7. Seus Direitos</h2>
                   <p className="mb-3">
                     De acordo com a LGPD (Lei Geral de Proteção de Dados), você tem os seguintes direitos:
                   </p>
@@ -150,7 +165,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-cookies">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">8. Cookies e Tecnologias Similares</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">8. Cookies e Tecnologias Similares</h2>
                   <p className="mb-3">
                     Utilizamos cookies e tecnologias similares para:
                   </p>
@@ -166,7 +181,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-retencao">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">9. Retenção de Dados</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">9. Retenção de Dados</h2>
                   <p>
                     Mantemos seus dados pessoais apenas pelo tempo necessário para cumprir as finalidades 
                     descritas nesta política, salvo quando a retenção por período superior for exigida 
@@ -176,7 +191,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-internacional">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">10. Transferências Internacionais</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">10. Transferências Internacionais</h2>
                   <p>
                     Alguns de nossos provedores de serviços podem estar localizados fora do Brasil. 
                     Garantimos que todas as transferências internacionais de dados cumpram com os 
@@ -185,7 +200,7 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-alteracoes">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">11. Alterações nesta Política</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">11. Alterações nesta Política</h2>
                   <p>
                     Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos sobre 
                     mudanças significativas através da plataforma ou por e-mail. Recomendamos que 
@@ -195,15 +210,15 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                 </section>
 
                 <section data-testid="section-contato">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-primary mb-3 sm:mb-4">12. Contato</h2>
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-primary mb-2 sm:mb-3 md:mb-4">12. Contato</h2>
                   <p className="mb-3">
                     Se você tiver dúvidas sobre esta Política de Privacidade ou sobre como tratamos 
                     seus dados pessoais, entre em contato conosco:
                   </p>
-                  <div className="bg-muted p-4 sm:p-6 rounded-lg sm:rounded-xl w-full">
-                    <div className="space-y-2 sm:space-y-3">
-                      <p className="text-base sm:text-lg font-semibold">Métrika Trading</p>
-                      <div className="space-y-1 sm:space-y-2 text-sm sm:text-base">
+                  <div className="bg-muted p-3 sm:p-4 md:p-6 rounded-lg sm:rounded-xl w-full">
+                    <div className="space-y-1.5 sm:space-y-2 md:space-y-3">
+                      <p className="text-sm sm:text-base md:text-lg font-semibold">Métrika Trading</p>
+                      <div className="space-y-1 sm:space-y-1.5 md:space-y-2 text-xs sm:text-sm md:text-base">
                         <p>E-mail: <span className="text-primary font-medium">privacidade@metrika.com.br</span></p>
                         <p>E-mail de suporte: <span className="text-primary font-medium">suporte@metrika.com.br</span></p>
                         <p>Através da seção "Suporte" da plataforma</p>
@@ -212,8 +227,8 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
                   </div>
                 </section>
 
-                <div className="border-t pt-4 sm:pt-6 mt-6 sm:mt-8">
-                  <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                <div className="border-t pt-3 sm:pt-4 md:pt-6 mt-4 sm:mt-6 md:mt-8">
+                  <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground text-center">
                     Esta Política de Privacidade é válida a partir de {new Date().toLocaleDateString('pt-BR')} 
                     e substitui qualquer versão anterior.
                   </p>
