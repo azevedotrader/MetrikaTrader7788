@@ -33,6 +33,7 @@ import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
 import ResetPassword from "@/pages/reset-password";
 import PoliticaPrivacidade from "@/pages/politica-privacidade";
+import TermosServico from "@/pages/termos-servico";
 import NotFound from "@/pages/not-found";
 
 // Títulos das páginas agora são chaves de tradução
@@ -50,6 +51,7 @@ const pageTitleKeys: Record<string, string> = {
   "/perfil": "profile.title",
   "/suporte": "support.title",
   "/politica-privacidade": "Política de Privacidade",
+  "/termos-servico": "Termos de Serviço",
   "/admin": "nav.admin",
   "/teste-gateio": "Teste Gate.io API"
 };
@@ -78,6 +80,11 @@ function AppContent() {
         {/* Privacy policy route - public */}
         <Route path="/politica-privacidade">
           <PoliticaPrivacidade />
+        </Route>
+        
+        {/* Terms of service route - public */}
+        <Route path="/termos-servico">
+          <TermosServico />
         </Route>
         
         {/* Admin routes - separate from regular app */}
@@ -186,6 +193,11 @@ function AppContent() {
                   </Route>
                   <Route path="/politica-privacidade">
                     <PoliticaPrivacidade 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                  </Route>
+                  <Route path="/termos-servico">
+                    <TermosServico 
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                   </Route>

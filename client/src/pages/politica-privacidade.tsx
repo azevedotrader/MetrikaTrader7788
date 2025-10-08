@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TopBar } from "@/components/layout/top-bar";
 
 interface PrivacyPageProps {
   onMenuClick?: () => void;
@@ -14,23 +15,30 @@ export default function PoliticaPrivacidade({ onMenuClick }: PrivacyPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header simplificado com botão voltar */}
-      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-7xl">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setLocation("/")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Voltar para Home</span>
-            <span className="sm:hidden">Voltar</span>
-          </Button>
-          <h1 className="text-lg sm:text-xl font-semibold text-foreground">Política de Privacidade</h1>
-          <div className="w-20 sm:w-32"></div> {/* Spacer para centralizar o título */}
+      {/* Use TopBar for authenticated users, custom header for public access */}
+      {onMenuClick ? (
+        <TopBar 
+          title="Política de Privacidade" 
+          onMenuClick={onMenuClick}
+        />
+      ) : (
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-7xl">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Voltar para Home</span>
+              <span className="sm:hidden">Voltar</span>
+            </Button>
+            <h1 className="text-lg sm:text-xl font-semibold text-foreground">Política de Privacidade</h1>
+            <div className="w-20 sm:w-32"></div> {/* Spacer para centralizar o título */}
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-5xl">
         <Card className="border-border/50 shadow-lg">

@@ -232,13 +232,21 @@ export default function Perfil() {
 
 
               {/* Links úteis */}
-              <div className="flex justify-center pt-4 border-t border-zinc-700">
+              <div className="flex justify-center gap-4 pt-4 border-t border-zinc-700">
                 <a 
                   href="/politica-privacidade" 
                   className="text-sm text-zinc-400 hover:text-white transition-colors underline"
                   data-testid="link-privacy-policy-profile"
                 >
                   Política de Privacidade
+                </a>
+                <span className="text-zinc-600">•</span>
+                <a 
+                  href="/termos-servico" 
+                  className="text-sm text-zinc-400 hover:text-white transition-colors underline"
+                  data-testid="link-terms-service-profile"
+                >
+                  Termos de Serviço
                 </a>
               </div>
 
