@@ -4013,6 +4013,28 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
               .values(insertData)
               .returning();
 
+            // Criar registro de importação manual do WhatsApp
+            const now = new Date();
+            const displayName = `WhatsApp - ${now.toLocaleString('pt-BR', { 
+              day: '2-digit', 
+              month: '2-digit', 
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}`;
+            
+            await db
+              .insert(csvImports)
+              .values({
+                userId: user.id,
+                broker: 'whatsapp',
+                fileName: `whatsapp_${now.getTime()}.txt`,
+                displayName: displayName,
+                tradesImported: 1,
+                tradesSkipped: 0,
+                status: 'completed'
+              });
+
             // Atualizar mensagem como processada
             await db
               .update(whatsappMessages)
@@ -4284,10 +4306,10 @@ Vamos começar! 🚀`;
       const simplePatterns = {
         // Vitória ou Perda
         resultado_tipo: /(vit[oó]ria|ganho|win|gain|lucro|perda|loss|preju[íi]zo)/i,
-        // Ativo
-        ativo: /([A-Z0-9]{3,10})/,
+        // Ativo - melhorado para detectar em contexto "no/do ATIVO"
+        ativo: /(?:no|do|em|ativo[:\s]+)([A-Z][A-Z0-9]{2,9})|^([A-Z][A-Z0-9]{2,9})/i,
         // Valor de entrada (capital usado)
-        entrada: /(?:entrada|capital|usei|investi|valor)[:\s]*([0-9.,]+)/i,
+        entrada: /(?:entrada|capital|usei|investi|valor)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
         // Lucro ou Prejuízo
         lucro: /(?:lucro|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)/i,
         prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i
@@ -4299,7 +4321,12 @@ Vamos começar! 🚀`;
       for (const [key, pattern] of Object.entries(simplePatterns)) {
         const match = text.match(pattern);
         if (match) {
-          extracted[key] = match[1].trim();
+          // Para ativo, pode vir em match[1] ou match[2] dependendo do padrão
+          if (key === 'ativo') {
+            extracted[key] = (match[1] || match[2])?.trim();
+          } else {
+            extracted[key] = match[1]?.trim();
+          }
         }
       }
 
