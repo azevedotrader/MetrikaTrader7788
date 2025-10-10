@@ -34,6 +34,7 @@ import AdminLogin from "@/pages/admin-login";
 import ResetPassword from "@/pages/reset-password";
 import PoliticaPrivacidade from "@/pages/politica-privacidade";
 import TermosServico from "@/pages/termos-servico";
+import ExclusaoDados from "@/pages/exclusao-dados";
 import NotFound from "@/pages/not-found";
 
 // Títulos das páginas agora são chaves de tradução
@@ -52,6 +53,7 @@ const pageTitleKeys: Record<string, string> = {
   "/suporte": "support.title",
   "/politica-privacidade": "Política de Privacidade",
   "/termos-servico": "Termos de Serviço",
+  "/exclusao-dados": "Exclusão de Dados",
   "/admin": "nav.admin",
   "/teste-gateio": "Teste Gate.io API"
 };
@@ -77,14 +79,23 @@ function AppContent() {
           <ResetPassword />
         </Route>
         
-        {/* Privacy policy route - public */}
+        {/* Legal pages - accessible both public and authenticated */}
         <Route path="/politica-privacidade">
-          <PoliticaPrivacidade />
+          <PoliticaPrivacidade 
+            onMenuClick={isAuthenticated ? () => setIsSidebarOpen(true) : undefined}
+          />
         </Route>
         
-        {/* Terms of service route - public */}
         <Route path="/termos-servico">
-          <TermosServico />
+          <TermosServico 
+            onMenuClick={isAuthenticated ? () => setIsSidebarOpen(true) : undefined}
+          />
+        </Route>
+        
+        <Route path="/exclusao-dados">
+          <ExclusaoDados 
+            onMenuClick={isAuthenticated ? () => setIsSidebarOpen(true) : undefined}
+          />
         </Route>
         
         {/* Admin routes - separate from regular app */}
@@ -191,16 +202,7 @@ function AppContent() {
                     />
                     <Importacoes />
                   </Route>
-                  <Route path="/politica-privacidade">
-                    <PoliticaPrivacidade 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                  </Route>
-                  <Route path="/termos-servico">
-                    <TermosServico 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                  </Route>
+                  {/* Legal pages are handled by public routes above with conditional onMenuClick */}
                   {/* Admin route moved to standalone section */}
                   <Route path="/">
                     {/* Dashboard will handle its own TopBar with filters */}
