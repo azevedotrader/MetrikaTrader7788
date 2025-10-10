@@ -4018,11 +4018,17 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           }
         }
         
-        // Se não conseguiu processar como trade, enviar menu com opções de texto
-        console.log('📋 Sending menu options (could not parse as trade)');
-        const menuMessage = `👋 Olá ${user.name}!\n\n📊 *O que você deseja fazer?*\n\nResponda com o número da opção:\n\n*1️⃣ Salvar Trade* - Enviar um novo trade\n*2️⃣ Ver Estatísticas* - Ver suas stats\n*3️⃣ Ajuda* - Ver instruções\n\nDigite: 1, 2 ou 3`;
+        // Se não conseguiu processar como trade, enviar menu interativo com botões
+        console.log('📋 Sending interactive menu with buttons');
+        const menuMessage = `👋 Olá ${user.name}!\n\n📊 *O que você deseja fazer?*\n\nEscolha uma opção abaixo:`;
         
-        await sendWhatsAppMessage(fromNumber, menuMessage);
+        const menuButtons = [
+          { id: 'btn_save_trade', title: '💾 Salvar Trade' },
+          { id: 'btn_statistics', title: '📊 Estatísticas' },
+          { id: 'btn_help', title: '❓ Ajuda' }
+        ];
+        
+        await sendWhatsAppInteractiveMessage(fromNumber, menuMessage, menuButtons);
         await db
           .update(whatsappMessages)
           .set({ 
