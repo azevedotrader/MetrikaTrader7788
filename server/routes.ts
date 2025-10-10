@@ -3893,8 +3893,63 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         }
       }
       
-      // Se for mensagem de texto, tentar processar como trade primeiro
+      // Se for mensagem de texto, verificar se é resposta do menu
       if (!isButtonReply) {
+        // Processar respostas do menu numérico
+        if (messageTextLower === '1') {
+          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nEnvie uma mensagem com estas informações:\n\n• **Tipo**: COMPRA ou VENDA\n• **Ativo**: Ex: EURUSD, BTCUSDT\n• **Quantidade**: Volume\n• **Entrada**: Preço entrada\n• **Saída**: Preço saída\n\n📋 *Exemplos:*\n\n*Forex:*\nCOMPRA EURUSD 0.1 entrada 1.0850 saída 1.0890\n\n*Crypto:*\nVENDA BTCUSDT 0.01 entrada 45000 saída 44500\n\n*Ações:*\nCOMPRA PETR4 100 entrada 28.50 saída 29.20\n\n💡 Pode usar linguagem natural!\n\nEnvie seu trade agora! 🚀`;
+          await sendWhatsAppMessage(fromNumber, saveTradeMessage);
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'save_trade_instructions_sent',
+              processedAt: new Date()
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+          return;
+        } else if (messageTextLower === '2') {
+          const userTrades = await db
+            .select()
+            .from(trades)
+            .where(eq(trades.userId, user.id));
+          
+          const totalTrades = userTrades.length;
+          const totalProfit = userTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+          const wins = userTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+          const losses = userTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+          const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0';
+          
+          const statsMessage = `📊 *Suas Estatísticas*\n\n` +
+            `📈 Total de Trades: ${totalTrades}\n` +
+            `💰 Lucro Total: R$ ${totalProfit.toFixed(2)}\n` +
+            `✅ Wins: ${wins}\n` +
+            `❌ Losses: ${losses}\n` +
+            `🎯 Win Rate: ${winRate}%\n\n` +
+            `🚀 Continue assim!`;
+          
+          await sendWhatsAppMessage(fromNumber, statsMessage);
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'statistics_sent',
+              processedAt: new Date()
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+          return;
+        } else if (messageTextLower === '3') {
+          const helpMessage = getHelpMessage();
+          await sendWhatsAppMessage(fromNumber, helpMessage);
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'help_sent',
+              processedAt: new Date()
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+          return;
+        }
+        
+        // Tentar processar como trade
         const tradeData = parseTradeFromMessage(messageText, user.id);
         
         if (tradeData) {
@@ -3963,17 +4018,11 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           }
         }
         
-        // Se não conseguiu processar como trade, enviar menu interativo
-        console.log('📋 Sending interactive menu (could not parse as trade)');
-        const menuMessage = `👋 Olá ${user.name}!\n\n📊 *O que você deseja fazer?*\n\nEscolha uma opção abaixo:`;
+        // Se não conseguiu processar como trade, enviar menu com opções de texto
+        console.log('📋 Sending menu options (could not parse as trade)');
+        const menuMessage = `👋 Olá ${user.name}!\n\n📊 *O que você deseja fazer?*\n\nResponda com o número da opção:\n\n*1️⃣ Salvar Trade* - Enviar um novo trade\n*2️⃣ Ver Estatísticas* - Ver suas stats\n*3️⃣ Ajuda* - Ver instruções\n\nDigite: 1, 2 ou 3`;
         
-        const menuButtons = [
-          { id: 'btn_save_trade', title: '💾 Salvar Trade' },
-          { id: 'btn_statistics', title: '📊 Ver Estatísticas' },
-          { id: 'btn_help', title: '❓ Ajuda' }
-        ];
-        
-        await sendWhatsAppInteractiveMessage(fromNumber, menuMessage, menuButtons);
+        await sendWhatsAppMessage(fromNumber, menuMessage);
         await db
           .update(whatsappMessages)
           .set({ 
