@@ -3839,7 +3839,23 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       if (isButtonReply) {
         if (messageTextLower === 'btn_save_trade') {
           // Enviar instruções de como salvar trade (formato simplificado)
-          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nÉ super simples! Envie uma mensagem com:\n\n✅ *Vitória* ou ❌ *Perda*\n📊 *Ativo* (ex: EURUSD, BTCUSDT, PETR4)\n💰 *Entrada* (valor usado)\n📈 *Lucro* ou 📉 *Prejuízo*\n\n📋 *Exemplos:*\n\n✅ Vitória EURUSD entrada 100 lucro 50\n\n❌ Perda BTCUSDT entrada 200 prejuízo 30\n\n✅ Ganhei 75 no PETR4 entrada 150\n\n❌ Perdi 40 no WIN entrada 300\n\n💡 Use linguagem natural!\n\nEnvie seu trade agora! 🚀`;
+          const saveTradeMessage = `📝 *COMO SALVAR UM TRADE*\n\n` +
+            `É muito simples! Só me diga 4 coisas:\n\n` +
+            `1️⃣ Foi *vitória* ✅ ou *perda* ❌?\n` +
+            `2️⃣ Qual o *ativo*? (EURUSD, PETR4, WIN...)\n` +
+            `3️⃣ Quanto você *investiu*?\n` +
+            `4️⃣ Quanto você *ganhou* ou *perdeu*?\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `📋 *EXEMPLOS PRÁTICOS:*\n\n` +
+            `✅ "Vitória EURUSD entrada 100 lucro 50"\n` +
+            `   (Investiu R$100, ganhou R$50)\n\n` +
+            `❌ "Perda BTCUSDT entrada 200 prejuízo 30"\n` +
+            `   (Investiu R$200, perdeu R$30)\n\n` +
+            `✅ "Ganhei 75 no WIN entrada 150"\n\n` +
+            `❌ "Perdi 40 no PETR4"\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `💡 *DICA:* Use linguagem natural, eu entendo!\n\n` +
+            `🚀 *Envie seu trade agora mesmo!*`;
           await sendWhatsAppMessage(fromNumber, saveTradeMessage);
           await db
             .update(whatsappMessages)
@@ -3897,7 +3913,23 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       if (!isButtonReply) {
         // Processar respostas do menu numérico
         if (messageTextLower === '1') {
-          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nÉ super simples! Envie uma mensagem com:\n\n✅ *Vitória* ou ❌ *Perda*\n📊 *Ativo* (ex: EURUSD, BTCUSDT, PETR4)\n💰 *Entrada* (valor usado)\n📈 *Lucro* ou 📉 *Prejuízo*\n\n📋 *Exemplos:*\n\n✅ Vitória EURUSD entrada 100 lucro 50\n\n❌ Perda BTCUSDT entrada 200 prejuízo 30\n\n✅ Ganhei 75 no PETR4 entrada 150\n\n❌ Perdi 40 no WIN entrada 300\n\n💡 Use linguagem natural!\n\nEnvie seu trade agora! 🚀`;
+          const saveTradeMessage = `📝 *COMO SALVAR UM TRADE*\n\n` +
+            `É muito simples! Só me diga 4 coisas:\n\n` +
+            `1️⃣ Foi *vitória* ✅ ou *perda* ❌?\n` +
+            `2️⃣ Qual o *ativo*? (EURUSD, PETR4, WIN...)\n` +
+            `3️⃣ Quanto você *investiu*?\n` +
+            `4️⃣ Quanto você *ganhou* ou *perdeu*?\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `📋 *EXEMPLOS PRÁTICOS:*\n\n` +
+            `✅ "Vitória EURUSD entrada 100 lucro 50"\n` +
+            `   (Investiu R$100, ganhou R$50)\n\n` +
+            `❌ "Perda BTCUSDT entrada 200 prejuízo 30"\n` +
+            `   (Investiu R$200, perdeu R$30)\n\n` +
+            `✅ "Ganhei 75 no WIN entrada 150"\n\n` +
+            `❌ "Perdi 40 no PETR4"\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `💡 *DICA:* Use linguagem natural, eu entendo!\n\n` +
+            `🚀 *Envie seu trade agora mesmo!*`;
           await sendWhatsAppMessage(fromNumber, saveTradeMessage);
           await db
             .update(whatsappMessages)
@@ -3998,7 +4030,22 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             });
 
             // Enviar confirmação de sucesso via WhatsApp
-            const successMessage = `✅ *Trade salvo com sucesso!*\n\n📊 **Detalhes:**\n• Ativo: ${newTrade.ativo}\n• Tipo: ${newTrade.tipo === 'compra' ? 'COMPRA' : 'VENDA'}\n• Quantidade: ${newTrade.quantidade}\n• Entrada: ${newTrade.precoEntrada || '0'}\n• Saída: ${newTrade.precoSaida || '0'}\n• P&L: ${newTrade.resultado ? (parseFloat(newTrade.resultado) >= 0 ? '+' : '') + 'R$ ' + newTrade.resultado : 'N/A'}\n\n🚀 Acesse sua conta Métrika para ver mais detalhes!`;
+            const resultado = parseFloat(newTrade.resultado || '0');
+            const isProfit = resultado >= 0;
+            const emoji = isProfit ? '✅' : '❌';
+            const resultText = isProfit ? 'VITÓRIA' : 'PERDA';
+            
+            const successMessage = `${emoji} *TRADE REGISTRADO!*\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n` +
+              `📊 *Resumo do Trade:*\n\n` +
+              `🎯 Ativo: *${newTrade.ativo}*\n` +
+              `${isProfit ? '✅' : '❌'} Resultado: *${resultText}*\n` +
+              `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
+              `📈 P&L: ${isProfit ? '+' : ''}R$ ${Math.abs(resultado).toFixed(2)}\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `🚀 *Trade salvo na sua conta Métrika!*\n\n` +
+              `📱 Acesse a plataforma para ver análises completas!\n\n` +
+              `💡 Envie outro trade quando quiser!`;
             await sendWhatsAppMessage(fromNumber, successMessage);
             return;
           } catch (error) {
@@ -4020,7 +4067,9 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         
         // Se não conseguiu processar como trade, enviar menu interativo com botões
         console.log('📋 Sending interactive menu with buttons');
-        const menuMessage = `👋 Olá ${user.name}!\n\n📊 *O que você deseja fazer?*\n\nEscolha uma opção abaixo:`;
+        const menuMessage = `👋 Olá *${user.name}*!\n\n` +
+          `Seja bem-vindo ao *Métrika Trading Bot* 🚀\n\n` +
+          `Escolha o que deseja fazer:`;
         
         const menuButtons = [
           { id: 'btn_save_trade', title: '💾 Salvar Trade' },
@@ -4191,30 +4240,35 @@ Vamos começar! 🚀`;
   }
 
   function getHelpMessage() {
-    return `🆘 *Ajuda - Métrika Trading Bot*
-
-📊 **Como funciona:**
-Envie seus trades por WhatsApp de forma simples e rápida!
-
-📝 **Formato simplificado:**
-✅/❌ [Vitória/Perda] [ATIVO] entrada [VALOR] lucro/prejuízo [VALOR]
-
-📋 **Exemplos:**
-• Vitória EURUSD entrada 100 lucro 50
-• Perda BTCUSDT entrada 200 prejuízo 30
-• Ganhei 75 no WIN entrada 150
-• Perdi 40 no PETR4
-
-🔄 **Menu:**
-Digite 1, 2 ou 3 para acessar:
-1️⃣ Salvar Trade
-2️⃣ Ver Estatísticas
-3️⃣ Ajuda
-
-⚙️ **Configuração:**
-Configure seu WhatsApp no perfil Métrika.
-
-🚀 **Envie seu trade agora!**`;
+    return `🤖 *MÉTRIKA TRADING BOT*\n\n` +
+      `Seu assistente para registrar trades por WhatsApp!\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📱 *COMO FUNCIONA:*\n\n` +
+      `1️⃣ Você envia o resultado do seu trade\n` +
+      `2️⃣ Eu salvo automaticamente na sua conta\n` +
+      `3️⃣ Você acompanha tudo na plataforma!\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📝 *FORMATO SIMPLES:*\n\n` +
+      `✅/❌ Vitória/Perda + Ativo + Entrada + Lucro/Prejuízo\n\n` +
+      `*Exemplos:*\n` +
+      `• Vitória EURUSD entrada 100 lucro 50\n` +
+      `• Perda WIN entrada 300 prejuízo 45\n` +
+      `• Ganhei 80 no PETR4 entrada 200\n` +
+      `• Perdi 25 no BTCUSDT\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🎯 *MENU RÁPIDO:*\n\n` +
+      `Digite ou clique:\n` +
+      `1️⃣ Salvar Trade - Ver instruções\n` +
+      `2️⃣ Estatísticas - Ver seu desempenho\n` +
+      `3️⃣ Ajuda - Esta mensagem\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚙️ *IMPORTANTE:*\n` +
+      `Configure seu WhatsApp no perfil da plataforma Métrika primeiro!\n\n` +
+      `📊 Acesse: metrika.com.br\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `💡 *DICA PRO:*\n` +
+      `Use linguagem natural! O bot entende várias formas de escrever.\n\n` +
+      `🚀 *Bora registrar seus trades!*`;
   }
 
   // Função para extrair dados do trade da mensagem
