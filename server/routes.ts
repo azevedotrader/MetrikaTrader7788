@@ -3774,18 +3774,26 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         from: message.from,
         text: message.text?.body,
         type: message.type,
-        timestamp: message.timestamp
+        timestamp: message.timestamp,
+        interactive: message.interactive
       });
 
-      // Só processar mensagens de texto
-      if (message.type !== 'text' || !message.text?.body) {
-        console.log('⏭️ Ignoring non-text message');
+      const fromNumber = message.from;
+      const messageId = message.id;
+      let messageText = '';
+      let isButtonReply = false;
+
+      // Verificar se é resposta de botão interativo
+      if (message.type === 'interactive' && message.interactive?.type === 'button_reply') {
+        messageText = message.interactive.button_reply.id;
+        isButtonReply = true;
+        console.log('🔘 Button reply detected:', messageText);
+      } else if (message.type === 'text' && message.text?.body) {
+        messageText = message.text.body;
+      } else {
+        console.log('⏭️ Ignoring unsupported message type');
         return;
       }
-
-      const fromNumber = message.from;
-      const messageText = message.text.body;
-      const messageId = message.id;
 
       // Buscar usuário pelo número do WhatsApp
       const [user] = await db
@@ -3825,132 +3833,155 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
 
       console.log('👤 Found user:', user.name, 'for number:', fromNumber);
 
-      // Verificar se é comando especial antes de tentar extrair trade
       const messageTextLower = messageText.toLowerCase().trim();
       
-      // Responder a comandos de ajuda
-      if (messageTextLower === 'ajuda' || messageTextLower === 'help') {
-        const helpMessage = getHelpMessage();
-        await sendWhatsAppMessage(fromNumber, helpMessage);
-        await db
-          .update(whatsappMessages)
-          .set({ 
-            status: 'help_sent',
-            processedAt: new Date()
-          })
-          .where(eq(whatsappMessages.id, savedMessage.id));
-        return;
-      }
-      
-      // Responder a comandos de exemplo
-      if (messageTextLower === 'exemplo' || messageTextLower === 'exemplos' || messageTextLower === 'examples') {
-        const examplesMessage = getExamplesMessage();
-        await sendWhatsAppMessage(fromNumber, examplesMessage);
-        await db
-          .update(whatsappMessages)
-          .set({ 
-            status: 'examples_sent',
-            processedAt: new Date()
-          })
-          .where(eq(whatsappMessages.id, savedMessage.id));
-        return;
-      }
-      
-      // Responder a saudações
-      if (messageTextLower === 'oi' || messageTextLower === 'olá' || messageTextLower === 'ola' || 
-          messageTextLower === 'hi' || messageTextLower === 'hello' || messageTextLower === 'bom dia' ||
-          messageTextLower === 'boa tarde' || messageTextLower === 'boa noite') {
-        const welcomeMessage = getWelcomeMessage();
-        await sendWhatsAppMessage(fromNumber, welcomeMessage);
-        await db
-          .update(whatsappMessages)
-          .set({ 
-            status: 'welcome_sent',
-            processedAt: new Date()
-          })
-          .where(eq(whatsappMessages.id, savedMessage.id));
-        return;
-      }
-
-      // Tentar extrair informações do trade da mensagem
-      const tradeData = parseTradeFromMessage(messageText, user.id);
-      
-      if (tradeData) {
-        try {
-          // Validar dados do trade
-          const validatedTrade = insertTradeSchema.parse(tradeData);
-          
-          // Criar objeto trade para inserção
-          const insertData = {
-            userId: user.id,
-            dataHora: new Date(validatedTrade.dataHora!),
-            ativo: validatedTrade.ativo!,
-            mercado: validatedTrade.mercado!,
-            setup: validatedTrade.setup || 'WhatsApp',
-            capitalUtilizado: validatedTrade.capitalUtilizado || '100',
-            quantidade: validatedTrade.quantidade || '1',
-            tipo: validatedTrade.tipo!,
-            precoEntrada: validatedTrade.precoEntrada || '0',
-            precoSaida: validatedTrade.precoSaida || '0',
-            resultado: validatedTrade.resultado || '0',
-            corretora: validatedTrade.corretora!,
-            origem: 'whatsapp',
-            comentario: validatedTrade.comentario || ''
-          };
-
-          // Salvar trade no banco
-          const [newTrade] = await db
-            .insert(trades)
-            .values(insertData)
-            .returning();
-
-          // Atualizar mensagem como processada
+      // Se for clique em botão, processar a ação
+      if (isButtonReply) {
+        if (messageTextLower === 'btn_save_trade') {
+          // Enviar instruções de como salvar trade
+          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nEnvie uma mensagem com estas informações:\n\n• **Tipo**: COMPRA ou VENDA\n• **Ativo**: Ex: EURUSD, BTCUSDT\n• **Quantidade**: Volume\n• **Entrada**: Preço entrada\n• **Saída**: Preço saída\n\n📋 *Exemplos:*\n\n*Forex:*\nCOMPRA EURUSD 0.1 entrada 1.0850 saída 1.0890\n\n*Crypto:*\nVENDA BTCUSDT 0.01 entrada 45000 saída 44500\n\n*Ações:*\nCOMPRA PETR4 100 entrada 28.50 saída 29.20\n\n💡 Pode usar linguagem natural!\n\nEnvie seu trade agora! 🚀`;
+          await sendWhatsAppMessage(fromNumber, saveTradeMessage);
           await db
             .update(whatsappMessages)
             .set({ 
-              status: 'processed',
-              tradeId: newTrade.id,
+              status: 'save_trade_instructions_sent',
               processedAt: new Date()
             })
             .where(eq(whatsappMessages.id, savedMessage.id));
-
-          console.log('✅ Trade created from WhatsApp:', {
-            tradeId: newTrade.id,
-            ativo: newTrade.ativo,
-            resultado: newTrade.resultado
-          });
-
-          // Enviar confirmação de sucesso via WhatsApp
-          const successMessage = `✅ *Trade salvo com sucesso!*\n\n📊 **Detalhes:**\n• Ativo: ${newTrade.ativo}\n• Tipo: ${newTrade.tipo === 'compra' ? 'COMPRA' : 'VENDA'}\n• Quantidade: ${newTrade.quantidade}\n• Entrada: ${newTrade.precoEntrada || '0'}\n• Saída: ${newTrade.precoSaida || '0'}\n• P&L: ${newTrade.resultado ? (parseFloat(newTrade.resultado) >= 0 ? '+' : '') + 'R$ ' + newTrade.resultado : 'N/A'}\n\n🚀 Acesse sua conta Métrika para ver mais detalhes!`;
-          await sendWhatsAppMessage(fromNumber, successMessage);
-
-        } catch (error) {
-          console.error('❌ Error creating trade:', error);
+          return;
+        } else if (messageTextLower === 'btn_statistics') {
+          // Buscar estatísticas do usuário
+          const userTrades = await db
+            .select()
+            .from(trades)
+            .where(eq(trades.userId, user.id));
+          
+          const totalTrades = userTrades.length;
+          const totalProfit = userTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+          const wins = userTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+          const losses = userTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+          const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0';
+          
+          const statsMessage = `📊 *Suas Estatísticas*\n\n` +
+            `📈 Total de Trades: ${totalTrades}\n` +
+            `💰 Lucro Total: R$ ${totalProfit.toFixed(2)}\n` +
+            `✅ Wins: ${wins}\n` +
+            `❌ Losses: ${losses}\n` +
+            `🎯 Win Rate: ${winRate}%\n\n` +
+            `🚀 Continue assim!`;
+          
+          await sendWhatsAppMessage(fromNumber, statsMessage);
           await db
             .update(whatsappMessages)
             .set({ 
-              status: 'failed',
-              errorMessage: error instanceof Error ? error.message : 'Erro ao criar trade'
+              status: 'statistics_sent',
+              processedAt: new Date()
             })
             .where(eq(whatsappMessages.id, savedMessage.id));
-          
-          // Enviar mensagem de erro
-          const errorMessage = `❌ *Erro ao salvar trade*\n\nDesculpe, houve um problema ao salvar seu trade. Tente novamente ou digite "ajuda" para ver o formato correto.\n\n🔧 **Erro técnico:** ${error instanceof Error ? error.message : 'Erro desconhecido'}`;
-          await sendWhatsAppMessage(fromNumber, errorMessage);
+          return;
+        } else if (messageTextLower === 'btn_help') {
+          const helpMessage = getHelpMessage();
+          await sendWhatsAppMessage(fromNumber, helpMessage);
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'help_sent',
+              processedAt: new Date()
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+          return;
         }
-      } else {
-        console.log('❌ Could not parse trade from message');
+      }
+      
+      // Se for mensagem de texto, tentar processar como trade primeiro
+      if (!isButtonReply) {
+        const tradeData = parseTradeFromMessage(messageText, user.id);
+        
+        if (tradeData) {
+          try {
+            // Validar dados do trade
+            const validatedTrade = insertTradeSchema.parse(tradeData);
+            
+            // Criar objeto trade para inserção
+            const insertData = {
+              userId: user.id,
+              dataHora: new Date(validatedTrade.dataHora!),
+              ativo: validatedTrade.ativo!,
+              mercado: validatedTrade.mercado!,
+              setup: validatedTrade.setup || 'WhatsApp',
+              capitalUtilizado: validatedTrade.capitalUtilizado || '100',
+              quantidade: validatedTrade.quantidade || '1',
+              tipo: validatedTrade.tipo!,
+              precoEntrada: validatedTrade.precoEntrada || '0',
+              precoSaida: validatedTrade.precoSaida || '0',
+              resultado: validatedTrade.resultado || '0',
+              corretora: validatedTrade.corretora!,
+              origem: 'whatsapp',
+              comentario: validatedTrade.comentario || ''
+            };
+
+            // Salvar trade no banco
+            const [newTrade] = await db
+              .insert(trades)
+              .values(insertData)
+              .returning();
+
+            // Atualizar mensagem como processada
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'processed',
+                tradeId: newTrade.id,
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+
+            console.log('✅ Trade created from WhatsApp:', {
+              tradeId: newTrade.id,
+              ativo: newTrade.ativo,
+              resultado: newTrade.resultado
+            });
+
+            // Enviar confirmação de sucesso via WhatsApp
+            const successMessage = `✅ *Trade salvo com sucesso!*\n\n📊 **Detalhes:**\n• Ativo: ${newTrade.ativo}\n• Tipo: ${newTrade.tipo === 'compra' ? 'COMPRA' : 'VENDA'}\n• Quantidade: ${newTrade.quantidade}\n• Entrada: ${newTrade.precoEntrada || '0'}\n• Saída: ${newTrade.precoSaida || '0'}\n• P&L: ${newTrade.resultado ? (parseFloat(newTrade.resultado) >= 0 ? '+' : '') + 'R$ ' + newTrade.resultado : 'N/A'}\n\n🚀 Acesse sua conta Métrika para ver mais detalhes!`;
+            await sendWhatsAppMessage(fromNumber, successMessage);
+            return;
+          } catch (error) {
+            console.error('❌ Error creating trade:', error);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'failed',
+                errorMessage: error instanceof Error ? error.message : 'Erro ao criar trade'
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            
+            // Enviar mensagem de erro
+            const errorMessage = `❌ *Erro ao salvar trade*\n\nDesculpe, houve um problema ao salvar seu trade. Tente novamente ou clique em "❓ Ajuda" para ver o formato correto.`;
+            await sendWhatsAppMessage(fromNumber, errorMessage);
+            return;
+          }
+        }
+        
+        // Se não conseguiu processar como trade, enviar menu interativo
+        console.log('📋 Sending interactive menu (could not parse as trade)');
+        const menuMessage = `👋 Olá ${user.name}!\n\n📊 *O que você deseja fazer?*\n\nEscolha uma opção abaixo:`;
+        
+        const menuButtons = [
+          { id: 'btn_save_trade', title: '💾 Salvar Trade' },
+          { id: 'btn_statistics', title: '📊 Ver Estatísticas' },
+          { id: 'btn_help', title: '❓ Ajuda' }
+        ];
+        
+        await sendWhatsAppInteractiveMessage(fromNumber, menuMessage, menuButtons);
         await db
           .update(whatsappMessages)
           .set({ 
-            status: 'failed',
-            errorMessage: 'Não foi possível extrair dados do trade da mensagem'
+            status: 'menu_sent',
+            processedAt: new Date()
           })
           .where(eq(whatsappMessages.id, savedMessage.id));
-        
-        // Enviar mensagem educativa quando não conseguir compreender
-        const parseFailedMessage = `🤔 *Não consegui entender esta mensagem*\n\nParece que você tentou enviar um trade, mas não consegui extrair as informações necessárias.\n\n💡 **Digite "exemplo" para ver formatos corretos**\n\n📝 **Lembre-se de incluir:**\n• Tipo: COMPRA ou VENDA\n• Ativo: Ex: EURUSD, BTCUSDT\n• Quantidade: Volume\n• Preços de entrada e saída\n\n❓ Digite "ajuda" para mais informações`;
-        await sendWhatsAppMessage(fromNumber, parseFailedMessage);
+        return;
       }
 
     } catch (error) {
@@ -3993,6 +4024,59 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       return true;
     } catch (error: any) {
       console.error('❌ Erro ao enviar mensagem WhatsApp:', error.response?.data || error.message);
+      return false;
+    }
+  }
+
+  // Função para enviar mensagem interativa com botões
+  async function sendWhatsAppInteractiveMessage(to: string, bodyText: string, buttons: Array<{id: string, title: string}>) {
+    try {
+      const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+      const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '106540352242922';
+      
+      if (!accessToken) {
+        console.error('❌ WHATSAPP_ACCESS_TOKEN não configurado');
+        return false;
+      }
+
+      // WhatsApp permite no máximo 3 botões
+      const limitedButtons = buttons.slice(0, 3).map(btn => ({
+        type: "reply",
+        reply: {
+          id: btn.id,
+          title: btn.title.substring(0, 20) // WhatsApp limita a 20 caracteres
+        }
+      }));
+
+      const response = await axios.post(
+        `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
+        {
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: to,
+          type: 'interactive',
+          interactive: {
+            type: 'button',
+            body: {
+              text: bodyText
+            },
+            action: {
+              buttons: limitedButtons
+            }
+          }
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      console.log('✅ Mensagem interativa WhatsApp enviada:', response.data);
+      return true;
+    } catch (error: any) {
+      console.error('❌ Erro ao enviar mensagem interativa WhatsApp:', error.response?.data || error.message);
       return false;
     }
   }
