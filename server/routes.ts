@@ -3838,8 +3838,8 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       // Se for clique em botão, processar a ação
       if (isButtonReply) {
         if (messageTextLower === 'btn_save_trade') {
-          // Enviar instruções de como salvar trade
-          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nEnvie uma mensagem com estas informações:\n\n• **Tipo**: COMPRA ou VENDA\n• **Ativo**: Ex: EURUSD, BTCUSDT\n• **Quantidade**: Volume\n• **Entrada**: Preço entrada\n• **Saída**: Preço saída\n\n📋 *Exemplos:*\n\n*Forex:*\nCOMPRA EURUSD 0.1 entrada 1.0850 saída 1.0890\n\n*Crypto:*\nVENDA BTCUSDT 0.01 entrada 45000 saída 44500\n\n*Ações:*\nCOMPRA PETR4 100 entrada 28.50 saída 29.20\n\n💡 Pode usar linguagem natural!\n\nEnvie seu trade agora! 🚀`;
+          // Enviar instruções de como salvar trade (formato simplificado)
+          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nÉ super simples! Envie uma mensagem com:\n\n✅ *Vitória* ou ❌ *Perda*\n📊 *Ativo* (ex: EURUSD, BTCUSDT, PETR4)\n💰 *Entrada* (valor usado)\n📈 *Lucro* ou 📉 *Prejuízo*\n\n📋 *Exemplos:*\n\n✅ Vitória EURUSD entrada 100 lucro 50\n\n❌ Perda BTCUSDT entrada 200 prejuízo 30\n\n✅ Ganhei 75 no PETR4 entrada 150\n\n❌ Perdi 40 no WIN entrada 300\n\n💡 Use linguagem natural!\n\nEnvie seu trade agora! 🚀`;
           await sendWhatsAppMessage(fromNumber, saveTradeMessage);
           await db
             .update(whatsappMessages)
@@ -3897,7 +3897,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       if (!isButtonReply) {
         // Processar respostas do menu numérico
         if (messageTextLower === '1') {
-          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nEnvie uma mensagem com estas informações:\n\n• **Tipo**: COMPRA ou VENDA\n• **Ativo**: Ex: EURUSD, BTCUSDT\n• **Quantidade**: Volume\n• **Entrada**: Preço entrada\n• **Saída**: Preço saída\n\n📋 *Exemplos:*\n\n*Forex:*\nCOMPRA EURUSD 0.1 entrada 1.0850 saída 1.0890\n\n*Crypto:*\nVENDA BTCUSDT 0.01 entrada 45000 saída 44500\n\n*Ações:*\nCOMPRA PETR4 100 entrada 28.50 saída 29.20\n\n💡 Pode usar linguagem natural!\n\nEnvie seu trade agora! 🚀`;
+          const saveTradeMessage = `📝 *Como salvar um trade:*\n\nÉ super simples! Envie uma mensagem com:\n\n✅ *Vitória* ou ❌ *Perda*\n📊 *Ativo* (ex: EURUSD, BTCUSDT, PETR4)\n💰 *Entrada* (valor usado)\n📈 *Lucro* ou 📉 *Prejuízo*\n\n📋 *Exemplos:*\n\n✅ Vitória EURUSD entrada 100 lucro 50\n\n❌ Perda BTCUSDT entrada 200 prejuízo 30\n\n✅ Ganhei 75 no PETR4 entrada 150\n\n❌ Perdi 40 no WIN entrada 300\n\n💡 Use linguagem natural!\n\nEnvie seu trade agora! 🚀`;
           await sendWhatsAppMessage(fromNumber, saveTradeMessage);
           await db
             .update(whatsappMessages)
@@ -4194,21 +4194,27 @@ Vamos começar! 🚀`;
     return `🆘 *Ajuda - Métrika Trading Bot*
 
 📊 **Como funciona:**
-Envie seus trades por WhatsApp e eu salvo automaticamente na sua conta Métrika!
+Envie seus trades por WhatsApp de forma simples e rápida!
 
-📝 **Formato básico:**
-[TIPO] [ATIVO] [QUANTIDADE] entrada [PREÇO1] saída [PREÇO2]
+📝 **Formato simplificado:**
+✅/❌ [Vitória/Perda] [ATIVO] entrada [VALOR] lucro/prejuízo [VALOR]
 
-🔄 **Comandos:**
-• "ajuda" - Esta mensagem
-• "exemplo" - Ver exemplos detalhados
-• "oi" ou "olá" - Mensagem de boas-vindas
+📋 **Exemplos:**
+• Vitória EURUSD entrada 100 lucro 50
+• Perda BTCUSDT entrada 200 prejuízo 30
+• Ganhei 75 no WIN entrada 150
+• Perdi 40 no PETR4
+
+🔄 **Menu:**
+Digite 1, 2 ou 3 para acessar:
+1️⃣ Salvar Trade
+2️⃣ Ver Estatísticas
+3️⃣ Ajuda
 
 ⚙️ **Configuração:**
-Certifique-se de ter configurado seu WhatsApp no seu perfil Métrika.
+Configure seu WhatsApp no perfil Métrika.
 
-🚀 **Vamos começar!**
-Envie seu primeiro trade ou digite "exemplo" para ver formatos!`;
+🚀 **Envie seu trade agora!**`;
   }
 
   // Função para extrair dados do trade da mensagem
@@ -4219,51 +4225,36 @@ Envie seu primeiro trade ou digite "exemplo" para ver formatos!`;
       // Normalizar texto
       const text = messageText.toLowerCase().trim();
       
-      // Padrões para detectar informações do trade
-      const patterns = {
-        // Ativo: WIN, WDO, BTCUSDT, etc.
-        ativo: /(?:ativo|symbol|par)[:\s]*([a-z0-9]+)/i,
-        // Tipo: compra/venda, buy/sell, long/short
-        tipo: /(?:tipo|side|direction)[:\s]*(compra|venda|buy|sell|long|short)/i,
-        // Quantidade
-        quantidade: /(?:qtd|quantidade|qty|size)[:\s]*([0-9.,]+)/i,
-        // Preço de entrada
-        entrada: /(?:entrada|entry|pre[cç]o)[:\s]*([0-9.,]+)/i,
-        // Preço de saída
-        saida: /(?:saida|sa[íi]da|exit|close)[:\s]*([0-9.,]+)/i,
-        // Resultado
-        resultado: /(?:resultado|result|pnl|profit|loss)[:\s]*([+-]?[0-9.,]+)/i,
-        // Capital
-        capital: /(?:capital|size|valor)[:\s]*([0-9.,]+)/i,
-        // Setup/Estratégia
-        setup: /(?:setup|estrategia|strategy)[:\s]*([a-z0-9\s]+)/i
+      // FORMATO SIMPLIFICADO - Vitória/Perda com lucro/prejuízo
+      // Exemplos: "Vitória EURUSD entrada 100 lucro 50", "Perda BTCUSDT entrada 200 prejuízo 30"
+      const simplePatterns = {
+        // Vitória ou Perda
+        resultado_tipo: /(vit[oó]ria|ganho|win|gain|lucro|perda|loss|preju[íi]zo)/i,
+        // Ativo
+        ativo: /([A-Z0-9]{3,10})/,
+        // Valor de entrada (capital usado)
+        entrada: /(?:entrada|capital|usei|investi|valor)[:\s]*([0-9.,]+)/i,
+        // Lucro ou Prejuízo
+        lucro: /(?:lucro|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)/i,
+        prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i
       };
 
-      // Extrair valores usando patterns
       const extracted: any = {};
       
-      for (const [key, pattern] of Object.entries(patterns)) {
+      // Extrair informações do formato simplificado
+      for (const [key, pattern] of Object.entries(simplePatterns)) {
         const match = text.match(pattern);
         if (match) {
           extracted[key] = match[1].trim();
         }
       }
 
-      console.log('🎯 Extracted data:', extracted);
+      console.log('🎯 Extracted data (simple format):', extracted);
 
-      // Validar se tem informações suficientes
+      // Validar se tem informações mínimas (ativo + resultado)
       if (!extracted.ativo) {
         console.log('❌ No asset found in message');
         return null;
-      }
-
-      // Normalizar tipo
-      let tipo = 'compra';
-      if (extracted.tipo) {
-        const tipoText = extracted.tipo.toLowerCase();
-        if (['venda', 'sell', 'short'].includes(tipoText)) {
-          tipo = 'venda';
-        }
       }
 
       // Normalizar valores numéricos
@@ -4272,33 +4263,50 @@ Envie seu primeiro trade ou digite "exemplo" para ver formatos!`;
         return value.replace(/,/g, '.').replace(/[^\d.-]/g, '') || defaultValue;
       };
 
-      // Calcular resultado se não fornecido
-      let resultado = normalizeNumber(extracted.resultado, '0');
-      if (resultado === '0' && extracted.entrada && extracted.saida) {
-        const entrada = parseFloat(normalizeNumber(extracted.entrada));
-        const saida = parseFloat(normalizeNumber(extracted.saida));
-        const qtd = parseFloat(normalizeNumber(extracted.quantidade, '1'));
+      // Determinar se foi vitória ou perda
+      let resultado = '0';
+      let tipo: 'compra' | 'venda' = 'compra';
+      
+      if (extracted.resultado_tipo) {
+        const resultText = extracted.resultado_tipo.toLowerCase();
         
-        if (!isNaN(entrada) && !isNaN(saida)) {
-          const diff = tipo === 'compra' ? (saida - entrada) : (entrada - saida);
-          resultado = (diff * qtd).toString();
+        // Se mencionou vitória/ganho/lucro = positivo
+        if (['vitoria', 'vitória', 'ganho', 'win', 'gain', 'lucro'].some(w => resultText.includes(w))) {
+          resultado = normalizeNumber(extracted.lucro || extracted.prejuizo, '0');
+          if (resultado && parseFloat(resultado) > 0) {
+            resultado = '+' + resultado;
+          }
+        } 
+        // Se mencionou perda/prejuízo = negativo
+        else if (['perda', 'loss', 'prejuizo', 'prejuízo'].some(w => resultText.includes(w))) {
+          resultado = normalizeNumber(extracted.prejuizo || extracted.lucro, '0');
+          if (resultado && parseFloat(resultado) > 0) {
+            resultado = '-' + resultado;
+          }
         }
+      }
+      
+      // Se encontrou valor de lucro/prejuízo explícito
+      if (extracted.lucro && !resultado.startsWith('+')) {
+        resultado = '+' + normalizeNumber(extracted.lucro);
+      } else if (extracted.prejuizo && !resultado.startsWith('-')) {
+        resultado = '-' + normalizeNumber(extracted.prejuizo);
       }
 
       const tradeData: InsertTrade = {
         userId,
         ativo: extracted.ativo.toUpperCase(),
         tipo: tipo as 'compra' | 'venda',
-        quantidade: normalizeNumber(extracted.quantidade, '1'),
-        precoEntrada: normalizeNumber(extracted.entrada, '0'),
-        precoSaida: normalizeNumber(extracted.saida, extracted.entrada || '0'),
+        quantidade: '1', // Quantidade padrão
+        precoEntrada: '0', // Não usa preço de entrada neste formato
+        precoSaida: '0', // Não usa preço de saída neste formato
         resultado,
-        capitalUtilizado: normalizeNumber(extracted.capital, '100'),
-        setup: extracted.setup || 'WhatsApp',
+        capitalUtilizado: normalizeNumber(extracted.entrada, '100'), // Valor de entrada = capital usado
+        setup: 'WhatsApp',
         mercado: 'b3', // Assumir B3 por padrão
         corretora: 'b3',
         dataHora: new Date().toISOString(),
-        comentario: `Importado via WhatsApp: ${messageText.substring(0, 100)}...`
+        comentario: `Via WhatsApp: ${messageText.substring(0, 100)}`
       };
 
       console.log('✅ Parsed trade:', tradeData);
