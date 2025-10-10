@@ -3921,7 +3921,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           });
 
           // Enviar confirmação de sucesso via WhatsApp
-          const successMessage = `✅ *Trade salvo com sucesso!*\n\n📊 **Detalhes:**\n• Ativo: ${newTrade.ativo}\n• Tipo: ${newTrade.tipo === 'compra' ? 'COMPRA' : 'VENDA'}\n• Quantidade: ${newTrade.quantidade}\n• Entrada: ${newTrade.precoEntrada}\n• Saída: ${newTrade.precoSaida}\n• P&L: ${parseFloat(newTrade.resultado) >= 0 ? '+' : ''}R$ ${newTrade.resultado}\n\n🚀 Acesse sua conta Métrika para ver mais detalhes!`;
+          const successMessage = `✅ *Trade salvo com sucesso!*\n\n📊 **Detalhes:**\n• Ativo: ${newTrade.ativo}\n• Tipo: ${newTrade.tipo === 'compra' ? 'COMPRA' : 'VENDA'}\n• Quantidade: ${newTrade.quantidade}\n• Entrada: ${newTrade.precoEntrada || '0'}\n• Saída: ${newTrade.precoSaida || '0'}\n• P&L: ${newTrade.resultado ? (parseFloat(newTrade.resultado) >= 0 ? '+' : '') + 'R$ ' + newTrade.resultado : 'N/A'}\n\n🚀 Acesse sua conta Métrika para ver mais detalhes!`;
           await sendWhatsAppMessage(fromNumber, successMessage);
 
         } catch (error) {
