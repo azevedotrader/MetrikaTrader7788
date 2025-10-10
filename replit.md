@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Integração WhatsApp Business API - Janeiro 2025
+- **WhatsApp Bot Completo**: ✅ Sistema de salvamento de trades via WhatsApp implementado
+- **Parser Inteligente**: ✅ Extração automática de dados de trades de mensagens em linguagem natural
+- **Respostas Automáticas**: ✅ Bot responde com confirmações, ajuda e exemplos
+- **Comandos Disponíveis**: "ajuda", "exemplo", saudações
+- **Webhook Configurado**: ✅ Endpoint `/webhooks/whatsapp` recebe mensagens do Meta/Facebook
+- **Secrets Configurados**: WHATSAPP_ACCESS_TOKEN, WHATSAPP_APP_SECRET, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN
+- **Interface Usuário**: ✅ Campo no perfil para configurar número do WhatsApp
+- **Banco de Dados**: ✅ Tabela `whatsapp_messages` para rastrear todas as mensagens e processamento
+
 ### Integração OpenAI e SendGrid Ativada - Janeiro 2025
 - **OpenAI GPT-5**: ✅ Integrado e funcionando (modelo mais recente)
 - **SendGrid**: ✅ Configurado para emails (boas-vindas, recuperação de senha)
