@@ -3841,18 +3841,16 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           // Enviar instruções de como salvar trade (formato simplificado)
           const saveTradeMessage = `📝 *COMO SALVAR UM TRADE*\n\n` +
             `É muito simples! Só me diga 4 coisas:\n\n` +
-            `1️⃣ Foi *vitória* ✅ ou *perda* ❌?\n` +
-            `2️⃣ Qual o *ativo*? (EURUSD, PETR4, WIN...)\n` +
-            `3️⃣ Quanto você *investiu*?\n` +
-            `4️⃣ Quanto você *ganhou* ou *perdeu*?\n\n` +
+            `1️⃣ Foi Take ✅ ou Stop ❌?\n` +
+            `2️⃣ Qual o ativo? (EURUSD, BTC, WIN...)\n` +
+            `3️⃣ Quanto você arriscou?\n` +
+            `4️⃣ Quanto você ganhou? (Caso tenha perdido não precisa colocar)\n\n` +
             `━━━━━━━━━━━━━━━━━━━━\n` +
             `📋 *EXEMPLOS PRÁTICOS:*\n\n` +
-            `✅ "Vitória EURUSD entrada 100 lucro 50"\n` +
-            `   (Investiu R$100, ganhou R$50)\n\n` +
-            `❌ "Perda BTCUSDT entrada 200 prejuízo 30"\n` +
-            `   (Investiu R$200, perdeu R$30)\n\n` +
-            `✅ "Ganhei 75 no WIN entrada 150"\n\n` +
-            `❌ "Perdi 40 no PETR4"\n` +
+            `✅ "Take no EURUSD arrisquei 100 lucrei 300"\n\n` +
+            `❌ "Stop no BTCUSD arrisquei 200"\n\n` +
+            `✅ "Ganhei 500 no WIN arrisquei 150"\n\n` +
+            `❌ "Perdi no XAUUSD arrisquei 30"\n` +
             `━━━━━━━━━━━━━━━━━━━━\n\n` +
             `💡 *DICA:* Use linguagem natural, eu entendo!\n\n` +
             `🚀 *Envie seu trade agora mesmo!*`;
@@ -3915,18 +3913,16 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         if (messageTextLower === '1') {
           const saveTradeMessage = `📝 *COMO SALVAR UM TRADE*\n\n` +
             `É muito simples! Só me diga 4 coisas:\n\n` +
-            `1️⃣ Foi *vitória* ✅ ou *perda* ❌?\n` +
-            `2️⃣ Qual o *ativo*? (EURUSD, PETR4, WIN...)\n` +
-            `3️⃣ Quanto você *investiu*?\n` +
-            `4️⃣ Quanto você *ganhou* ou *perdeu*?\n\n` +
+            `1️⃣ Foi Take ✅ ou Stop ❌?\n` +
+            `2️⃣ Qual o ativo? (EURUSD, BTC, WIN...)\n` +
+            `3️⃣ Quanto você arriscou?\n` +
+            `4️⃣ Quanto você ganhou? (Caso tenha perdido não precisa colocar)\n\n` +
             `━━━━━━━━━━━━━━━━━━━━\n` +
             `📋 *EXEMPLOS PRÁTICOS:*\n\n` +
-            `✅ "Vitória EURUSD entrada 100 lucro 50"\n` +
-            `   (Investiu R$100, ganhou R$50)\n\n` +
-            `❌ "Perda BTCUSDT entrada 200 prejuízo 30"\n` +
-            `   (Investiu R$200, perdeu R$30)\n\n` +
-            `✅ "Ganhei 75 no WIN entrada 150"\n\n` +
-            `❌ "Perdi 40 no PETR4"\n` +
+            `✅ "Take no EURUSD arrisquei 100 lucrei 300"\n\n` +
+            `❌ "Stop no BTCUSD arrisquei 200"\n\n` +
+            `✅ "Ganhei 500 no WIN arrisquei 150"\n\n` +
+            `❌ "Perdi no XAUUSD arrisquei 30"\n` +
             `━━━━━━━━━━━━━━━━━━━━\n\n` +
             `💡 *DICA:* Use linguagem natural, eu entendo!\n\n` +
             `🚀 *Envie seu trade agora mesmo!*`;
@@ -4301,17 +4297,18 @@ Vamos começar! 🚀`;
       // Normalizar texto
       const text = messageText.toLowerCase().trim();
       
-      // FORMATO SIMPLIFICADO - Vitória/Perda com lucro/prejuízo
-      // Exemplos: "Vitória EURUSD entrada 100 lucro 50", "Perda BTCUSDT entrada 200 prejuízo 30"
+      // FORMATO SIMPLIFICADO - Take/Stop com valor arriscado e lucro
+      // Exemplos: "Take no EURUSD arrisquei 100 lucrei 300", "Stop no BTC arrisquei 200"
       const simplePatterns = {
-        // Vitória ou Perda
-        resultado_tipo: /(vit[oó]ria|ganho|win|gain|lucro|perda|loss|preju[íi]zo)/i,
+        // Take ou Stop (vitória ou perda)
+        resultado_tipo: /(take|stop|vit[oó]ria|ganho|win|gain|lucro|lucrei|perda|loss|preju[íi]zo|perdi)/i,
         // Ativo - melhorado para detectar em contexto "no/do ATIVO"
         ativo: /(?:no|do|em|ativo[:\s]+)([A-Z][A-Z0-9]{2,9})|^([A-Z][A-Z0-9]{2,9})/i,
-        // Valor de entrada (capital usado)
-        entrada: /(?:entrada|capital|usei|investi|valor)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
-        // Lucro ou Prejuízo
-        lucro: /(?:lucro|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)/i,
+        // Valor arriscado (capital usado)
+        arriscado: /(?:arrisquei|arriscado|risco|entrada|capital|usei|investi|valor)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
+        // Lucro (só para takes/vitórias)
+        lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)/i,
+        // Prejuízo explícito (opcional para stops)
         prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i
       };
 
@@ -4354,27 +4351,31 @@ Vamos começar! 🚀`;
       if (extracted.resultado_tipo) {
         const resultText = extracted.resultado_tipo.toLowerCase();
         
-        // Se mencionou vitória/ganho/lucro = positivo
-        if (['vitoria', 'vitória', 'ganho', 'win', 'gain', 'lucro'].some(w => resultText.includes(w))) {
-          resultado = normalizeNumber(extracted.lucro || extracted.prejuizo, '0');
-          if (resultado && parseFloat(resultado) > 0) {
-            resultado = '+' + resultado;
+        // Se mencionou TAKE/vitória/ganho/lucro = positivo (precisa ter valor de lucro)
+        if (['take', 'vitoria', 'vitória', 'ganho', 'win', 'gain', 'lucro', 'lucrei'].some(w => resultText.includes(w))) {
+          const lucroValue = normalizeNumber(extracted.lucro, '0');
+          if (lucroValue && parseFloat(lucroValue) > 0) {
+            resultado = '+' + lucroValue;
+          } else {
+            // Se é TAKE mas não tem valor de lucro, considerar 0
+            resultado = '0';
           }
         } 
-        // Se mencionou perda/prejuízo = negativo
-        else if (['perda', 'loss', 'prejuizo', 'prejuízo'].some(w => resultText.includes(w))) {
-          resultado = normalizeNumber(extracted.prejuizo || extracted.lucro, '0');
-          if (resultado && parseFloat(resultado) > 0) {
-            resultado = '-' + resultado;
+        // Se mencionou STOP/perda/prejuízo = negativo
+        else if (['stop', 'perda', 'loss', 'prejuizo', 'prejuízo', 'perdi'].some(w => resultText.includes(w))) {
+          // Se tem prejuízo explícito, usar esse valor
+          if (extracted.prejuizo) {
+            const perdaValue = normalizeNumber(extracted.prejuizo, '0');
+            resultado = '-' + perdaValue;
+          } 
+          // Se NÃO tem prejuízo explícito, a perda = valor arriscado
+          else if (extracted.arriscado) {
+            const arriscadoValue = normalizeNumber(extracted.arriscado, '0');
+            resultado = '-' + arriscadoValue;
+          } else {
+            resultado = '0';
           }
         }
-      }
-      
-      // Se encontrou valor de lucro/prejuízo explícito
-      if (extracted.lucro && !resultado.startsWith('+')) {
-        resultado = '+' + normalizeNumber(extracted.lucro);
-      } else if (extracted.prejuizo && !resultado.startsWith('-')) {
-        resultado = '-' + normalizeNumber(extracted.prejuizo);
       }
 
       const tradeData: InsertTrade = {
@@ -4385,7 +4386,7 @@ Vamos começar! 🚀`;
         precoEntrada: '0', // Não usa preço de entrada neste formato
         precoSaida: '0', // Não usa preço de saída neste formato
         resultado,
-        capitalUtilizado: normalizeNumber(extracted.entrada, '100'), // Valor de entrada = capital usado
+        capitalUtilizado: normalizeNumber(extracted.arriscado, '100'), // Valor arriscado = capital usado
         setup: 'WhatsApp',
         mercado: 'b3', // Assumir B3 por padrão
         corretora: 'b3',
