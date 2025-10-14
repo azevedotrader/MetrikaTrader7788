@@ -4332,8 +4332,11 @@ Vamos começar! 🚀`;
 
       console.log('🎯 Extracted data (simple format):', extracted);
 
+      // Palavras-chave que NÃO são ativos
+      const excludedWords = ['ajuda', 'help', 'oi', 'ola', 'olá', 'exemplo', 'example', 'teste', 'test'];
+
       // Validar se tem informações mínimas (ativo + resultado)
-      if (!extracted.ativo) {
+      if (!extracted.ativo || excludedWords.includes(extracted.ativo?.toLowerCase())) {
         console.log('❌ No asset found in message');
         return null;
       }
