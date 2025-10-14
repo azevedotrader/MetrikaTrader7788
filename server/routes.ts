@@ -4300,14 +4300,14 @@ Vamos começar! 🚀`;
       // FORMATO SIMPLIFICADO - Take/Stop com valor arriscado e lucro
       // Exemplos: "Take no EURUSD arrisquei 100 lucrei 300", "Stop no BTC arrisquei 200"
       const simplePatterns = {
+        // Ativo - SEMPRE procurar "no/do/em ATIVO" primeiro (para evitar detectar palavras-chave)
+        ativo: /(?:no|do|em)\s+([A-Z][A-Z0-9]{2,9})/i,
         // Take ou Stop (vitória ou perda)
-        resultado_tipo: /(take|stop|vit[oó]ria|ganho|win|gain|lucro|lucrei|perda|loss|preju[íi]zo|perdi)/i,
-        // Ativo - melhorado para detectar em contexto "no/do ATIVO"
-        ativo: /(?:no|do|em|ativo[:\s]+)([A-Z][A-Z0-9]{2,9})|^([A-Z][A-Z0-9]{2,9})/i,
+        resultado_tipo: /(take|stop|vit[oó]ria|ganho|win|gain|lucro|lucrei|ganhei|perda|loss|preju[íi]zo|perdi)/i,
         // Valor arriscado (capital usado)
         arriscado: /(?:arrisquei|arriscado|risco|entrada|capital|usei|investi|valor)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
-        // Lucro (só para takes/vitórias)
-        lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)/i,
+        // Lucro (só para takes/vitórias) - procurar número ANTES da palavra ganho/lucro
+        lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)|^([0-9.,]+)\s*(?:no|do)/i,
         // Prejuízo explícito (opcional para stops)
         prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i
       };
@@ -4318,8 +4318,8 @@ Vamos começar! 🚀`;
       for (const [key, pattern] of Object.entries(simplePatterns)) {
         const match = text.match(pattern);
         if (match) {
-          // Para ativo, pode vir em match[1] ou match[2] dependendo do padrão
-          if (key === 'ativo') {
+          // Para ativo e lucro, pode vir em match[1] ou match[2] dependendo do padrão
+          if (key === 'ativo' || key === 'lucro') {
             extracted[key] = (match[1] || match[2])?.trim();
           } else {
             extracted[key] = match[1]?.trim();
@@ -4390,6 +4390,7 @@ Vamos começar! 🚀`;
         setup: 'WhatsApp',
         mercado: 'b3', // Assumir B3 por padrão
         corretora: 'b3',
+        origem: 'manual', // WhatsApp trades são salvos como manual
         dataHora: new Date().toISOString(),
         comentario: `Via WhatsApp: ${messageText.substring(0, 100)}`
       };
