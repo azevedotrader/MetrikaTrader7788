@@ -1,0 +1,136 @@
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+❌ Assinatura inválida do Meta - acesso negado
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+📱 WhatsApp webhook POST received: {
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+hasSignature: true,
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+hasAppSecret: true,
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+isDevelopment: false,
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+bodyObject: 'whatsapp_business_account',
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+fullBody: '{\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "object": "whatsapp_business_account",\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "entry": [\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "id": "24765962706425957",\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "changes": [\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "value": {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "messaging_product": "whatsapp",\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "metadata": {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "display_phone_number": "5522974051621",\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "phone_number_id": "729976686876621"\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' },\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "contacts": [\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "profile": {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "name": "Red Pill Company"\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' },\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "wa_id": "556192800343"\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' }\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' ],\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "messages": [\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "context": {\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "from": "5522974051621",\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "id": "wamid.HBgMNTU2MTkyODAwMzQzFQIAERgSOUMzNDgyRDg5QUM3QzYzMDg4AA=="\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' },\n' +
+2025-10-14 22:41:42.18
+1d0e2adb
+User
+' "from": "556192800343",\n' +
