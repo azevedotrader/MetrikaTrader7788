@@ -4352,7 +4352,7 @@ Vamos começar! 🚀`;
         const resultText = extracted.resultado_tipo.toLowerCase();
         
         // Se mencionou TAKE/vitória/ganho/lucro = positivo (precisa ter valor de lucro)
-        if (['take', 'vitoria', 'vitória', 'ganho', 'win', 'gain', 'lucro', 'lucrei'].some(w => resultText.includes(w))) {
+        if (['take', 'vitoria', 'vitória', 'ganho', 'ganh', 'win', 'gain', 'lucro', 'lucr'].some(w => resultText.includes(w))) {
           const lucroValue = normalizeNumber(extracted.lucro, '0');
           if (lucroValue && parseFloat(lucroValue) > 0) {
             resultado = '+' + lucroValue;
