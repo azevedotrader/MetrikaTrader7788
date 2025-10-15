@@ -3707,11 +3707,12 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       const APP_SECRET = process.env.WHATSAPP_APP_SECRET;
       const isDevelopment = process.env.NODE_ENV === 'development';
       
-      console.log('📱 WhatsApp webhook received:', { 
+      console.log('📱 WhatsApp webhook POST received:', { 
         hasSignature: !!signature, 
         hasAppSecret: !!APP_SECRET,
         isDevelopment,
-        bodyObject: req.body?.object 
+        bodyObject: req.body?.object,
+        fullBody: JSON.stringify(req.body, null, 2)
       });
       
       // Em produção, exigir verificação de assinatura
@@ -3787,11 +3788,15 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       if (message.type === 'interactive' && message.interactive?.type === 'button_reply') {
         messageText = message.interactive.button_reply.id;
         isButtonReply = true;
-        console.log('🔘 Button reply detected:', messageText);
+        console.log('🔘 Button reply detected:', {
+          buttonId: messageText,
+          fullInteractive: JSON.stringify(message.interactive)
+        });
       } else if (message.type === 'text' && message.text?.body) {
         messageText = message.text.body;
+        console.log('💬 Text message detected:', messageText);
       } else {
-        console.log('⏭️ Ignoring unsupported message type');
+        console.log('⏭️ Ignoring unsupported message type:', message.type);
         return;
       }
 
