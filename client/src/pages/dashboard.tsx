@@ -3203,27 +3203,116 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-resultado">{t('metrics.result')} (R$)</Label>
-                <Input
-                  id="edit-resultado"
-                  type="number"
-                  step="0.01"
-                  value={editingTrade.resultado || ''}
-                  onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
-                  className="bg-zinc-800 border-zinc-700 text-white"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-capital">Capital Arriscado (R$)</Label>
+                  <Input
+                    id="edit-capital"
+                    type="number"
+                    step="0.01"
+                    value={editingTrade.capitalUtilizado || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, capitalUtilizado: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-resultado">{t('metrics.result')} (R$)</Label>
+                  <Input
+                    id="edit-resultado"
+                    type="number"
+                    step="0.01"
+                    value={editingTrade.resultado || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-quantidade">{t('trades.quantity')}</Label>
+                  <Input
+                    id="edit-quantidade"
+                    type="number"
+                    step="0.01"
+                    value={editingTrade.quantidade || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-entrada">Preço Entrada</Label>
+                  <Input
+                    id="edit-entrada"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.precoEntrada || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, precoEntrada: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-saida">Preço Saída</Label>
+                  <Input
+                    id="edit-saida"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.precoSaida || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, precoSaida: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-stop">Stop Loss</Label>
+                  <Input
+                    id="edit-stop"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.stop || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, stop: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-alvo">Alvo (Target)</Label>
+                  <Input
+                    id="edit-alvo"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.alvo || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, alvo: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-setup">Setup</Label>
+                  <Input
+                    id="edit-setup"
+                    value={editingTrade.setup || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, setup: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-quantidade">{t('trades.quantity')}</Label>
+                <Label htmlFor="edit-comentario">Comentário</Label>
                 <Input
-                  id="edit-quantidade"
-                  type="number"
-                  step="0.01"
-                  value={editingTrade.quantidade || ''}
-                  onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
+                  id="edit-comentario"
+                  value={editingTrade.comentario || ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, comentario: e.target.value})}
                   className="bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="Observações sobre o trade..."
                 />
               </div>
             </div>
@@ -3247,9 +3336,16 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     data: {
                       ativo: editingTrade.ativo,
                       tipo: editingTrade.tipo,
+                      dataHora: editingTrade.dataHora,
                       resultado: parseFloat(editingTrade.resultado || '0'),
                       quantidade: parseFloat(editingTrade.quantidade || '0'),
-                      dataHora: editingTrade.dataHora,
+                      capitalUtilizado: editingTrade.capitalUtilizado || '0',
+                      precoEntrada: editingTrade.precoEntrada || '0',
+                      precoSaida: editingTrade.precoSaida || '0',
+                      stop: editingTrade.stop || '0',
+                      alvo: editingTrade.alvo || '0',
+                      setup: editingTrade.setup || '',
+                      comentario: editingTrade.comentario || '',
                     }
                   });
                 }
