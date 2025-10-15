@@ -3161,6 +3161,15 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </div>
               
               <div className="space-y-2">
+                <Label>Mercado</Label>
+                <div className="px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-md text-sm text-zinc-400">
+                  {editingTrade.mercado === 'crypto' ? '🪙 Crypto' : 
+                   editingTrade.mercado === 'forex' ? '💱 Forex' : 
+                   '📊 B3 (Brasil)'}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
                 <Label htmlFor="edit-tipo">{t('trades.type')}</Label>
                 <Select 
                   value={editingTrade.tipo || ''} 

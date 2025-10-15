@@ -4378,9 +4378,30 @@ Vamos começar! 🚀`;
         }
       }
 
+      // Detectar mercado automaticamente baseado no ativo
+      const ativo = extracted.ativo.toUpperCase();
+      let mercado: 'crypto' | 'forex' | 'b3' = 'b3';
+      let corretora: 'crypto' | 'forex' | 'b3' | 'auto' = 'b3';
+      
+      // Crypto: termina com USD, USDT, BTC, ETH ou começa com BTC, ETH
+      if (/(?:USDT?|BTC|ETH)$/.test(ativo) || /^(?:BTC|ETH)/.test(ativo)) {
+        mercado = 'crypto';
+        corretora = 'crypto';
+      }
+      // Forex: pares de moedas (6 letras, ex: EURUSD, GBPJPY, AUDCAD)
+      else if (/^[A-Z]{6}$/.test(ativo)) {
+        mercado = 'forex';
+        corretora = 'forex';
+      }
+      // B3: qualquer outro (WIN, PETR4, etc)
+      else {
+        mercado = 'b3';
+        corretora = 'b3';
+      }
+
       const tradeData: InsertTrade = {
         userId,
-        ativo: extracted.ativo.toUpperCase(),
+        ativo,
         tipo: tipo as 'compra' | 'venda',
         quantidade: '1', // Quantidade padrão
         precoEntrada: '0', // Não usa preço de entrada neste formato
@@ -4388,8 +4409,8 @@ Vamos começar! 🚀`;
         resultado,
         capitalUtilizado: normalizeNumber(extracted.arriscado, '100'), // Valor arriscado = capital usado
         setup: 'WhatsApp',
-        mercado: 'b3', // Assumir B3 por padrão
-        corretora: 'b3',
+        mercado,
+        corretora,
         origem: 'manual', // WhatsApp trades são salvos como manual
         dataHora: new Date().toISOString(),
         comentario: `Via WhatsApp: ${messageText.substring(0, 100)}`
