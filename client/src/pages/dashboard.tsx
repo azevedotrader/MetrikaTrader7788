@@ -3174,8 +3174,15 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <Input
                   id="edit-datahora"
                   type="datetime-local"
-                  value={editingTrade.dataHora ? new Date(editingTrade.dataHora).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()})}
+                  value={editingTrade.dataHora ? (() => {
+                    const date = new Date(editingTrade.dataHora);
+                    const offset = date.getTimezoneOffset() * 60000;
+                    const localDate = new Date(date.getTime() - offset);
+                    return localDate.toISOString().slice(0, 16);
+                  })() : ''}
+                  onChange={(e) => {
+                    setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()});
+                  }}
                   className="bg-zinc-800 border-zinc-700 text-white"
                 />
               </div>
