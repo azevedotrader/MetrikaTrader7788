@@ -8,6 +8,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -26,6 +35,7 @@ import {
   Trash2,
   Upload,
   FileSpreadsheet,
+  X,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { CsvSelectionModal } from "@/components/modals/csv-selection-modal";
@@ -55,7 +65,7 @@ export default function Importacoes() {
   });
 
   const manualTrades = useMemo(() => {
-    return allTrades.filter((trade: any) => trade.origem === "manual");
+    return (allTrades as any[]).filter((trade: any) => trade.origem === "manual");
   }, [allTrades]);
 
   // Broker info for display
@@ -128,6 +138,29 @@ export default function Importacoes() {
       toast({
         title: "Erro",
         description: "Não foi possível excluir o trade.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Edit trade mutation
+  const editTradeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest("PUT", `/api/trades/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      setShowEditTradeDialog(false);
+      setEditingTrade(null);
+      toast({
+        title: "Trade atualizado",
+        description: "O trade foi atualizado com sucesso.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o trade.",
         variant: "destructive",
       });
     },
@@ -428,6 +461,237 @@ export default function Importacoes() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Trade Dialog */}
+      <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="relative">
+            <button
+              onClick={() => {
+                setShowEditTradeDialog(false);
+                setEditingTrade(null);
+              }}
+              className="absolute right-0 top-0 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 h-6 w-6 flex items-center justify-center"
+              data-testid="button-close-dialog"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+            <DialogTitle>Editar Trade</DialogTitle>
+            <DialogDescription className="text-zinc-400">
+              Edite os dados do trade criado manualmente ou via WhatsApp
+            </DialogDescription>
+          </DialogHeader>
+          {editingTrade && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-ativo">Ativo</Label>
+                <Input
+                  id="edit-ativo"
+                  value={editingTrade.ativo || ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, ativo: e.target.value})}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Mercado</Label>
+                <div className="px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-md text-sm text-zinc-400">
+                  {editingTrade.mercado === 'crypto' ? '🪙 Crypto' : 
+                   editingTrade.mercado === 'forex' ? '💱 Forex' : 
+                   '📊 B3 (Brasil)'}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-datahora">Data/Hora</Label>
+                <Input
+                  id="edit-datahora"
+                  type="datetime-local"
+                  value={editingTrade.dataHora ? (() => {
+                    const date = new Date(editingTrade.dataHora);
+                    const offset = date.getTimezoneOffset() * 60000;
+                    const localDate = new Date(date.getTime() - offset);
+                    return localDate.toISOString().slice(0, 16);
+                  })() : ''}
+                  onChange={(e) => {
+                    setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()});
+                  }}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-tipo">Tipo</Label>
+                <Select 
+                  value={editingTrade.tipo || ''} 
+                  onValueChange={(value) => setEditingTrade({...editingTrade, tipo: value})}
+                >
+                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                    <SelectItem value="compra" className="text-white">Compra</SelectItem>
+                    <SelectItem value="venda" className="text-white">Venda</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-capital">Capital Arriscado (R$)</Label>
+                  <Input
+                    id="edit-capital"
+                    type="number"
+                    step="0.01"
+                    value={editingTrade.capitalUtilizado || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, capitalUtilizado: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-resultado">Resultado (R$)</Label>
+                  <Input
+                    id="edit-resultado"
+                    type="number"
+                    step="0.01"
+                    value={editingTrade.resultado || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-quantidade">Quantidade</Label>
+                  <Input
+                    id="edit-quantidade"
+                    type="number"
+                    step="0.01"
+                    value={editingTrade.quantidade || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-entrada">Preço Entrada</Label>
+                  <Input
+                    id="edit-entrada"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.precoEntrada || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, precoEntrada: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-saida">Preço Saída</Label>
+                  <Input
+                    id="edit-saida"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.precoSaida || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, precoSaida: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-stop">Stop Loss</Label>
+                  <Input
+                    id="edit-stop"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.stop || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, stop: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-alvo">Alvo (Target)</Label>
+                  <Input
+                    id="edit-alvo"
+                    type="number"
+                    step="0.0001"
+                    value={editingTrade.alvo || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, alvo: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-setup">Setup</Label>
+                  <Input
+                    id="edit-setup"
+                    value={editingTrade.setup || ''}
+                    onChange={(e) => setEditingTrade({...editingTrade, setup: e.target.value})}
+                    className="bg-zinc-800 border-zinc-700 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-comentario">Comentário</Label>
+                <Input
+                  id="edit-comentario"
+                  value={editingTrade.comentario || ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, comentario: e.target.value})}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="Observações sobre o trade..."
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditTradeDialog(false);
+                setEditingTrade(null);
+              }}
+              className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingTrade) {
+                  editTradeMutation.mutate({
+                    id: editingTrade.id,
+                    data: {
+                      ativo: editingTrade.ativo,
+                      tipo: editingTrade.tipo,
+                      dataHora: editingTrade.dataHora,
+                      resultado: parseFloat(editingTrade.resultado || '0'),
+                      quantidade: parseFloat(editingTrade.quantidade || '0'),
+                      capitalUtilizado: editingTrade.capitalUtilizado || '0',
+                      precoEntrada: editingTrade.precoEntrada || '0',
+                      precoSaida: editingTrade.precoSaida || '0',
+                      stop: editingTrade.stop || '0',
+                      alvo: editingTrade.alvo || '0',
+                      setup: editingTrade.setup || '',
+                      comentario: editingTrade.comentario || '',
+                    }
+                  });
+                }
+              }}
+              disabled={editTradeMutation.isPending}
+              className="bg-white text-black hover:bg-gray-200"
+            >
+              {editTradeMutation.isPending ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* CSV Import Modal */}
       <CsvSelectionModal 
