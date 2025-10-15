@@ -3999,7 +3999,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
               precoSaida: validatedTrade.precoSaida || '0',
               resultado: validatedTrade.resultado || '0',
               corretora: validatedTrade.corretora!,
-              origem: 'whatsapp',
+              origem: 'manual',
               comentario: validatedTrade.comentario || ''
             };
 
