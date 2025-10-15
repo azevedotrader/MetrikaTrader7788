@@ -3168,6 +3168,17 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                    '📊 B3 (Brasil)'}
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-datahora">Data/Hora</Label>
+                <Input
+                  id="edit-datahora"
+                  type="datetime-local"
+                  value={editingTrade.dataHora ? new Date(editingTrade.dataHora).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()})}
+                  className="bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
               
               <div className="space-y-2">
                 <Label htmlFor="edit-tipo">{t('trades.type')}</Label>
@@ -3231,6 +3242,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       tipo: editingTrade.tipo,
                       resultado: parseFloat(editingTrade.resultado || '0'),
                       quantidade: parseFloat(editingTrade.quantidade || '0'),
+                      dataHora: editingTrade.dataHora,
                     }
                   });
                 }
