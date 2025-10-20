@@ -72,7 +72,7 @@ async function adminApiRequest(url: string, method: string = 'GET', data?: any) 
 const updateUserSchema = z.object({
   name: z.string().optional(),
   email: z.string().email().optional(),
-  password: z.string().min(6).optional(),
+  password: z.string().min(6).or(z.literal("")).optional(),
   phone: z.string().optional(),
   planType: z.enum(["free", "starter", "pro", "black"]).optional(),
   isActive: z.boolean().optional(),
