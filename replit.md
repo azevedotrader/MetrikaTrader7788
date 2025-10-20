@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Landing Page - Copy Melhorada para WhatsApp - Janeiro 2025
+- **Nova Seção Exclusiva**: Seção dedicada destacando integração WhatsApp como diferencial único
+- **Badge Hero**: Badge destacado na seção hero mencionando funcionalidade exclusiva do WhatsApp
+- **Mockup WhatsApp**: Visualização interativa mostrando como funciona o bot no WhatsApp
+- **4 Diferenciais**: Linguagem Natural, Detecção Automática, Estatísticas no WhatsApp, Registro Instantâneo
+- **Copy Atualizada**: Enfatiza que é a "única plataforma no Brasil" com essa funcionalidade
+- **Praticidade**: Destaca possibilidade de salvar trades e ver estatísticas sem abrir navegador
+
 ### Integração WhatsApp Business API - Janeiro 2025
 - **WhatsApp Bot Completo**: ✅ Sistema de salvamento de trades via WhatsApp implementado
 - **Parser Inteligente**: ✅ Extração automática de dados de trades de mensagens em linguagem natural
