@@ -2670,6 +2670,32 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
   
+  // PATCH /api/user/whatsapp - Update WhatsApp number
+  app.patch("/api/user/whatsapp", requireAuth, async (req, res) => {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+      
+      const { whatsappNumber } = req.body;
+      
+      if (!whatsappNumber || typeof whatsappNumber !== 'string') {
+        return res.status(400).json({ message: "Número do WhatsApp inválido" });
+      }
+      
+      const updatedUser = await storage.updateProfile(userId, { whatsappNumber });
+      
+      res.json({
+        message: "Número do WhatsApp atualizado com sucesso",
+        whatsappNumber: updatedUser.whatsappNumber
+      });
+    } catch (error) {
+      console.error("Error updating WhatsApp number:", error);
+      res.status(500).json({ message: "Erro ao atualizar número do WhatsApp" });
+    }
+  });
+  
   // PUT /api/profile - Atualizar perfil do usuário
   app.put("/api/profile", requireAuth, async (req, res) => {
     try {

@@ -8,6 +8,7 @@ interface User {
   capitalInicial?: string;
   metaMensal?: string;
   perfilRisco?: string;
+  whatsappNumber?: string;
   createdAt?: string;
   updatedAt?: string;
   initials?: string;

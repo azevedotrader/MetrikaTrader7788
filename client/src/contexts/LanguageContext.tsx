@@ -66,6 +66,9 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.admin": "Admin",
     "nav.logout": "Sair",
 
+    // WhatsApp
+    "whatsapp.title": "WhatsApp",
+
     // Gestão de Risco
     "risk_management.title": "Gestão de Risco",
     "risk_management.description": "Calcule o tamanho ideal da posição e projete seu crescimento",
@@ -1037,6 +1040,9 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.admin": "Admin",
     "nav.logout": "Logout",
 
+    // WhatsApp
+    "whatsapp.title": "WhatsApp",
+
     // Support
     "support.title": "Support",
     "support.description": "Contact us for help with your account",
@@ -1988,6 +1994,9 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.profile": "Perfil",
     "nav.admin": "Admin",
     "nav.logout": "Salir",
+
+    // WhatsApp
+    "whatsapp.title": "WhatsApp",
 
     // Soporte
     "support.title": "Soporte",

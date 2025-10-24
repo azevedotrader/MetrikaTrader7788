@@ -19,6 +19,7 @@ import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
 import ImportarCSV from "@/pages/importar-csv";
+import WhatsAppPage from "@/pages/whatsapp";
 import Graficos from "@/pages/graficos";
 import Analises from "@/pages/analises";
 import RiskManagement from "@/pages/risk-management";
@@ -42,6 +43,7 @@ const pageTitleKeys: Record<string, string> = {
   "/dashboard": "nav.dashboard",
   "/novo-trade": "trades.add_new",
   "/importar-csv": "trade.import_csv",
+  "/whatsapp": "whatsapp.title",
   "/graficos": "charts.title",
   "/analises": "nav.trades",
   "/gestao": "risk_management.title",
@@ -138,6 +140,13 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <ImportarCSV />
+                  </Route>
+                  <Route path="/whatsapp">
+                    <TopBar 
+                      title={t(pageTitleKeys["/whatsapp"])} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <WhatsAppPage />
                   </Route>
                   <Route path="/gestao">
                     <TopBar 
