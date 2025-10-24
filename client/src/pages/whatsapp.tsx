@@ -11,29 +11,31 @@ import { PhoneIcon, InfoIcon, MessageSquare, TrendingUp } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function WhatsAppPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const [whatsappNumber, setWhatsappNumber] = useState(user?.whatsappNumber || "");
 
   const saveNumberMutation = useMutation({
     mutationFn: async (number: string) => {
-      return await fetch("/api/user/whatsapp", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsappNumber: number }),
-      }).then(res => res.json());
+      const response = await apiRequest("PATCH", "/api/user/whatsapp", { whatsappNumber: number });
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Número salvo com sucesso!",
         description: "Seu número do WhatsApp foi vinculado à sua conta.",
       });
+      // Atualizar o número localmente e no contexto do usuário
+      if (data.whatsappNumber) {
+        setWhatsappNumber(data.whatsappNumber);
+        updateUser({ whatsappNumber: data.whatsappNumber });
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao salvar número",
-        description: "Tente novamente mais tarde.",
+        description: error.message || "Tente novamente mais tarde.",
         variant: "destructive",
       });
     },
