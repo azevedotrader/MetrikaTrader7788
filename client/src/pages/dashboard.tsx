@@ -602,6 +602,23 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
     return groupDataByPeriod();
   }, [trades, timeFilter]);
 
+  // Calcular valores mínimo e máximo para o domain do YAxis
+  const yAxisDomain = useMemo(() => {
+    if (!chartData.length) return [0, 100];
+    
+    const allValues = chartData.flatMap(d => [d.cumulativeProfit, d.profit]);
+    const minValue = Math.min(...allValues, 0); // Garantir que inclui zero
+    const maxValue = Math.max(...allValues, 0); // Garantir que inclui zero
+    
+    // Adicionar margem de 10% para melhor visualização
+    const margin = Math.max(Math.abs(minValue), Math.abs(maxValue)) * 0.1;
+    
+    return [
+      Math.floor(minValue - margin),
+      Math.ceil(maxValue + margin)
+    ];
+  }, [chartData]);
+
   const formatTooltipValue = (value: number, name: string) => {
     if (name === "cumulativeProfit") {
       return [`R$ ${value.toFixed(2)}`, t('chart.profitability_accumulated')];
@@ -656,6 +673,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                   fontSize={10}
                   width={60}
                   tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
+                  domain={yAxisDomain}
                 />
                 <RechartsTooltip
                   contentStyle={{
@@ -666,6 +684,14 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                   }}
                   formatter={formatTooltipValue}
                   labelStyle={{ color: "#CBD5E1" }}
+                />
+                {/* Linha de referência em zero */}
+                <ReferenceLine 
+                  y={0} 
+                  stroke="#64748B" 
+                  strokeWidth={2} 
+                  strokeDasharray="3 3"
+                  label={{ value: 'R$ 0', fill: '#94A3B8', fontSize: 11, position: 'right' }}
                 />
                 <Line
                   type="monotone"
