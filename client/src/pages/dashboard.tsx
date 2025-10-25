@@ -46,6 +46,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { 
+  Tooltip as InfoTooltip, 
+  TooltipContent as InfoTooltipContent, 
+  TooltipProvider as InfoTooltipProvider, 
+  TooltipTrigger as InfoTooltipTrigger 
+} from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useTour } from "@/contexts/TourContext";
@@ -78,7 +84,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -339,85 +345,183 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
   };
 
   return (
-    <div className="flex flex-col gap-3 h-full">
-      {/* Primeira linha: 3 métricas */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {/* IQT */}
-        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">IQT</div>
-          <div 
-            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}
-            data-testid="text-iqt"
-          >
-            {metrics.iqt.toFixed(1)}
+    <InfoTooltipProvider>
+      <div className="flex flex-col gap-3 h-full">
+        {/* Primeira linha: 3 métricas */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {/* IQT */}
+          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+            <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
+              IQT
+              <InfoTooltip>
+                <InfoTooltipTrigger asChild>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </InfoTooltipTrigger>
+                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                  <p className="font-semibold mb-1">Índice de Qualidade de Trading</p>
+                  <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando rentabilidade, assertividade e risco. Quanto maior, melhor sua estratégia.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 5 | ⚠️ Regular: 1-5 | ❌ Ruim: &lt; 1</p>
+                </InfoTooltipContent>
+              </InfoTooltip>
+            </div>
+            <div 
+              className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.iqt, 'iqt')}`}
+              data-testid="text-iqt"
+            >
+              {metrics.iqt.toFixed(1)}
+            </div>
+            <div className="text-xs text-zinc-500">{t('metrics.quality_index')}</div>
           </div>
-          <div className="text-xs text-zinc-500">{t('metrics.quality_index')}</div>
+
+          {/* Eficiência de Risco */}
+          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+            <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
+              Eficiência
+              <InfoTooltip>
+                <InfoTooltipTrigger asChild>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </InfoTooltipTrigger>
+                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                  <p className="font-semibold mb-1">Eficiência de Risco</p>
+                  <p className="text-sm text-zinc-300">Mostra quanto você ganha em relação ao risco assumido. Quanto maior, mais eficiente está sendo sua gestão de risco.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 0.05 | ⚠️ Regular: 0.01-0.05 | ❌ Ruim: &lt; 0.01</p>
+                </InfoTooltipContent>
+              </InfoTooltip>
+            </div>
+            <div 
+              className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}
+              data-testid="text-eficiencia"
+            >
+              {metrics.eficienciaRisco.toFixed(2)}
+            </div>
+            <div className="text-xs text-zinc-500">{t('metrics.risk_percentage')}</div>
+          </div>
+
+          {/* Score de Consistência */}
+          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+            <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
+              Consistência
+              <InfoTooltip>
+                <InfoTooltipTrigger asChild>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </InfoTooltipTrigger>
+                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                  <p className="font-semibold mb-1">Score de Consistência</p>
+                  <p className="text-sm text-zinc-300">Avalia a estabilidade dos seus resultados ao longo do tempo. Alta consistência indica disciplina e controle emocional.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1.5 | ⚠️ Regular: 1-1.5 | ❌ Ruim: &lt; 1</p>
+                </InfoTooltipContent>
+              </InfoTooltip>
+            </div>
+            <div 
+              className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}
+              data-testid="text-consistencia"
+            >
+              {metrics.scoreConsistencia.toFixed(2)}
+            </div>
+            <div className="text-xs text-zinc-500">{t('metrics.score')}</div>
+          </div>
         </div>
 
-        {/* Eficiência de Risco */}
-        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">Eficiência</div>
-          <div 
-            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.eficienciaRisco, 'eficiencia')}`}
-            data-testid="text-eficiencia"
-          >
-            {metrics.eficienciaRisco.toFixed(2)}
+        {/* Segunda linha: 3 métricas */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {/* RAP */}
+          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+            <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
+              RAP
+              <InfoTooltip>
+                <InfoTooltipTrigger asChild>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </InfoTooltipTrigger>
+                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                  <p className="font-semibold mb-1">Retorno Ajustado por Precisão</p>
+                  <p className="text-sm text-zinc-300">Mostra quanto você lucra em relação à sua taxa de acerto. Útil para avaliar se você está maximizando seus ganhos mesmo com assertividade moderada.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 10 | ⚠️ Regular: 5-10 | ❌ Ruim: &lt; 5</p>
+                </InfoTooltipContent>
+              </InfoTooltip>
+            </div>
+            <div 
+              className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}
+              data-testid="text-rap"
+            >
+              {metrics.retornoAjustadoPrecisao.toFixed(2)}
+            </div>
+            <div className="text-xs text-zinc-500">{t('metrics.precision')}</div>
           </div>
-          <div className="text-xs text-zinc-500">{t('metrics.risk_percentage')}</div>
-        </div>
 
-        {/* Score de Consistência */}
-        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">Consistência</div>
-          <div 
-            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.scoreConsistencia, 'consistencia')}`}
-            data-testid="text-consistencia"
-          >
-            {metrics.scoreConsistencia.toFixed(2)}
+          {/* IPI */}
+          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+            <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
+              IPI
+              <InfoTooltip>
+                <InfoTooltipTrigger asChild>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </InfoTooltipTrigger>
+                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                  <p className="font-semibold mb-1">Índice de Performance Integrado</p>
+                  <p className="text-sm text-zinc-300">Métrica avançada que combina rentabilidade, lucro, estabilidade e drawdown. Resume a performance completa da sua estratégia.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 2.0 | ⚠️ Regular: 1-2 | ❌ Ruim: &lt; 1</p>
+                </InfoTooltipContent>
+              </InfoTooltip>
+            </div>
+            <div 
+              className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.ipi, 'ipi')}`}
+              data-testid="text-ipi"
+            >
+              {metrics.ipi.toFixed(3)}
+            </div>
+            <div className="text-xs text-zinc-500">{t('metrics.performance')}</div>
           </div>
-          <div className="text-xs text-zinc-500">{t('metrics.score')}</div>
+
+          {/* Expectancy - Van Tharp */}
+          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+            <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
+              Expectancy
+              <InfoTooltip>
+                <InfoTooltipTrigger asChild>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </InfoTooltipTrigger>
+                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                  <p className="font-semibold mb-1">Expectancy (Van Tharp)</p>
+                  <p className="text-sm text-zinc-300">Mostra quanto você espera ganhar (ou perder) em média por trade. Métrica fundamental para saber se sua estratégia é lucrativa a longo prazo.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ R$ 50 | ⚠️ Regular: &gt; R$ 0 | ❌ Ruim: &lt; R$ 0</p>
+                </InfoTooltipContent>
+              </InfoTooltip>
+            </div>
+            <div 
+              className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.expectancy, 'expectancy')}`}
+              data-testid="text-expectancy"
+            >
+              R$ {metrics.expectancy.toFixed(2)}
+            </div>
+            <div className="text-xs text-zinc-500">{t('metrics.van_tharp')}</div>
+          </div>
         </div>
       </div>
-
-      {/* Segunda linha: 3 métricas */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        {/* RAP */}
-        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">RAP</div>
-          <div 
-            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.retornoAjustadoPrecisao, 'rap')}`}
-            data-testid="text-rap"
-          >
-            {metrics.retornoAjustadoPrecisao.toFixed(2)}
-          </div>
-          <div className="text-xs text-zinc-500">{t('metrics.precision')}</div>
-        </div>
-
-        {/* IPI */}
-        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">IPI</div>
-          <div 
-            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.ipi, 'ipi')}`}
-            data-testid="text-ipi"
-          >
-            {metrics.ipi.toFixed(3)}
-          </div>
-          <div className="text-xs text-zinc-500">{t('metrics.performance')}</div>
-        </div>
-
-        {/* Expectancy - Van Tharp */}
-        <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
-          <div className="text-xs text-zinc-400 mb-1 sm:mb-2">Expectancy</div>
-          <div 
-            className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.expectancy, 'expectancy')}`}
-            data-testid="text-expectancy"
-          >
-            R$ {metrics.expectancy.toFixed(2)}
-          </div>
-          <div className="text-xs text-zinc-500">{t('metrics.van_tharp')}</div>
-        </div>
-      </div>
-    </div>
+    </InfoTooltipProvider>
   );
 }
 
@@ -553,7 +657,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                   width={60}
                   tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
                 />
-                <Tooltip
+                <RechartsTooltip
                   contentStyle={{
                     backgroundColor: "#1E293B",
                     border: "1px solid #475569",
@@ -777,7 +881,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                   domain={['dataMin', 0]}
                   width={65}
                 />
-                <Tooltip
+                <RechartsTooltip
                   contentStyle={{
                     backgroundColor: "#1E293B",
                     border: "1px solid #475569",
@@ -929,7 +1033,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
               }
               width={window.innerWidth < 640 ? 40 : window.innerWidth < 1024 ? 50 : 60}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <RechartsTooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} strokeDasharray="2 2" />
             
             {/* Linha conectando os pontos */}
@@ -1167,7 +1271,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
                     r: 4 
                   }}
                 />
-                <Tooltip
+                <RechartsTooltip
                   contentStyle={{
                     backgroundColor: "#1E293B",
                     border: "1px solid #475569",
@@ -1776,7 +1880,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
                   }
                 />
                 
-                <Tooltip content={<CustomTooltip />} />
+                <RechartsTooltip content={<CustomTooltip />} />
 
                 {/* Linha do eixo 0 */}
                 <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
@@ -2184,7 +2288,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
             height={20}
           />
           <YAxis hide />
-          <Tooltip
+          <RechartsTooltip
             cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
             content={({ active, payload, label }) => {
               if (!active || !payload || !payload.length) return null;
