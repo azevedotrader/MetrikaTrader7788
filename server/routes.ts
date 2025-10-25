@@ -31,6 +31,81 @@ const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || (
 // Admin credentials - now fetched from database
 const ADMIN_EMAIL = 'admin@metrika.com.br';
 
+// Função para buscar cotação USD/BRL (API gratuita Frankfurter)
+async function getUsdToBrlRate(): Promise<number> {
+  try {
+    console.log('💱 Buscando cotação USD/BRL...');
+    const response = await axios.get('https://api.frankfurter.dev/v1/latest?base=USD&symbols=BRL', {
+      timeout: 5000
+    });
+    
+    const rate = response.data.rates.BRL;
+    console.log(`✅ Cotação obtida: 1 USD = ${rate} BRL`);
+    return rate;
+  } catch (error) {
+    console.error('❌ Erro ao buscar cotação USD/BRL:', error);
+    // Fallback: usar cotação aproximada caso a API falhe
+    const fallbackRate = 5.80;
+    console.warn(`⚠️ Usando cotação fallback: ${fallbackRate} BRL`);
+    return fallbackRate;
+  }
+}
+
+// Função para converter trades de USD para BRL (Forex e Crypto)
+async function convertTradesToBRL(trades: InsertTrade[]): Promise<InsertTrade[]> {
+  if (trades.length === 0) return trades;
+  
+  // Verificar se há trades de Forex ou Crypto que precisam conversão
+  const needsConversion = trades.some(t => 
+    t.mercado === 'forex' || t.mercado === 'crypto'
+  );
+  
+  if (!needsConversion) {
+    console.log('ℹ️ Nenhum trade de Forex/Crypto detectado - conversão não necessária');
+    return trades;
+  }
+  
+  // Buscar cotação atual
+  const usdToBrlRate = await getUsdToBrlRate();
+  
+  // Converter valores de USD para BRL
+  const convertedTrades = trades.map(trade => {
+    // Apenas converter Forex e Crypto (B3 já está em BRL)
+    if (trade.mercado === 'forex' || trade.mercado === 'crypto') {
+      console.log(`💱 Convertendo trade ${trade.ativo}: mercado=${trade.mercado}`);
+      
+      // Função auxiliar para converter string para número, multiplicar e retornar como string
+      const convertValue = (value: string | undefined): string | undefined => {
+        if (!value) return value;
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) return value;
+        return (numValue * usdToBrlRate).toFixed(2);
+      };
+      
+      return {
+        ...trade,
+        // Converter valores monetários de USD para BRL (todos são strings)
+        resultado: convertValue(trade.resultado),
+        precoEntrada: convertValue(trade.precoEntrada),
+        precoSaida: convertValue(trade.precoSaida),
+        stop: convertValue(trade.stop),
+        alvo: convertValue(trade.alvo),
+      };
+    }
+    
+    // B3 já está em BRL, retornar sem conversão
+    return trade;
+  });
+  
+  const convertedCount = convertedTrades.filter(t => 
+    t.mercado === 'forex' || t.mercado === 'crypto'
+  ).length;
+  
+  console.log(`✅ ${convertedCount} trades convertidos de USD para BRL (taxa: ${usdToBrlRate})`);
+  
+  return convertedTrades;
+}
+
 // Função para processar arquivos Excel da Clear
 async function processExcelFile(filePath: string, userId: string): Promise<InsertTrade[]> {
   console.log(`📊 Processando arquivo Excel Clear: ${filePath}`);
@@ -1707,6 +1782,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
         if (excelResult.length > 0) {
           console.log(`💾 [${userId}] Inserindo ${excelResult.length} trades Excel no banco`);
+          // Excel da Clear é B3, não precisa conversão (já está em BRL)
           await storage.createBulkTrades(excelResult, csvImport.id);
         }
 
@@ -1798,8 +1874,10 @@ export async function registerRoutes(app: Express): Promise<void> {
           });
 
           if (result.trades.length > 0) {
-            console.log(`💾 [${userId}] Inserindo ${result.trades.length} trades no banco com isolamento`);
-            await storage.createBulkTrades(result.trades);
+            console.log(`🔄 Aplicando conversão de moeda para trades de Forex/Crypto...`);
+            const convertedTrades = await convertTradesToBRL(result.trades);
+            console.log(`💾 [${userId}] Inserindo ${convertedTrades.length} trades no banco com isolamento`);
+            await storage.createBulkTrades(convertedTrades);
           }
 
           return res.json({
@@ -1973,10 +2051,14 @@ export async function registerRoutes(app: Express): Promise<void> {
         errorMessage: result.errors.length > 0 ? result.errors.join('; ') : null
       });
 
+      // Convert trades from USD to BRL for Forex/Crypto markets
+      console.log(`🔄 Aplicando conversão de moeda para trades de Forex/Crypto...`);
+      const convertedTrades = await convertTradesToBRL(result.trades);
+      
       // Save trades to database with CSV import ID
       const processingMethod = (result.summary as any)?.processingMethod || 'Sistema Tradicional';
-      console.log(`💾 Salvando ${result.trades.length} trades no banco... (Método: ${processingMethod})`);
-      const savedTrades = await storage.createBulkTrades(result.trades, csvImportRecord.id);
+      console.log(`💾 Salvando ${convertedTrades.length} trades no banco... (Método: ${processingMethod})`);
+      const savedTrades = await storage.createBulkTrades(convertedTrades, csvImportRecord.id);
 
       // Update CSV import with final trade count in database
       await storage.updateCsvImportTradesCount(csvImportRecord.id, savedTrades.length);
@@ -2164,8 +2246,12 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
 
+      // Aplicar conversão de moeda para Forex/Crypto antes de salvar
+      console.log(`🔄 Aplicando conversão de moeda para trades de Forex/Crypto...`);
+      const convertedSmartTrades = await convertTradesToBRL(smartTrades);
+      
       // Salvar novos trades interpretados (sem CSV import ID pois é reprocessamento)
-      const savedTrades = await storage.createBulkTrades(smartTrades);
+      const savedTrades = await storage.createBulkTrades(convertedSmartTrades);
       
       console.log(`✅ Reprocessamento inteligente concluído: ${smartTrades.length} métricas interpretadas`);
 
