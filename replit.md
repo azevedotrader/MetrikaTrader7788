@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Conversão Automática USD→BRL em CSV Imports - Janeiro 2025
+- **Conversão Automática**: ✅ Sistema converte automaticamente valores de USD para BRL em imports de CSV
+- **Mercados Suportados**: Forex e Crypto (B3 já vem em BRL)
+- **API de Cotação**: Usa API gratuita Frankfurter para obter taxa de câmbio atual
+- **Campos Convertidos**: resultado, precoEntrada, precoSaida, stop, alvo
+- **Fallback Seguro**: Se API falhar, usa taxa aproximada de 5.80 BRL
+- **Logs Detalhados**: Sistema registra todas as conversões para auditoria
+- **WhatsApp Diferente**: WhatsApp continua exigindo valores em R$ (sem conversão automática)
+- **Transparência**: Usuário vê os valores já convertidos em BRL no dashboard
+
 ### Landing Page - Copy Melhorada para WhatsApp - Janeiro 2025
 - **Nova Seção Exclusiva**: Seção dedicada destacando integração WhatsApp como diferencial único
 - **Badge Hero**: Badge destacado na seção hero mencionando funcionalidade exclusiva do WhatsApp
