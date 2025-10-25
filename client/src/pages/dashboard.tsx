@@ -2869,118 +2869,6 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
           </div>
 
-          {/* Bottom Row - Square Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Progress Tracker - Maior para dar mais espaço ao calendário */}
-            <SquareCard
-              title={t('metrics.progress_tracker')}
-              value=""
-              icon={Calendar}
-              color="text-blue-600"
-              className="md:col-span-2 lg:col-span-2 min-h-[500px] lg:min-h-[600px]"
-              data-testid="card-progress-tracker"
-            >
-              <div className="h-full flex flex-col">
-                <div className="flex-1 overflow-hidden min-h-[400px] lg:min-h-[500px]">
-                  <TradingCalendar 
-                    trades={filteredTrades} 
-                    className="scale-110 sm:scale-125 lg:scale-100"
-                  />
-                </div>
-                
-                {/* Métricas adicionais no espaço vazio */}
-                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-zinc-700">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-full">
-                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
-                          <p className="text-sm sm:text-lg font-bold text-[#2FA87A] truncate">
-                            R$ {metrics.melhorTrade.toFixed(2)}
-                          </p>
-                        </div>
-                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
-                      </div>
-                    </div>
-
-                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-zinc-400 text-xs truncate">{t('dashboard.frequent_emotion')}</p>
-                          <p className="text-xs sm:text-sm font-bold text-white truncate">
-                            {(metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).charAt(0).toUpperCase() + (metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).slice(1)}
-                          </p>
-                          <p className="text-xs text-zinc-500 truncate">
-                            {metrics.emocaoMaisRecorrente.count} {t('time.times')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SquareCard>
-
-            {/* Métricas Avançadas de Performance - Ao lado do calendário */}
-            <SquareCard
-              title={t('metrics.advanced_metrics')}
-              value=""
-              icon={BarChart3}
-              color="text-[#2FA87A]"
-              data-testid="card-advanced-metrics"
-              className="md:col-span-2 lg:col-span-1 min-h-[500px] lg:min-h-[600px]"
-            >
-              <div className="h-full p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-auto">
-                {/* Seção 1: Métricas Matemáticas */}
-                <div>
-                  <AdvancedMetrics trades={filteredTrades} t={t} />
-                </div>
-                
-                {/* Seção 2: Métrika Score */}
-                <div className="border-t border-zinc-700 pt-3 sm:pt-4">
-                  <div className="text-sm font-semibold text-zinc-300 mb-2 sm:mb-3 flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    {t('metrics.metrika_score')}
-                  </div>
-                  <div className="scale-90 sm:scale-100 origin-top">
-                    <MetrikaScore trades={filteredTrades} t={t} />
-                  </div>
-                </div>
-              </div>
-            </SquareCard>
-
-            {/* Mobile: Cards PnL e Trades em layout responsivo */}
-            <div className="md:hidden grid grid-cols-1 gap-3">
-              {/* PnL Chart Mobile - Card separado */}
-              <Card className="bg-zinc-900/90 border-zinc-800">
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-zinc-400">{t('metrics.daily_net_pnl')}</h3>
-                    <BarChart3 className="h-4 w-4 text-[#2FA87A]" />
-                  </div>
-                  <div className="h-48 overflow-hidden">
-                    <NetDailyPnLBarChart trades={filteredTrades} />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Trades Mobile - Card separado */}
-              <Card className="bg-zinc-900/90 border-zinc-800">
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-zinc-400">{t('dashboard.recent_trades')}</h3>
-                    <FileText className="h-4 w-4 text-zinc-400" />
-                  </div>
-                  <div className="h-48 overflow-hidden">
-                    <RecentTrades trades={filteredTrades} />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-          </div>
-
-
           {/* Performance Chart + 4 Metric Blocks - Layout lado a lado */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Performance por Período - Gráfico (3/4 da largura) */}
@@ -3155,6 +3043,117 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Bottom Row - Square Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {/* Progress Tracker - Maior para dar mais espaço ao calendário */}
+            <SquareCard
+              title={t('metrics.progress_tracker')}
+              value=""
+              icon={Calendar}
+              color="text-blue-600"
+              className="md:col-span-2 lg:col-span-2 min-h-[500px] lg:min-h-[600px]"
+              data-testid="card-progress-tracker"
+            >
+              <div className="h-full flex flex-col">
+                <div className="flex-1 overflow-hidden min-h-[400px] lg:min-h-[500px]">
+                  <TradingCalendar 
+                    trades={filteredTrades} 
+                    className="scale-110 sm:scale-125 lg:scale-100"
+                  />
+                </div>
+                
+                {/* Métricas adicionais no espaço vazio */}
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-zinc-700">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-full">
+                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
+                          <p className="text-sm sm:text-lg font-bold text-[#2FA87A] truncate">
+                            R$ {metrics.melhorTrade.toFixed(2)}
+                          </p>
+                        </div>
+                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
+                      </div>
+                    </div>
+
+                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-zinc-400 text-xs truncate">{t('dashboard.frequent_emotion')}</p>
+                          <p className="text-xs sm:text-sm font-bold text-white truncate">
+                            {(metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).charAt(0).toUpperCase() + (metrics.emocaoMaisRecorrente.emocao || t('emotion.neutral')).slice(1)}
+                          </p>
+                          <p className="text-xs text-zinc-500 truncate">
+                            {metrics.emocaoMaisRecorrente.count} {t('time.times')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </SquareCard>
+
+            {/* Métricas Avançadas de Performance - Ao lado do calendário */}
+            <SquareCard
+              title={t('metrics.advanced_metrics')}
+              value=""
+              icon={BarChart3}
+              color="text-[#2FA87A]"
+              data-testid="card-advanced-metrics"
+              className="md:col-span-2 lg:col-span-1 min-h-[500px] lg:min-h-[600px]"
+            >
+              <div className="h-full p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-auto">
+                {/* Seção 1: Métricas Matemáticas */}
+                <div>
+                  <AdvancedMetrics trades={filteredTrades} t={t} />
+                </div>
+                
+                {/* Seção 2: Métrika Score */}
+                <div className="border-t border-zinc-700 pt-3 sm:pt-4">
+                  <div className="text-sm font-semibold text-zinc-300 mb-2 sm:mb-3 flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    {t('metrics.metrika_score')}
+                  </div>
+                  <div className="scale-90 sm:scale-100 origin-top">
+                    <MetrikaScore trades={filteredTrades} t={t} />
+                  </div>
+                </div>
+              </div>
+            </SquareCard>
+
+            {/* Mobile: Cards PnL e Trades em layout responsivo */}
+            <div className="md:hidden grid grid-cols-1 gap-3">
+              {/* PnL Chart Mobile - Card separado */}
+              <Card className="bg-zinc-900/90 border-zinc-800">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-zinc-400">{t('metrics.daily_net_pnl')}</h3>
+                    <BarChart3 className="h-4 w-4 text-[#2FA87A]" />
+                  </div>
+                  <div className="h-48 overflow-hidden">
+                    <NetDailyPnLBarChart trades={filteredTrades} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Trades Mobile - Card separado */}
+              <Card className="bg-zinc-900/90 border-zinc-800">
+                <CardContent className="p-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-zinc-400">{t('dashboard.recent_trades')}</h3>
+                    <FileText className="h-4 w-4 text-zinc-400" />
+                  </div>
+                  <div className="h-48 overflow-hidden">
+                    <RecentTrades trades={filteredTrades} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
           </div>
 
           {/* Trade Time Performance + PnL e Trades Recentes - Lado a lado */}
