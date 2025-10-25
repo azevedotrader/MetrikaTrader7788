@@ -3795,6 +3795,37 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
 
+  // Função para normalizar números de telefone brasileiros
+  function normalizePhoneNumber(phone: string): string[] {
+    // Remove todos os caracteres não numéricos
+    const cleaned = phone.replace(/\D/g, '');
+    
+    // Retorna variações possíveis do número
+    const variations: string[] = [cleaned];
+    
+    // Se for um número brasileiro (começa com 55)
+    if (cleaned.startsWith('55') && cleaned.length >= 12) {
+      const countryCode = cleaned.substring(0, 2); // 55
+      const areaCode = cleaned.substring(2, 4); // DDD (2 dígitos)
+      const restOfNumber = cleaned.substring(4); // Resto do número
+      
+      // Variação 1: Com o 9 extra (formato novo)
+      if (restOfNumber.length === 9 && restOfNumber.startsWith('9')) {
+        // Já tem o 9, adicionar versão sem o 9
+        variations.push(`${countryCode}${areaCode}${restOfNumber.substring(1)}`);
+      }
+      
+      // Variação 2: Sem o 9 extra (formato antigo)
+      if (restOfNumber.length === 8) {
+        // Não tem o 9, adicionar versão com o 9
+        variations.push(`${countryCode}${areaCode}9${restOfNumber}`);
+      }
+    }
+    
+    console.log('📞 Variações do número:', variations);
+    return variations;
+  }
+
   // Função para processar mensagem do WhatsApp
   async function processWhatsAppMessage(message: any) {
     try {
@@ -3828,11 +3859,28 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       }
 
       // Buscar usuário pelo número do WhatsApp
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.whatsappNumber, fromNumber))
-        .limit(1);
+      // Normalizar número e buscar usuário com variações
+      const phoneVariations = normalizePhoneNumber(fromNumber);
+      console.log('🔍 Buscando usuário com variações de número:', phoneVariations);
+      
+      // Buscar todos os usuários e filtrar manualmente com as variações
+      const allUsers = await db.select().from(users);
+      let user = null;
+      
+      for (const u of allUsers) {
+        if (u.whatsappNumber) {
+          const userPhoneVariations = normalizePhoneNumber(u.whatsappNumber);
+          // Verificar se há interseção entre as variações
+          const hasMatch = phoneVariations.some(v1 => 
+            userPhoneVariations.some(v2 => v1 === v2)
+          );
+          if (hasMatch) {
+            user = u;
+            console.log('✅ Usuário encontrado! Número cadastrado:', u.whatsappNumber, '| Número recebido:', fromNumber);
+            break;
+          }
+        }
+      }
 
       // Salvar mensagem no banco
       const [savedMessage] = await db
