@@ -131,7 +131,7 @@ export default function Landing() {
               <div data-testid="badge-whatsapp-hero" className="mb-8 inline-flex items-center bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/40 rounded-full px-6 py-3 animate-glow">
                 <MessageCircle className="w-5 h-5 text-green-400 mr-3" />
                 <span className="text-white font-semibold text-sm sm:text-base">
-                  🇧🇷 Única no Brasil: <span className="text-green-400">Salve trades pelo WhatsApp!</span>
+                  ✨ Funcionalidade Inovadora: <span className="text-green-400">Salve trades pelo WhatsApp!</span>
                 </span>
               </div>
 
@@ -448,15 +448,15 @@ export default function Landing() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge data-testid="badge-exclusive-brazil" className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-6 py-3 text-base font-bold mb-6 animate-glow">
-              🇧🇷 EXCLUSIVO NO BRASIL
+            <Badge data-testid="badge-exclusive-feature" className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-6 py-3 text-base font-bold mb-6 animate-glow">
+              ✨ FUNCIONALIDADE INOVADORA
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               <span className="text-white">Salve Trades pelo </span>
               <span className="gradient-text block animate-pulse-slow">WhatsApp!</span>
             </h2>
             <p className="text-xl text-slate-200 max-w-4xl mx-auto mb-8">
-              A <span className="text-green-400 font-bold">única plataforma no Brasil</span> que permite registrar suas operações 
+              Uma <span className="text-green-400 font-bold">plataforma pioneira</span> que permite registrar suas operações 
               e visualizar estatísticas <span className="text-emerald-400 font-bold">direto do seu celular</span>, sem abrir o navegador!
             </p>
           </div>
@@ -587,8 +587,8 @@ export default function Landing() {
                     <div>
                       <h4 className="text-lg font-bold text-white mb-2">Funcionalidade Exclusiva!</h4>
                       <p className="text-slate-200">
-                        Somos a <span className="text-green-400 font-bold">primeira e única plataforma no Brasil</span> que 
-                        oferece integração completa com WhatsApp para gerenciamento de trades. Praticidade incomparável!
+                        Uma <span className="text-green-400 font-bold">plataforma pioneira</span> com 
+                        integração completa com WhatsApp para gerenciamento de trades. Praticidade incomparável!
                       </p>
                     </div>
                   </div>
