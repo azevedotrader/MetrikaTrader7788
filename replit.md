@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Upload de Imagens por Trade - Janeiro 2025
+- **Funcionalidade**: ✅ Sistema permite upload de 1 imagem por trade (ao invés de 1 imagem por dia)
+- **Schema Atualizado**: Campo `tradeId` adicionado à tabela `diary_images` (opcional, permite vincular imagem ao trade)
+- **Interface Melhorada**: Botão de upload aparece em cada trade no modal de detalhes do dia
+- **Visualização**: Imagem aparece diretamente abaixo do trade correspondente
+- **Limite**: Cada trade pode ter apenas 1 imagem (limite intencional para simplicidade)
+- **Backend**: Rotas criadas: POST/GET/DELETE `/api/trades/:tradeId/images`
+- **Migração**: ✅ Banco de dados atualizado com sucesso
+
 ### Conversão Automática USD→BRL em CSV Imports - Janeiro 2025
 - **Conversão Automática**: ✅ Sistema converte automaticamente valores de USD para BRL em imports de CSV
 - **Mercados Suportados**: Forex e Crypto (B3 já vem em BRL)

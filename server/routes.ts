@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users, whatsappMessages, InsertWhatsappMessage, trades } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users, whatsappMessages, InsertWhatsappMessage, trades, diaryImages } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -3400,6 +3400,166 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       res.json({ message: "Imagem deletada com sucesso" });
     } catch (error) {
       console.error('Erro ao deletar imagem:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+
+  // ==================== ROTAS DE IMAGENS DE TRADES ====================
+  
+  // Upload de imagem para um trade
+  app.post('/api/trades/:tradeId/images', requireAuth, uploadImage.single('image'), async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { tradeId } = req.params;
+      const { caption } = req.body;
+      
+      if (!req.file) {
+        return res.status(400).json({ error: "Nenhuma imagem enviada" });
+      }
+      
+      // Verificar se o trade existe e pertence ao usuário
+      const trade = await db
+        .select()
+        .from(trades)
+        .where(and(eq(trades.id, tradeId), eq(trades.userId, userId)))
+        .limit(1)
+        .then(rows => rows[0]);
+      
+      if (!trade) {
+        return res.status(404).json({ error: "Trade não encontrado" });
+      }
+      
+      // Criar registro da imagem no banco
+      const imageData = {
+        tradeId,
+        diaryEntryId: null,
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        filePath: req.file.path,
+        fileSize: req.file.size,
+        mimeType: req.file.mimetype,
+        caption: caption || null
+      };
+      
+      const [image] = await db
+        .insert(diaryImages)
+        .values(imageData)
+        .returning();
+      
+      res.json({
+        message: "Imagem enviada com sucesso",
+        image: {
+          id: image.id,
+          fileName: image.fileName,
+          originalName: image.originalName,
+          caption: image.caption,
+          fileSize: image.fileSize,
+          mimeType: image.mimeType,
+          createdAt: image.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao fazer upload da imagem do trade:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+  
+  // Buscar imagens de um trade
+  app.get('/api/trades/:tradeId/images', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { tradeId } = req.params;
+      
+      // Verificar se o trade existe e pertence ao usuário
+      const trade = await db
+        .select()
+        .from(trades)
+        .where(and(eq(trades.id, tradeId), eq(trades.userId, userId)))
+        .limit(1)
+        .then(rows => rows[0]);
+      
+      if (!trade) {
+        return res.status(404).json({ error: "Trade não encontrado" });
+      }
+      
+      const images = await db
+        .select()
+        .from(diaryImages)
+        .where(eq(diaryImages.tradeId, tradeId));
+      
+      res.json({
+        images: images.map(img => ({
+          id: img.id,
+          fileName: img.fileName,
+          originalName: img.originalName,
+          caption: img.caption,
+          fileSize: img.fileSize,
+          mimeType: img.mimeType,
+          createdAt: img.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error('Erro ao buscar imagens do trade:', error);
+      res.status(500).json({ 
+        error: "Erro interno do servidor",
+        message: error instanceof Error ? error.message : "Erro desconhecido"
+      });
+    }
+  });
+  
+  // Deletar imagem de um trade
+  app.delete('/api/trades/:tradeId/images/:imageId', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { tradeId, imageId } = req.params;
+      
+      // Verificar se o trade existe e pertence ao usuário
+      const trade = await db
+        .select()
+        .from(trades)
+        .where(and(eq(trades.id, tradeId), eq(trades.userId, userId)))
+        .limit(1)
+        .then(rows => rows[0]);
+      
+      if (!trade) {
+        return res.status(404).json({ error: "Trade não encontrado" });
+      }
+      
+      // Buscar a imagem para obter o caminho do arquivo
+      const image = await db
+        .select()
+        .from(diaryImages)
+        .where(and(eq(diaryImages.id, imageId), eq(diaryImages.tradeId, tradeId)))
+        .limit(1)
+        .then(rows => rows[0]);
+      
+      if (!image) {
+        return res.status(404).json({ error: "Imagem não encontrada" });
+      }
+      
+      // Deletar o arquivo físico
+      try {
+        if (fs.existsSync(image.filePath)) {
+          fs.unlinkSync(image.filePath);
+        }
+      } catch (fileError) {
+        console.warn('Erro ao deletar arquivo físico:', fileError);
+      }
+      
+      // Deletar o registro do banco
+      await db
+        .delete(diaryImages)
+        .where(eq(diaryImages.id, imageId));
+      
+      res.json({ message: "Imagem deletada com sucesso" });
+    } catch (error) {
+      console.error('Erro ao deletar imagem do trade:', error);
       res.status(500).json({ 
         error: "Erro interno do servidor",
         message: error instanceof Error ? error.message : "Erro desconhecido"

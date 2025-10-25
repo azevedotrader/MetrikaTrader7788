@@ -140,10 +140,11 @@ export const diaryEntries = pgTable("diary_entries", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Tabela para imagens do diário
+// Tabela para imagens do diário e trades
 export const diaryImages = pgTable("diary_images", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  diaryEntryId: varchar("diary_entry_id").notNull().references(() => diaryEntries.id, { onDelete: "cascade" }),
+  diaryEntryId: varchar("diary_entry_id").references(() => diaryEntries.id, { onDelete: "cascade" }),
+  tradeId: varchar("trade_id").references(() => trades.id, { onDelete: "cascade" }),
   fileName: text("file_name").notNull(),
   originalName: text("original_name").notNull(),
   filePath: text("file_path").notNull(), // Caminho no object storage

@@ -35,6 +35,8 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   const [loadingImages, setLoadingImages] = useState(false);
   const [selectedImage, setSelectedImage] = useState<DiaryImage | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [tradeImages, setTradeImages] = useState<{ [tradeId: string]: DiaryImage[] }>({});
+  const [uploadingTradeId, setUploadingTradeId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -115,100 +117,57 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
     }
   };
 
-  // Carregar imagens da entrada do diário do dia
+  // Carregar imagens dos trades
   useEffect(() => {
-    if (dayDiaryEntry && isOpen) {
-      loadDayImages(dayDiaryEntry.id);
-    } else {
-      setDayImages([]);
+    if (!isOpen || dayTrades.length === 0 || !selectedDate) {
+      setTradeImages({});
+      return;
     }
-  }, [dayDiaryEntry, isOpen]);
 
-  const loadDayImages = async (diaryEntryId: string) => {
-    setLoadingImages(true);
-    try {
-      const userId = localStorage.getItem('user-id');
-      if (!userId) return;
+    const fetchTradeImages = async () => {
+      setLoadingImages(true);
+      try {
+        const userId = localStorage.getItem('user-id');
+        if (!userId) return;
 
-      const response = await fetch(`/api/diary/${diaryEntryId}/images`, {
-        headers: {
-          "user-id": userId,
-          "X-User-ID": userId
-        },
-        credentials: "include"
-      });
+        const imagesMap: { [tradeId: string]: DiaryImage[] } = {};
+        
+        await Promise.all(
+          dayTrades.map(async (trade) => {
+            try {
+              const response = await fetch(`/api/trades/${trade.id}/images`, {
+                headers: {
+                  "user-id": userId,
+                  "X-User-ID": userId
+                },
+                credentials: "include"
+              });
 
-      if (response.ok) {
-        const images = await response.json();
-        setDayImages(images);
+              if (response.ok) {
+                const data = await response.json();
+                if (data.images && data.images.length > 0) {
+                  imagesMap[trade.id] = data.images;
+                }
+              }
+            } catch (error) {
+              console.error(`Erro ao carregar imagens do trade ${trade.id}:`, error);
+            }
+          })
+        );
+
+        setTradeImages(imagesMap);
+      } catch (error) {
+        console.error('Erro ao carregar imagens dos trades:', error);
+      } finally {
+        setLoadingImages(false);
       }
-    } catch (error) {
-      console.error('Erro ao carregar imagens do dia:', error);
-    } finally {
-      setLoadingImages(false);
-    }
-  };
+    };
 
-  // Criar entrada básica do diário se não existir
-  const createBasicDiaryEntry = async (date: Date): Promise<string | null> => {
-    try {
-      const userId = localStorage.getItem('user-id');
-      if (!userId) throw new Error('Usuário não autenticado');
+    fetchTradeImages();
+  }, [isOpen, selectedDate, dayTrades.length]);
 
-      const formatDateForInput = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
-      const basicEntry = {
-        date: formatDateForInput(date),
-        title: `Entrada de ${format(date, "d 'de' MMMM", { locale: ptBR })}`,
-        content: "Entrada criada para adicionar imagens.",
-        emotion: undefined,
-        trades: 0,
-        pnl: "0",
-        winRate: "0",
-        lessons: "",
-        improvements: "",
-      };
-
-      const response = await fetch("/api/diary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "user-id": userId,
-          "X-User-ID": userId
-        },
-        body: JSON.stringify(basicEntry),
-        credentials: "include"
-      });
-
-      if (!response.ok) throw new Error("Erro ao criar entrada");
-
-      const newEntry = await response.json();
-      
-      // Atualizar cache das entradas do diário
-      queryClient.invalidateQueries({ queryKey: ["/api/diary"] });
-      
-      return newEntry.id;
-    } catch (error) {
-      console.error('Erro ao criar entrada básica:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar entrada do diário.",
-        variant: "destructive",
-      });
-      return null;
-    }
-  };
-
-  // Handle upload de imagem
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  // Handle upload de imagem para um trade específico
+  const handleTradeImageUpload = async (tradeId: string, file: File) => {
     // Validação do arquivo
     if (!file.type.startsWith('image/')) {
       toast({
@@ -228,29 +187,15 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
       return;
     }
 
-    setUploadingImage(true);
+    setUploadingTradeId(tradeId);
     try {
       const userId = localStorage.getItem('user-id');
       if (!userId) throw new Error('Usuário não autenticado');
 
-      // Verificar se já existe entrada para o dia ou criar uma nova
-      let targetDiaryEntryId = dayDiaryEntry?.id;
-      
-      if (!targetDiaryEntryId && selectedDate) {
-        targetDiaryEntryId = await createBasicDiaryEntry(selectedDate);
-        if (!targetDiaryEntryId) {
-          throw new Error('Não foi possível criar entrada do diário');
-        }
-      }
-
-      if (!targetDiaryEntryId) {
-        throw new Error('Não foi possível determinar entrada do diário');
-      }
-
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch(`/api/diary/${targetDiaryEntryId}/images`, {
+      const response = await fetch(`/api/trades/${tradeId}/images`, {
         method: 'POST',
         headers: {
           "user-id": userId,
@@ -263,38 +208,38 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
       if (!response.ok) throw new Error('Erro ao fazer upload');
 
       const result = await response.json();
-      setDayImages(prev => [...prev, result.image]);
+      
+      // Atualizar o estado local com a nova imagem
+      setTradeImages(prev => ({
+        ...prev,
+        [tradeId]: [result.image]
+      }));
       
       toast({
         title: "Sucesso!",
-        description: "Imagem adicionada com sucesso.",
+        description: "Imagem adicionada ao trade com sucesso.",
       });
     } catch (error) {
       console.error('Erro no upload:', error);
       toast({
-        title: "Erro no upload",
+        title: "Erro",
         description: "Não foi possível fazer upload da imagem.",
         variant: "destructive",
       });
     } finally {
-      setUploadingImage(false);
+      setUploadingTradeId(null);
     }
-
-    // Limpar o input
-    event.target.value = '';
   };
 
-  // Handle deletar imagem
-  const handleImageDelete = async (imageId: string) => {
-    if (!dayDiaryEntry?.id) return;
-
+  // Handle deletar imagem de um trade
+  const handleTradeImageDelete = async (tradeId: string, imageId: string) => {
     if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
 
     try {
       const userId = localStorage.getItem('user-id');
       if (!userId) throw new Error('Usuário não autenticado');
 
-      const response = await fetch(`/api/diary/${dayDiaryEntry.id}/images/${imageId}`, {
+      const response = await fetch(`/api/trades/${tradeId}/images/${imageId}`, {
         method: 'DELETE',
         headers: {
           "user-id": userId,
@@ -305,7 +250,11 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
 
       if (!response.ok) throw new Error('Erro ao deletar imagem');
 
-      setDayImages(prev => prev.filter(img => img.id !== imageId));
+      // Remover a imagem do estado local
+      setTradeImages(prev => ({
+        ...prev,
+        [tradeId]: []
+      }));
       
       toast({
         title: "Sucesso!",
@@ -473,47 +422,113 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                   {dayTrades.map((trade, index) => {
                     const resultado = parseFloat(trade.resultado) || 0;
                     const isProfit = resultado > 0;
+                    const tradeImage = tradeImages[trade.id]?.[0];
+                    const isUploadingThisTrade = uploadingTradeId === trade.id;
                     
                     return (
                       <div
                         key={trade.id || index}
                         className={cn(
-                          "flex items-center justify-between p-3 rounded-lg border",
+                          "rounded-lg border",
                           isProfit 
                             ? "bg-green-950/20 border-green-800/30" 
                             : "bg-red-950/20 border-red-800/30"
                         )}
                         data-testid={`trade-item-${index}`}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-zinc-400" />
-                            <span className="text-sm text-zinc-400">
-                              {trade.dataHora ? formatTime(trade.dataHora) : "Horário não disponível"}
-                            </span>
+                        {/* Info do trade */}
+                        <div className="flex items-center justify-between p-3">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-zinc-400" />
+                              <span className="text-sm text-zinc-400">
+                                {trade.dataHora ? formatTime(trade.dataHora) : "Horário não disponível"}
+                              </span>
+                            </div>
+                            
+                            <div className="flex flex-col">
+                              <span className="font-medium text-white">{trade.ativo}</span>
+                              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                                {trade.tipo && <span>{trade.tipo}</span>}
+                                {trade.quantidade && <span>• {trade.quantidade} unidades</span>}
+                                {trade.broker && <span>• {trade.broker}</span>}
+                              </div>
+                            </div>
                           </div>
-                          
-                          <div className="flex flex-col">
-                            <span className="font-medium text-white">{trade.ativo}</span>
-                            <div className="flex items-center gap-2 text-xs text-zinc-400">
-                              {trade.tipo && <span>{trade.tipo}</span>}
-                              {trade.quantidade && <span>• {trade.quantidade} unidades</span>}
-                              {trade.broker && <span>• {trade.broker}</span>}
+
+                          <div className="flex items-center gap-3">
+                            {/* Botão de upload de imagem */}
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    handleTradeImageUpload(trade.id, file);
+                                  }
+                                  e.target.value = '';
+                                }}
+                                disabled={isUploadingThisTrade || !!tradeImage}
+                                className="hidden"
+                                id={`trade-image-upload-${trade.id}`}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => document.getElementById(`trade-image-upload-${trade.id}`)?.click()}
+                                disabled={isUploadingThisTrade || !!tradeImage}
+                                className="flex items-center gap-1 h-7 px-2"
+                                data-testid={`button-upload-trade-image-${index}`}
+                              >
+                                <ImageIcon className="h-3 w-3" />
+                                {isUploadingThisTrade ? "..." : tradeImage ? "✓" : "+"}
+                              </Button>
+                            </div>
+
+                            {/* Resultado */}
+                            <div className="text-right">
+                              <div className={cn(
+                                "font-bold text-lg",
+                                isProfit ? "text-green-600" : "text-red-500"
+                              )}>
+                                {formatCurrency(resultado)}
+                              </div>
+                              <div className="text-xs text-zinc-400">
+                                Res Op
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <div className={cn(
-                            "font-bold text-lg",
-                            isProfit ? "text-green-600" : "text-red-500"
-                          )}>
-                            {formatCurrency(resultado)}
+                        {/* Imagem do trade */}
+                        {tradeImage && (
+                          <div className="px-3 pb-3">
+                            <div className="relative group w-32 h-32 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700">
+                              <img
+                                src={`/api/images/${tradeImage.id}`}
+                                alt={tradeImage.originalName}
+                                className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                                onClick={() => setSelectedImage(tradeImage)}
+                                onError={(e) => {
+                                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
+                                }}
+                                data-testid={`trade-image-${index}`}
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleTradeImageDelete(trade.id, tradeImage.id)}
+                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
+                                data-testid={`button-delete-trade-image-${index}`}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="text-xs text-zinc-400">
-                            Res Op
-                          </div>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
@@ -522,95 +537,6 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
             </Card>
           )}
 
-          {/* Seção de Imagens - Card independente */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <ImageIcon className="w-5 h-5" />
-                {dayImages.length > 0 ? `${dayImages.length === 1 ? 'Imagem' : 'Imagens'} (${dayImages.length})` : 'Imagens'}
-              </CardTitle>
-              
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  className="hidden"
-                  id="day-image-upload"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('day-image-upload')?.click()}
-                  disabled={uploadingImage}
-                  className="flex items-center gap-2"
-                  data-testid="button-upload-day-image"
-                >
-                  <Upload className="h-3 w-3" />
-                  {uploadingImage ? "Enviando..." : "Adicionar"}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {/* Grid de imagens */}
-              {dayImages.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {dayImages.slice(0, 8).map((image) => (
-                    <div key={image.id} className="relative group aspect-square rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700 hover:border-zinc-500 transition-all hover:shadow-lg">
-                      <img
-                        src={`/api/images/${image.id}`}
-                        alt={image.originalName}
-                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
-                        title={image.originalName}
-                        onClick={() => setSelectedImage(image)}
-                        onError={(e) => {
-                          e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIxIDEyLjc5QTkgOSAwIDEgMSAxMS4yMSAzQTcgNyAwIDAgMCAyMSAxMi43OVoiIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+';
-                        }}
-                        data-testid={`calendar-image-${image.id}`}
-                      />
-                      {/* Botão de deletar - visível no hover */}
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleImageDelete(image.id)}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
-                        data-testid={`button-delete-day-image-${image.id}`}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
-                  {dayImages.length > 8 && (
-                    <div className="aspect-square rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                      <span className="text-sm text-zinc-400">
-                        +{dayImages.length - 8}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Mensagem quando não há imagens */}
-              {dayImages.length === 0 && !loadingImages && (
-                <div className="text-center py-6 text-zinc-400 text-sm border border-zinc-700 rounded-lg border-dashed">
-                  <ImageIcon className="h-8 w-8 mx-auto mb-2 text-zinc-600" />
-                  <span className="block mb-2">Nenhuma imagem adicionada</span>
-                  <span className="text-xs text-zinc-500">Clique em "Adicionar" para enviar imagens</span>
-                </div>
-              )}
-
-              {/* Loading de imagens */}
-              {loadingImages && (
-                <div className="flex items-center justify-center gap-2 text-zinc-400 py-4">
-                  <ImageIcon className="h-4 w-4 animate-pulse" />
-                  <span className="text-sm">Carregando imagens...</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           {/* Mensagem quando não há dados */}
           {!dayDiaryEntry && dayTrades.length === 0 && (
