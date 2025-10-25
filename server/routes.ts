@@ -4384,8 +4384,8 @@ Vamos começar! 🚀`;
         ativo: /(?:no|do|em)\s+([A-Z][A-Z0-9]{2,9})/i,
         // Take ou Stop (vitória ou perda)
         resultado_tipo: /(take|stop|vit[oó]ria|ganho|win|gain|lucro|lucrei|ganhei|perda|loss|preju[íi]zo|perdi)/i,
-        // Valor arriscado (capital usado)
-        arriscado: /(?:arrisquei|arriscado|risco|entrada|capital|usei|investi|valor)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
+        // Valor arriscado (capital usado) - AGORA INCLUI comprei/vendi + valor
+        arriscado: /(?:arrisquei|arriscado|risco|entrada|capital|usei|investi|valor|comprei|vendi|compra|venda)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
         // Lucro (só para takes/vitórias) - procurar número ANTES da palavra ganho/lucro
         lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)|^([0-9.,]+)\s*(?:no|do)/i,
         // Prejuízo explícito (opcional para stops)
