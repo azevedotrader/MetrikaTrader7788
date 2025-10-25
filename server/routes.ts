@@ -4303,6 +4303,9 @@ Olá! Eu sou seu assistente para salvar trades automaticamente.
 • Entrei com 250 no WINQ25 e ganhei 180
 • Comprei 350 no PETR4 e perdi
 
+⚠️ *IMPORTANTE:*
+Envie todos os valores em *R$ (REAIS)*. Nosso sistema não converte automaticamente de dólar para real.
+
 ⚙️ *Comandos:*
 • Digite "ajuda" para ver instruções
 • Digite "exemplo" para ver mais exemplos
@@ -4333,7 +4336,10 @@ Vamos começar! 🚀`;
 💡 *Formato simples:*
 • [Ação] + [Valor] + no [Ativo] + e [Resultado]
 • Não precisa informar quantidade, preços ou outros detalhes
-• O sistema detecta automaticamente se é Crypto, Forex ou B3! 🤖`;
+• O sistema detecta automaticamente se é Crypto, Forex ou B3! 🤖
+
+⚠️ *IMPORTANTE:*
+Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dólar automaticamente.`;
   }
 
   function getHelpMessage() {
@@ -4355,6 +4361,9 @@ Vamos começar! 🚀`;
       `*B3 (Ações/Futuros):*\n` +
       `• Entrei com 250 no WINQ25 e ganhei 180\n` +
       `• Comprei 350 no PETR4 e perdi\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚠️ *IMPORTANTE:*\n` +
+      `Envie todos os valores em *R$ (REAIS)*. Nosso sistema não converte de dólar automaticamente.\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `💡 *DICA PRO:*\n` +
       `Use linguagem natural! O bot entende várias formas de escrever.\n\n` +

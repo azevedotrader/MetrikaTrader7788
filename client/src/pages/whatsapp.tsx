@@ -205,6 +205,15 @@ export default function WhatsAppPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <Alert className="bg-yellow-900/20 border-yellow-600/30">
+              <InfoIcon className="h-4 w-4 text-yellow-600" />
+              <AlertTitle className="text-yellow-600">⚠️ Importante: Valores em REAIS (R$)</AlertTitle>
+              <AlertDescription className="text-zinc-300">
+                Todos os valores devem ser informados em <strong>R$ (REAIS)</strong>. Nosso sistema não converte automaticamente de dólar para real. 
+                Se você opera em dólar, converta os valores antes de enviar a mensagem.
+              </AlertDescription>
+            </Alert>
+
             <Alert className="bg-blue-900/20 border-blue-600/30">
               <InfoIcon className="h-4 w-4 text-blue-600" />
               <AlertTitle className="text-blue-600">Dica Importante</AlertTitle>
