@@ -103,65 +103,6 @@ Lucro: R$ 320`,
           </div>
         </div>
 
-        {/* Configuração do Webhook */}
-        <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-600/30">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <InfoIcon className="w-5 h-5 text-purple-600" />
-              Configuração do Webhook (Para Desenvolvedores)
-            </CardTitle>
-            <CardDescription className="text-zinc-400">
-              Configure estes valores no Meta Developer Console (Facebook)
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert className="bg-purple-900/20 border-purple-600/30">
-              <InfoIcon className="h-4 w-4 text-purple-600" />
-              <AlertTitle className="text-purple-600">Webhook do WhatsApp</AlertTitle>
-              <AlertDescription className="text-zinc-300">
-                Para receber mensagens automaticamente via WhatsApp Business API
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-3">
-              <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700">
-                <h4 className="text-white font-semibold mb-2 flex items-center gap-2">
-                  URL do Webhook
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => copyToClipboard(`${window.location.origin}/webhook`)}
-                    className="text-zinc-400 hover:text-white h-6 px-2"
-                  >
-                    <FaCopy className="w-3 h-3" />
-                  </Button>
-                </h4>
-                <code className="text-green-400 text-sm break-all">
-                  {window.location.origin}/webhook
-                </code>
-              </div>
-
-              <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700">
-                <h4 className="text-white font-semibold mb-2">Token de Verificação</h4>
-                <p className="text-zinc-400 text-sm">
-                  Configurado nos secrets do servidor (WHATSAPP_VERIFY_TOKEN)
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4">
-              <h4 className="text-blue-400 font-semibold mb-2">Como Configurar:</h4>
-              <ol className="text-zinc-300 text-sm space-y-2 list-decimal list-inside">
-                <li>Acesse o <a href="https://developers.facebook.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Meta Developer Console</a></li>
-                <li>Vá em Produtos → WhatsApp → Configuração → Webhook</li>
-                <li>Cole a URL do webhook acima</li>
-                <li>Use o mesmo token de verificação configurado no servidor</li>
-                <li>Inscreva-se no campo "messages"</li>
-              </ol>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Configuração do Número */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
