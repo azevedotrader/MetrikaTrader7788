@@ -610,13 +610,27 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
     const minValue = Math.min(...allValues, 0); // Garantir que inclui zero
     const maxValue = Math.max(...allValues, 0); // Garantir que inclui zero
     
+    // Debug: mostrar valores calculados
+    console.log('📊 Capital Curve - Dados do gráfico:', {
+      chartDataLength: chartData.length,
+      firstPoint: chartData[0],
+      lastPoint: chartData[chartData.length - 1],
+      minValue,
+      maxValue,
+      allValues: allValues.slice(0, 5) // Primeiros 5 valores
+    });
+    
     // Adicionar margem de 10% para melhor visualização
     const margin = Math.max(Math.abs(minValue), Math.abs(maxValue)) * 0.1;
     
-    return [
+    const domain = [
       Math.floor(minValue - margin),
       Math.ceil(maxValue + margin)
     ];
+    
+    console.log('📊 Capital Curve - Domain calculado:', domain);
+    
+    return domain;
   }, [chartData]);
 
   const formatTooltipValue = (value: number, name: string) => {
@@ -671,9 +685,10 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                 <YAxis
                   stroke="#9CA3AF"
                   fontSize={10}
-                  width={60}
+                  width={70}
                   tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
                   domain={yAxisDomain}
+                  allowDataOverflow={false}
                 />
                 <RechartsTooltip
                   contentStyle={{
@@ -688,25 +703,57 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                 {/* Linha de referência em zero */}
                 <ReferenceLine 
                   y={0} 
-                  stroke="#64748B" 
+                  stroke="#FFF" 
                   strokeWidth={2} 
-                  strokeDasharray="3 3"
-                  label={{ value: 'R$ 0', fill: '#94A3B8', fontSize: 11, position: 'right' }}
+                  strokeDasharray="5 5"
+                  label={{ 
+                    value: 'ZERO', 
+                    fill: '#FFF', 
+                    fontSize: 12, 
+                    position: 'insideTopRight',
+                    fontWeight: 'bold'
+                  }}
                 />
                 <Line
                   type="monotone"
                   dataKey="cumulativeProfit"
                   stroke="#2FA87A"
                   strokeWidth={3}
-                  dot={{ fill: "#2FA87A", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#2FA87A", strokeWidth: 2 }}
+                  dot={(props) => {
+                    const { cx, cy, payload } = props;
+                    const isNegative = payload.cumulativeProfit < 0;
+                    return (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={4}
+                        fill={isNegative ? "#F06363" : "#2FA87A"}
+                        stroke={isNegative ? "#F06363" : "#2FA87A"}
+                        strokeWidth={2}
+                      />
+                    );
+                  }}
+                  activeDot={{ r: 6 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="profit"
-                  stroke="#2FA87A"
+                  stroke="#6B7280"
                   strokeWidth={2}
-                  dot={{ fill: "#2FA87A", strokeWidth: 2, r: 3 }}
+                  dot={(props) => {
+                    const { cx, cy, payload } = props;
+                    const isNegative = payload.profit < 0;
+                    return (
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={3}
+                        fill={isNegative ? "#F06363" : "#2FA87A"}
+                        stroke={isNegative ? "#F06363" : "#2FA87A"}
+                        strokeWidth={2}
+                      />
+                    );
+                  }}
                   strokeDasharray="5 5"
                 />
               </ComposedChart>
