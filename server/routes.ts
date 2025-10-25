@@ -4289,52 +4289,51 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
 
 Olá! Eu sou seu assistente para salvar trades automaticamente.
 
-📝 *Como enviar um trade:*
+📝 *Formato Simples - Basta enviar:*
 
-Envie uma mensagem com estas informações:
-• **Tipo**: COMPRA ou VENDA
-• **Ativo**: Ex: EURUSD, BTCUSDT, PETR4
-• **Quantidade**: Volume negociado
-• **Preço de entrada**: Preço que entrou
-• **Preço de saída**: Preço que saiu
+*Crypto:*
+• Comprei 400 no BTC e ganhei 150
+• Entrei com 300 no ETHUSDT e perdi
 
-📝 *Exemplos:*
+*Forex:*
+• Comprei 200 no EURUSD e ganhei 85
+• Vendi 500 no GBPJPY e perdi 120
 
-COMPRA EURUSD 0.1 lotes entrada 1.0850 saída 1.0890
-
-VENDA BTCUSDT 0.05 entrada 45000 saída 44500 profit 250
-
-COMPRA PETR4 100 ações por 28.50 vendeu 29.20
+*B3:*
+• Entrei com 250 no WINQ25 e ganhei 180
+• Comprei 350 no PETR4 e perdi
 
 ⚙️ *Comandos:*
-• Digite "ajuda" para ver esta mensagem
+• Digite "ajuda" para ver instruções
 • Digite "exemplo" para ver mais exemplos
+
+💡 Use linguagem natural! Não precisa informar quantidade, preços ou outros detalhes.
 
 Vamos começar! 🚀`;
   }
 
   function getExamplesMessage() {
-    return `📝 *Exemplos de Trades:*
+    return `📝 *Exemplos de Mensagens Simples:*
 
-**Forex:**
-• COMPRA EURUSD 0.1 entrada 1.0850 saída 1.0890
-• VENDA GBPUSD 0.2 lotes entrada 1.2650 saiu 1.2620
-• Comprei AUDJPY 0.15 por 98.50 fechei 99.20
+*💰 CRYPTO:*
+✅ Comprei 400 no BTC e ganhei 150
+❌ Entrei com 300 no ETHUSDT e perdi
+✅ Vendi 250 no BTCUSDT e ganhei 80
 
-**Crypto:**
-• COMPRA BTCUSDT 0.01 entrada 45000 saída 46500
-• Vendi ETHUSDT 0.1 por 3200 fechou 3150
-• BTC long 0.005 entrada 44000 tp 45000
+*💱 FOREX:*
+✅ Comprei 200 no EURUSD e ganhei 85
+❌ Vendi 500 no GBPJPY e perdi 120
+✅ Entrei com 350 no GBPUSD e ganhei 90
 
-**Ações (B3):**
-• COMPRA PETR4 100 ações 28.50 vendeu 29.20
-• Vendi VALE3 200 por 62.80 fechei 61.90
-• ITUB4 compra 500 entrada 25.30 saída 26.10
+*📈 B3 (Ações/Futuros):*
+✅ Entrei com 250 no WINQ25 e ganhei 180
+❌ Comprei 350 no PETR4 e perdi
+✅ Vendi 400 no VALE3 e ganhei 120
 
-💡 *Dicas:*
-• Use palavras como: compra/venda, entrada/saída, lotes/ações
-• Inclua sempre o ativo, quantidade e preços
-• Pode usar linguagem natural, eu entendo! 🤖`;
+💡 *Formato simples:*
+• [Ação] + [Valor] + no [Ativo] + e [Resultado]
+• Não precisa informar quantidade, preços ou outros detalhes
+• O sistema detecta automaticamente se é Crypto, Forex ou B3! 🤖`;
   }
 
   function getHelpMessage() {
@@ -4347,22 +4346,15 @@ Vamos começar! 🚀`;
       `3️⃣ Você acompanha tudo na plataforma!\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📝 *FORMATO SIMPLES:*\n\n` +
-      `✅/❌ Vitória/Perda + Ativo + Entrada + Lucro/Prejuízo\n\n` +
-      `*Exemplos:*\n` +
-      `• Vitória EURUSD entrada 100 lucro 50\n` +
-      `• Perda WIN entrada 300 prejuízo 45\n` +
-      `• Ganhei 80 no PETR4 entrada 200\n` +
-      `• Perdi 25 no BTCUSDT\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `🎯 *MENU RÁPIDO:*\n\n` +
-      `Digite ou clique:\n` +
-      `1️⃣ Salvar Trade - Ver instruções\n` +
-      `2️⃣ Estatísticas - Ver seu desempenho\n` +
-      `3️⃣ Ajuda - Esta mensagem\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚙️ *IMPORTANTE:*\n` +
-      `Configure seu WhatsApp no perfil da plataforma Métrika primeiro!\n\n` +
-      `📊 Acesse: metrika.com.br\n\n` +
+      `*Crypto:*\n` +
+      `• Comprei 400 no BTC e ganhei 150\n` +
+      `• Entrei com 300 no ETHUSDT e perdi\n\n` +
+      `*Forex:*\n` +
+      `• Comprei 200 no EURUSD e ganhei 85\n` +
+      `• Vendi 500 no GBPJPY e perdi 120\n\n` +
+      `*B3 (Ações/Futuros):*\n` +
+      `• Entrei com 250 no WINQ25 e ganhei 180\n` +
+      `• Comprei 350 no PETR4 e perdi\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `💡 *DICA PRO:*\n` +
       `Use linguagem natural! O bot entende várias formas de escrever.\n\n` +

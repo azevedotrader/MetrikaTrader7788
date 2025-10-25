@@ -63,29 +63,28 @@ export default function WhatsAppPage() {
 
   const exampleMessages = [
     {
-      title: "Trade de Compra",
-      message: `Trade BTC
-Compra
-Entrada: 45000
-Saída: 46500
-Quantidade: 0.5
-Resultado: +750`,
+      title: "Crypto - Vitória",
+      message: `Comprei 400 no BTC e ganhei 150`,
     },
     {
-      title: "Trade de Venda",
-      message: `Trade EUR/USD
-Venda
-Entrada: 1.0850
-Stop: 1.0900
-Alvo: 1.0750
-Capital: 1000`,
+      title: "Crypto - Perda",
+      message: `Entrei com 300 no ETHUSDT e perdi`,
     },
     {
-      title: "Trade Simples",
-      message: `PETR4
-Compra 100 ações
-R$ 28.50
-Lucro: R$ 320`,
+      title: "Forex - Vitória",
+      message: `Comprei 200 no EURUSD e ganhei 85`,
+    },
+    {
+      title: "Forex - Perda",
+      message: `Vendi 500 no GBPJPY e perdi 120`,
+    },
+    {
+      title: "B3 - Vitória",
+      message: `Entrei com 250 no WINQ25 e ganhei 180`,
+    },
+    {
+      title: "B3 - Perda",
+      message: `Comprei 350 no PETR4 e perdi`,
     },
   ];
 
