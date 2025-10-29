@@ -102,6 +102,74 @@ export default function WhatsAppPage() {
           </div>
         </div>
 
+        {/* Como Começar - Número do Bot */}
+        <Card className="bg-gradient-to-r from-green-900/20 to-green-800/20 border-green-600/30">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <FaWhatsapp className="w-6 h-6 text-green-500" />
+              Como Começar a Registrar Trades
+            </CardTitle>
+            <CardDescription className="text-zinc-300">
+              Para registrar seus trades via WhatsApp, envie uma mensagem para nosso bot oficial
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-zinc-900/50 p-4 rounded-lg border border-green-600/20">
+              <p className="text-zinc-300 mb-2">📱 Número do Bot Métrika:</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="bg-zinc-800 px-4 py-2 rounded-md border border-zinc-700">
+                  <p className="text-2xl font-bold text-green-500">+55 22 97405-1621</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard("+55 22 97405-1621")}
+                  className="border-zinc-700 hover:bg-zinc-800"
+                  data-testid="button-copy-bot-number"
+                >
+                  <FaCopy className="w-4 h-4 mr-2" />
+                  Copiar Número
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-zinc-300">
+                <strong className="text-white">Como usar:</strong>
+              </p>
+              <ol className="list-decimal list-inside space-y-2 text-zinc-300">
+                <li>Clique no botão abaixo para abrir uma conversa direta com nosso bot</li>
+                <li>Configure seu número do WhatsApp na seção abaixo (apenas uma vez)</li>
+                <li>Envie seus trades em linguagem natural - nossa IA entende!</li>
+                <li>Receba confirmação automática de que o trade foi salvo</li>
+              </ol>
+            </div>
+
+            <a 
+              href="https://wa.me/5522974051621?text=Olá! Quero começar a registrar meus trades."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full"
+            >
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700 text-white text-lg py-6"
+                data-testid="button-start-whatsapp-chat"
+              >
+                <FaWhatsapp className="w-6 h-6 mr-2" />
+                Iniciar Conversa no WhatsApp
+              </Button>
+            </a>
+
+            <Alert className="bg-blue-900/20 border-blue-600/30">
+              <InfoIcon className="h-4 w-4 text-blue-500" />
+              <AlertTitle className="text-blue-500">💡 Dica</AlertTitle>
+              <AlertDescription className="text-zinc-300">
+                Salve nosso número <strong>+55 22 97405-1621</strong> na sua agenda como "Métrika Bot" para facilitar o envio de trades!
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+
         {/* Configuração do Número */}
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
