@@ -3983,26 +3983,32 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         hasSignature: !!signature, 
         hasAppSecret: !!APP_SECRET,
         isDevelopment,
-        bodyObject: req.body?.object,
-        fullBody: JSON.stringify(req.body, null, 2)
+        hasRawBody: !!req.rawBody,
+        bodyObject: req.body?.object
       });
       
       // Em produção, exigir verificação de assinatura
       if (!isDevelopment) {
         if (!APP_SECRET) {
-          console.warn('⚠️ WHATSAPP_APP_SECRET não configurado - pulando verificação (INSEGURO)');
-        } else {
-          const payload = JSON.stringify(req.body);
-          const isValid = verifyMetaSignature(payload, signature, APP_SECRET);
-          
-          if (!isValid) {
-            console.warn('⚠️ Assinatura inválida detectada, mas permitindo acesso (MODO TEMPORÁRIO)');
-            console.log('🔍 Signature recebida:', signature);
-            console.log('🔍 App Secret (primeiros 10 chars):', APP_SECRET?.substring(0, 10) + '...');
-          } else {
-            console.log('✅ Assinatura Meta verificada com sucesso');
-          }
+          console.error('❌ WHATSAPP_APP_SECRET não configurado - rejeitando requisição');
+          return res.sendStatus(500);
         }
+        
+        if (!req.rawBody) {
+          console.error('❌ Raw body não disponível para verificação de assinatura');
+          return res.sendStatus(500);
+        }
+        
+        const isValid = verifyMetaSignature(req.rawBody, signature, APP_SECRET);
+        
+        if (!isValid) {
+          console.error('❌ Assinatura inválida do Meta - acesso negado');
+          console.log('🔍 Signature recebida:', signature);
+          console.log('🔍 App Secret (primeiros 10 chars):', APP_SECRET?.substring(0, 10) + '...');
+          return res.sendStatus(403);
+        }
+        
+        console.log('✅ Assinatura Meta verificada com sucesso');
       } else {
         console.log('⚠️ Modo desenvolvimento - verificação de assinatura opcional');
       }

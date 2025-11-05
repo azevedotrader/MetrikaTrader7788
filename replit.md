@@ -10,6 +10,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### WhatsApp Bot - Correção Produção - Novembro 2025
+- **Problema Resolvido**: ✅ Bot do WhatsApp agora funciona corretamente em produção
+- **Verificação de Assinatura**: Implementado middleware que captura corpo raw da requisição
+- **Segurança**: Verificação HMAC-SHA256 agora funciona corretamente usando raw body
+- **Middleware**: Adicionado `express.json({ verify })` específico para rota `/webhook`
+- **Produção**: Sistema agora valida assinatura do Meta/Facebook corretamente
+- **Página WhatsApp**: ✅ Seção destacada com número +55 22 97405-1621 e botão direto wa.me
+- **UX Melhorada**: Botão verde grande "Iniciar Conversa no WhatsApp" com link direto
+
 ### Upload de Imagens por Trade - Janeiro 2025
 - **Funcionalidade**: ✅ Sistema permite upload de 1 imagem por trade (ao invés de 1 imagem por dia)
 - **Schema Atualizado**: Campo `tradeId` adicionado à tabela `diary_images` (opcional, permite vincular imagem ao trade)
@@ -18,6 +27,7 @@ Preferred communication style: Simple, everyday language.
 - **Limite**: Cada trade pode ter apenas 1 imagem (limite intencional para simplicidade)
 - **Backend**: Rotas criadas: POST/GET/DELETE `/api/trades/:tradeId/images`
 - **Migração**: ✅ Banco de dados atualizado com sucesso
+- **Bug Fix**: ✅ Corrigido problema de imagens "stale" ao trocar entre dias com mesmo número de trades
 
 ### Conversão Automática USD→BRL em CSV Imports - Janeiro 2025
 - **Conversão Automática**: ✅ Sistema converte automaticamente valores de USD para BRL em imports de CSV

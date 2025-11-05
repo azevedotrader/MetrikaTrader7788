@@ -4,6 +4,15 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
+
+// Middleware para capturar o corpo raw para verificação de assinatura do WhatsApp
+app.use('/webhook', express.json({
+  verify: (req: any, res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
+
+// Middleware padrão de JSON para outras rotas
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
