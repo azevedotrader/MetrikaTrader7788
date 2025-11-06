@@ -2511,7 +2511,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // AI Chat endpoint
-  app.post('/api/ai/chat', async (req, res) => {
+  app.post('/api/ai/chat', requireAuth, async (req, res) => {
     try {
       const { message, language = 'pt' } = req.body;
       
@@ -2520,7 +2520,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
 
       // Get user context for personalized responses
-      const userId = req.headers['user-id'] as string;
+      const userId = req.userId;
       let userContext = undefined;
       
       if (userId) {
