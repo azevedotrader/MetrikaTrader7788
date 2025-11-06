@@ -185,6 +185,14 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Emoções
     "emotion.neutral": "neutro",
+    "emotions.confident": "Confiante",
+    "emotions.anxious": "Ansioso",
+    "emotions.fear": "Medo",
+    "emotions.greedy": "Ganancioso",
+    "emotions.calm": "Calmo",
+    "emotions.excited": "Empolgado",
+    "emotions.frustrated": "Frustrado",
+    "emotions.neutral": "Neutro",
 
     // Consolidação
     "consolidated.summary": "Resumo Consolidado",
@@ -1109,6 +1117,14 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Emotions
     "emotion.neutral": "neutral",
+    "emotions.confident": "Confident",
+    "emotions.anxious": "Anxious",
+    "emotions.fear": "Fear",
+    "emotions.greedy": "Greedy",
+    "emotions.calm": "Calm",
+    "emotions.excited": "Excited",
+    "emotions.frustrated": "Frustrated",
+    "emotions.neutral": "Neutral",
 
     // Consolidation
     "consolidated.summary": "Consolidated Summary",
@@ -2065,6 +2081,14 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Emociones
     "emotion.neutral": "neutro",
+    "emotions.confident": "Confiado",
+    "emotions.anxious": "Ansioso",
+    "emotions.fear": "Miedo",
+    "emotions.greedy": "Codicioso",
+    "emotions.calm": "Tranquilo",
+    "emotions.excited": "Emocionado",
+    "emotions.frustrated": "Frustrado",
+    "emotions.neutral": "Neutral",
 
     // Consolidación
     "consolidated.summary": "Resumen Consolidado",
