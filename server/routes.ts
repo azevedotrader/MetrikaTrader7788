@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users, whatsappMessages, InsertWhatsappMessage, trades, diaryImages } from "@shared/schema";
+import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users, whatsappMessages, InsertWhatsappMessage, trades, diaryImages, insertBankrollManagementSchema, BankrollSummaryDTO } from "@shared/schema";
 import { storage } from "./storage";
 import { AuthenticatedRequest } from "./types";
 import multer from "multer";
@@ -4896,6 +4896,194 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
     } catch (error) {
       console.error('Error fetching WhatsApp messages:', error);
       res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
+
+  // ===== ENDPOINTS DE GESTÃO DE BANCA (BANKROLL) =====
+
+  // Schema de validação para criar gestão (com coercion para converter strings em números)
+  const createBankrollSchema = z.object({
+    userId: z.string().min(1),
+    profile: z.enum(['conservador', 'moderado', 'agressivo']).optional(),
+    timeHorizon: z.enum(['curto', 'longo']),
+    bankrollValue: z.coerce.number().positive()
+  });
+
+  // Schema de validação para ajustar gestão (com coercion)
+  const adjustBankrollSchema = z.object({
+    userId: z.string().min(1),
+    consecutiveWins: z.coerce.number().int().nonnegative().optional(),
+    consecutiveLosses: z.coerce.number().int().nonnegative().optional()
+  }).refine(
+    data => data.consecutiveWins !== undefined || data.consecutiveLosses !== undefined,
+    { message: 'Pelo menos consecutiveWins ou consecutiveLosses deve ser fornecido' }
+  );
+
+  // Criar gestão de banca via WhatsApp
+  app.post('/api/bankroll/whatsapp/create', async (req: any, res: any) => {
+    try {
+      // Validar payload com Zod
+      const validationResult = createBankrollSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos', 
+          details: validationResult.error.issues 
+        });
+      }
+
+      const { userId, profile, timeHorizon, bankrollValue } = validationResult.data;
+
+      // Importar helpers
+      const { computeRiskMatrix, buildProjection, calculateTargetBalance, summarizeForWhatsApp } = await import('./bankroll-helpers');
+
+      // Usar perfil moderado como padrão se não fornecido
+      const riskProfile = profile ?? 'moderado';
+
+      // Calcular parâmetros baseado no perfil e prazo
+      const riskConfig = computeRiskMatrix(
+        timeHorizon,
+        riskProfile
+      );
+
+      // Gerar projeção de 90 dias
+      const projectedGrowth = buildProjection(
+        bankrollValue,
+        riskConfig.dailyTarget,
+        90 // Sempre 90 dias de projeção para dashboard
+      );
+
+      // Calcular meta final baseada no horizonte específico
+      const targetBalance = calculateTargetBalance(
+        bankrollValue,
+        riskConfig.dailyTarget,
+        riskConfig.horizonDays
+      );
+
+      // Criar registro no banco
+      const bankrollData = {
+        userId,
+        profile: riskConfig.profile,
+        timeHorizon: timeHorizon || 'longo',
+        bankrollValue: bankrollValue.toFixed(2),
+        riskPerTrade: riskConfig.riskPerTrade.toFixed(4),
+        dailyProfitTarget: riskConfig.dailyTarget.toFixed(4),
+        horizonDays: riskConfig.horizonDays,
+        targetBalance: targetBalance.toFixed(2),
+        projectedGrowth,
+        consecutiveWins: 0,
+        consecutiveLosses: 0
+      };
+
+      const created = await storage.createBankrollManagement(bankrollData);
+
+      // Gerar resumo para WhatsApp
+      const summary: BankrollSummaryDTO = {
+        profile: created.profile,
+        timeHorizon: created.timeHorizon,
+        bankrollValue: parseFloat(created.bankrollValue),
+        riskPerTrade: parseFloat(created.riskPerTrade),
+        dailyProfitTarget: parseFloat(created.dailyProfitTarget),
+        horizonDays: created.horizonDays,
+        targetBalance: parseFloat(created.targetBalance),
+        projectedGrowth: created.projectedGrowth
+      };
+
+      const whatsappMessage = summarizeForWhatsApp(summary);
+
+      res.json({
+        success: true,
+        bankroll: created,
+        whatsappMessage
+      });
+    } catch (error) {
+      console.error('Error creating bankroll:', error);
+      res.status(500).json({ error: 'Erro ao criar gestão de banca' });
+    }
+  });
+
+  // Obter resumo da gestão de banca para WhatsApp
+  app.get('/api/bankroll/whatsapp/summary/:userId', async (req: any, res: any) => {
+    try {
+      const { userId } = req.params;
+
+      const bankroll = await storage.getBankrollManagement(userId);
+      
+      if (!bankroll) {
+        return res.status(404).json({ error: 'Gestão de banca não encontrada' });
+      }
+
+      // Importar helper
+      const { summarizeForWhatsApp } = await import('./bankroll-helpers');
+
+      // Montar DTO
+      const summary: BankrollSummaryDTO = {
+        profile: bankroll.profile,
+        timeHorizon: bankroll.timeHorizon,
+        bankrollValue: parseFloat(bankroll.bankrollValue),
+        riskPerTrade: parseFloat(bankroll.riskPerTrade),
+        dailyProfitTarget: parseFloat(bankroll.dailyProfitTarget),
+        horizonDays: bankroll.horizonDays,
+        targetBalance: parseFloat(bankroll.targetBalance),
+        projectedGrowth: bankroll.projectedGrowth
+      };
+
+      const whatsappMessage = summarizeForWhatsApp(summary);
+
+      res.json({
+        success: true,
+        bankroll,
+        whatsappMessage
+      });
+    } catch (error) {
+      console.error('Error getting bankroll summary:', error);
+      res.status(500).json({ error: 'Erro ao obter resumo da banca' });
+    }
+  });
+
+  // Ajustar gestão de banca (após trade)
+  app.post('/api/bankroll/whatsapp/adjust', async (req: any, res: any) => {
+    try {
+      // Validar payload com Zod
+      const validationResult = adjustBankrollSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Dados inválidos', 
+          details: validationResult.error.issues 
+        });
+      }
+
+      const { userId, consecutiveWins, consecutiveLosses } = validationResult.data;
+
+      const adjusted = await storage.adjustBankrollManagement(userId, {
+        consecutiveWins,
+        consecutiveLosses
+      });
+
+      // Importar helper
+      const { formatAdjustmentMessage } = await import('./bankroll-helpers');
+
+      // Se houve ajuste automático, gerar mensagem
+      let whatsappMessage = null;
+      if (consecutiveLosses && consecutiveLosses >= 3) {
+        const riskPercent = parseFloat(adjusted.riskPerTrade) * 100;
+        const targetPercent = parseFloat(adjusted.dailyProfitTarget) * 100;
+        whatsappMessage = formatAdjustmentMessage(riskPercent, targetPercent, 'consecutive_losses');
+      } else if (consecutiveWins && consecutiveWins >= 3) {
+        const riskPercent = parseFloat(adjusted.riskPerTrade) * 100;
+        const targetPercent = parseFloat(adjusted.dailyProfitTarget) * 100;
+        whatsappMessage = formatAdjustmentMessage(riskPercent, targetPercent, 'consecutive_wins');
+      }
+
+      res.json({
+        success: true,
+        bankroll: adjusted,
+        whatsappMessage
+      });
+    } catch (error) {
+      console.error('Error adjusting bankroll:', error);
+      res.status(500).json({ error: 'Erro ao ajustar gestão de banca' });
     }
   });
 
