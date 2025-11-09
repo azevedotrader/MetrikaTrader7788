@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, decimal, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, decimal, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -466,3 +466,64 @@ export const whatsappMessagesRelations = relations(whatsappMessages, ({ one }) =
 
 export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
 export type InsertWhatsappMessage = typeof whatsappMessages.$inferInsert;
+
+// Tabela para gestão inteligente de banca (bankroll management)
+export const bankrollManagements = pgTable("bankroll_managements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(), // Um usuário tem apenas uma gestão ativa
+  bankrollValue: decimal("bankroll_value", { precision: 12, scale: 2 }).notNull(), // Valor inicial da banca
+  profile: text("profile").notNull().$type<"conservador" | "moderado" | "agressivo">(), // Perfil de risco
+  timeHorizon: text("time_horizon").notNull().$type<"curto" | "longo">(), // Horizonte temporal
+  horizonDays: integer("horizon_days").notNull(), // Número de dias do horizonte (15, 30, 90, 180)
+  riskPerTrade: decimal("risk_per_trade", { precision: 5, scale: 4 }).notNull(), // % de risco por trade (0.0025, 0.006, 0.03)
+  dailyProfitTarget: decimal("daily_profit_target", { precision: 5, scale: 4 }).notNull(), // Meta diária de lucro %
+  projectedGrowth: jsonb("projected_growth").$type<Array<{ day: number; balance: number }>>().notNull(), // Projeções de crescimento
+  targetBalance: decimal("target_balance", { precision: 12, scale: 2 }).notNull(), // Saldo alvo final
+  autoAdjust: boolean("auto_adjust").default(true), // Se está com ajuste automático ativo
+  consecutiveWins: integer("consecutive_wins").default(0), // Contador de vitórias consecutivas
+  consecutiveLosses: integer("consecutive_losses").default(0), // Contador de perdas consecutivas
+  lastAdjustmentAt: timestamp("last_adjustment_at"), // Último ajuste automático
+  lastResetAt: timestamp("last_reset_at").defaultNow(), // Último reset dos contadores
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const bankrollManagementsRelations = relations(bankrollManagements, ({ one }) => ({
+  user: one(users, {
+    fields: [bankrollManagements.userId],
+    references: [users.id],
+  }),
+}));
+
+export type BankrollManagement = typeof bankrollManagements.$inferSelect;
+export type InsertBankrollManagement = typeof bankrollManagements.$inferInsert;
+
+export const insertBankrollManagementSchema = createInsertSchema(bankrollManagements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  consecutiveWins: true,
+  consecutiveLosses: true,
+  lastAdjustmentAt: true,
+  lastResetAt: true,
+});
+
+// Schema para criação de gestão via WhatsApp (recebe números, converte para strings decimais)
+export const insertBankrollManagementSchemaFromWhatsApp = z.object({
+  userId: z.string(),
+  bankrollValue: z.string().or(z.number().positive().transform(String)), // Aceita número mas converte para string
+  timeHorizon: z.enum(["curto", "longo"]),
+  profile: z.enum(["conservador", "moderado", "agressivo"]).optional(), // Opcional - pode ser calculado automaticamente
+});
+
+// DTO para summary WhatsApp (retorna números para facilitar formatação)
+export type BankrollSummaryDTO = {
+  profile: "conservador" | "moderado" | "agressivo";
+  timeHorizon: "curto" | "longo";
+  bankrollValue: number;
+  riskPerTrade: number;
+  dailyProfitTarget: number;
+  targetBalance: number;
+  horizonDays: number;
+  projectedGrowth: Array<{ day: number; balance: number }>;
+};

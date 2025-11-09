@@ -1,0 +1,127 @@
+Implementar Gestão Inteligente de Banca com Integração WhatsApp
+
+Objetivo:
+Evoluir o módulo atual de “Gestão de Risco” para um sistema de Gestão Inteligente de Banca, onde o usuário pode criar, visualizar e ajustar sua gestão diretamente pelo WhatsApp, com cálculo automático e projeções baseadas em prazo (curto/longo) e perfil.
+
+Requisitos Funcionais:
+
+Criar endpoint POST /bankroll/whatsapp/create que receba:
+
+{
+  "user_id": "12345",
+  "bankroll": 500,
+  "time_horizon": "curto" | "longo",
+  "profile": "conservador" | "moderado" | "agressivo"
+}
+
+
+e retorne:
+
+Valor em risco
+
+Lucro esperado/trade
+
+Crescimento diário estimado
+
+Projeção de crescimento (array de 90 dias)
+
+Meta final e tempo estimado para atingi-la
+
+Calcular automaticamente os parâmetros de gestão conforme tabela:
+
+Prazo	Perfil	Risco por Trade	Meta Diária	Horizonte (dias)
+curto	agressivo	0.03	0.06	15
+curto	moderado	0.02	0.04	30
+longo	equilibrado	0.01	0.02	90
+longo	conservador	0.005	0.01	180
+
+Criar endpoint GET /bankroll/whatsapp/summary/:user_id para retornar a gestão ativa, com dados formatados para mensagem WhatsApp:
+
+💼 Sua Gestão Personalizada:
+- Perfil: Moderado (Curto Prazo)
+- Saldo: R$500
+- Risco por Trade: 0,6%
+- Lucro Esperado/Trade: R$9
+- Crescimento Diário Estimado: +2,88%
+- Meta Final (30 dias): R$650
+📊 Gráfico de projeção disponível no painel.
+
+
+Integração com WhatsApp (via Twilio ou API interna):
+
+Mensagem inicial: “Criar Gestão”
+
+Bot pergunta:
+
+Prazo: curto ou longo
+
+Valor da banca
+
+Perfil (ou define automático)
+
+Sistema gera gestão e envia resumo formatado.
+
+Gráfico de Projeção (imagem)
+
+Reutilizar o cálculo atual de simulação (90 dias)
+
+Gerar gráfico com base na banca inicial e crescimento diário estimado
+
+Salvar como imagem e enviar via WhatsApp.
+
+Ajuste Automático Diário (daily_adjust)
+
+Reduz risco em 20% se o usuário tiver 3 dias consecutivos de perda
+
+Aumenta meta diária em até 10% se lucro > meta por 3 dias seguidos
+
+Atualiza stake e envia mensagem automática via WhatsApp:
+
+⚙️ Gestão ajustada automaticamente:
+Novo risco por trade: 0,8%
+Nova meta diária: +3,2%
+
+
+Armazenamento
+
+Tabela: bankroll_managements
+
+{
+  "user_id": "12345",
+  "bankroll_value": 500,
+  "profile": "moderado",
+  "time_horizon": "curto",
+  "risk_per_trade": 0.006,
+  "daily_profit_target": 0.0288,
+  "projected_growth": [...],
+  "auto_adjust": true,
+  "created_at": "2025-11-09T00:00:00Z"
+}
+
+
+Painel (frontend)
+
+Adicionar botão “Integrar com WhatsApp” dentro do módulo de Gestão de Risco.
+
+Quando o usuário clicar, ele recebe uma mensagem no WhatsApp iniciando o fluxo.
+
+Entrega esperada:
+
+Código backend (Python/FastAPI) com endpoints /bankroll/whatsapp/create, /summary e daily_adjust.
+
+Integração com API do WhatsApp (Twilio, Z-API ou Meta Cloud API).
+
+Envio automático de mensagens de resumo e atualização.
+
+Reutilização do módulo de gráfico atual para gerar imagem de projeção.
+
+Documentação do fluxo no arquivo bankroll_whatsapp_flow.json.
+
+Observação:
+O sistema deve priorizar simplicidade — o usuário só precisa informar:
+
+Valor da banca
+
+Prazo (curto/longo)
+O resto é automático.
+O objetivo é tornar o processo rápido, inteligente e visual.
