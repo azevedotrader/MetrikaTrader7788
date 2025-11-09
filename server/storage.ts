@@ -914,11 +914,19 @@ export class DatabaseStorage implements IStorage {
 
     // Update if adjustment was made
     if (shouldAdjust || adjustmentData.consecutiveWins !== undefined || adjustmentData.consecutiveLosses !== undefined) {
+      // Recalcular projeções e meta final com novos valores
+      const { buildProjection, calculateTargetBalance } = await import('./bankroll-helpers');
+      const bankrollValue = parseFloat(current.bankrollValue);
+      const projectedGrowth = buildProjection(bankrollValue, dailyProfitTarget, current.horizonDays);
+      const targetBalance = calculateTargetBalance(bankrollValue, dailyProfitTarget, current.horizonDays);
+
       const [updated] = await db
         .update(bankrollManagements)
         .set({
           riskPerTrade: riskPerTrade.toFixed(4),
           dailyProfitTarget: dailyProfitTarget.toFixed(4),
+          projectedGrowth,
+          targetBalance: targetBalance.toFixed(2),
           consecutiveWins,
           consecutiveLosses,
           lastAdjustmentAt: shouldAdjust ? new Date() : current.lastAdjustmentAt,
