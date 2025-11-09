@@ -33,6 +33,10 @@ import {
   type InsertSupportConversation,
   type SupportMessage,
   type InsertSupportMessage,
+  type BankrollManagement,
+  type InsertBankrollManagement,
+  type BankrollSummaryDTO,
+  bankrollManagements,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, gte, lte, isNull } from "drizzle-orm";
@@ -110,6 +114,13 @@ export interface IStorage {
   
   // Login tracking
   updateLastLogin(userId: string): Promise<User>;
+  
+  // Bankroll management operations
+  getBankrollManagement(userId: string): Promise<BankrollManagement | undefined>;
+  createBankrollManagement(data: InsertBankrollManagement): Promise<BankrollManagement>;
+  updateBankrollManagement(userId: string, updates: Partial<InsertBankrollManagement>): Promise<BankrollManagement>;
+  deleteBankrollManagement(userId: string): Promise<void>;
+  adjustBankrollManagement(userId: string, adjustmentData: { consecutiveWins?: number; consecutiveLosses?: number }): Promise<BankrollManagement>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -818,6 +829,112 @@ export class DatabaseStorage implements IStorage {
     }
     
     return updatedUser;
+  }
+
+  // Bankroll management operations
+  async getBankrollManagement(userId: string): Promise<BankrollManagement | undefined> {
+    const [bankroll] = await db
+      .select()
+      .from(bankrollManagements)
+      .where(eq(bankrollManagements.userId, userId));
+    return bankroll || undefined;
+  }
+
+  async createBankrollManagement(data: InsertBankrollManagement): Promise<BankrollManagement> {
+    // Delete existing bankroll if any (unique constraint)
+    await db
+      .delete(bankrollManagements)
+      .where(eq(bankrollManagements.userId, data.userId));
+
+    const [newBankroll] = await db
+      .insert(bankrollManagements)
+      .values({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return newBankroll;
+  }
+
+  async updateBankrollManagement(userId: string, updates: Partial<InsertBankrollManagement>): Promise<BankrollManagement> {
+    const [updated] = await db
+      .update(bankrollManagements)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(bankrollManagements.userId, userId))
+      .returning();
+    
+    if (!updated) {
+      throw new Error('Bankroll management não encontrado');
+    }
+    
+    return updated;
+  }
+
+  async deleteBankrollManagement(userId: string): Promise<void> {
+    await db
+      .delete(bankrollManagements)
+      .where(eq(bankrollManagements.userId, userId));
+  }
+
+  async adjustBankrollManagement(
+    userId: string, 
+    adjustmentData: { consecutiveWins?: number; consecutiveLosses?: number }
+  ): Promise<BankrollManagement> {
+    const current = await this.getBankrollManagement(userId);
+    if (!current) {
+      throw new Error('Bankroll management não encontrado');
+    }
+
+    // Calculate new consecutive values (default to 0 if null)
+    const consecutiveWins = adjustmentData.consecutiveWins ?? current.consecutiveWins ?? 0;
+    const consecutiveLosses = adjustmentData.consecutiveLosses ?? current.consecutiveLosses ?? 0;
+
+    // Parse decimal values to numbers for calculations
+    let riskPerTrade = parseFloat(current.riskPerTrade);
+    let dailyProfitTarget = parseFloat(current.dailyProfitTarget);
+    let shouldAdjust = false;
+
+    // Apply adjustment rules
+    if (consecutiveLosses >= 3) {
+      // Reduce risk by 20% after 3 consecutive losses
+      riskPerTrade = riskPerTrade * 0.8;
+      shouldAdjust = true;
+      console.log(`🔻 Reduzindo risco em 20% após ${consecutiveLosses} perdas consecutivas`);
+    } else if (consecutiveWins >= 3) {
+      // Increase target by 10% after 3 consecutive wins
+      dailyProfitTarget = dailyProfitTarget * 1.1;
+      shouldAdjust = true;
+      console.log(`📈 Aumentando meta diária em 10% após ${consecutiveWins} ganhos consecutivos`);
+    }
+
+    // Update if adjustment was made
+    if (shouldAdjust || adjustmentData.consecutiveWins !== undefined || adjustmentData.consecutiveLosses !== undefined) {
+      const [updated] = await db
+        .update(bankrollManagements)
+        .set({
+          riskPerTrade: riskPerTrade.toFixed(4),
+          dailyProfitTarget: dailyProfitTarget.toFixed(4),
+          consecutiveWins,
+          consecutiveLosses,
+          lastAdjustmentAt: shouldAdjust ? new Date() : current.lastAdjustmentAt,
+          updatedAt: new Date()
+        })
+        .where(eq(bankrollManagements.userId, userId))
+        .returning();
+
+      if (!updated) {
+        throw new Error('Falha ao atualizar bankroll management');
+      }
+
+      return updated;
+    }
+
+    return current;
   }
 }
 
