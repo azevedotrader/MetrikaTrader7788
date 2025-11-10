@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ interface RiskCalculation {
 
 export default function RiskManagement() {
   const { t, language } = useLanguage();
+  const [, setLocation] = useLocation();
   
   // Sistema de moeda dinâmica baseado no idioma
   const getCurrency = () => {
@@ -515,6 +517,112 @@ export default function RiskManagement() {
           </Card>
         )}
         
+        {/* Card de Integração WhatsApp - Gestão de Banca */}
+        <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-800/50 mt-6 md:mt-8 lg:col-span-3">
+          <CardHeader className="p-4 md:p-6 border-b border-green-800/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-600/20 rounded-lg">
+                <svg className="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-lg md:text-xl text-white">
+                  🚀 Gestão de Banca via WhatsApp
+                </CardTitle>
+                <CardDescription className="text-sm md:text-base text-green-400/80 mt-1">
+                  Crie e gerencie sua banca personalizada direto pelo WhatsApp
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 md:p-6 space-y-4">
+            {/* Instruções */}
+            <div className="bg-zinc-900/50 rounded-lg p-4 border border-zinc-800">
+              <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-yellow-500" />
+                Como funciona:
+              </h4>
+              <div className="space-y-2 text-sm text-zinc-300">
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500 font-mono">1.</span>
+                  <div>
+                    <p className="font-medium text-white">Configure seu WhatsApp no Perfil</p>
+                    <p className="text-zinc-400 text-xs">Adicione seu número na aba "Perfil" da plataforma</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500 font-mono">2.</span>
+                  <div>
+                    <p className="font-medium text-white">Crie sua gestão de banca</p>
+                    <p className="text-zinc-400 text-xs font-mono">/banca criar 1000 moderado longo</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-500 font-mono">3.</span>
+                  <div>
+                    <p className="font-medium text-white">Veja seu resumo a qualquer momento</p>
+                    <p className="text-zinc-400 text-xs font-mono">/banca</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Comandos disponíveis */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
+                <div className="text-xs text-zinc-500 uppercase mb-1">Criar Gestão</div>
+                <code className="text-green-400 text-sm font-mono block">
+                  /banca criar VALOR [PERFIL] [PRAZO]
+                </code>
+                <p className="text-xs text-zinc-400 mt-2">
+                  Ex: <span className="text-white">/banca criar 1000</span>
+                </p>
+              </div>
+              <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
+                <div className="text-xs text-zinc-500 uppercase mb-1">Ver Resumo</div>
+                <code className="text-green-400 text-sm font-mono block">
+                  /banca
+                </code>
+                <p className="text-xs text-zinc-400 mt-2">
+                  Mostra seus parâmetros e projeção
+                </p>
+              </div>
+            </div>
+
+            {/* Botão de ação */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => window.open('https://wa.me/5522974051621', '_blank')}
+                data-testid="button-open-whatsapp"
+              >
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                Abrir WhatsApp (+55 22 97405-1621)
+              </Button>
+              <Button
+                variant="outline"
+                className="border-green-800 text-green-400 hover:bg-green-900/20"
+                onClick={() => setLocation('/perfil')}
+                data-testid="button-configure-whatsapp"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Configurar WhatsApp no Perfil
+              </Button>
+            </div>
+
+            {/* Aviso de segurança */}
+            <div className="flex items-start gap-2 bg-yellow-900/20 border border-yellow-800/30 rounded-lg p-3">
+              <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-yellow-200/90">
+                <strong>Importante:</strong> Configure seu número WhatsApp no perfil antes de usar os comandos. 
+                Somente usuários autenticados podem criar gestão de banca.
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
       </div>
     </div>
