@@ -87,6 +87,37 @@ Preferred communication style: Simple, everyday language.
   - Prompt melhorado: foco em extrair TODOS os trades linha por linha
   - Sistema tradicional ultra-permissivo: aceita dados não-tradicionais
 
+### Intelligent Bankroll Management System - Janeiro 2025
+- **Sistema Completo**: ✅ Gestão inteligente de banca implementada com projeções automáticas
+- **Integração WhatsApp**: ✅ Comandos `/banca criar`, `/banca`, `/banca ajuste` funcionais via WhatsApp
+- **Banco de Dados**: Tabela `bankroll_managements` com campos: initialCapital, currentBalance, riskProfile (conservador/moderado/agressivo), timeHorizon (curto/medio/longo), riskConfig (jsonb), projectedGrowth (jsonb), consecutiveWins, consecutiveLosses, lastAdjustment
+- **Cálculos Determinísticos**:
+  - Helpers em `server/bankroll-helpers.ts`: computeRiskMatrix, buildProjection, calculateTargetBalance, summarizeForWhatsApp
+  - Projeções de 90 dias usando crescimento composto (sem aleatoriedade)
+  - Rastreamento de streaks de vitórias/perdas consecutivas
+  - Ajuste automático de banca após cada trade
+- **API Endpoints**:
+  - POST `/api/bankroll/whatsapp/create` - Cria gestão personalizada
+  - GET `/api/bankroll/whatsapp/summary/:userId` - Retorna resumo formatado
+  - POST `/api/bankroll/whatsapp/adjust` - Ajusta banca após trade
+  - Validação completa com Zod, coerção de tipos, fallbacks para profile
+- **Comandos WhatsApp**:
+  - `/banca criar VALOR [PERFIL] [PRAZO]` - Fluxo conversacional para criar gestão (ex: `/banca criar 1000 moderado longo`)
+  - `/banca` ou `/banca resumo` - Mostra parâmetros atuais e projeção de crescimento
+  - Ajuste automático após salvar trade via WhatsApp
+  - Usa storage direto (sem HTTP) para evitar dependências de porta/ambiente
+- **Frontend**:
+  - Card destacado em `/gestao-risco` com instruções e comandos WhatsApp
+  - Design verde com gradiente (from-green-900/20 to-emerald-900/20)
+  - Botão direto para WhatsApp (+55 22 97405-1621)
+  - Navegação SPA usando wouter (setLocation)
+  - Instruções passo-a-passo para configuração e uso
+- **Perfis de Risco**:
+  - Conservador: 0.25% por trade, máx 1% diário, 60% win rate
+  - Moderado: 0.6% por trade, máx 2.4% diário, 55% win rate
+  - Agressivo: 2.5% por trade, máx 10% diário, 50% win rate
+- **Arquitetura**: Storage CRUD em `server/storage.ts`, helpers deterministicos, endpoints REST, integração WhatsApp sem dependências HTTP
+
 ## System Architecture
 
 ### Frontend
@@ -120,6 +151,7 @@ Preferred communication style: Simple, everyday language.
   - Platform Stats (analytics and metrics)
   - Password Reset Tokens (recuperação de senha)
   - Diary Entries (diário de trading)
+  - Bankroll Managements (intelligent risk management with automated projections)
 - **Admin System**: ✅ Usuário admin criado (admin@metrika.com.br)
 - **Initial Data**: ✅ Planos de assinatura configurados (Starter, Pro, Black)
 - **Multi-broker Support**: Data segregated for Crypto, Forex, B3 markets, supporting manual, CSV, and API origins.

@@ -8,6 +8,11 @@ const RISK_MATRIX = {
     moderado: { riskPerTrade: 0.02, dailyTarget: 0.04, horizonDays: 30 },
     conservador: { riskPerTrade: 0.01, dailyTarget: 0.02, horizonDays: 30 },
   },
+  medio: {
+    agressivo: { riskPerTrade: 0.02, dailyTarget: 0.04, horizonDays: 45 },
+    moderado: { riskPerTrade: 0.015, dailyTarget: 0.03, horizonDays: 60 },
+    conservador: { riskPerTrade: 0.0075, dailyTarget: 0.015, horizonDays: 90 },
+  },
   longo: {
     agressivo: { riskPerTrade: 0.015, dailyTarget: 0.03, horizonDays: 60 },
     moderado: { riskPerTrade: 0.01, dailyTarget: 0.02, horizonDays: 90 }, // equilibrado
@@ -19,7 +24,7 @@ const RISK_MATRIX = {
  * Calcula os parâmetros de risco baseado no perfil e prazo
  */
 export function computeRiskMatrix(
-  timeHorizon: "curto" | "longo",
+  timeHorizon: "curto" | "medio" | "longo",
   profile?: "conservador" | "moderado" | "agressivo"
 ): {
   profile: "conservador" | "moderado" | "agressivo";
@@ -30,7 +35,10 @@ export function computeRiskMatrix(
   // Se perfil não for fornecido, usa moderado como padrão
   const selectedProfile = profile || "moderado";
   
-  const config = RISK_MATRIX[timeHorizon][selectedProfile];
+  // Validação runtime: se horizonte inválido, usa 'medio' como fallback seguro
+  const validHorizon = RISK_MATRIX[timeHorizon] ? timeHorizon : "medio";
+  
+  const config = RISK_MATRIX[validHorizon][selectedProfile];
   
   return {
     profile: selectedProfile,
@@ -95,6 +103,7 @@ export function summarizeForWhatsApp(summary: BankrollSummaryDTO): string {
 
   const timeHorizonLabels = {
     curto: "Curto Prazo",
+    medio: "Médio Prazo",
     longo: "Longo Prazo",
   };
 

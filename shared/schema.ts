@@ -512,14 +512,14 @@ export const insertBankrollManagementSchema = createInsertSchema(bankrollManagem
 export const insertBankrollManagementSchemaFromWhatsApp = z.object({
   userId: z.string(),
   bankrollValue: z.string().or(z.number().positive().transform(String)), // Aceita número mas converte para string
-  timeHorizon: z.enum(["curto", "longo"]),
+  timeHorizon: z.enum(["curto", "medio", "longo"]),
   profile: z.enum(["conservador", "moderado", "agressivo"]).optional(), // Opcional - pode ser calculado automaticamente
 });
 
 // DTO para summary WhatsApp (retorna números para facilitar formatação)
 export type BankrollSummaryDTO = {
   profile: "conservador" | "moderado" | "agressivo";
-  timeHorizon: "curto" | "longo";
+  timeHorizon: "curto" | "medio" | "longo";
   bankrollValue: number;
   riskPerTrade: number;
   dailyProfitTarget: number;
