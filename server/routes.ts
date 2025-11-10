@@ -4309,6 +4309,172 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           return;
         }
         
+        // ===== COMANDOS DE GESTÃO DE BANCA =====
+        
+        // Comando: /banca resumo ou /banca
+        if (messageTextLower === '/banca' || messageTextLower === '/banca resumo') {
+          try {
+            const bankroll = await storage.getBankrollManagement(user.id);
+            
+            if (!bankroll) {
+              const noBankrollMessage = `💼 *Gestão de Banca não configurada*\n\n` +
+                `Você ainda não tem uma gestão personalizada!\n\n` +
+                `📝 *Para criar sua gestão:*\n` +
+                `Envie: */banca criar VALOR PERFIL PRAZO*\n\n` +
+                `📋 *Exemplo:*\n` +
+                `_/banca criar 1000 moderado longo_\n\n` +
+                `*Perfis:* conservador, moderado, agressivo\n` +
+                `*Prazos:* curto, longo\n\n` +
+                `💡 Se não especificar perfil/prazo, usaremos valores equilibrados!`;
+              
+              await sendWhatsAppMessage(fromNumber, noBankrollMessage);
+              await db
+                .update(whatsappMessages)
+                .set({ 
+                  status: 'bankroll_not_found',
+                  processedAt: new Date()
+                })
+                .where(eq(whatsappMessages.id, savedMessage.id));
+              return;
+            }
+            
+            // Importar helper e gerar resumo
+            const { summarizeForWhatsApp } = await import('./bankroll-helpers');
+            const summary = {
+              profile: bankroll.profile,
+              timeHorizon: bankroll.timeHorizon,
+              bankrollValue: parseFloat(bankroll.bankrollValue),
+              riskPerTrade: parseFloat(bankroll.riskPerTrade),
+              dailyProfitTarget: parseFloat(bankroll.dailyProfitTarget),
+              horizonDays: bankroll.horizonDays,
+              targetBalance: parseFloat(bankroll.targetBalance),
+              projectedGrowth: bankroll.projectedGrowth
+            };
+            
+            const whatsappMessage = summarizeForWhatsApp(summary);
+            await sendWhatsAppMessage(fromNumber, whatsappMessage);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'bankroll_summary_sent',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error getting bankroll summary:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao buscar gestão de banca. Tente novamente!');
+            return;
+          }
+        }
+        
+        // Comando: /banca criar VALOR [PERFIL] [PRAZO]
+        if (messageTextLower.startsWith('/banca criar')) {
+          try {
+            // Parsear comando: /banca criar 1000 moderado longo
+            const parts = messageText.trim().split(/\s+/);
+            
+            if (parts.length < 3) {
+              const instructionsMessage = `💼 *Como criar sua Gestão de Banca:*\n\n` +
+                `📝 *Formato:*\n` +
+                `/banca criar VALOR PERFIL PRAZO\n\n` +
+                `📋 *Exemplos:*\n` +
+                `• _/banca criar 1000_ (usa padrões)\n` +
+                `• _/banca criar 1000 moderado longo_\n` +
+                `• _/banca criar 500 agressivo curto_\n\n` +
+                `*Perfis disponíveis:*\n` +
+                `• conservador - Menor risco\n` +
+                `• moderado - Equilibrado ✅\n` +
+                `• agressivo - Maior retorno\n\n` +
+                `*Prazos:*\n` +
+                `• curto - Ganhos rápidos\n` +
+                `• longo - Crescimento sustentável ✅`;
+              
+              await sendWhatsAppMessage(fromNumber, instructionsMessage);
+              return;
+            }
+            
+            const bankrollValue = parseFloat(parts[2]);
+            const profile = parts[3]?.toLowerCase() as 'conservador' | 'moderado' | 'agressivo' | undefined;
+            const timeHorizon = parts[4]?.toLowerCase() as 'curto' | 'longo' || 'longo';
+            
+            if (isNaN(bankrollValue) || bankrollValue <= 0) {
+              await sendWhatsAppMessage(fromNumber, '❌ Valor inválido! Use números positivos. Ex: /banca criar 1000');
+              return;
+            }
+            
+            // Verificar se já existe gestão
+            const existing = await storage.getBankrollManagement(user.id);
+            if (existing) {
+              const confirmMessage = `⚠️ *Gestão de Banca já existe!*\n\n` +
+                `Você já tem uma gestão configurada.\n\n` +
+                `💰 Saldo atual: R$ ${existing.bankrollValue}\n` +
+                `📊 Perfil: ${existing.profile}\n\n` +
+                `Para atualizar, entre em contato com o suporte.`;
+              
+              await sendWhatsAppMessage(fromNumber, confirmMessage);
+              return;
+            }
+            
+            // Criar gestão diretamente via storage (não HTTP)
+            const { computeRiskMatrix, buildProjection, calculateTargetBalance, summarizeForWhatsApp } = await import('./bankroll-helpers');
+            
+            // Usar perfil moderado como padrão se não fornecido
+            const riskProfile = profile ?? 'moderado';
+            
+            // Calcular parâmetros baseado no perfil e prazo
+            const riskConfig = computeRiskMatrix(timeHorizon, riskProfile);
+            
+            // Gerar projeção de 90 dias
+            const projectedGrowth = buildProjection(bankrollValue, riskConfig.dailyTarget, 90);
+            
+            // Calcular meta final baseada no horizonte específico
+            const targetBalance = calculateTargetBalance(bankrollValue, riskConfig.dailyTarget, riskConfig.horizonDays);
+            
+            // Criar registro no banco
+            const created = await storage.createBankrollManagement({
+              userId: user.id,
+              profile: riskConfig.profile,
+              timeHorizon: timeHorizon,
+              bankrollValue: bankrollValue.toFixed(2),
+              riskPerTrade: riskConfig.riskPerTrade.toFixed(4),
+              dailyProfitTarget: riskConfig.dailyTarget.toFixed(4),
+              horizonDays: riskConfig.horizonDays,
+              targetBalance: targetBalance.toFixed(2),
+              projectedGrowth,
+              consecutiveWins: 0,
+              consecutiveLosses: 0
+            });
+            
+            // Gerar resumo para WhatsApp
+            const summary = {
+              profile: created.profile,
+              timeHorizon: created.timeHorizon,
+              bankrollValue: parseFloat(created.bankrollValue),
+              riskPerTrade: parseFloat(created.riskPerTrade),
+              dailyProfitTarget: parseFloat(created.dailyProfitTarget),
+              horizonDays: created.horizonDays,
+              targetBalance: parseFloat(created.targetBalance),
+              projectedGrowth: created.projectedGrowth
+            };
+            
+            const whatsappMessage = summarizeForWhatsApp(summary);
+            await sendWhatsAppMessage(fromNumber, whatsappMessage);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'bankroll_created',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error creating bankroll:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao criar gestão de banca. Tente novamente!');
+            return;
+          }
+        }
+        
         // Tentar processar como trade
         const tradeData = parseTradeFromMessage(messageText, user.id);
         
