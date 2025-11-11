@@ -31,27 +31,43 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Build callback URL dynamically based on environment
+// Build callback URL dynamically based on request hostname
 // This function is called on every auth request to support dynamic env var updates
-export const getCallbackURL = () => {
-  // In development, use REPLIT_DOMAINS
-  if (process.env.NODE_ENV === 'development' && process.env.REPLIT_DOMAINS) {
-    const url = `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
-    log(`[OAuth] Using dev callback URL: ${url}`);
+export const getCallbackURL = (req?: Request) => {
+  // If request is provided, detect based on hostname
+  if (req) {
+    const host = req.get('host') || '';
+    const protocol = req.protocol || 'https';
+    
+    // Check if it's a custom domain (production)
+    if (host.includes('appmetrika.com.br')) {
+      const url = `https://appmetrika.com.br/auth/google/callback`;
+      log(`[OAuth] Using production callback URL: ${url}`);
+      return url;
+    }
+    
+    // Check if it's Replit dev domain
+    if (host.includes('.replit.dev')) {
+      const url = `${protocol}://${host}/auth/google/callback`;
+      log(`[OAuth] Using dev callback URL: ${url}`);
+      return url;
+    }
+  }
+  
+  // Fallback: use environment variables
+  if (process.env.GOOGLE_CALLBACK_BASE_URL) {
+    const url = `${process.env.GOOGLE_CALLBACK_BASE_URL}/auth/google/callback`;
+    log(`[OAuth] Using env var callback URL: ${url}`);
     return url;
   }
   
-  // In production, use custom base URL or REPLIT_DOMAINS
-  const baseUrl = process.env.GOOGLE_CALLBACK_BASE_URL || 
-                  (process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : null);
-  
-  if (!baseUrl) {
-    throw new Error('GOOGLE_CALLBACK_BASE_URL or REPLIT_DOMAINS must be set for Google OAuth');
+  if (process.env.REPLIT_DOMAINS) {
+    const url = `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
+    log(`[OAuth] Using REPLIT_DOMAINS callback URL: ${url}`);
+    return url;
   }
   
-  const url = new URL('/auth/google/callback', baseUrl).toString();
-  log(`[OAuth] Using prod callback URL: ${url}`);
-  return url;
+  throw new Error('Cannot determine OAuth callback URL - no request host or env vars available');
 };
 
 // Configure Google OAuth Strategy

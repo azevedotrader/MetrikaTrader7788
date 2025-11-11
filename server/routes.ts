@@ -1235,7 +1235,7 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Google OAuth Routes
   app.get("/auth/google", (req, res, next) => {
     try {
-      const callbackURL = getCallbackURL();
+      const callbackURL = getCallbackURL(req);
       passport.authenticate("google", {
         scope: ["profile", "email"],
         callbackURL
@@ -1249,7 +1249,7 @@ export async function registerRoutes(app: Express): Promise<void> {
     "/auth/google/callback",
     (req, res, next) => {
       try {
-        const callbackURL = getCallbackURL();
+        const callbackURL = getCallbackURL(req);
         passport.authenticate("google", { 
           failureRedirect: "/login", 
           session: false,
