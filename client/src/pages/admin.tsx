@@ -466,10 +466,56 @@ export default function AdminPage() {
         <TabsContent value="users" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Usuários</CardTitle>
-              <CardDescription>
-                Visualize todos os usuários da plataforma
-              </CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <CardTitle>Usuários</CardTitle>
+                  <CardDescription>
+                    Visualize todos os usuários da plataforma
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('adminToken');
+                      const response = await fetch('/api/admin/users/export', {
+                        headers: {
+                          'Authorization': `Bearer ${token}`
+                        }
+                      });
+                      
+                      if (!response.ok) throw new Error('Erro ao exportar');
+                      
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `usuarios-metrika-${new Date().toISOString().split('T')[0]}.csv`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                      
+                      toast({
+                        title: "Exportação concluída!",
+                        description: "Arquivo CSV baixado com sucesso."
+                      });
+                    } catch (error) {
+                      toast({
+                        title: "Erro ao exportar",
+                        description: "Não foi possível exportar os usuários.",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  data-testid="button-export-users-csv"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Exportar Usuários (CSV)
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {usersLoading ? (

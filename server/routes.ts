@@ -2847,6 +2847,57 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
 
+  // GET /api/admin/users/export - Exportar usuários em CSV
+  app.get("/api/admin/users/export", requireAdmin, async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      
+      // Cabeçalhos CSV
+      const csvHeaders = [
+        'ID',
+        'Nome',
+        'Email',
+        'Telefone',
+        'WhatsApp',
+        'Plano',
+        'Status',
+        'Data Registro',
+        'Expiração Plano',
+        'Admin'
+      ].join(',');
+      
+      // Converter usuários para linhas CSV
+      const csvRows = users.map(user => {
+        return [
+          user.id,
+          `"${(user.name || '').replace(/"/g, '""')}"`, // Escapar aspas
+          user.email,
+          user.phone || '',
+          user.whatsappNumber || '',
+          user.planType,
+          user.isActive ? 'Ativo' : 'Inativo',
+          user.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-BR') : '',
+          user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString('pt-BR') : '',
+          user.email === ADMIN_EMAIL ? 'Sim' : 'Não'
+        ].join(',');
+      });
+      
+      // Combinar cabeçalhos e linhas
+      const csv = [csvHeaders, ...csvRows].join('\n');
+      
+      // Configurar headers HTTP para download
+      const timestamp = new Date().toISOString().split('T')[0];
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="usuarios-metrika-${timestamp}.csv"`);
+      
+      // Adicionar BOM UTF-8 para Excel reconhecer caracteres especiais
+      res.send('\ufeff' + csv);
+    } catch (error) {
+      console.error("Error exporting users:", error);
+      res.status(500).json({ message: "Erro ao exportar usuários" });
+    }
+  });
+
   // PUT /api/admin/users/:id - Atualizar usuário
   app.put("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
