@@ -10,6 +10,29 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2025)
 
+### Google OAuth 2.0 Authentication - Janeiro 2025
+- **Integração Completa**: ✅ Login com Google implementado usando passport-google-oauth20
+- **Fluxo Seguro**: Sistema de códigos opacos (opaque codes) para prevenir XSS
+- **Popup OAuth**: Janela popup abre /auth/google, autentica via Google, retorna código
+- **Arquitetura de Segurança**:
+  - Callback gera código opaco aleatório (32 bytes hex)
+  - Armazena temporariamente em Map global (in-memory) com TTL 5 minutos
+  - Código single-use: deletado imediatamente após exchange
+  - Página success envia apenas código via postMessage (sem dados de usuário)
+  - Frontend valida origin e troca código por JWT via POST /api/auth/google/exchange
+- **Backend Endpoints**:
+  - GET /auth/google - Inicia fluxo OAuth
+  - GET /auth/google/callback - Processa callback, gera código opaco
+  - GET /auth/google/success - Página segura que envia postMessage
+  - POST /api/auth/google/exchange - Troca código por user+JWT
+- **Database Schema**: Campos adicionados à tabela users:
+  - googleId (nullable) - ID único do Google
+  - profilePhoto (nullable) - URL da foto de perfil
+- **Frontend**: Botão "Entrar com Google" em login-modal.tsx
+- **Type Safety**: Declaração global para oauthPendingLogins em server/types.ts
+- **Segurança Produção**: trust proxy habilitado, session cookies com sameSite 'lax'
+- **Autenticação Híbrida**: Suporta login tradicional (email/senha) E Google OAuth simultaneamente
+
 ### WhatsApp Bot - Correção Produção - Novembro 2025
 - **Problema Resolvido**: ✅ Bot do WhatsApp agora funciona corretamente em produção
 - **Verificação de Assinatura**: Implementado middleware que captura corpo raw da requisição
