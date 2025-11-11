@@ -9,6 +9,9 @@ import { storage } from "./storage";
 
 const app = express();
 
+// Trust proxy for secure cookies behind reverse proxy/CDN
+app.set('trust proxy', 1);
+
 // Configure session
 app.use(
   session({
@@ -18,6 +21,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
+      sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })

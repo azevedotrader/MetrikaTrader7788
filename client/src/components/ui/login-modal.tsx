@@ -137,8 +137,53 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
             type="button"
             variant="outline"
             className="w-full bg-white hover:bg-gray-100 text-gray-900 border-gray-300"
-            onClick={() => {
-              window.location.href = '/auth/google';
+            onClick={async () => {
+              // Open OAuth in popup
+              const width = 500;
+              const height = 600;
+              const left = window.screenX + (window.outerWidth - width) / 2;
+              const top = window.screenY + (window.outerHeight - height) / 2;
+              
+              const popup = window.open(
+                '/auth/google',
+                'Google Login',
+                `width=${width},height=${height},left=${left},top=${top}`
+              );
+              
+              // Listen for postMessage from popup
+              const handleMessage = async (event: MessageEvent) => {
+                if (event.origin !== window.location.origin) return;
+                
+                if (event.data.type === 'GOOGLE_AUTH_CODE') {
+                  window.removeEventListener('message', handleMessage);
+                  
+                  try {
+                    // Exchange code for user data and token
+                    const response = await fetch('/api/auth/google/exchange', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ code: event.data.code })
+                    });
+                    
+                    if (response.ok) {
+                      const { user, token } = await response.json();
+                      
+                      // Store in localStorage
+                      localStorage.setItem('user', JSON.stringify(user));
+                      localStorage.setItem('user-id', user.id);
+                      localStorage.setItem('user-token', token);
+                      
+                      // Reload to trigger auth context update
+                      window.location.reload();
+                    }
+                  } catch (error) {
+                    console.error('Error exchanging Google auth code:', error);
+                    setError('Erro ao completar login com Google');
+                  }
+                }
+              };
+              
+              window.addEventListener('message', handleMessage);
             }}
             data-testid="button-google-login"
           >

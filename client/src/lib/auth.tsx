@@ -115,49 +115,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearUserDataCache();
   };
 
-  // Check for Google OAuth session on mount
+  // Load user from localStorage on app start
   useEffect(() => {
-    const checkGoogleAuth = async () => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
       try {
-        const response = await fetch('/auth/user', {
-          credentials: 'include'
-        });
+        const parsedUser = JSON.parse(storedUser);
+        const userWithInitials = {
+          ...parsedUser,
+          initials: getInitials(parsedUser.name)
+        };
+        setUser(userWithInitials);
         
-        if (response.ok) {
-          const userData = await response.json();
-          const userWithInitials = {
-            ...userData,
-            initials: getInitials(userData.name)
-          };
-          setUser(userWithInitials);
-          localStorage.setItem('user', JSON.stringify(userWithInitials));
-          localStorage.setItem('user-id', userData.id);
-          return;
+        // Ensure user-id is also in localStorage
+        if (parsedUser.id && !localStorage.getItem('user-id')) {
+          localStorage.setItem('user-id', parsedUser.id);
         }
       } catch (error) {
-        console.error("Error checking Google auth:", error);
+        console.error("Error parsing stored user:", error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('user-id');
       }
-
-      // Fall back to localStorage if no Google session
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-          
-          // Ensure user-id is also in localStorage
-          if (parsedUser.id && !localStorage.getItem('user-id')) {
-            localStorage.setItem('user-id', parsedUser.id);
-          }
-        } catch (error) {
-          console.error("Error parsing stored user:", error);
-          localStorage.removeItem('user');
-          localStorage.removeItem('user-id');
-        }
-      }
-    };
-
-    checkGoogleAuth();
+    }
   }, []);
 
   return (

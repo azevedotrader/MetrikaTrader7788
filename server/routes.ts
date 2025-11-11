@@ -1236,12 +1236,109 @@ export async function registerRoutes(app: Express): Promise<void> {
 
   app.get(
     "/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/login" }),
-    (req, res) => {
-      // Successful authentication, redirect to dashboard
-      res.redirect("/dashboard");
+    passport.authenticate("google", { failureRedirect: "/login", session: false }),
+    async (req, res) => {
+      // Generate JWT token for API authentication
+      const user = req.user as any;
+      
+      // Update lastLoginAt
+      await storage.updateLastLogin(user.id);
+      
+      const token = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email,
+          name: user.name
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Create a secure opaque code that maps to the user data + token
+      const authCode = crypto.randomBytes(32).toString('hex');
+      
+      // Store temporarily in memory (5 min expiration)
+      if (!global.oauthPendingLogins) {
+        global.oauthPendingLogins = new Map();
+      }
+      
+      global.oauthPendingLogins.set(authCode, {
+        user: { ...user, password: undefined },
+        token,
+        expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
+      });
+      
+      // Clean up expired codes periodically
+      const entries = Array.from(global.oauthPendingLogins.entries());
+      for (const [code, data] of entries) {
+        if (data.expiresAt < Date.now()) {
+          global.oauthPendingLogins.delete(code);
+        }
+      }
+      
+      // Redirect to a safe exchange endpoint
+      res.redirect(`/auth/google/success?code=${authCode}`);
     }
   );
+
+  // Success page that calls postMessage securely
+  app.get("/auth/google/success", (req, res) => {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Login Successful</title>
+        </head>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h2>Login bem-sucedido!</h2>
+          <p>Redirecionando...</p>
+          <script>
+            (function() {
+              const code = new URLSearchParams(window.location.search).get('code');
+              if (code && window.opener) {
+                window.opener.postMessage({
+                  type: 'GOOGLE_AUTH_CODE',
+                  code: code
+                }, window.location.origin);
+                setTimeout(() => window.close(), 1000);
+              } else {
+                // Fallback: redirect to dashboard with code
+                window.location.href = '/dashboard?oauth_code=' + code;
+              }
+            })();
+          </script>
+        </body>
+      </html>
+    `;
+    res.send(html);
+  });
+
+  // Exchange opaque code for user data + JWT (API endpoint)
+  app.post("/api/auth/google/exchange", (req, res) => {
+    const { code } = req.body;
+    
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ error: 'Invalid code' });
+    }
+    
+    const loginData = global.oauthPendingLogins?.get(code);
+    
+    if (!loginData || (loginData as any).expiresAt < Date.now()) {
+      global.oauthPendingLogins?.delete(code);
+      return res.status(400).json({ error: 'Invalid or expired code' });
+    }
+    
+    // Remove code immediately after use (single use)
+    if (global.oauthPendingLogins) {
+      global.oauthPendingLogins.delete(code);
+    }
+    
+    // Return user data and token
+    res.json({
+      user: loginData.user,
+      token: (loginData as any).token
+    });
+  });
 
   app.get("/auth/logout", (req, res) => {
     req.logout((err) => {
@@ -1250,15 +1347,6 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       res.json({ message: "Logout realizado com sucesso" });
     });
-  });
-
-  app.get("/auth/user", (req, res) => {
-    if (req.isAuthenticated()) {
-      const user = req.user as any;
-      const { password, ...userResponse } = user;
-      return res.json(userResponse);
-    }
-    res.status(401).json({ message: "Não autenticado" });
   });
 
   // Health check
