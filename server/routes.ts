@@ -1229,14 +1229,36 @@ function parseTradeFromCSVRow(row: any, fieldMap: any, userId: string): InsertTr
 }
 
 export async function registerRoutes(app: Express): Promise<void> {
+  // Import getCallbackURL for dynamic resolution
+  const { getCallbackURL } = await import('./index.js');
+  
   // Google OAuth Routes
-  app.get("/auth/google", passport.authenticate("google", {
-    scope: ["profile", "email"]
-  }));
+  app.get("/auth/google", (req, res, next) => {
+    try {
+      const callbackURL = getCallbackURL();
+      passport.authenticate("google", {
+        scope: ["profile", "email"],
+        callbackURL
+      } as any)(req, res, next);
+    } catch (error: any) {
+      res.status(500).json({ error: `OAuth configuration error: ${error.message}` });
+    }
+  });
 
   app.get(
     "/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/login", session: false }),
+    (req, res, next) => {
+      try {
+        const callbackURL = getCallbackURL();
+        passport.authenticate("google", { 
+          failureRedirect: "/login", 
+          session: false,
+          callbackURL
+        } as any)(req, res, next);
+      } catch (error: any) {
+        res.status(500).json({ error: `OAuth configuration error: ${error.message}` });
+      }
+    },
     async (req, res) => {
       // Generate JWT token for API authentication
       const user = req.user as any;

@@ -32,10 +32,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Build callback URL dynamically based on environment
-const getCallbackURL = () => {
+// This function is called on every auth request to support dynamic env var updates
+export const getCallbackURL = () => {
   // In development, use REPLIT_DOMAINS
   if (process.env.NODE_ENV === 'development' && process.env.REPLIT_DOMAINS) {
-    return `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
+    const url = `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
+    log(`[OAuth] Using dev callback URL: ${url}`);
+    return url;
   }
   
   // In production, use custom base URL or REPLIT_DOMAINS
@@ -46,16 +49,19 @@ const getCallbackURL = () => {
     throw new Error('GOOGLE_CALLBACK_BASE_URL or REPLIT_DOMAINS must be set for Google OAuth');
   }
   
-  return new URL('/auth/google/callback', baseUrl).toString();
+  const url = new URL('/auth/google/callback', baseUrl).toString();
+  log(`[OAuth] Using prod callback URL: ${url}`);
+  return url;
 };
 
 // Configure Google OAuth Strategy
+// Note: callbackURL is omitted here and passed dynamically in authenticate() calls
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: getCallbackURL(),
+      // callbackURL is passed dynamically in routes.ts for hot-reload support
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
