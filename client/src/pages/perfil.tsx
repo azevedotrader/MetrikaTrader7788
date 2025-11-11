@@ -133,17 +133,28 @@ export default function Perfil() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Picture Section */}
               <div className="flex items-center space-x-6">
-                <div className="w-20 h-20 gradient-purple-blue rounded-full flex items-center justify-center">
-                  <span className="text-white text-2xl font-bold">{user?.initials}</span>
-                </div>
-                <div>
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="bg-black hover:bg-gray-800 border-black text-white"
-                  >
-                    Alterar Foto
-                  </Button>
+                {user?.profilePhoto ? (
+                  <img 
+                    src={user.profilePhoto} 
+                    alt={user.name}
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 gradient-purple-blue rounded-full flex items-center justify-center">
+                    <span className="text-white text-2xl font-bold">{user?.initials}</span>
+                  </div>
+                )}
+                <div className="flex flex-col gap-2">
+                  <p className="text-white font-semibold">{user?.name}</p>
+                  <p className="text-zinc-400 text-sm">{user?.email}</p>
+                  {user?.googleId && (
+                    <p className="text-green-500 text-xs flex items-center gap-1">
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                      Conectado com Google
+                    </p>
+                  )}
                 </div>
               </div>
 

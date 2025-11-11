@@ -1277,10 +1277,13 @@ export async function registerRoutes(app: Express): Promise<void> {
         return res.status(400).json({ message: "Email já está em uso" });
       }
       
-      // Hash password before storing
+      // Hash password before storing (only if password provided)
       const { confirmPassword, ...userData } = validatedData;
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      const user = await storage.createUser({ ...userData, password: hashedPassword });
+      const hashedPassword = userData.password ? await bcrypt.hash(userData.password, 10) : undefined;
+      const user = await storage.createUser({ 
+        ...userData, 
+        password: hashedPassword 
+      });
 
       // Send welcome email (don't wait for it to complete)
       sendWelcomeEmail(user.email, user.name).catch(error => {
@@ -1314,6 +1317,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(401).json({ message: "Credenciais inválidas" });
+      }
+
+      // Google OAuth users don't have passwords
+      if (!user.password) {
+        return res.status(401).json({ message: "Por favor, faça login com o Google" });
       }
       
       // Use bcrypt to compare passwords
@@ -2661,6 +2669,11 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       // Get admin user from database
       const adminUser = await storage.getUserByEmail(email);
       if (!adminUser || adminUser.role !== 'admin') {
+        return res.status(401).json({ message: 'Credenciais inválidas' });
+      }
+
+      // Check if admin has password (not Google OAuth user)
+      if (!adminUser.password) {
         return res.status(401).json({ message: 'Credenciais inválidas' });
       }
       

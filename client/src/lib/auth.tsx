@@ -5,6 +5,8 @@ interface User {
   id: string;
   name: string;
   email: string;
+  profilePhoto?: string;
+  googleId?: string;
   capitalInicial?: string;
   metaMensal?: string;
   perfilRisco?: string;
@@ -95,7 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Try to logout from Google OAuth session
+      await fetch('/auth/logout', {
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error("Error logging out from Google:", error);
+    }
+    
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('user-id');
@@ -104,24 +115,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearUserDataCache();
   };
 
-  // Load user from localStorage on app start
+  // Check for Google OAuth session on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const checkGoogleAuth = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        const response = await fetch('/auth/user', {
+          credentials: 'include'
+        });
         
-        // Ensure user-id is also in localStorage
-        if (parsedUser.id && !localStorage.getItem('user-id')) {
-          localStorage.setItem('user-id', parsedUser.id);
+        if (response.ok) {
+          const userData = await response.json();
+          const userWithInitials = {
+            ...userData,
+            initials: getInitials(userData.name)
+          };
+          setUser(userWithInitials);
+          localStorage.setItem('user', JSON.stringify(userWithInitials));
+          localStorage.setItem('user-id', userData.id);
+          return;
         }
       } catch (error) {
-        console.error("Error parsing stored user:", error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('user-id');
+        console.error("Error checking Google auth:", error);
       }
-    }
+
+      // Fall back to localStorage if no Google session
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          
+          // Ensure user-id is also in localStorage
+          if (parsedUser.id && !localStorage.getItem('user-id')) {
+            localStorage.setItem('user-id', parsedUser.id);
+          }
+        } catch (error) {
+          console.error("Error parsing stored user:", error);
+          localStorage.removeItem('user');
+          localStorage.removeItem('user-id');
+        }
+      }
+    };
+
+    checkGoogleAuth();
   }, []);
 
   return (
