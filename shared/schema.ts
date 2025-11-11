@@ -7,9 +7,11 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),
   phone: varchar("phone"),
   whatsappNumber: varchar("whatsapp_number"), // Número do WhatsApp para receber trades
+  googleId: text("google_id"), // Google OAuth ID
+  profilePhoto: text("profile_photo"), // URL da foto de perfil do Google
   capitalInicial: decimal("capital_inicial", { precision: 12, scale: 2 }).default("0"),
   metaMensal: decimal("meta_mensal", { precision: 5, scale: 2 }).default("5"),
   perfilRisco: text("perfil_risco").default("moderado"),
@@ -159,12 +161,21 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   password: true,
   phone: true,
+  googleId: true,
+  profilePhoto: true,
 }).extend({
   email: z.string().email("Email deve ser válido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional(),
   phone: z.string().optional(),
-  confirmPassword: z.string()
-}).refine(data => data.password === data.confirmPassword, {
+  googleId: z.string().optional(),
+  profilePhoto: z.string().optional(),
+  confirmPassword: z.string().optional()
+}).refine(data => {
+  if (data.password && data.password.length > 0) {
+    return data.password === data.confirmPassword;
+  }
+  return true;
+}, {
   message: "Senhas não conferem",
   path: ["confirmPassword"]
 });

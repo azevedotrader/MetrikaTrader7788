@@ -11,6 +11,7 @@ import path from "path";
 import { Readable } from "stream";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import passport from "passport";
 import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
 import { db } from "./db";
@@ -1228,6 +1229,38 @@ function parseTradeFromCSVRow(row: any, fieldMap: any, userId: string): InsertTr
 }
 
 export async function registerRoutes(app: Express): Promise<void> {
+  // Google OAuth Routes
+  app.get("/auth/google", passport.authenticate("google", {
+    scope: ["profile", "email"]
+  }));
+
+  app.get(
+    "/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login" }),
+    (req, res) => {
+      // Successful authentication, redirect to dashboard
+      res.redirect("/dashboard");
+    }
+  );
+
+  app.get("/auth/logout", (req, res) => {
+    req.logout((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Erro ao fazer logout" });
+      }
+      res.json({ message: "Logout realizado com sucesso" });
+    });
+  });
+
+  app.get("/auth/user", (req, res) => {
+    if (req.isAuthenticated()) {
+      const user = req.user as any;
+      const { password, ...userResponse } = user;
+      return res.json(userResponse);
+    }
+    res.status(401).json({ message: "Não autenticado" });
+  });
+
   // Health check
   app.get("/api/health", async (req, res) => {
     res.status(200).json({ status: "ok" });

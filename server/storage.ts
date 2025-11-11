@@ -46,7 +46,9 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
   createUser(insertUser: Omit<InsertUser, 'confirmPassword'>): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User>;
   
   // Trade operations - SEMPRE requerem userId para isolamento
   getTrades(userId: string, broker?: string): Promise<Trade[]>;
@@ -139,10 +141,24 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+    return user || undefined;
+  }
+
   async createUser(insertUser: Omit<InsertUser, 'confirmPassword'>): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }
