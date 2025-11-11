@@ -31,13 +31,31 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Build callback URL dynamically based on environment
+const getCallbackURL = () => {
+  // In development, use REPLIT_DOMAINS
+  if (process.env.NODE_ENV === 'development' && process.env.REPLIT_DOMAINS) {
+    return `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
+  }
+  
+  // In production, use custom base URL or REPLIT_DOMAINS
+  const baseUrl = process.env.GOOGLE_CALLBACK_BASE_URL || 
+                  (process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS}` : null);
+  
+  if (!baseUrl) {
+    throw new Error('GOOGLE_CALLBACK_BASE_URL or REPLIT_DOMAINS must be set for Google OAuth');
+  }
+  
+  return new URL('/auth/google/callback', baseUrl).toString();
+};
+
 // Configure Google OAuth Strategy
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: '/auth/google/callback',
+      callbackURL: getCallbackURL(),
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
