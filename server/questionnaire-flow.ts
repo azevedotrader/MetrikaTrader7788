@@ -96,7 +96,7 @@ export const QUESTIONS: Question[] = [
       const winRate = parseFloat(parts[0]);
       const riskReward = parseFloat(parts[1]);
 
-      return !isNaN(winRate) && !isNaN(riskReward) && winRate >= 0 && winRate <= 100 && riskReward > 0;
+      return !isNaN(winRate) && !isNaN(riskReward) && winRate >= 0 && winRate <= 100 && riskReward >= 0.5 && riskReward <= 10;
     },
     parser: (answer) => {
       const normalized = answer.trim().toUpperCase();
@@ -108,12 +108,16 @@ export const QUESTIONS: Question[] = [
       const winRate = parseFloat(parts[0]);
       const riskReward = parseFloat(parts[1]);
 
+      // Validate ranges and return undefined if out of bounds
+      const validWinRate = !isNaN(winRate) && winRate >= 0 && winRate <= 100 ? winRate : undefined;
+      const validRiskReward = !isNaN(riskReward) && riskReward >= 0.5 && riskReward <= 10 ? riskReward : undefined;
+
       return {
-        winRate: isNaN(winRate) ? undefined : winRate,
-        riskReward: isNaN(riskReward) ? undefined : riskReward,
+        winRate: validWinRate,
+        riskReward: validRiskReward,
       };
     },
-    helpText: 'Digite dois números separados por vírgula (Win Rate, Risk/Reward) ou "PULAR"',
+    helpText: 'Digite dois números separados por vírgula (Win Rate 0-100, Risk/Reward 0.5-10) ou "PULAR"',
   },
   {
     id: 6,
@@ -217,19 +221,28 @@ export function parseAnswer(questionId: number, answer: string): any {
 
 /**
  * Converte respostas parciais para o formato QuestionnaireAnswers
+ * VALIDA RANGES: Descarta valores fora dos limites permitidos
+ * USA SANITIZAÇÃO PROFUNDA: Aceita strings, arrays, objetos e converte para números válidos
  */
 export function convertToQuestionnaireAnswers(partialAnswers: any): QuestionnaireAnswers | null {
   if (!partialAnswers.q1 || !partialAnswers.q2 || !partialAnswers.q3 || !partialAnswers.q4 || !partialAnswers.q6 || !partialAnswers.q7) {
     return null; // Respostas incompletas
   }
 
+  // Usar sanitizador profundo para métricas opcionais
+  const { sanitizeQuestionnaireMetrics } = require('./questionnaire-sanitizer');
+  const metrics = sanitizeQuestionnaireMetrics(
+    partialAnswers.q5_winRate,
+    partialAnswers.q5_riskReward
+  );
+
   return {
     q1: partialAnswers.q1,
     q2: partialAnswers.q2,
     q3: partialAnswers.q3,
     q4: partialAnswers.q4,
-    q5_winRate: partialAnswers.q5_winRate,
-    q5_riskReward: partialAnswers.q5_riskReward,
+    q5_winRate: metrics.winRate,
+    q5_riskReward: metrics.riskReward,
     q6: partialAnswers.q6,
     q7: partialAnswers.q7,
   };

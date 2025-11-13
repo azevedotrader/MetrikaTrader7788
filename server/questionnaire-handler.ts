@@ -144,6 +144,18 @@ async function finalizeQuestionnaire(userId: string, bankrollValue: string, part
       riskProfile.horizonDays
     );
 
+    // Criar objeto sanitizado de respostas (sem valores inválidos)
+    const sanitizedAnswers = {
+      q1: answers.q1,
+      q2: answers.q2,
+      q3: answers.q3,
+      q4: answers.q4,
+      q5_winRate: answers.q5_winRate,
+      q5_riskReward: answers.q5_riskReward,
+      q6: answers.q6,
+      q7: answers.q7,
+    };
+
     // Criar gestão de banca no banco de dados
     await storage.createBankrollManagement({
       userId,
@@ -158,7 +170,7 @@ async function finalizeQuestionnaire(userId: string, bankrollValue: string, part
       customRiskReward: answers.q5_riskReward?.toString(),
       psychologicalProfile: answers.q6,
       lossReactionProfile: answers.q7,
-      questionnaireAnswers: partialAnswers,
+      questionnaireAnswers: sanitizedAnswers,
       
       // Perfil calculado
       profile: riskProfile.profile,

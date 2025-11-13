@@ -862,7 +862,31 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(bankrollManagements)
       .where(eq(bankrollManagements.userId, userId));
-    return bankroll || undefined;
+    
+    if (!bankroll) {
+      return undefined;
+    }
+
+    // SANITIZAR dados ao retornar para proteger contra dados legacy malformados
+    const { sanitizePartialAnswers, sanitizeCustomMetrics } = await import('./questionnaire-sanitizer');
+    
+    // Sanitizar questionnaireAnswers
+    const sanitizedAnswers = bankroll.questionnaireAnswers 
+      ? sanitizePartialAnswers(bankroll.questionnaireAnswers)
+      : bankroll.questionnaireAnswers;
+    
+    // Sanitizar custom metrics
+    const customMetrics = sanitizeCustomMetrics(
+      bankroll.customWinRate,
+      bankroll.customRiskReward
+    );
+
+    return {
+      ...bankroll,
+      questionnaireAnswers: sanitizedAnswers,
+      customWinRate: customMetrics.customWinRate,
+      customRiskReward: customMetrics.customRiskReward,
+    };
   }
 
   async createBankrollManagement(data: InsertBankrollManagement): Promise<BankrollManagement> {
@@ -871,10 +895,17 @@ export class DatabaseStorage implements IStorage {
       .delete(bankrollManagements)
       .where(eq(bankrollManagements.userId, data.userId));
 
+    // SANITIZAR questionnaireAnswers antes de persistir
+    const { sanitizePartialAnswers } = await import('./questionnaire-sanitizer');
+    const sanitizedAnswers = data.questionnaireAnswers 
+      ? sanitizePartialAnswers(data.questionnaireAnswers)
+      : data.questionnaireAnswers;
+
     const [newBankroll] = await db
       .insert(bankrollManagements)
       .values({
         ...data,
+        questionnaireAnswers: sanitizedAnswers,
         createdAt: new Date(),
         updatedAt: new Date()
       })
@@ -884,12 +915,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateBankrollManagement(userId: string, updates: Partial<InsertBankrollManagement>): Promise<BankrollManagement> {
+    // SANITIZAR questionnaireAnswers e customMetrics antes de atualizar
+    const { sanitizePartialAnswers, sanitizeCustomMetrics } = await import('./questionnaire-sanitizer');
+    
+    const sanitizedQuestionnaireAnswers = updates.questionnaireAnswers 
+      ? sanitizePartialAnswers(updates.questionnaireAnswers)
+      : updates.questionnaireAnswers;
+    
+    const customMetrics = updates.customWinRate !== undefined || updates.customRiskReward !== undefined
+      ? sanitizeCustomMetrics(updates.customWinRate, updates.customRiskReward)
+      : { customWinRate: updates.customWinRate, customRiskReward: updates.customRiskReward };
+
+    // MONTAR objeto de update com valores sanitizados LAST (para evitar spread reintroduzir valores taint)
+    const sanitizedUpdates = {
+      ...updates,
+      // Sobrescrever com valores sanitizados ao final
+      questionnaireAnswers: sanitizedQuestionnaireAnswers,
+      customWinRate: customMetrics.customWinRate,
+      customRiskReward: customMetrics.customRiskReward,
+      updatedAt: new Date()
+    };
+
     const [updated] = await db
       .update(bankrollManagements)
-      .set({
-        ...updates,
-        updatedAt: new Date()
-      })
+      .set(sanitizedUpdates)
       .where(eq(bankrollManagements.userId, userId))
       .returning();
     
@@ -976,7 +1025,21 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(questionnaireStates)
       .where(eq(questionnaireStates.userId, userId));
-    return state || undefined;
+    
+    if (!state) {
+      return undefined;
+    }
+
+    // SANITIZAR partialAnswers ao retornar para proteger contra dados legacy malformados
+    const { sanitizePartialAnswers } = await import('./questionnaire-sanitizer');
+    const sanitizedAnswers = state.partialAnswers 
+      ? sanitizePartialAnswers(state.partialAnswers)
+      : state.partialAnswers;
+
+    return {
+      ...state,
+      partialAnswers: sanitizedAnswers,
+    };
   }
 
   async createQuestionnaireState(data: Omit<InsertQuestionnaireState, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionnaireState> {
@@ -985,10 +1048,17 @@ export class DatabaseStorage implements IStorage {
       .delete(questionnaireStates)
       .where(eq(questionnaireStates.userId, data.userId));
 
+    // SANITIZAR partialAnswers antes de persistir
+    const { sanitizePartialAnswers } = await import('./questionnaire-sanitizer');
+    const sanitizedAnswers = data.partialAnswers 
+      ? sanitizePartialAnswers(data.partialAnswers)
+      : data.partialAnswers;
+
     const [newState] = await db
       .insert(questionnaireStates)
       .values({
         ...data,
+        partialAnswers: sanitizedAnswers,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -1002,10 +1072,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateQuestionnaireState(userId: string, updates: Partial<InsertQuestionnaireState>): Promise<QuestionnaireState> {
+    // SANITIZAR partialAnswers antes de atualizar
+    const { sanitizePartialAnswers } = await import('./questionnaire-sanitizer');
+    const sanitizedAnswers = updates.partialAnswers 
+      ? sanitizePartialAnswers(updates.partialAnswers)
+      : updates.partialAnswers;
+
     const [updated] = await db
       .update(questionnaireStates)
       .set({
         ...updates,
+        partialAnswers: sanitizedAnswers,
         updatedAt: new Date(),
       })
       .where(eq(questionnaireStates.userId, userId))
