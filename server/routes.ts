@@ -4403,38 +4403,49 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             .where(eq(whatsappMessages.id, savedMessage.id));
           return;
         } else if (messageTextLower === 'btn_create_bankroll') {
-          // Enviar instruções para criar gestão personalizada
-          const createBankrollMessage = `🎯 *CRIAR GESTÃO DE RISCO PERSONALIZADA*\n\n` +
-            `Vou criar uma gestão 100% personalizada para você!\n\n` +
-            `📝 *Como funciona:*\n` +
-            `Farei 7 perguntas rápidas sobre:\n` +
-            `• Sua experiência em trading\n` +
-            `• Seu capital disponível\n` +
-            `• Mercados que opera\n` +
-            `• Tolerância a risco\n` +
-            `• Win rate e risk/reward\n` +
-            `• Prazo de operações\n` +
-            `• Tempo dedicado ao trading\n\n` +
-            `⏱️ *Leva apenas 2 minutos!*\n\n` +
-            `💰 *Para começar, envie:*\n` +
-            `/gestao criar VALOR\n\n` +
-            `📋 *Exemplo:*\n` +
-            `_/gestao criar 1000_\n\n` +
-            `🚀 *Vantagens:*\n` +
-            `✅ Risco calculado automaticamente\n` +
-            `✅ Projeções personalizadas\n` +
-            `✅ Ajustes automáticos após cada trade\n\n` +
-            `💡 Envie o comando agora!`;
-          
-          await sendWhatsAppMessage(fromNumber, createBankrollMessage);
-          await db
-            .update(whatsappMessages)
-            .set({ 
-              status: 'create_bankroll_instructions_sent',
-              processedAt: new Date()
-            })
-            .where(eq(whatsappMessages.id, savedMessage.id));
-          return;
+          // Iniciar processo de criação de gestão personalizada
+          // Criar estado especial para esperar valor da banca
+          try {
+            const { 
+              startQuestionnaire
+            } = await import('./questionnaire-handler');
+            
+            // Criar estado inicial com currentQuestion = 0 (esperando valor)
+            await storage.createQuestionnaireState({
+              userId: user.id,
+              currentQuestion: 0, // 0 = esperando valor da banca
+              partialAnswers: {},
+              bankrollValue: null
+            });
+            
+            const askBankrollMessage = `🎯 *CRIAR GESTÃO DE RISCO PERSONALIZADA*\n\n` +
+              `Vou criar uma gestão 100% personalizada para você!\n\n` +
+              `📝 *Farei 7 perguntas rápidas sobre:*\n` +
+              `• Sua experiência em trading\n` +
+              `• Mercados que opera\n` +
+              `• Tolerância a risco\n` +
+              `• Win rate e risk/reward\n` +
+              `• E mais...\n\n` +
+              `⏱️ *Leva apenas 2 minutos!*\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `💰 *Para começar, me diga:*\n\n` +
+              `Qual é o valor da sua banca em R$?\n\n` +
+              `📋 *Exemplo:* 1000`;
+            
+            await sendWhatsAppMessage(fromNumber, askBankrollMessage);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'waiting_for_bankroll_value',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error starting bankroll creation:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao iniciar criação de gestão. Tente novamente!');
+            return;
+          }
         } else if (messageTextLower === 'btn_statistics') {
           // Buscar estatísticas do usuário
           const userTrades = await db
@@ -4563,9 +4574,35 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         // Verificar se usuário está em questionário ativo
         const inQuestionnaire = await isInQuestionnaire(user.id);
         
-        // Se está em questionário E não é comando de cancelamento, processar como resposta
+        // Se está em questionário E não é comando de cancelamento
         if (inQuestionnaire && messageTextLower !== '/gestao cancelar' && messageTextLower !== '/questao cancelar') {
           try {
+            // Verificar se está esperando valor da banca (currentQuestion = 0)
+            const state = await storage.getQuestionnaireState(user.id);
+            
+            if (state && state.currentQuestion === 0) {
+              // Processar valor da banca
+              const bankrollValue = parseFloat(messageText.replace(/[^\d.-]/g, ''));
+              
+              if (isNaN(bankrollValue) || bankrollValue <= 0) {
+                await sendWhatsAppMessage(fromNumber, '❌ Valor inválido! Digite apenas o valor numérico.\n\n📋 *Exemplo:* 1000');
+                return;
+              }
+              
+              // Iniciar questionário com o valor
+              const response = await startQuestionnaire(user.id, bankrollValue);
+              await sendWhatsAppMessage(fromNumber, response);
+              await db
+                .update(whatsappMessages)
+                .set({ 
+                  status: 'questionnaire_started',
+                  processedAt: new Date()
+                })
+                .where(eq(whatsappMessages.id, savedMessage.id));
+              return;
+            }
+            
+            // Processar resposta normal do questionário
             const response = await processQuestionnaireAnswer(user.id, messageText);
             await sendWhatsAppMessage(fromNumber, response);
             await db
