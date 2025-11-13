@@ -478,23 +478,47 @@ export const whatsappMessagesRelations = relations(whatsappMessages, ({ one }) =
 export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
 export type InsertWhatsappMessage = typeof whatsappMessages.$inferInsert;
 
-// Tabela para gestão inteligente de banca (bankroll management)
+// Tabela para gestão inteligente de banca (bankroll management) - PERSONALIZADA POR QUESTIONÁRIO
 export const bankrollManagements = pgTable("bankroll_managements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id).unique(), // Um usuário tem apenas uma gestão ativa
   bankrollValue: decimal("bankroll_value", { precision: 12, scale: 2 }).notNull(), // Valor inicial da banca
-  profile: text("profile").notNull().$type<"conservador" | "moderado" | "agressivo">(), // Perfil de risco
-  timeHorizon: text("time_horizon").notNull().$type<"curto" | "longo">(), // Horizonte temporal
-  horizonDays: integer("horizon_days").notNull(), // Número de dias do horizonte (15, 30, 90, 180)
-  riskPerTrade: decimal("risk_per_trade", { precision: 5, scale: 4 }).notNull(), // % de risco por trade (0.0025, 0.006, 0.03)
-  dailyProfitTarget: decimal("daily_profit_target", { precision: 5, scale: 4 }).notNull(), // Meta diária de lucro %
-  projectedGrowth: jsonb("projected_growth").$type<Array<{ day: number; balance: number }>>().notNull(), // Projeções de crescimento
-  targetBalance: decimal("target_balance", { precision: 12, scale: 2 }).notNull(), // Saldo alvo final
-  autoAdjust: boolean("auto_adjust").default(true), // Se está com ajuste automático ativo
-  consecutiveWins: integer("consecutive_wins").default(0), // Contador de vitórias consecutivas
-  consecutiveLosses: integer("consecutive_losses").default(0), // Contador de perdas consecutivas
-  lastAdjustmentAt: timestamp("last_adjustment_at"), // Último ajuste automático
-  lastResetAt: timestamp("last_reset_at").defaultNow(), // Último reset dos contadores
+  
+  // === RESPOSTAS DO QUESTIONÁRIO PERSONALIZADO ===
+  experienceLevel: text("experience_level").$type<"A" | "B" | "C">(), // Pergunta 1: Iniciante/Intermediário/Avançado
+  tradingObjective: text("trading_objective").$type<"A" | "B" | "C">(), // Pergunta 2: Preservação/Equilíbrio/Agressivo
+  tradingMarkets: text("trading_markets").array(), // Pergunta 3: Array de mercados (A, B, C, D, E)
+  tradingTimeframe: text("trading_timeframe").$type<"A" | "B" | "C">(), // Pergunta 4: Day/Swing/Position
+  customWinRate: decimal("custom_win_rate", { precision: 5, scale: 2 }), // Pergunta 5: Win rate opcional (0-100)
+  customRiskReward: decimal("custom_risk_reward", { precision: 5, scale: 2 }), // Pergunta 5: R/R opcional (ex: 2.5)
+  psychologicalProfile: text("psychological_profile").$type<"A" | "B" | "C">(), // Pergunta 6: Reação a perda de 5%
+  lossReactionProfile: text("loss_reaction_profile").$type<"A" | "B" | "C">(), // Pergunta 7: Reação a 5+ perdas consecutivas
+  questionnaireAnswers: jsonb("questionnaire_answers").$type<{
+    q1?: string;
+    q2?: string;
+    q3?: string[];
+    q4?: string;
+    q5_winRate?: number;
+    q5_riskReward?: number;
+    q6?: string;
+    q7?: string;
+  }>(), // Armazena todas as respostas em formato JSON
+  
+  // === PERFIL CALCULADO BASEADO NAS RESPOSTAS ===
+  profile: text("profile").notNull().$type<"conservador" | "moderado" | "agressivo">(), // Calculado automaticamente
+  timeHorizon: text("time_horizon").notNull().$type<"curto" | "medio" | "longo">(), // Calculado automaticamente
+  horizonDays: integer("horizon_days").notNull(), // Calculado automaticamente
+  riskPerTrade: decimal("risk_per_trade", { precision: 5, scale: 4 }).notNull(), // Calculado automaticamente
+  dailyProfitTarget: decimal("daily_profit_target", { precision: 5, scale: 4 }).notNull(), // Calculado automaticamente
+  
+  // === PROJEÇÕES E MONITORAMENTO ===
+  projectedGrowth: jsonb("projected_growth").$type<Array<{ day: number; balance: number }>>().notNull(),
+  targetBalance: decimal("target_balance", { precision: 12, scale: 2 }).notNull(),
+  autoAdjust: boolean("auto_adjust").default(true),
+  consecutiveWins: integer("consecutive_wins").default(0),
+  consecutiveLosses: integer("consecutive_losses").default(0),
+  lastAdjustmentAt: timestamp("last_adjustment_at"),
+  lastResetAt: timestamp("last_reset_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
