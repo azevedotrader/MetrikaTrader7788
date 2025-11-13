@@ -235,7 +235,7 @@ export default function RiskManagement() {
                   </div>
 
                   <a
-                    href="https://wa.me/5511999999999?text=Oi!%20Quero%20criar%20minha%20gest%C3%A3o%20de%20risco%20personalizada"
+                    href="https://wa.me/5522974051621?text=Oi!%20Quero%20criar%20minha%20gest%C3%A3o%20de%20risco%20personalizada"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block"

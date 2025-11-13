@@ -571,7 +571,7 @@ export function RiskParametersDisplay({
           </div>
 
           <a
-            href="https://wa.me/5511999999999?text=Oi!%20Quero%20acessar%20minha%20gest%C3%A3o%20de%20risco"
+            href="https://wa.me/5522974051621?text=Oi!%20Quero%20acessar%20minha%20gest%C3%A3o%20de%20risco"
             target="_blank"
             rel="noopener noreferrer"
             className="block"
