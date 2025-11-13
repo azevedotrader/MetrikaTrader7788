@@ -205,18 +205,20 @@ async function finalizeQuestionnaire(userId: string, bankrollValue: string, part
     // Deletar estado do questionário
     await storage.deleteQuestionnaireState(userId);
 
-    // Formatar mensagens de sucesso
-    const paramsExplanation = formatRiskParametersExplanation(riskParams);
+    // Formatar mensagens de sucesso com valores em R$
+    const paramsExplanation = formatRiskParametersExplanation(riskParams, bankrollValueNum);
     
     return `
 ${paramsExplanation}
 
-📊 *Perfil*: ${riskProfile.profile.toUpperCase()} (${riskProfile.timeHorizon})
-💰 *Meta Final*: R$ ${targetBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} em ${riskProfile.horizonDays} dias
-
 ━━━━━━━━━━━━━━━━━━━━
 
-💡 *Dica*: Use /gestao para ver o status completo da sua gestão a qualquer momento!
+📊 *Seu Perfil*: ${riskProfile.profile.toUpperCase()} (${riskProfile.timeHorizon})
+💰 *Banca Inicial*: R$ ${bankrollValueNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+🎯 *Meta em ${riskProfile.horizonDays} dias*: R$ ${targetBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+
+✅ *Gestão ativa e funcionando!*
+🚀 *Agora salve seus trades e acompanhe seu progresso!*
     `.trim();
   } catch (error) {
     console.error('Erro ao finalizar questionário:', error);

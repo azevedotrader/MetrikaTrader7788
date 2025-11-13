@@ -433,32 +433,37 @@ _Este perfil foi personalizado com base nas suas respostas e nas suas caracterí
 }
 
 /**
- * Formata explicação dos parâmetros de gestão de risco
+ * Formata explicação dos parâmetros de gestão de risco com valores em R$
  */
-export function formatRiskParametersExplanation(params: RiskManagementParameters): string {
+export function formatRiskParametersExplanation(params: RiskManagementParameters, bankrollValue: number): string {
+  // Calcular valores em R$ baseados na banca
+  const riskPerOperationReais = bankrollValue * params.risk_per_operation;
+  const maxDailyRiskReais = bankrollValue * params.max_daily_risk;
+  const maxWeeklyRiskReais = bankrollValue * params.max_weekly_risk;
+  const minGainPerReal = params.min_risk_reward_ratio;
+
   return `
-🎯 *GESTÃO DE RISCO CONFIGURADA!*
+🎯 *SEU PLANO DE GERENCIAMENTO DE RISCO PERSONALIZADO*
 
-💰 *Parâmetros Personalizados:*
+Baseado no seu perfil, aqui estão suas regras de ouro:
 
-📊 *Risco por Operação:* ${(params.risk_per_operation * 100).toFixed(2)}%
-   _Quanto você arrisca em cada trade_
+📊 *RISCO POR OPERAÇÃO: ${(params.risk_per_operation * 100).toFixed(2)}%*
+   → Nunca arrisque mais que R$ ${riskPerOperationReais.toFixed(2)} por trade
 
-🚨 *Risco Máximo Diário:* ${(params.max_daily_risk * 100).toFixed(2)}%
-   _Limite de perda no dia_
+🚨 *RISCO MÁXIMO DIÁRIO: ${(params.max_daily_risk * 100).toFixed(2)}%*
+   → Se perder R$ ${maxDailyRiskReais.toFixed(2)} no dia, PARE de operar
 
-📅 *Risco Máximo Semanal:* ${(params.max_weekly_risk * 100).toFixed(2)}%
-   _Limite de perda na semana_
+📅 *RISCO MÁXIMO SEMANAL: ${(params.max_weekly_risk * 100).toFixed(2)}%*
+   → Se perder R$ ${maxWeeklyRiskReais.toFixed(2)} na semana, reavalie sua estratégia
 
-⚖️ *Risk/Reward Mínimo:* 1:${params.min_risk_reward_ratio.toFixed(1)}
-   _Relação mínima de ganho/perda_
+💰 *RELAÇÃO RISCO/RETORNO MÍNIMA: 1:${params.min_risk_reward_ratio.toFixed(1)}*
+   → Para cada R$1 arriscado, busque ganhar R$${minGainPerReal.toFixed(1)}
 
-🔻 *Gatilho de Proteção:* ${params.drawdown_trigger_losses} perdas consecutivas
-   _Reduz risco automaticamente após sequência de perdas_
+⚠️ *REGRA DE DRAWDOWN:*
+   → Após ${params.drawdown_trigger_losses} perdas seguidas, reduza seu risco pela metade até obter 1 ganho
 
 ━━━━━━━━━━━━━━━━━━━━
 
-✅ *Gestão ativa e funcionando!*
-🚀 *Agora salve seus trades e acompanhe seu progresso!*
+💡 *Lembre-se: A disciplina é o único caminho para a consistência.*
   `.trim();
 }
