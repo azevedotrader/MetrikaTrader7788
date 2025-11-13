@@ -157,7 +157,7 @@ export function sanitizePartialAnswers(partialAnswers: any): any {
         .filter(v => v !== null);
       
       // DEDUPE e LIMITE (máximo 5 mercados, que é o total de opções)
-      const uniqueMarkets = [...new Set(validMarkets)].slice(0, 5);
+      const uniqueMarkets = Array.from(new Set(validMarkets)).slice(0, 5);
       
       if (uniqueMarkets.length > 0) {
         sanitized.q3 = uniqueMarkets;
