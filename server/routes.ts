@@ -4402,6 +4402,39 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             })
             .where(eq(whatsappMessages.id, savedMessage.id));
           return;
+        } else if (messageTextLower === 'btn_create_bankroll') {
+          // Enviar instruções para criar gestão personalizada
+          const createBankrollMessage = `🎯 *CRIAR GESTÃO DE RISCO PERSONALIZADA*\n\n` +
+            `Vou criar uma gestão 100% personalizada para você!\n\n` +
+            `📝 *Como funciona:*\n` +
+            `Farei 7 perguntas rápidas sobre:\n` +
+            `• Sua experiência em trading\n` +
+            `• Seu capital disponível\n` +
+            `• Mercados que opera\n` +
+            `• Tolerância a risco\n` +
+            `• Win rate e risk/reward\n` +
+            `• Prazo de operações\n` +
+            `• Tempo dedicado ao trading\n\n` +
+            `⏱️ *Leva apenas 2 minutos!*\n\n` +
+            `💰 *Para começar, envie:*\n` +
+            `/gestao criar VALOR\n\n` +
+            `📋 *Exemplo:*\n` +
+            `_/gestao criar 1000_\n\n` +
+            `🚀 *Vantagens:*\n` +
+            `✅ Risco calculado automaticamente\n` +
+            `✅ Projeções personalizadas\n` +
+            `✅ Ajustes automáticos após cada trade\n\n` +
+            `💡 Envie o comando agora!`;
+          
+          await sendWhatsAppMessage(fromNumber, createBankrollMessage);
+          await db
+            .update(whatsappMessages)
+            .set({ 
+              status: 'create_bankroll_instructions_sent',
+              processedAt: new Date()
+            })
+            .where(eq(whatsappMessages.id, savedMessage.id));
+          return;
         } else if (messageTextLower === 'btn_statistics') {
           // Buscar estatísticas do usuário
           const userTrades = await db
@@ -4912,7 +4945,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         
         const menuButtons = [
           { id: 'btn_save_trade', title: '💾 Salvar Trade' },
-          { id: 'btn_statistics', title: '📊 Estatísticas' },
+          { id: 'btn_create_bankroll', title: '🎯 Criar Gestão' },
           { id: 'btn_help', title: '❓ Ajuda' }
         ];
         
