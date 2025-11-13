@@ -4,6 +4,7 @@
  */
 
 import type { QuestionnaireAnswers } from './risk-profile-calculator';
+import { sanitizeQuestionnaireMetrics } from './questionnaire-sanitizer';
 
 export type QuestionType = 'single_choice' | 'multiple_choice' | 'numeric';
 
@@ -230,7 +231,6 @@ export function convertToQuestionnaireAnswers(partialAnswers: any): Questionnair
   }
 
   // Usar sanitizador profundo para métricas opcionais
-  const { sanitizeQuestionnaireMetrics } = require('./questionnaire-sanitizer');
   const metrics = sanitizeQuestionnaireMetrics(
     partialAnswers.q5_winRate,
     partialAnswers.q5_riskReward
