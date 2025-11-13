@@ -230,10 +230,10 @@ export function RiskParametersDisplay({
         </CardHeader>
       </Card>
 
-      {/* Banca Total */}
+      {/* Capital Total */}
       <Card className="bg-zinc-900/50 border-zinc-800">
         <CardHeader>
-          <CardTitle className="text-white text-lg">Banca Total</CardTitle>
+          <CardTitle className="text-white text-lg">Capital Total</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
@@ -314,8 +314,8 @@ export function RiskParametersDisplay({
                   Após {bankroll.drawdownTriggerLosses} perdas seguidas
                 </h4>
                 <p className="text-sm text-zinc-400 mt-1">
-                  Reduza seu risco pela METADE até obter 1 trade positivo. Isso protege sua
-                  banca durante períodos difíceis.
+                  Reduza seu risco pela METADE até obter 1 trade positivo. Isso protege seu
+                  capital durante períodos difíceis.
                 </p>
               </div>
             </div>
@@ -340,7 +340,7 @@ export function RiskParametersDisplay({
                 <div>
                   <CardTitle className="text-white flex items-center gap-2 mb-2">
                     <TrendingUp className="w-5 h-5" />
-                    Evolução da Banca
+                    Evolução do Capital
                   </CardTitle>
                   <CardDescription>
                     Visualização da performance ao longo dos seus trades
@@ -372,7 +372,7 @@ export function RiskParametersDisplay({
                 <div className="flex items-start gap-2 mb-3">
                   <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-blue-200/80 leading-relaxed">
-                    Este gráfico mostra como sua banca evoluiu ao longo do tempo. A linha roxa representa o saldo acumulado 
+                    Este gráfico mostra como seu capital evoluiu ao longo do tempo. A linha roxa representa o saldo acumulado 
                     após cada trade. Use os filtros abaixo para analisar períodos específicos ou mercados diferentes.
                   </p>
                 </div>
@@ -554,7 +554,7 @@ export function RiskParametersDisplay({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-green-200/80 leading-relaxed">
-            Sabia que você pode gerenciar sua banca e criar gestões de risco diretamente pelo WhatsApp? 
+            Sabia que você pode gerenciar seu capital e criar gestões de risco diretamente pelo WhatsApp? 
             É a mesma tecnologia, com o mesmo algoritmo de cálculo!
           </p>
           
