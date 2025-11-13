@@ -494,6 +494,7 @@ export const questionnaireStates = pgTable("questionnaire_states", {
     q6?: string;
     q7?: string;
   }>().default(sql`'{}'::jsonb`), // Respostas parciais durante o questionário
+  lastActivityAt: timestamp("last_activity_at").defaultNow(), // Última atividade para timeout de 2 minutos
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

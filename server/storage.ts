@@ -1059,6 +1059,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...data,
         partialAnswers: sanitizedAnswers,
+        lastActivityAt: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -1083,6 +1084,7 @@ export class DatabaseStorage implements IStorage {
       .set({
         ...updates,
         partialAnswers: sanitizedAnswers,
+        lastActivityAt: new Date(),
         updatedAt: new Date(),
       })
       .where(eq(questionnaireStates.userId, userId))

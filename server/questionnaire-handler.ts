@@ -71,6 +71,21 @@ export async function processQuestionnaireAnswer(userId: string, answer: string)
       return '❌ Nenhum questionário em andamento.\n\nInicie um novo com: /gestao criar VALOR';
     }
 
+    // Verificar timeout de 2 minutos (120000 ms)
+    const TIMEOUT_MS = 2 * 60 * 1000; // 2 minutos
+    const lastActivity = state.lastActivityAt ? new Date(state.lastActivityAt).getTime() : 0;
+    const now = Date.now();
+    const timeSinceLastActivity = now - lastActivity;
+
+    if (timeSinceLastActivity > TIMEOUT_MS) {
+      // Timeout expirado - deletar estado e informar usuário
+      await storage.deleteQuestionnaireState(userId);
+      return '⏱️ Tempo esgotado! Seu questionário foi resetado por inatividade.\n\n' +
+             'Para criar uma nova gestão de risco, envie:\n' +
+             '/gestao criar VALOR\n\n' +
+             'Exemplo: /gestao criar 1000';
+    }
+
     const currentQuestion = state.currentQuestion;
 
     // Validar resposta
