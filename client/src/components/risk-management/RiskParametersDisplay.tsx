@@ -1,7 +1,10 @@
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2, MessageSquare } from "lucide-react";
+import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
 interface BankrollManagement {
   id: string;
@@ -13,6 +16,15 @@ interface BankrollManagement {
   minRiskRewardRatio: string;
   drawdownTriggerLosses: number;
   createdAt: Date;
+}
+
+interface Trade {
+  id: string;
+  dataHora: string;
+  resultado: string;
+  capitalUtilizado: string;
+  ativo: string;
+  mercado: string;
 }
 
 interface RiskParametersDisplayProps {
@@ -32,6 +44,54 @@ export function RiskParametersDisplay({
   const maxWeeklyRisk = parseFloat(bankroll.maxWeeklyRisk);
   const minRiskRewardRatio = parseFloat(bankroll.minRiskRewardRatio);
 
+  // Buscar trades do usuário para o gráfico
+  const { data: trades, isLoading: isLoadingTrades } = useQuery<Trade[]>({
+    queryKey: ["/api/trades"],
+  });
+
+  // Processar dados para o gráfico
+  const chartData = useMemo(() => {
+    if (!trades || trades.length === 0) {
+      return [];
+    }
+
+    const sortedTrades = [...trades].sort(
+      (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime()
+    );
+
+    let runningBalance = bankrollValue;
+    const data = [];
+
+    data.push({
+      date: "Início",
+      saldo: bankrollValue,
+      resultado: 0,
+      ativo: "-",
+      formattedDate: "Início",
+    });
+
+    sortedTrades.forEach((trade, index) => {
+      const resultado = parseFloat(trade.resultado || "0");
+      runningBalance += resultado;
+
+      const tradeDate = new Date(trade.dataHora);
+      const formattedDate = tradeDate.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+      });
+
+      data.push({
+        date: `Trade ${index + 1}`,
+        saldo: runningBalance,
+        resultado: resultado,
+        ativo: trade.ativo,
+        formattedDate: formattedDate,
+      });
+    });
+
+    return data;
+  }, [trades, bankrollValue]);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -41,6 +101,33 @@ export function RiskParametersDisplay({
 
   const formatPercent = (value: number) => {
     return `${(value * 100).toFixed(2)}%`;
+  };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-lg">
+          <p className="text-white font-semibold mb-1">{data.date}</p>
+          <p className="text-zinc-400 text-xs mb-2">{data.formattedDate}</p>
+          <p className="text-white font-bold">{formatCurrency(data.saldo)}</p>
+          {data.resultado !== 0 && (
+            <p
+              className={`text-sm mt-1 ${
+                data.resultado > 0 ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              {data.resultado > 0 ? "+" : ""}
+              {formatCurrency(data.resultado)}
+            </p>
+          )}
+          {data.ativo !== "-" && (
+            <p className="text-zinc-500 text-xs mt-1">{data.ativo}</p>
+          )}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -173,6 +260,118 @@ export function RiskParametersDisplay({
           </div>
         </CardContent>
       </Card>
+
+      {/* Gráfico de Performance */}
+      {trades && trades.length > 0 ? (
+        <Card className="bg-zinc-900/50 border-zinc-800" data-testid="performance-chart">
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-white flex items-center gap-2 mb-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Evolução da Banca
+                </CardTitle>
+                <CardDescription>
+                  Visualização da performance ao longo de {trades.length} trade{trades.length !== 1 ? "s" : ""}
+                </CardDescription>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-zinc-500 mb-1">Saldo Atual</p>
+                <p className="text-xl font-bold text-white">
+                  {formatCurrency(chartData[chartData.length - 1]?.saldo || bankrollValue)}
+                </p>
+                {chartData.length > 1 && (
+                  <p
+                    className={`text-sm font-medium ${
+                      chartData[chartData.length - 1].saldo >= bankrollValue
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {chartData[chartData.length - 1].saldo >= bankrollValue ? "+" : ""}
+                    {formatCurrency(chartData[chartData.length - 1].saldo - bankrollValue)} (
+                    {((((chartData[chartData.length - 1].saldo - bankrollValue) / bankrollValue) * 100)).toFixed(2)}%)
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                  <XAxis
+                    dataKey="date"
+                    stroke="#71717a"
+                    style={{ fontSize: "12px" }}
+                    tick={{ fill: "#71717a" }}
+                  />
+                  <YAxis
+                    stroke="#71717a"
+                    style={{ fontSize: "12px" }}
+                    tick={{ fill: "#71717a" }}
+                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <ReferenceLine
+                    y={bankrollValue}
+                    stroke="#6366f1"
+                    strokeDasharray="5 5"
+                    label={{
+                      value: "Banca Inicial",
+                      fill: "#6366f1",
+                      fontSize: 12,
+                      position: "insideTopRight",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="saldo"
+                    stroke="#8b5cf6"
+                    strokeWidth={3}
+                    dot={{ fill: "#8b5cf6", r: 4 }}
+                    activeDot={{ r: 6, fill: "#a78bfa" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Estatísticas rápidas */}
+            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-zinc-800">
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 mb-1">Banca Inicial</p>
+                <p className="text-sm font-semibold text-white">{formatCurrency(bankrollValue)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 mb-1">Total de Trades</p>
+                <p className="text-sm font-semibold text-white">{trades.length}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-zinc-500 mb-1">Variação</p>
+                <p
+                  className={`text-sm font-semibold ${
+                    chartData[chartData.length - 1]?.saldo >= bankrollValue
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  {chartData.length > 1 
+                    ? `${chartData[chartData.length - 1].saldo >= bankrollValue ? "+" : ""}${((((chartData[chartData.length - 1].saldo - bankrollValue) / bankrollValue) * 100)).toFixed(2)}%`
+                    : "0.00%"
+                  }
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : isLoadingTrades ? (
+        <Card className="bg-zinc-900/50 border-zinc-800">
+          <CardContent className="p-6 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* Card do WhatsApp */}
       <Card className="bg-gradient-to-br from-green-950/30 to-emerald-950/30 border-green-800/40">

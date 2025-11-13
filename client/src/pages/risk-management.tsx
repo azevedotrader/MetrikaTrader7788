@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { QuestionnaireForm } from "@/components/risk-management/QuestionnaireForm";
 import { RiskParametersDisplay } from "@/components/risk-management/RiskParametersDisplay";
-import { PerformanceChart } from "@/components/risk-management/PerformanceChart";
 
 interface BankrollManagement {
   id: string;
@@ -275,14 +274,11 @@ export default function RiskManagement() {
           />
         ) : bankroll ? (
           // Mostrar parâmetros calculados
-          <div className="space-y-6">
-            <PerformanceChart bankroll={bankroll} />
-            <RiskParametersDisplay
-              bankroll={bankroll}
-              onDelete={handleDelete}
-              isDeleting={deleteMutation.isPending}
-            />
-          </div>
+          <RiskParametersDisplay
+            bankroll={bankroll}
+            onDelete={handleDelete}
+            isDeleting={deleteMutation.isPending}
+          />
         ) : (
           // Estado de erro
           <Card className="bg-red-900/20 border-red-800/50">
