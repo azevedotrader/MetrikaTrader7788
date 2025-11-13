@@ -4516,23 +4516,139 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           return;
         }
         
+        // ===== FLUXO DE QUESTIONÁRIO DE GESTÃO DE RISCO =====
+        
+        // Importar handlers do questionário
+        const { 
+          startQuestionnaire, 
+          processQuestionnaireAnswer, 
+          isInQuestionnaire,
+          cancelQuestionnaire,
+          getQuestionnaireProgress
+        } = await import('./questionnaire-handler');
+        
+        // Verificar se usuário está em questionário ativo
+        const inQuestionnaire = await isInQuestionnaire(user.id);
+        
+        // Se está em questionário E não é comando de cancelamento, processar como resposta
+        if (inQuestionnaire && messageTextLower !== '/gestao cancelar' && messageTextLower !== '/questao cancelar') {
+          try {
+            const response = await processQuestionnaireAnswer(user.id, messageText);
+            await sendWhatsAppMessage(fromNumber, response);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'questionnaire_response_processed',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error processing questionnaire answer:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao processar resposta. Tente novamente.');
+            return;
+          }
+        }
+        
+        // Comando: /gestao criar VALOR - Inicia questionário personalizado
+        if (messageTextLower.startsWith('/gestao criar')) {
+          try {
+            const parts = messageText.trim().split(/\s+/);
+            
+            if (parts.length < 3) {
+              const instructionsMessage = `💼 *Como criar sua Gestão de Risco Personalizada:*\n\n` +
+                `📝 *Formato:*\n` +
+                `/gestao criar VALOR\n\n` +
+                `📋 *Exemplo:*\n` +
+                `_/gestao criar 1000_\n\n` +
+                `💡 Após enviar o comando, farei 7 perguntas rápidas para criar uma gestão 100% personalizada para o seu perfil!`;
+              
+              await sendWhatsAppMessage(fromNumber, instructionsMessage);
+              return;
+            }
+            
+            const bankrollValue = parseFloat(parts[2]);
+            
+            if (isNaN(bankrollValue) || bankrollValue <= 0) {
+              await sendWhatsAppMessage(fromNumber, '❌ Valor inválido! Use números positivos. Ex: /gestao criar 1000');
+              return;
+            }
+            
+            // Iniciar questionário
+            const response = await startQuestionnaire(user.id, bankrollValue);
+            await sendWhatsAppMessage(fromNumber, response);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'questionnaire_started',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error starting questionnaire:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao iniciar questionário. Tente novamente!');
+            return;
+          }
+        }
+        
+        // Comando: /gestao cancelar - Cancela questionário em andamento
+        if (messageTextLower === '/gestao cancelar' || messageTextLower === '/questao cancelar') {
+          try {
+            const response = await cancelQuestionnaire(user.id);
+            await sendWhatsAppMessage(fromNumber, response);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'questionnaire_cancelled',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error cancelling questionnaire:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao cancelar questionário.');
+            return;
+          }
+        }
+        
+        // Comando: /gestao progresso - Mostra progresso do questionário
+        if (messageTextLower === '/gestao progresso') {
+          try {
+            const response = await getQuestionnaireProgress(user.id);
+            await sendWhatsAppMessage(fromNumber, response);
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'questionnaire_progress_sent',
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, savedMessage.id));
+            return;
+          } catch (error) {
+            console.error('❌ Error getting questionnaire progress:', error);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao buscar progresso.');
+            return;
+          }
+        }
+        
         // ===== COMANDOS DE GESTÃO DE BANCA =====
         
-        // Comando: /banca resumo ou /banca
-        if (messageTextLower === '/banca' || messageTextLower === '/banca resumo') {
+        // Comando: /gestao resumo ou /gestao - Mostra resumo da gestão criada
+        if (messageTextLower === '/gestao' || messageTextLower === '/gestao resumo') {
           try {
             const bankroll = await storage.getBankrollManagement(user.id);
             
             if (!bankroll) {
-              const noBankrollMessage = `💼 *Gestão de Banca não configurada*\n\n` +
+              const noBankrollMessage = `💼 *Gestão de Risco não configurada*\n\n` +
                 `Você ainda não tem uma gestão personalizada!\n\n` +
-                `📝 *Para criar sua gestão:*\n` +
-                `Envie: */banca criar VALOR PERFIL PRAZO*\n\n` +
+                `📝 *Para criar sua gestão 100% personalizada:*\n` +
+                `Envie: */gestao criar VALOR*\n\n` +
                 `📋 *Exemplo:*\n` +
-                `_/banca criar 1000 moderado longo_\n\n` +
-                `*Perfis:* conservador, moderado, agressivo\n` +
-                `*Prazos:* curto, longo\n\n` +
-                `💡 Se não especificar perfil/prazo, usaremos valores equilibrados!`;
+                `_/gestao criar 1000_\n\n` +
+                `🎯 *O que acontece:*\n` +
+                `Farei 7 perguntas rápidas sobre seu perfil e criarei uma gestão de risco sob medida para você!\n\n` +
+                `⏱️ Leva menos de 2 minutos.`;
               
               await sendWhatsAppMessage(fromNumber, noBankrollMessage);
               await db
@@ -4969,7 +5085,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
 
   function getHelpMessage() {
     return `🤖 *MÉTRIKA TRADING BOT*\n\n` +
-      `Seu assistente para registrar trades por WhatsApp!\n\n` +
+      `Seu assistente para registrar trades e gerenciar risco por WhatsApp!\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `📱 *COMO FUNCIONA:*\n\n` +
       `1️⃣ Você envia o resultado do seu trade\n` +
@@ -4986,6 +5102,11 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       `*B3 (Ações/Futuros):*\n` +
       `• Entrei com 250 no WINQ25 e ganhei 180\n` +
       `• Comprei 350 no PETR4 e perdi\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🎯 *GESTÃO DE RISCO PERSONALIZADA:*\n\n` +
+      `• */gestao criar VALOR* - Inicia questionário\n` +
+      `• */gestao* - Ver resumo da sua gestão\n` +
+      `• */gestao cancelar* - Cancela questionário\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
       `⚠️ *IMPORTANTE:*\n` +
       `Envie todos os valores em *R$ (REAIS)*. Nosso sistema não converte de dólar automaticamente.\n\n` +
