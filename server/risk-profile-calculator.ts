@@ -33,6 +33,17 @@ export type CalculatedRiskProfile = {
 };
 
 /**
+ * Parâmetros de Gestão de Risco para o sistema de Bankroll Management
+ */
+export type RiskManagementParameters = {
+  risk_per_operation: number; // Percentual do capital a arriscar por operação (ex: 0.01 = 1%)
+  max_daily_risk: number; // Percentual máximo de perda permitido no dia (ex: 0.03 = 3%)
+  max_weekly_risk: number; // Percentual máximo de perda permitido na semana (ex: 0.06 = 6%)
+  min_risk_reward_ratio: number; // Relação mínima de risco/retorno (ex: 2.0 = 1:2)
+  drawdown_trigger_losses: number; // Número de perdas consecutivas que aciona redução de risco
+};
+
+/**
  * TABELA DE SCORING
  * Cada resposta tem um peso que contribui para o perfil final
  */
@@ -288,6 +299,122 @@ export function validateQuestionnaireAnswers(answers: Partial<QuestionnaireAnswe
 }
 
 /**
+ * CÁLCULO DE PARÂMETROS DE GESTÃO DE RISCO
+ * Baseado principalmente na Pergunta 2 (perfil: Conservador/Moderado/Arrojado)
+ * Com ajustes finos baseados nas demais respostas
+ */
+export function calculateRiskManagementParameters(answers: QuestionnaireAnswers): RiskManagementParameters {
+  // PASSO 1: Definir parâmetros base conforme Pergunta 2 (Objetivo/Perfil)
+  let baseParams: RiskManagementParameters;
+  
+  if (answers.q2 === "A") {
+    // Conservador - Preservação de Capital
+    baseParams = {
+      risk_per_operation: 0.005,    // 0.5% por operação
+      max_daily_risk: 0.015,        // 1.5% máximo no dia
+      max_weekly_risk: 0.03,        // 3% máximo na semana
+      min_risk_reward_ratio: 2.5,   // Mínimo 1:2.5
+      drawdown_trigger_losses: 3    // Reduz risco após 3 perdas consecutivas
+    };
+  } else if (answers.q2 === "B") {
+    // Moderado - Equilíbrio Risco/Retorno
+    baseParams = {
+      risk_per_operation: 0.01,     // 1% por operação
+      max_daily_risk: 0.03,         // 3% máximo no dia
+      max_weekly_risk: 0.06,        // 6% máximo na semana
+      min_risk_reward_ratio: 2.0,   // Mínimo 1:2
+      drawdown_trigger_losses: 4    // Reduz risco após 4 perdas consecutivas
+    };
+  } else {
+    // Arrojado - Crescimento Agressivo
+    baseParams = {
+      risk_per_operation: 0.02,     // 2% por operação
+      max_daily_risk: 0.06,         // 6% máximo no dia
+      max_weekly_risk: 0.12,        // 12% máximo na semana
+      min_risk_reward_ratio: 1.5,   // Mínimo 1:1.5
+      drawdown_trigger_losses: 5    // Reduz risco após 5 perdas consecutivas
+    };
+  }
+
+  // PASSO 2: Ajustes finos baseado em experiência (Q1)
+  if (answers.q1 === "A") {
+    // Iniciante: SEMPRE reduz risco em 30% (proteção)
+    baseParams.risk_per_operation *= 0.7;
+    baseParams.max_daily_risk *= 0.7;
+    baseParams.max_weekly_risk *= 0.7;
+    baseParams.min_risk_reward_ratio = Math.max(baseParams.min_risk_reward_ratio, 2.0); // Mínimo 1:2
+    baseParams.drawdown_trigger_losses = Math.max(baseParams.drawdown_trigger_losses - 1, 2); // Mais conservador
+  } else if (answers.q1 === "C") {
+    // Avançado: Pode aumentar levemente o risco (10%)
+    baseParams.risk_per_operation *= 1.1;
+    baseParams.max_daily_risk *= 1.1;
+    baseParams.max_weekly_risk *= 1.1;
+  }
+
+  // PASSO 3: Ajustes baseado em timeframe (Q4)
+  if (answers.q4 === "A") {
+    // Day Trade: Aumenta max_daily_risk mas mantém risk_per_operation
+    baseParams.max_daily_risk *= 1.2;
+  } else if (answers.q4 === "C") {
+    // Position Trade: Reduz max_daily_risk (menos operações por dia)
+    baseParams.max_daily_risk *= 0.8;
+    baseParams.max_weekly_risk *= 0.9;
+  }
+
+  // PASSO 4: Ajustes baseado em perfil psicológico (Q6 e Q7)
+  const psychologyAverage = [answers.q6, answers.q7].filter(a => a === "A").length;
+  
+  if (psychologyAverage >= 1) {
+    // Se tem perfil mais abalado/duvidoso (respostas "A"): reduz risco
+    baseParams.risk_per_operation *= 0.85;
+    baseParams.max_daily_risk *= 0.85;
+    baseParams.drawdown_trigger_losses = Math.max(baseParams.drawdown_trigger_losses - 1, 2);
+  }
+
+  // PASSO 5: Ajustes baseado em Win Rate e Risk/Reward customizados (Q5)
+  const { validWinRate, validRiskReward } = validateCustomMetrics(answers.q5_winRate, answers.q5_riskReward);
+  
+  if (validWinRate !== undefined) {
+    if (validWinRate >= 60) {
+      // Win rate alto: pode aumentar risco levemente
+      baseParams.risk_per_operation *= 1.15;
+      baseParams.max_daily_risk *= 1.15;
+    } else if (validWinRate <= 40) {
+      // Win rate baixo: REDUZ risco significativamente
+      baseParams.risk_per_operation *= 0.75;
+      baseParams.max_daily_risk *= 0.75;
+      baseParams.min_risk_reward_ratio = Math.max(baseParams.min_risk_reward_ratio, 2.5); // Exige R:R maior
+    }
+  }
+
+  if (validRiskReward !== undefined) {
+    // Se o trader tem R:R personalizado válido
+    baseParams.min_risk_reward_ratio = Math.max(baseParams.min_risk_reward_ratio, validRiskReward);
+    
+    // R:R alto (>= 3.0): pode aumentar risco por operação levemente
+    if (validRiskReward >= 3.0) {
+      baseParams.risk_per_operation *= 1.1;
+    }
+  }
+
+  // PASSO 6: Limites de segurança absolutos (proteção final)
+  baseParams.risk_per_operation = Math.min(0.03, Math.max(0.003, baseParams.risk_per_operation)); // Entre 0.3% e 3%
+  baseParams.max_daily_risk = Math.min(0.08, Math.max(0.01, baseParams.max_daily_risk)); // Entre 1% e 8%
+  baseParams.max_weekly_risk = Math.min(0.15, Math.max(0.02, baseParams.max_weekly_risk)); // Entre 2% e 15%
+  baseParams.min_risk_reward_ratio = Math.min(5.0, Math.max(1.2, baseParams.min_risk_reward_ratio)); // Entre 1.2 e 5.0
+  baseParams.drawdown_trigger_losses = Math.min(7, Math.max(2, baseParams.drawdown_trigger_losses)); // Entre 2 e 7
+
+  // PASSO 7: Arredondar valores para 4 casas decimais
+  return {
+    risk_per_operation: Math.round(baseParams.risk_per_operation * 10000) / 10000,
+    max_daily_risk: Math.round(baseParams.max_daily_risk * 10000) / 10000,
+    max_weekly_risk: Math.round(baseParams.max_weekly_risk * 10000) / 10000,
+    min_risk_reward_ratio: Math.round(baseParams.min_risk_reward_ratio * 100) / 100,
+    drawdown_trigger_losses: Math.round(baseParams.drawdown_trigger_losses)
+  };
+}
+
+/**
  * Formata explicação do perfil para o usuário
  */
 export function formatProfileExplanation(result: CalculatedRiskProfile): string {
@@ -316,5 +443,36 @@ export function formatProfileExplanation(result: CalculatedRiskProfile): string 
 📈 *Score Total*: ${result.scoringBreakdown.totalScore.toFixed(1)} pontos
 
 _Este perfil foi personalizado com base nas suas respostas e nas suas características como trader._
+  `.trim();
+}
+
+/**
+ * Formata explicação dos parâmetros de gestão de risco
+ */
+export function formatRiskParametersExplanation(params: RiskManagementParameters): string {
+  return `
+🎯 *GESTÃO DE RISCO CONFIGURADA!*
+
+💰 *Parâmetros Personalizados:*
+
+📊 *Risco por Operação:* ${(params.risk_per_operation * 100).toFixed(2)}%
+   _Quanto você arrisca em cada trade_
+
+🚨 *Risco Máximo Diário:* ${(params.max_daily_risk * 100).toFixed(2)}%
+   _Limite de perda no dia_
+
+📅 *Risco Máximo Semanal:* ${(params.max_weekly_risk * 100).toFixed(2)}%
+   _Limite de perda na semana_
+
+⚖️ *Risk/Reward Mínimo:* 1:${params.min_risk_reward_ratio.toFixed(1)}
+   _Relação mínima de ganho/perda_
+
+🔻 *Gatilho de Proteção:* ${params.drawdown_trigger_losses} perdas consecutivas
+   _Reduz risco automaticamente após sequência de perdas_
+
+━━━━━━━━━━━━━━━━━━━━
+
+✅ *Gestão ativa e funcionando!*
+🚀 *Agora salve seus trades e acompanhe seu progresso!*
   `.trim();
 }

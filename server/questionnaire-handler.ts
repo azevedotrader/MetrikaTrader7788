@@ -14,7 +14,12 @@ import {
   getProgressMessage,
   getConfirmationMessage,
 } from './questionnaire-flow';
-import { calculateRiskProfile, formatProfileExplanation } from './risk-profile-calculator';
+import { 
+  calculateRiskProfile, 
+  calculateRiskManagementParameters,
+  formatProfileExplanation,
+  formatRiskParametersExplanation
+} from './risk-profile-calculator';
 import { buildProjection, calculateTargetBalance } from './bankroll-helpers';
 
 /**
@@ -130,6 +135,9 @@ async function finalizeQuestionnaire(userId: string, bankrollValue: string, part
 
     // Calcular perfil de risco personalizado
     const riskProfile = calculateRiskProfile(answers);
+    
+    // Calcular parâmetros de gestão de risco (NOVOS - 5 parâmetros)
+    const riskParams = calculateRiskManagementParameters(answers);
 
     // Calcular projeções
     const bankrollValueNum = parseFloat(bankrollValue);
@@ -179,6 +187,13 @@ async function finalizeQuestionnaire(userId: string, bankrollValue: string, part
       riskPerTrade: riskProfile.riskPerTrade.toString(),
       dailyProfitTarget: riskProfile.dailyProfitTarget.toString(),
       
+      // Parâmetros de gestão de risco (NOVOS - Sistema Inteligente)
+      riskPerOperation: riskParams.risk_per_operation.toString(),
+      maxDailyRisk: riskParams.max_daily_risk.toString(),
+      maxWeeklyRisk: riskParams.max_weekly_risk.toString(),
+      minRiskRewardRatio: riskParams.min_risk_reward_ratio.toString(),
+      drawdownTriggerLosses: riskParams.drawdown_trigger_losses,
+      
       // Projeções
       projectedGrowth,
       targetBalance: targetBalance.toString(),
@@ -190,20 +205,18 @@ async function finalizeQuestionnaire(userId: string, bankrollValue: string, part
     // Deletar estado do questionário
     await storage.deleteQuestionnaireState(userId);
 
-    // Formatar mensagem de sucesso
-    const explanation = formatProfileExplanation(riskProfile);
-
+    // Formatar mensagens de sucesso
+    const paramsExplanation = formatRiskParametersExplanation(riskParams);
+    
     return `
-${explanation}
+${paramsExplanation}
 
+📊 *Perfil*: ${riskProfile.profile.toUpperCase()} (${riskProfile.timeHorizon})
 💰 *Meta Final*: R$ ${targetBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} em ${riskProfile.horizonDays} dias
 
-🎯 *Próximos Passos*:
-• Continue registrando seus trades normalmente
-• Seu risco será ajustado automaticamente
-• Use /gestao para ver status
+━━━━━━━━━━━━━━━━━━━━
 
-_Boa sorte nos seus trades!_ 📈
+💡 *Dica*: Use /gestao para ver o status completo da sua gestão a qualquer momento!
     `.trim();
   } catch (error) {
     console.error('Erro ao finalizar questionário:', error);

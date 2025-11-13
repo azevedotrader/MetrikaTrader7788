@@ -541,6 +541,13 @@ export const bankrollManagements = pgTable("bankroll_managements", {
   riskPerTrade: decimal("risk_per_trade", { precision: 5, scale: 4 }).notNull(), // Calculado automaticamente
   dailyProfitTarget: decimal("daily_profit_target", { precision: 5, scale: 4 }).notNull(), // Calculado automaticamente
   
+  // === PARÂMETROS DE GESTÃO DE RISCO (NOVOS - SISTEMA INTELIGENTE) ===
+  riskPerOperation: decimal("risk_per_operation", { precision: 5, scale: 4 }).notNull(), // % do capital a arriscar por operação (0.003-0.03)
+  maxDailyRisk: decimal("max_daily_risk", { precision: 5, scale: 4 }).notNull(), // % máximo de perda permitido no dia (0.01-0.08)
+  maxWeeklyRisk: decimal("max_weekly_risk", { precision: 5, scale: 4 }).notNull(), // % máximo de perda permitido na semana (0.02-0.15)
+  minRiskRewardRatio: decimal("min_risk_reward_ratio", { precision: 5, scale: 2 }).notNull(), // Relação mínima de risco/retorno (1.2-5.0)
+  drawdownTriggerLosses: integer("drawdown_trigger_losses").notNull(), // Número de perdas consecutivas que aciona redução de risco (2-7)
+  
   // === PROJEÇÕES E MONITORAMENTO ===
   projectedGrowth: jsonb("projected_growth").$type<Array<{ day: number; balance: number }>>().notNull(),
   targetBalance: decimal("target_balance", { precision: 12, scale: 2 }).notNull(),
