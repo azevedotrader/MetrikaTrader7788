@@ -146,7 +146,31 @@ const BASE_RISK_MATRIX = {
 };
 
 /**
+ * Valida e normaliza métricas customizadas (win rate e R:R)
+ */
+function validateCustomMetrics(winRate?: number, riskReward?: number): {
+  validWinRate?: number;
+  validRiskReward?: number;
+} {
+  let validWinRate: number | undefined;
+  let validRiskReward: number | undefined;
+
+  // Validar win rate (0-100)
+  if (winRate !== undefined && winRate !== null) {
+    validWinRate = Math.min(100, Math.max(0, winRate));
+  }
+
+  // Validar risk/reward (deve ser positivo)
+  if (riskReward !== undefined && riskReward !== null && riskReward > 0) {
+    validRiskReward = Math.min(10, Math.max(0.5, riskReward)); // Limitar entre 0.5 e 10
+  }
+
+  return { validWinRate, validRiskReward };
+}
+
+/**
  * Ajusta risco baseado em win rate e risk/reward customizados
+ * CORRIGIDO: Trata winRate=0 corretamente (não é undefined)
  */
 function adjustRiskByMetrics(
   baseRisk: number,
@@ -157,24 +181,29 @@ function adjustRiskByMetrics(
   let adjustedRisk = baseRisk;
   let adjustedTarget = baseDailyTarget;
 
-  // Se win rate é alto (>60%), pode aumentar risco levemente
-  if (winRate && winRate > 60) {
-    adjustedRisk = baseRisk * 1.2; // +20%
-    adjustedTarget = baseDailyTarget * 1.2;
-  }
+  // Validar e normalizar métricas
+  const { validWinRate, validRiskReward } = validateCustomMetrics(winRate, riskReward);
 
-  // Se win rate é baixo (<45%), reduzir risco
-  if (winRate && winRate < 45) {
-    adjustedRisk = baseRisk * 0.8; // -20%
-    adjustedTarget = baseDailyTarget * 0.8;
+  // Ajustar baseado em win rate (CRÍTICO: verifica !== undefined, não truthy)
+  if (validWinRate !== undefined) {
+    if (validWinRate > 60) {
+      // Win rate alto: +20% risco e target
+      adjustedRisk = baseRisk * 1.2;
+      adjustedTarget = baseDailyTarget * 1.2;
+    } else if (validWinRate < 45) {
+      // Win rate baixo: -20% risco e target (PROTEÇÃO CRÍTICA)
+      adjustedRisk = baseRisk * 0.8;
+      adjustedTarget = baseDailyTarget * 0.8;
+    }
+    // Se win rate está entre 45-60%, usa valores base (sem ajuste)
   }
 
   // Se risk/reward é alto (>2.5), pode aumentar target
-  if (riskReward && riskReward > 2.5) {
+  if (validRiskReward !== undefined && validRiskReward > 2.5) {
     adjustedTarget = baseDailyTarget * 1.3;
   }
 
-  // Limites de segurança
+  // Limites de segurança ABSOLUTOS (proteção contra qualquer configuração perigosa)
   adjustedRisk = Math.min(0.05, Math.max(0.003, adjustedRisk)); // Entre 0.3% e 5%
   adjustedTarget = Math.min(0.10, Math.max(0.005, adjustedTarget)); // Entre 0.5% e 10%
 
@@ -198,8 +227,14 @@ export function calculateRiskProfile(answers: QuestionnaireAnswers): CalculatedR
   const totalScore = experienceScore + objectiveScore + marketScore + timeframeScore + psychologyScore;
 
   // Determinar perfil e horizonte
-  const profile = scoreToProfile(totalScore);
+  let profile = scoreToProfile(totalScore);
   const timeHorizon = calculateTimeHorizon(answers.q4, answers.q1);
+
+  // REGRA DE PROTEÇÃO: Iniciantes (A) nunca podem ser agressivos
+  // Mesmo com score alto, limite a "moderado"
+  if (answers.q1 === "A" && profile === "agressivo") {
+    profile = "moderado";
+  }
 
   // Buscar parâmetros base
   const baseParams = BASE_RISK_MATRIX[profile][timeHorizon];
