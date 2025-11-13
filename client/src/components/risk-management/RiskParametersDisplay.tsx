@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2, MessageSquare, Loader2 } from "lucide-react";
+import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2, MessageSquare, Loader2, Filter, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface BankrollManagement {
   id: string;
@@ -44,18 +45,45 @@ export function RiskParametersDisplay({
   const maxWeeklyRisk = parseFloat(bankroll.maxWeeklyRisk);
   const minRiskRewardRatio = parseFloat(bankroll.minRiskRewardRatio);
 
+  // Estados para filtros
+  const [periodFilter, setPeriodFilter] = useState<string>("all");
+  const [marketFilter, setMarketFilter] = useState<string>("all");
+
   // Buscar trades do usuário para o gráfico
   const { data: trades, isLoading: isLoadingTrades } = useQuery<Trade[]>({
     queryKey: ["/api/trades"],
   });
 
+  // Filtrar trades baseado nos filtros selecionados
+  const filteredTrades = useMemo(() => {
+    if (!trades) return [];
+
+    let filtered = [...trades];
+
+    // Filtro de período
+    if (periodFilter !== "all") {
+      const now = new Date();
+      const daysAgo = parseInt(periodFilter);
+      const cutoffDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+      
+      filtered = filtered.filter(trade => new Date(trade.dataHora) >= cutoffDate);
+    }
+
+    // Filtro de mercado
+    if (marketFilter !== "all") {
+      filtered = filtered.filter(trade => trade.mercado.toLowerCase() === marketFilter.toLowerCase());
+    }
+
+    return filtered;
+  }, [trades, periodFilter, marketFilter]);
+
   // Processar dados para o gráfico
   const chartData = useMemo(() => {
-    if (!trades || trades.length === 0) {
+    if (!filteredTrades || filteredTrades.length === 0) {
       return [];
     }
 
-    const sortedTrades = [...trades].sort(
+    const sortedTrades = [...filteredTrades].sort(
       (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime()
     );
 
@@ -90,7 +118,49 @@ export function RiskParametersDisplay({
     });
 
     return data;
-  }, [trades, bankrollValue]);
+  }, [filteredTrades, bankrollValue]);
+
+  // Calcular estatísticas avançadas
+  const statistics = useMemo(() => {
+    if (!filteredTrades || filteredTrades.length === 0) {
+      return null;
+    }
+
+    const wins = filteredTrades.filter(t => parseFloat(t.resultado || "0") > 0);
+    const losses = filteredTrades.filter(t => parseFloat(t.resultado || "0") < 0);
+    
+    const totalProfit = wins.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+    const totalLoss = Math.abs(losses.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0));
+    
+    const winRate = filteredTrades.length > 0 ? (wins.length / filteredTrades.length) * 100 : 0;
+    const avgWin = wins.length > 0 ? totalProfit / wins.length : 0;
+    const avgLoss = losses.length > 0 ? totalLoss / losses.length : 0;
+    const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : 0;
+    
+    const bestTrade = filteredTrades.reduce((best, t) => {
+      const result = parseFloat(t.resultado || "0");
+      return result > parseFloat(best.resultado || "0") ? t : best;
+    }, filteredTrades[0]);
+    
+    const worstTrade = filteredTrades.reduce((worst, t) => {
+      const result = parseFloat(t.resultado || "0");
+      return result < parseFloat(worst.resultado || "0") ? t : worst;
+    }, filteredTrades[0]);
+
+    return {
+      totalTrades: filteredTrades.length,
+      wins: wins.length,
+      losses: losses.length,
+      winRate,
+      totalProfit,
+      totalLoss,
+      avgWin,
+      avgLoss,
+      profitFactor,
+      bestTrade,
+      worstTrade,
+    };
+  }, [filteredTrades]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -265,34 +335,85 @@ export function RiskParametersDisplay({
       {trades && trades.length > 0 ? (
         <Card className="bg-zinc-900/50 border-zinc-800" data-testid="performance-chart">
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-white flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Evolução da Banca
-                </CardTitle>
-                <CardDescription>
-                  Visualização da performance ao longo de {trades.length} trade{trades.length !== 1 ? "s" : ""}
-                </CardDescription>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-zinc-500 mb-1">Saldo Atual</p>
-                <p className="text-xl font-bold text-white">
-                  {formatCurrency(chartData[chartData.length - 1]?.saldo || bankrollValue)}
-                </p>
-                {chartData.length > 1 && (
-                  <p
-                    className={`text-sm font-medium ${
-                      chartData[chartData.length - 1].saldo >= bankrollValue
-                        ? "text-green-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    {chartData[chartData.length - 1].saldo >= bankrollValue ? "+" : ""}
-                    {formatCurrency(chartData[chartData.length - 1].saldo - bankrollValue)} (
-                    {((((chartData[chartData.length - 1].saldo - bankrollValue) / bankrollValue) * 100)).toFixed(2)}%)
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-white flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Evolução da Banca
+                  </CardTitle>
+                  <CardDescription>
+                    Visualização da performance ao longo dos seus trades
+                  </CardDescription>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-zinc-500 mb-1">Saldo {periodFilter === "all" ? "Atual" : "do Período"}</p>
+                  <p className="text-xl font-bold text-white">
+                    {formatCurrency(chartData[chartData.length - 1]?.saldo || bankrollValue)}
                   </p>
-                )}
+                  {chartData.length > 1 && (
+                    <p
+                      className={`text-sm font-medium ${
+                        chartData[chartData.length - 1].saldo >= bankrollValue
+                          ? "text-green-400"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {chartData[chartData.length - 1].saldo >= bankrollValue ? "+" : ""}
+                      {formatCurrency(chartData[chartData.length - 1].saldo - bankrollValue)} (
+                      {((((chartData[chartData.length - 1].saldo - bankrollValue) / bankrollValue) * 100)).toFixed(2)}%)
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Explicação e Filtros */}
+              <div className="bg-blue-950/30 border border-blue-800/30 rounded-lg p-4">
+                <div className="flex items-start gap-2 mb-3">
+                  <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-blue-200/80 leading-relaxed">
+                    Este gráfico mostra como sua banca evoluiu ao longo do tempo. A linha roxa representa o saldo acumulado 
+                    após cada trade. Use os filtros abaixo para analisar períodos específicos ou mercados diferentes.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-zinc-400 mb-2 block flex items-center gap-1">
+                      <Filter className="w-3 h-3" />
+                      Período
+                    </label>
+                    <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os trades</SelectItem>
+                        <SelectItem value="7">Últimos 7 dias</SelectItem>
+                        <SelectItem value="30">Últimos 30 dias</SelectItem>
+                        <SelectItem value="90">Últimos 90 dias</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-zinc-400 mb-2 block flex items-center gap-1">
+                      <Filter className="w-3 h-3" />
+                      Mercado
+                    </label>
+                    <Select value={marketFilter} onValueChange={setMarketFilter}>
+                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos os mercados</SelectItem>
+                        <SelectItem value="crypto">Crypto</SelectItem>
+                        <SelectItem value="forex">Forex</SelectItem>
+                        <SelectItem value="b3">B3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -337,32 +458,82 @@ export function RiskParametersDisplay({
               </ResponsiveContainer>
             </div>
 
-            {/* Estatísticas rápidas */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-zinc-800">
-              <div className="text-center">
-                <p className="text-xs text-zinc-500 mb-1">Banca Inicial</p>
-                <p className="text-sm font-semibold text-white">{formatCurrency(bankrollValue)}</p>
+            {/* Estatísticas Detalhadas */}
+            {statistics && (
+              <div className="mt-6 pt-6 border-t border-zinc-800">
+                <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                  📊 Estatísticas do Período
+                </h4>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
+                    <p className="text-xs text-zinc-500 mb-1">Total de Trades</p>
+                    <p className="text-lg font-bold text-white">{statistics.totalTrades}</p>
+                  </div>
+                  
+                  <div className="bg-green-950/30 border border-green-800/30 rounded-lg p-3 text-center">
+                    <p className="text-xs text-green-400 mb-1">Wins</p>
+                    <p className="text-lg font-bold text-green-400">{statistics.wins}</p>
+                  </div>
+                  
+                  <div className="bg-red-950/30 border border-red-800/30 rounded-lg p-3 text-center">
+                    <p className="text-xs text-red-400 mb-1">Losses</p>
+                    <p className="text-lg font-bold text-red-400">{statistics.losses}</p>
+                  </div>
+                  
+                  <div className="bg-blue-950/30 border border-blue-800/30 rounded-lg p-3 text-center">
+                    <p className="text-xs text-blue-400 mb-1">Win Rate</p>
+                    <p className="text-lg font-bold text-blue-400">{statistics.winRate.toFixed(1)}%</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                    <p className="text-xs text-zinc-400 mb-2">Lucro Médio por Win</p>
+                    <p className="text-base font-semibold text-green-400">{formatCurrency(statistics.avgWin)}</p>
+                  </div>
+                  
+                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                    <p className="text-xs text-zinc-400 mb-2">Perda Média por Loss</p>
+                    <p className="text-base font-semibold text-red-400">{formatCurrency(statistics.avgLoss)}</p>
+                  </div>
+                  
+                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                    <p className="text-xs text-zinc-400 mb-2">Melhor Trade</p>
+                    <p className="text-base font-semibold text-green-400">
+                      {formatCurrency(parseFloat(statistics.bestTrade.resultado || "0"))}
+                    </p>
+                    <p className="text-xs text-zinc-500 mt-1">{statistics.bestTrade.ativo}</p>
+                  </div>
+                  
+                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                    <p className="text-xs text-zinc-400 mb-2">Pior Trade</p>
+                    <p className="text-base font-semibold text-red-400">
+                      {formatCurrency(parseFloat(statistics.worstTrade.resultado || "0"))}
+                    </p>
+                    <p className="text-xs text-zinc-500 mt-1">{statistics.worstTrade.ativo}</p>
+                  </div>
+                </div>
+
+                <div className="mt-3 bg-purple-950/30 border border-purple-800/30 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-purple-400 mb-1">Profit Factor</p>
+                      <p className="text-xs text-zinc-400">Lucro Total ÷ Perda Total</p>
+                    </div>
+                    <p className={`text-2xl font-bold ${statistics.profitFactor >= 1.5 ? "text-green-400" : statistics.profitFactor >= 1 ? "text-yellow-400" : "text-red-400"}`}>
+                      {statistics.profitFactor.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="mt-2 text-xs text-zinc-500">
+                    {statistics.profitFactor >= 2 && "🔥 Excelente! Você ganha 2x mais do que perde"}
+                    {statistics.profitFactor >= 1.5 && statistics.profitFactor < 2 && "✅ Muito bom! Continue assim"}
+                    {statistics.profitFactor >= 1 && statistics.profitFactor < 1.5 && "⚠️ Razoável, mas pode melhorar"}
+                    {statistics.profitFactor < 1 && "❌ Atenção! Você está perdendo mais do que ganhando"}
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-xs text-zinc-500 mb-1">Total de Trades</p>
-                <p className="text-sm font-semibold text-white">{trades.length}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-zinc-500 mb-1">Variação</p>
-                <p
-                  className={`text-sm font-semibold ${
-                    chartData[chartData.length - 1]?.saldo >= bankrollValue
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {chartData.length > 1 
-                    ? `${chartData[chartData.length - 1].saldo >= bankrollValue ? "+" : ""}${((((chartData[chartData.length - 1].saldo - bankrollValue) / bankrollValue) * 100)).toFixed(2)}%`
-                    : "0.00%"
-                  }
-                </p>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       ) : isLoadingTrades ? (
