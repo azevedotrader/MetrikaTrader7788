@@ -7,11 +7,11 @@ interface BankrollManagement {
   id: string;
   userId: string;
   bankrollValue: string;
-  risk_per_operation: string;
-  max_daily_risk: string;
-  max_weekly_risk: string;
-  min_risk_reward_ratio: string;
-  drawdown_trigger_losses: number;
+  riskPerOperation: string;
+  maxDailyRisk: string;
+  maxWeeklyRisk: string;
+  minRiskRewardRatio: string;
+  drawdownTriggerLosses: number;
   createdAt: Date;
 }
 
@@ -27,10 +27,10 @@ export function RiskParametersDisplay({
   isDeleting,
 }: RiskParametersDisplayProps) {
   const bankrollValue = parseFloat(bankroll.bankrollValue);
-  const riskPerOperation = parseFloat(bankroll.risk_per_operation);
-  const maxDailyRisk = parseFloat(bankroll.max_daily_risk);
-  const maxWeeklyRisk = parseFloat(bankroll.max_weekly_risk);
-  const minRiskRewardRatio = parseFloat(bankroll.min_risk_reward_ratio);
+  const riskPerOperation = parseFloat(bankroll.riskPerOperation);
+  const maxDailyRisk = parseFloat(bankroll.maxDailyRisk);
+  const maxWeeklyRisk = parseFloat(bankroll.maxWeeklyRisk);
+  const minRiskRewardRatio = parseFloat(bankroll.minRiskRewardRatio);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -149,12 +149,12 @@ export function RiskParametersDisplay({
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
                 <span className="text-2xl font-bold text-red-400" data-testid="text-drawdown-trigger">
-                  {bankroll.drawdown_trigger_losses}
+                  {bankroll.drawdownTriggerLosses}
                 </span>
               </div>
               <div>
                 <h4 className="font-semibold text-white">
-                  Após {bankroll.drawdown_trigger_losses} perdas seguidas
+                  Após {bankroll.drawdownTriggerLosses} perdas seguidas
                 </h4>
                 <p className="text-sm text-zinc-400 mt-1">
                   Reduza seu risco pela METADE até obter 1 trade positivo. Isso protege sua
@@ -166,7 +166,7 @@ export function RiskParametersDisplay({
               <p className="text-xs text-red-300">
                 <strong>Exemplo:</strong> Se seu risco normal é{" "}
                 {formatCurrency(bankrollValue * riskPerOperation)}, após{" "}
-                {bankroll.drawdown_trigger_losses} perdas seguidas, reduza para{" "}
+                {bankroll.drawdownTriggerLosses} perdas seguidas, reduza para{" "}
                 {formatCurrency((bankrollValue * riskPerOperation) / 2)} até recuperar.
               </p>
             </div>

@@ -4836,7 +4836,13 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
               targetBalance: targetBalance.toFixed(2),
               projectedGrowth,
               consecutiveWins: 0,
-              consecutiveLosses: 0
+              consecutiveLosses: 0,
+              // Valores padrão para novos campos (sistema antigo - não usa questionário)
+              riskPerOperation: riskConfig.riskPerTrade.toFixed(4),
+              maxDailyRisk: riskConfig.dailyTarget.toFixed(4),
+              maxWeeklyRisk: (riskConfig.dailyTarget * 2.5).toFixed(4),
+              minRiskRewardRatio: '2.0',
+              drawdownTriggerLosses: 4,
             });
             
             // Gerar resumo para WhatsApp
@@ -5536,7 +5542,13 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         targetBalance: targetBalance.toFixed(2),
         projectedGrowth,
         consecutiveWins: 0,
-        consecutiveLosses: 0
+        consecutiveLosses: 0,
+        // Valores padrão para novos campos (via WhatsApp antigo - não usa questionário)
+        riskPerOperation: riskConfig.riskPerTrade.toFixed(4),
+        maxDailyRisk: riskConfig.dailyTarget.toFixed(4),
+        maxWeeklyRisk: (riskConfig.dailyTarget * 2.5).toFixed(4),
+        minRiskRewardRatio: '2.0',
+        drawdownTriggerLosses: 4,
       };
 
       const created = await storage.createBankrollManagement(bankrollData);
@@ -5690,8 +5702,8 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       // Criar gestão no banco
       const bankrollData = {
         userId,
-        profile: answers.q2 === 'A' ? 'conservador' : answers.q2 === 'B' ? 'moderado' : 'agressivo',
-        timeHorizon: 'longo', // padrão
+        profile: (answers.q2 === 'A' ? 'conservador' : answers.q2 === 'B' ? 'moderado' : 'agressivo') as 'conservador' | 'moderado' | 'agressivo',
+        timeHorizon: 'longo' as 'longo', // padrão
         bankrollValue: bankrollValue.toFixed(2),
         riskPerTrade: params.risk_per_operation.toFixed(6),
         dailyProfitTarget: '0', // não usado no novo sistema
@@ -5700,12 +5712,12 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         projectedGrowth: [],
         consecutiveWins: 0,
         consecutiveLosses: 0,
-        // Novos campos do questionário
-        risk_per_operation: params.risk_per_operation.toString(),
-        max_daily_risk: params.max_daily_risk.toString(),
-        max_weekly_risk: params.max_weekly_risk.toString(),
-        min_risk_reward_ratio: params.min_risk_reward_ratio.toString(),
-        drawdown_trigger_losses: params.drawdown_trigger_losses,
+        // Novos campos do questionário (camelCase para corresponder ao schema)
+        riskPerOperation: params.risk_per_operation.toString(),
+        maxDailyRisk: params.max_daily_risk.toString(),
+        maxWeeklyRisk: params.max_weekly_risk.toString(),
+        minRiskRewardRatio: params.min_risk_reward_ratio.toString(),
+        drawdownTriggerLosses: params.drawdown_trigger_losses,
       };
 
       const created = await storage.createBankrollManagement(bankrollData);

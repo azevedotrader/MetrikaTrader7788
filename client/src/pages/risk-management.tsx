@@ -12,11 +12,11 @@ interface BankrollManagement {
   id: string;
   userId: string;
   bankrollValue: string;
-  risk_per_operation: string;
-  max_daily_risk: string;
-  max_weekly_risk: string;
-  min_risk_reward_ratio: string;
-  drawdown_trigger_losses: number;
+  riskPerOperation: string;
+  maxDailyRisk: string;
+  maxWeeklyRisk: string;
+  minRiskRewardRatio: string;
+  drawdownTriggerLosses: number;
   createdAt: Date;
 }
 
