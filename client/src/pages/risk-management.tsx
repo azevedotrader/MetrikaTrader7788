@@ -190,14 +190,68 @@ export default function RiskManagement() {
                   </ul>
                 </div>
 
-                <div className="bg-blue-950/30 border border-blue-800/30 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-300 mb-2 flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    Também disponível no WhatsApp
-                  </h3>
-                  <p className="text-sm text-blue-200/70">
-                    Você pode criar sua gestão tanto aqui na plataforma quanto pelo WhatsApp. Os
-                    parâmetros calculados serão os mesmos!
+                <div className="bg-gradient-to-br from-green-950/40 to-emerald-950/40 border border-green-800/40 rounded-lg p-5">
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-green-200 mb-1 text-base">
+                        Prefere criar pelo WhatsApp?
+                      </h3>
+                      <p className="text-sm text-green-200/80 leading-relaxed">
+                        Você tem <strong>duas formas</strong> de criar sua gestão de risco personalizada:
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-400 font-bold mt-0.5">1.</span>
+                      <div className="flex-1">
+                        <p className="text-sm text-green-100 font-medium">Aqui na Plataforma Web</p>
+                        <p className="text-xs text-green-200/70 mt-0.5">
+                          Interface visual completa com o questionário das 7 perguntas
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-green-400 font-bold mt-0.5">2.</span>
+                      <div className="flex-1">
+                        <p className="text-sm text-green-100 font-medium">Pelo WhatsApp Bot</p>
+                        <p className="text-xs text-green-200/70 mt-0.5">
+                          Conversação interativa com botões - sem precisar digitar nada!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-green-900/30 border border-green-700/30 rounded-md p-3 mb-4">
+                    <p className="text-xs text-green-200/90">
+                      <strong>✨ Importante:</strong> Não importa qual método você escolher, os parâmetros
+                      de risco calculados serão <strong>exatamente os mesmos</strong>. O algoritmo é
+                      idêntico em ambos os canais!
+                    </p>
+                  </div>
+
+                  <a
+                    href="https://wa.me/5511999999999?text=Oi!%20Quero%20criar%20minha%20gest%C3%A3o%20de%20risco%20personalizada"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
+                      size="lg"
+                      data-testid="button-whatsapp-cta"
+                    >
+                      <MessageSquare className="w-5 h-5 mr-2" />
+                      Criar pelo WhatsApp
+                    </Button>
+                  </a>
+
+                  <p className="text-xs text-green-300/60 text-center mt-2">
+                    Clique em "🎯 Criar Gestão" no menu e responda 7 perguntas com A/B/C
                   </p>
                 </div>
               </div>
