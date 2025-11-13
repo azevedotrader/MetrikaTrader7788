@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2 } from "lucide-react";
+import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BankrollManagement {
@@ -171,6 +171,50 @@ export function RiskParametersDisplay({
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Card do WhatsApp */}
+      <Card className="bg-gradient-to-br from-green-950/30 to-emerald-950/30 border-green-800/40">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2 text-lg">
+            <MessageSquare className="w-5 h-5 text-green-400" />
+            Também disponível pelo WhatsApp
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-green-200/80 leading-relaxed">
+            Sabia que você pode gerenciar sua banca e criar gestões de risco diretamente pelo WhatsApp? 
+            É a mesma tecnologia, com o mesmo algoritmo de cálculo!
+          </p>
+          
+          <div className="bg-green-900/30 border border-green-700/30 rounded-md p-3">
+            <p className="text-xs text-green-200/90">
+              <strong>✨ Recursos disponíveis no WhatsApp:</strong>
+            </p>
+            <ul className="text-xs text-green-200/80 mt-2 space-y-1 ml-4">
+              <li>• Criar gestão personalizada (7 perguntas interativas)</li>
+              <li>• Salvar trades rapidamente</li>
+              <li>• Consultar seus parâmetros de risco</li>
+              <li>• Tudo com botões - sem precisar digitar!</li>
+            </ul>
+          </div>
+
+          <a
+            href="https://wa.me/5511999999999?text=Oi!%20Quero%20acessar%20minha%20gest%C3%A3o%20de%20risco"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
+            <Button
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
+              size="lg"
+              data-testid="button-whatsapp-cta-active"
+            >
+              <MessageSquare className="w-5 h-5 mr-2" />
+              Acessar pelo WhatsApp
+            </Button>
+          </a>
         </CardContent>
       </Card>
 
