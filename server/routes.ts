@@ -5651,5 +5651,91 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
     }
   });
 
+  // ===== NOVAS ROTAS DE GESTÃO DE RISCO (QUESTIONÁRIO) =====
+
+  // GET: Buscar gestão de risco do usuário autenticado
+  app.get('/api/bankroll-management', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const bankroll = await storage.getBankrollManagement(userId);
+      
+      if (!bankroll) {
+        return res.status(404).json({ error: 'Gestão de risco não encontrada' });
+      }
+
+      res.json(bankroll);
+    } catch (error) {
+      console.error('Error fetching bankroll management:', error);
+      res.status(500).json({ error: 'Erro ao buscar gestão de risco' });
+    }
+  });
+
+  // POST: Criar nova gestão de risco baseada no questionário
+  app.post('/api/bankroll-management', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { bankrollValue, answers } = req.body;
+
+      // Validar inputs
+      if (!bankrollValue || !answers) {
+        return res.status(400).json({ error: 'bankrollValue e answers são obrigatórios' });
+      }
+
+      // Importar função de cálculo
+      const { calculateRiskManagementParameters } = await import('./risk-profile-calculator');
+
+      // Calcular parâmetros baseado nas respostas
+      const params = calculateRiskManagementParameters(answers);
+
+      // Criar gestão no banco
+      const bankrollData = {
+        userId,
+        profile: answers.q2 === 'A' ? 'conservador' : answers.q2 === 'B' ? 'moderado' : 'agressivo',
+        timeHorizon: 'longo', // padrão
+        bankrollValue: bankrollValue.toFixed(2),
+        riskPerTrade: params.risk_per_operation.toFixed(6),
+        dailyProfitTarget: '0', // não usado no novo sistema
+        horizonDays: 90, // padrão
+        targetBalance: bankrollValue.toFixed(2), // não usado no novo sistema
+        projectedGrowth: [],
+        consecutiveWins: 0,
+        consecutiveLosses: 0,
+        // Novos campos do questionário
+        risk_per_operation: params.risk_per_operation.toString(),
+        max_daily_risk: params.max_daily_risk.toString(),
+        max_weekly_risk: params.max_weekly_risk.toString(),
+        min_risk_reward_ratio: params.min_risk_reward_ratio.toString(),
+        drawdown_trigger_losses: params.drawdown_trigger_losses,
+      };
+
+      const created = await storage.createBankrollManagement(bankrollData);
+
+      res.status(201).json(created);
+    } catch (error) {
+      console.error('Error creating bankroll management:', error);
+      res.status(500).json({ error: 'Erro ao criar gestão de risco' });
+    }
+  });
+
+  // DELETE: Deletar gestão de risco existente
+  app.delete('/api/bankroll-management', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      
+      // Verificar se existe
+      const existing = await storage.getBankrollManagement(userId);
+      if (!existing) {
+        return res.status(404).json({ error: 'Gestão de risco não encontrada' });
+      }
+
+      await storage.deleteBankrollManagement(userId);
+
+      res.json({ success: true, message: 'Gestão de risco deletada com sucesso' });
+    } catch (error) {
+      console.error('Error deleting bankroll management:', error);
+      res.status(500).json({ error: 'Erro ao deletar gestão de risco' });
+    }
+  });
+
   const httpServer = createServer(app);
 }
