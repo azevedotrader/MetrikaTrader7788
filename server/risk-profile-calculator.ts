@@ -336,75 +336,61 @@ export function calculateRiskManagementParameters(answers: QuestionnaireAnswers)
     };
   }
 
-  // PASSO 2: Ajustes finos baseado em experiência (Q1)
-  if (answers.q1 === "A") {
-    // Iniciante: SEMPRE reduz risco em 30% (proteção)
-    baseParams.risk_per_operation *= 0.7;
-    baseParams.max_daily_risk *= 0.7;
-    baseParams.max_weekly_risk *= 0.7;
-    baseParams.min_risk_reward_ratio = Math.max(baseParams.min_risk_reward_ratio, 2.0); // Mínimo 1:2
-    baseParams.drawdown_trigger_losses = Math.max(baseParams.drawdown_trigger_losses - 1, 2); // Mais conservador
-  } else if (answers.q1 === "C") {
-    // Avançado: Pode aumentar levemente o risco (10%)
-    baseParams.risk_per_operation *= 1.1;
-    baseParams.max_daily_risk *= 1.1;
-    baseParams.max_weekly_risk *= 1.1;
-  }
-
-  // PASSO 3: Ajustes baseado em timeframe (Q4)
-  if (answers.q4 === "A") {
-    // Day Trade: Aumenta max_daily_risk mas mantém risk_per_operation
-    baseParams.max_daily_risk *= 1.2;
-  } else if (answers.q4 === "C") {
-    // Position Trade: Reduz max_daily_risk (menos operações por dia)
-    baseParams.max_daily_risk *= 0.8;
-    baseParams.max_weekly_risk *= 0.9;
-  }
-
-  // PASSO 4: Ajustes baseado em perfil psicológico (Q6 e Q7)
-  const psychologyAverage = [answers.q6, answers.q7].filter(a => a === "A").length;
+  // PASSO 2: APLICAR MODIFICADORES
   
-  if (psychologyAverage >= 1) {
-    // Se tem perfil mais abalado/duvidoso (respostas "A"): reduz risco
-    baseParams.risk_per_operation *= 0.85;
-    baseParams.max_daily_risk *= 0.85;
-    baseParams.drawdown_trigger_losses = Math.max(baseParams.drawdown_trigger_losses - 1, 2);
+  // Modificador por Experiência (Pergunta 1)
+  if (answers.q1 === "A") {
+    // Iniciante: SEMPRE reduz risco em 50% (proteção máxima)
+    baseParams.risk_per_operation *= 0.5;
   }
 
-  // PASSO 5: Ajustes baseado em Win Rate e Risk/Reward customizados (Q5)
+  // Modificador por Psicologia de Perda (Pergunta 6)
+  if (answers.q6 === "A") {
+    // Muito abalado com perdas: reduz max_daily_risk em 50%
+    baseParams.max_daily_risk *= 0.5;
+  }
+
+  // Modificador por Psicologia de Drawdown (Pergunta 7)
+  if (answers.q7 === "A") {
+    // Duvida da estratégia após drawdown: reduz gatilho em 1 (mínimo 1)
+    baseParams.drawdown_trigger_losses = Math.max(1, baseParams.drawdown_trigger_losses - 1);
+  } else if (answers.q7 === "C") {
+    // Segue o plano rigorosamente: aumenta gatilho em 1
+    baseParams.drawdown_trigger_losses = baseParams.drawdown_trigger_losses + 1;
+  }
+
+  // Modificador por Timeframe (Pergunta 4)
+  if (answers.q4 === "A") {
+    // Day Trade: aumenta max_daily_risk em 20%
+    baseParams.max_daily_risk *= 1.20;
+  } else if (answers.q4 === "B" || answers.q4 === "C") {
+    // Swing/Position Trade: aumenta max_weekly_risk em 20%
+    baseParams.max_weekly_risk *= 1.20;
+  }
+
+  // Modificador por Win Rate e R:R (Pergunta 5) - OPCIONAL
   const { validWinRate, validRiskReward } = validateCustomMetrics(answers.q5_winRate, answers.q5_riskReward);
   
-  if (validWinRate !== undefined) {
-    if (validWinRate >= 60) {
-      // Win rate alto: pode aumentar risco levemente
-      baseParams.risk_per_operation *= 1.15;
-      baseParams.max_daily_risk *= 1.15;
-    } else if (validWinRate <= 40) {
-      // Win rate baixo: REDUZ risco significativamente
-      baseParams.risk_per_operation *= 0.75;
-      baseParams.max_daily_risk *= 0.75;
-      baseParams.min_risk_reward_ratio = Math.max(baseParams.min_risk_reward_ratio, 2.5); // Exige R:R maior
-    }
-  }
-
-  if (validRiskReward !== undefined) {
-    // Se o trader tem R:R personalizado válido
-    baseParams.min_risk_reward_ratio = Math.max(baseParams.min_risk_reward_ratio, validRiskReward);
+  if (validWinRate !== undefined && validRiskReward !== undefined) {
+    // Calcular expectativa matemática
+    const winRateDecimal = validWinRate / 100;
+    const lossRate = 1 - winRateDecimal;
+    const expectativa = (winRateDecimal * validRiskReward) - (lossRate * 1);
     
-    // R:R alto (>= 3.0): pode aumentar risco por operação levemente
-    if (validRiskReward >= 3.0) {
-      baseParams.risk_per_operation *= 1.1;
+    // Se expectativa é baixa (< 0.1), aumentar exigência de R:R em 25%
+    if (expectativa < 0.1) {
+      baseParams.min_risk_reward_ratio *= 1.25;
     }
   }
 
-  // PASSO 6: Limites de segurança absolutos (proteção final)
+  // PASSO 3: Limites de segurança absolutos (proteção final)
   baseParams.risk_per_operation = Math.min(0.03, Math.max(0.003, baseParams.risk_per_operation)); // Entre 0.3% e 3%
   baseParams.max_daily_risk = Math.min(0.08, Math.max(0.01, baseParams.max_daily_risk)); // Entre 1% e 8%
   baseParams.max_weekly_risk = Math.min(0.15, Math.max(0.02, baseParams.max_weekly_risk)); // Entre 2% e 15%
   baseParams.min_risk_reward_ratio = Math.min(5.0, Math.max(1.2, baseParams.min_risk_reward_ratio)); // Entre 1.2 e 5.0
-  baseParams.drawdown_trigger_losses = Math.min(7, Math.max(2, baseParams.drawdown_trigger_losses)); // Entre 2 e 7
+  baseParams.drawdown_trigger_losses = Math.min(7, Math.max(1, baseParams.drawdown_trigger_losses)); // Entre 1 e 7
 
-  // PASSO 7: Arredondar valores para 4 casas decimais
+  // PASSO 4: Arredondar valores para 4 casas decimais
   return {
     risk_per_operation: Math.round(baseParams.risk_per_operation * 10000) / 10000,
     max_daily_risk: Math.round(baseParams.max_daily_risk * 10000) / 10000,
