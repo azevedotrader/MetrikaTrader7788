@@ -229,7 +229,7 @@ ${paramsExplanation}
 ━━━━━━━━━━━━━━━━━━━━
 
 📊 *Seu Perfil*: ${riskProfile.profile.toUpperCase()} (${riskProfile.timeHorizon})
-💰 *Banca Inicial*: R$ ${bankrollValueNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+💰 *Capital Inicial*: R$ ${bankrollValueNum.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 🎯 *Meta em ${riskProfile.horizonDays} dias*: R$ ${targetBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
 ✅ *Gestão ativa e funcionando!*

@@ -197,7 +197,7 @@ export function PerformanceChart({ bankroll }: PerformanceChartProps) {
                 stroke="#6366f1"
                 strokeDasharray="5 5"
                 label={{
-                  value: "Banca Inicial",
+                  value: "Capital Inicial",
                   fill: "#6366f1",
                   fontSize: 12,
                   position: "insideTopRight",
@@ -218,7 +218,7 @@ export function PerformanceChart({ bankroll }: PerformanceChartProps) {
         {/* Estatísticas rápidas */}
         <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-zinc-800">
           <div className="text-center">
-            <p className="text-xs text-zinc-500 mb-1">Banca Inicial</p>
+            <p className="text-xs text-zinc-500 mb-1">Capital Inicial</p>
             <p className="text-sm font-semibold text-white">{formatCurrency(initialBankroll)}</p>
           </div>
           <div className="text-center">

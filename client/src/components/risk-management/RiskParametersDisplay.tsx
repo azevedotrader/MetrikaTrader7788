@@ -440,7 +440,7 @@ export function RiskParametersDisplay({
                     stroke="#6366f1"
                     strokeDasharray="5 5"
                     label={{
-                      value: "Banca Inicial",
+                      value: "Capital Inicial",
                       fill: "#6366f1",
                       fontSize: 12,
                       position: "insideTopRight",
