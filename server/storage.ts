@@ -11,6 +11,7 @@ import {
   passwordResetTokens,
   supportConversations,
   supportMessages,
+  questionnaireStates,
   type User, 
   type InsertUser, 
   type Trade, 
@@ -36,6 +37,8 @@ import {
   type BankrollManagement,
   type InsertBankrollManagement,
   type BankrollSummaryDTO,
+  type QuestionnaireState,
+  type InsertQuestionnaireState,
   bankrollManagements,
 } from "@shared/schema";
 import { db } from "./db";
@@ -123,6 +126,12 @@ export interface IStorage {
   updateBankrollManagement(userId: string, updates: Partial<InsertBankrollManagement>): Promise<BankrollManagement>;
   deleteBankrollManagement(userId: string): Promise<void>;
   adjustBankrollManagement(userId: string, adjustmentData: { consecutiveWins?: number; consecutiveLosses?: number }): Promise<BankrollManagement>;
+  
+  // Questionnaire state operations (para fluxo conversacional WhatsApp)
+  getQuestionnaireState(userId: string): Promise<QuestionnaireState | undefined>;
+  createQuestionnaireState(data: Omit<InsertQuestionnaireState, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionnaireState>;
+  updateQuestionnaireState(userId: string, updates: Partial<InsertQuestionnaireState>): Promise<QuestionnaireState>;
+  deleteQuestionnaireState(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -959,6 +968,60 @@ export class DatabaseStorage implements IStorage {
     }
 
     return current;
+  }
+
+  // Questionnaire state operations
+  async getQuestionnaireState(userId: string): Promise<QuestionnaireState | undefined> {
+    const [state] = await db
+      .select()
+      .from(questionnaireStates)
+      .where(eq(questionnaireStates.userId, userId));
+    return state || undefined;
+  }
+
+  async createQuestionnaireState(data: Omit<InsertQuestionnaireState, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionnaireState> {
+    // Delete existing state if any (unique constraint on userId)
+    await db
+      .delete(questionnaireStates)
+      .where(eq(questionnaireStates.userId, data.userId));
+
+    const [newState] = await db
+      .insert(questionnaireStates)
+      .values({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    if (!newState) {
+      throw new Error('Falha ao criar questionnaire state');
+    }
+
+    return newState;
+  }
+
+  async updateQuestionnaireState(userId: string, updates: Partial<InsertQuestionnaireState>): Promise<QuestionnaireState> {
+    const [updated] = await db
+      .update(questionnaireStates)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(questionnaireStates.userId, userId))
+      .returning();
+
+    if (!updated) {
+      throw new Error('Questionnaire state não encontrado');
+    }
+
+    return updated;
+  }
+
+  async deleteQuestionnaireState(userId: string): Promise<void> {
+    await db
+      .delete(questionnaireStates)
+      .where(eq(questionnaireStates.userId, userId));
   }
 }
 
