@@ -92,7 +92,7 @@ export function calculateTargetBalance(
 }
 
 /**
- * Formata o resumo da gestão de banca para enviar via WhatsApp
+ * Formata o resumo da gestão de capital para enviar via WhatsApp
  */
 export function summarizeForWhatsApp(summary: BankrollSummaryDTO): string {
   const profileLabels = {

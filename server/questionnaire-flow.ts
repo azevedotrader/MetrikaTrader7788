@@ -255,7 +255,7 @@ export function getWelcomeMessage(bankrollValue: number): string {
   return `
 🎯 *Ótimo! Vou criar sua gestão de risco personalizada*
 
-💰 *Valor da Banca:* R$ ${bankrollValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+💰 *Valor do Capital:* R$ ${bankrollValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
 📋 Vou fazer *7 perguntas* para entender seu perfil de trader e criar uma gestão 100% personalizada para você.
 

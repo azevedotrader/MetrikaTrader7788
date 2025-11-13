@@ -4429,7 +4429,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
               `⏱️ *Leva apenas 2 minutos!*\n\n` +
               `━━━━━━━━━━━━━━━━━━━━\n\n` +
               `💰 *Para começar, me diga:*\n\n` +
-              `Qual é o valor da sua banca em R$?\n\n` +
+              `Qual é o valor do seu capital em R$?\n\n` +
               `📋 *Exemplo:* 1000`;
             
             await sendWhatsAppMessage(fromNumber, askBankrollMessage);
@@ -4756,25 +4756,25 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             return;
           } catch (error) {
             console.error('❌ Error getting bankroll summary:', error);
-            await sendWhatsAppMessage(fromNumber, '❌ Erro ao buscar gestão de banca. Tente novamente!');
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao buscar gestão de capital. Tente novamente!');
             return;
           }
         }
         
-        // Comando: /banca criar VALOR [PERFIL] [PRAZO]
-        if (messageTextLower.startsWith('/banca criar')) {
+        // Comando: /capital criar VALOR [PERFIL] [PRAZO]
+        if (messageTextLower.startsWith('/capital criar') || messageTextLower.startsWith('/banca criar')) {
           try {
-            // Parsear comando: /banca criar 1000 moderado longo
+            // Parsear comando: /capital criar 1000 moderado longo
             const parts = messageText.trim().split(/\s+/);
             
             if (parts.length < 3) {
-              const instructionsMessage = `💼 *Como criar sua Gestão de Banca:*\n\n` +
+              const instructionsMessage = `💼 *Como criar sua Gestão de Capital:*\n\n` +
                 `📝 *Formato:*\n` +
-                `/banca criar VALOR PERFIL PRAZO\n\n` +
+                `/capital criar VALOR PERFIL PRAZO\n\n` +
                 `📋 *Exemplos:*\n` +
-                `• _/banca criar 1000_ (usa padrões)\n` +
-                `• _/banca criar 1000 moderado longo_\n` +
-                `• _/banca criar 500 agressivo curto_\n\n` +
+                `• _/capital criar 1000_ (usa padrões)\n` +
+                `• _/capital criar 1000 moderado longo_\n` +
+                `• _/capital criar 500 agressivo curto_\n\n` +
                 `*Perfis disponíveis:*\n` +
                 `• conservador - Menor risco\n` +
                 `• moderado - Equilibrado ✅\n` +
@@ -4792,14 +4792,14 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             const timeHorizon = parts[4]?.toLowerCase() as 'curto' | 'longo' || 'longo';
             
             if (isNaN(bankrollValue) || bankrollValue <= 0) {
-              await sendWhatsAppMessage(fromNumber, '❌ Valor inválido! Use números positivos. Ex: /banca criar 1000');
+              await sendWhatsAppMessage(fromNumber, '❌ Valor inválido! Use números positivos. Ex: /capital criar 1000');
               return;
             }
             
             // Verificar se já existe gestão
             const existing = await storage.getBankrollManagement(user.id);
             if (existing) {
-              const confirmMessage = `⚠️ *Gestão de Banca já existe!*\n\n` +
+              const confirmMessage = `⚠️ *Gestão de Capital já existe!*\n\n` +
                 `Você já tem uma gestão configurada.\n\n` +
                 `💰 Saldo atual: R$ ${existing.bankrollValue}\n` +
                 `📊 Perfil: ${existing.profile}\n\n` +
@@ -4869,7 +4869,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             return;
           } catch (error) {
             console.error('❌ Error creating bankroll:', error);
-            await sendWhatsAppMessage(fromNumber, '❌ Erro ao criar gestão de banca. Tente novamente!');
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao criar gestão de capital. Tente novamente!');
             return;
           }
         }
