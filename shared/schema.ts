@@ -478,6 +478,36 @@ export const whatsappMessagesRelations = relations(whatsappMessages, ({ one }) =
 export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
 export type InsertWhatsappMessage = typeof whatsappMessages.$inferInsert;
 
+// Tabela para armazenar estado do questionário de gestão de risco via WhatsApp
+export const questionnaireStates = pgTable("questionnaire_states", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(), // Um usuário por vez
+  currentQuestion: integer("current_question").notNull().default(1), // Pergunta atual (1-7)
+  bankrollValue: decimal("bankroll_value", { precision: 12, scale: 2 }), // Valor da banca informado primeiro
+  partialAnswers: jsonb("partial_answers").$type<{
+    q1?: string;
+    q2?: string;
+    q3?: string[];
+    q4?: string;
+    q5_winRate?: number;
+    q5_riskReward?: number;
+    q6?: string;
+    q7?: string;
+  }>().default(sql`'{}'::jsonb`), // Respostas parciais durante o questionário
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const questionnaireStatesRelations = relations(questionnaireStates, ({ one }) => ({
+  user: one(users, {
+    fields: [questionnaireStates.userId],
+    references: [users.id],
+  }),
+}));
+
+export type QuestionnaireState = typeof questionnaireStates.$inferSelect;
+export type InsertQuestionnaireState = typeof questionnaireStates.$inferInsert;
+
 // Tabela para gestão inteligente de banca (bankroll management) - PERSONALIZADA POR QUESTIONÁRIO
 export const bankrollManagements = pgTable("bankroll_managements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
