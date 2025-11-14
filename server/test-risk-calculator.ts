@@ -9,7 +9,7 @@ import { calculateRiskManagementParameters, type QuestionnaireAnswers } from './
 const exampleAnswers: QuestionnaireAnswers = {
   q1: "A", // Iniciante
   q2: "B", // Moderado
-  q3: ["A"], // Ações
+  q3: ["B"], // B3
   q4: "A", // Day Trade
   q5_winRate: 50,
   q5_riskReward: 2.0,
@@ -21,7 +21,7 @@ console.log('🧪 TESTE DO CALCULADOR DE RISCO\n');
 console.log('📋 Entrada:');
 console.log('  - P1 (Experiência): A (Iniciante)');
 console.log('  - P2 (Objetivo): B (Moderado)');
-console.log('  - P3 (Mercados): A (Ações)');
+console.log('  - P3 (Mercados): B (B3)');
 console.log('  - P4 (Timeframe): A (Day Trade)');
 console.log('  - P5 (Métricas): win_rate=50%, risk_reward=2.0');
 console.log('  - P6 (Psicologia Perda): B (Desconfortável)');

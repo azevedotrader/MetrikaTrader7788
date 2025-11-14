@@ -195,7 +195,7 @@ export function validateAnswer(questionId: number, answer: string): {
       const keys = question.options?.map((o) => o.key).join(', ') || 'A, B, C';
       errorMessage += `Por favor, digite uma das opções: ${keys}`;
     } else if (question.type === 'multiple_choice') {
-      errorMessage += 'Por favor, digite opções válidas separadas por vírgula (ex: A,D,E)';
+      errorMessage += 'Por favor, digite opções válidas separadas por vírgula (ex: A,B,C)';
     } else if (question.helpText) {
       errorMessage += question.helpText;
     }

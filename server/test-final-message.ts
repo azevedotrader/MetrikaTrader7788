@@ -9,7 +9,7 @@ import { calculateRiskManagementParameters, formatRiskParametersExplanation, typ
 const exemplo1: QuestionnaireAnswers = {
   q1: "A", // Iniciante
   q2: "B", // Moderado
-  q3: ["A"], // Ações
+  q3: ["B"], // B3
   q4: "A", // Day Trade
   q5_winRate: 50,
   q5_riskReward: 2.0,
@@ -36,7 +36,7 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 const exemplo2: QuestionnaireAnswers = {
   q1: "C", // Avançado
   q2: "C", // Arrojado
-  q3: ["D", "E"], // Forex + Cripto
+  q3: ["A", "C"], // Forex + Cripto
   q4: "B", // Swing Trade
   q5_winRate: 65,
   q5_riskReward: 3.0,
@@ -59,7 +59,7 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 const exemplo3: QuestionnaireAnswers = {
   q1: "A", // Iniciante
   q2: "A", // Conservador
-  q3: ["A"], // Ações
+  q3: ["B"], // B3
   q4: "C", // Position Trade
   q5_winRate: 35,
   q5_riskReward: 1.2,

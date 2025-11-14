@@ -8,7 +8,7 @@
 export type QuestionnaireAnswers = {
   q1: "A" | "B" | "C"; // Experiência
   q2: "A" | "B" | "C"; // Objetivo
-  q3: string[]; // Mercados (A, B, C, D, E)
+  q3: string[]; // Mercados (A: Forex, B: B3, C: Cripto, D: Outro)
   q4: "A" | "B" | "C"; // Timeframe
   q5_winRate?: number; // Win rate (0-100)
   q5_riskReward?: number; // Risk/Reward ratio

@@ -5145,7 +5145,7 @@ Vamos começar! 🚀`;
 ❌ Vendi 500 no GBPJPY e perdi 120
 ✅ Entrei com 350 no GBPUSD e ganhei 90
 
-*📈 B3 (Ações/Futuros):*
+*📈 B3:*
 ✅ Entrei com 250 no WINQ25 e ganhei 180
 ❌ Comprei 350 no PETR4 e perdi
 ✅ Vendi 400 no VALE3 e ganhei 120
@@ -5175,7 +5175,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       `*Forex:*\n` +
       `• Comprei 200 no EURUSD e ganhei 85\n` +
       `• Vendi 500 no GBPJPY e perdi 120\n\n` +
-      `*B3 (Ações/Futuros):*\n` +
+      `*B3:*\n` +
       `• Entrei com 250 no WINQ25 e ganhei 180\n` +
       `• Comprei 350 no PETR4 e perdi\n\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
