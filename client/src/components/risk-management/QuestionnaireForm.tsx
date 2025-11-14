@@ -26,7 +26,7 @@ interface QuestionnaireFormProps {
 const QUESTIONS = [
   {
     id: "bankroll",
-    title: "Qual é o valor da sua banca de trading?",
+    title: "Qual é o valor do seu capital de trading?",
     type: "number",
     description: "Informe o valor total que você tem disponível para trading",
   },
@@ -178,7 +178,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
             <p className="text-sm text-zinc-400">{currentQuestion.description}</p>
             <div>
               <Label htmlFor="bankroll-input" className="text-white">
-                Valor da Banca (R$)
+                Capital Inicial (R$)
               </Label>
               <Input
                 id="bankroll-input"

@@ -126,7 +126,7 @@ export function PerformanceChart({ bankroll }: PerformanceChartProps) {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            Evolução da Banca
+            Evolução do Capital
           </CardTitle>
           <CardDescription>Gráfico de performance ao longo do tempo</CardDescription>
         </CardHeader>
@@ -153,7 +153,7 @@ export function PerformanceChart({ bankroll }: PerformanceChartProps) {
           <div>
             <CardTitle className="text-white flex items-center gap-2 mb-2">
               <TrendingUp className="w-5 h-5" />
-              Evolução da Banca
+              Evolução do Capital
             </CardTitle>
             <CardDescription>
               Visualização da performance ao longo de {trades.length} trade{trades.length !== 1 ? "s" : ""}
