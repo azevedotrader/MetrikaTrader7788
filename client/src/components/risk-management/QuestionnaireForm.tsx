@@ -57,10 +57,9 @@ const QUESTIONS = [
     type: "checkbox",
     options: [
       { value: "A", label: "Forex" },
-      { value: "B", label: "Ações (B3)" },
-      { value: "C", label: "Crypto" },
-      { value: "D", label: "Futuros" },
-      { value: "E", label: "Opções" },
+      { value: "B", label: "B3" },
+      { value: "C", label: "Cripto" },
+      { value: "D", label: "Outro" },
     ],
   },
   {

@@ -48,21 +48,20 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 3,
-    text: '❓ *Pergunta 3/7:*\n\nEm quais mercados você opera principalmente?\n\n_Você pode escolher mais de uma opção. Separe por vírgula (ex: A,D,E)_',
+    text: '❓ *Pergunta 3/7:*\n\nEm quais mercados você opera principalmente?\n\n_Você pode escolher mais de uma opção. Separe por vírgula (ex: A,B,C)_',
     type: 'multiple_choice',
     options: [
-      { key: 'A', label: '(A) Ações (Mercado à vista)' },
-      { key: 'B', label: '(B) Futuros (Índice, Dólar, Commodities)' },
-      { key: 'C', label: '(C) Opções' },
-      { key: 'D', label: '(D) Forex' },
-      { key: 'E', label: '(E) Criptomoedas' },
+      { key: 'A', label: '(A) Forex' },
+      { key: 'B', label: '(B) B3' },
+      { key: 'C', label: '(C) Cripto' },
+      { key: 'D', label: '(D) Outro' },
     ],
     validation: (answer) => {
       const choices = answer
         .toUpperCase()
         .split(/[,\s]+/)
         .filter(Boolean);
-      return choices.length > 0 && choices.every((c) => ['A', 'B', 'C', 'D', 'E'].includes(c));
+      return choices.length > 0 && choices.every((c) => ['A', 'B', 'C', 'D'].includes(c));
     },
     parser: (answer) => {
       return answer

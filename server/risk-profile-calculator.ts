@@ -64,11 +64,10 @@ const OBJECTIVE_SCORES = {
 
 // Pergunta 3: Mercados (0-15 pontos) - Baseado na volatilidade dos mercados
 const MARKET_VOLATILITY = {
-  A: 1, // Ações - Baixa volatilidade
-  B: 2, // Futuros - Média volatilidade
-  C: 3, // Opções - Alta volatilidade
-  D: 3, // Forex - Alta volatilidade
-  E: 4, // Cripto - Altíssima volatilidade
+  A: 3, // Forex - Alta volatilidade
+  B: 1.5, // B3 - Baixa a média volatilidade
+  C: 4, // Cripto - Altíssima volatilidade
+  D: 2, // Outro - Média volatilidade
 };
 
 // Pergunta 4: Timeframe (0-10 pontos)
@@ -98,9 +97,9 @@ function calculateMarketScore(markets: string[]): number {
   const avgVolatility = totalVolatility / markets.length;
 
   // Normalizar para escala 0-15
-  // Volatilidade 1 (ações) = 0 pontos
-  // Volatilidade 4 (cripto) = 15 pontos
-  return Math.min(15, ((avgVolatility - 1) / 3) * 15);
+  // Volatilidade 1.5 (B3) = 0 pontos
+  // Volatilidade 4 (Cripto) = 15 pontos
+  return Math.min(15, ((avgVolatility - 1.5) / 2.5) * 15);
 }
 
 /**
