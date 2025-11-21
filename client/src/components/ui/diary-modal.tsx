@@ -128,13 +128,12 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
   const loadImages = async (diaryEntryId: string) => {
     try {
-      const userId = localStorage.getItem('user-id');
-      if (!userId) return;
+      const token = localStorage.getItem('user-token');
+      if (!token) return;
 
       const response = await fetch(`/api/diary/${diaryEntryId}/images`, {
         headers: {
-          "user-id": userId,
-          "X-User-ID": userId
+          "Authorization": `Bearer ${token}`
         },
         credentials: "include"
       });
@@ -175,8 +174,8 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     if (entry?.id) {
       setUploadingImage(true);
       try {
-        const userId = localStorage.getItem('user-id');
-        if (!userId) throw new Error('Usuário não autenticado');
+        const token = localStorage.getItem('user-token');
+        if (!token) throw new Error('Usuário não autenticado');
 
         const formData = new FormData();
         formData.append('image', file);
@@ -184,8 +183,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
         const response = await fetch(`/api/diary/${entry.id}/images`, {
           method: 'POST',
           headers: {
-            "user-id": userId,
-            "X-User-ID": userId
+            "Authorization": `Bearer ${token}`
           },
           body: formData,
           credentials: "include"
@@ -256,14 +254,13 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
     if (!confirm("Tem certeza que deseja remover esta imagem?")) return;
 
     try {
-      const userId = localStorage.getItem('user-id');
-      if (!userId) throw new Error('Usuário não autenticado');
+      const token = localStorage.getItem('user-token');
+      if (!token) throw new Error('Usuário não autenticado');
 
       const response = await fetch(`/api/diary/${entry.id}/images/${imageId}`, {
         method: 'DELETE',
         headers: {
-          "user-id": userId,
-          "X-User-ID": userId
+          "Authorization": `Bearer ${token}`
         },
         credentials: "include"
       });
@@ -289,19 +286,18 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
   const onSubmit = async (data: InsertDiaryEntry) => {
     setIsLoading(true);
     try {
+      const token = localStorage.getItem('user-token');
+      if (!token) {
+        throw new Error('Usuário não autenticado');
+      }
+
       if (entry) {
         // Atualizar entrada existente
-        const userId = localStorage.getItem('user-id');
-        if (!userId) {
-          throw new Error('Usuário não autenticado');
-        }
-        
         const response = await fetch(`/api/diary/${entry.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "user-id": userId,
-            "X-User-ID": userId
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify(data),
           credentials: "include"
@@ -316,17 +312,11 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
         });
       } else {
         // Criar nova entrada
-        const userId = localStorage.getItem('user-id');
-        if (!userId) {
-          throw new Error('Usuário não autenticado');
-        }
-        
         const response = await fetch("/api/diary", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "user-id": userId,
-            "X-User-ID": userId
+            "Authorization": `Bearer ${token}`
           },
           body: JSON.stringify(data),
           credentials: "include"
@@ -350,8 +340,7 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
               const uploadResponse = await fetch(`/api/diary/${newEntry.id}/images`, {
                 method: 'POST',
                 headers: {
-                  "user-id": userId,
-                  "X-User-ID": userId
+                  "Authorization": `Bearer ${token}`
                 },
                 body: formData,
                 credentials: "include"
@@ -408,16 +397,15 @@ export function DiaryModal({ isOpen, onClose, selectedDate, entry, onSuccess }: 
 
     setIsLoading(true);
     try {
-      const userId = localStorage.getItem('user-id');
-      if (!userId) {
+      const token = localStorage.getItem('user-token');
+      if (!token) {
         throw new Error('Usuário não autenticado');
       }
       
       const response = await fetch(`/api/diary/${entry.id}`, {
         method: "DELETE",
         headers: {
-          "user-id": userId,
-          "X-User-ID": userId
+          "Authorization": `Bearer ${token}`
         },
         credentials: "include"
       });
