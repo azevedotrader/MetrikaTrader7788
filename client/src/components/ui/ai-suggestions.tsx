@@ -154,17 +154,8 @@ export function AISuggestionsPopup() {
   const [isVisible, setIsVisible] = useState(false);
   const [currentAdvice, setCurrentAdvice] = useState<TradingAdvice | null>(null);
 
-  const { data: advice = [] } = useQuery({
+  const { data: advice = [] } = useQuery<TradingAdvice[]>({
     queryKey: ['/api/ai/advice'],
-    queryFn: async () => {
-      const userId = localStorage.getItem('user-id') || '';
-      const response = await fetch('/api/ai/advice', {
-        headers: {
-          'user-id': userId
-        }
-      });
-      return response.json();
-    },
     refetchInterval: 2 * 60 * 1000, // Verifica a cada 2 minutos
   });
 

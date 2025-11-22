@@ -13,28 +13,8 @@ export function useUserPlan() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: userPlan, isLoading } = useQuery({
-    queryKey: ['/api/user/plan', user?.id],
-    queryFn: async () => {
-      const userId = localStorage.getItem('user-id');
-      
-      if (!userId || userId === '' || userId === 'null') {
-        throw new Error('Usuário não autenticado');
-      }
-
-      const response = await fetch('/api/user/plan', {
-        headers: {
-          'user-id': userId,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch user plan');
-      }
-      const data = await response.json();
-      return data as UserPlan;
-    },
+  const { data: userPlan, isLoading } = useQuery<UserPlan>({
+    queryKey: ['/api/user/plan'],
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -52,12 +32,17 @@ export function useUserPlan() {
     refresh: () => {
       // Invalidar cache e re-fetch
       queryClient.invalidateQueries({ queryKey: ['/api/user/plan'] });
+      const token = localStorage.getItem('user-token');
+      if (!token) {
+        throw new Error('Usuário não autenticado');
+      }
       return fetch('/api/user/plan', { 
         method: 'GET',
         headers: {
-          'user-id': localStorage.getItem('user-id') || '',
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
     }
   };
