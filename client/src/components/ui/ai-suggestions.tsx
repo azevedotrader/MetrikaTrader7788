@@ -67,17 +67,8 @@ export function AISuggestions({ userProfile, recentTrades = [], onClose }: AISug
   const [dismissedAdvice, setDismissedAdvice] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-  const { data: advice = [], isLoading } = useQuery({
-    queryKey: ['/api/ai/advice', userProfile?.id],
-    queryFn: async () => {
-      const userId = localStorage.getItem('user-id') || '';
-      const response = await fetch('/api/ai/advice', {
-        headers: {
-          'user-id': userId
-        }
-      });
-      return response.json();
-    },
+  const { data: advice = [], isLoading } = useQuery<TradingAdvice[]>({
+    queryKey: ['/api/ai/advice'],
     refetchInterval: 5 * 60 * 1000, // Atualiza a cada 5 minutos
     enabled: showSuggestions
   });
