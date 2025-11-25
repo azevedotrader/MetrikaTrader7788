@@ -313,13 +313,15 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
     switch (type) {
       case 'iqt':
         // IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
-        if (value >= 5) return 'text-[#2FA87A]'; // Verde
-        if (value >= 1) return 'text-yellow-500'; // Amarelo
+        // Valores típicos: 100-2000+ (usa rentabilidade em R$)
+        if (value >= 100) return 'text-[#2FA87A]'; // Verde
+        if (value >= 20) return 'text-yellow-500'; // Amarelo
         return 'text-[#F06363]'; // Vermelho
       case 'eficiencia':
         // Eficiência = Rentabilidade / (RR_médio × 100)
-        if (value >= 0.05) return 'text-[#2FA87A]';
-        if (value >= 0.01) return 'text-yellow-500';
+        // Valores típicos: 1-50+ (usa rentabilidade em R$)
+        if (value >= 5) return 'text-[#2FA87A]';
+        if (value >= 1) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'consistencia':
         // Score de Consistência = √(Assertividade × FatorDeLucro)
@@ -328,8 +330,9 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
         return 'text-[#F06363]';
       case 'rap':
         // RAP = Rentabilidade / Assertividade
-        if (value >= 10) return 'text-[#2FA87A]';
-        if (value >= 5) return 'text-yellow-500';
+        // Valores típicos: 100-10000+ (usa rentabilidade em R$)
+        if (value >= 1000) return 'text-[#2FA87A]';
+        if (value >= 100) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'ipi':
         // IPI - Índice de Performance Integrado
@@ -364,7 +367,7 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Índice de Qualidade de Trading</p>
                   <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando rentabilidade, assertividade e risco. Quanto maior, melhor sua estratégia.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 5 | ⚠️ Regular: 1-5 | ❌ Ruim: &lt; 1</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 100 | ⚠️ Regular: 20-100 | ❌ Ruim: &lt; 20</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -392,7 +395,7 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Eficiência de Risco</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você ganha em relação ao risco assumido. Quanto maior, mais eficiente está sendo sua gestão de risco.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 0.05 | ⚠️ Regular: 0.01-0.05 | ❌ Ruim: &lt; 0.01</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 5 | ⚠️ Regular: 1-5 | ❌ Ruim: &lt; 1</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -451,7 +454,7 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Retorno Ajustado por Precisão</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você lucra em relação à sua taxa de acerto. Útil para avaliar se você está maximizando seus ganhos mesmo com assertividade moderada.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 10 | ⚠️ Regular: 5-10 | ❌ Ruim: &lt; 5</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1000 | ⚠️ Regular: 100-1000 | ❌ Ruim: &lt; 100</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
