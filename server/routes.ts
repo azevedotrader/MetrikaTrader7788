@@ -2844,6 +2844,24 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
   
+  // EXCHANGE RATE ROUTES
+  
+  // GET /api/exchange-rate - Get current USD/BRL exchange rate
+  app.get("/api/exchange-rate", async (req, res) => {
+    try {
+      const rate = await getUsdToBrlRate();
+      res.json({ 
+        rate,
+        base: 'USD',
+        target: 'BRL',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error fetching exchange rate:', error);
+      res.status(500).json({ error: 'Erro ao buscar taxa de câmbio', rate: 5.80 });
+    }
+  });
+  
   // USER PROFILE ROUTES
   
   // GET /api/user/plan - Get user plan information
