@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { QuestionnaireForm } from "@/components/risk-management/QuestionnaireForm";
 import { RiskParametersDisplay } from "@/components/risk-management/RiskParametersDisplay";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface BankrollManagement {
   id: string;
@@ -34,6 +35,7 @@ interface QuestionnaireAnswers {
 export default function RiskManagement() {
   const { toast } = useToast();
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const { formatCurrency, getCurrencySymbol } = useCurrency();
 
   // Buscar gestão existente
   const {
@@ -278,6 +280,8 @@ export default function RiskManagement() {
             bankroll={bankroll}
             onDelete={handleDelete}
             isDeleting={deleteMutation.isPending}
+            formatCurrency={formatCurrency}
+            getCurrencySymbol={getCurrencySymbol}
           />
         ) : (
           // Estado de erro

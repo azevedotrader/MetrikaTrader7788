@@ -19,10 +19,23 @@ interface BankrollManagement {
 
 interface PerformanceChartProps {
   bankroll: BankrollManagement;
+  formatCurrency?: (value: number) => string;
+  getCurrencySymbol?: () => string;
 }
 
-export function PerformanceChart({ bankroll }: PerformanceChartProps) {
+export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp, getCurrencySymbol: getCurrencySymbolProp }: PerformanceChartProps) {
   const initialBankroll = parseFloat(bankroll.bankrollValue);
+  
+  // Default currency formatting if prop not provided
+  const defaultFormatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+  
+  const formatCurrency = formatCurrencyProp || defaultFormatCurrency;
+  const currencySymbol = getCurrencySymbolProp ? getCurrencySymbolProp() : "R$";
 
   // Buscar trades do usuário
   const { data: trades, isLoading } = useQuery<Trade[]>({
@@ -74,14 +87,6 @@ export function PerformanceChart({ bankroll }: PerformanceChartProps) {
 
     return data;
   }, [trades, initialBankroll]);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -189,7 +194,7 @@ export function PerformanceChart({ bankroll }: PerformanceChartProps) {
                 stroke="#71717a"
                 style={{ fontSize: "12px" }}
                 tick={{ fill: "#71717a" }}
-                tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => `${currencySymbol} ${(value / 1000).toFixed(0)}k`}
               />
               <Tooltip content={<CustomTooltip />} />
               <ReferenceLine

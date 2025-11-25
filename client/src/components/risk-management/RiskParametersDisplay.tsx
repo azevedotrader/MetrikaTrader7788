@@ -32,18 +32,33 @@ interface RiskParametersDisplayProps {
   bankroll: BankrollManagement;
   onDelete: () => void;
   isDeleting: boolean;
+  formatCurrency?: (value: number) => string;
+  getCurrencySymbol?: () => string;
 }
 
 export function RiskParametersDisplay({
   bankroll,
   onDelete,
   isDeleting,
+  formatCurrency: formatCurrencyProp,
+  getCurrencySymbol: getCurrencySymbolProp,
 }: RiskParametersDisplayProps) {
   const bankrollValue = parseFloat(bankroll.bankrollValue);
   const riskPerOperation = parseFloat(bankroll.riskPerOperation);
   const maxDailyRisk = parseFloat(bankroll.maxDailyRisk);
   const maxWeeklyRisk = parseFloat(bankroll.maxWeeklyRisk);
   const minRiskRewardRatio = parseFloat(bankroll.minRiskRewardRatio);
+  
+  // Default currency formatting if prop not provided
+  const defaultFormatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+  
+  const formatCurrency = formatCurrencyProp || defaultFormatCurrency;
+  const currencySymbol = getCurrencySymbolProp ? getCurrencySymbolProp() : "R$";
 
   // Estados para filtros
   const [periodFilter, setPeriodFilter] = useState<string>("all");
@@ -162,13 +177,6 @@ export function RiskParametersDisplay({
     };
   }, [filteredTrades]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
-
   const formatPercent = (value: number) => {
     return `${(value * 100).toFixed(2)}%`;
   };
@@ -285,7 +293,7 @@ export function RiskParametersDisplay({
           icon={Target}
           title="Relação Risco/Retorno Mínima"
           percentage={`1:${minRiskRewardRatio.toFixed(1)}`}
-          value={`Para cada R$1 arriscado, busque ganhar R$${minRiskRewardRatio.toFixed(1)}`}
+          value={`Para cada ${currencySymbol}1 arriscado, busque ganhar ${currencySymbol}${minRiskRewardRatio.toFixed(1)}`}
           description="Sempre busque esse R:R ou melhor"
           color="from-green-500/20 to-emerald-500/20"
           borderColor="border-green-500/50"
@@ -432,7 +440,7 @@ export function RiskParametersDisplay({
                     stroke="#71717a"
                     style={{ fontSize: "12px" }}
                     tick={{ fill: "#71717a" }}
-                    tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
+                    tickFormatter={(value) => `${currencySymbol} ${(value / 1000).toFixed(0)}k`}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <ReferenceLine
