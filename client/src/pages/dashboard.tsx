@@ -105,6 +105,7 @@ import { type Trade } from "@shared/schema";
 import { TradingCalendar } from "@/components/ui/trading-calendar";
 import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency } from "@/hooks/useCurrency";
 import { TopBar } from "@/components/layout/top-bar";
 import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 import {
@@ -306,7 +307,7 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
 }
 
 // Componente AdvancedMetrics
-function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { trades: Trade[]; t: (key: string) => string; formatCurrency: (value: number) => string; getCurrencySymbol: () => string }) {
   const metrics = calculateAdvancedMetrics(trades);
 
   const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi' | 'expectancy') => {
@@ -510,7 +511,7 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Expectancy (Van Tharp)</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você espera ganhar (ou perder) em média por trade. Métrica fundamental para saber se sua estratégia é lucrativa a longo prazo.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ R$ 50 | ⚠️ Regular: &gt; R$ 0 | ❌ Ruim: &lt; R$ 0</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ {getCurrencySymbol()}50 | ⚠️ Regular: &gt; {getCurrencySymbol()}0 | ❌ Ruim: &lt; {getCurrencySymbol()}0</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -518,7 +519,7 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
               className={`text-sm sm:text-lg font-bold mb-1 ${getScoreColor(metrics.expectancy, 'expectancy')}`}
               data-testid="text-expectancy"
             >
-              R$ {metrics.expectancy.toFixed(2)}
+              {formatCurrency(metrics.expectancy)}
             </div>
             <div className="text-xs text-zinc-500">{t('metrics.van_tharp')}</div>
           </div>
@@ -529,7 +530,7 @@ function AdvancedMetrics({ trades, t }: { trades: Trade[]; t: (key: string) => s
 }
 
 // Capital Curve Chart - Professional Trading Analytics
-function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: (key: string) => string; formatCurrency: (value: number) => string }) {
   const [timeFilter, setTimeFilter] = useState<
     "dia" | "semana" | "mes" | "ano"
   >("mes");
@@ -638,9 +639,9 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
 
   const formatTooltipValue = (value: number, name: string) => {
     if (name === "cumulativeProfit") {
-      return [`R$ ${value.toFixed(2)}`, t('chart.profitability_accumulated')];
+      return [formatCurrency(value), t('chart.profitability_accumulated')];
     }
-    return [`R$ ${value.toFixed(2)}`, t('chart.period_result')];
+    return [formatCurrency(value), t('chart.period_result')];
   };
 
   return (
@@ -689,7 +690,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
                   stroke="#9CA3AF"
                   fontSize={10}
                   width={70}
-                  tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
+                  tickFormatter={(value) => formatCurrency(value)}
                   domain={yAxisDomain}
                   allowDataOverflow={false}
                 />
@@ -791,7 +792,7 @@ function CapitalCurveChart({ trades, t }: { trades: Trade[]; t: (key: string) =>
 }
 
 // Drawdown Chart - Shows the drawdown values in R$ over time (daily view)
-function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+function DrawdownChart({ trades, t, formatCurrency }: { trades: Trade[]; t: (key: string) => string; formatCurrency: (value: number) => string }) {
   const timeFilter = "dia"; // Fixo em dia para melhor expressividade
 
   const chartData = useMemo(() => {
@@ -916,9 +917,9 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
 
   const formatTooltipValue = (value: number, name: string, props: any) => {
     if (name === 'drawdown') {
-      return [`R$ ${value.toFixed(2)}`, 'Drawdown'];
+      return [formatCurrency(value), 'Drawdown'];
     }
-    return [`R$ ${value.toFixed(2)}`, 'Drawdown'];
+    return [formatCurrency(value), 'Drawdown'];
   };
 
   return (
@@ -930,7 +931,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
           <div className="text-slate-400 text-center">
             <div>Max Drawdown:</div>
             <div className="text-[#F06363] font-semibold text-base sm:text-lg">
-              R$ {maxDrawdown.toFixed(2)}
+              {formatCurrency(maxDrawdown)}
             </div>
           </div>
         </div>
@@ -953,7 +954,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
                 <YAxis 
                   stroke="#9CA3AF"
                   fontSize={10}
-                  tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
+                  tickFormatter={(value) => formatCurrency(value)}
                   domain={['dataMin', 0]}
                   width={65}
                 />
@@ -998,7 +999,7 @@ function DrawdownChart({ trades, t }: { trades: Trade[]; t: (key: string) => str
 }
 
 // Trade Time Performance - Scatter plot showing performance by time of day
-function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; t: (key: string) => string; formatCurrency: (value: number) => string }) {
   const timeData = useMemo(() => {
     if (!trades.length) return [];
 
@@ -1068,10 +1069,10 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
         <div className="bg-black border border-zinc-700 rounded-lg p-3 text-white">
           <p className="font-medium mb-1">⏰ {label}</p>
           <p className={`${data.value >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
-            💰 Total: R$ {data.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            💰 Total: {formatCurrency(data.value)}
           </p>
           <p className={`${data.average >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
-            📊 Média: R$ {data.average.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            📊 Média: {formatCurrency(data.average)}
           </p>
           <p className="text-zinc-300">📈 Trades: {data.count}</p>
         </div>
@@ -1100,13 +1101,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
             <YAxis
               stroke="#aaa"
               fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
-              tickFormatter={(value) => 
-                window.innerWidth < 640
-                  ? `${(value / 1000).toFixed(1)}k`
-                  : window.innerWidth < 1024
-                  ? `R$ ${(value / 1000).toFixed(1)}k`
-                  : `R$ ${(value / 1000).toFixed(1)}k`
-              }
+              tickFormatter={(value) => formatCurrency(value)}
               width={window.innerWidth < 640 ? 40 : window.innerWidth < 1024 ? 50 : 60}
             />
             <RechartsTooltip content={<CustomTooltip />} />
@@ -1139,7 +1134,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
                   const best = timeData.reduce((prev, current) => 
                     prev.value > current.value ? prev : current
                   );
-                  return `${best.time} (R$ ${best.value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`;
+                  return `${best.time} (${formatCurrency(best.value)})`;
                 })()}
               </div>
             </div>
@@ -1150,7 +1145,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
                   const worst = timeData.reduce((prev, current) => 
                     prev.value < current.value ? prev : current
                   );
-                  return `${worst.time} (R$ ${worst.value.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`;
+                  return `${worst.time} (${formatCurrency(worst.value)})`;
                 })()}
               </div>
             </div>
@@ -1162,7 +1157,7 @@ function TradeTimePerformance({ trades, t }: { trades: Trade[]; t: (key: string)
 }
 
 // Métrika Score - Hexagonal radar chart similar to Zella Score
-function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => string }) {
+function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key: string) => string; formatCurrency: (value: number) => string }) {
   const metricsData = useMemo(() => {
     if (!trades.length) return [];
 
@@ -1408,7 +1403,7 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
                         <div className={`font-bold ${
                           data.total >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'
                         }`}>
-                          R$ {data.total.toFixed(2)}
+                          {formatCurrency(data.total)}
                         </div>
                         <div className="text-slate-500">
                           {data.count} trades ({percentage.toFixed(1)}%)
@@ -1427,10 +1422,11 @@ function MetrikaScore({ trades, t }: { trades: Trade[]; t: (key: string) => stri
 }
 
 // Performance Period Chart Component  
-function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: { 
+function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrency }: { 
   trades: Trade[]; 
   t: (key: string) => string;
   onPeriodFilterChange?: (filteredTrades: Trade[]) => void;
+  formatCurrency: (value: number) => string;
 }) {
   const [selectedPeriod, setSelectedPeriod] = useState<
     "week" | "month" | "year" | "specific-month"
@@ -1602,7 +1598,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
           <div class="text-xs font-bold text-[#2FA87A] truncate">
-            R$ ${totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+            ${formatCurrency(totalPositive)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
             ${totalPositiveCount}
@@ -1613,7 +1609,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
           <div class="text-xs font-bold text-[#F06363] truncate">
-            -R$ ${totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+            ${formatCurrency(totalNegative)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
             ${totalNegativeCount}
@@ -1624,7 +1620,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
           <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}">
-            R$ ${finalAccumulated.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+            ${formatCurrency(finalAccumulated)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
             ${winRate.toFixed(0)}%
@@ -1635,7 +1631,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
         <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
           <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-blue-600' : 'text-orange-400'}">
-            R$ ${avgPerPeriod.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+            ${formatCurrency(avgPerPeriod)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
             ${chartData.length}d
@@ -1893,16 +1889,16 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
                       {label}
                     </p>
                     <p style={{ margin: 0, color: data.accumulated >= 0 ? "#2FA87A" : "#F06363" }}>
-                      💰 Acumulado: R$ {data.accumulated.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      💰 Acumulado: {formatCurrency(data.accumulated)}
                     </p>
                     {data.positive > 0 && (
                       <p style={{ margin: 0, color: "#2FA87A" }}>
-                        📈 Lucro: R$ {data.positive.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        📈 Lucro: {formatCurrency(data.positive)}
                       </p>
                     )}
                     {data.negative < 0 && (
                       <p style={{ margin: 0, color: "#F06363" }}>
-                        📉 Perda: R$ {Math.abs(data.negative).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                        📉 Perda: {formatCurrency(Math.abs(data.negative))}
                       </p>
                     )}
                   </div>
@@ -1949,11 +1945,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange }: {
                 <YAxis 
                   stroke="#aaa"
                   fontSize={window.innerWidth < 768 ? 9 : 12}
-                  tickFormatter={(value) =>
-                    window.innerWidth < 768
-                      ? `${(value / 1000).toFixed(0)}k`
-                      : `R$ ${(value / 1000).toFixed(1)}k`
-                  }
+                  tickFormatter={(value) => formatCurrency(value)}
                 />
                 
                 <RechartsTooltip content={<CustomTooltip />} />
@@ -2315,7 +2307,7 @@ function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#2F
 }
 
 // Net Daily PnL Bar Chart Component
-function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
+function NetDailyPnLBarChart({ trades, formatCurrency }: { trades: Trade[]; formatCurrency: (value: number) => string }) {
   const dailyData = useMemo(() => {
     if (!trades.length) return [];
 
@@ -2378,7 +2370,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
                     {label}
                   </div>
                   <div className={`text-sm font-semibold ${isPositive ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
-                    {isPositive ? '+' : ''}R$ {Math.abs(value).toFixed(2)}
+                    {isPositive ? '+' : ''}{formatCurrency(Math.abs(value))}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
                     PnL Diário
@@ -2410,7 +2402,7 @@ function NetDailyPnLBarChart({ trades }: { trades: Trade[] }) {
 }
 
 // Recent Trades Component
-function RecentTrades({ trades }: { trades: Trade[] }) {
+function RecentTrades({ trades, formatCurrency }: { trades: Trade[]; formatCurrency: (value: number) => string }) {
   const recentTrades = useMemo(() => {
     return [...trades]
       .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
@@ -2455,7 +2447,7 @@ function RecentTrades({ trades }: { trades: Trade[] }) {
                 {parseFloat(trade.quantidade || '0').toFixed(0)}
               </div>
               <div className={`font-medium ${result >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
-                {result >= 0 ? '+' : ''}R${result.toFixed(0)}
+                {result >= 0 ? '+' : ''}{formatCurrency(result)}
               </div>
             </div>
           );
@@ -2472,6 +2464,7 @@ interface DashboardProps {
 export default function Dashboard({ onMenuClick }: DashboardProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { formatCurrency, formatCurrencyCompact, getCurrencySymbol } = useCurrency();
   const queryClient = useQueryClient();
   const { startTour } = useTour();
 
@@ -2784,9 +2777,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                   return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                 })()} break-words`}>
-                  R$ {(() => {
+                  {(() => {
                     const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                    return totalResult.toFixed(2);
+                    return formatCurrency(totalResult);
                   })()}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
@@ -2902,17 +2895,17 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
                     <div className="text-base md:text-lg lg:text-xl font-bold text-[#2FA87A] break-words">
-                      +R$ {(() => {
+                      +{(() => {
                         const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
-                        return avgWin.toFixed(0);
+                        return formatCurrency(avgWin);
                       })()}
                     </div>
                     <div className="text-sm md:text-base font-semibold text-[#F06363] break-words">
-                      -R$ {(() => {
+                      {(() => {
                         const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
-                        return avgLoss.toFixed(0);
+                        return formatCurrency(-avgLoss);
                       })()}
                     </div>
                   </div>
@@ -2962,6 +2955,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       trades={filteredTrades} 
                       t={t}
                       onPeriodFilterChange={setPeriodFilteredTrades}
+                      formatCurrency={formatCurrency}
                     />
                   </div>
                 </CardContent>
@@ -2975,11 +2969,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.profits_short')}</div>
                   <div className="text-lg md:text-xl font-bold text-[#2FA87A] mb-2">
-                    R$ {(() => {
+                    {(() => {
                       const totalPositive = periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') > 0)
                         .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      return totalPositive.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                      return formatCurrency(totalPositive);
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
@@ -3010,11 +3004,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.losses_short')}</div>
                   <div className="text-lg md:text-xl font-bold text-[#F06363] mb-2">
-                    -R$ {(() => {
+                    {(() => {
                       const totalNegative = Math.abs(periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') < 0)
                         .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
-                      return totalNegative.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                      return formatCurrency(-totalNegative);
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
@@ -3048,9 +3042,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                   })()}`}>
-                    R$ {(() => {
+                    {(() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      return totalResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                      return formatCurrency(totalResult);
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
@@ -3087,10 +3081,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
                     return avgResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                   })()}`}>
-                    R$ {(() => {
+                    {(() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
-                      return avgResult.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+                      return formatCurrency(avgResult);
                     })()}
                   </div>
                   <div className="flex flex-col items-center">
@@ -3148,7 +3142,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
                           <p className="text-sm sm:text-lg font-bold text-[#2FA87A] truncate">
-                            R$ {metrics.melhorTrade.toFixed(2)}
+                            {formatCurrency(metrics.melhorTrade)}
                           </p>
                         </div>
                         <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
@@ -3185,7 +3179,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               <div className="h-full p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-auto">
                 {/* Seção 1: Métricas Matemáticas */}
                 <div>
-                  <AdvancedMetrics trades={filteredTrades} t={t} />
+                  <AdvancedMetrics trades={filteredTrades} t={t} formatCurrency={formatCurrency} getCurrencySymbol={getCurrencySymbol} />
                 </div>
                 
                 {/* Seção 2: Métrika Score */}
@@ -3195,7 +3189,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     {t('metrics.metrika_score')}
                   </div>
                   <div className="scale-90 sm:scale-100 origin-top">
-                    <MetrikaScore trades={filteredTrades} t={t} />
+                    <MetrikaScore trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
                   </div>
                 </div>
               </div>
@@ -3211,7 +3205,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <BarChart3 className="h-4 w-4 text-[#2FA87A]" />
                   </div>
                   <div className="h-48 overflow-hidden">
-                    <NetDailyPnLBarChart trades={filteredTrades} />
+                    <NetDailyPnLBarChart trades={filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </CardContent>
               </Card>
@@ -3224,7 +3218,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <FileText className="h-4 w-4 text-zinc-400" />
                   </div>
                   <div className="h-48 overflow-hidden">
-                    <RecentTrades trades={filteredTrades} />
+                    <RecentTrades trades={filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </CardContent>
               </Card>
@@ -3243,7 +3237,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     {t('metrics.trade_time_performance')}
                   </CardTitle>
                 </CardHeader>
-                <TradeTimePerformance trades={filteredTrades} t={t} />
+                <TradeTimePerformance trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
               </Card>
             </div>
 
@@ -3260,7 +3254,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   className="h-[280px] flex-shrink-0"
                 >
                   <div className="h-full overflow-hidden min-h-[200px]">
-                    <NetDailyPnLBarChart trades={filteredTrades} />
+                    <NetDailyPnLBarChart trades={filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </SquareCard>
 
@@ -3274,7 +3268,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   className="flex-1 min-h-[280px]"
                 >
                   <div className="h-full overflow-auto">
-                    <RecentTrades trades={filteredTrades} />
+                    <RecentTrades trades={filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </SquareCard>
               </div>
@@ -3291,7 +3285,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   {t('dashboard.capital_curve')}
                 </CardTitle>
               </CardHeader>
-              <CapitalCurveChart trades={filteredTrades} t={t} />
+              <CapitalCurveChart trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
             </Card>
 
             {/* Gráfico de Drawdown */}
@@ -3302,7 +3296,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   {t('metrics.drawdown')}
                 </CardTitle>
               </CardHeader>
-              <DrawdownChart trades={filteredTrades} t={t} />
+              <DrawdownChart trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
             </Card>
           </div>
       </div>
