@@ -128,7 +128,8 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
       setLoadingImages(true);
       try {
         const userId = localStorage.getItem('user-id');
-        if (!userId) return;
+        const token = localStorage.getItem('user-token');
+        if (!userId || !token) return;
 
         const imagesMap: { [tradeId: string]: DiaryImage[] } = {};
         
@@ -138,7 +139,8 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
               const response = await fetch(`/api/trades/${trade.id}/images`, {
                 headers: {
                   "user-id": userId,
-                  "X-User-ID": userId
+                  "X-User-ID": userId,
+                  "Authorization": `Bearer ${token}`
                 },
                 credentials: "include"
               });
@@ -190,7 +192,8 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
     setUploadingTradeId(tradeId);
     try {
       const userId = localStorage.getItem('user-id');
-      if (!userId) throw new Error('Usuário não autenticado');
+      const token = localStorage.getItem('user-token');
+      if (!userId || !token) throw new Error('Usuário não autenticado');
 
       const formData = new FormData();
       formData.append('image', file);
@@ -199,7 +202,8 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
         method: 'POST',
         headers: {
           "user-id": userId,
-          "X-User-ID": userId
+          "X-User-ID": userId,
+          "Authorization": `Bearer ${token}`
         },
         body: formData,
         credentials: "include"
@@ -237,13 +241,15 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
 
     try {
       const userId = localStorage.getItem('user-id');
-      if (!userId) throw new Error('Usuário não autenticado');
+      const token = localStorage.getItem('user-token');
+      if (!userId || !token) throw new Error('Usuário não autenticado');
 
       const response = await fetch(`/api/trades/${tradeId}/images/${imageId}`, {
         method: 'DELETE',
         headers: {
           "user-id": userId,
-          "X-User-ID": userId
+          "X-User-ID": userId,
+          "Authorization": `Bearer ${token}`
         },
         credentials: "include"
       });
