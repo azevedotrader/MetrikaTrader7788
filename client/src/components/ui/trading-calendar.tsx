@@ -239,6 +239,7 @@ export function TradingCalendar({
     }
 
     // Calcular resumos por semana
+    let weekCounter = 0; // Contador sequencial para semanas com trades
     calendar.forEach((weekDays, index) => {
       const validDays = weekDays.filter((day) => day !== null) as TradeDay[];
       const totalPnl = validDays.reduce((sum, day) => sum + day.pnl, 0);
@@ -246,8 +247,9 @@ export function TradingCalendar({
       const tradingDays = validDays.length;
 
       if (tradingDays > 0) {
+        weekCounter++; // Incrementa o contador apenas quando há trades
         weeks.push({
-          weekNumber: index + 1,
+          weekNumber: weekCounter, // Usa o contador sequencial em vez do índice
           pnl: totalPnl,
           days: tradingDays,
           trades: totalTrades,
