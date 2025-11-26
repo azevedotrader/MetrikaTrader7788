@@ -206,50 +206,32 @@ export function TradingCalendar({
 
   const tradeDays = processRealTradeData();
 
-  // Calcular resumos semanais
+  // Calcular resumos semanais baseado nas semanas lógicas do mês
+  // Semana 1 = dias 1-7, Semana 2 = dias 8-14, Semana 3 = dias 15-21, Semana 4 = dias 22-28/29/30/31
   const calculateWeekSummaries = (): WeekSummary[] => {
     const weeks: WeekSummary[] = [];
-    const calendar: (TradeDay | null)[][] = [];
+    
+    // Definir as 4 semanas do mês
+    const weekRanges = [
+      { start: 1, end: 7 },   // Semana 1
+      { start: 8, end: 14 },  // Semana 2
+      { start: 15, end: 21 }, // Semana 3
+      { start: 22, end: daysInMonth }, // Semana 4 (inclui todos os dias restantes)
+    ];
 
-    // Criar matriz do calendário
-    let week: (TradeDay | null)[] = [];
+    weekRanges.forEach((range, index) => {
+      // Filtrar trades desta semana
+      const weekTrades = tradeDays.filter(
+        (td) => td.date >= range.start && td.date <= range.end
+      );
 
-    // Dias vazios no início
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      week.push(null);
-    }
+      if (weekTrades.length > 0) {
+        const totalPnl = weekTrades.reduce((sum, day) => sum + day.pnl, 0);
+        const totalTrades = weekTrades.reduce((sum, day) => sum + day.trades, 0);
+        const tradingDays = weekTrades.length;
 
-    // Dias do mês
-    for (let day = 1; day <= daysInMonth; day++) {
-      const tradeDay = tradeDays.find((td) => td.date === day);
-      week.push(tradeDay || null);
-
-      if (week.length === 7) {
-        calendar.push(week);
-        week = [];
-      }
-    }
-
-    // Completar última semana se necessário
-    while (week.length < 7 && week.length > 0) {
-      week.push(null);
-    }
-    if (week.length > 0) {
-      calendar.push(week);
-    }
-
-    // Calcular resumos por semana
-    let weekCounter = 0; // Contador sequencial para semanas com trades
-    calendar.forEach((weekDays, index) => {
-      const validDays = weekDays.filter((day) => day !== null) as TradeDay[];
-      const totalPnl = validDays.reduce((sum, day) => sum + day.pnl, 0);
-      const totalTrades = validDays.reduce((sum, day) => sum + day.trades, 0);
-      const tradingDays = validDays.length;
-
-      if (tradingDays > 0) {
-        weekCounter++; // Incrementa o contador apenas quando há trades
         weeks.push({
-          weekNumber: weekCounter, // Usa o contador sequencial em vez do índice
+          weekNumber: index + 1,
           pnl: totalPnl,
           days: tradingDays,
           trades: totalTrades,
