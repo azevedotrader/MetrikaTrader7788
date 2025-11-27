@@ -1429,6 +1429,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
   const getChartData = () => {
     // Usar diretamente os trades já filtrados que vêm do dashboard principal
     if (!trades.length) return [];
+    
+    console.log('📊 Performance Chart - Trades recebidos:', trades.length, 'Período:', selectedPeriod);
 
     let periodFilteredTrades = trades;
     let groupBy: "day" | "week" | "month" = "day";
@@ -1475,6 +1477,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         return tradeDate >= startDate! && tradeDate <= endDate!;
       });
     }
+    
+    console.log('📊 Performance Chart - Trades após filtro:', periodFilteredTrades.length, 'Start:', startDate, 'End:', endDate);
 
     if (periodFilteredTrades.length === 0) return [];
 
@@ -1483,7 +1487,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
       (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime(),
     );
 
-    // Criar dados do gráfico trade por trade com pontos intermediários para gaps
+    // Criar dados do gráfico trade por trade para máximo detalhe
+    // O stepAfter cria automaticamente linhas horizontais entre pontos
     let accumulated = 0;
     const chartData: any[] = [];
 
@@ -1491,44 +1496,12 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
       const tradeDate = new Date(trade.dataHora);
       const resultado = parseFloat(trade.resultado || "0");
       
+      accumulated += resultado;
+      
       // Formato de label baseado no período selecionado
       const label = selectedPeriod === "year" 
         ? format(tradeDate, "dd/MM/yy", { locale: ptBR })
         : format(tradeDate, "dd/MM", { locale: ptBR });
-      
-      // Se não for o primeiro trade, verificar se há gap significativo
-      if (index > 0) {
-        const prevTrade = sortedTrades[index - 1];
-        const prevDate = new Date(prevTrade.dataHora);
-        const daysDiff = Math.floor((tradeDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        // Se houver gap de mais de 1 dia, adicionar ponto intermediário para criar platô
-        if (daysDiff > 1) {
-          // Adicionar ponto no início do gap (mantém acumulado anterior)
-          const gapStartDate = new Date(prevDate.getTime() + 24 * 60 * 60 * 1000);
-          const gapLabel = selectedPeriod === "year" 
-            ? format(gapStartDate, "dd/MM/yy", { locale: ptBR })
-            : format(gapStartDate, "dd/MM", { locale: ptBR });
-          
-          chartData.push({
-            period: gapLabel,
-            date: gapStartDate,
-            positive: 0,
-            negative: 0,
-            total: 0,
-            accumulated,
-            accumulatedPositive: accumulated >= 0 ? accumulated : 0,
-            accumulatedNegative: accumulated < 0 ? accumulated : 0,
-            positiveCount: 0,
-            negativeCount: 0,
-            totalCount: 0,
-            hasData: false,
-            isGap: true,
-          });
-        }
-      }
-      
-      accumulated += resultado;
       
       chartData.push({
         period: label,
