@@ -1483,57 +1483,35 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
       (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime(),
     );
 
-    // Agrupar trades por período (chave única baseada na data)
-    const tradesByPeriod = new Map<string, { trades: Trade[]; date: Date }>();
-    
-    sortedTrades.forEach((trade) => {
-      const tradeDate = new Date(trade.dataHora);
-      const key = format(tradeDate, "yyyy-MM-dd");
-      
-      if (!tradesByPeriod.has(key)) {
-        tradesByPeriod.set(key, { trades: [], date: tradeDate });
-      }
-      tradesByPeriod.get(key)!.trades.push(trade);
-    });
-
-    // Criar dados do gráfico apenas com dias que têm operações
-    // O stepAfter criará automaticamente linhas horizontais entre os pontos
+    // Criar dados do gráfico trade por trade para máximo detalhe
     let accumulated = 0;
     const chartData: any[] = [];
 
-    // Ordenar as chaves por data
-    const sortedKeys = Array.from(tradesByPeriod.keys()).sort();
-
-    sortedKeys.forEach((key) => {
-      const { trades: periodTrades, date } = tradesByPeriod.get(key)!;
+    sortedTrades.forEach((trade, index) => {
+      const tradeDate = new Date(trade.dataHora);
+      const resultado = parseFloat(trade.resultado || "0");
       
-      const positives = periodTrades.filter(t => parseFloat(t.resultado || "0") > 0);
-      const negatives = periodTrades.filter(t => parseFloat(t.resultado || "0") < 0);
-      
-      const totalPositive = positives.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
-      const totalNegative = negatives.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
-      const periodTotal = totalPositive + totalNegative;
-      
-      accumulated += periodTotal;
+      accumulated += resultado;
       
       // Formato de label baseado no período selecionado
       const label = selectedPeriod === "year" 
-        ? format(date, "dd/MM/yy", { locale: ptBR })
-        : format(date, "dd/MM", { locale: ptBR });
+        ? format(tradeDate, "dd/MM/yy", { locale: ptBR })
+        : format(tradeDate, "dd/MM", { locale: ptBR });
       
       chartData.push({
         period: label,
-        date: date,
-        positive: totalPositive,
-        negative: Math.abs(totalNegative),
-        total: periodTotal,
+        date: tradeDate,
+        positive: resultado > 0 ? resultado : 0,
+        negative: resultado < 0 ? Math.abs(resultado) : 0,
+        total: resultado,
         accumulated,
         accumulatedPositive: accumulated >= 0 ? accumulated : 0,
         accumulatedNegative: accumulated < 0 ? accumulated : 0,
-        positiveCount: positives.length,
-        negativeCount: negatives.length,
-        totalCount: periodTrades.length,
+        positiveCount: resultado > 0 ? 1 : 0,
+        negativeCount: resultado < 0 ? 1 : 0,
+        totalCount: 1,
         hasData: true,
+        tradeIndex: index + 1,
       });
     });
 
@@ -1849,7 +1827,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
               zeroPosition = Math.max(0, Math.min(100, zeroPosition));
             }
 
-            // Tooltip personalizado
+            // Tooltip personalizado para trade individual
             const CustomTooltip = ({ active, payload, label }: any) => {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
@@ -1858,25 +1836,19 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                     backgroundColor: "#000000",
                     border: "1px solid #444",
                     borderRadius: "8px",
-                    padding: "8px",
-                    color: "#fff"
+                    padding: "10px",
+                    color: "#fff",
+                    minWidth: "140px"
                   }}>
-                    <p style={{ margin: 0, fontWeight: "bold", marginBottom: "4px" }}>
-                      {label}
+                    <p style={{ margin: 0, fontWeight: "bold", marginBottom: "6px", fontSize: "12px" }}>
+                      📅 {label} {data.tradeIndex ? `• Trade #${data.tradeIndex}` : ''}
                     </p>
-                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#2FA87A" : "#F06363" }}>
-                      💰 Acumulado: {formatCurrency(data.accumulated)}
+                    <p style={{ margin: 0, marginBottom: "4px", color: data.total >= 0 ? "#2FA87A" : "#F06363", fontSize: "13px" }}>
+                      {data.total >= 0 ? "📈" : "📉"} {data.total >= 0 ? "+" : ""}{formatCurrency(data.total)}
                     </p>
-                    {data.positive > 0 && (
-                      <p style={{ margin: 0, color: "#2FA87A" }}>
-                        📈 Lucro: {formatCurrency(data.positive)}
-                      </p>
-                    )}
-                    {data.negative < 0 && (
-                      <p style={{ margin: 0, color: "#F06363" }}>
-                        📉 Perda: {formatCurrency(Math.abs(data.negative))}
-                      </p>
-                    )}
+                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#2FA87A" : "#F06363", fontSize: "12px", opacity: 0.8 }}>
+                      💰 Total: {formatCurrency(data.accumulated)}
+                    </p>
                   </div>
                 );
               }
