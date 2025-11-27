@@ -29,8 +29,8 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'user-id': 'current-user'
-        }
+        },
+        credentials: 'include'
       });
       return response.json();
     },

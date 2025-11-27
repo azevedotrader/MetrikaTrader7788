@@ -57,13 +57,12 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
   const csvAnalysisMutation = useMutation({
     mutationFn: async (csvId: string) => {
-      const userId = localStorage.getItem('user-id') || '';
       const response = await fetch('/api/ai/analyze-csv-tips', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'user-id': userId
         },
+        credentials: 'include',
         body: JSON.stringify({ csvId })
       });
       return response.json();
