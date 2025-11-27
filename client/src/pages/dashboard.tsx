@@ -299,36 +299,40 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
   const metrics = calculateAdvancedMetrics(trades);
 
   const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi' | 'expectancy') => {
+    // Sistema de cores:
+    // 🟢 Verde = Bom/Excelente (acima de 70% do objetivo)
+    // 🟡 Amarelo = Mediano (entre 30-70% do objetivo)
+    // 🔴 Vermelho = Precisa melhorar (abaixo de 30%)
     switch (type) {
       case 'iqt':
-        // IQT - Escala normalizada 0-200+
-        if (value >= 100) return 'text-[#2FA87A]'; // Verde - Excelente
-        if (value >= 50) return 'text-yellow-500'; // Amarelo - Bom
+        // IQT - Objetivo: 100 | Verde ≥70 | Amarelo 30-70 | Vermelho <30
+        if (value >= 70) return 'text-[#2FA87A]'; // Verde - Bom
+        if (value >= 30) return 'text-yellow-500'; // Amarelo - Mediano
         return 'text-[#F06363]'; // Vermelho - Precisa melhorar
       case 'eficiencia':
-        // Eficiência - Escala 0-50+
-        if (value >= 5) return 'text-[#2FA87A]';
-        if (value >= 2) return 'text-yellow-500';
+        // Eficiência - Objetivo: 5 | Verde ≥3.5 | Amarelo 1.5-3.5 | Vermelho <1.5
+        if (value >= 3.5) return 'text-[#2FA87A]';
+        if (value >= 1.5) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'consistencia':
-        // Score de Consistência - Escala 0-3+
-        if (value >= 1.2) return 'text-[#2FA87A]';
-        if (value >= 0.8) return 'text-yellow-500';
+        // Consistência - Objetivo: 1.2 | Verde ≥0.9 | Amarelo 0.5-0.9 | Vermelho <0.5
+        if (value >= 0.9) return 'text-[#2FA87A]';
+        if (value >= 0.5) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'rap':
-        // RAP - Escala normalizada 0-300+
-        if (value >= 100) return 'text-[#2FA87A]';
-        if (value >= 50) return 'text-yellow-500';
+        // RAP - Objetivo: 100 | Verde ≥70 | Amarelo 30-70 | Vermelho <30
+        if (value >= 70) return 'text-[#2FA87A]';
+        if (value >= 30) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'ipi':
-        // IPI - Escala 0-10+
-        if (value >= 2.0) return 'text-[#2FA87A]';
-        if (value >= 1.0) return 'text-yellow-500';
+        // IPI - Objetivo: 2.0 | Verde ≥1.4 | Amarelo 0.6-1.4 | Vermelho <0.6
+        if (value >= 1.4) return 'text-[#2FA87A]';
+        if (value >= 0.6) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'expectancy':
-        // Expectancy - Lucro esperado por trade em R$
-        if (value >= 50) return 'text-[#2FA87A]';
-        if (value > 0) return 'text-yellow-500';
+        // Expectancy - Objetivo: 50 | Verde ≥20 | Amarelo 0-20 | Vermelho <0
+        if (value >= 20) return 'text-[#2FA87A]';
+        if (value >= 0) return 'text-yellow-500';
         return 'text-[#F06363]';
     }
   };
@@ -353,7 +357,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Índice de Qualidade de Trading</p>
                   <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando taxa de acerto, fator de lucro e risco/retorno. Quanto maior, melhor sua estratégia.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 100 | ⚠️ Bom: 50-100 | ❌ Precisa melhorar: &lt; 50</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 70 | ⚠️ Mediano: 30-70 | ❌ Precisa melhorar: &lt; 30</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -381,7 +385,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Eficiência de Risco</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você ganha em relação ao risco assumido. Quanto maior, mais eficiente está sendo sua gestão de risco.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 5 | ⚠️ Bom: 2-5 | ❌ Precisa melhorar: &lt; 2</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 3.5 | ⚠️ Mediano: 1.5-3.5 | ❌ Precisa melhorar: &lt; 1.5</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -409,7 +413,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Score de Consistência</p>
                   <p className="text-sm text-zinc-300">Avalia a estabilidade dos seus resultados ao longo do tempo. Alta consistência indica disciplina e controle emocional.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 1.2 | ⚠️ Bom: 0.8-1.2 | ❌ Precisa melhorar: &lt; 0.8</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 0.9 | ⚠️ Mediano: 0.5-0.9 | ❌ Precisa melhorar: &lt; 0.5</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -440,7 +444,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Retorno Ajustado por Precisão</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você lucra em relação à sua taxa de acerto. Útil para avaliar se você está maximizando seus ganhos mesmo com assertividade moderada.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 100 | ⚠️ Bom: 50-100 | ❌ Precisa melhorar: &lt; 50</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 70 | ⚠️ Mediano: 30-70 | ❌ Precisa melhorar: &lt; 30</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -468,7 +472,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Índice de Performance Integrado</p>
                   <p className="text-sm text-zinc-300">Métrica avançada que combina rentabilidade, lucro, estabilidade e drawdown. Resume a performance completa da sua estratégia.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 2.0 | ⚠️ Regular: 1-2 | ❌ Ruim: &lt; 1</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1.4 | ⚠️ Mediano: 0.6-1.4 | ❌ Precisa melhorar: &lt; 0.6</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -496,7 +500,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Expectancy (Van Tharp)</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você espera ganhar (ou perder) em média por trade. Métrica fundamental para saber se sua estratégia é lucrativa a longo prazo.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ {getCurrencySymbol()}50 | ⚠️ Regular: &gt; {getCurrencySymbol()}0 | ❌ Ruim: &lt; {getCurrencySymbol()}0</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ {getCurrencySymbol()}20 | ⚠️ Mediano: {getCurrencySymbol()}0-20 | ❌ Negativo: &lt; {getCurrencySymbol()}0</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
