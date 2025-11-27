@@ -720,7 +720,7 @@ export function TradingPerformanceChart({
               />
             ))}
 
-            {/* Área preenchida - usa monotone para suavidade */}
+            {/* Área preenchida com curva suave */}
             <Area
               type="monotone"
               dataKey="accumulated"
@@ -730,28 +730,21 @@ export function TradingPerformanceChart({
               isAnimationActive={false}
             />
 
-            {/* Linhas por segmento - tipo diferente baseado na diferença de dias */}
-            {lineSegments.map((segment) => (
-              <Line
-                key={segment.id}
-                data={segment.data}
-                type={segment.type}
-                dataKey="accumulated"
-                stroke="url(#tradingGradient)"
-                strokeWidth={hoveredPoint !== null ? 3 : 2}
-                strokeOpacity={segment.isGap ? 0.6 : 1}
-                strokeDasharray={segment.isGap ? "5 3" : "0"}
-                dot={false}
-                activeDot={{
-                  r: 6,
-                  fill: "#fff",
-                  stroke: segment.isGap ? "#888" : "#2FA87A",
-                  strokeWidth: 2,
-                }}
-                isAnimationActive={false}
-                connectNulls
-              />
-            ))}
+            {/* Linha principal - curva suave/natural para mostrar volatilidade */}
+            <Line
+              type="monotone"
+              dataKey="accumulated"
+              stroke="url(#tradingGradient)"
+              strokeWidth={hoveredPoint !== null ? 3 : 2}
+              dot={false}
+              activeDot={{
+                r: 6,
+                fill: "#fff",
+                stroke: "#2FA87A",
+                strokeWidth: 2,
+              }}
+              isAnimationActive={false}
+            />
 
             {/* Marcar picos com pontos especiais */}
             {peaks.filter(p => p.type === "peak").map((peak, index) => (
