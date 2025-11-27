@@ -501,40 +501,38 @@ export function TradingPerformanceChart({
   if (chartData.length === 0) {
     return (
       <div className="w-full" data-testid="trading-performance-chart-empty">
-        <div className="flex justify-between items-center mb-4 md:mb-6 px-2">
-          <div className="flex gap-2 md:gap-3 flex-wrap items-center">
-            {[
-              { key: "1d", label: "1D" },
-              { key: "1s", label: "1S" },
-              { key: "1m", label: "1M" },
-              { key: "3m", label: "3M" },
-              { key: "6m", label: "6M" },
-              { key: "ytd", label: currentYear.toString() },
-              { key: "1a", label: "1A" },
-            ].map((filter) => (
-              <button
-                key={filter.key}
-                onClick={() => {
-                  setSelectedPeriod(filter.key as any);
-                  setCustomStartDate("");
-                  setCustomEndDate("");
-                }}
-                className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
-                  selectedPeriod === filter.key
-                    ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap items-center">
+          {[
+            { key: "1d", label: "1D" },
+            { key: "1s", label: "1S" },
+            { key: "1m", label: "1M" },
+            { key: "3m", label: "3M" },
+            { key: "6m", label: "6M" },
+            { key: "ytd", label: currentYear.toString() },
+            { key: "1a", label: "1A" },
+          ].map((filter) => (
+            <button
+              key={filter.key}
+              onClick={() => {
+                setSelectedPeriod(filter.key as any);
+                setCustomStartDate("");
+                setCustomEndDate("");
+              }}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
+                selectedPeriod === filter.key
+                  ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
           
-          {/* Botão de Filtro Customizado */}
+          {/* Botão de Filtro Customizado - junto dos outros */}
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <button
-                className={`p-2 rounded transition-all ${
+                className={`p-1.5 rounded transition-all ${
                   selectedPeriod === "custom"
                     ? "text-[#3b82f6]"
                     : "text-zinc-400 hover:text-white"
@@ -543,7 +541,7 @@ export function TradingPerformanceChart({
                 <Filter className="w-5 h-5" />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="end">
+            <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="center">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium text-white flex items-center gap-2">
@@ -625,41 +623,39 @@ export function TradingPerformanceChart({
   return (
     <div data-testid="trading-performance-chart" className="w-full">
       {/* Filtros de Período - Estilo Trading App */}
-      <div className="flex justify-between items-center mb-4 md:mb-6 px-2">
-        <div className="flex gap-2 md:gap-3 flex-wrap items-center">
-          {[
-            { key: "1d", label: "1D" },
-            { key: "1s", label: "1S" },
-            { key: "1m", label: "1M" },
-            { key: "3m", label: "3M" },
-            { key: "6m", label: "6M" },
-            { key: "ytd", label: currentYear.toString() },
-            { key: "1a", label: "1A" },
-          ].map((filter) => (
-            <button
-              key={filter.key}
-              onClick={() => {
-                setSelectedPeriod(filter.key as any);
-                setCustomStartDate("");
-                setCustomEndDate("");
-              }}
-              className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
-                selectedPeriod === filter.key
-                  ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-              data-testid={`btn-period-${filter.key}`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
+      <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap items-center">
+        {[
+          { key: "1d", label: "1D" },
+          { key: "1s", label: "1S" },
+          { key: "1m", label: "1M" },
+          { key: "3m", label: "3M" },
+          { key: "6m", label: "6M" },
+          { key: "ytd", label: currentYear.toString() },
+          { key: "1a", label: "1A" },
+        ].map((filter) => (
+          <button
+            key={filter.key}
+            onClick={() => {
+              setSelectedPeriod(filter.key as any);
+              setCustomStartDate("");
+              setCustomEndDate("");
+            }}
+            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
+              selectedPeriod === filter.key
+                ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                : "text-zinc-400 hover:text-white"
+            }`}
+            data-testid={`btn-period-${filter.key}`}
+          >
+            {filter.label}
+          </button>
+        ))}
 
-        {/* Botão de Filtro Customizado */}
+        {/* Botão de Filtro Customizado - junto dos outros */}
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
             <button
-              className={`p-2 rounded transition-all ${
+              className={`p-1.5 rounded transition-all ${
                 selectedPeriod === "custom"
                   ? "text-[#3b82f6]"
                   : "text-zinc-400 hover:text-white"
@@ -669,7 +665,7 @@ export function TradingPerformanceChart({
               <Filter className="w-5 h-5" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="end">
+          <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="center">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-medium text-white flex items-center gap-2">
