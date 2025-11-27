@@ -12,7 +12,7 @@ import {
   ReferenceDot,
   ReferenceArea,
 } from "recharts";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +53,13 @@ interface ConsolidationZone {
   startLabel: string;
   endLabel: string;
   avgValue: number;
+}
+
+interface LineSegment {
+  id: string;
+  data: ChartDataPoint[];
+  type: "monotone" | "stepAfter";
+  isGap: boolean; // true se for um gap de mais de 7 dias
 }
 
 interface TradingPerformanceChartProps {
@@ -210,6 +217,67 @@ function formatDate(date: Date, period: "week" | "month" | "year" | "specific-mo
   return format(date, "dd/MM", { locale: ptBR });
 }
 
+// Função para criar segmentos de linha baseados na diferença de dias
+// Menos de 7 dias = linha volátil (monotone)
+// 7+ dias = linha reta (stepAfter) para indicar período sem atividade
+function createLineSegments(data: ChartDataPoint[], gapThreshold: number = 7): LineSegment[] {
+  if (data.length < 2) {
+    return [{
+      id: "segment-0",
+      data: data,
+      type: "monotone",
+      isGap: false,
+    }];
+  }
+  
+  const segments: LineSegment[] = [];
+  let currentSegment: ChartDataPoint[] = [data[0]];
+  let currentType: "monotone" | "stepAfter" = "monotone";
+  let segmentIndex = 0;
+  
+  for (let i = 1; i < data.length; i++) {
+    const prevDate = data[i - 1].date;
+    const currDate = data[i].date;
+    const daysDiff = differenceInCalendarDays(currDate, prevDate);
+    
+    // Determinar o tipo de linha baseado na diferença de dias
+    const needsGapLine = daysDiff >= gapThreshold;
+    
+    if (needsGapLine !== (currentType === "stepAfter")) {
+      // Mudou o tipo de linha - finalizar segmento atual
+      if (currentSegment.length > 0) {
+        // Adicionar o ponto atual ao segmento anterior para continuidade
+        segments.push({
+          id: `segment-${segmentIndex}`,
+          data: [...currentSegment],
+          type: currentType,
+          isGap: currentType === "stepAfter",
+        });
+        segmentIndex++;
+      }
+      
+      // Iniciar novo segmento com o ponto anterior (para continuidade visual)
+      currentSegment = [data[i - 1], data[i]];
+      currentType = needsGapLine ? "stepAfter" : "monotone";
+    } else {
+      // Mesmo tipo - adicionar ao segmento atual
+      currentSegment.push(data[i]);
+    }
+  }
+  
+  // Finalizar último segmento
+  if (currentSegment.length > 0) {
+    segments.push({
+      id: `segment-${segmentIndex}`,
+      data: currentSegment,
+      type: currentType,
+      isGap: currentType === "stepAfter",
+    });
+  }
+  
+  return segments;
+}
+
 export function TradingPerformanceChart({ 
   trades, 
   t, 
@@ -223,8 +291,8 @@ export function TradingPerformanceChart({
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
   // Gerar dados do gráfico
-  const { chartData, peaks, consolidationZones, periodFilteredTrades } = useMemo(() => {
-    if (!trades.length) return { chartData: [], peaks: [], consolidationZones: [], periodFilteredTrades: [] as Trade[] };
+  const { chartData, peaks, consolidationZones, periodFilteredTrades, lineSegments } = useMemo(() => {
+    if (!trades.length) return { chartData: [], peaks: [], consolidationZones: [], periodFilteredTrades: [] as Trade[], lineSegments: [] as LineSegment[] };
 
     let periodFilteredTrades = trades;
     const now = new Date();
@@ -266,7 +334,7 @@ export function TradingPerformanceChart({
       });
     }
 
-    if (periodFilteredTrades.length === 0) return { chartData: [], peaks: [], consolidationZones: [], periodFilteredTrades: [] as Trade[] };
+    if (periodFilteredTrades.length === 0) return { chartData: [], peaks: [], consolidationZones: [], periodFilteredTrades: [] as Trade[], lineSegments: [] as LineSegment[] };
 
     // Ordenar trades por data
     const sortedTrades = [...periodFilteredTrades].sort(
@@ -317,11 +385,15 @@ export function TradingPerformanceChart({
       }
     });
 
+    // Criar segmentos de linha baseados na diferença de dias entre trades
+    const lineSegments = createLineSegments(data);
+
     return { 
       chartData: data, 
       peaks: detectedPeaks,
       consolidationZones: detectedZones,
       periodFilteredTrades,
+      lineSegments,
     };
   }, [trades, selectedPeriod, selectedMonth, selectedStartDay, selectedEndDay]);
 
@@ -648,31 +720,38 @@ export function TradingPerformanceChart({
               />
             ))}
 
-            {/* Área preenchida */}
+            {/* Área preenchida - usa monotone para suavidade */}
             <Area
-              type="stepAfter"
+              type="monotone"
               dataKey="accumulated"
               stroke="none"
               fill="url(#tradingGradient)"
-              fillOpacity={0.2}
+              fillOpacity={0.15}
               isAnimationActive={false}
             />
 
-            {/* Linha principal - stepAfter para estilo trading */}
-            <Line
-              type="stepAfter"
-              dataKey="accumulated"
-              stroke="url(#tradingGradient)"
-              strokeWidth={hoveredPoint !== null ? 3 : 2}
-              dot={false}
-              activeDot={{
-                r: 6,
-                fill: "#fff",
-                stroke: "#2FA87A",
-                strokeWidth: 2,
-              }}
-              isAnimationActive={false}
-            />
+            {/* Linhas por segmento - tipo diferente baseado na diferença de dias */}
+            {lineSegments.map((segment) => (
+              <Line
+                key={segment.id}
+                data={segment.data}
+                type={segment.type}
+                dataKey="accumulated"
+                stroke="url(#tradingGradient)"
+                strokeWidth={hoveredPoint !== null ? 3 : 2}
+                strokeOpacity={segment.isGap ? 0.6 : 1}
+                strokeDasharray={segment.isGap ? "5 3" : "0"}
+                dot={false}
+                activeDot={{
+                  r: 6,
+                  fill: "#fff",
+                  stroke: segment.isGap ? "#888" : "#2FA87A",
+                  strokeWidth: 2,
+                }}
+                isAnimationActive={false}
+                connectNulls
+              />
+            ))}
 
             {/* Marcar picos com pontos especiais */}
             {peaks.filter(p => p.type === "peak").map((peak, index) => (
