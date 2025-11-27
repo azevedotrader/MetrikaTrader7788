@@ -223,14 +223,7 @@ export default function Importacoes() {
                 <div className="text-center py-12 text-zinc-400">
                   <FileSpreadsheet className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
                   <h3 className="text-lg font-medium mb-2">{t('empty.no_csv_imports')}</h3>
-                  <p className="text-sm mb-6">Comece importando seu primeiro arquivo CSV</p>
-                  <Button
-                    onClick={() => setShowCsvModal(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <FileSpreadsheet className="w-4 h-4 mr-2" />
-                    Importar CSV
-                  </Button>
+                  <p className="text-sm">Importe CSVs através do menu de corretoras no dashboard</p>
                 </div>
               ) : (
                 <div className="space-y-4">
