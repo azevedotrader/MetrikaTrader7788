@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { TradingPerformanceChart } from "@/components/ui/trading-performance-chart";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   Card,
@@ -1429,8 +1430,6 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
   const getChartData = () => {
     // Usar diretamente os trades já filtrados que vêm do dashboard principal
     if (!trades.length) return [];
-    
-    console.log('📊 Performance Chart - Trades recebidos:', trades.length, 'Período:', selectedPeriod);
 
     let periodFilteredTrades = trades;
     let groupBy: "day" | "week" | "month" = "day";
@@ -2904,7 +2903,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <CardContent className="p-4">
                   {/* Gráfico - Área Principal */}
                   <div className="w-full">
-                    <PerformancePeriodChart 
+                    <TradingPerformanceChart 
                       trades={filteredTrades} 
                       t={t}
                       onPeriodFilterChange={setPeriodFilteredTrades}
