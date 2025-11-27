@@ -14,14 +14,6 @@ import {
 } from "recharts";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { BarChart3, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { Trade } from "@shared/schema";
 
@@ -210,8 +202,8 @@ function detectConsolidationZones(data: ChartDataPoint[], minLength: number = 3,
 }
 
 // Formatar data baseado no período
-function formatDate(date: Date, period: "week" | "month" | "year" | "specific-month"): string {
-  if (period === "year") {
+function formatDate(date: Date, period: "1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a"): string {
+  if (period === "1a" || period === "ytd" || period === "6m") {
     return format(date, "dd/MM/yy", { locale: ptBR });
   }
   return format(date, "dd/MM", { locale: ptBR });
@@ -284,11 +276,9 @@ export function TradingPerformanceChart({
   formatCurrency, 
   onPeriodFilterChange 
 }: TradingPerformanceChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<"week" | "month" | "year" | "specific-month">("month");
-  const [selectedMonth, setSelectedMonth] = useState<string>(format(new Date(), "yyyy-MM"));
-  const [selectedStartDay, setSelectedStartDay] = useState<number>(1);
-  const [selectedEndDay, setSelectedEndDay] = useState<number>(31);
+  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a">("1m");
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const currentYear = new Date().getFullYear();
 
   // Gerar dados do gráfico
   const { chartData, peaks, consolidationZones, periodFilteredTrades, lineSegments } = useMemo(() => {
@@ -301,24 +291,34 @@ export function TradingPerformanceChart({
 
     // Determinar período
     switch (selectedPeriod) {
-      case "week":
+      case "1d":
+        startDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case "1s":
         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         endDate = now;
         break;
-      case "year":
+      case "1m":
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case "3m":
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case "6m":
+        startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        break;
+      case "ytd":
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = now;
+        break;
+      case "1a":
         startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
         endDate = now;
         break;
-      case "specific-month":
-        const [yearStr, monthStr] = selectedMonth.split("-");
-        const yearNum = parseInt(yearStr, 10);
-        const monthNum = parseInt(monthStr, 10);
-        const lastDayOfMonth = new Date(yearNum, monthNum, 0).getDate();
-        const actualEndDay = Math.min(selectedEndDay, lastDayOfMonth);
-        startDate = new Date(yearNum, monthNum - 1, selectedStartDay);
-        endDate = new Date(yearNum, monthNum - 1, actualEndDay, 23, 59, 59);
-        break;
-      case "month":
       default:
         const tradeDates = trades.map(t => new Date(t.dataHora).getTime());
         startDate = new Date(Math.min(...tradeDates));
@@ -395,21 +395,21 @@ export function TradingPerformanceChart({
       periodFilteredTrades,
       lineSegments,
     };
-  }, [trades, selectedPeriod, selectedMonth, selectedStartDay, selectedEndDay]);
+  }, [trades, selectedPeriod]);
 
   // Usar useEffect para chamar o callback de forma segura (fora do render)
   const prevFilteredTradesRef = useRef<string>("");
   useEffect(() => {
     if (onPeriodFilterChange && periodFilteredTrades) {
       // Comparar usando um hash do array (length + primeiro/último IDs + período)
-      const newHash = `${periodFilteredTrades.length}-${periodFilteredTrades[0]?.id || ''}-${periodFilteredTrades[periodFilteredTrades.length - 1]?.id || ''}-${selectedPeriod}-${selectedMonth}`;
+      const newHash = `${periodFilteredTrades.length}-${periodFilteredTrades[0]?.id || ''}-${periodFilteredTrades[periodFilteredTrades.length - 1]?.id || ''}-${selectedPeriod}`;
       
       if (prevFilteredTradesRef.current !== newHash) {
         prevFilteredTradesRef.current = newHash;
         onPeriodFilterChange(periodFilteredTrades);
       }
     }
-  }, [periodFilteredTrades, onPeriodFilterChange, selectedPeriod, selectedMonth]);
+  }, [periodFilteredTrades, onPeriodFilterChange, selectedPeriod]);
 
   // Calcular domínio do Y e posição do zero para gradiente
   const { yMin, yMax, zeroPosition } = useMemo(() => {
@@ -482,42 +482,30 @@ export function TradingPerformanceChart({
     return null;
   }, [formatCurrency]);
 
-  // Gerar lista de meses para seleção
-  const monthOptions = useMemo(() => {
-    const months = [];
-    const now = new Date();
-    for (let i = 0; i < 24; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({
-        value: format(date, "yyyy-MM"),
-        label: format(date, "MMM/yy", { locale: ptBR }),
-      });
-    }
-    return months;
-  }, []);
-
   if (chartData.length === 0) {
     return (
       <div className="w-full" data-testid="trading-performance-chart-empty">
-        <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap items-center">
+        <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap items-center">
           {[
-            { key: "week", label: t('time.7_days') },
-            { key: "month", label: t('chart.all_months') },
-            { key: "year", label: t('time.1_year') },
+            { key: "1d", label: "1D" },
+            { key: "1s", label: "1S" },
+            { key: "1m", label: "1M" },
+            { key: "3m", label: "3M" },
+            { key: "6m", label: "6M" },
+            { key: "ytd", label: currentYear.toString() },
+            { key: "1a", label: "1A" },
           ].map((filter) => (
-            <Button
+            <button
               key={filter.key}
-              variant={selectedPeriod === filter.key ? "default" : "outline"}
-              size="sm"
               onClick={() => setSelectedPeriod(filter.key as any)}
-              className={`text-xs md:text-sm ${
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
                 selectedPeriod === filter.key
-                  ? "bg-[#2FA87A] hover:bg-[#279169] text-white"
-                  : "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                  ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                  : "text-zinc-400 hover:text-white"
               }`}
             >
               {filter.label}
-            </Button>
+            </button>
           ))}
         </div>
         <div className="h-[500px] md:h-[550px] flex items-center justify-center text-zinc-400">
@@ -532,104 +520,30 @@ export function TradingPerformanceChart({
 
   return (
     <div data-testid="trading-performance-chart" className="w-full">
-      {/* Filtros de Período */}
-      <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-6 flex-wrap items-center">
+      {/* Filtros de Período - Estilo Trading App */}
+      <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap items-center">
         {[
-          { key: "week", label: t('time.7_days') },
-          { key: "month", label: t('chart.all_months') },
-          { key: "year", label: t('time.1_year') },
+          { key: "1d", label: "1D" },
+          { key: "1s", label: "1S" },
+          { key: "1m", label: "1M" },
+          { key: "3m", label: "3M" },
+          { key: "6m", label: "6M" },
+          { key: "ytd", label: currentYear.toString() },
+          { key: "1a", label: "1A" },
         ].map((filter) => (
-          <Button
+          <button
             key={filter.key}
-            variant={selectedPeriod === filter.key ? "default" : "outline"}
-            size="sm"
             onClick={() => setSelectedPeriod(filter.key as any)}
-            className={`text-xs md:text-sm ${
+            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
               selectedPeriod === filter.key
-                ? "bg-[#2FA87A] hover:bg-[#279169] text-white"
-                : "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                : "text-zinc-400 hover:text-white"
             }`}
             data-testid={`btn-period-${filter.key}`}
           >
             {filter.label}
-          </Button>
+          </button>
         ))}
-
-        {/* Seletor de Mês */}
-        <Select value={selectedMonth} onValueChange={(value) => {
-          setSelectedMonth(value);
-          setSelectedPeriod("specific-month");
-          const [year, month] = value.split('-');
-          const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
-          setSelectedStartDay(1);
-          setSelectedEndDay(lastDay);
-        }}>
-          <SelectTrigger 
-            className="bg-zinc-800 border-zinc-700 text-white w-32 md:w-40 text-xs md:text-sm"
-            data-testid="select-month"
-          >
-            <SelectValue placeholder="Mês Específico" />
-          </SelectTrigger>
-          <SelectContent className="bg-zinc-800 border-zinc-700">
-            {monthOptions.map((month) => (
-              <SelectItem
-                key={month.value}
-                value={month.value}
-                className="text-white hover:bg-zinc-700 text-xs md:text-sm"
-              >
-                {month.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Filtros de dias quando mês específico selecionado */}
-        {selectedPeriod === "specific-month" && (
-          <>
-            <span className="text-zinc-400 text-xs md:text-sm">Do dia</span>
-            <Select 
-              value={selectedStartDay.toString()} 
-              onValueChange={(value) => {
-                const day = parseInt(value);
-                setSelectedStartDay(day);
-                if (day > selectedEndDay) setSelectedEndDay(day);
-              }}
-            >
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <SelectItem key={day} value={day.toString()} className="text-white hover:bg-zinc-700">
-                    {day}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <span className="text-zinc-400 text-xs md:text-sm">ao dia</span>
-            
-            <Select 
-              value={selectedEndDay.toString()} 
-              onValueChange={(value) => {
-                const day = parseInt(value);
-                setSelectedEndDay(day);
-                if (day < selectedStartDay) setSelectedStartDay(day);
-              }}
-            >
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
-                {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                  <SelectItem key={day} value={day.toString()} className="text-white hover:bg-zinc-700">
-                    {day}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </>
-        )}
       </div>
 
       {/* Indicadores de Picos e Fundos */}
