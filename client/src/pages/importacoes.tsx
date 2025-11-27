@@ -290,11 +290,6 @@ export default function Importacoes() {
                               {importItem.displayName || importItem.fileName}
                             </div>
                           )}
-                          <div className="text-sm text-zinc-400 mt-1">
-                            {brokerInfo[
-                              importItem.broker as keyof typeof brokerInfo
-                            ]?.name || importItem.broker}
-                          </div>
                         </div>
                       </div>
                       
@@ -398,11 +393,6 @@ export default function Importacoes() {
                         <div className="min-w-0 flex-1">
                           <div className="font-medium text-white truncate pr-2">
                             {trade.ativo} - {trade.tipo === 'compra' ? '📈' : '📉'} {trade.tipo}
-                          </div>
-                          <div className="text-sm text-zinc-400 mt-1">
-                            {brokerInfo[
-                              trade.mercado as keyof typeof brokerInfo
-                            ]?.name || trade.mercado} • Manual
                           </div>
                         </div>
                       </div>
