@@ -14,7 +14,9 @@ import {
 } from "recharts";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BarChart3, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { BarChart3, TrendingUp, TrendingDown, Minus, Filter, X, Calendar } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import type { Trade } from "@shared/schema";
 
 interface ChartDataPoint {
@@ -202,8 +204,8 @@ function detectConsolidationZones(data: ChartDataPoint[], minLength: number = 3,
 }
 
 // Formatar data baseado no período
-function formatDate(date: Date, period: "1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a"): string {
-  if (period === "1a" || period === "ytd" || period === "6m") {
+function formatDate(date: Date, period: "1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom"): string {
+  if (period === "1a" || period === "ytd" || period === "6m" || period === "custom") {
     return format(date, "dd/MM/yy", { locale: ptBR });
   }
   return format(date, "dd/MM", { locale: ptBR });
@@ -276,8 +278,11 @@ export function TradingPerformanceChart({
   formatCurrency, 
   onPeriodFilterChange 
 }: TradingPerformanceChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a">("1m");
+  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom">("1m");
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
   // Gerar dados do gráfico
@@ -318,6 +323,17 @@ export function TradingPerformanceChart({
       case "1a":
         startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
         endDate = now;
+        break;
+      case "custom":
+        if (customStartDate && customEndDate) {
+          startDate = new Date(customStartDate);
+          endDate = new Date(customEndDate);
+          endDate.setHours(23, 59, 59, 999);
+        } else {
+          const tradeDates = trades.map(t => new Date(t.dataHora).getTime());
+          startDate = new Date(Math.min(...tradeDates));
+          endDate = new Date(Math.max(...tradeDates));
+        }
         break;
       default:
         const tradeDates = trades.map(t => new Date(t.dataHora).getTime());
@@ -395,7 +411,7 @@ export function TradingPerformanceChart({
       periodFilteredTrades,
       lineSegments,
     };
-  }, [trades, selectedPeriod]);
+  }, [trades, selectedPeriod, customStartDate, customEndDate]);
 
   // Usar useEffect para chamar o callback de forma segura (fora do render)
   const prevFilteredTradesRef = useRef<string>("");
@@ -485,28 +501,116 @@ export function TradingPerformanceChart({
   if (chartData.length === 0) {
     return (
       <div className="w-full" data-testid="trading-performance-chart-empty">
-        <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap items-center">
-          {[
-            { key: "1d", label: "1D" },
-            { key: "1s", label: "1S" },
-            { key: "1m", label: "1M" },
-            { key: "3m", label: "3M" },
-            { key: "6m", label: "6M" },
-            { key: "ytd", label: currentYear.toString() },
-            { key: "1a", label: "1A" },
-          ].map((filter) => (
-            <button
-              key={filter.key}
-              onClick={() => setSelectedPeriod(filter.key as any)}
-              className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
-                selectedPeriod === filter.key
-                  ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
+        <div className="flex justify-between items-center mb-4 md:mb-6 px-2">
+          <div className="flex gap-2 md:gap-3 flex-wrap items-center">
+            {[
+              { key: "1d", label: "1D" },
+              { key: "1s", label: "1S" },
+              { key: "1m", label: "1M" },
+              { key: "3m", label: "3M" },
+              { key: "6m", label: "6M" },
+              { key: "ytd", label: currentYear.toString() },
+              { key: "1a", label: "1A" },
+            ].map((filter) => (
+              <button
+                key={filter.key}
+                onClick={() => {
+                  setSelectedPeriod(filter.key as any);
+                  setCustomStartDate("");
+                  setCustomEndDate("");
+                }}
+                className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
+                  selectedPeriod === filter.key
+                    ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* Botão de Filtro Customizado */}
+          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={`p-2 rounded transition-all ${
+                  selectedPeriod === "custom"
+                    ? "text-[#3b82f6]"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                <Filter className="w-5 h-5" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-white flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Período Personalizado
+                  </h4>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="text-zinc-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-zinc-400 mb-1 block">Data Inicial</label>
+                    <input
+                      type="date"
+                      value={customStartDate}
+                      onChange={(e) => setCustomStartDate(e.target.value)}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-xs text-zinc-400 mb-1 block">Data Final</label>
+                    <input
+                      type="date"
+                      value={customEndDate}
+                      onChange={(e) => setCustomEndDate(e.target.value)}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setCustomStartDate("");
+                      setCustomEndDate("");
+                      setSelectedPeriod("1m");
+                      setIsFilterOpen(false);
+                    }}
+                    className="flex-1 bg-transparent border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  >
+                    Limpar
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (customStartDate && customEndDate) {
+                        setSelectedPeriod("custom");
+                        setIsFilterOpen(false);
+                      }
+                    }}
+                    disabled={!customStartDate || !customEndDate}
+                    className="flex-1 bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="h-[500px] md:h-[550px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
@@ -521,29 +625,126 @@ export function TradingPerformanceChart({
   return (
     <div data-testid="trading-performance-chart" className="w-full">
       {/* Filtros de Período - Estilo Trading App */}
-      <div className="flex justify-center gap-2 md:gap-3 mb-4 md:mb-6 flex-wrap items-center">
-        {[
-          { key: "1d", label: "1D" },
-          { key: "1s", label: "1S" },
-          { key: "1m", label: "1M" },
-          { key: "3m", label: "3M" },
-          { key: "6m", label: "6M" },
-          { key: "ytd", label: currentYear.toString() },
-          { key: "1a", label: "1A" },
-        ].map((filter) => (
-          <button
-            key={filter.key}
-            onClick={() => setSelectedPeriod(filter.key as any)}
-            className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
-              selectedPeriod === filter.key
-                ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
-                : "text-zinc-400 hover:text-white"
-            }`}
-            data-testid={`btn-period-${filter.key}`}
-          >
-            {filter.label}
-          </button>
-        ))}
+      <div className="flex justify-between items-center mb-4 md:mb-6 px-2">
+        <div className="flex gap-2 md:gap-3 flex-wrap items-center">
+          {[
+            { key: "1d", label: "1D" },
+            { key: "1s", label: "1S" },
+            { key: "1m", label: "1M" },
+            { key: "3m", label: "3M" },
+            { key: "6m", label: "6M" },
+            { key: "ytd", label: currentYear.toString() },
+            { key: "1a", label: "1A" },
+          ].map((filter) => (
+            <button
+              key={filter.key}
+              onClick={() => {
+                setSelectedPeriod(filter.key as any);
+                setCustomStartDate("");
+                setCustomEndDate("");
+              }}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
+                selectedPeriod === filter.key
+                  ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+              data-testid={`btn-period-${filter.key}`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Botão de Filtro Customizado */}
+        <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <PopoverTrigger asChild>
+            <button
+              className={`p-2 rounded transition-all ${
+                selectedPeriod === "custom"
+                  ? "text-[#3b82f6]"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+              data-testid="btn-custom-filter"
+            >
+              <Filter className="w-5 h-5" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="end">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-white flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Período Personalizado
+                </h4>
+                <button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="text-zinc-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-zinc-400 mb-1 block">Data Inicial</label>
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                    data-testid="input-start-date"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-xs text-zinc-400 mb-1 block">Data Final</label>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                    data-testid="input-end-date"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setCustomStartDate("");
+                    setCustomEndDate("");
+                    setSelectedPeriod("1m");
+                    setIsFilterOpen(false);
+                  }}
+                  className="flex-1 bg-transparent border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                >
+                  Limpar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (customStartDate && customEndDate) {
+                      setSelectedPeriod("custom");
+                      setIsFilterOpen(false);
+                    }
+                  }}
+                  disabled={!customStartDate || !customEndDate}
+                  className="flex-1 bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+                >
+                  Aplicar
+                </Button>
+              </div>
+              
+              {selectedPeriod === "custom" && customStartDate && customEndDate && (
+                <div className="text-xs text-zinc-400 text-center pt-2 border-t border-zinc-700">
+                  {format(new Date(customStartDate), "dd/MM/yyyy")} - {format(new Date(customEndDate), "dd/MM/yyyy")}
+                </div>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Indicadores de Picos e Fundos */}
