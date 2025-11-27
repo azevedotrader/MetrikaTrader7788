@@ -161,6 +161,7 @@ const simbolosEmocoes = {
 };
 
 // Função para calcular métricas avançadas
+// NOTA: Todas as métricas são NORMALIZADAS para escalas coerentes (não usam R$ diretamente)
 function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
   if (!trades.length) {
     return {
@@ -178,40 +179,30 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
     return acc + parseFloat(trade.resultado || "0");
   }, 0);
 
-  // Capital total utilizado para normalização
-  const capitalTotalUtilizado = trades.reduce((acc, trade) => {
-    return acc + parseFloat(trade.capitalUtilizado || "0");
-  }, 0);
-
-  // Usar rentabilidade total como a métrica base (conforme fórmulas originais)
-  // Para comparabilidade, vamos normalizar por um fator ou usar diretamente
-  const rentabilidade = Math.abs(rentabilidadeTotalR$); // Valor absoluto para as fórmulas
-
   const tradesLucrativos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
   const tradesNegativo = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
   
-  // Assertividade (Taxa de Acerto)
+  // Assertividade (Taxa de Acerto) - valor entre 0 e 1
   const assertividade = trades.length > 0 ? (tradesLucrativos.length / trades.length) : 0;
   
-  // Fator de Lucro com tratamento melhorado para ausência de perdas
+  // Fator de Lucro (Profit Factor)
   const totalLucros = tradesLucrativos.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0);
   const totalPerdas = Math.abs(tradesNegativo.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0));
   
-  let fatorDeLucro = 0;
+  let fatorDeLucro = 1;
   if (totalPerdas > 0) {
     fatorDeLucro = totalLucros / totalPerdas;
   } else if (totalLucros > 0) {
-    // Quando não há perdas, usa um valor alto mas limitado (5)
-    fatorDeLucro = 5;
+    fatorDeLucro = 5; // Máximo quando não há perdas
   }
   
-  // RR Médio - baseado nos valores de Take e Stop dos trades
+  // RR Médio - Relação Risco/Retorno média
   const tradesComTakeStop = trades.filter(trade => 
     trade.alvo && trade.stop && 
     parseFloat(trade.alvo) > 0 && parseFloat(trade.stop) > 0
   );
   
-  let rrMedio = 1; // Valor padrão conservador
+  let rrMedio = 1;
   if (tradesComTakeStop.length > 0) {
     const totalRRR = tradesComTakeStop.reduce((acc, trade) => {
       const takeValue = parseFloat(trade.alvo!);
@@ -227,36 +218,15 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
     }, 0);
     rrMedio = totalRRR / tradesComTakeStop.length;
   } else if (tradesLucrativos.length > 0 && tradesNegativo.length > 0) {
-    // Fallback: calcular baseado na média de ganhos/perdas
     const mediaGanhos = totalLucros / tradesLucrativos.length;
     const mediaPerdas = totalPerdas / tradesNegativo.length;
     rrMedio = mediaPerdas > 0 ? mediaGanhos / mediaPerdas : 1;
   }
 
-  // Cálculo das 4 métricas avançadas (conforme fórmulas originais)
-  
-  // 1. IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
-  const iqt = rrMedio > 0 
-    ? (rentabilidade * fatorDeLucro * assertividade) / rrMedio
-    : 0;
-  
-  // 2. Eficiência de Risco = Rentabilidade / (RR_médio × 100)
-  const eficienciaRisco = rrMedio > 0 ? rentabilidade / (rrMedio * 100) : 0;
-  
-  // 3. Score de Consistência = √(Assertividade × FatorDeLucro)
-  const scoreConsistencia = Math.sqrt(assertividade * fatorDeLucro);
-  
-  // 4. RAP = Rentabilidade / Assertividade
-  const retornoAjustadoPrecisao = assertividade > 0 ? rentabilidade / assertividade : 0;
-
-  // Cálculos adicionais para IPI
-
   // Estabilidade: % de dias lucrativos no período
   const tradesPorDia = trades.reduce((acc, trade) => {
     const data = trade.dataHora ? new Date(trade.dataHora).toDateString() : 'unknown';
-    if (!acc[data]) {
-      acc[data] = 0;
-    }
+    if (!acc[data]) acc[data] = 0;
     acc[data] += parseFloat(trade.resultado || "0");
     return acc;
   }, {} as Record<string, number>);
@@ -272,35 +242,53 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
 
   trades.forEach(trade => {
     capitalAcumulado += parseFloat(trade.resultado || "0");
-    if (capitalAcumulado > pico) {
-      pico = capitalAcumulado;
-    }
+    if (capitalAcumulado > pico) pico = capitalAcumulado;
     if (pico > 0) {
       const drawdownAtual = (pico - capitalAcumulado) / pico;
-      if (drawdownAtual > maiorDrawdown) {
-        maiorDrawdown = drawdownAtual;
-      }
+      if (drawdownAtual > maiorDrawdown) maiorDrawdown = drawdownAtual;
     }
   });
 
-  // Converter rentabilidade para percentual (assumindo uma base de capital)
-  const rentabilidadePercentual = rentabilidade / 1000; // Normalização simples
+  // ====== MÉTRICAS AVANÇADAS NORMALIZADAS ======
+  
+  // 1. IQT (Índice de Qualidade de Trading) - Escala 0-200+
+  // Fórmula: (Assertividade × Fator de Lucro × RR Médio) × 100 / (1 + Drawdown)
+  // Combina taxa de acerto, lucratividade e risco em um único índice
+  const iqt = ((assertividade * fatorDeLucro * Math.min(rrMedio, 5)) * 100) / (1 + maiorDrawdown);
+  
+  // 2. Eficiência de Risco - Escala 0-50+
+  // Fórmula: (Fator de Lucro × Assertividade × 10) / (1 + Volatilidade do RR)
+  // Mostra quão bem você gerencia risco em relação aos ganhos
+  const volatilidade = Math.abs(1 - rrMedio) * 0.5; // Penaliza RR muito variável
+  const eficienciaRisco = (fatorDeLucro * assertividade * 10) / (1 + volatilidade);
+  
+  // 3. Score de Consistência - Escala 0-3+
+  // Fórmula: √(Assertividade × Fator de Lucro × Estabilidade × 2)
+  // Mede o quão consistente é sua estratégia
+  const scoreConsistencia = Math.sqrt(assertividade * fatorDeLucro * (estabilidade + 0.5));
+  
+  // 4. RAP (Retorno Ajustado à Precisão) - Escala 0-500+
+  // Fórmula: (Fator de Lucro × Assertividade × 100) × Estabilidade
+  // Mostra qualidade do retorno considerando a precisão
+  const retornoAjustadoPrecisao = (fatorDeLucro * assertividade * 100) * (estabilidade + 0.5);
 
-  // 5. IPI = ((Rentabilidade × Fator de Lucro) × (Assertividade + Estabilidade)) ÷ (RR Médio × (1 + Drawdown))
-  const numeradorIPI = (rentabilidadePercentual * fatorDeLucro) * (assertividade + estabilidade);
-  const denominadorIPI = rrMedio * (1 + maiorDrawdown);
-  const ipi = denominadorIPI > 0 ? numeradorIPI / denominadorIPI : 0;
+  // 5. IPI (Índice de Performance Integrado) - Escala 0-10+
+  // Fórmula: ((Fator de Lucro × Assertividade) × (1 + Estabilidade)) ÷ (1 + Drawdown)
+  // Índice completo que considera todos os fatores de performance
+  const ipi = ((fatorDeLucro * assertividade) * (1 + estabilidade)) / (1 + maiorDrawdown);
 
-  // 6. Expectancy (Van Tharp) = (Taxa de Acerto × Ganho Médio) − ((1 − Taxa de Acerto) × Perda Média)
+  // 6. Expectancy (Van Tharp) - Valor em R$ por trade
+  // Fórmula: (Taxa de Acerto × Ganho Médio) − ((1 − Taxa de Acerto) × Perda Média)
+  // Lucro esperado por operação
   const ganhoMedio = tradesLucrativos.length > 0 ? totalLucros / tradesLucrativos.length : 0;
   const perdaMedia = tradesNegativo.length > 0 ? Math.abs(totalPerdas / tradesNegativo.length) : 0;
   const expectancy = (assertividade * ganhoMedio) - ((1 - assertividade) * perdaMedia);
 
   return {
     iqt: Math.max(0, iqt),
-    eficienciaRisco,
+    eficienciaRisco: Math.max(0, eficienciaRisco),
     scoreConsistencia: Math.max(0, scoreConsistencia),
-    retornoAjustadoPrecisao,
+    retornoAjustadoPrecisao: Math.max(0, retornoAjustadoPrecisao),
     ipi: Math.max(0, ipi),
     expectancy,
   };
@@ -313,38 +301,35 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
   const getScoreColor = (value: number, type: 'iqt' | 'eficiencia' | 'consistencia' | 'rap' | 'ipi' | 'expectancy') => {
     switch (type) {
       case 'iqt':
-        // IQT = (Rentabilidade × FatorDeLucro × Assertividade) / RR_médio
-        // Valores típicos: 100-2000+ (usa rentabilidade em R$)
-        if (value >= 100) return 'text-[#2FA87A]'; // Verde
-        if (value >= 20) return 'text-yellow-500'; // Amarelo
-        return 'text-[#F06363]'; // Vermelho
+        // IQT - Escala normalizada 0-200+
+        if (value >= 100) return 'text-[#2FA87A]'; // Verde - Excelente
+        if (value >= 50) return 'text-yellow-500'; // Amarelo - Bom
+        return 'text-[#F06363]'; // Vermelho - Precisa melhorar
       case 'eficiencia':
-        // Eficiência = Rentabilidade / (RR_médio × 100)
-        // Valores típicos: 1-50+ (usa rentabilidade em R$)
+        // Eficiência - Escala 0-50+
         if (value >= 5) return 'text-[#2FA87A]';
-        if (value >= 1) return 'text-yellow-500';
+        if (value >= 2) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'consistencia':
-        // Score de Consistência = √(Assertividade × FatorDeLucro)
-        if (value >= 1.5) return 'text-[#2FA87A]';
-        if (value >= 1) return 'text-yellow-500';
+        // Score de Consistência - Escala 0-3+
+        if (value >= 1.2) return 'text-[#2FA87A]';
+        if (value >= 0.8) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'rap':
-        // RAP = Rentabilidade / Assertividade
-        // Valores típicos: 100-10000+ (usa rentabilidade em R$)
-        if (value >= 1000) return 'text-[#2FA87A]';
-        if (value >= 100) return 'text-yellow-500';
+        // RAP - Escala normalizada 0-300+
+        if (value >= 100) return 'text-[#2FA87A]';
+        if (value >= 50) return 'text-yellow-500';
         return 'text-[#F06363]';
       case 'ipi':
-        // IPI - Índice de Performance Integrado
-        if (value >= 2.0) return 'text-[#2FA87A]'; // Estratégia de qualidade
-        if (value >= 1.0) return 'text-yellow-500'; // Estratégia razoável
-        return 'text-[#F06363]'; // Estratégia fraca
+        // IPI - Escala 0-10+
+        if (value >= 2.0) return 'text-[#2FA87A]';
+        if (value >= 1.0) return 'text-yellow-500';
+        return 'text-[#F06363]';
       case 'expectancy':
-        // Expectancy (Van Tharp) - Lucro esperado por trade em R$
-        if (value >= 50) return 'text-[#2FA87A]'; // Estratégia muito lucrativa
-        if (value > 0) return 'text-yellow-500'; // Estratégia lucrativa
-        return 'text-[#F06363]'; // Estratégia não lucrativa
+        // Expectancy - Lucro esperado por trade em R$
+        if (value >= 50) return 'text-[#2FA87A]';
+        if (value > 0) return 'text-yellow-500';
+        return 'text-[#F06363]';
     }
   };
 
@@ -367,8 +352,8 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 </InfoTooltipTrigger>
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Índice de Qualidade de Trading</p>
-                  <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando rentabilidade, assertividade e risco. Quanto maior, melhor sua estratégia.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 100 | ⚠️ Regular: 20-100 | ❌ Ruim: &lt; 20</p>
+                  <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando taxa de acerto, fator de lucro e risco/retorno. Quanto maior, melhor sua estratégia.</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 100 | ⚠️ Bom: 50-100 | ❌ Precisa melhorar: &lt; 50</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -396,7 +381,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Eficiência de Risco</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você ganha em relação ao risco assumido. Quanto maior, mais eficiente está sendo sua gestão de risco.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 5 | ⚠️ Regular: 1-5 | ❌ Ruim: &lt; 1</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 5 | ⚠️ Bom: 2-5 | ❌ Precisa melhorar: &lt; 2</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -424,7 +409,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Score de Consistência</p>
                   <p className="text-sm text-zinc-300">Avalia a estabilidade dos seus resultados ao longo do tempo. Alta consistência indica disciplina e controle emocional.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1.5 | ⚠️ Regular: 1-1.5 | ❌ Ruim: &lt; 1</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 1.2 | ⚠️ Bom: 0.8-1.2 | ❌ Precisa melhorar: &lt; 0.8</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
@@ -455,7 +440,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                 <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
                   <p className="font-semibold mb-1">Retorno Ajustado por Precisão</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você lucra em relação à sua taxa de acerto. Útil para avaliar se você está maximizando seus ganhos mesmo com assertividade moderada.</p>
-                  <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1000 | ⚠️ Regular: 100-1000 | ❌ Ruim: &lt; 100</p>
+                  <p className="text-xs text-zinc-400 mt-2">✅ Excelente: ≥ 100 | ⚠️ Bom: 50-100 | ❌ Precisa melhorar: &lt; 50</p>
                 </InfoTooltipContent>
               </InfoTooltip>
             </div>
