@@ -2654,8 +2654,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     );
   }
 
-  // Calcular métricas com base nos trades filtrados (inicialmente os mesmos trades filtrados)
-  const metrics = calculateMetrics(periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades, t);
+  // Calcular métricas com base nos trades filtrados pelo período
+  const metrics = calculateMetrics(periodFilteredTrades, t);
 
   // Funções para manipular CSVs
   const handleCsvToggle = (csvId: string) => {
@@ -2726,16 +2726,16 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${(() => {
-                  const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                  const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                   return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                 })()} break-words`}>
                   {(() => {
-                    const totalResult = filteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                    const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     return formatCurrency(totalResult);
                   })()}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
-                  {filteredTrades.length} trades
+                  {periodFilteredTrades.length} trades
                 </div>
               </CardContent>
             </Card>
@@ -2750,8 +2750,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
                   <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#ffffff]">
                     {(() => {
-                      const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = filteredTrades.length;
+                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                      const totalTrades = periodFilteredTrades.length;
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       return winRate % 1 === 0 ? winRate.toFixed(0) : winRate.toFixed(1);
                     })()}%
@@ -2759,14 +2759,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="shrink-0 min-w-[35px]">
                     <CircularProgress 
                       percentage={(() => {
-                        const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = filteredTrades.length;
+                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = periodFilteredTrades.length;
                         return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       })()} 
                       size={35}
                       color={(() => {
-                        const winTrades = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = filteredTrades.length;
+                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = periodFilteredTrades.length;
                         const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                         return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#F06363";
                       })()}
@@ -2788,7 +2788,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
                   {(() => {
                     const dailyMap = new Map<string, number>();
-                    filteredTrades.forEach(trade => {
+                    periodFilteredTrades.forEach(trade => {
                       const date = format(new Date(trade.dataHora), 'yyyy-MM-dd');
                       const result = parseFloat(trade.resultado || '0');
                       dailyMap.set(date, (dailyMap.get(date) || 0) + result);
@@ -2848,14 +2848,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="flex flex-col">
                     <div className="text-base md:text-lg lg:text-xl font-bold text-[#2FA87A] break-words">
                       +{(() => {
-                        const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                        const avgWin = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
                         return formatCurrency(avgWin);
                       })()}
                     </div>
                     <div className="text-sm md:text-base font-semibold text-[#F06363] break-words">
                       {(() => {
-                        const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                        const avgLoss = Math.abs(periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
                         return formatCurrency(-avgLoss);
                       })()}
@@ -2863,9 +2863,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   </div>
                   <div className="ml-2 flex items-center">
                     {(() => {
-                      const avgWin = filteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                      const avgWin = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                         .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
-                      const avgLoss = Math.abs(filteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                      const avgLoss = Math.abs(periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                         .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
                       const maxValue = Math.max(avgWin, avgLoss);
                       const winHeight = maxValue > 0 ? (avgWin / maxValue) * 35 : 0;
