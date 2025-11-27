@@ -278,7 +278,7 @@ export function TradingPerformanceChart({
   formatCurrency, 
   onPeriodFilterChange 
 }: TradingPerformanceChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom">("1m");
+  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom">("1a");
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
