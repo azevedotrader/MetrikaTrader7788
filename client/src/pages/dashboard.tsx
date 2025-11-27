@@ -3131,7 +3131,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               <div className="h-full p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-auto">
                 {/* Seção 1: Métricas Matemáticas */}
                 <div>
-                  <AdvancedMetrics trades={filteredTrades} t={t} formatCurrency={formatCurrency} getCurrencySymbol={getCurrencySymbol} />
+                  <AdvancedMetrics trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} t={t} formatCurrency={formatCurrency} getCurrencySymbol={getCurrencySymbol} />
                 </div>
                 
                 {/* Seção 2: Métrika Score */}
@@ -3141,7 +3141,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     {t('metrics.metrika_score')}
                   </div>
                   <div className="scale-90 sm:scale-100 origin-top">
-                    <MetrikaScore trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
+                    <MetrikaScore trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} t={t} formatCurrency={formatCurrency} />
                   </div>
                 </div>
               </div>
@@ -3157,7 +3157,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <BarChart3 className="h-4 w-4 text-[#2FA87A]" />
                   </div>
                   <div className="h-48 overflow-hidden">
-                    <NetDailyPnLBarChart trades={filteredTrades} formatCurrency={formatCurrency} />
+                    <NetDailyPnLBarChart trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </CardContent>
               </Card>
@@ -3170,7 +3170,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <FileText className="h-4 w-4 text-zinc-400" />
                   </div>
                   <div className="h-48 overflow-hidden">
-                    <RecentTrades trades={filteredTrades} formatCurrency={formatCurrency} />
+                    <RecentTrades trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </CardContent>
               </Card>
@@ -3189,7 +3189,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     {t('metrics.trade_time_performance')}
                   </CardTitle>
                 </CardHeader>
-                <TradeTimePerformance trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
+                <TradeTimePerformance trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} t={t} formatCurrency={formatCurrency} />
               </Card>
             </div>
 
@@ -3206,7 +3206,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   className="h-[280px] flex-shrink-0"
                 >
                   <div className="h-full overflow-hidden min-h-[200px]">
-                    <NetDailyPnLBarChart trades={filteredTrades} formatCurrency={formatCurrency} />
+                    <NetDailyPnLBarChart trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </SquareCard>
 
@@ -3220,7 +3220,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   className="flex-1 min-h-[280px]"
                 >
                   <div className="h-full overflow-auto">
-                    <RecentTrades trades={filteredTrades} formatCurrency={formatCurrency} />
+                    <RecentTrades trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} formatCurrency={formatCurrency} />
                   </div>
                 </SquareCard>
               </div>
@@ -3237,7 +3237,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   {t('dashboard.capital_curve')}
                 </CardTitle>
               </CardHeader>
-              <CapitalCurveChart trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
+              <CapitalCurveChart trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} t={t} formatCurrency={formatCurrency} />
             </Card>
 
             {/* Gráfico de Drawdown */}
@@ -3248,7 +3248,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   {t('metrics.drawdown')}
                 </CardTitle>
               </CardHeader>
-              <DrawdownChart trades={filteredTrades} t={t} formatCurrency={formatCurrency} />
+              <DrawdownChart trades={periodFilteredTrades.length > 0 ? periodFilteredTrades : filteredTrades} t={t} formatCurrency={formatCurrency} />
             </Card>
           </div>
       </div>
