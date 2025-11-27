@@ -2725,15 +2725,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${(() => {
+                {(() => {
                   const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                  return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
-                })()} break-words`}>
-                  {(() => {
-                    const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                    return formatCurrency(totalResult);
-                  })()}
-                </div>
+                  const formattedValue = formatCurrency(totalResult);
+                  const valueLength = formattedValue.length;
+                  const fontSize = valueLength > 14 ? 'text-sm md:text-base lg:text-lg' : 
+                                   valueLength > 11 ? 'text-base md:text-lg lg:text-xl' : 
+                                   valueLength > 8 ? 'text-lg md:text-xl lg:text-2xl' : 
+                                   'text-xl md:text-2xl lg:text-3xl';
+                  const colorClass = totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
+                  return (
+                    <div className={`${fontSize} font-bold ${colorClass} whitespace-nowrap overflow-hidden`}>
+                      {formattedValue}
+                    </div>
+                  );
+                })()}
                 <div className="text-xs text-zinc-500 mt-1">
                   {periodFilteredTrades.length} trades
                 </div>
