@@ -1428,58 +1428,52 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
 
   const getChartData = () => {
     // Usar diretamente os trades já filtrados que vêm do dashboard principal
-    // Isso garante que respeitamos todos os filtros (broker, CSV, etc.)
     if (!trades.length) return [];
 
     let periodFilteredTrades = trades;
     let groupBy: "day" | "week" | "month" = "day";
+    const now = new Date();
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
 
-    // Apenas aplica filtro de período se um período específico for selecionado
-    // Isso evita conflito com os filtros globais do dashboard
-    if (selectedPeriod !== "month") { // "month" é o padrão, mostra todos os trades filtrados
-      const now = new Date();
-      let startDate: Date;
-      let endDate: Date;
+    // Determinar período e granularidade
+    switch (selectedPeriod) {
+      case "week":
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        groupBy = "day";
+        break;
+      case "year":
+        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        endDate = now;
+        groupBy = "month";
+        break;
+      case "specific-month":
+        const [yearStr, monthStr] = selectedMonth.split("-");
+        const yearNum = parseInt(yearStr, 10);
+        const monthNum = parseInt(monthStr, 10);
+        const lastDayOfMonth = new Date(yearNum, monthNum, 0).getDate();
+        const actualEndDay = Math.min(selectedEndDay, lastDayOfMonth);
+        startDate = new Date(yearNum, monthNum - 1, selectedStartDay);
+        endDate = new Date(yearNum, monthNum - 1, actualEndDay, 23, 59, 59);
+        groupBy = "day";
+        break;
+      case "month":
+      default:
+        // Usar range dos trades disponíveis
+        const tradeDates = trades.map(t => new Date(t.dataHora).getTime());
+        startDate = new Date(Math.min(...tradeDates));
+        endDate = new Date(Math.max(...tradeDates));
+        groupBy = "day";
+        break;
+    }
 
-      switch (selectedPeriod) {
-        case "week":
-          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          endDate = now;
-          groupBy = "day";
-          break;
-        case "year":
-          startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-          endDate = now;
-          groupBy = "month";
-          break;
-        case "specific-month":
-          // Corrigir problema de timezone na conversão da data
-          const [yearStr, monthStr] = selectedMonth.split("-");
-          const yearNum = parseInt(yearStr, 10);
-          const monthNum = parseInt(monthStr, 10);
-          
-          // Determinar último dia do mês selecionado
-          const lastDayOfMonth = new Date(yearNum, monthNum, 0).getDate();
-          const actualEndDay = Math.min(selectedEndDay, lastDayOfMonth);
-          
-          // Criar datas com range de dias específicos
-          startDate = new Date(yearNum, monthNum - 1, selectedStartDay);
-          endDate = new Date(yearNum, monthNum - 1, actualEndDay, 23, 59, 59);
-          
-          groupBy = "day";
-          break;
-        default:
-          // Para "month" (30 dias) usa todos os trades já filtrados
-          break;
-      }
-
-      // Aplicar filtro adicional de período apenas se definido
-      if (startDate! && endDate!) {
-        periodFilteredTrades = trades.filter((trade) => {
-          const tradeDate = new Date(trade.dataHora);
-          return tradeDate >= startDate && tradeDate <= endDate;
-        });
-      }
+    // Filtrar trades pelo período
+    if (startDate && endDate) {
+      periodFilteredTrades = trades.filter((trade) => {
+        const tradeDate = new Date(trade.dataHora);
+        return tradeDate >= startDate! && tradeDate <= endDate!;
+      });
     }
 
     if (periodFilteredTrades.length === 0) return [];
@@ -1489,66 +1483,97 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
       (a, b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime(),
     );
 
-    // Agrupar trades por período
-    const groups = new Map<string, { trades: Trade[]; date: Date }>();
+    // Primeiro trade define o início real se não houver trades antes do startDate
+    const firstTradeDate = new Date(sortedTrades[0].dataHora);
+    const lastTradeDate = new Date(sortedTrades[sortedTrades.length - 1].dataHora);
+    
+    // Usar o range dos trades para o gráfico
+    const chartStartDate = startDate && startDate < firstTradeDate ? firstTradeDate : (startDate || firstTradeDate);
+    const chartEndDate = endDate && endDate > lastTradeDate ? endDate : (endDate || lastTradeDate);
 
+    // Agrupar trades por período (chave única baseada na data)
+    const tradesByPeriod = new Map<string, Trade[]>();
+    
     sortedTrades.forEach((trade) => {
       const tradeDate = new Date(trade.dataHora);
       let key: string;
-
-      if (groupBy === "day") {
-        key = format(tradeDate, "dd/MM", { locale: ptBR });
-      } else if (groupBy === "month") {
-        key = format(tradeDate, "MMM/yy", { locale: ptBR });
+      
+      if (groupBy === "month") {
+        key = format(tradeDate, "yyyy-MM");
       } else {
-        key = format(tradeDate, "dd/MM", { locale: ptBR });
+        key = format(tradeDate, "yyyy-MM-dd");
       }
-
-      if (!groups.has(key)) {
-        groups.set(key, { trades: [], date: tradeDate });
+      
+      if (!tradesByPeriod.has(key)) {
+        tradesByPeriod.set(key, []);
       }
-      groups.get(key)!.trades.push(trade);
+      tradesByPeriod.get(key)!.push(trade);
     });
 
-    // Criar dados do gráfico com valores individuais e acumulados
+    // Gerar array de todos os períodos (incluindo sem operações)
+    const allPeriods: { key: string; label: string; date: Date }[] = [];
+    
+    if (groupBy === "month") {
+      // Gerar todos os meses do período
+      let currentDate = new Date(chartStartDate.getFullYear(), chartStartDate.getMonth(), 1);
+      const endMonth = new Date(chartEndDate.getFullYear(), chartEndDate.getMonth(), 1);
+      
+      while (currentDate <= endMonth) {
+        allPeriods.push({
+          key: format(currentDate, "yyyy-MM"),
+          label: format(currentDate, "dd/MM/yy", { locale: ptBR }),
+          date: new Date(currentDate),
+        });
+        currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      }
+    } else {
+      // Gerar todos os dias do período
+      let currentDate = new Date(chartStartDate);
+      currentDate.setHours(0, 0, 0, 0);
+      const endDay = new Date(chartEndDate);
+      endDay.setHours(23, 59, 59, 999);
+      
+      while (currentDate <= endDay) {
+        allPeriods.push({
+          key: format(currentDate, "yyyy-MM-dd"),
+          label: format(currentDate, "dd/MM", { locale: ptBR }),
+          date: new Date(currentDate),
+        });
+        currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+      }
+    }
+
+    // Criar dados do gráfico com linha contínua
     let accumulated = 0;
     const chartData: any[] = [];
 
-    Array.from(groups.entries()).forEach(
-      ([period, { trades: periodTrades }]) => {
-        const positives = periodTrades.filter(
-          (t) => parseFloat(t.resultado || "0") > 0,
-        );
-        const negatives = periodTrades.filter(
-          (t) => parseFloat(t.resultado || "0") < 0,
-        );
-
-        const totalPositive = positives.reduce(
-          (sum, t) => sum + parseFloat(t.resultado || "0"),
-          0,
-        );
-        const totalNegative = negatives.reduce(
-          (sum, t) => sum + parseFloat(t.resultado || "0"),
-          0,
-        );
-        const periodTotal = totalPositive + totalNegative;
-
-        accumulated += periodTotal;
-
-        chartData.push({
-          period,
-          positive: totalPositive,
-          negative: Math.abs(totalNegative),
-          total: periodTotal,
-          accumulated,
-          accumulatedPositive: accumulated >= 0 ? accumulated : 0,
-          accumulatedNegative: accumulated < 0 ? accumulated : 0,
-          positiveCount: positives.length,
-          negativeCount: negatives.length,
-          totalCount: periodTrades.length,
-        });
-      },
-    );
+    allPeriods.forEach(({ key, label, date }) => {
+      const periodTrades = tradesByPeriod.get(key) || [];
+      
+      const positives = periodTrades.filter(t => parseFloat(t.resultado || "0") > 0);
+      const negatives = periodTrades.filter(t => parseFloat(t.resultado || "0") < 0);
+      
+      const totalPositive = positives.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+      const totalNegative = negatives.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
+      const periodTotal = totalPositive + totalNegative;
+      
+      accumulated += periodTotal;
+      
+      chartData.push({
+        period: label,
+        date: date,
+        positive: totalPositive,
+        negative: Math.abs(totalNegative),
+        total: periodTotal,
+        accumulated,
+        accumulatedPositive: accumulated >= 0 ? accumulated : 0,
+        accumulatedNegative: accumulated < 0 ? accumulated : 0,
+        positiveCount: positives.length,
+        negativeCount: negatives.length,
+        totalCount: periodTrades.length,
+        hasData: periodTrades.length > 0,
+      });
+    });
 
     return chartData;
   };
@@ -1942,9 +1967,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 {/* Linha do eixo 0 */}
                 <ReferenceLine y={0} stroke="gray" strokeWidth={1} />
 
-                {/* Área preenchida */}
+                {/* Área preenchida - stepAfter para manter linha horizontal quando não há operações */}
                 <Area
-                  type="monotone"
+                  type="stepAfter"
                   dataKey="accumulated"
                   stroke="none"
                   fill="url(#dynamicGradient)"
@@ -1952,9 +1977,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                   isAnimationActive={false}
                 />
 
-                {/* Linha principal */}
+                {/* Linha principal - stepAfter para efeito de degrau como gráfico de trading */}
                 <Line
-                  type="monotone"
+                  type="stepAfter"
                   dataKey="accumulated"
                   stroke="url(#dynamicGradient)"
                   strokeWidth={2}
