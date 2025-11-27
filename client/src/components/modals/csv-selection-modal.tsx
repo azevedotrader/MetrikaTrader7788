@@ -11,6 +11,7 @@ import { ptBR } from "date-fns/locale";
 import { AiAnalysisResultsModal } from "./ai-analysis-results-modal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserPlan } from "@/hooks/useUserPlan";
+import { apiRequest } from "@/lib/queryClient";
 
 interface CsvImport {
   id: string;
@@ -57,14 +58,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
   const csvAnalysisMutation = useMutation({
     mutationFn: async (csvId: string) => {
-      const response = await fetch('/api/ai/analyze-csv-tips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ csvId })
-      });
+      const response = await apiRequest('POST', '/api/ai/analyze-csv-tips', { csvId });
       return response.json();
     },
     onSuccess: (data) => {

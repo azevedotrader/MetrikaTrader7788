@@ -4,6 +4,7 @@ import { Button } from "./button";
 import { Badge } from "./badge";
 import { X, FileSpreadsheet, AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface CsvTip {
   id: string;
@@ -25,13 +26,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
 
   const csvTipsMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/ai/analyze-csv-tips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
+      const response = await apiRequest('POST', '/api/ai/analyze-csv-tips', {});
       return response.json();
     },
     onSuccess: (data) => {
