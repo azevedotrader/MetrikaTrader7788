@@ -202,7 +202,7 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
   corretora: z.enum(["crypto", "forex", "b3", "auto"], { message: "Corretora deve ser crypto, forex, b3 ou auto" }),
-  emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro"], { 
+  emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro", "medo"], { 
     message: "Emoção deve ser uma das opções disponíveis" 
   }).optional(),
 });
