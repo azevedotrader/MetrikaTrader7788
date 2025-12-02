@@ -2708,21 +2708,19 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
       <div className="space-y-6 md:space-y-8">
           {/* Hide/Show Data Toggle */}
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="flex justify-end -mb-2">
+            <button
               onClick={() => setHideData(!hideData)}
-              className="text-zinc-400 hover:text-white gap-2"
+              className="text-zinc-500 hover:text-zinc-300 transition-colors p-1"
               data-testid="toggle-hide-data"
+              title={hideData ? t('dashboard.show_data') : t('dashboard.hide_data')}
             >
               {hideData ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              <span className="text-xs">{hideData ? t('dashboard.show_data') : t('dashboard.hide_data')}</span>
-            </Button>
+            </button>
           </div>
 
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
-          <div data-testid="metrics-cards" className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6 ${hideData ? 'hidden' : ''}`}>
+          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6">
             {/* Net PnL */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
               <CardContent className="p-3 md:p-4 lg:p-5">
@@ -2740,8 +2738,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                                    'text-xl md:text-2xl lg:text-3xl';
                   const colorClass = totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                   return (
-                    <div className={`${fontSize} font-bold ${colorClass} whitespace-nowrap overflow-hidden`}>
-                      {formattedValue}
+                    <div className={`${fontSize} font-bold ${hideData ? 'text-zinc-500' : colorClass} whitespace-nowrap overflow-hidden`}>
+                      {hideData ? '•••••' : formattedValue}
                     </div>
                   );
                 })()}
@@ -2759,30 +2757,32 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#ffffff]">
-                    {(() => {
+                  <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#ffffff]'}`}>
+                    {hideData ? '••%' : (() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                       const totalTrades = periodFilteredTrades.length;
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                      return winRate % 1 === 0 ? winRate.toFixed(0) : winRate.toFixed(1);
-                    })()}%
+                      return (winRate % 1 === 0 ? winRate.toFixed(0) : winRate.toFixed(1)) + '%';
+                    })()}
                   </div>
-                  <div className="shrink-0 min-w-[35px]">
-                    <CircularProgress 
-                      percentage={(() => {
-                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = periodFilteredTrades.length;
-                        return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                      })()} 
-                      size={35}
-                      color={(() => {
-                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = periodFilteredTrades.length;
-                        const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                        return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#F06363";
-                      })()}
-                    />
-                  </div>
+                  {!hideData && (
+                    <div className="shrink-0 min-w-[35px]">
+                      <CircularProgress 
+                        percentage={(() => {
+                          const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                          const totalTrades = periodFilteredTrades.length;
+                          return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        })()} 
+                        size={35}
+                        color={(() => {
+                          const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                          const totalTrades = periodFilteredTrades.length;
+                          const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                          return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#F06363";
+                        })()}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -2811,20 +2811,22 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#fafafa]">
-                            {dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)}%
+                          <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#fafafa]'}`}>
+                            {hideData ? '••%' : (dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)) + '%'}
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
-                            {winningDays} de {totalDays} dias
+                            {hideData ? '• de • dias' : `${winningDays} de ${totalDays} dias`}
                           </div>
                         </div>
-                        <div className="shrink-0 min-w-[35px]">
-                          <CircularProgress 
-                            percentage={dayWinRate} 
-                            size={35}
-                            color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#eab308" : "#F06363"}
-                          />
-                        </div>
+                        {!hideData && (
+                          <div className="shrink-0 min-w-[35px]">
+                            <CircularProgress 
+                              percentage={dayWinRate} 
+                              size={35}
+                              color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#eab308" : "#F06363"}
+                            />
+                          </div>
+                        )}
                       </>
                     );
                   })()}
@@ -2839,8 +2841,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className="text-xl md:text-2xl lg:text-3xl font-bold text-white break-words">
-                  {metrics.riscoRetornoMedio.toFixed(2)}
+                <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${hideData ? 'text-zinc-500' : 'text-white'} break-words`}>
+                  {hideData ? '••' : metrics.riscoRetornoMedio.toFixed(2)}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
                   {t('metrics.risk_reward')}
@@ -2857,45 +2859,47 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <div className="text-base md:text-lg lg:text-xl font-bold text-[#2FA87A] break-words">
-                      +{(() => {
+                    <div className={`text-base md:text-lg lg:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} break-words`}>
+                      {hideData ? '+•••' : '+' + (() => {
                         const avgWin = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
                         return formatCurrency(avgWin);
                       })()}
                     </div>
-                    <div className="text-sm md:text-base font-semibold text-[#F06363] break-words">
-                      {(() => {
+                    <div className={`text-sm md:text-base font-semibold ${hideData ? 'text-zinc-500' : 'text-[#F06363]'} break-words`}>
+                      {hideData ? '-•••' : (() => {
                         const avgLoss = Math.abs(periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
                         return formatCurrency(-avgLoss);
                       })()}
                     </div>
                   </div>
-                  <div className="ml-2 flex items-center">
-                    {(() => {
-                      const avgWin = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
-                        .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
-                      const avgLoss = Math.abs(periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
-                        .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
-                      const maxValue = Math.max(avgWin, avgLoss);
-                      const winHeight = maxValue > 0 ? (avgWin / maxValue) * 35 : 0;
-                      const lossHeight = maxValue > 0 ? (avgLoss / maxValue) * 35 : 0;
-                      
-                      return (
-                        <div className="flex items-end gap-1 h-10">
-                          <div 
-                            className="bg-[#2FA87A] rounded-sm w-2 transition-all duration-300"
-                            style={{ height: `${winHeight}px` }}
-                          />
-                          <div 
-                            className="bg-[#F06363] rounded-sm w-2 transition-all duration-300"
-                            style={{ height: `${lossHeight}px` }}
-                          />
-                        </div>
-                      );
-                    })()}
-                  </div>
+                  {!hideData && (
+                    <div className="ml-2 flex items-center">
+                      {(() => {
+                        const avgWin = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
+                          .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
+                        const avgLoss = Math.abs(periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
+                          .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
+                        const maxValue = Math.max(avgWin, avgLoss);
+                        const winHeight = maxValue > 0 ? (avgWin / maxValue) * 35 : 0;
+                        const lossHeight = maxValue > 0 ? (avgLoss / maxValue) * 35 : 0;
+                        
+                        return (
+                          <div className="flex items-end gap-1 h-10">
+                            <div 
+                              className="bg-[#2FA87A] rounded-sm w-2 transition-all duration-300"
+                              style={{ height: `${winHeight}px` }}
+                            />
+                            <div 
+                              className="bg-[#F06363] rounded-sm w-2 transition-all duration-300"
+                              style={{ height: `${lossHeight}px` }}
+                            />
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
