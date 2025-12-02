@@ -26,7 +26,9 @@ import {
   Upload,
   MessageCircle,
   Smartphone,
-  Sparkles
+  Sparkles,
+  Menu,
+  X
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { LoginModal } from "@/components/ui/login-modal";
@@ -38,6 +40,7 @@ export default function Landing() {
   const { t } = useLanguage();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSwitchToRegister = () => {
     setShowLogin(false);
@@ -56,7 +59,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-2">
             <div className="flex items-center space-x-2 min-w-0 flex-shrink-0">
-              <Logo variant="header" className="!h-16 sm:!h-20 md:!h-24 lg:!h-28 max-w-fit" />
+              <Logo variant="header" className="!h-12 sm:!h-16 md:!h-20 lg:!h-24 max-w-fit" />
             </div>
             <nav className="hidden md:flex space-x-8">
               <a href="#recursos" className="text-slate-300 hover:text-white transition-colors">
@@ -69,26 +72,77 @@ export default function Landing() {
                 {t('landing.header.contact')}
               </a>
             </nav>
-            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4 flex-shrink-0">
+            <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
               <LanguageSelector />
               <Button 
                 variant="ghost" 
                 onClick={() => setShowLogin(true)}
-                className="text-slate-300 hover:text-white text-xs sm:text-sm md:text-base px-1 sm:px-2 md:px-4 py-1 sm:py-2"
+                className="hidden sm:flex text-slate-300 hover:text-white text-sm md:text-base px-2 md:px-4 py-2"
               >
-                <span className="hidden sm:inline">{t('landing.header.login')}</span>
-                <span className="sm:hidden">Login</span>
+                {t('landing.header.login')}
               </Button>
               <Button 
                 onClick={() => setShowRegister(true)}
-                className="gradient-purple-blue hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base px-1 sm:px-2 md:px-4 py-1 sm:py-2"
+                className="hidden sm:flex gradient-purple-blue hover:opacity-90 transition-opacity text-sm md:text-base px-2 md:px-4 py-2"
               >
-                <span className="hidden sm:inline">{t('landing.header.start')}</span>
-                <span className="sm:hidden">Start</span>
+                {t('landing.header.start')}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden text-slate-300 hover:text-white"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                data-testid="button-mobile-menu"
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
             </div>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-slate-900/95 backdrop-blur-sm border-t border-slate-800">
+            <div className="px-4 py-4 space-y-3">
+              <a 
+                href="#recursos" 
+                className="block text-slate-300 hover:text-white transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('landing.header.features')}
+              </a>
+              <a 
+                href="#precos" 
+                className="block text-slate-300 hover:text-white transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('landing.header.pricing')}
+              </a>
+              <a 
+                href="mailto:suporte@appmetrika.com.br" 
+                className="block text-slate-300 hover:text-white transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('landing.header.contact')}
+              </a>
+              <div className="flex flex-col gap-2 pt-3 border-t border-slate-800">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => { setShowLogin(true); setMobileMenuOpen(false); }}
+                  className="w-full text-slate-300 hover:text-white justify-center"
+                >
+                  {t('landing.header.login')}
+                </Button>
+                <Button 
+                  onClick={() => { setShowRegister(true); setMobileMenuOpen(false); }}
+                  className="w-full gradient-purple-blue hover:opacity-90 transition-opacity justify-center"
+                >
+                  {t('landing.header.start')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
       {/* Hero Section */}
       <section className="relative py-16 sm:py-24 lg:py-32 overflow-hidden">
@@ -441,27 +495,27 @@ export default function Landing() {
       </section>
 
       {/* WhatsApp Integration - Exclusive Feature Section */}
-      <section data-testid="section-whatsapp-integration" className="py-24 bg-gradient-to-br from-green-900/30 via-slate-900 to-slate-900 relative overflow-hidden">
+      <section data-testid="section-whatsapp-integration" className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-green-900/30 via-slate-900 to-slate-900 relative overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute top-10 right-10 w-64 h-64 bg-green-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div className="absolute bottom-10 left-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-10 right-10 w-32 sm:w-48 lg:w-64 h-32 sm:h-48 lg:h-64 bg-green-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        <div className="absolute bottom-10 left-10 w-24 sm:w-32 lg:w-48 h-24 sm:h-32 lg:h-48 bg-emerald-500/10 rounded-full blur-3xl animate-float"></div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge data-testid="badge-exclusive-feature" className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-6 py-3 text-base font-bold mb-6 animate-glow">
+          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+            <Badge data-testid="badge-exclusive-feature" className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-bold mb-4 sm:mb-6 animate-glow">
               ✨ FUNCIONALIDADE INOVADORA
             </Badge>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6">
               <span className="text-white">Salve Trades pelo </span>
               <span className="gradient-text block animate-pulse-slow">WhatsApp!</span>
             </h2>
-            <p className="text-xl text-slate-200 max-w-4xl mx-auto mb-8">
+            <p className="text-base sm:text-lg lg:text-xl text-slate-200 max-w-4xl mx-auto mb-6 sm:mb-8 px-2">
               Uma <span className="text-green-400 font-bold">plataforma pioneira</span> que permite registrar suas operações 
               e visualizar estatísticas <span className="text-emerald-400 font-bold">direto do seu celular</span>, sem abrir o navegador!
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* WhatsApp Phone Mockup */}
             <div className="relative">
               <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-green-500/40 shadow-2xl max-w-md mx-auto">
@@ -524,24 +578,24 @@ export default function Landing() {
                 </CardContent>
               </Card>
 
-              {/* Floating badges */}
-              <div className="absolute -top-6 -left-6 bg-green-500/20 backdrop-blur-sm border border-green-500/40 rounded-full px-4 py-2 flex items-center space-x-2">
-                <Sparkles className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-green-400 font-bold">IA Integrada</span>
+              {/* Floating badges - hidden on mobile to prevent overflow */}
+              <div className="hidden sm:flex absolute -top-4 sm:-top-6 -left-2 sm:-left-6 bg-green-500/20 backdrop-blur-sm border border-green-500/40 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 items-center space-x-2">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                <span className="text-xs sm:text-sm text-green-400 font-bold">IA Integrada</span>
               </div>
-              <div className="absolute -bottom-6 -right-6 bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/40 rounded-full px-4 py-2 flex items-center space-x-2">
-                <Zap className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm text-emerald-400 font-bold">Instantâneo</span>
+              <div className="hidden sm:flex absolute -bottom-4 sm:-bottom-6 -right-2 sm:-right-6 bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/40 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 items-center space-x-2">
+                <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+                <span className="text-xs sm:text-sm text-emerald-400 font-bold">Instantâneo</span>
               </div>
             </div>
 
             {/* Features List */}
-            <div>
-              <h3 className="text-3xl font-bold text-white mb-8">
+            <div className="mt-8 lg:mt-0">
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-6 sm:mb-8 text-center lg:text-left">
                 Máxima <span className="text-green-400">Praticidade</span>
               </h3>
               
-              <div className="space-y-6 mb-8">
+              <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
                 {[
                   {
                     icon: MessageCircle,
@@ -568,25 +622,25 @@ export default function Landing() {
                     color: "text-purple-500"
                   }
                 ].map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-4 bg-slate-800/40 rounded-lg p-4 border border-slate-700 hover:border-green-500/40 transition-all">
-                    <div className={`w-12 h-12 ${feature.color} bg-current/10 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                  <div key={index} className="flex items-start space-x-3 sm:space-x-4 bg-slate-800/40 rounded-lg p-3 sm:p-4 border border-slate-700 hover:border-green-500/40 transition-all">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${feature.color} bg-current/10 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <feature.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${feature.color}`} />
                     </div>
-                    <div>
-                      <h4 className="text-xl font-semibold text-white mb-2">{feature.title}</h4>
-                      <p className="text-slate-300">{feature.description}</p>
+                    <div className="min-w-0">
+                      <h4 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2">{feature.title}</h4>
+                      <p className="text-sm sm:text-base text-slate-300">{feature.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-green-500/40">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-start space-x-3">
-                    <Star className="w-6 h-6 text-yellow-400 flex-shrink-0 mt-1" />
+                    <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0 mt-1" />
                     <div>
-                      <h4 className="text-lg font-bold text-white mb-2">Funcionalidade Exclusiva!</h4>
-                      <p className="text-slate-200">
+                      <h4 className="text-base sm:text-lg font-bold text-white mb-2">Funcionalidade Exclusiva!</h4>
+                      <p className="text-sm sm:text-base text-slate-200">
                         Uma <span className="text-green-400 font-bold">plataforma pioneira</span> com 
                         integração completa com WhatsApp para gerenciamento de trades. Praticidade incomparável!
                       </p>
@@ -657,9 +711,14 @@ export default function Landing() {
             </Card>
 
             {/* Plano Pro - Destaque */}
-            <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-emerald-500 relative sm:transform sm:scale-110 shadow-2xl animate-glow">
-              <CardContent className="p-4 sm:p-6 md:p-8">
-                <div className="text-center mb-8">
+            <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-2 border-emerald-500 relative md:scale-105 shadow-2xl animate-glow order-first md:order-none">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-bold">
+                  MAIS POPULAR
+                </Badge>
+              </div>
+              <CardContent className="p-4 sm:p-6 md:p-8 pt-6 sm:pt-8">
+                <div className="text-center mb-6 sm:mb-8">
                   <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.pro_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
                     <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.pro_price')}</span>
@@ -668,7 +727,7 @@ export default function Landing() {
                   <p className="text-slate-300">{t('landing.pricing.pro_annual')}</p>
                 </div>
                 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                   {[
                     t('landing.pricing.pro_feature1'),
                     t('landing.pricing.pro_feature2'),
@@ -677,18 +736,18 @@ export default function Landing() {
                     t('landing.pricing.pro_feature6')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                      <span className="text-white font-medium">{feature}</span>
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                      <span className="text-sm sm:text-base text-white font-medium">{feature}</span>
                     </div>
                   ))}
                 </div>
 
                 <Button 
-                  className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 text-xl font-bold py-4 animate-glow"
+                  className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 text-base sm:text-lg md:text-xl font-bold py-3 sm:py-4 animate-glow"
                   onClick={() => setShowRegister(true)}
                 >
                   {t('landing.pricing.pro_button')}
-                  <ArrowRight className="w-6 h-6 ml-3" />
+                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2 sm:ml-3" />
                 </Button>
               </CardContent>
             </Card>
