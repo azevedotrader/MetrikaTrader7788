@@ -27,7 +27,7 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: Supports traditional email/password login and Google OAuth 2.0. Utilizes secure opaque codes and JWTs.
 - **WhatsApp Integration**: Features a full WhatsApp bot for saving trades, managing bankroll, and an interactive questionnaire with 7 personalized questions. Includes intelligent parsing of natural language messages, HMAC-SHA256 signature verification, state-driven conversational flows, and interactive button menu for easy navigation. Users can create personalized risk management directly through WhatsApp buttons without typing commands.
 - **AI Integration**: Leverages OpenAI GPT-5 for collaborative CSV analysis, working alongside a traditional parser to extract trade data from various formats, including performance reports.
-- **Image Uploads**: Allows one image upload per trade with dedicated backend routes.
+- **Image Uploads**: Uses Replit Object Storage for persistent image storage. Images are uploaded to diary entries and trades via dedicated routes, stored permanently in cloud storage, and served through the `/api/images/:imageId` endpoint. Includes fallback to local storage if Object Storage is not configured.
 
 ### Database
 - **ORM**: Drizzle ORM with Zod validation

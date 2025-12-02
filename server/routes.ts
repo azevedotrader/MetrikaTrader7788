@@ -21,6 +21,7 @@ import crypto from "crypto";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 import WhatsApp from "whatsapp";
 import axios from "axios";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 // JWT Secret - must be provided in production
 const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || (
@@ -289,9 +290,9 @@ const upload = multer({
   dest: 'uploads/'
 });
 
-// Configure multer for image uploads with file type validation
+// Configure multer for image uploads with memory storage (for Object Storage)
 const uploadImage = multer({
-  dest: 'uploads/images/',
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
@@ -3482,7 +3483,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
 
   // Rotas para imagens do diário
   
-  // Upload de imagem para uma entrada do diário
+  // Upload de imagem para uma entrada do diário (usando Object Storage)
   app.post('/api/diary/:id/images', requireAuth, uploadImage.single('image'), async (req: any, res: any) => {
     try {
       const userId = req.userId;
@@ -3499,12 +3500,42 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         return res.status(404).json({ error: "Entrada do diário não encontrada" });
       }
       
+      const imageId = crypto.randomUUID();
+      const extension = req.file.originalname.split('.').pop() || 'jpg';
+      let storedPath: string;
+      let fileName: string;
+      
+      // Verificar se Object Storage está configurado
+      const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
+      if (privateObjectDir) {
+        // Upload para Object Storage
+        const objectStorageService = new ObjectStorageService();
+        const objectPath = `/diary-images/${userId}/${imageId}.${extension}`;
+        
+        storedPath = await objectStorageService.uploadBuffer(
+          req.file.buffer,
+          objectPath,
+          req.file.mimetype
+        );
+        fileName = `${imageId}.${extension}`;
+      } else {
+        // Fallback: salvar localmente (para dev sem Object Storage configurado)
+        const uploadsDir = 'uploads/images';
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        fileName = `${imageId}.${extension}`;
+        storedPath = `${uploadsDir}/${fileName}`;
+        fs.writeFileSync(storedPath, req.file.buffer);
+        console.warn('⚠️ Object Storage não configurado, usando armazenamento local');
+      }
+      
       // Criar registro da imagem no banco
       const imageData = {
         diaryEntryId,
-        fileName: req.file.filename,
+        fileName,
         originalName: req.file.originalname,
-        filePath: req.file.path,
+        filePath: storedPath,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
         caption: caption || null
@@ -3564,7 +3595,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
   
-  // Servir imagem específica
+  // Servir imagem específica (usando Object Storage)
   app.get('/api/images/:imageId', async (req: any, res: any) => {
     try {
       const { imageId } = req.params;
@@ -3574,15 +3605,28 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         return res.status(404).json({ error: "Imagem não encontrada" });
       }
       
-      // Verificar se o arquivo existe
-      if (!fs.existsSync(image.filePath)) {
-        return res.status(404).json({ error: "Arquivo de imagem não encontrado" });
+      // Verificar se é um caminho do Object Storage
+      if (image.filePath.startsWith('/objects/')) {
+        // Buscar do Object Storage
+        const objectStorageService = new ObjectStorageService();
+        try {
+          const objectFile = await objectStorageService.getObjectEntityFile(image.filePath);
+          await objectStorageService.downloadObject(objectFile, res);
+        } catch (error) {
+          if (error instanceof ObjectNotFoundError) {
+            return res.status(404).json({ error: "Arquivo de imagem não encontrado no storage" });
+          }
+          throw error;
+        }
+      } else {
+        // Fallback para arquivos locais antigos
+        if (!fs.existsSync(image.filePath)) {
+          return res.status(404).json({ error: "Arquivo de imagem não encontrado" });
+        }
+        res.setHeader('Content-Type', image.mimeType);
+        res.setHeader('Content-Length', image.fileSize);
+        res.sendFile(path.resolve(image.filePath));
       }
-      
-      // Servir o arquivo
-      res.setHeader('Content-Type', image.mimeType);
-      res.setHeader('Content-Length', image.fileSize);
-      res.sendFile(path.resolve(image.filePath));
     } catch (error) {
       console.error('Erro ao servir imagem:', error);
       res.status(500).json({ 
@@ -3592,7 +3636,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
   
-  // Deletar imagem
+  // Deletar imagem (usando Object Storage)
   app.delete('/api/diary/:diaryId/images/:imageId', requireAuth, async (req: any, res: any) => {
     try {
       const userId = req.userId;
@@ -3610,13 +3654,20 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         return res.status(404).json({ error: "Imagem não encontrada" });
       }
       
-      // Deletar o arquivo físico
+      // Deletar do storage (Object Storage ou local)
       try {
-        if (fs.existsSync(image.filePath)) {
-          fs.unlinkSync(image.filePath);
+        if (image.filePath.startsWith('/objects/')) {
+          // Deletar do Object Storage
+          const objectStorageService = new ObjectStorageService();
+          await objectStorageService.deleteObject(image.filePath);
+        } else {
+          // Deletar arquivo local (fallback para arquivos antigos)
+          if (fs.existsSync(image.filePath)) {
+            fs.unlinkSync(image.filePath);
+          }
         }
       } catch (fileError) {
-        console.warn('Erro ao deletar arquivo físico:', fileError);
+        console.warn('Erro ao deletar arquivo do storage:', fileError);
       }
       
       // Deletar o registro do banco
@@ -3634,7 +3685,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
 
   // ==================== ROTAS DE IMAGENS DE TRADES ====================
   
-  // Upload de imagem para um trade
+  // Upload de imagem para um trade (usando Object Storage)
   app.post('/api/trades/:tradeId/images', requireAuth, uploadImage.single('image'), async (req: any, res: any) => {
     try {
       const userId = req.userId;
@@ -3657,13 +3708,43 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         return res.status(404).json({ error: "Trade não encontrado" });
       }
       
+      const imageId = crypto.randomUUID();
+      const extension = req.file.originalname.split('.').pop() || 'jpg';
+      let storedPath: string;
+      let fileName: string;
+      
+      // Verificar se Object Storage está configurado
+      const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
+      if (privateObjectDir) {
+        // Upload para Object Storage
+        const objectStorageService = new ObjectStorageService();
+        const objectPath = `/trade-images/${userId}/${imageId}.${extension}`;
+        
+        storedPath = await objectStorageService.uploadBuffer(
+          req.file.buffer,
+          objectPath,
+          req.file.mimetype
+        );
+        fileName = `${imageId}.${extension}`;
+      } else {
+        // Fallback: salvar localmente (para dev sem Object Storage configurado)
+        const uploadsDir = 'uploads/images';
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        fileName = `${imageId}.${extension}`;
+        storedPath = `${uploadsDir}/${fileName}`;
+        fs.writeFileSync(storedPath, req.file.buffer);
+        console.warn('⚠️ Object Storage não configurado, usando armazenamento local');
+      }
+      
       // Criar registro da imagem no banco
       const imageData = {
         tradeId,
         diaryEntryId: null,
-        fileName: req.file.filename,
+        fileName,
         originalName: req.file.originalname,
-        filePath: req.file.path,
+        filePath: storedPath,
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
         caption: caption || null
@@ -3738,7 +3819,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
     }
   });
   
-  // Deletar imagem de um trade
+  // Deletar imagem de um trade (usando Object Storage)
   app.delete('/api/trades/:tradeId/images/:imageId', requireAuth, async (req: any, res: any) => {
     try {
       const userId = req.userId;
@@ -3768,13 +3849,20 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         return res.status(404).json({ error: "Imagem não encontrada" });
       }
       
-      // Deletar o arquivo físico
+      // Deletar do storage (Object Storage ou local)
       try {
-        if (fs.existsSync(image.filePath)) {
-          fs.unlinkSync(image.filePath);
+        if (image.filePath.startsWith('/objects/')) {
+          // Deletar do Object Storage
+          const objectStorageService = new ObjectStorageService();
+          await objectStorageService.deleteObject(image.filePath);
+        } else {
+          // Deletar arquivo local (fallback para arquivos antigos)
+          if (fs.existsSync(image.filePath)) {
+            fs.unlinkSync(image.filePath);
+          }
         }
       } catch (fileError) {
-        console.warn('Erro ao deletar arquivo físico:', fileError);
+        console.warn('Erro ao deletar arquivo do storage:', fileError);
       }
       
       // Deletar o registro do banco
