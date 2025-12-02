@@ -889,9 +889,9 @@ export function TradingPerformanceChart({
         {/* Logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <img 
-            src={metrikaIcon} 
+            src={metrikaLogo} 
             alt="" 
-            className="w-24 sm:w-32 md:w-40 opacity-[0.06] select-none"
+            className="w-40 sm:w-56 md:w-72 opacity-[0.06] select-none"
             draggable={false}
           />
         </div>
