@@ -884,13 +884,6 @@ export function TradingPerformanceChart({
             ))}
           </ComposedChart>
         </ResponsiveContainer>
-
-        {/* Watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="opacity-[0.05] text-6xl font-bold text-zinc-500">
-            MÉTRIKA
-          </div>
-        </div>
       </div>
     </div>
   );
