@@ -172,6 +172,8 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.your_metrika_score": "Seu Gráfico de Consistência",
     "dashboard.insufficient_data_for_score": "Sem dados suficientes para calcular o score",
     "dashboard.register_trades_for_score": "Registre trades para ver seu Métrika Score",
+    "dashboard.hide_data": "Ocultar dados",
+    "dashboard.show_data": "Mostrar dados",
 
     // Tabs
     "tabs.imports": "Importações",

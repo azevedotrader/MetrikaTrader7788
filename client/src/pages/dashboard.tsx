@@ -78,6 +78,8 @@ import {
   CheckSquare,
   ChevronDown,
   X,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   LineChart as RechartsLineChart,
@@ -2463,6 +2465,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
   const [editingTrade, setEditingTrade] = useState<any>(null);
   const [showEditTradeDialog, setShowEditTradeDialog] = useState(false);
   const [periodFilteredTrades, setPeriodFilteredTrades] = useState<Trade[]>([]);
+  const [hideData, setHideData] = useState(false);
 
 
   // Fetch trades data
@@ -2704,8 +2707,22 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
 
       <div className="space-y-6 md:space-y-8">
+          {/* Hide/Show Data Toggle */}
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setHideData(!hideData)}
+              className="text-zinc-400 hover:text-white gap-2"
+              data-testid="toggle-hide-data"
+            >
+              {hideData ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              <span className="text-xs">{hideData ? t('dashboard.show_data') : t('dashboard.hide_data')}</span>
+            </Button>
+          </div>
+
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
-          <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6">
+          <div data-testid="metrics-cards" className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6 ${hideData ? 'hidden' : ''}`}>
             {/* Net PnL */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
               <CardContent className="p-3 md:p-4 lg:p-5">
