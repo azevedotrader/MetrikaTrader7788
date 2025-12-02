@@ -108,7 +108,6 @@ import { SmartReprocessButton } from "@/components/SmartReprocessButton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCurrency } from "@/hooks/useCurrency";
 import { TopBar } from "@/components/layout/top-bar";
-import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 import {
   format,
   startOfDay,
@@ -1928,17 +1927,6 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
             );
           })()}
         </ResponsiveContainer>
-        
-        {/* Logo watermark grande no centro do gráfico */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <div className="opacity-[0.08] hover:opacity-[0.15] transition-opacity duration-300 flex items-center justify-center">
-            <img 
-              src={metrikaLogo} 
-              alt="METRIKA" 
-              className="block object-contain h-64 sm:h-80 md:h-96 lg:h-[400px] xl:h-[450px] w-auto max-w-full max-h-full"
-            />
-          </div>
-        </div>
       </div>
       )}
 
