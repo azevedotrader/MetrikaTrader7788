@@ -18,6 +18,7 @@ import { BarChart3, TrendingUp, TrendingDown, Minus, Filter, X, Calendar } from 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import type { Trade } from "@shared/schema";
+import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 
 interface ChartDataPoint {
   date: Date;
@@ -765,6 +766,15 @@ export function TradingPerformanceChart({
 
       {/* Gráfico */}
       <div className="relative h-[350px] sm:h-[450px] md:h-[550px]">
+        {/* Watermark logo */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+          <img 
+            src={metrikaLogo} 
+            alt="" 
+            className="w-48 sm:w-64 md:w-80 opacity-[0.04] select-none"
+            draggable={false}
+          />
+        </div>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
