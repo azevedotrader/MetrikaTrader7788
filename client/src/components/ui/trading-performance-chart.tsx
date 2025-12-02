@@ -766,15 +766,17 @@ export function TradingPerformanceChart({
 
       {/* Gráfico */}
       <div className="relative h-[350px] sm:h-[450px] md:h-[550px]">
-        {/* Watermark logo - behind all chart elements */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: -1 }}>
-          <img 
-            src={metrikaLogo} 
-            alt="" 
-            className="w-48 sm:w-64 md:w-80 opacity-[0.06] select-none"
-            draggable={false}
-          />
-        </div>
+        {/* Watermark logo centered behind chart */}
+        <div 
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ 
+            backgroundImage: `url(${metrikaLogo})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: '200px auto',
+            opacity: 0.08
+          }}
+        />
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
