@@ -18,7 +18,7 @@ import { BarChart3, TrendingUp, TrendingDown, Minus, Filter, X, Calendar } from 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import type { Trade } from "@shared/schema";
-import metrikaIcon from "@assets/35481a34-81b8-4b62-b340-c886ca3c22ee_1758221898509.png";
+import metrikaLogo from "@assets/bb593927-43a1-4153-a7cb-c63e789ec7c3_1757781377777.png";
 
 interface ChartDataPoint {
   date: Date;
