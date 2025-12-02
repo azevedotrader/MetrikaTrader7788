@@ -610,7 +610,7 @@ export function TradingPerformanceChart({
             </PopoverContent>
           </Popover>
         </div>
-        <div className="h-[500px] md:h-[550px] flex items-center justify-center text-zinc-400">
+        <div className="h-[350px] sm:h-[450px] md:h-[550px] flex items-center justify-center text-zinc-400">
           <div className="text-center">
             <BarChart3 className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-4 opacity-50" />
             <p className="text-sm">{t('empty.no_trades_period')}</p>
@@ -764,7 +764,7 @@ export function TradingPerformanceChart({
       )}
 
       {/* Gráfico */}
-      <div className="relative h-[500px] md:h-[550px]">
+      <div className="relative h-[350px] sm:h-[450px] md:h-[550px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}

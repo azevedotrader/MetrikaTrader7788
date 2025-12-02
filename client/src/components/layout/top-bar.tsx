@@ -48,23 +48,24 @@ export function TopBar({
   const { t } = useLanguage();
   
   return (
-    <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-4 lg:px-6 py-3 ${isMobile ? 'left-0' : 'left-16'}`}>
-      <div className="flex items-center justify-between">
-        {/* Left Section - Menu + Filters */}
-        <div className="flex items-center space-x-3 lg:space-x-4 flex-1 min-w-0">
+    <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-2 sm:px-4 lg:px-6 py-2 sm:py-3 ${isMobile ? 'left-0' : 'left-16'}`}>
+      <div className="flex items-center justify-between gap-2">
+        {/* Left Section - Menu button */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Mobile menu button */}
           {isMobile && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-zinc-400 hover:text-white lg:hidden flex-shrink-0"
+              className="text-zinc-400 hover:text-white p-1.5"
               onClick={onMenuClick}
+              data-testid="mobile-menu-button"
             >
               <Menu className="w-5 h-5" />
             </Button>
           )}
           
-          {/* Dashboard Filter - only show on dashboard */}
+          {/* Dashboard Filter - only show on desktop */}
           {showDashboardFilter && (
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               <Select
@@ -181,14 +182,14 @@ export function TopBar({
           )}
         </div>
         
-        {/* Center Section - Title */}
-        <div className="flex justify-center flex-1 min-w-0">
-          <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-white truncate text-center">{title}</h1>
-        </div>
+        {/* Center Section - Title (responsive) */}
+        <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white truncate flex-1 text-center min-w-0 px-2">
+          {title}
+        </h1>
         
-        {/* Right Section */}
-        <div className="flex items-center space-x-3 lg:space-x-4 justify-end flex-1 min-w-0">
-          <PlanStatus />
+        {/* Right Section - Plan + Language (compact on mobile) */}
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <PlanStatus compact={isMobile} />
           <LanguageSelector />
         </div>
       </div>

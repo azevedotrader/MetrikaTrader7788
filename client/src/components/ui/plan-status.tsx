@@ -13,7 +13,11 @@ interface PlanInfo {
   expiresAt?: string;
 }
 
-export function PlanStatus() {
+interface PlanStatusProps {
+  compact?: boolean;
+}
+
+export function PlanStatus({ compact = false }: PlanStatusProps) {
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -89,9 +93,9 @@ export function PlanStatus() {
 
   return (
     <>
-      <div className="flex items-center space-x-2 lg:space-x-3" data-testid="plan-status">
+      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3" data-testid="plan-status">
         <Badge 
-          className={`${planDetails.color} text-white hover:${planDetails.color}/80 flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium cursor-pointer transition-all duration-200 hover:scale-105`}
+          className={`${planDetails.color} text-white hover:${planDetails.color}/80 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium cursor-pointer transition-all duration-200 hover:scale-105`}
           data-testid={`badge-plan-${planInfo.planType}`}
           onClick={() => setIsModalOpen(true)}
         >
@@ -99,8 +103,8 @@ export function PlanStatus() {
           <span>{planDetails.name}</span>
         </Badge>
         
-        {showDuration && (
-          <div className="flex items-center space-x-1.5 text-xs text-zinc-400 bg-zinc-800/50 rounded-md px-2 py-1" data-testid="plan-duration">
+        {showDuration && !compact && (
+          <div className="hidden sm:flex items-center space-x-1.5 text-xs text-zinc-400 bg-zinc-800/50 rounded-md px-2 py-1" data-testid="plan-duration">
             <Clock className="w-3 h-3 text-zinc-500" />
             <span className="font-medium">
               {planInfo.daysRemaining !== undefined 

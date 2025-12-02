@@ -118,12 +118,12 @@ export default function Diario() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
+      <div className="p-3 sm:p-4 md:p-6">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-end mb-6">
+          <div className="flex items-center justify-end mb-4 sm:mb-6">
             <Skeleton className="h-10 w-32" />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="bg-slate-800 border-slate-700">
                 <CardHeader>
@@ -147,15 +147,15 @@ export default function Diario() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-3 sm:p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-end mb-6">
+        <div className="flex items-center justify-end mb-4 sm:mb-6">
           <Button
             onClick={handleNewEntry}
-            className="gradient-purple-blue hover:opacity-90 transition-opacity"
+            className="gradient-purple-blue hover:opacity-90 transition-opacity text-sm sm:text-base"
             data-testid="button-new-entry"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1 sm:mr-2" />
             {t('journal.add_entry')}
           </Button>
         </div>

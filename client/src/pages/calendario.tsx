@@ -14,7 +14,7 @@ export default function CalendarioPage() {
   const { data: calendarData = [] } = useQuery({ queryKey: ['/api/trades/calendar'] });
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6 pb-6 md:pb-8">
 
       {/* Instrucoes */}
       <Card className="rounded-lg border text-card-foreground shadow-sm border-slate-700 bg-[#141313c4]">

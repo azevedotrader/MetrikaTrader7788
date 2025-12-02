@@ -29,11 +29,10 @@ export function LanguageSelector() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 px-3 py-2 rounded-md transition-all duration-200"
+          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-md transition-all duration-200"
           data-testid="language-selector"
         >
-          <Languages className="w-4 h-4 mr-2" />
-          <span className="hidden sm:inline text-base">{languageFlags[language]}</span>
+          <span className="text-sm sm:text-base">{languageFlags[language]}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-700">
