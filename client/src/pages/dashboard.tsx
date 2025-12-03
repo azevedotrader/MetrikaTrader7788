@@ -3101,11 +3101,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               className="md:col-span-2 lg:col-span-2 min-h-[500px] lg:min-h-[600px]"
               data-testid="card-progress-tracker"
             >
-              <div className="h-full flex flex-col">
+              <div className="h-full flex flex-col -mx-4 sm:mx-0">
                 <div className="flex-1 overflow-hidden min-h-[400px] lg:min-h-[500px]">
                   <TradingCalendar 
                     trades={filteredTrades} 
-                    className="scale-110 sm:scale-125 lg:scale-100"
+                    className="scale-100"
                   />
                 </div>
                 
