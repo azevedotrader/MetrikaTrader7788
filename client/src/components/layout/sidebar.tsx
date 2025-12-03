@@ -144,7 +144,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-2">
+          <nav className="flex-1 p-2 overflow-y-auto">
             <ul className="space-y-2">
               {navigation.map((item) => (
                 <li key={item.href}>
