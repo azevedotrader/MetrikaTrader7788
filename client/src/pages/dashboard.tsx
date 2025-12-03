@@ -2935,145 +2935,153 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 {/* Lucros */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.profits_short')}</div>
-                  <div className="text-lg md:text-xl font-bold text-[#2FA87A] mb-2">
-                    {(() => {
+                  <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} mb-2`}>
+                    {hideData ? '•••••' : (() => {
                       const totalPositive = periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') > 0)
                         .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       return formatCurrency(totalPositive);
                     })()}
                   </div>
-                  <div className="flex flex-col items-center">
-                    {(() => {
-                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = periodFilteredTrades.length;
-                      const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                      return (
-                        <>
-                          <CircularProgress 
-                            percentage={winPercentage} 
-                            size={35}
-                            color="#2FA87A"
-                          />
-                          <div className="text-xs text-zinc-500 mt-1">
-                            {winPercentage.toFixed(1)}%
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
+                  {!hideData && (
+                    <div className="flex flex-col items-center">
+                      {(() => {
+                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = periodFilteredTrades.length;
+                        const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        return (
+                          <>
+                            <CircularProgress 
+                              percentage={winPercentage} 
+                              size={35}
+                              color="#2FA87A"
+                            />
+                            <div className="text-xs text-zinc-500 mt-1">
+                              {winPercentage.toFixed(1)}%
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div className="text-xs text-zinc-500 mt-1">
-                    {periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length} trades
+                    {hideData ? '•• trades' : `${periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length} trades`}
                   </div>
                 </div>
 
                 {/* Perdas */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.losses_short')}</div>
-                  <div className="text-lg md:text-xl font-bold text-[#F06363] mb-2">
-                    {(() => {
+                  <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#F06363]'} mb-2`}>
+                    {hideData ? '•••••' : (() => {
                       const totalNegative = Math.abs(periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') < 0)
                         .reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0));
                       return formatCurrency(-totalNegative);
                     })()}
                   </div>
-                  <div className="flex flex-col items-center">
-                    {(() => {
-                      const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
-                      const totalTrades = periodFilteredTrades.length;
-                      const lossPercentage = totalTrades > 0 ? (lossTrades / totalTrades) * 100 : 0;
-                      return (
-                        <>
-                          <CircularProgress 
-                            percentage={lossPercentage} 
-                            size={35}
-                            color="#F06363"
-                          />
-                          <div className="text-xs text-zinc-500 mt-1">
-                            {lossPercentage.toFixed(1)}%
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
+                  {!hideData && (
+                    <div className="flex flex-col items-center">
+                      {(() => {
+                        const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                        const totalTrades = periodFilteredTrades.length;
+                        const lossPercentage = totalTrades > 0 ? (lossTrades / totalTrades) * 100 : 0;
+                        return (
+                          <>
+                            <CircularProgress 
+                              percentage={lossPercentage} 
+                              size={35}
+                              color="#F06363"
+                            />
+                            <div className="text-xs text-zinc-500 mt-1">
+                              {lossPercentage.toFixed(1)}%
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div className="text-xs text-zinc-500 mt-1">
-                    {periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length} trades
+                    {hideData ? '•• trades' : `${periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length} trades`}
                   </div>
                 </div>
 
                 {/* Resultado */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.result')}</div>
-                  <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
+                  <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                   })()}`}>
-                    {(() => {
+                    {hideData ? '•••••' : (() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       return formatCurrency(totalResult);
                     })()}
                   </div>
-                  <div className="flex flex-col items-center">
-                    {(() => {
-                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = periodFilteredTrades.length;
-                      const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      const isPositive = totalResult >= 0;
-                      return (
-                        <>
-                          <CircularProgress 
-                            percentage={winRate} 
-                            size={35}
-                            color={isPositive ? "#2FA87A" : "#F06363"}
-                          />
-                          <div className="text-xs text-zinc-500 mt-1">
-                            {winRate.toFixed(1)}%
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
+                  {!hideData && (
+                    <div className="flex flex-col items-center">
+                      {(() => {
+                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = periodFilteredTrades.length;
+                        const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                        const isPositive = totalResult >= 0;
+                        return (
+                          <>
+                            <CircularProgress 
+                              percentage={winRate} 
+                              size={35}
+                              color={isPositive ? "#2FA87A" : "#F06363"}
+                            />
+                            <div className="text-xs text-zinc-500 mt-1">
+                              {winRate.toFixed(1)}%
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div className="text-xs text-zinc-500 mt-1">
-                    {periodFilteredTrades.length} trades
+                    {hideData ? '•• trades' : `${periodFilteredTrades.length} trades`}
                   </div>
                 </div>
 
                 {/* Média */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.average')}</div>
-                  <div className={`text-lg md:text-xl font-bold mb-2 ${(() => {
+                  <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
                     return avgResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
                   })()}`}>
-                    {(() => {
+                    {hideData ? '•••••' : (() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
                       return formatCurrency(avgResult);
                     })()}
                   </div>
-                  <div className="flex flex-col items-center">
-                    {(() => {
-                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                      const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
-                      const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100);
-                      const isPositive = avgResult >= 0;
-                      return (
-                        <>
-                          <CircularProgress 
-                            percentage={normalizedPercentage} 
-                            size={35}
-                            color={isPositive ? "#2FA87A" : "#F06363"}
-                          />
-                          <div className="text-xs text-zinc-500 mt-1">
-                            {normalizedPercentage.toFixed(1)}%
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
+                  {!hideData && (
+                    <div className="flex flex-col items-center">
+                      {(() => {
+                        const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                        const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
+                        const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100);
+                        const isPositive = avgResult >= 0;
+                        return (
+                          <>
+                            <CircularProgress 
+                              percentage={normalizedPercentage} 
+                              size={35}
+                              color={isPositive ? "#2FA87A" : "#F06363"}
+                            />
+                            <div className="text-xs text-zinc-500 mt-1">
+                              {normalizedPercentage.toFixed(1)}%
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div className="text-xs text-zinc-500 mt-1">
                     {t('metrics.per_trade')}
                   </div>
@@ -3108,11 +3116,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
-                          <p className="text-sm sm:text-lg font-bold text-[#2FA87A] truncate">
-                            {formatCurrency(metrics.melhorTrade)}
+                          <p className={`text-sm sm:text-lg font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} truncate`}>
+                            {hideData ? '•••••' : formatCurrency(metrics.melhorTrade)}
                           </p>
                         </div>
-                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
+                        <TrendingUp className={`h-4 w-4 sm:h-6 sm:w-6 ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} flex-shrink-0 ml-2`} />
                       </div>
                     </div>
 
