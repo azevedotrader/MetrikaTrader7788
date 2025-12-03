@@ -575,6 +575,8 @@ const translations: Record<Language, Record<string, string>> = {
     "form.edit": "Editar",
     "form.close": "Fechar",
     "form.submit": "Enviar",
+    "form.trade_saved": "Trade salvo com sucesso! 🎯",
+    "form.trade_saved_desc": "Sua operação foi registrada. Continue assim!",
 
     // Landing Page - Header
     "landing.header.features": "Recursos",
@@ -1474,6 +1476,8 @@ const translations: Record<Language, Record<string, string>> = {
     "form.edit": "Edit",
     "form.close": "Close",
     "form.submit": "Submit",
+    "form.trade_saved": "Trade saved successfully! 🎯",
+    "form.trade_saved_desc": "Your trade has been recorded. Keep it up!",
 
     // Landing Page - Header
     "landing.header.features": "Features",
@@ -2445,6 +2449,8 @@ const translations: Record<Language, Record<string, string>> = {
     "form.edit": "Editar",
     "form.close": "Cerrar",
     "form.submit": "Enviar",
+    "form.trade_saved": "¡Operación guardada con éxito! 🎯",
+    "form.trade_saved_desc": "Tu operación ha sido registrada. ¡Sigue así!",
 
     // Landing Page - Header
     "landing.header.features": "Recursos",
