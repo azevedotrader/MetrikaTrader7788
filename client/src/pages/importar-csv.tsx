@@ -1,8 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { VipUpgradeModal } from "@/components/modals/vip-upgrade-modal";
 import {
   Card,
   CardContent,
@@ -21,15 +23,27 @@ import {
 import {
   Upload,
   FileText,
+  Crown,
+  Lock,
 } from "lucide-react";
 
 export default function ImportarCSV() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { planType, isLoading: planLoading } = useUserPlan();
   
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [selectedBroker, setSelectedBroker] = useState<string>("");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  
+  const isFreePlan = planType === 'free';
+  
+  useEffect(() => {
+    if (!planLoading && isFreePlan) {
+      setShowUpgradeModal(true);
+    }
+  }, [planLoading, isFreePlan]);
 
   // Mutation para upload de CSV
   const uploadMutation = useMutation({
@@ -92,6 +106,52 @@ export default function ImportarCSV() {
 
     uploadMutation.mutate();
   }, [csvFile, selectedBroker, uploadMutation, toast]);
+
+  if (isFreePlan) {
+    return (
+      <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
+        <Card className="bg-graphite/50 border-charcoal-700 relative overflow-hidden">
+          <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center p-6 max-w-md">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Recurso VIP</h3>
+              <p className="text-zinc-400 mb-4">
+                A importação de CSV está disponível apenas para assinantes VIP. 
+                Faça upgrade para desbloquear este recurso.
+              </p>
+              <Button 
+                onClick={() => setShowUpgradeModal(true)}
+                className="bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold"
+                data-testid="button-upgrade-csv"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Desbloquear Agora
+              </Button>
+            </div>
+          </div>
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Upload className="h-5 w-5 text-neutral-400" />
+              {t('trade.import_trades_csv')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 opacity-30 pointer-events-none">
+            <div className="h-48 flex items-center justify-center text-zinc-500">
+              Conteúdo bloqueado para usuários Free
+            </div>
+          </CardContent>
+        </Card>
+        
+        <VipUpgradeModal 
+          open={showUpgradeModal} 
+          onOpenChange={setShowUpgradeModal}
+          feature="csv"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
