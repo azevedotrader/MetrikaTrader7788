@@ -356,13 +356,13 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 </Button>
               </div>
 
-              {/* Plano Black */}
+              {/* Plano VIP */}
               <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
                 <div className="text-center mb-3 md:mb-4">
                   <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-purple-600/20 rounded-lg mb-2 md:mb-3">
                     <Crown className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
                   </div>
-                  <h3 className="text-base md:text-lg font-bold text-white">Black</h3>
+                  <h3 className="text-base md:text-lg font-bold text-white">VIP</h3>
                   <p className="text-xs md:text-sm text-zinc-400">Para traders sérios</p>
                 </div>
                 
@@ -391,7 +391,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 </ul>
 
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm md:text-base py-2 md:py-3">
-                  Escolher Black
+                  Escolher VIP
                 </Button>
               </div>
             </div>

@@ -65,7 +65,7 @@ export function PlanStatus({ compact = false }: PlanStatusProps) {
         };
       case 'black':
         return {
-          name: 'Black',
+          name: 'VIP',
           color: 'bg-black',
           icon: <Crown className="w-3 h-3" />
         };

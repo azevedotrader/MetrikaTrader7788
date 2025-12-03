@@ -281,7 +281,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               <div className="text-center space-y-3">
                 <p className="text-zinc-300 text-sm md:text-base leading-relaxed">
                   O <strong className="text-purple-600">suporte completo</strong> está disponível para usuários dos 
-                  planos <strong className="text-purple-600">Starter</strong>, <strong className="text-purple-600">Pro</strong> e <strong className="text-purple-600">Black</strong>.
+                  planos <strong className="text-purple-600">Starter</strong>, <strong className="text-purple-600">Pro</strong> e <strong className="text-purple-600">VIP</strong>.
                 </p>
                 <p className="text-zinc-400 text-sm">
                   Faça upgrade para ter acesso ao suporte especializado e recursos avançados da Métrika.
@@ -323,7 +323,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   </div>
                 </div>
 
-                {/* Plano Black */}
+                {/* Plano VIP */}
                 <div className="bg-gradient-to-br from-black/40 to-zinc-900/40 border border-yellow-500/50 rounded-lg p-4 md:p-6 relative">
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
                     <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
@@ -336,7 +336,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       <div className="w-8 h-8 bg-black border border-yellow-500 rounded-full flex items-center justify-center">
                         <span className="text-yellow-500 text-sm font-bold">♥</span>
                       </div>
-                      <h3 className="text-lg md:text-xl font-bold text-white">Black</h3>
+                      <h3 className="text-lg md:text-xl font-bold text-white">VIP</h3>
                     </div>
                     <p className="text-2xl md:text-3xl font-bold text-yellow-500">R$ 97,00</p>
                     <p className="text-zinc-400 text-xs md:text-sm">por mês</p>

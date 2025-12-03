@@ -752,7 +752,7 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            {/* Plano Black */}
+            {/* Plano VIP */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="text-center mb-8">

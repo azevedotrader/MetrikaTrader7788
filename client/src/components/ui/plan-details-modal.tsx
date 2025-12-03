@@ -43,7 +43,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
         };
       case 'black':
         return {
-          name: 'Black',
+          name: 'VIP',
           color: 'bg-black',
           icon: <Crown className="w-5 h-5" />,
           description: 'Plano premium com todos os recursos'

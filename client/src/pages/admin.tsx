@@ -403,7 +403,7 @@ export default function AdminPage() {
                   {statsLoading ? "..." : ((stats as any)?.proUsers || 0) + ((stats as any)?.blackUsers || 0)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats as any)?.proUsers || 0} Pro + {(stats as any)?.blackUsers || 0} Black
+                  {(stats as any)?.proUsers || 0} Pro + {(stats as any)?.blackUsers || 0} VIP
                 </p>
               </CardContent>
             </Card>
@@ -444,7 +444,7 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Black</span>
+                  <span className="text-sm font-medium">VIP</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
@@ -749,7 +749,7 @@ export default function AdminPage() {
                           <SelectItem value="free">Free</SelectItem>
                           <SelectItem value="starter">Starter</SelectItem>
                           <SelectItem value="pro">Pro</SelectItem>
-                          <SelectItem value="black">Black</SelectItem>
+                          <SelectItem value="black">VIP</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

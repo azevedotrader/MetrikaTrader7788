@@ -144,7 +144,7 @@ export default function TermosServico({ onMenuClick }: TermsPageProps) {
                   
                   <h3 className="text-base sm:text-lg font-medium text-foreground mb-2 sm:mb-3">6.1. Planos Disponíveis</h3>
                   <p className="mb-3">
-                    Oferecemos diferentes planos de assinatura (Starter, Pro, Black) com recursos e limites específicos. 
+                    Oferecemos diferentes planos de assinatura (Starter, Pro, VIP) com recursos e limites específicos. 
                     Os detalhes de cada plano estão disponíveis em nossa página de preços.
                   </p>
 
