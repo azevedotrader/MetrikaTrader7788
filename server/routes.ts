@@ -1264,6 +1264,9 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Generate JWT token for API authentication
       const user = req.user as any;
       
+      // Check if this is the first login (lastLoginAt is null) BEFORE updating
+      const isFirstLogin = !user.lastLoginAt;
+      
       // Update lastLoginAt
       await storage.updateLastLogin(user.id);
       
@@ -1285,9 +1288,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         global.oauthPendingLogins = new Map();
       }
       
-      global.oauthPendingLogins.set(authCode, {
+      (global.oauthPendingLogins as Map<string, any>).set(authCode, {
         user: { ...user, password: undefined },
         token,
+        isFirstLogin,
         expiresAt: Date.now() + 5 * 60 * 1000 // 5 minutes
       });
       
@@ -1356,10 +1360,11 @@ export async function registerRoutes(app: Express): Promise<void> {
       global.oauthPendingLogins.delete(code);
     }
     
-    // Return user data and token
+    // Return user data, token, and first login flag
     res.json({
       user: loginData.user,
-      token: (loginData as any).token
+      token: (loginData as any).token,
+      isFirstLogin: (loginData as any).isFirstLogin || false
     });
   });
 

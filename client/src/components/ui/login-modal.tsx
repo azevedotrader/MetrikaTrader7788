@@ -166,12 +166,17 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                     });
                     
                     if (response.ok) {
-                      const { user, token } = await response.json();
+                      const { user, token, isFirstLogin } = await response.json();
                       
                       // Store in localStorage
                       localStorage.setItem('user', JSON.stringify(user));
                       localStorage.setItem('user-id', user.id);
                       localStorage.setItem('user-token', token);
+                      
+                      // Store first login flag for tour triggering
+                      if (isFirstLogin) {
+                        localStorage.setItem('should-start-tour', 'true');
+                      }
                       
                       // Reload to trigger auth context update
                       window.location.reload();
