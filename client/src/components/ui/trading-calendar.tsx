@@ -251,7 +251,7 @@ export function TradingCalendar({
   ) => {
     if (!dayNumber || !isCurrentMonth) {
       return (
-        <div className="p-1 border-r border-b border-zinc-700 h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px]">
+        <div className="p-1 border-r border-b border-zinc-700 h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px]">
         </div>
       );
     }
@@ -274,7 +274,7 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[125px] sm:h-[140px] md:h-[155px] lg:h-[170px] p-2 md:p-2.5",
+          "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px] p-1 sm:p-2 md:p-2.5",
           "backdrop-blur-[2px] md:backdrop-blur-[3px] bg-black/10 ring-1 ring-white/5 shadow-sm",
           isToday && "ring-zinc-600/50",
           hasData && isProfit && "hover:brightness-105",
@@ -306,7 +306,7 @@ export function TradingCalendar({
         {/* Número do dia - canto superior esquerdo */}
         <div
           className={cn(
-            "absolute top-1.5 left-1.5 text-[11px] sm:text-xs font-semibold",
+            "absolute top-1 left-1 sm:top-1.5 sm:left-1.5 text-[10px] sm:text-[11px] md:text-xs font-semibold",
             hasData && isBreakEven ? "text-zinc-900/90" : "text-white/80",
           )}
         >
@@ -315,10 +315,10 @@ export function TradingCalendar({
         
         {/* Ícone do diário - canto superior direito */}
         {hasDiary && (
-          <div title={t("calendar.diary_entry_available")} className="absolute top-1.5 right-1.5">
+          <div title={t("calendar.diary_entry_available")} className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5">
             <BookOpen
               className={cn(
-                "w-4 h-4",
+                "w-3 h-3 sm:w-4 sm:h-4",
                 hasData && isBreakEven ? "text-zinc-900/80" : "text-white/80"
               )}
               data-testid={`diary-indicator-${dayNumber}`}
@@ -332,7 +332,7 @@ export function TradingCalendar({
             <div
               className={cn(
                 "font-extrabold tracking-tight tabular-nums leading-none text-center",
-                "text-lg sm:text-xl md:text-2xl",
+                "text-sm sm:text-lg md:text-2xl",
                 hasData && isBreakEven ? "text-zinc-900" : "text-white"
               )}
               style={{ 
@@ -340,13 +340,13 @@ export function TradingCalendar({
               }}
             >
               <span className="sm:hidden">
-                {isProfit ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                {tradeDay.pnl >= 0 ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(0)}k` : tradeDay.pnl.toFixed(0)}
               </span>
               <span className="hidden sm:inline md:hidden">
-                {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
               </span>
               <span className="hidden md:inline">
-                {isProfit ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+                {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
               </span>
             </div>
           </div>
@@ -355,14 +355,14 @@ export function TradingCalendar({
         {/* Métricas secundárias - parte inferior */}
         {hasData && tradeDay && (
           <div className={cn(
-            "absolute bottom-1.5 left-2 right-2 flex items-center justify-center gap-2 text-[10px] sm:text-xs",
+            "absolute bottom-0.5 sm:bottom-1.5 left-0.5 right-0.5 sm:left-2 sm:right-2 flex items-center justify-center gap-1 sm:gap-2 text-[8px] sm:text-[10px] md:text-xs",
             hasData && isBreakEven ? "text-zinc-900/90" : "text-white/85"
           )}>
-            <span>{tradeDay.trades} {tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}</span>
+            <span>{tradeDay.trades} <span className="hidden sm:inline">{tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}</span><span className="sm:hidden">t</span></span>
             {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
               <>
-                <span>•</span>
-                <span>{tradeDay.winRate.toFixed(0)}% {t("calendar.win")}</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="hidden sm:inline">{tradeDay.winRate.toFixed(0)}% {t("calendar.win")}</span>
               </>
             )}
           </div>
@@ -498,7 +498,7 @@ export function TradingCalendar({
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm bg-zinc-800/30"
+                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-zinc-800/30"
               >
                 {day}
               </div>
