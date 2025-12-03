@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, Loader2, AlertCircle, MessageSquare } from "lucide-react";
+import { Calculator, Loader2, AlertCircle, MessageSquare, Crown, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { QuestionnaireForm } from "@/components/risk-management/QuestionnaireForm";
 import { RiskParametersDisplay } from "@/components/risk-management/RiskParametersDisplay";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useUserPlan } from "@/hooks/useUserPlan";
+import { VipUpgradeModal } from "@/components/modals/vip-upgrade-modal";
 
 interface BankrollManagement {
   id: string;
@@ -36,6 +38,16 @@ export default function RiskManagement() {
   const { toast } = useToast();
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
   const { formatCurrency, getCurrencySymbol } = useCurrency();
+  const { planType, isLoading: planLoading } = useUserPlan();
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  
+  const isFreePlan = planType === 'free';
+  
+  useEffect(() => {
+    if (!planLoading && isFreePlan) {
+      setShowUpgradeModal(true);
+    }
+  }, [planLoading, isFreePlan]);
 
   // Buscar gestão existente
   const {
@@ -112,13 +124,59 @@ export default function RiskManagement() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || planLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 p-4 md:p-6 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
           <p className="text-zinc-400">Carregando gestão de risco...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (isFreePlan) {
+    return (
+      <div className="min-h-screen bg-zinc-950 p-4 md:p-6">
+        <Card className="max-w-3xl mx-auto bg-graphite/50 border-charcoal-700 relative overflow-hidden">
+          <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center p-6 max-w-md">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Recurso VIP</h3>
+              <p className="text-zinc-400 mb-4">
+                A Gestão de Risco Inteligente está disponível apenas para assinantes VIP.
+                Crie seu perfil de risco personalizado e receba análises automáticas!
+              </p>
+              <Button 
+                onClick={() => setShowUpgradeModal(true)}
+                className="bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold"
+                data-testid="button-upgrade-risk"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Desbloquear Gestão de Risco
+              </Button>
+            </div>
+          </div>
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Calculator className="w-5 h-5" />
+              Gestão de Risco Inteligente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 opacity-30 pointer-events-none">
+            <div className="h-48 flex items-center justify-center text-zinc-500">
+              Conteúdo bloqueado para usuários Free
+            </div>
+          </CardContent>
+        </Card>
+        
+        <VipUpgradeModal 
+          open={showUpgradeModal} 
+          onOpenChange={setShowUpgradeModal}
+          feature="risk"
+        />
       </div>
     );
   }
