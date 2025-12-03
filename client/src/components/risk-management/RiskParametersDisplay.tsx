@@ -213,22 +213,24 @@ export function RiskParametersDisplay({
       {/* Header com botão de deletar */}
       <Card className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border-green-800/50">
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-white flex items-center gap-2">
-                <CheckCircle2 className="w-6 h-6 text-green-500" />
-                Gestão de Risco Ativa
-              </CardTitle>
-              <CardDescription className="text-green-300/70 mt-2">
-                Seu plano personalizado está configurado e pronto para uso
-              </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex items-start gap-2 min-w-0 flex-1">
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <CardTitle className="text-white text-base sm:text-lg">
+                  Gestão de Risco Ativa
+                </CardTitle>
+                <CardDescription className="text-green-300/70 mt-1 text-sm">
+                  Seu plano personalizado está configurado e pronto para uso
+                </CardDescription>
+              </div>
             </div>
             <Button
               variant="destructive"
               size="sm"
               onClick={onDelete}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 flex-shrink-0 self-start"
               data-testid="button-delete-management"
             >
               <Trash2 className="w-4 h-4 mr-2" />
