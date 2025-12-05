@@ -5860,5 +5860,161 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
     }
   });
 
+  // ===== ROTAS DE CARTEIRAS CUSTOMIZADAS =====
+
+  // GET: Listar todas as carteiras do usuário
+  app.get('/api/wallets', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const wallets = await storage.getWallets(userId);
+      res.json(wallets);
+    } catch (error) {
+      console.error('Error fetching wallets:', error);
+      res.status(500).json({ error: 'Erro ao buscar carteiras' });
+    }
+  });
+
+  // GET: Buscar carteira específica por ID
+  app.get('/api/wallets/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
+      
+      const wallet = await storage.getWallet(id, userId);
+      
+      if (!wallet) {
+        return res.status(404).json({ error: 'Carteira não encontrada' });
+      }
+
+      res.json(wallet);
+    } catch (error) {
+      console.error('Error fetching wallet:', error);
+      res.status(500).json({ error: 'Erro ao buscar carteira' });
+    }
+  });
+
+  // POST: Criar nova carteira
+  app.post('/api/wallets', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { name, description, color, icon } = req.body;
+
+      // Validar nome obrigatório
+      if (!name || name.trim() === '') {
+        return res.status(400).json({ error: 'Nome da carteira é obrigatório' });
+      }
+
+      // Validar tamanho do nome
+      if (name.length > 50) {
+        return res.status(400).json({ error: 'Nome deve ter no máximo 50 caracteres' });
+      }
+
+      // Validar descrição se fornecida
+      if (description && description.length > 200) {
+        return res.status(400).json({ error: 'Descrição deve ter no máximo 200 caracteres' });
+      }
+
+      // Validar cor se fornecida (formato hex)
+      if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
+        return res.status(400).json({ error: 'Cor deve ser um código hex válido (ex: #8B5CF6)' });
+      }
+
+      const wallet = await storage.createWallet({
+        userId,
+        name: name.trim(),
+        description: description?.trim() || undefined,
+        color: color || '#8B5CF6',
+        icon: icon || 'wallet',
+      });
+
+      res.status(201).json(wallet);
+    } catch (error) {
+      console.error('Error creating wallet:', error);
+      res.status(500).json({ error: 'Erro ao criar carteira' });
+    }
+  });
+
+  // PATCH: Atualizar carteira existente
+  app.patch('/api/wallets/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
+      const { name, description, color, icon } = req.body;
+
+      // Verificar se carteira existe e pertence ao usuário
+      const existing = await storage.getWallet(id, userId);
+      if (!existing) {
+        return res.status(404).json({ error: 'Carteira não encontrada' });
+      }
+
+      // Não permitir editar carteiras padrão do sistema
+      if (existing.isDefault) {
+        return res.status(403).json({ error: 'Não é permitido editar carteiras padrão do sistema' });
+      }
+
+      // Construir updates
+      const updates: any = {};
+      
+      if (name !== undefined) {
+        if (!name || name.trim() === '') {
+          return res.status(400).json({ error: 'Nome da carteira é obrigatório' });
+        }
+        if (name.length > 50) {
+          return res.status(400).json({ error: 'Nome deve ter no máximo 50 caracteres' });
+        }
+        updates.name = name.trim();
+      }
+
+      if (description !== undefined) {
+        if (description && description.length > 200) {
+          return res.status(400).json({ error: 'Descrição deve ter no máximo 200 caracteres' });
+        }
+        updates.description = description?.trim() || null;
+      }
+
+      if (color !== undefined) {
+        if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
+          return res.status(400).json({ error: 'Cor deve ser um código hex válido (ex: #8B5CF6)' });
+        }
+        updates.color = color;
+      }
+
+      if (icon !== undefined) {
+        updates.icon = icon;
+      }
+
+      const wallet = await storage.updateWallet(id, updates, userId);
+      res.json(wallet);
+    } catch (error) {
+      console.error('Error updating wallet:', error);
+      res.status(500).json({ error: 'Erro ao atualizar carteira' });
+    }
+  });
+
+  // DELETE: Deletar carteira
+  app.delete('/api/wallets/:id', requireAuth, async (req: any, res: any) => {
+    try {
+      const userId = req.userId;
+      const { id } = req.params;
+
+      // Verificar se carteira existe e pertence ao usuário
+      const existing = await storage.getWallet(id, userId);
+      if (!existing) {
+        return res.status(404).json({ error: 'Carteira não encontrada' });
+      }
+
+      // Não permitir deletar carteiras padrão do sistema
+      if (existing.isDefault) {
+        return res.status(403).json({ error: 'Não é permitido deletar carteiras padrão do sistema' });
+      }
+
+      await storage.deleteWallet(id, userId);
+      res.json({ success: true, message: 'Carteira deletada com sucesso' });
+    } catch (error) {
+      console.error('Error deleting wallet:', error);
+      res.status(500).json({ error: 'Erro ao deletar carteira' });
+    }
+  });
+
   const httpServer = createServer(app);
 }
