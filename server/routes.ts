@@ -1686,6 +1686,16 @@ export async function registerRoutes(app: Express): Promise<void> {
         }
       }
       
+      // Validate wallet ownership if walletId is provided
+      if (req.body.walletId) {
+        const wallet = await storage.getWallet(userId, req.body.walletId);
+        if (!wallet) {
+          return res.status(400).json({ 
+            message: 'Carteira não encontrada ou não pertence ao usuário' 
+          });
+        }
+      }
+      
       const validatedData = insertTradeSchema.parse({
         ...req.body,
         userId, // Usuário autenticado obrigatório
@@ -1909,6 +1919,17 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       if (!file) {
         return res.status(400).json({ message: "Nenhum arquivo enviado" });
+      }
+
+      // Validate wallet ownership if walletId is provided
+      if (walletId) {
+        const wallet = await storage.getWallet(userId, walletId);
+        if (!wallet) {
+          fs.unlinkSync(file.path);
+          return res.status(400).json({ 
+            message: 'Carteira não encontrada ou não pertence ao usuário' 
+          });
+        }
       }
 
       console.log(`🤖 Sistema de Importação CSV: ${file.originalname}`);
