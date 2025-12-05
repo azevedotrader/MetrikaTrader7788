@@ -230,14 +230,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
           {/* User Profile */}
           <div className="p-2 border-t border-zinc-800">
-            <div className={cn("flex items-center transition-all duration-300", sidebarExpanded ? "space-x-3 px-2" : "justify-center")}>
+            <div className={cn("flex items-center transition-all duration-300", sidebarExpanded ? "space-x-3 px-2" : "flex-col gap-2")}>
               <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-medium text-sm">{user?.name?.charAt(0) || 'U'}</span>
               </div>
               <div 
                 className={cn(
                   "flex-1 transition-all duration-300",
-                  sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
+                  sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0 hidden"
                 )}
               >
                 <p className="text-sm font-medium text-white whitespace-nowrap">{user?.name}</p>
@@ -252,11 +252,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     onClose();
                   }
                 }}
-                className={cn(
-                  "text-zinc-400 hover:text-white transition-all duration-300 flex-shrink-0",
-                  sidebarExpanded ? "opacity-100" : "opacity-0 w-0 p-0"
-                )}
+                className="text-zinc-400 hover:text-red-400 hover:bg-red-900/20 transition-all duration-300 flex-shrink-0"
                 title={t('nav.logout')}
+                data-testid="sidebar-logout-button"
               >
                 <LogOut className="w-4 h-4" />
               </Button>
