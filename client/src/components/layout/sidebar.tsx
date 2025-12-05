@@ -15,7 +15,8 @@ import {
   MessageCircle,
   Calculator,
   GraduationCap,
-  Upload
+  Upload,
+  Wallet
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { Logo } from "@/components/ui/logo";
@@ -31,6 +32,7 @@ const navigation = [
   { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
   { nameKey: "trades.add_new", href: "/novo-trade", icon: PlusCircle },
   { nameKey: "trade.import_csv", href: "/importar-csv", icon: Upload },
+  { nameKey: "nav.wallets", href: "/carteiras", icon: Wallet },
   { nameKey: "whatsapp.title", href: "/whatsapp", icon: FaWhatsapp },
   { nameKey: "risk_management.title", href: "/gestao", icon: Calculator },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },

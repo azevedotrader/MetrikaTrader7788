@@ -29,6 +29,7 @@ import Calendario from "@/pages/calendario";
 import Suporte from "@/pages/suporte";
 import Aprendizado from "@/pages/aprendizado";
 import Importacoes from "@/pages/importacoes";
+import Carteiras from "@/pages/carteiras";
 import TesteGateIO from "@/pages/teste-gateio";
 import AdminPage from "@/pages/admin";
 import AdminLogin from "@/pages/admin-login";
@@ -51,6 +52,7 @@ const pageTitleKeys: Record<string, string> = {
   "/calendario": "calendar.title",
   "/aprendizado": "learning.title",
   "/importacoes": "dashboard.imports_and_trades",
+  "/carteiras": "Carteiras",
   "/perfil": "profile.title",
   "/suporte": "support.title",
   "/politica-privacidade": "Política de Privacidade",
@@ -210,6 +212,13 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Importacoes />
+                  </Route>
+                  <Route path="/carteiras">
+                    <TopBar 
+                      title={pageTitleKeys["/carteiras"]} 
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <Carteiras />
                   </Route>
                   {/* Legal pages are handled by public routes above with conditional onMenuClick */}
                   {/* Admin route moved to standalone section */}
