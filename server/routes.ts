@@ -1904,6 +1904,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       
       const file = req.file;
       const broker = req.body.broker || 'auto';
+      const walletId = req.body.walletId || null;
       const useTraditional = req.body.useTraditional === 'true' || req.body.useTraditional === true;
 
       if (!file) {
@@ -1940,7 +1941,11 @@ export async function registerRoutes(app: Express): Promise<void> {
         if (excelResult.length > 0) {
           console.log(`💾 [${userId}] Inserindo ${excelResult.length} trades Excel no banco`);
           // Excel da Clear é B3, não precisa conversão (já está em BRL)
-          await storage.createBulkTrades(excelResult, csvImport.id);
+          // Adicionar walletId se fornecido
+          const tradesWithWallet = walletId 
+            ? excelResult.map(trade => ({ ...trade, walletId }))
+            : excelResult;
+          await storage.createBulkTrades(tradesWithWallet, csvImport.id);
         }
 
         // Clean up uploaded file
@@ -2033,8 +2038,12 @@ export async function registerRoutes(app: Express): Promise<void> {
           if (result.trades.length > 0) {
             console.log(`🔄 Aplicando conversão de moeda para trades de Forex/Crypto...`);
             const convertedTrades = await convertTradesToBRL(result.trades);
-            console.log(`💾 [${userId}] Inserindo ${convertedTrades.length} trades no banco com isolamento`);
-            await storage.createBulkTrades(convertedTrades);
+            // Adicionar walletId se fornecido
+            const tradesWithWallet = walletId 
+              ? convertedTrades.map(trade => ({ ...trade, walletId }))
+              : convertedTrades;
+            console.log(`💾 [${userId}] Inserindo ${tradesWithWallet.length} trades no banco com isolamento`);
+            await storage.createBulkTrades(tradesWithWallet);
           }
 
           return res.json({
@@ -2212,10 +2221,15 @@ export async function registerRoutes(app: Express): Promise<void> {
       console.log(`🔄 Aplicando conversão de moeda para trades de Forex/Crypto...`);
       const convertedTrades = await convertTradesToBRL(result.trades);
       
+      // Adicionar walletId se fornecido
+      const tradesWithWallet = walletId 
+        ? convertedTrades.map(trade => ({ ...trade, walletId }))
+        : convertedTrades;
+      
       // Save trades to database with CSV import ID
       const processingMethod = (result.summary as any)?.processingMethod || 'Sistema Tradicional';
-      console.log(`💾 Salvando ${convertedTrades.length} trades no banco... (Método: ${processingMethod})`);
-      const savedTrades = await storage.createBulkTrades(convertedTrades, csvImportRecord.id);
+      console.log(`💾 Salvando ${tradesWithWallet.length} trades no banco... (Método: ${processingMethod})`);
+      const savedTrades = await storage.createBulkTrades(tradesWithWallet, csvImportRecord.id);
 
       // Update CSV import with final trade count in database
       await storage.updateCsvImportTradesCount(csvImportRecord.id, savedTrades.length);

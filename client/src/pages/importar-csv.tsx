@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -25,7 +25,9 @@ import {
   FileText,
   Crown,
   Lock,
+  Wallet,
 } from "lucide-react";
+import type { Wallet as WalletType } from "@shared/schema";
 
 export default function ImportarCSV() {
   const { t } = useLanguage();
@@ -35,9 +37,15 @@ export default function ImportarCSV() {
   
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [selectedBroker, setSelectedBroker] = useState<string>("");
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
   const isFreePlan = planType === 'free';
+
+  // Fetch user's custom wallets
+  const { data: wallets = [] } = useQuery<WalletType[]>({
+    queryKey: ['/api/wallets'],
+  });
   
   useEffect(() => {
     if (!planLoading && isFreePlan) {
@@ -55,6 +63,11 @@ export default function ImportarCSV() {
       const formData = new FormData();
       formData.append("csvFile", csvFile);
       formData.append("broker", selectedBroker);
+      
+      // Include walletId if a custom wallet is selected
+      if (selectedWalletId) {
+        formData.append("walletId", selectedWalletId);
+      }
 
       return apiRequest("POST", "/api/trades/upload-csv", formData);
     },
@@ -69,6 +82,7 @@ export default function ImportarCSV() {
       // Reset form
       setCsvFile(null);
       setSelectedBroker("");
+      setSelectedWalletId(null);
       
       // Reset file input
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -171,16 +185,53 @@ export default function ImportarCSV() {
                   {t('form.select_market_label')}
                 </label>
                 <Select
-                  value={selectedBroker}
-                  onValueChange={setSelectedBroker}
+                  value={selectedWalletId ? `wallet:${selectedWalletId}` : selectedBroker}
+                  onValueChange={(value) => {
+                    // Verificar se é uma carteira customizada
+                    if (value.startsWith("wallet:")) {
+                      const walletId = value.replace("wallet:", "");
+                      const wallet = wallets.find(w => w.id === walletId);
+                      if (wallet) {
+                        setSelectedWalletId(walletId);
+                        setSelectedBroker(wallet.name);
+                      }
+                    } else {
+                      // Mercado padrão
+                      setSelectedWalletId(null);
+                      setSelectedBroker(value);
+                    }
+                  }}
                 >
                   <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                     <SelectValue placeholder={t('form.crypto_b3_forex')} />
                   </SelectTrigger>
-                  <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                  <SelectContent className="bg-charcoal-800 border-charcoal-600 max-h-72">
                     <SelectItem value="crypto">{t('form.crypto_icon')}</SelectItem>
                     <SelectItem value="b3">{t('form.b3_icon')}</SelectItem>
                     <SelectItem value="forex">{t('form.forex_icon')}</SelectItem>
+                    {wallets.length > 0 && (
+                      <>
+                        <div className="border-t border-charcoal-600 my-1" />
+                        <div className="px-2 py-1.5 text-xs text-charcoal-400 font-medium flex items-center gap-1">
+                          <Wallet className="h-3 w-3" />
+                          Carteiras Customizadas
+                        </div>
+                        {wallets.map((wallet) => (
+                          <SelectItem 
+                            key={wallet.id} 
+                            value={`wallet:${wallet.id}`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <span 
+                                className="inline-block w-2 h-2 rounded-full"
+                                style={{ backgroundColor: wallet.color || '#8B5CF6' }}
+                              />
+                              {wallet.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
