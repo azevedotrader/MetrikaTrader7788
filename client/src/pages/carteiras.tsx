@@ -23,26 +23,27 @@ import {
 import { Wallet, Plus, MoreVertical, Pencil, Trash2, Loader2, FolderOpen, TrendingUp, Bitcoin, DollarSign, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Wallet as WalletType } from "@shared/schema";
 
 const WALLET_COLORS = [
-  { name: "Roxo", value: "#8B5CF6" },
-  { name: "Azul", value: "#3B82F6" },
-  { name: "Verde", value: "#10B981" },
-  { name: "Amarelo", value: "#F59E0B" },
-  { name: "Vermelho", value: "#EF4444" },
-  { name: "Rosa", value: "#EC4899" },
-  { name: "Índigo", value: "#6366F1" },
-  { name: "Ciano", value: "#06B6D4" },
+  { key: "colorPurple", value: "#8B5CF6" },
+  { key: "colorBlue", value: "#3B82F6" },
+  { key: "colorGreen", value: "#10B981" },
+  { key: "colorYellow", value: "#F59E0B" },
+  { key: "colorRed", value: "#EF4444" },
+  { key: "colorPink", value: "#EC4899" },
+  { key: "colorIndigo", value: "#6366F1" },
+  { key: "colorCyan", value: "#06B6D4" },
 ];
 
 const WALLET_ICONS = [
-  { name: "Carteira", value: "wallet", icon: Wallet },
-  { name: "Tendência", value: "trending", icon: TrendingUp },
-  { name: "Crypto", value: "bitcoin", icon: Bitcoin },
-  { name: "Dólar", value: "dollar", icon: DollarSign },
-  { name: "Gráfico", value: "chart", icon: BarChart3 },
-  { name: "Pasta", value: "folder", icon: FolderOpen },
+  { key: "iconWallet", value: "wallet", icon: Wallet },
+  { key: "iconTrending", value: "trending", icon: TrendingUp },
+  { key: "iconCrypto", value: "bitcoin", icon: Bitcoin },
+  { key: "iconDollar", value: "dollar", icon: DollarSign },
+  { key: "iconChart", value: "chart", icon: BarChart3 },
+  { key: "iconFolder", value: "folder", icon: FolderOpen },
 ];
 
 function getIconComponent(iconValue: string) {
@@ -52,6 +53,7 @@ function getIconComponent(iconValue: string) {
 
 export default function Carteiras() {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<WalletType | null>(null);
@@ -74,8 +76,8 @@ export default function Carteiras() {
     },
     onSuccess: () => {
       toast({
-        title: "Carteira criada!",
-        description: "Sua nova carteira está pronta para uso.",
+        title: t("wallets.created"),
+        description: t("wallets.createdDescription"),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       setIsCreateOpen(false);
@@ -84,8 +86,8 @@ export default function Carteiras() {
     onError: (error: any) => {
       toast({
         variant: "destructive",
-        title: "Erro ao criar carteira",
-        description: error.message || "Tente novamente",
+        title: t("wallets.errorCreate"),
+        description: error.message || t("wallets.tryAgain"),
       });
     },
   });
@@ -97,8 +99,8 @@ export default function Carteiras() {
     },
     onSuccess: () => {
       toast({
-        title: "Carteira atualizada!",
-        description: "As alterações foram salvas.",
+        title: t("wallets.updated"),
+        description: t("wallets.updatedDescription"),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
       setIsEditOpen(false);
@@ -108,8 +110,8 @@ export default function Carteiras() {
     onError: (error: any) => {
       toast({
         variant: "destructive",
-        title: "Erro ao atualizar carteira",
-        description: error.message || "Tente novamente",
+        title: t("wallets.errorUpdate"),
+        description: error.message || t("wallets.tryAgain"),
       });
     },
   });
@@ -121,16 +123,16 @@ export default function Carteiras() {
     },
     onSuccess: () => {
       toast({
-        title: "Carteira deletada",
-        description: "A carteira foi removida com sucesso.",
+        title: t("wallets.deleted"),
+        description: t("wallets.deletedDescription"),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/wallets"] });
     },
     onError: (error: any) => {
       toast({
         variant: "destructive",
-        title: "Erro ao deletar carteira",
-        description: error.message || "Tente novamente",
+        title: t("wallets.errorDelete"),
+        description: error.message || t("wallets.tryAgain"),
       });
     },
   });
@@ -148,8 +150,8 @@ export default function Carteiras() {
     if (!formData.name.trim()) {
       toast({
         variant: "destructive",
-        title: "Nome obrigatório",
-        description: "Digite um nome para a carteira.",
+        title: t("wallets.nameRequired"),
+        description: t("wallets.nameRequiredDescription"),
       });
       return;
     }
@@ -172,8 +174,8 @@ export default function Carteiras() {
     if (!formData.name.trim()) {
       toast({
         variant: "destructive",
-        title: "Nome obrigatório",
-        description: "Digite um nome para a carteira.",
+        title: t("wallets.nameRequired"),
+        description: t("wallets.nameRequiredDescription"),
       });
       return;
     }
@@ -181,24 +183,24 @@ export default function Carteiras() {
   };
 
   const handleDelete = (wallet: WalletType) => {
-    if (confirm(`Tem certeza que deseja deletar a carteira "${wallet.name}"?`)) {
+    if (confirm(`${t("wallets.deleteConfirm")} "${wallet.name}"?`)) {
       deleteMutation.mutate(wallet.id);
     }
   };
 
   const defaultMarkets = [
-    { name: "Crypto", color: "#F59E0B", icon: "bitcoin", description: "Criptomoedas (BTC, ETH, etc)" },
-    { name: "Forex", color: "#10B981", icon: "dollar", description: "Mercado de câmbio" },
-    { name: "B3", color: "#3B82F6", icon: "chart", description: "Bolsa de valores brasileira" },
+    { name: "Crypto", color: "#F59E0B", icon: "bitcoin", descKey: "wallets.cryptoDescription" },
+    { name: "Forex", color: "#10B981", icon: "dollar", descKey: "wallets.forexDescription" },
+    { name: "B3", color: "#3B82F6", icon: "chart", descKey: "wallets.b3Description" },
   ];
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Carteiras</h1>
+          <h1 className="text-2xl font-bold text-white">{t("wallets.title")}</h1>
           <p className="text-gray-400 mt-1">
-            Organize seus trades em carteiras personalizadas para melhor análise
+            {t("wallets.subtitle")}
           </p>
         </div>
         
@@ -209,23 +211,23 @@ export default function Carteiras() {
               data-testid="button-create-wallet"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Nova Carteira
+              {t("wallets.newWallet")}
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-gray-900 border-gray-700">
             <DialogHeader>
-              <DialogTitle className="text-white">Criar Nova Carteira</DialogTitle>
+              <DialogTitle className="text-white">{t("wallets.createTitle")}</DialogTitle>
               <DialogDescription className="text-gray-400">
-                Crie uma carteira personalizada para organizar seus trades
+                {t("wallets.createDescription")}
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-gray-300">Nome</Label>
+                <Label htmlFor="name" className="text-gray-300">{t("wallets.name")}</Label>
                 <Input
                   id="name"
-                  placeholder="Ex: Prop Firm FTMO, Scalping BTC..."
+                  placeholder={t("wallets.namePlaceholder")}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="bg-gray-800 border-gray-700 text-white"
@@ -234,10 +236,10 @@ export default function Carteiras() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-gray-300">Descrição (opcional)</Label>
+                <Label htmlFor="description" className="text-gray-300">{t("wallets.description")}</Label>
                 <Textarea
                   id="description"
-                  placeholder="Descreva o propósito desta carteira..."
+                  placeholder={t("wallets.descriptionPlaceholder")}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="bg-gray-800 border-gray-700 text-white resize-none"
@@ -247,7 +249,7 @@ export default function Carteiras() {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-gray-300">Cor</Label>
+                <Label className="text-gray-300">{t("wallets.color")}</Label>
                 <div className="flex gap-2 flex-wrap">
                   {WALLET_COLORS.map((color) => (
                     <button
@@ -257,7 +259,7 @@ export default function Carteiras() {
                         formData.color === color.value ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110" : ""
                       }`}
                       style={{ backgroundColor: color.value }}
-                      title={color.name}
+                      title={t(`wallets.${color.key}`)}
                       data-testid={`color-${color.value}`}
                     />
                   ))}
@@ -265,7 +267,7 @@ export default function Carteiras() {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-gray-300">Ícone</Label>
+                <Label className="text-gray-300">{t("wallets.icon")}</Label>
                 <div className="flex gap-2 flex-wrap">
                   {WALLET_ICONS.map((iconData) => {
                     const IconComponent = iconData.icon;
@@ -278,7 +280,7 @@ export default function Carteiras() {
                             ? "border-purple-500 bg-purple-500/20 text-purple-400" 
                             : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
                         }`}
-                        title={iconData.name}
+                        title={t(`wallets.${iconData.key}`)}
                         data-testid={`icon-${iconData.value}`}
                       >
                         <IconComponent className="w-5 h-5" />
@@ -295,7 +297,7 @@ export default function Carteiras() {
                 onClick={() => { setIsCreateOpen(false); resetForm(); }}
                 className="border-gray-700 text-gray-300 hover:bg-gray-800"
               >
-                Cancelar
+                {t("wallets.cancel")}
               </Button>
               <Button 
                 onClick={handleCreate}
@@ -304,7 +306,7 @@ export default function Carteiras() {
                 data-testid="button-confirm-create"
               >
                 {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Criar Carteira
+                {t("wallets.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -313,7 +315,7 @@ export default function Carteiras() {
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white mb-4">Mercados Padrão</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">{t("wallets.defaultMarkets")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {defaultMarkets.map((market) => {
               const IconComponent = getIconComponent(market.icon);
@@ -336,7 +338,7 @@ export default function Carteiras() {
                       <div>
                         <CardTitle className="text-white text-lg">{market.name}</CardTitle>
                         <CardDescription className="text-gray-400 text-sm">
-                          {market.description}
+                          {t(market.descKey)}
                         </CardDescription>
                       </div>
                     </div>
@@ -348,7 +350,7 @@ export default function Carteiras() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-white mb-4">Suas Carteiras Personalizadas</h2>
+          <h2 className="text-lg font-semibold text-white mb-4">{t("wallets.customWallets")}</h2>
           
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -358,16 +360,16 @@ export default function Carteiras() {
             <Card className="bg-gray-800/50 border-gray-700 border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Wallet className="w-12 h-12 text-gray-500 mb-4" />
-                <h3 className="text-lg font-medium text-gray-300 mb-2">Nenhuma carteira criada</h3>
+                <h3 className="text-lg font-medium text-gray-300 mb-2">{t("wallets.noWallets")}</h3>
                 <p className="text-gray-400 text-center mb-4">
-                  Crie carteiras personalizadas para organizar seus trades por estratégia, conta ou projeto
+                  {t("wallets.noWalletsDescription")}
                 </p>
                 <Button 
                   onClick={() => setIsCreateOpen(true)}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Criar Primeira Carteira
+                  {t("wallets.createFirst")}
                 </Button>
               </CardContent>
             </Card>
@@ -421,7 +423,7 @@ export default function Carteiras() {
                               data-testid={`edit-wallet-${wallet.id}`}
                             >
                               <Pencil className="w-4 h-4 mr-2" />
-                              Editar
+                              {t("wallets.edit")}
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDelete(wallet)}
@@ -429,7 +431,7 @@ export default function Carteiras() {
                               data-testid={`delete-wallet-${wallet.id}`}
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
-                              Deletar
+                              {t("wallets.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -446,18 +448,18 @@ export default function Carteiras() {
       <Dialog open={isEditOpen} onOpenChange={(open) => { setIsEditOpen(open); if (!open) { setEditingWallet(null); resetForm(); }}}>
         <DialogContent className="bg-gray-900 border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-white">Editar Carteira</DialogTitle>
+            <DialogTitle className="text-white">{t("wallets.editTitle")}</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Atualize as informações da sua carteira
+              {t("wallets.editDescription")}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name" className="text-gray-300">Nome</Label>
+              <Label htmlFor="edit-name" className="text-gray-300">{t("wallets.name")}</Label>
               <Input
                 id="edit-name"
-                placeholder="Ex: Prop Firm FTMO, Scalping BTC..."
+                placeholder={t("wallets.namePlaceholder")}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="bg-gray-800 border-gray-700 text-white"
@@ -466,10 +468,10 @@ export default function Carteiras() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-description" className="text-gray-300">Descrição (opcional)</Label>
+              <Label htmlFor="edit-description" className="text-gray-300">{t("wallets.description")}</Label>
               <Textarea
                 id="edit-description"
-                placeholder="Descreva o propósito desta carteira..."
+                placeholder={t("wallets.descriptionPlaceholder")}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="bg-gray-800 border-gray-700 text-white resize-none"
@@ -479,7 +481,7 @@ export default function Carteiras() {
             </div>
             
             <div className="space-y-2">
-              <Label className="text-gray-300">Cor</Label>
+              <Label className="text-gray-300">{t("wallets.color")}</Label>
               <div className="flex gap-2 flex-wrap">
                 {WALLET_COLORS.map((color) => (
                   <button
@@ -489,14 +491,14 @@ export default function Carteiras() {
                       formData.color === color.value ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110" : ""
                     }`}
                     style={{ backgroundColor: color.value }}
-                    title={color.name}
+                    title={t(`wallets.${color.key}`)}
                   />
                 ))}
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label className="text-gray-300">Ícone</Label>
+              <Label className="text-gray-300">{t("wallets.icon")}</Label>
               <div className="flex gap-2 flex-wrap">
                 {WALLET_ICONS.map((iconData) => {
                   const IconComponent = iconData.icon;
@@ -509,7 +511,7 @@ export default function Carteiras() {
                           ? "border-purple-500 bg-purple-500/20 text-purple-400" 
                           : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
                       }`}
-                      title={iconData.name}
+                      title={t(`wallets.${iconData.key}`)}
                     >
                       <IconComponent className="w-5 h-5" />
                     </button>
@@ -525,7 +527,7 @@ export default function Carteiras() {
               onClick={() => { setIsEditOpen(false); setEditingWallet(null); resetForm(); }}
               className="border-gray-700 text-gray-300 hover:bg-gray-800"
             >
-              Cancelar
+              {t("wallets.cancel")}
             </Button>
             <Button 
               onClick={handleUpdate}
@@ -534,7 +536,7 @@ export default function Carteiras() {
               data-testid="button-confirm-edit"
             >
               {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Salvar Alterações
+              {t("wallets.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
