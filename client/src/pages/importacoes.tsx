@@ -78,7 +78,7 @@ export default function Importacoes() {
   // Rename CSV mutation
   const renameCsvMutation = useMutation({
     mutationFn: async (data: { csvId: string; displayName: string }) => {
-      return apiRequest("PATCH", `/api/csv-imports/${data.csvId}`, { 
+      return apiRequest("PATCH", `/api/csv-imports/${data.csvId}/rename`, { 
         displayName: data.displayName 
       });
     },
