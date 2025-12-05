@@ -2483,6 +2483,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     queryKey: ["/api/csv-imports"],
   });
 
+  // Fetch custom wallets
+  const { data: wallets = [] } = useQuery({
+    queryKey: ["/api/wallets"],
+  });
+
   // Filter manual trades
   const manualTrades = useMemo(() => {
     return trades.filter((trade: Trade) => trade.origem === 'manual');
@@ -2570,9 +2575,18 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     let filtered = [...trades];
 
     if (viewMode === "broker" && selectedBrokerFilter) {
-      filtered = filtered.filter(
-        (trade) => trade.corretora === selectedBrokerFilter,
-      );
+      // Verificar se é uma carteira customizada (formato: wallet:id)
+      if (selectedBrokerFilter.startsWith("wallet:")) {
+        const walletId = selectedBrokerFilter.replace("wallet:", "");
+        filtered = filtered.filter(
+          (trade) => trade.walletId === walletId,
+        );
+      } else {
+        // Filtro tradicional por corretora/mercado
+        filtered = filtered.filter(
+          (trade) => trade.corretora === selectedBrokerFilter,
+        );
+      }
     }
 
     if (viewMode === "csv" && selectedCsvIds.length > 0) {
@@ -2683,6 +2697,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
         selectedCsvIds={selectedCsvIds}
         onSelectedCsvIdsChange={setSelectedCsvIds}
         csvImports={Array.isArray(csvImports) ? csvImports : []}
+        wallets={Array.isArray(wallets) ? wallets : []}
         onCsvToggle={handleCsvToggle}
         onSelectAllCsvs={handleSelectAllCsvs}
         hideData={hideData}

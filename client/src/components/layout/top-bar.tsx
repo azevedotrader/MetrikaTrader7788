@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Settings, Menu, ChevronDown, Eye, EyeOff } from "lucide-react";
+import { Bell, Settings, Menu, ChevronDown, Eye, EyeOff, Wallet } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { PlanStatus } from "@/components/ui/plan-status";
@@ -13,6 +13,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Separator } from "@/components/ui/separator";
+import type { Wallet as WalletType } from "@shared/schema";
 
 interface TopBarProps {
   title: string;
@@ -28,6 +30,8 @@ interface TopBarProps {
   onCsvToggle?: (csvId: string) => void;
   onSelectAllCsvs?: () => void;
   showDashboardFilter?: boolean;
+  // Custom wallets for filter
+  wallets?: WalletType[];
   // Privacy toggle
   hideData?: boolean;
   onHideDataChange?: (hide: boolean) => void;
@@ -46,6 +50,7 @@ export function TopBar({
   onCsvToggle,
   onSelectAllCsvs,
   showDashboardFilter = false,
+  wallets = [],
   hideData = false,
   onHideDataChange
 }: TopBarProps) {
@@ -106,7 +111,7 @@ export function TopBar({
                   <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white h-8 text-sm w-36 lg:w-40">
                     <SelectValue placeholder="Selecionar mercado" />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectContent className="bg-zinc-800 border-zinc-700 max-h-80">
                     <SelectItem value="b3" className="text-white hover:bg-zinc-700">
                       B3 - Ações Brasileiras
                     </SelectItem>
@@ -116,6 +121,28 @@ export function TopBar({
                     <SelectItem value="forex" className="text-white hover:bg-zinc-700">
                       Forex - Câmbio
                     </SelectItem>
+                    {wallets.length > 0 && (
+                      <>
+                        <Separator className="my-1 bg-zinc-700" />
+                        <div className="px-2 py-1 text-xs text-zinc-500 font-medium flex items-center gap-1">
+                          <Wallet className="h-3 w-3" />
+                          Carteiras Customizadas
+                        </div>
+                        {wallets.map((wallet) => (
+                          <SelectItem 
+                            key={wallet.id} 
+                            value={`wallet:${wallet.id}`} 
+                            className="text-white hover:bg-zinc-700"
+                          >
+                            <span 
+                              className="inline-block w-2 h-2 rounded-full mr-2"
+                              style={{ backgroundColor: wallet.color || '#8B5CF6' }}
+                            />
+                            {wallet.name}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               )}
