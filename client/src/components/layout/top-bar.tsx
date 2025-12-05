@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Settings, Menu, ChevronDown, Eye, EyeOff, Wallet } from "lucide-react";
+import { Bell, Settings, Menu, ChevronDown, Eye, EyeOff, Wallet, LogOut, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { PlanStatus } from "@/components/ui/plan-status";
@@ -14,6 +14,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/lib/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Wallet as WalletType } from "@shared/schema";
 
 interface TopBarProps {
@@ -56,6 +64,7 @@ export function TopBar({
 }: TopBarProps) {
   const isMobile = useIsMobile();
   const { t } = useLanguage();
+  const { user, logout } = useAuth();
   
   return (
     <header className={`fixed top-0 right-0 z-40 bg-zinc-900/95 backdrop-blur border-b border-zinc-800 px-2 sm:px-4 lg:px-6 py-2 sm:py-3 ${isMobile ? 'left-0' : 'left-16'}`}>
@@ -231,10 +240,56 @@ export function TopBar({
           )}
         </div>
         
-        {/* Right Section - Plan + Language (compact on mobile) */}
+        {/* Right Section - Plan + Language + User Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <PlanStatus compact={isMobile} />
           <LanguageSelector />
+          
+          {/* User Menu with Logout - Always visible */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative h-8 w-8 rounded-full bg-zinc-800 hover:bg-zinc-700 p-0"
+                data-testid="user-menu-button"
+              >
+                <span className="text-white font-medium text-sm">
+                  {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56 bg-zinc-900 border-zinc-700" align="end">
+              <div className="flex items-center gap-2 p-2">
+                <div className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-medium text-sm">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{user?.name || 'Usuário'}</p>
+                  <p className="text-xs text-zinc-400 truncate">{user?.email}</p>
+                </div>
+              </div>
+              <DropdownMenuSeparator className="bg-zinc-700" />
+              <DropdownMenuItem 
+                className="text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer"
+                onClick={() => window.location.href = '/perfil'}
+              >
+                <User className="mr-2 h-4 w-4" />
+                <span>{t ? t('profile.title') : 'Perfil'}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-zinc-700" />
+              <DropdownMenuItem 
+                className="text-red-400 hover:text-red-300 hover:bg-zinc-800 cursor-pointer"
+                onClick={logout}
+                data-testid="logout-button"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>{t ? t('nav.logout') : 'Sair'}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
