@@ -20,6 +20,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(true),
   role: text("role").default("user"), // "user", "admin"
   lastLoginAt: timestamp("last_login_at"),
+  forceLogoutAt: timestamp("force_logout_at"), // Quando definido, força logout em sessões anteriores
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

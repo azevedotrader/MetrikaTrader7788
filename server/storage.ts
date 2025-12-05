@@ -55,6 +55,7 @@ export interface IStorage {
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
   createUser(insertUser: Omit<InsertUser, 'confirmPassword'>): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User>;
+  setForceLogout(userId: string): Promise<void>; // Força logout invalidando sessões
   
   // Trade operations - SEMPRE requerem userId para isolamento
   getTrades(userId: string, broker?: string): Promise<Trade[]>;
@@ -180,6 +181,13 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return user;
+  }
+
+  async setForceLogout(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ forceLogoutAt: new Date(), updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   async getTrades(userId: string, broker?: string): Promise<Trade[]> {

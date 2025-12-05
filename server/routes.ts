@@ -327,12 +327,40 @@ function getUserId(req: any): string {
 }
 
 // Middleware de autenticação obrigatória - ISOLAMENTO TOTAL
-function requireAuth(req: any, res: any, next: any) {
+async function requireAuth(req: any, res: any, next: any) {
   try {
-    const userId = getUserId(req);
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new Error("Token JWT obrigatório - acesso negado");
+    }
+    
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    if (!decoded.userId) {
+      throw new Error("Token JWT inválido - userId não encontrado");
+    }
+    
+    const userId = decoded.userId;
     
     if (!userId || userId.trim() === '') {
       throw new Error("UserId vazio ou inválido");
+    }
+    
+    // Verificar se o usuário foi forçado a fazer logout (admin mudou o plano)
+    const user = await storage.getUser(userId);
+    if (user?.forceLogoutAt) {
+      const tokenIssuedAt = decoded.iat ? new Date(decoded.iat * 1000) : new Date(0);
+      const forceLogoutAt = new Date(user.forceLogoutAt);
+      
+      if (tokenIssuedAt < forceLogoutAt) {
+        console.warn(`🚫 Token invalidado por forceLogout para usuário ${userId}`);
+        return res.status(401).json({ 
+          error: "SESSION_EXPIRED",
+          message: "Sua sessão expirou. Por favor, faça login novamente.",
+          forceLogout: true
+        });
+      }
     }
     
     req.userId = userId; // Adicionar ao request
@@ -3124,6 +3152,16 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       if (updates.planExpiresAt) {
         delete updates.planExpiresAt; // Ignorar qualquer data manual
         console.log('⚠️ Admin tentou definir planExpiresAt manualmente. Política de 30 dias automáticos aplicada.');
+      }
+      
+      // Se o plano está sendo alterado, forçar logout do usuário
+      if (updates.planType) {
+        const currentUser = await storage.getUser(userId);
+        if (currentUser && currentUser.planType !== updates.planType) {
+          console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType} para ${updates.planType}. Forçando logout.`);
+          // Definir forceLogoutAt para invalidar sessões atuais
+          await storage.setForceLogout(userId);
+        }
       }
       
       const updatedUser = await storage.updateUserByAdmin(userId, updates);
