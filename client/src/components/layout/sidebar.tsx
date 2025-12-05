@@ -115,17 +115,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       <div 
         data-testid="sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 bg-zinc-900/90 border-r border-zinc-800 transition-all duration-300 ease-in-out z-50",
+          "fixed inset-y-0 left-0 bg-gradient-to-b from-zinc-900 via-zinc-900/98 to-zinc-950 border-r border-zinc-800/50 transition-all duration-300 ease-in-out z-50 backdrop-blur-sm",
           isMobile 
-            ? cn("w-72 transform", isOpen ? "translate-x-0" : "-translate-x-full")
-            : cn(isExpanded ? "w-72" : "w-20")
+            ? cn("w-72 transform shadow-2xl", isOpen ? "translate-x-0" : "-translate-x-full")
+            : cn(isExpanded ? "w-72 shadow-xl" : "w-16")
         )}
         onMouseEnter={() => !isMobile && setIsExpanded(true)}
         onMouseLeave={() => !isMobile && setIsExpanded(false)}
       >
         <div className="flex flex-col h-full">
           {/* Logo and Close Button */}
-          <div className="p-4 border-b border-zinc-800">
+          <div className="p-3 border-b border-zinc-800/30">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center">
                 <Logo variant="sidebar" expanded={sidebarExpanded} />
@@ -137,7 +137,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="text-zinc-400 hover:text-white lg:hidden"
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 lg:hidden rounded-lg"
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -145,17 +145,17 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             </div>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 p-2 overflow-y-auto">
-            <ul className="space-y-2">
+          {/* Navigation - scrollbar hidden by default */}
+          <nav className="flex-1 px-2 py-3 overflow-y-auto scrollbar-hidden hover:scrollbar-thin">
+            <ul className="space-y-1">
               {navigation.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href}>
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all duration-200",
-                        location === item.href && "bg-zinc-800 text-white",
+                        "w-full text-zinc-400 hover:bg-zinc-800/60 hover:text-white transition-all duration-200 rounded-lg h-10",
+                        location === item.href && "bg-zinc-800/80 text-white border-l-2 border-purple-500",
                         sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                       )}
                       title={!sidebarExpanded ? t(item.nameKey) : undefined}
@@ -164,7 +164,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       <item.icon className={cn("w-5 h-5 flex-shrink-0", sidebarExpanded && "mr-3")} />
                       <span 
                         className={cn(
-                          "transition-all duration-300 whitespace-nowrap",
+                          "transition-all duration-300 whitespace-nowrap text-sm",
                           sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
                         )}
                       >
@@ -175,73 +175,76 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 </li>
               ))}
             </ul>
-
-            {/* Botões de Importação */}
-            <div className="px-2 py-3 border-t border-zinc-800/50 space-y-2">
-              {/* Análise CSV com IA */}
-              <Button
-                onClick={handleAnalyzeCsv}
-                className={cn(
-                  "w-full text-zinc-300 hover:bg-green-700 hover:text-white transition-all duration-200 bg-green-600/20 border border-green-600/30",
-                  sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
-                )}
-                title={!sidebarExpanded ? t('brokers.csv_import') : undefined}
-                data-testid="analyze-csv-sidebar-button"
-              >
-                <FileSpreadsheet className={cn(
-                  "w-5 h-5 flex-shrink-0",
-                  sidebarExpanded && "mr-3"
-                )} />
-                <span 
-                  className={cn(
-                    "transition-all duration-300 whitespace-nowrap",
-                    sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
-                  )}
-                >
-                  {t('brokers.csv_import')}
-                </span>
-              </Button>
-
-              {/* Gerenciar Importações */}
-              <Button
-                onClick={handleManageImports}
-                className={cn(
-                  "w-full text-zinc-300 hover:bg-blue-700 hover:text-white transition-all duration-200 bg-blue-600/20 border border-blue-600/30",
-                  sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
-                )}
-                title={!sidebarExpanded ? t('imports.manage_description') : undefined}
-                data-testid="manage-imports-sidebar-button"
-              >
-                <Upload className={cn(
-                  "w-5 h-5 flex-shrink-0",
-                  sidebarExpanded && "mr-3"
-                )} />
-                <span 
-                  className={cn(
-                    "transition-all duration-300 whitespace-nowrap",
-                    sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
-                  )}
-                >
-                  {t('tabs.imports')}
-                </span>
-              </Button>
-            </div>
           </nav>
+          
+          {/* Action Buttons - Fixed at bottom above footer */}
+          <div className="px-2 py-2 border-t border-zinc-800/30 space-y-1.5 bg-zinc-900/50">
+            {/* Análise CSV com IA */}
+            <Button
+              onClick={handleAnalyzeCsv}
+              className={cn(
+                "w-full text-emerald-400 hover:bg-emerald-600/20 hover:text-emerald-300 transition-all duration-200 bg-emerald-600/10 border border-emerald-600/20 rounded-lg h-9",
+                sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
+              )}
+              title={!sidebarExpanded ? t('brokers.csv_import') : undefined}
+              data-testid="analyze-csv-sidebar-button"
+            >
+              <FileSpreadsheet className={cn(
+                "w-4 h-4 flex-shrink-0",
+                sidebarExpanded && "mr-2"
+              )} />
+              <span 
+                className={cn(
+                  "transition-all duration-300 whitespace-nowrap text-sm",
+                  sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
+                )}
+              >
+                {t('brokers.csv_import')}
+              </span>
+            </Button>
 
-          {/* User Profile */}
-          <div className="p-2 border-t border-zinc-800">
-            <div className={cn("flex items-center transition-all duration-300", sidebarExpanded ? "space-x-3 px-2" : "flex-col gap-2")}>
-              <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-medium text-sm">{user?.name?.charAt(0) || 'U'}</span>
+            {/* Gerenciar Importações */}
+            <Button
+              onClick={handleManageImports}
+              className={cn(
+                "w-full text-blue-400 hover:bg-blue-600/20 hover:text-blue-300 transition-all duration-200 bg-blue-600/10 border border-blue-600/20 rounded-lg h-9",
+                sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
+              )}
+              title={!sidebarExpanded ? t('imports.manage_description') : undefined}
+              data-testid="manage-imports-sidebar-button"
+            >
+              <Upload className={cn(
+                "w-4 h-4 flex-shrink-0",
+                sidebarExpanded && "mr-2"
+              )} />
+              <span 
+                className={cn(
+                  "transition-all duration-300 whitespace-nowrap text-sm",
+                  sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
+                )}
+              >
+                {t('tabs.imports')}
+              </span>
+            </Button>
+          </div>
+
+          {/* User Profile Footer */}
+          <div className="p-2 border-t border-zinc-800/30 bg-zinc-950/50">
+            <div className={cn(
+              "flex items-center transition-all duration-300 rounded-lg p-2",
+              sidebarExpanded ? "space-x-3 hover:bg-zinc-800/30" : "flex-col gap-2"
+            )}>
+              <div className="w-9 h-9 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                <span className="text-white font-semibold text-sm">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
               </div>
               <div 
                 className={cn(
-                  "flex-1 transition-all duration-300",
+                  "flex-1 min-w-0 transition-all duration-300",
                   sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0 hidden"
                 )}
               >
-                <p className="text-sm font-medium text-white whitespace-nowrap">{user?.name}</p>
-                <p className="text-xs text-zinc-400 whitespace-nowrap">Trader Pro</p>
+                <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+                <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
               </div>
               <Button
                 variant="ghost"
@@ -252,7 +255,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     onClose();
                   }
                 }}
-                className="text-zinc-400 hover:text-red-400 hover:bg-red-900/20 transition-all duration-300 flex-shrink-0"
+                className={cn(
+                  "text-zinc-500 hover:text-red-400 hover:bg-red-900/20 transition-all duration-200 flex-shrink-0 rounded-lg",
+                  sidebarExpanded ? "h-8 w-8 p-0" : "h-8 w-8 p-0"
+                )}
                 title={t('nav.logout')}
                 data-testid="sidebar-logout-button"
               >
