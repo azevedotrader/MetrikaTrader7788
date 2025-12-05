@@ -36,6 +36,7 @@ import {
   Calculator,
   Crown,
   Lock,
+  Wallet,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -43,6 +44,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserPlan } from "@/hooks/useUserPlan";
 import { VipUpgradeModal } from "@/components/modals/vip-upgrade-modal";
 import { useState, useEffect } from "react";
+import type { Wallet as WalletType } from "@shared/schema";
 
 export default function NovoTrade() {
   const { toast } = useToast();
@@ -57,6 +59,14 @@ export default function NovoTrade() {
     queryKey: ['/api/trades'],
     enabled: isFreePlan,
   });
+
+  // Fetch user's custom wallets
+  const { data: wallets = [] } = useQuery<WalletType[]>({
+    queryKey: ['/api/wallets'],
+  });
+
+  // State para carteira selecionada
+  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
   
   const hasReachedFreeLimit = isFreePlan && (existingTrades?.length || 0) >= 1;
 
@@ -149,6 +159,7 @@ export default function NovoTrade() {
       setTradeResult(null);
       setRiskRewardRatio(null);
       setFinalResult(null);
+      setSelectedWalletId(null);
     },
     onError: (error: any) => {
       toast({
@@ -176,8 +187,14 @@ export default function NovoTrade() {
 
     // Ensure resultado is set correctly
     data.resultado = finalResult?.toString() || "0";
+    
+    // Include walletId if a custom wallet is selected
+    const tradeData = {
+      ...data,
+      walletId: selectedWalletId || undefined,
+    };
 
-    createTradeMutation.mutate(data);
+    createTradeMutation.mutate(tradeData);
   };
 
   if (hasReachedFreeLimit) {
@@ -294,21 +311,56 @@ export default function NovoTrade() {
                       </FormLabel>
                       <Select
                         onValueChange={(value) => {
-                          field.onChange(value);
-                          // Atualizar corretora automaticamente quando o mercado mudar
-                          form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
+                          // Verificar se é uma carteira customizada
+                          if (value.startsWith("wallet:")) {
+                            const walletId = value.replace("wallet:", "");
+                            const wallet = wallets.find(w => w.id === walletId);
+                            if (wallet) {
+                              setSelectedWalletId(walletId);
+                              field.onChange(wallet.name);
+                              form.setValue("corretora", wallet.name);
+                            }
+                          } else {
+                            // Mercado padrão
+                            setSelectedWalletId(null);
+                            field.onChange(value);
+                            form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
+                          }
                         }}
-                        defaultValue={field.value}
+                        value={selectedWalletId ? `wallet:${selectedWalletId}` : field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                             <SelectValue placeholder={t('form.select_market')} />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600 max-h-72">
                           <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
                           <SelectItem value="forex">{t('form.forex')}</SelectItem>
                           <SelectItem value="b3">{t('form.b3')}</SelectItem>
+                          {wallets.length > 0 && (
+                            <>
+                              <div className="border-t border-charcoal-600 my-1" />
+                              <div className="px-2 py-1.5 text-xs text-charcoal-400 font-medium flex items-center gap-1">
+                                <Wallet className="h-3 w-3" />
+                                Carteiras Customizadas
+                              </div>
+                              {wallets.map((wallet) => (
+                                <SelectItem 
+                                  key={wallet.id} 
+                                  value={`wallet:${wallet.id}`}
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span 
+                                      className="inline-block w-2 h-2 rounded-full"
+                                      style={{ backgroundColor: wallet.color || '#8B5CF6' }}
+                                    />
+                                    {wallet.name}
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
