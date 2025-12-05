@@ -12,6 +12,7 @@ import {
   supportConversations,
   supportMessages,
   questionnaireStates,
+  wallets,
   type User, 
   type InsertUser, 
   type Trade, 
@@ -39,6 +40,8 @@ import {
   type BankrollSummaryDTO,
   type QuestionnaireState,
   type InsertQuestionnaireState,
+  type Wallet,
+  type InsertWallet,
   bankrollManagements,
 } from "@shared/schema";
 import { db } from "./db";
@@ -132,6 +135,13 @@ export interface IStorage {
   createQuestionnaireState(data: Omit<InsertQuestionnaireState, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionnaireState>;
   updateQuestionnaireState(userId: string, updates: Partial<InsertQuestionnaireState>): Promise<QuestionnaireState>;
   deleteQuestionnaireState(userId: string): Promise<void>;
+  
+  // Wallet operations (carteiras customizadas)
+  getWallets(userId: string): Promise<Wallet[]>;
+  getWallet(id: string, userId: string): Promise<Wallet | undefined>;
+  createWallet(data: InsertWallet & { userId: string }): Promise<Wallet>;
+  updateWallet(id: string, updates: Partial<InsertWallet>, userId: string): Promise<Wallet>;
+  deleteWallet(id: string, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1101,6 +1111,63 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(questionnaireStates)
       .where(eq(questionnaireStates.userId, userId));
+  }
+
+  // Wallet operations (carteiras customizadas)
+  async getWallets(userId: string): Promise<Wallet[]> {
+    return await db
+      .select()
+      .from(wallets)
+      .where(eq(wallets.userId, userId))
+      .orderBy(desc(wallets.createdAt));
+  }
+
+  async getWallet(id: string, userId: string): Promise<Wallet | undefined> {
+    const [wallet] = await db
+      .select()
+      .from(wallets)
+      .where(and(eq(wallets.id, id), eq(wallets.userId, userId)));
+    return wallet || undefined;
+  }
+
+  async createWallet(data: InsertWallet & { userId: string }): Promise<Wallet> {
+    const [wallet] = await db
+      .insert(wallets)
+      .values({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    if (!wallet) {
+      throw new Error('Falha ao criar carteira');
+    }
+
+    return wallet;
+  }
+
+  async updateWallet(id: string, updates: Partial<InsertWallet>, userId: string): Promise<Wallet> {
+    const [wallet] = await db
+      .update(wallets)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(wallets.id, id), eq(wallets.userId, userId)))
+      .returning();
+
+    if (!wallet) {
+      throw new Error('Carteira não encontrada');
+    }
+
+    return wallet;
+  }
+
+  async deleteWallet(id: string, userId: string): Promise<void> {
+    await db
+      .delete(wallets)
+      .where(and(eq(wallets.id, id), eq(wallets.userId, userId)));
   }
 }
 
