@@ -29,7 +29,7 @@ export const trades = pgTable("trades", {
   userId: varchar("user_id").notNull().references(() => users.id),
   dataHora: timestamp("data_hora").notNull(),
   ativo: text("ativo").notNull(),
-  mercado: text("mercado").notNull(), // "crypto", "forex", "b3"
+  mercado: text("mercado").notNull(), // "crypto", "forex", "b3" ou nome da carteira customizada
   setup: text("setup"),
   capitalUtilizado: decimal("capital_utilizado", { precision: 12, scale: 2 }).notNull(),
   stop: decimal("stop", { precision: 12, scale: 4 }),
@@ -42,11 +42,12 @@ export const trades = pgTable("trades", {
   emocao: text("emocao"), // "confiante", "ansioso", "impulsivo", etc.
   precoEntrada: decimal("preco_entrada", { precision: 12, scale: 4 }),
   precoSaida: decimal("preco_saida", { precision: 12, scale: 4 }),
-  corretora: text("corretora").notNull(), // "crypto", "forex", "b3"
+  corretora: text("corretora").notNull(), // "crypto", "forex", "b3" ou nome da carteira customizada
   status: text("status").default("fechado"), // "aberto", "fechado"
   origem: text("origem").default("manual"), // "manual", "csv", "api"
   externalId: text("external_id"), // ID da API externa
   csvImportId: varchar("csv_import_id").references(() => csvImports.id), // Vinculação com CSV importado
+  walletId: varchar("wallet_id"), // Carteira customizada (opcional)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -75,6 +76,7 @@ export const csvImports = pgTable("csv_imports", {
   tradesSkipped: integer("trades_skipped").default(0),
   status: text("status").default("completed"), // "processing", "completed", "failed"
   errorMessage: text("error_message"),
+  walletId: varchar("wallet_id"), // Carteira customizada (opcional)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -123,6 +125,19 @@ export const platformStats = pgTable("platform_stats", {
   premiumUsers: integer("premium_users").notNull(),
   vipUsers: integer("vip_users").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Tabela para carteiras customizadas do usuário
+export const wallets = pgTable("wallets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(), // Nome da carteira (ex: "OB", "Prop Firm XYZ")
+  description: text("description"), // Descrição opcional
+  color: text("color").default("#8B5CF6"), // Cor para identificação visual (hex)
+  icon: text("icon").default("wallet"), // Ícone da carteira
+  isDefault: boolean("is_default").default(false), // Se é uma carteira padrão do sistema
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Tabela para entradas do diário de trading
@@ -188,7 +203,7 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   userId: z.string().optional(), // Make optional for external use
   dataHora: z.string().min(1, "Data e hora são obrigatórias"),
   ativo: z.string().min(1, "Ativo é obrigatório"),
-  mercado: z.enum(["crypto", "forex", "b3"], { message: "Mercado deve ser crypto, forex ou b3" }),
+  mercado: z.string().min(1, "Mercado é obrigatório"), // Agora aceita qualquer string para carteiras customizadas
   setup: z.string().optional(),
   // Simplified fields - removed required validations for removed fields
   capitalUtilizado: z.string().optional(),
@@ -201,10 +216,11 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   comentario: z.string().optional(),
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
-  corretora: z.enum(["crypto", "forex", "b3", "auto"], { message: "Corretora deve ser crypto, forex, b3 ou auto" }),
+  corretora: z.string().min(1, "Corretora é obrigatória"), // Agora aceita qualquer string para carteiras customizadas
   emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro", "medo"], { 
     message: "Emoção deve ser uma das opções disponíveis" 
   }).optional(),
+  walletId: z.string().optional(), // ID da carteira customizada
 });
 
 // Schema para configuração de API
@@ -230,6 +246,27 @@ export const updateCsvImportSchema = z.object({
   displayName: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
 });
 
+// Schema para criação de carteira
+export const insertWalletSchema = createInsertSchema(wallets).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  name: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres"),
+  description: z.string().max(200, "Descrição deve ter no máximo 200 caracteres").optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor deve ser um código hex válido").optional(),
+  icon: z.string().optional(),
+});
+
+// Schema para atualização de carteira
+export const updateWalletSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório").max(50, "Nome deve ter no máximo 50 caracteres").optional(),
+  description: z.string().max(200, "Descrição deve ter no máximo 200 caracteres").optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor deve ser um código hex válido").optional(),
+  icon: z.string().optional(),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertTrade = z.infer<typeof insertTradeSchema>;
@@ -240,6 +277,8 @@ export type CsvImport = typeof csvImports.$inferSelect;
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type PlatformStats = typeof platformStats.$inferSelect;
+export type Wallet = typeof wallets.$inferSelect;
+export type InsertWallet = z.infer<typeof insertWalletSchema>;
 
 // Schema para criação de plano
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
