@@ -2707,25 +2707,23 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
 
       <div className="space-y-6 md:space-y-8">
-          {/* Hide/Show Data Toggle */}
-          <div className="flex justify-end -mb-2">
-            <button
-              onClick={() => setHideData(!hideData)}
-              className="text-zinc-500 hover:text-zinc-300 transition-colors p-1"
-              data-testid="toggle-hide-data"
-              title={hideData ? t('dashboard.show_data') : t('dashboard.hide_data')}
-            >
-              {hideData ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
           <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6">
             {/* Net PnL */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
+                  <div className="text-xs text-zinc-400 font-medium flex items-center gap-1.5">
+                    {t('metrics.net_pnl')}
+                    <button
+                      onClick={() => setHideData(!hideData)}
+                      className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                      data-testid="toggle-hide-data"
+                      title={hideData ? t('dashboard.show_data') : t('dashboard.hide_data')}
+                    >
+                      {hideData ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                    </button>
+                  </div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
                 {(() => {
