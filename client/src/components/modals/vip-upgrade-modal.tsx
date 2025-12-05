@@ -184,35 +184,69 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-600/20 to-yellow-600/20 rounded-xl p-4 border border-yellow-500/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-zinc-400">Plano VIP</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-white">{currentTexts.price}</span>
-                  <span className="text-zinc-400">{currentTexts.period}</span>
+          <div className="space-y-3">
+            <div 
+              className="bg-gradient-to-r from-purple-600/20 to-yellow-600/20 rounded-xl p-4 border border-yellow-500/30 cursor-pointer hover:border-yellow-500/60 transition-all"
+              onClick={() => window.open('https://hub.la/g/kUCz3mE6Gon3TeOz1h40', '_blank')}
+              data-testid="plan-annual"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400">{lang === 'pt' ? 'Plano Anual' : lang === 'es' ? 'Plan Anual' : 'Annual Plan'}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 67' : '$39'}</span>
+                    <span className="text-zinc-400">/{lang === 'pt' ? 'mês' : lang === 'es' ? 'mes' : 'month'}</span>
+                  </div>
+                  <p className="text-xs text-green-400">{lang === 'pt' ? 'Economize 31%' : lang === 'es' ? 'Ahorra 31%' : 'Save 31%'}</p>
+                </div>
+                <div className="text-right">
+                  <span className="bg-green-500 text-black text-xs font-bold px-2 py-1 rounded-full">
+                    {lang === 'pt' ? 'MELHOR VALOR' : lang === 'es' ? 'MEJOR VALOR' : 'BEST VALUE'}
+                  </span>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
-                  POPULAR
-                </span>
+            </div>
+
+            <div 
+              className="bg-zinc-800/50 rounded-xl p-4 border border-purple-500/30 cursor-pointer hover:border-purple-500/60 transition-all"
+              onClick={() => window.open('https://hub.la/g/lUlRpoibiOjhnJF47H43', '_blank')}
+              data-testid="plan-quarterly"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400">{lang === 'pt' ? 'Plano Trimestral' : lang === 'es' ? 'Plan Trimestral' : 'Quarterly Plan'}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 77' : '$45'}</span>
+                    <span className="text-zinc-400">/{lang === 'pt' ? 'mês' : lang === 'es' ? 'mes' : 'month'}</span>
+                  </div>
+                  <p className="text-xs text-purple-400">{lang === 'pt' ? 'Economize 21%' : lang === 'es' ? 'Ahorra 21%' : 'Save 21%'}</p>
+                </div>
+                <div className="text-right">
+                  <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
+                    POPULAR
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div 
+              className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700 cursor-pointer hover:border-zinc-500 transition-all"
+              onClick={() => window.open('https://hub.la/g/CGRfvH9XIZzkXUFTkesn', '_blank')}
+              data-testid="plan-monthly"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-zinc-400">{lang === 'pt' ? 'Plano Mensal' : lang === 'es' ? 'Plan Mensual' : 'Monthly Plan'}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 97' : '$59'}</span>
+                    <span className="text-zinc-400">/{lang === 'pt' ? 'mês' : lang === 'es' ? 'mes' : 'month'}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-3">
-            <Button 
-              className="w-full bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold py-3 text-lg"
-              onClick={() => {
-                window.open('/', '_blank');
-                onOpenChange(false);
-              }}
-              data-testid="button-upgrade-vip"
-            >
-              <Crown className="w-5 h-5 mr-2" />
-              {currentTexts.cta}
-            </Button>
             <Button 
               variant="ghost" 
               className="w-full text-zinc-400 hover:text-zinc-300"
