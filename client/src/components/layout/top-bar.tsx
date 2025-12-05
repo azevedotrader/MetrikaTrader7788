@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Bell, Settings, Menu, ChevronDown } from "lucide-react";
+import { Bell, Settings, Menu, ChevronDown, Eye, EyeOff } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { PlanStatus } from "@/components/ui/plan-status";
@@ -28,6 +28,9 @@ interface TopBarProps {
   onCsvToggle?: (csvId: string) => void;
   onSelectAllCsvs?: () => void;
   showDashboardFilter?: boolean;
+  // Privacy toggle
+  hideData?: boolean;
+  onHideDataChange?: (hide: boolean) => void;
 }
 
 export function TopBar({ 
@@ -42,7 +45,9 @@ export function TopBar({
   csvImports = [],
   onCsvToggle,
   onSelectAllCsvs,
-  showDashboardFilter = false
+  showDashboardFilter = false,
+  hideData = false,
+  onHideDataChange
 }: TopBarProps) {
   const isMobile = useIsMobile();
   const { t } = useLanguage();
@@ -183,9 +188,21 @@ export function TopBar({
         </div>
         
         {/* Center Section - Title (responsive) */}
-        <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white truncate flex-1 text-center min-w-0 px-2">
-          {title}
-        </h1>
+        <div className="flex items-center justify-center gap-2 flex-1 min-w-0 px-2">
+          <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-white truncate">
+            {title}
+          </h1>
+          {onHideDataChange && (
+            <button
+              onClick={() => onHideDataChange(!hideData)}
+              className="text-zinc-400 hover:text-white transition-colors p-1 rounded hover:bg-zinc-700/50"
+              data-testid="toggle-hide-data"
+              title={hideData ? (t ? t('dashboard.show_data') : 'Mostrar dados') : (t ? t('dashboard.hide_data') : 'Ocultar dados')}
+            >
+              {hideData ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          )}
+        </div>
         
         {/* Right Section - Plan + Language (compact on mobile) */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
