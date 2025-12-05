@@ -5129,18 +5129,22 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             });
 
             // Enviar confirmação de sucesso via WhatsApp
-            const resultado = parseFloat(newTrade.resultado || '0');
-            const isProfit = resultado >= 0;
-            const emoji = isProfit ? '✅' : '❌';
-            const resultText = isProfit ? 'VITÓRIA' : 'PERDA';
+            const resultadoStr = newTrade.resultado || '0';
+            const resultado = parseFloat(resultadoStr);
+            // Verifica se é loss: começa com "-" OU é número negativo
+            const isLoss = resultadoStr.startsWith('-') || resultado < 0;
+            const isProfit = !isLoss && resultado > 0;
+            const emoji = isLoss ? '❌' : (isProfit ? '✅' : '➡️');
+            const resultText = isLoss ? 'PERDA' : (isProfit ? 'VITÓRIA' : 'EMPATE');
             
+            const pnlPrefix = isLoss ? '-' : (isProfit ? '+' : '');
             const successMessage = `${emoji} *TRADE REGISTRADO!*\n\n` +
               `━━━━━━━━━━━━━━━━━━━━\n` +
               `📊 *Resumo do Trade:*\n\n` +
               `🎯 Ativo: *${newTrade.ativo}*\n` +
-              `${isProfit ? '✅' : '❌'} Resultado: *${resultText}*\n` +
+              `${emoji} Resultado: *${resultText}*\n` +
               `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
-              `📈 P&L: ${isProfit ? '+' : ''}R$ ${Math.abs(resultado).toFixed(2)}\n` +
+              `📈 P&L: ${pnlPrefix}R$ ${Math.abs(resultado).toFixed(2)}\n` +
               `━━━━━━━━━━━━━━━━━━━━\n\n` +
               `🚀 *Trade salvo na sua conta Métrika!*\n\n` +
               `📱 Acesse a plataforma para ver análises completas!\n\n` +
@@ -5385,7 +5389,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       const text = messageText.toLowerCase().trim();
       
       // FORMATO SIMPLIFICADO - Take/Stop com valor arriscado e lucro
-      // Exemplos: "Take no EURUSD arrisquei 100 lucrei 300", "Stop no BTC arrisquei 200"
+      // Exemplos: "Take no EURUSD arrisquei 100 lucrei 300", "Stop no BTC arrisquei 200", "Stop -40usd no eurusd"
       const simplePatterns = {
         // Ativo - SEMPRE procurar "no/do/em ATIVO" primeiro (para evitar detectar palavras-chave)
         ativo: /(?:no|do|em)\s+([A-Z][A-Z0-9]{2,9})/i,
@@ -5396,7 +5400,11 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         // Lucro (só para takes/vitórias) - procurar número ANTES da palavra ganho/lucro
         lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)|^([0-9.,]+)\s*(?:no|do)/i,
         // Prejuízo explícito (opcional para stops)
-        prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i
+        prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i,
+        // Valor após Stop (ex: "Stop -40usd", "Stop 40", "Stop -50 no EURUSD")
+        stop_valor: /stop[:\s]*[-]?([0-9.,]+)/i,
+        // Valor após Take (ex: "Take 100usd", "Take +150 no BTCUSD")  
+        take_valor: /take[:\s]*[+]?([0-9.,]+)/i
       };
 
       const extracted: any = {};
@@ -5440,27 +5448,36 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         
         // Se mencionou TAKE/vitória/ganho/lucro = positivo (precisa ter valor de lucro)
         if (['take', 'vitoria', 'vitória', 'ganho', 'ganh', 'win', 'gain', 'lucro', 'lucr'].some(w => resultText.includes(w))) {
+          // Prioridade: lucro explícito > take_valor > arriscado
           const lucroValue = normalizeNumber(extracted.lucro, '0');
+          const takeValor = normalizeNumber(extracted.take_valor, '0');
+          
           if (lucroValue && parseFloat(lucroValue) > 0) {
             resultado = '+' + lucroValue;
+          } else if (takeValor && parseFloat(takeValor) > 0) {
+            resultado = '+' + takeValor;
           } else {
             // Se é TAKE mas não tem valor de lucro, considerar 0
             resultado = '0';
           }
         } 
-        // Se mencionou STOP/perda/prejuízo = negativo
+        // Se mencionou STOP/perda/prejuízo = negativo (SEMPRE É LOSS!)
         else if (['stop', 'perda', 'loss', 'prejuizo', 'prejuízo', 'perdi'].some(w => resultText.includes(w))) {
-          // Se tem prejuízo explícito, usar esse valor
-          if (extracted.prejuizo) {
-            const perdaValue = normalizeNumber(extracted.prejuizo, '0');
+          // Prioridade: prejuízo explícito > stop_valor > arriscado
+          const perdaValue = normalizeNumber(extracted.prejuizo, '0');
+          const stopValor = normalizeNumber(extracted.stop_valor, '0');
+          const arriscadoValue = normalizeNumber(extracted.arriscado, '0');
+          
+          if (perdaValue && parseFloat(perdaValue) > 0) {
             resultado = '-' + perdaValue;
-          } 
-          // Se NÃO tem prejuízo explícito, a perda = valor arriscado
-          else if (extracted.arriscado) {
-            const arriscadoValue = normalizeNumber(extracted.arriscado, '0');
+          } else if (stopValor && parseFloat(stopValor) > 0) {
+            // Valor após "Stop" = valor da perda
+            resultado = '-' + stopValor;
+          } else if (arriscadoValue && parseFloat(arriscadoValue) > 0) {
             resultado = '-' + arriscadoValue;
           } else {
-            resultado = '0';
+            // Stop sem valor = perda de 0 (mas ainda registra como loss)
+            resultado = '-0';
           }
         }
       }
