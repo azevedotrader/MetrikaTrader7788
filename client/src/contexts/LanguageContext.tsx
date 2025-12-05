@@ -65,6 +65,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.profile": "Perfil",
     "nav.admin": "Admin",
     "nav.logout": "Sair",
+    "nav.wallets": "Carteiras",
 
     // WhatsApp
     "whatsapp.title": "WhatsApp",
@@ -1051,6 +1052,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.profile": "Profile",
     "nav.admin": "Admin",
     "nav.logout": "Logout",
+    "nav.wallets": "Wallets",
 
     // WhatsApp
     "whatsapp.title": "WhatsApp",
@@ -2016,6 +2018,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.profile": "Perfil",
     "nav.admin": "Admin",
     "nav.logout": "Salir",
+    "nav.wallets": "Carteras",
 
     // WhatsApp
     "whatsapp.title": "WhatsApp",
