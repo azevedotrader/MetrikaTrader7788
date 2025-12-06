@@ -3770,9 +3770,14 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       const { tradeId } = req.params;
       const { caption } = req.body;
       
+      console.log(`📸 Iniciando upload de imagem para trade ${tradeId}, usuário ${userId}`);
+      
       if (!req.file) {
+        console.log('❌ Nenhuma imagem no request');
         return res.status(400).json({ error: "Nenhuma imagem enviada" });
       }
+      
+      console.log(`📁 Arquivo recebido: ${req.file.originalname}, tamanho: ${req.file.size} bytes`);
       
       // Verificar se o trade existe e pertence ao usuário
       const trade = await db
@@ -3783,8 +3788,11 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         .then(rows => rows[0]);
       
       if (!trade) {
+        console.log(`❌ Trade ${tradeId} não encontrado para usuário ${userId}`);
         return res.status(404).json({ error: "Trade não encontrado" });
       }
+      
+      console.log(`✅ Trade encontrado: ${trade.id}`);
       
       const imageId = crypto.randomUUID();
       const extension = req.file.originalname.split('.').pop() || 'jpg';
@@ -3795,6 +3803,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
       const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
       if (privateObjectDir) {
         // Upload para Object Storage
+        console.log(`☁️ Fazendo upload para Object Storage...`);
         const objectStorageService = new ObjectStorageService();
         const objectPath = `/trade-images/${userId}/${imageId}.${extension}`;
         
@@ -3804,6 +3813,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
           req.file.mimetype
         );
         fileName = `${imageId}.${extension}`;
+        console.log(`✅ Upload Object Storage concluído: ${storedPath}`);
       } else {
         // Fallback: salvar localmente (para dev sem Object Storage configurado)
         const uploadsDir = 'uploads/images';
@@ -3814,6 +3824,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         storedPath = `${uploadsDir}/${fileName}`;
         fs.writeFileSync(storedPath, req.file.buffer);
         console.warn('⚠️ Object Storage não configurado, usando armazenamento local');
+        console.log(`💾 Arquivo salvo localmente: ${storedPath}`);
       }
       
       // Criar registro da imagem no banco
@@ -3828,10 +3839,14 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         caption: caption || null
       };
       
+      console.log(`💾 Salvando registro no banco:`, JSON.stringify(imageData));
+      
       const [image] = await db
         .insert(diaryImages)
         .values(imageData)
         .returning();
+      
+      console.log(`✅ Imagem salva no banco com ID: ${image.id}`);
       
       res.json({
         message: "Imagem enviada com sucesso",
@@ -3846,7 +3861,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         }
       });
     } catch (error) {
-      console.error('Erro ao fazer upload da imagem do trade:', error);
+      console.error('❌ Erro ao fazer upload da imagem do trade:', error);
       res.status(500).json({ 
         error: "Erro interno do servidor",
         message: error instanceof Error ? error.message : "Erro desconhecido"
