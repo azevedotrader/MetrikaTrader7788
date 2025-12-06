@@ -123,9 +123,9 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         onMouseEnter={() => !isMobile && setIsExpanded(true)}
         onMouseLeave={() => !isMobile && setIsExpanded(false)}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Logo and Close Button */}
-          <div className="p-3 border-b border-zinc-800/30">
+          <div className="p-3 border-b border-zinc-800/30 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center">
                 <Logo variant="sidebar" expanded={sidebarExpanded} />
@@ -146,7 +146,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation - scrollbar hidden by default */}
-          <nav className="flex-1 px-2 py-3 overflow-y-auto scrollbar-hidden hover:scrollbar-thin">
+          <nav className="flex-1 min-h-0 px-2 py-3 overflow-y-auto scrollbar-hidden hover:scrollbar-thin">
             <ul className="space-y-1">
               {navigation.map((item) => (
                 <li key={item.href}>
@@ -178,7 +178,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </nav>
           
           {/* Action Buttons - Fixed at bottom above footer */}
-          <div className="px-2 py-2 border-t border-zinc-800/30 space-y-1.5 bg-zinc-900/50">
+          <div className="px-2 py-2 border-t border-zinc-800/30 space-y-1.5 bg-zinc-900/50 flex-shrink-0">
             {/* Análise CSV com IA */}
             <Button
               onClick={handleAnalyzeCsv}
@@ -229,7 +229,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
 
           {/* User Profile Footer */}
-          <div className="p-2 border-t border-zinc-800/30 bg-zinc-950/50">
+          <div className="p-2 border-t border-zinc-800/30 bg-zinc-950/50 flex-shrink-0">
             <div className={cn(
               "flex items-center transition-all duration-300 rounded-lg p-2",
               sidebarExpanded ? "space-x-3 hover:bg-zinc-800/30" : "flex-col gap-2"
