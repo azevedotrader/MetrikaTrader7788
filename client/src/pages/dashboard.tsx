@@ -2754,7 +2754,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </CardContent>
             </Card>
 
-            {/* Trade Win % */}
+            {/* Trade Win % - SEMPRE VISÍVEL (não é valor monetário) */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-trade-win">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -2762,39 +2762,37 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#ffffff]'}`}>
-                    {hideData ? '••%' : (() => {
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#ffffff]">
+                    {(() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                       const totalTrades = periodFilteredTrades.length;
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       return (winRate % 1 === 0 ? winRate.toFixed(0) : winRate.toFixed(1)) + '%';
                     })()}
                   </div>
-                  {!hideData && (
-                    <div className="shrink-0 min-w-[35px]">
-                      <CircularProgress 
-                        percentage={(() => {
-                          const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                          const totalTrades = periodFilteredTrades.length;
-                          return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                        })()} 
-                        size={35}
-                        color={(() => {
-                          const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                          const totalTrades = periodFilteredTrades.length;
-                          const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                          return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#F06363";
-                        })()}
-                      />
-                    </div>
-                  )}
+                  <div className="shrink-0 min-w-[35px]">
+                    <CircularProgress 
+                      percentage={(() => {
+                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = periodFilteredTrades.length;
+                        return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                      })()} 
+                      size={35}
+                      color={(() => {
+                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                        const totalTrades = periodFilteredTrades.length;
+                        const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                        return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#F06363";
+                      })()}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             
 
-            {/* Day Win % */}
+            {/* Day Win % - SEMPRE VISÍVEL (não é valor monetário) */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-day-win">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -2816,22 +2814,20 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#fafafa]'}`}>
-                            {hideData ? '••%' : (dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)) + '%'}
+                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#fafafa]">
+                            {(dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)) + '%'}
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
-                            {hideData ? '• de • dias' : `${winningDays} de ${totalDays} dias`}
+                            {`${winningDays} de ${totalDays} dias`}
                           </div>
                         </div>
-                        {!hideData && (
-                          <div className="shrink-0 min-w-[35px]">
-                            <CircularProgress 
-                              percentage={dayWinRate} 
-                              size={35}
-                              color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#eab308" : "#F06363"}
-                            />
-                          </div>
-                        )}
+                        <div className="shrink-0 min-w-[35px]">
+                          <CircularProgress 
+                            percentage={dayWinRate} 
+                            size={35}
+                            color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#eab308" : "#F06363"}
+                          />
+                        </div>
                       </>
                     );
                   })()}
@@ -2839,15 +2835,15 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               </CardContent>
             </Card>
 
-            {/* RR Médio */}
+            {/* RR Médio - SEMPRE VISÍVEL (não é valor monetário) */}
             <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-rr">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
-                <div className={`text-xl md:text-2xl lg:text-3xl font-bold ${hideData ? 'text-zinc-500' : 'text-white'} break-words`}>
-                  {hideData ? '••' : metrics.riscoRetornoMedio.toFixed(2)}
+                <div className="text-xl md:text-2xl lg:text-3xl font-bold text-white break-words">
+                  {metrics.riscoRetornoMedio.toFixed(2)}
                 </div>
                 <div className="text-xs text-zinc-500 mt-1">
                   {t('metrics.risk_reward')}
@@ -2937,7 +2933,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             {/* 4 Metric Blocks - À direita (1/4 da largura) */}
             <div className="lg:col-span-1">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 h-full">
-                {/* Lucros */}
+                {/* Lucros - valor monetário ocultável, percentual e contagem sempre visíveis */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.profits_short')}</div>
                   <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} mb-2`}>
@@ -2948,33 +2944,31 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       return formatCurrency(totalPositive);
                     })()}
                   </div>
-                  {!hideData && (
-                    <div className="flex flex-col items-center">
-                      {(() => {
-                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = periodFilteredTrades.length;
-                        const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                        return (
-                          <>
-                            <CircularProgress 
-                              percentage={winPercentage} 
-                              size={35}
-                              color="#2FA87A"
-                            />
-                            <div className="text-xs text-zinc-500 mt-1">
-                              {winPercentage.toFixed(1)}%
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center">
+                    {(() => {
+                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                      const totalTrades = periodFilteredTrades.length;
+                      const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                      return (
+                        <>
+                          <CircularProgress 
+                            percentage={winPercentage} 
+                            size={35}
+                            color="#2FA87A"
+                          />
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {winPercentage.toFixed(1)}%
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {hideData ? '•• trades' : `${periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length} trades`}
+                    {`${periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length} trades`}
                   </div>
                 </div>
 
-                {/* Perdas */}
+                {/* Perdas - valor monetário ocultável, percentual e contagem sempre visíveis */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.losses_short')}</div>
                   <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#F06363]'} mb-2`}>
@@ -2985,33 +2979,31 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       return formatCurrency(-totalNegative);
                     })()}
                   </div>
-                  {!hideData && (
-                    <div className="flex flex-col items-center">
-                      {(() => {
-                        const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
-                        const totalTrades = periodFilteredTrades.length;
-                        const lossPercentage = totalTrades > 0 ? (lossTrades / totalTrades) * 100 : 0;
-                        return (
-                          <>
-                            <CircularProgress 
-                              percentage={lossPercentage} 
-                              size={35}
-                              color="#F06363"
-                            />
-                            <div className="text-xs text-zinc-500 mt-1">
-                              {lossPercentage.toFixed(1)}%
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center">
+                    {(() => {
+                      const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                      const totalTrades = periodFilteredTrades.length;
+                      const lossPercentage = totalTrades > 0 ? (lossTrades / totalTrades) * 100 : 0;
+                      return (
+                        <>
+                          <CircularProgress 
+                            percentage={lossPercentage} 
+                            size={35}
+                            color="#F06363"
+                          />
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {lossPercentage.toFixed(1)}%
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {hideData ? '•• trades' : `${periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length} trades`}
+                    {`${periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length} trades`}
                   </div>
                 </div>
 
-                {/* Resultado */}
+                {/* Resultado - valor monetário ocultável, percentual e contagem sempre visíveis */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.result')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
@@ -3023,35 +3015,33 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       return formatCurrency(totalResult);
                     })()}
                   </div>
-                  {!hideData && (
-                    <div className="flex flex-col items-center">
-                      {(() => {
-                        const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = periodFilteredTrades.length;
-                        const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                        const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                        const isPositive = totalResult >= 0;
-                        return (
-                          <>
-                            <CircularProgress 
-                              percentage={winRate} 
-                              size={35}
-                              color={isPositive ? "#2FA87A" : "#F06363"}
-                            />
-                            <div className="text-xs text-zinc-500 mt-1">
-                              {winRate.toFixed(1)}%
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center">
+                    {(() => {
+                      const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
+                      const totalTrades = periodFilteredTrades.length;
+                      const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
+                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const isPositive = totalResult >= 0;
+                      return (
+                        <>
+                          <CircularProgress 
+                            percentage={winRate} 
+                            size={35}
+                            color={isPositive ? "#2FA87A" : "#F06363"}
+                          />
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {winRate.toFixed(1)}%
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    {hideData ? '•• trades' : `${periodFilteredTrades.length} trades`}
+                    {`${periodFilteredTrades.length} trades`}
                   </div>
                 </div>
 
-                {/* Média */}
+                {/* Média - valor monetário ocultável, percentual sempre visível */}
                 <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.average')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
@@ -3065,28 +3055,26 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       return formatCurrency(avgResult);
                     })()}
                   </div>
-                  {!hideData && (
-                    <div className="flex flex-col items-center">
-                      {(() => {
-                        const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                        const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
-                        const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100);
-                        const isPositive = avgResult >= 0;
-                        return (
-                          <>
-                            <CircularProgress 
-                              percentage={normalizedPercentage} 
-                              size={35}
-                              color={isPositive ? "#2FA87A" : "#F06363"}
-                            />
-                            <div className="text-xs text-zinc-500 mt-1">
-                              {normalizedPercentage.toFixed(1)}%
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
+                  <div className="flex flex-col items-center">
+                    {(() => {
+                      const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
+                      const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
+                      const normalizedPercentage = Math.min(Math.abs(avgResult) * 2, 100);
+                      const isPositive = avgResult >= 0;
+                      return (
+                        <>
+                          <CircularProgress 
+                            percentage={normalizedPercentage} 
+                            size={35}
+                            color={isPositive ? "#2FA87A" : "#F06363"}
+                          />
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {normalizedPercentage.toFixed(1)}%
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
                     {t('metrics.per_trade')}
                   </div>
@@ -3125,7 +3113,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                             {hideData ? '•••••' : formatCurrency(metrics.melhorTrade)}
                           </p>
                         </div>
-                        <TrendingUp className={`h-4 w-4 sm:h-6 sm:w-6 ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} flex-shrink-0 ml-2`} />
+                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
                       </div>
                     </div>
 
