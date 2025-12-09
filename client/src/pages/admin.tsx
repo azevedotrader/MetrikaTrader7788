@@ -395,15 +395,15 @@ export default function AdminPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs sm:text-sm font-medium">Planos Premium</CardTitle>
+                <CardTitle className="text-xs sm:text-sm font-medium">Planos Pagos</CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               </CardHeader>
               <CardContent className="pb-3">
                 <div className="text-xl sm:text-2xl font-bold">
-                  {statsLoading ? "..." : ((stats as any)?.proUsers || 0) + ((stats as any)?.blackUsers || 0)}
+                  {statsLoading ? "..." : ((stats as any)?.monthlyUsers || 0) + ((stats as any)?.quarterlyUsers || 0) + ((stats as any)?.annualUsers || 0)}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats as any)?.proUsers || 0} Pro + {(stats as any)?.blackUsers || 0} VIP
+                  {(stats as any)?.monthlyUsers || 0} Mensal + {(stats as any)?.quarterlyUsers || 0} Trimestral + {(stats as any)?.annualUsers || 0} Anual
                 </p>
               </CardContent>
             </Card>
@@ -416,45 +416,59 @@ export default function AdminPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Starter</span>
+                  <span className="text-sm font-medium">Gratuito</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-green-600 rounded" 
+                        className="h-full bg-gray-600 rounded" 
                         style={{ 
-                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.starterUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.freeUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{(stats as any)?.starterUsers || 0}</span>
+                    <span className="text-sm text-gray-600">{(stats as any)?.freeUsers || 0}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Pro</span>
+                  <span className="text-sm font-medium">Mensal (R$97)</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
                         className="h-full bg-blue-600 rounded" 
                         style={{ 
-                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.proUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.monthlyUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{(stats as any)?.proUsers || 0}</span>
+                    <span className="text-sm text-gray-600">{(stats as any)?.monthlyUsers || 0}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">VIP</span>
+                  <span className="text-sm font-medium">Trimestral (R$197)</span>
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
                         className="h-full bg-purple-600 rounded" 
                         style={{ 
-                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.blackUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.quarterlyUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{(stats as any)?.blackUsers || 0}</span>
+                    <span className="text-sm text-gray-600">{(stats as any)?.quarterlyUsers || 0}</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Anual (R$547)</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-32 h-2 bg-gray-200 rounded">
+                      <div 
+                        className="h-full bg-gradient-to-r from-purple-600 to-blue-600 rounded" 
+                        style={{ 
+                          width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.annualUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600">{(stats as any)?.annualUsers || 0}</span>
                   </div>
                 </div>
               </div>
@@ -746,10 +760,10 @@ export default function AdminPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="free">Free</SelectItem>
-                          <SelectItem value="starter">Starter</SelectItem>
-                          <SelectItem value="pro">Pro</SelectItem>
-                          <SelectItem value="black">VIP</SelectItem>
+                          <SelectItem value="free">Gratuito</SelectItem>
+                          <SelectItem value="monthly">Mensal (R$97)</SelectItem>
+                          <SelectItem value="quarterly">Trimestral (R$197)</SelectItem>
+                          <SelectItem value="annual">Anual (R$547)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

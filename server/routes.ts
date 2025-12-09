@@ -3246,43 +3246,37 @@ Todos os planos pagos incluem:
   });
 
   // GET /api/admin/stats - Estatísticas da plataforma
+  // Sempre calcula em tempo real para garantir dados atualizados com a nova estrutura de planos
   app.get("/api/admin/stats", requireAdmin, async (req, res) => {
     try {
-      const stats = await storage.getPlatformStats();
+      const allUsers = await storage.getAllUsers();
+      const allTrades = await storage.getAllTrades();
       
-      // Se não há stats, calcular em tempo real
-      if (!stats) {
-        const allUsers = await storage.getAllUsers();
-        const allTrades = await storage.getAllTrades();
-        
-        const totalUsers = allUsers.length;
-        const activeUsers = allUsers.filter(u => u.isActive).length;
-        const monthlyUsers = allUsers.filter(u => u.planType === 'monthly').length;
-        const quarterlyUsers = allUsers.filter(u => u.planType === 'quarterly').length;
-        const annualUsers = allUsers.filter(u => u.planType === 'annual').length;
-        const freeUsers = allUsers.filter(u => !u.planType || u.planType === 'free').length;
-        
-        // Calcular receita mensal baseado nos novos planos
-        // Mensal: R$97/mês, Trimestral: R$197/3 meses (~R$65.67/mês), Anual: R$547/12 meses (~R$45.58/mês)
-        const monthlyRevenue = (monthlyUsers * 97) + (quarterlyUsers * 65.67) + (annualUsers * 45.58);
-        
-        const calculatedStats = {
-          date: new Date(),
-          totalUsers,
-          activeUsers,
-          newUsers: 0,
-          totalTrades: allTrades.length,
-          monthlyRevenue: monthlyRevenue.toFixed(2),
-          monthlyUsers,
-          quarterlyUsers,
-          annualUsers,
-          freeUsers,
-        };
-        
-        res.json(calculatedStats);
-      } else {
-        res.json(stats);
-      }
+      const totalUsers = allUsers.length;
+      const activeUsers = allUsers.filter(u => u.isActive).length;
+      const monthlyUsers = allUsers.filter(u => u.planType === 'monthly').length;
+      const quarterlyUsers = allUsers.filter(u => u.planType === 'quarterly').length;
+      const annualUsers = allUsers.filter(u => u.planType === 'annual').length;
+      const freeUsers = allUsers.filter(u => !u.planType || u.planType === 'free').length;
+      
+      // Calcular receita mensal baseado nos novos planos
+      // Mensal: R$97/mês, Trimestral: R$197/3 meses (~R$65.67/mês), Anual: R$547/12 meses (~R$45.58/mês)
+      const monthlyRevenue = (monthlyUsers * 97) + (quarterlyUsers * 65.67) + (annualUsers * 45.58);
+      
+      const calculatedStats = {
+        date: new Date(),
+        totalUsers,
+        activeUsers,
+        newUsers: 0,
+        totalTrades: allTrades.length,
+        monthlyRevenue: monthlyRevenue.toFixed(2),
+        monthlyUsers,
+        quarterlyUsers,
+        annualUsers,
+        freeUsers,
+      };
+      
+      res.json(calculatedStats);
     } catch (error) {
       console.error("Error fetching stats:", error);
       res.status(500).json({ message: "Erro interno do servidor" });
