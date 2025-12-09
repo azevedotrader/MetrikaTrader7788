@@ -73,8 +73,11 @@ export function useUserPlan() {
         }
         
         // Invalidate related caches to reflect new plan permissions
-        queryClient.invalidateQueries({ queryKey: ['/api/trades'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+        // Use exact: false to invalidate all queries starting with these keys
+        queryClient.invalidateQueries({ queryKey: ['/api/trades'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['/api/user'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['/api/wallets'], exact: false });
+        queryClient.invalidateQueries({ queryKey: ['/api/csv-imports'], exact: false });
       }
     }
     

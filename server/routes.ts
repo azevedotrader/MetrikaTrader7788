@@ -3139,13 +3139,24 @@ Todos os planos pagos incluem:
         console.log('⚠️ Admin tentou definir planExpiresAt manualmente. Política de 30 dias automáticos aplicada.');
       }
       
-      // Se o plano está sendo alterado, apenas logar a mudança
-      // O frontend detecta a mudança via polling e atualiza automaticamente sem logout
+      // Se o plano está sendo alterado, verificar se é downgrade para free
+      // Downgrades para free forçam logout por segurança
+      // Upgrades e mudanças entre planos pagos: frontend detecta via polling
       if (updates.planType) {
         const currentUser = await storage.getUser(userId);
         if (currentUser && currentUser.planType !== updates.planType) {
-          console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType} para ${updates.planType}. Frontend será atualizado automaticamente via polling.`);
-          // Não forçar logout - atualização em tempo real via polling
+          const isPaidPlan = (plan: string | null) => plan ? ['monthly', 'quarterly', 'annual'].includes(plan) : false;
+          const wasPayingUser = isPaidPlan(currentUser.planType);
+          const isNowFree = updates.planType === 'free';
+          
+          if (wasPayingUser && isNowFree) {
+            // Downgrade para free: forçar logout por segurança
+            console.log(`🔄 Usuário ${userId} rebaixado de ${currentUser.planType} para free. Forçando logout por segurança.`);
+            await storage.setForceLogout(userId);
+          } else {
+            // Upgrade ou mudança entre planos pagos: atualização em tempo real
+            console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType} para ${updates.planType}. Frontend será atualizado via polling.`);
+          }
         }
       }
       
