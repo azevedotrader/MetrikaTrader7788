@@ -481,14 +481,31 @@ export class DatabaseStorage implements IStorage {
   async updateUserByAdmin(id: string, updates: UpdateUserByAdmin): Promise<User> {
     const updateData: any = { ...updates };
     
-    // Se planType está sendo atualizado para um plano pago, definir automaticamente 30 dias de duração
+    // Se planType está sendo atualizado, definir a duração correta baseada no tipo de plano
     if (updates.planType) {
-      // Se planExpiresAt não foi fornecido explicitamente, definir para 30 dias a partir de agora
-      if (!updates.planExpiresAt) {
+      // Definir duração baseada no tipo de plano
+      const getPlanDurationDays = (planType: string): number => {
+        switch (planType) {
+          case 'monthly': return 30;
+          case 'quarterly': return 90;
+          case 'annual': return 365;
+          case 'free': return 0; // Plano gratuito não tem expiração
+          default: return 30;
+        }
+      };
+      
+      const durationDays = getPlanDurationDays(updates.planType);
+      
+      if (updates.planType === 'free') {
+        // Plano gratuito: remover data de expiração
+        updateData.planExpiresAt = null;
+        console.log(`✅ Plano gratuito ativado para usuário ${id}`);
+      } else if (!updates.planExpiresAt) {
+        // Plano pago sem data explícita: calcular baseado na duração do plano
         const now = new Date();
-        const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
-        updateData.planExpiresAt = thirtyDaysFromNow;
-        console.log(`✅ Plano ${updates.planType} ativado para usuário ${id} até ${thirtyDaysFromNow.toISOString()}`);
+        const expiresAt = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+        updateData.planExpiresAt = expiresAt;
+        console.log(`✅ Plano ${updates.planType} (${durationDays} dias) ativado para usuário ${id} até ${expiresAt.toISOString()}`);
       } else {
         updateData.planExpiresAt = new Date(updates.planExpiresAt);
         console.log(`✅ Plano ${updates.planType} ativado para usuário ${id} até ${updates.planExpiresAt}`);

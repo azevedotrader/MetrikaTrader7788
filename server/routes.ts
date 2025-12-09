@@ -2931,18 +2931,28 @@ Todos os planos pagos incluem:
       let daysRemaining;
       let expiresAt;
 
-      // Fix legacy users: if paid plan but no expiration date, set 30 days from now
+      // Fix legacy users: if paid plan but no expiration date, set correct duration
       if (planType !== 'free' && !user.planExpiresAt) {
+        const getPlanDurationDays = (plan: string): number => {
+          switch (plan) {
+            case 'monthly': return 30;
+            case 'quarterly': return 90;
+            case 'annual': return 365;
+            default: return 30;
+          }
+        };
+        
+        const durationDays = getPlanDurationDays(planType);
         const now = new Date();
-        const thirtyDaysFromNow = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000));
-        console.log(`🔧 Corrigindo usuário ${userId} com plano ${planType} sem data de expiração. Definindo 30 dias.`);
+        const expirationDate = new Date(now.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+        console.log(`🔧 Corrigindo usuário ${userId} com plano ${planType} sem data de expiração. Definindo ${durationDays} dias.`);
         
         await storage.updateUserByAdmin(userId, { 
-          planExpiresAt: thirtyDaysFromNow
+          planExpiresAt: expirationDate
         });
         
         // Update user object for calculations below
-        user.planExpiresAt = thirtyDaysFromNow;
+        user.planExpiresAt = expirationDate;
       }
 
       // Check if paid plan has expired and automatically downgrade to free
