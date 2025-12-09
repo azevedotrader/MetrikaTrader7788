@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Crown, Sparkles, TrendingUp, Zap, X } from "lucide-react";
+import { Crown, Sparkles, Zap, X, CheckCircle, XCircle, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface UpgradeModalProps {
@@ -23,6 +22,12 @@ interface UpgradeModalProps {
   reason?: 'limit_reached' | 'ai_feature' | 'general';
 }
 
+const CHECKOUT_LINKS = {
+  monthly: 'https://pay.kiwify.com.br/mensal',
+  quarterly: 'https://pay.kiwify.com.br/trimestral',
+  annual: 'https://pay.kiwify.com.br/anual',
+};
+
 export function UpgradeModal({ 
   open, 
   onOpenChange, 
@@ -30,179 +35,208 @@ export function UpgradeModal({
   reason = 'general' 
 }: UpgradeModalProps) {
   const { t } = useLanguage();
-  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'black'>('starter');
 
-  const plans = {
-    starter: {
-      name: t('pricing.plans.starter.name'),
-      price: 'R$ 19,90',
-      features: [
-        t('pricing.plans.starter.features.unlimitedTrades'),
-        t('pricing.plans.starter.features.csvImport'),
-        t('pricing.plans.starter.features.aiAnalysis'),
-        t('pricing.plans.starter.features.tradingJournal'),
-        t('pricing.plans.starter.features.basicCharts'),
-        t('pricing.plans.starter.features.emailSupport')
-      ],
-      icon: <TrendingUp className="h-5 w-5" />,
-      color: 'bg-blue-600'
+  const plans = [
+    {
+      id: 'monthly',
+      name: 'Mensal',
+      price: 'R$ 29,90',
+      period: '/mês',
+      color: 'bg-blue-600',
+      popular: false,
     },
-    black: {
-      name: t('pricing.plans.black.name'),
-      price: 'R$ 49,90',
-      features: [
-        t('pricing.plans.black.features.everything'),
-        t('pricing.plans.black.features.advancedAi'),
-        t('pricing.plans.black.features.customReports'),
-        t('pricing.plans.black.features.prioritySupport'),
-        t('pricing.plans.black.features.apiAccess'),
-        t('pricing.plans.black.features.earlyAccess')
-      ],
-      icon: <Crown className="h-5 w-5" />,
-      color: 'bg-purple-600'
-    }
-  };
+    {
+      id: 'quarterly',
+      name: 'Trimestral',
+      price: 'R$ 69,90',
+      period: '/trimestre',
+      color: 'bg-purple-600',
+      popular: true,
+      savings: 'Economize 22%',
+    },
+    {
+      id: 'annual',
+      name: 'Anual',
+      price: 'R$ 199,90',
+      period: '/ano',
+      color: 'bg-gradient-to-r from-purple-600 to-blue-600',
+      popular: false,
+      savings: 'Economize 44%',
+    },
+  ];
+
+  const freeFeatures = [
+    { text: 'Máximo 10 trades', included: false },
+    { text: 'Sem análise com IA', included: false },
+    { text: 'Suporte básico', included: true },
+    { text: 'Dashboard básico', included: true },
+  ];
+
+  const paidFeatures = [
+    { text: 'Trades ilimitados', included: true },
+    { text: 'Análise com IA avançada', included: true },
+    { text: 'Suporte prioritário', included: true },
+    { text: 'Importação CSV ilimitada', included: true },
+    { text: 'Relatórios avançados', included: true },
+    { text: 'Gestão de risco completa', included: true },
+  ];
 
   const getModalContent = () => {
     switch (reason) {
       case 'limit_reached':
         return {
-          title: t('upgrade.limitReached.title'),
+          title: 'Limite de Trades Atingido',
           description: currentUsage 
-            ? t('upgrade.limitReached.description', { 
-                current: currentUsage.total, 
-                limit: 10 
-              })
-            : t('upgrade.limitReached.descriptionGeneral'),
-          urgency: true
+            ? `Você já registrou ${currentUsage.total} de 10 trades do plano Free. Faça upgrade para continuar!`
+            : 'Você atingiu o limite do plano gratuito. Faça upgrade para trades ilimitados!',
         };
       case 'ai_feature':
         return {
-          title: t('upgrade.aiFeature.title'),
-          description: t('upgrade.aiFeature.description'),
-          urgency: false
+          title: 'Recurso Premium',
+          description: 'A análise com IA está disponível apenas para assinantes. Escolha um plano para desbloquear!',
         };
       default:
         return {
-          title: t('upgrade.general.title'),
-          description: t('upgrade.general.description'),
-          urgency: false
+          title: 'Faça Upgrade para Acesso Completo',
+          description: 'Desbloqueie todos os recursos da plataforma e leve seu trading ao próximo nível.',
         };
     }
+  };
+
+  const handleUpgradeClick = (planId: string) => {
+    window.open(CHECKOUT_LINKS[planId as keyof typeof CHECKOUT_LINKS], '_blank');
+    onOpenChange(false);
   };
 
   const content = getModalContent();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" data-testid="modal-upgrade">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-zinc-700 text-white" data-testid="modal-upgrade">
         <DialogHeader className="text-center space-y-4">
           <div className="mx-auto w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-bold" data-testid="text-upgrade-title">
+          <DialogTitle className="text-2xl font-bold text-white" data-testid="text-upgrade-title">
             {content.title}
           </DialogTitle>
-          <DialogDescription className="text-base text-muted-foreground max-w-2xl mx-auto" data-testid="text-upgrade-description">
+          <DialogDescription className="text-base text-zinc-400 max-w-2xl mx-auto" data-testid="text-upgrade-description">
             {content.description}
           </DialogDescription>
           
           {currentUsage && reason === 'limit_reached' && (
-            <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mx-auto max-w-sm">
+            <div className="bg-orange-950 border border-orange-800 rounded-lg p-4 mx-auto max-w-sm">
               <div className="flex items-center justify-center space-x-2">
-                <Zap className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-medium text-orange-800 dark:text-orange-200">
-                  {t('upgrade.usage.current')}: {currentUsage.total}/10
+                <Zap className="h-4 w-4 text-orange-500" />
+                <span className="text-sm font-medium text-orange-200">
+                  Uso atual: {currentUsage.total}/10 trades
                 </span>
-              </div>
-              <div className="mt-2 flex justify-center space-x-4 text-xs text-orange-700 dark:text-orange-300">
-                <span>{t('upgrade.usage.csvImports')}: {currentUsage.csvImports}</span>
-                <span>{t('upgrade.usage.manualTrades')}: {currentUsage.manualTrades}</span>
               </div>
             </div>
           )}
         </DialogHeader>
 
-        <Separator className="my-6" />
+        <Separator className="my-6 bg-zinc-700" />
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {Object.entries(plans).map(([key, plan]) => (
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-zinc-800 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-5 h-5 text-gray-400" />
+              <h3 className="text-lg font-semibold text-white">Plano Free</h3>
+            </div>
+            <p className="text-2xl font-bold text-white mb-4">Grátis</p>
+            <ul className="space-y-3">
+              {freeFeatures.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  {feature.included ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-red-500" />
+                  )}
+                  <span className={`text-sm ${feature.included ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                    {feature.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border border-purple-500/30 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="w-5 h-5 text-purple-400" />
+              <h3 className="text-lg font-semibold text-white">Planos Pagos</h3>
+              <Badge className="bg-purple-600 text-white text-xs">Acesso Completo</Badge>
+            </div>
+            <p className="text-sm text-zinc-400 mb-4">Todos os planos incluem:</p>
+            <ul className="space-y-3">
+              {paidFeatures.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-sm text-zinc-300">{feature.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          {plans.map((plan) => (
             <div
-              key={key}
-              className={`relative rounded-xl border-2 p-6 cursor-pointer transition-all duration-200 ${
-                selectedPlan === key
-                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+              key={plan.id}
+              className={`relative rounded-xl border-2 p-4 transition-all duration-200 ${
+                plan.popular
+                  ? 'border-purple-500 bg-purple-950/30'
+                  : 'border-zinc-700 hover:border-zinc-600'
               }`}
-              onClick={() => setSelectedPlan(key as 'starter' | 'black')}
-              data-testid={`plan-${key}`}
             >
-              {key === 'black' && (
+              {plan.popular && (
                 <Badge 
-                  className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-blue-600 text-white"
-                  data-testid="badge-popular"
+                  className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white"
                 >
-                  {t('upgrade.plans.popular')}
+                  Mais Popular
                 </Badge>
               )}
               
               <div className="text-center mb-4">
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${plan.color} text-white mb-3`}>
-                  {plan.icon}
-                </div>
-                <h3 className="text-xl font-bold" data-testid={`text-plan-name-${key}`}>
-                  {plan.name}
-                </h3>
-                <div className="text-3xl font-bold text-purple-600 dark:text-purple-600 mt-2" data-testid={`text-plan-price-${key}`}>
+                <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+                <div className="text-2xl font-bold text-purple-400 mt-2">
                   {plan.price}
-                  <span className="text-sm font-normal text-muted-foreground">/{t('upgrade.plans.perMonth')}</span>
+                  <span className="text-sm font-normal text-zinc-500">{plan.period}</span>
                 </div>
+                {plan.savings && (
+                  <Badge className="mt-2 bg-green-600 text-white text-xs">
+                    {plan.savings}
+                  </Badge>
+                )}
               </div>
 
-              <ul className="space-y-3">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center space-x-3" data-testid={`feature-${key}-${index}`}>
-                    <div className="w-5 h-5 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-3 h-3 text-green-600 dark:text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <Button
+                className={`w-full ${plan.color} hover:opacity-90 text-white`}
+                onClick={() => handleUpgradeClick(plan.id)}
+                data-testid={`button-upgrade-${plan.id}`}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Assinar {plan.name}
+              </Button>
             </div>
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 mt-8">
+        <div className="flex justify-center mt-6">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => onOpenChange(false)}
-            className="flex-1"
+            className="text-zinc-400 hover:text-white"
             data-testid="button-cancel"
           >
             <X className="w-4 h-4 mr-2" />
-            {t('upgrade.buttons.cancel')}
-          </Button>
-          
-          <Button
-            className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-            onClick={() => {
-              // TODO: Implement upgrade functionality
-              console.log('Upgrading to:', selectedPlan);
-              onOpenChange(false);
-            }}
-            data-testid="button-upgrade"
-          >
-            <Crown className="w-4 h-4 mr-2" />
-            {t('upgrade.buttons.upgrade')} {plans[selectedPlan].name}
+            Fechar
           </Button>
         </div>
 
-        <div className="text-center mt-4">
-          <p className="text-xs text-muted-foreground" data-testid="text-guarantee">
-            {t('upgrade.guarantee')}
+        <div className="text-center mt-2">
+          <p className="text-xs text-zinc-500">
+            Pagamento seguro via PIX ou cartão. Cancele quando quiser.
           </p>
         </div>
       </DialogContent>

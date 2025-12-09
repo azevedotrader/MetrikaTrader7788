@@ -2,11 +2,16 @@ import { useAuth } from "@/lib/auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export interface UserPlan {
-  planType: 'free' | 'starter' | 'pro' | 'black';
+  planType: 'free' | 'monthly' | 'quarterly' | 'annual';
   isAiEnabled: boolean;
   hasUnlimitedTrades: boolean;
   daysRemaining?: number;
   expiresAt?: string;
+}
+
+// Helper function to check if a plan is paid (has full access)
+export function isPaidPlan(planType: string): boolean {
+  return planType === 'monthly' || planType === 'quarterly' || planType === 'annual';
 }
 
 export function useUserPlan() {
@@ -21,11 +26,12 @@ export function useUserPlan() {
 
   // Fallback for when we can't fetch the plan
   const planType = userPlan?.planType || 'free';
+  const hasPaidPlan = isPaidPlan(planType);
   
   return {
     planType,
-    isAiEnabled: planType === 'pro' || planType === 'black',
-    hasUnlimitedTrades: planType !== 'free',
+    isAiEnabled: hasPaidPlan, // All paid plans have AI access
+    hasUnlimitedTrades: hasPaidPlan, // All paid plans have unlimited trades
     daysRemaining: userPlan?.daysRemaining,
     expiresAt: userPlan?.expiresAt,
     isLoading,

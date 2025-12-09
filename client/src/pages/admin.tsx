@@ -74,14 +74,14 @@ const updateUserSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).or(z.literal("")).optional(),
   phone: z.string().optional(),
-  planType: z.enum(["free", "starter", "pro", "black"]).optional(),
+  planType: z.enum(["free", "monthly", "quarterly", "annual"]).optional(),
   isActive: z.boolean().optional(),
 });
 
 const editPlanSchema = z.object({
   name: z.string().min(1, "Nome obrigatório"),
-  type: z.enum(["free", "starter", "pro", "black"], {
-    errorMap: () => ({ message: "Tipo deve ser: free, starter, pro ou black" })
+  type: z.enum(["free", "monthly", "quarterly", "annual"], {
+    errorMap: () => ({ message: "Tipo deve ser: free, monthly, quarterly ou annual" })
   }),
   price: z.string().transform(Number),
   features: z.string().transform(val => val.split(',').map(f => f.trim())),
@@ -292,12 +292,12 @@ export default function AdminPage() {
     switch (planType) {
       case 'free':
         return 'bg-gray-100 text-gray-800';
-      case 'starter':
-        return 'bg-green-100 text-green-800';
-      case 'pro':
+      case 'monthly':
         return 'bg-blue-100 text-blue-800';
-      case 'black':
+      case 'quarterly':
         return 'bg-purple-100 text-purple-800';
+      case 'annual':
+        return 'bg-gradient-to-r from-purple-500 to-blue-500 text-white';
       default:
         return 'bg-gray-100 text-gray-800';
     }

@@ -43,8 +43,11 @@ export class AITradingService {
       throw new Error("Usuário não encontrado");
     }
     
-    // Apenas usuários free e starter são bloqueados, pro e black têm acesso completo
-    if (user.planType === 'free' || user.planType === 'starter') {
+    // Helper to check if plan is paid (monthly, quarterly, annual have full access)
+    const isPaidPlan = (plan: string) => plan === 'monthly' || plan === 'quarterly' || plan === 'annual';
+    
+    // Only free users are blocked, all paid plans have full access
+    if (!isPaidPlan(user.planType || 'free')) {
       throw new FreeUserRestrictedError(feature);
     }
   }

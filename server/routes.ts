@@ -2746,8 +2746,9 @@ export async function registerRoutes(app: Express): Promise<void> {
       if (userId) {
         const user = await storage.getUser(userId);
         
-        // Check if user has a free or starter plan (pro and black have full access)
-        if (user && (user.planType === 'free' || user.planType === 'starter')) {
+        // Check if user has a free plan (all paid plans have full access)
+        const isPaidPlan = (plan: string) => plan === 'monthly' || plan === 'quarterly' || plan === 'annual';
+        if (user && !isPaidPlan(user.planType || 'free')) {
           const upgradeMessage = language === 'en' 
             ? `🤖 **AI Assistant Available for Premium Members Only**
 
@@ -2755,28 +2756,17 @@ I'm your dedicated trading mentor powered by the most advanced technology availa
 
 **🚀 Unlock Premium AI Features:**
 
-**💼 Starter Plan** - Perfect entry point
+All paid plans include:
+• Unlimited trades
 • AI Trading Assistant with deep market analysis
 • Personalized trade recommendations
 • Advanced performance analytics
-• Priority email support
-• Only $6.99/month
+• Priority support
+• Full access to all features
 
-**⭐ Pro Plan** - Most popular choice
-• Everything in Starter PLUS
-• Advanced risk management algorithms
-• Custom trading strategies tailored to your style
-• Real-time market alerts and signals
-• Live chat support
-• Only $17.99/month
-
-**🏆 Black Plan** - For serious traders
-• Everything in Pro PLUS
-• Exclusive 1-on-1 strategy sessions
-• VIP support with instant response
-• Premium trading signals from experts
-• Early access to new features
-• Only $34.99/month
+**💳 Monthly** - R$ 29,90/month
+**📦 Quarterly** - R$ 69,90/quarter (Save 22%)
+**🏆 Annual** - R$ 199,90/year (Save 44%)
 
 **Ready to dominate the markets?** Upgrade now and get your first AI analysis in seconds!`
             : `🤖 **Assistente IA Exclusivo para Membros Premium**
@@ -2785,28 +2775,17 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
 
 **🚀 Desbloqueie o Poder da IA Premium:**
 
-**💼 Plano Starter** - Entrada perfeita
+Todos os planos pagos incluem:
+• Trades ilimitados
 • Assistente IA com análise profunda de mercado
 • Recomendações personalizadas de trades
 • Analytics avançados de performance
-• Suporte prioritário por email
-• Apenas R$ 19,90/mês
+• Suporte prioritário
+• Acesso completo a todos os recursos
 
-**⭐ Plano Pro** - Escolha mais popular
-• Tudo do Starter MAIS
-• Algoritmos avançados de gestão de risco
-• Estratégias customizadas para seu perfil
-• Alertas e sinais de mercado em tempo real
-• Chat de suporte ao vivo
-• Apenas R$ 49,90/mês
-
-**🏆 Plano Black** - Para traders profissionais
-• Tudo do Pro MAIS
-• Sessões exclusivas 1-on-1 de estratégia
-• Suporte VIP com resposta instantânea
-• Sinais premium de especialistas
-• Acesso antecipado a novos recursos
-• Apenas R$ 97,00/mês
+**💳 Mensal** - R$ 29,90/mês
+**📦 Trimestral** - R$ 69,90/trimestre (Economize 22%)
+**🏆 Anual** - R$ 199,90/ano (Economize 44%)
 
 **Pronto para dominar os mercados?** Faça upgrade agora e tenha sua primeira análise IA em segundos!`;
 
@@ -2986,10 +2965,13 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         }
       }
       
+      // Helper function to check if plan is paid (monthly, quarterly, annual)
+      const isPaidPlan = (plan: string) => plan === 'monthly' || plan === 'quarterly' || plan === 'annual';
+      
       res.json({
         planType,
-        isAiEnabled: planType === 'pro' || planType === 'black',
-        hasUnlimitedTrades: planType !== 'free',
+        isAiEnabled: isPaidPlan(planType), // All paid plans have AI access
+        hasUnlimitedTrades: isPaidPlan(planType), // All paid plans have unlimited trades
         daysRemaining,
         expiresAt
       });
@@ -3251,23 +3233,26 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
         
         const totalUsers = allUsers.length;
         const activeUsers = allUsers.filter(u => u.isActive).length;
-        const starterUsers = allUsers.filter(u => u.planType === 'starter').length;
-        const proUsers = allUsers.filter(u => u.planType === 'pro').length;
-        const blackUsers = allUsers.filter(u => u.planType === 'black').length;
+        const monthlyUsers = allUsers.filter(u => u.planType === 'monthly').length;
+        const quarterlyUsers = allUsers.filter(u => u.planType === 'quarterly').length;
+        const annualUsers = allUsers.filter(u => u.planType === 'annual').length;
+        const freeUsers = allUsers.filter(u => !u.planType || u.planType === 'free').length;
         
         // Calcular receita mensal baseado nos novos planos
-        const monthlyRevenue = (starterUsers * 29.90) + (proUsers * 49.90) + (blackUsers * 97.00);
+        // Mensal: R$29,90/mês, Trimestral: R$69,90/3 meses (~R$23,30/mês), Anual: R$199,90/12 meses (~R$16,66/mês)
+        const monthlyRevenue = (monthlyUsers * 29.90) + (quarterlyUsers * 23.30) + (annualUsers * 16.66);
         
         const calculatedStats = {
           date: new Date(),
           totalUsers,
           activeUsers,
-          newUsers: 0, // Seria calculado baseado em registros do mês
+          newUsers: 0,
           totalTrades: allTrades.length,
           monthlyRevenue: monthlyRevenue.toFixed(2),
-          starterUsers,
-          proUsers,
-          blackUsers,
+          monthlyUsers,
+          quarterlyUsers,
+          annualUsers,
+          freeUsers,
         };
         
         res.json(calculatedStats);
@@ -4197,7 +4182,7 @@ Sou seu mentor de trading pessoal, alimentado pela tecnologia mais avançada do 
             name: 'Administrador Métrika',
             email: ADMIN_EMAIL,
             password: await bcrypt.hash('metrika777', 10),
-            planType: 'black',
+            planType: 'annual',
             isActive: true,
             role: 'admin'
           })

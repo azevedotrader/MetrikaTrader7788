@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { PlanDetailsModal } from "./plan-details-modal";
 
 interface PlanInfo {
-  planType: 'free' | 'starter' | 'pro' | 'black';
+  planType: 'free' | 'monthly' | 'quarterly' | 'annual';
   isAiEnabled: boolean;
   hasUnlimitedTrades: boolean;
   daysRemaining?: number;
@@ -51,22 +51,22 @@ export function PlanStatus({ compact = false }: PlanStatusProps) {
           color: 'bg-gray-500',
           icon: <Zap className="w-3 h-3" />
         };
-      case 'starter':
+      case 'monthly':
         return {
-          name: 'Starter',
+          name: 'Mensal',
           color: 'bg-blue-600',
-          icon: <Zap className="w-3 h-3" />
+          icon: <Crown className="w-3 h-3" />
         };
-      case 'pro':
+      case 'quarterly':
         return {
-          name: 'Pro',
+          name: 'Trimestral',
           color: 'bg-purple-600',
           icon: <Crown className="w-3 h-3" />
         };
-      case 'black':
+      case 'annual':
         return {
-          name: 'VIP',
-          color: 'bg-black',
+          name: 'Anual',
+          color: 'bg-gradient-to-r from-purple-600 to-blue-600',
           icon: <Crown className="w-3 h-3" />
         };
       default:

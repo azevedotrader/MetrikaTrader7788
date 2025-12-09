@@ -99,8 +99,9 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
       return;
     }
 
-    // Verificar se o usuário tem acesso à IA (apenas free e starter precisam fazer upgrade)
-    if (planType === 'free' || planType === 'starter') {
+    // Verificar se o usuário tem acesso à IA (apenas free precisa fazer upgrade)
+    const isPaidPlan = planType === 'monthly' || planType === 'quarterly' || planType === 'annual';
+    if (!isPaidPlan) {
       setShowUpgradeModal(true);
       return;
     }
