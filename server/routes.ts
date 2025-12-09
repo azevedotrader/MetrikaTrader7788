@@ -3145,17 +3145,17 @@ Todos os planos pagos incluem:
       if (updates.planType) {
         const currentUser = await storage.getUser(userId);
         if (currentUser && currentUser.planType !== updates.planType) {
-          const isPaidPlan = (plan: string | null) => plan ? ['monthly', 'quarterly', 'annual'].includes(plan) : false;
-          const wasPayingUser = isPaidPlan(currentUser.planType);
           const isNowFree = updates.planType === 'free';
+          const wasNotFree = currentUser.planType !== 'free';
           
-          if (wasPayingUser && isNowFree) {
+          if (wasNotFree && isNowFree) {
             // Downgrade para free: forçar logout por segurança
-            console.log(`🔄 Usuário ${userId} rebaixado de ${currentUser.planType} para free. Forçando logout por segurança.`);
+            // Trata null/undefined/qualquer valor não-free como plano pago para garantir segurança
+            console.log(`🔄 Usuário ${userId} rebaixado de ${currentUser.planType || 'unknown'} para free. Forçando logout por segurança.`);
             await storage.setForceLogout(userId);
           } else {
-            // Upgrade ou mudança entre planos pagos: atualização em tempo real
-            console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType} para ${updates.planType}. Frontend será atualizado via polling.`);
+            // Upgrade ou mudança entre planos (não para free): atualização em tempo real
+            console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType || 'unknown'} para ${updates.planType}. Frontend será atualizado via polling.`);
           }
         }
       }
