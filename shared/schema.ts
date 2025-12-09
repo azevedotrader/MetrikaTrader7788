@@ -294,7 +294,7 @@ export const updateUserByAdminSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   phone: z.string().optional(),
-  planType: z.enum(["free", "starter", "pro", "black"]).optional(),
+  planType: z.enum(["free", "monthly", "quarterly", "annual"]).optional(),
   isActive: z.boolean().optional(),
   planExpiresAt: z.string().optional().transform(val => {
     if (!val || val.trim() === '') return undefined;
