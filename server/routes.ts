@@ -3139,13 +3139,13 @@ Todos os planos pagos incluem:
         console.log('⚠️ Admin tentou definir planExpiresAt manualmente. Política de 30 dias automáticos aplicada.');
       }
       
-      // Se o plano está sendo alterado, forçar logout do usuário
+      // Se o plano está sendo alterado, apenas logar a mudança
+      // O frontend detecta a mudança via polling e atualiza automaticamente sem logout
       if (updates.planType) {
         const currentUser = await storage.getUser(userId);
         if (currentUser && currentUser.planType !== updates.planType) {
-          console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType} para ${updates.planType}. Forçando logout.`);
-          // Definir forceLogoutAt para invalidar sessões atuais
-          await storage.setForceLogout(userId);
+          console.log(`🔄 Plano do usuário ${userId} alterado de ${currentUser.planType} para ${updates.planType}. Frontend será atualizado automaticamente via polling.`);
+          // Não forçar logout - atualização em tempo real via polling
         }
       }
       
