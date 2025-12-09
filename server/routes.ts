@@ -1984,7 +1984,8 @@ export async function registerRoutes(app: Express): Promise<void> {
           tradesImported: excelResult.length,
           status: "completed",
           tradesSkipped: 0,
-          errorMessage: null
+          errorMessage: null,
+          walletId: walletId || null
         });
 
         if (excelResult.length > 0) {
@@ -2081,7 +2082,8 @@ export async function registerRoutes(app: Express): Promise<void> {
             tradesImported: result.trades.length,
             status: "completed",
             tradesSkipped: result.summary.statisticsSkipped || 0,
-            errorMessage: null
+            errorMessage: null,
+            walletId: walletId || null
           });
 
           if (result.trades.length > 0) {
@@ -2263,7 +2265,8 @@ export async function registerRoutes(app: Express): Promise<void> {
         tradesImported: 0, // Será atualizado depois
         tradesSkipped: result.summary.statisticsSkipped,
         status: 'completed',
-        errorMessage: result.errors.length > 0 ? result.errors.join('; ') : null
+        errorMessage: result.errors.length > 0 ? result.errors.join('; ') : null,
+        walletId: walletId || null
       });
 
       // Convert trades from USD to BRL for Forex/Crypto markets
@@ -2764,9 +2767,9 @@ All paid plans include:
 • Priority support
 • Full access to all features
 
-**💳 Monthly** - R$ 29,90/month
-**📦 Quarterly** - R$ 69,90/quarter (Save 22%)
-**🏆 Annual** - R$ 199,90/year (Save 44%)
+**💳 Monthly** - R$ 97/month
+**📦 Quarterly** - R$ 197/quarter (Save 32%)
+**🏆 Annual** - R$ 547/year (Save 53%)
 
 **Ready to dominate the markets?** Upgrade now and get your first AI analysis in seconds!`
             : `🤖 **Assistente IA Exclusivo para Membros Premium**
@@ -2783,9 +2786,9 @@ Todos os planos pagos incluem:
 • Suporte prioritário
 • Acesso completo a todos os recursos
 
-**💳 Mensal** - R$ 29,90/mês
-**📦 Trimestral** - R$ 69,90/trimestre (Economize 22%)
-**🏆 Anual** - R$ 199,90/ano (Economize 44%)
+**💳 Mensal** - R$ 97/mês
+**📦 Trimestral** - R$ 197/trimestre (Economize 32%)
+**🏆 Anual** - R$ 547/ano (Economize 53%)
 
 **Pronto para dominar os mercados?** Faça upgrade agora e tenha sua primeira análise IA em segundos!`;
 
@@ -3239,8 +3242,8 @@ Todos os planos pagos incluem:
         const freeUsers = allUsers.filter(u => !u.planType || u.planType === 'free').length;
         
         // Calcular receita mensal baseado nos novos planos
-        // Mensal: R$29,90/mês, Trimestral: R$69,90/3 meses (~R$23,30/mês), Anual: R$199,90/12 meses (~R$16,66/mês)
-        const monthlyRevenue = (monthlyUsers * 29.90) + (quarterlyUsers * 23.30) + (annualUsers * 16.66);
+        // Mensal: R$97/mês, Trimestral: R$197/3 meses (~R$65.67/mês), Anual: R$547/12 meses (~R$45.58/mês)
+        const monthlyRevenue = (monthlyUsers * 97) + (quarterlyUsers * 65.67) + (annualUsers * 45.58);
         
         const calculatedStats = {
           date: new Date(),

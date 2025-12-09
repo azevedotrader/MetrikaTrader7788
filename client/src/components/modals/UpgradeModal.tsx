@@ -23,9 +23,9 @@ interface UpgradeModalProps {
 }
 
 const CHECKOUT_LINKS = {
-  monthly: 'https://pay.kiwify.com.br/mensal',
-  quarterly: 'https://pay.kiwify.com.br/trimestral',
-  annual: 'https://pay.kiwify.com.br/anual',
+  monthly: 'https://hub.la/g/CGRfvH9XIZzkXUFTkesn',
+  quarterly: 'https://hub.la/g/lUlRpoibiOjhnJF47H43',
+  annual: 'https://hub.la/g/kUCz3mE6Gon3TeOz1h40',
 };
 
 export function UpgradeModal({ 
@@ -40,7 +40,7 @@ export function UpgradeModal({
     {
       id: 'monthly',
       name: 'Mensal',
-      price: 'R$ 29,90',
+      price: 'R$ 97',
       period: '/mês',
       color: 'bg-blue-600',
       popular: false,
@@ -48,20 +48,20 @@ export function UpgradeModal({
     {
       id: 'quarterly',
       name: 'Trimestral',
-      price: 'R$ 69,90',
+      price: 'R$ 197',
       period: '/trimestre',
       color: 'bg-purple-600',
       popular: true,
-      savings: 'Economize 22%',
+      savings: 'Economize 32%',
     },
     {
       id: 'annual',
       name: 'Anual',
-      price: 'R$ 199,90',
+      price: 'R$ 547',
       period: '/ano',
       color: 'bg-gradient-to-r from-purple-600 to-blue-600',
       popular: false,
-      savings: 'Economize 44%',
+      savings: 'Economize 53%',
     },
   ];
 

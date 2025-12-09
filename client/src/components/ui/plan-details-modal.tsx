@@ -18,9 +18,9 @@ interface PlanDetailsModalProps {
 }
 
 const CHECKOUT_LINKS = {
-  monthly: 'https://pay.kiwify.com.br/mensal', // Substituir pelo link real
-  quarterly: 'https://pay.kiwify.com.br/trimestral', // Substituir pelo link real
-  annual: 'https://pay.kiwify.com.br/anual', // Substituir pelo link real
+  monthly: 'https://hub.la/g/CGRfvH9XIZzkXUFTkesn',
+  quarterly: 'https://hub.la/g/lUlRpoibiOjhnJF47H43',
+  annual: 'https://hub.la/g/kUCz3mE6Gon3TeOz1h40',
 };
 
 export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModalProps) {

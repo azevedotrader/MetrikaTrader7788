@@ -674,24 +674,23 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {/* Plano Starter */}
+            {/* Plano Mensal */}
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.starter_title')}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.monthly_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.starter_price')}</span>
-                    <span className="text-slate-400 ml-2">{t('landing.pricing.starter_period')}</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.monthly_price')}</span>
+                    <span className="text-slate-400 ml-2">{t('landing.pricing.monthly_period')}</span>
                   </div>
-                  <p className="text-slate-400">{t('landing.pricing.starter_trial')}</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    t('landing.pricing.starter_feature1'),
-                    t('landing.pricing.starter_feature2'),
-                    t('landing.pricing.starter_feature3'),
-                    t('landing.pricing.starter_feature4')
+                    t('landing.pricing.monthly_feature1'),
+                    t('landing.pricing.monthly_feature2'),
+                    t('landing.pricing.monthly_feature3'),
+                    t('landing.pricing.monthly_feature4')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
@@ -703,14 +702,14 @@ export default function Landing() {
                 <Button 
                   variant="outline" 
                   className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
-                  onClick={() => setShowRegister(true)}
+                  onClick={() => window.open('https://hub.la/g/CGRfvH9XIZzkXUFTkesn', '_blank')}
                 >
-                  {t('landing.pricing.starter_button')}
+                  {t('landing.pricing.monthly_button')}
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Plano Pro - Destaque */}
+            {/* Plano Trimestral - Destaque */}
             <Card className="bg-gradient-to-br from-emerald-600/25 to-indigo-600/25 border-2 border-emerald-500 relative md:scale-105 shadow-2xl animate-glow order-first md:order-none">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-bold">
@@ -719,21 +718,20 @@ export default function Landing() {
               </div>
               <CardContent className="p-4 sm:p-6 md:p-8 pt-6 sm:pt-8">
                 <div className="text-center mb-6 sm:mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.pro_title')}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.quarterly_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.pro_price')}</span>
-                    <span className="text-slate-400 ml-2">{t('landing.pricing.pro_period')}</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.quarterly_price')}</span>
+                    <span className="text-slate-400 ml-2">{t('landing.pricing.quarterly_period')}</span>
                   </div>
-                  <p className="text-slate-300">{t('landing.pricing.pro_annual')}</p>
+                  <p className="text-emerald-400 font-semibold">{t('landing.pricing.quarterly_savings')}</p>
                 </div>
                 
                 <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                   {[
-                    t('landing.pricing.pro_feature1'),
-                    t('landing.pricing.pro_feature2'),
-                    t('landing.pricing.pro_feature3'),
-                    t('landing.pricing.pro_feature4'),
-                    t('landing.pricing.pro_feature6')
+                    t('landing.pricing.quarterly_feature1'),
+                    t('landing.pricing.quarterly_feature2'),
+                    t('landing.pricing.quarterly_feature3'),
+                    t('landing.pricing.quarterly_feature4')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
@@ -744,48 +742,52 @@ export default function Landing() {
 
                 <Button 
                   className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 text-base sm:text-lg md:text-xl font-bold py-3 sm:py-4 animate-glow"
-                  onClick={() => setShowRegister(true)}
+                  onClick={() => window.open('https://hub.la/g/lUlRpoibiOjhnJF47H43', '_blank')}
                 >
-                  {t('landing.pricing.pro_button')}
+                  {t('landing.pricing.quarterly_button')}
                   <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2 sm:ml-3" />
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Plano VIP */}
-            <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
-              <CardContent className="p-4 sm:p-6 md:p-8">
+            {/* Plano Anual */}
+            <Card className="bg-gradient-to-br from-purple-900/40 to-slate-900/80 border-purple-500/50 hover:border-purple-400 transition-all relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1 text-xs font-bold">
+                  MELHOR VALOR
+                </Badge>
+              </div>
+              <CardContent className="p-4 sm:p-6 md:p-8 pt-6 sm:pt-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.black_title')}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.annual_title')}</h3>
                   <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.black_price')}</span>
-                    <span className="text-slate-400 ml-2">{t('landing.pricing.black_period')}</span>
+                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.annual_price')}</span>
+                    <span className="text-slate-400 ml-2">{t('landing.pricing.annual_period')}</span>
                   </div>
-                  <p className="text-slate-400">{t('landing.pricing.black_annual')}</p>
+                  <p className="text-green-400 font-semibold">{t('landing.pricing.annual_savings')}</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
                   {[
-                    'Tudo do PRO +',
-                    t('landing.pricing.black_feature2'),
-                    t('landing.pricing.black_feature3'),
-                    t('landing.pricing.black_feature4'),
-                    t('landing.pricing.black_feature5'),
-                    t('landing.pricing.black_feature6')
+                    t('landing.pricing.annual_feature1'),
+                    t('landing.pricing.annual_feature2'),
+                    t('landing.pricing.annual_feature3'),
+                    t('landing.pricing.annual_feature4'),
+                    t('landing.pricing.annual_feature5'),
+                    t('landing.pricing.annual_feature6')
                   ].map((feature, i) => (
                     <div key={i} className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
                       <span className="text-slate-300">{feature}</span>
                     </div>
                   ))}
                 </div>
 
                 <Button 
-                  variant="outline" 
-                  className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
-                  onClick={() => setShowRegister(true)}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold"
+                  onClick={() => window.open('https://hub.la/g/kUCz3mE6Gon3TeOz1h40', '_blank')}
                 >
-                  {t('landing.pricing.black_button')}
+                  {t('landing.pricing.annual_button')}
                 </Button>
               </CardContent>
             </Card>

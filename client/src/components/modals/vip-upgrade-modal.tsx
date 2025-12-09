@@ -102,30 +102,30 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
 
   const texts = {
     pt: {
-      unlock: "Desbloqueie o Plano VIP",
+      unlock: "Desbloqueie Acesso Premium",
       subtitle: "Eleve sua experiência de trading para o próximo nível",
-      vipBenefits: "Benefícios do Plano VIP",
-      price: "R$ 97,00",
+      vipBenefits: "Benefícios Premium",
+      price: "R$ 97",
       period: "/mês",
-      cta: "Quero ser VIP",
+      cta: "Quero Acesso Premium",
       later: "Mais tarde"
     },
     en: {
-      unlock: "Unlock the VIP Plan",
+      unlock: "Unlock Premium Access",
       subtitle: "Take your trading experience to the next level",
-      vipBenefits: "VIP Plan Benefits",
-      price: "$59",
+      vipBenefits: "Premium Benefits",
+      price: "$97",
       period: "/month",
-      cta: "I want to be VIP",
+      cta: "I want Premium Access",
       later: "Later"
     },
     es: {
-      unlock: "Desbloquea el Plan VIP",
+      unlock: "Desbloquea Acceso Premium",
       subtitle: "Lleva tu experiencia de trading al siguiente nivel",
-      vipBenefits: "Beneficios del Plan VIP",
-      price: "$59",
+      vipBenefits: "Beneficios Premium",
+      price: "$97",
       period: "/mes",
-      cta: "Quiero ser VIP",
+      cta: "Quiero Acceso Premium",
       later: "Más tarde"
     }
   };
@@ -194,10 +194,10 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
                 <div>
                   <p className="text-sm text-zinc-400">{lang === 'pt' ? 'Plano Anual' : lang === 'es' ? 'Plan Anual' : 'Annual Plan'}</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 67' : '$39'}</span>
-                    <span className="text-zinc-400">/{lang === 'pt' ? 'mês' : lang === 'es' ? 'mes' : 'month'}</span>
+                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 547' : '$547'}</span>
+                    <span className="text-zinc-400">/{lang === 'pt' ? 'ano' : lang === 'es' ? 'año' : 'year'}</span>
                   </div>
-                  <p className="text-xs text-green-400">{lang === 'pt' ? 'Economize 31%' : lang === 'es' ? 'Ahorra 31%' : 'Save 31%'}</p>
+                  <p className="text-xs text-green-400">{lang === 'pt' ? 'Economize 53%' : lang === 'es' ? 'Ahorra 53%' : 'Save 53%'}</p>
                 </div>
                 <div className="text-right">
                   <span className="bg-green-500 text-black text-xs font-bold px-2 py-1 rounded-full">
@@ -216,10 +216,10 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
                 <div>
                   <p className="text-sm text-zinc-400">{lang === 'pt' ? 'Plano Trimestral' : lang === 'es' ? 'Plan Trimestral' : 'Quarterly Plan'}</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 77' : '$45'}</span>
-                    <span className="text-zinc-400">/{lang === 'pt' ? 'mês' : lang === 'es' ? 'mes' : 'month'}</span>
+                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 197' : '$197'}</span>
+                    <span className="text-zinc-400">/{lang === 'pt' ? 'trimestre' : lang === 'es' ? 'trimestre' : 'quarter'}</span>
                   </div>
-                  <p className="text-xs text-purple-400">{lang === 'pt' ? 'Economize 21%' : lang === 'es' ? 'Ahorra 21%' : 'Save 21%'}</p>
+                  <p className="text-xs text-purple-400">{lang === 'pt' ? 'Economize 32%' : lang === 'es' ? 'Ahorra 32%' : 'Save 32%'}</p>
                 </div>
                 <div className="text-right">
                   <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
@@ -238,7 +238,7 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
                 <div>
                   <p className="text-sm text-zinc-400">{lang === 'pt' ? 'Plano Mensal' : lang === 'es' ? 'Plan Mensual' : 'Monthly Plan'}</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 97' : '$59'}</span>
+                    <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 97' : '$97'}</span>
                     <span className="text-zinc-400">/{lang === 'pt' ? 'mês' : lang === 'es' ? 'mes' : 'month'}</span>
                   </div>
                 </div>
