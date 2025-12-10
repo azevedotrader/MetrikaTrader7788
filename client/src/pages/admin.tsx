@@ -242,6 +242,7 @@ export default function AdminPage() {
     userForm.reset({
       name: user.name,
       email: user.email,
+      password: "", // Sempre limpar senha ao abrir modal para evitar alterações acidentais
       phone: user.phone || "",
       planType: user.planType,
       isActive: user.isActive,
