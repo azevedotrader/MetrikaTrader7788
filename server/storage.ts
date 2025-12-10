@@ -46,6 +46,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, count, sql, gte, lte, isNull } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 export interface IStorage {
   // User operations
@@ -480,6 +481,12 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserByAdmin(id: string, updates: UpdateUserByAdmin): Promise<User> {
     const updateData: any = { ...updates };
+    
+    // Se password está sendo atualizado, fazer hash com bcrypt
+    if (updates.password) {
+      updateData.password = await bcrypt.hash(updates.password, 10);
+      console.log(`🔐 Senha do usuário ${id} atualizada pelo admin (hash aplicado)`);
+    }
     
     // Se planType está sendo atualizado, definir a duração correta baseada no tipo de plano
     if (updates.planType) {
