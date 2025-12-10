@@ -6,11 +6,19 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'suporte@appmetrika.com.br';
 
 // Get the correct URL for different environments
 const getAppUrl = () => {
-  // Use the universal project domain with guaranteed SSL
+  // In production, use the published domain
+  if (process.env.REPLIT_DEPLOYMENT) {
+    return 'https://metrikai.replit.app';
+  }
+  // In development, use the Replit dev URL
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+  }
+  // Fallback
   return 'https://metrikai.replit.app';
 };
 
-const APP_URL = getAppUrl();
+let APP_URL = getAppUrl();
 
 // Initialize SendGrid if API key is provided
 if (SENDGRID_API_KEY) {
