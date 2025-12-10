@@ -6,16 +6,16 @@ const FROM_EMAIL = process.env.FROM_EMAIL || 'suporte@appmetrika.com.br';
 
 // Get the correct URL for different environments
 const getAppUrl = () => {
-  // In production, use the published domain
+  // In production, use the custom domain
   if (process.env.REPLIT_DEPLOYMENT) {
-    return 'https://metrikai.replit.app';
+    return 'https://appmetrika.com.br';
   }
   // In development, use the Replit dev URL
   if (process.env.REPLIT_DEV_DOMAIN) {
     return `https://${process.env.REPLIT_DEV_DOMAIN}`;
   }
-  // Fallback
-  return 'https://metrikai.replit.app';
+  // Fallback to production domain
+  return 'https://appmetrika.com.br';
 };
 
 let APP_URL = getAppUrl();
