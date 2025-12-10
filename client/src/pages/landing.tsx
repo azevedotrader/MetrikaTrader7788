@@ -678,11 +678,12 @@ export default function Landing() {
             <Card className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all">
               <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.monthly_title')}</h3>
-                  <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.monthly_price')}</span>
-                    <span className="text-slate-400 ml-2">{t('landing.pricing.monthly_period')}</span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">{t('landing.pricing.monthly_title')}</h3>
+                  <div className="flex items-baseline justify-center">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 97</span>
+                    <span className="text-slate-400 ml-2">/mês</span>
                   </div>
+                  <p className="text-slate-500 text-sm mt-2">Cobrado mensalmente</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
@@ -718,12 +719,13 @@ export default function Landing() {
               </div>
               <CardContent className="p-4 sm:p-6 md:p-8 pt-6 sm:pt-8">
                 <div className="text-center mb-6 sm:mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.quarterly_title')}</h3>
-                  <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.quarterly_price')}</span>
-                    <span className="text-slate-400 ml-2">{t('landing.pricing.quarterly_period')}</span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">{t('landing.pricing.quarterly_title')}</h3>
+                  <div className="flex items-baseline justify-center">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 65</span>
+                    <span className="text-slate-400 ml-2">/mês</span>
                   </div>
-                  <p className="text-emerald-400 font-semibold">{t('landing.pricing.quarterly_savings')}</p>
+                  <p className="text-slate-400 text-sm mt-2">R$ 197 cobrado a cada 3 meses</p>
+                  <p className="text-emerald-400 font-semibold mt-2">{t('landing.pricing.quarterly_savings')}</p>
                 </div>
                 
                 <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
@@ -759,12 +761,13 @@ export default function Landing() {
               </div>
               <CardContent className="p-4 sm:p-6 md:p-8 pt-6 sm:pt-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('landing.pricing.annual_title')}</h3>
-                  <div className="flex items-baseline justify-center mb-2">
-                    <span className="text-3xl sm:text-4xl font-bold text-white">{t('landing.pricing.annual_price')}</span>
-                    <span className="text-slate-400 ml-2">{t('landing.pricing.annual_period')}</span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">{t('landing.pricing.annual_title')}</h3>
+                  <div className="flex items-baseline justify-center">
+                    <span className="text-3xl sm:text-4xl font-bold text-white">R$ 45</span>
+                    <span className="text-slate-400 ml-2">/mês</span>
                   </div>
-                  <p className="text-green-400 font-semibold">{t('landing.pricing.annual_savings')}</p>
+                  <p className="text-slate-400 text-sm mt-2">R$ 547 cobrado anualmente</p>
+                  <p className="text-green-400 font-semibold mt-2">{t('landing.pricing.annual_savings')}</p>
                 </div>
                 
                 <div className="space-y-4 mb-8">
