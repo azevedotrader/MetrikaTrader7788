@@ -298,6 +298,7 @@ export async function sendPasswordResetEmail(email: string, token: string): Prom
   // Use the configured app URL with proper SSL
   const resetLink = `${APP_URL}/reset-password?token=${token}`;
   console.log(`🔗 Link de reset gerado: ${resetLink}`);
+  console.log(`📧 Email remetente configurado: ${FROM_EMAIL}`);
   
   const msg = {
     to: email,
