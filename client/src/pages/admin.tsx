@@ -40,7 +40,9 @@ import {
   MessageSquare,
   Clock,
   User,
-  Send
+  Send,
+  Search,
+  X
 } from "lucide-react";
 
 // Admin-specific API request function
@@ -99,6 +101,7 @@ export default function AdminPage() {
   const [isPlanDialogOpen, setIsPlanDialogOpen] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [adminMessage, setAdminMessage] = useState('');
+  const [searchEmail, setSearchEmail] = useState('');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -533,6 +536,36 @@ export default function AdminPage() {
               </div>
             </CardHeader>
             <CardContent>
+              {/* Search by Email */}
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Pesquisar por email..."
+                    value={searchEmail}
+                    onChange={(e) => setSearchEmail(e.target.value)}
+                    className="pl-10 pr-10"
+                    data-testid="input-search-user-email"
+                  />
+                  {searchEmail && (
+                    <button
+                      onClick={() => setSearchEmail('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      data-testid="button-clear-search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                {searchEmail && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    {((users as any)?.filter((user: any) => 
+                      user.email.toLowerCase().includes(searchEmail.toLowerCase())
+                    ) || []).length} usuário(s) encontrado(s)
+                  </p>
+                )}
+              </div>
+
               {usersLoading ? (
                 <p>Carregando usuários...</p>
               ) : (
@@ -552,7 +585,9 @@ export default function AdminPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {(users as any)?.map((user: any) => (
+                        {(users as any)?.filter((user: any) => 
+                          searchEmail ? user.email.toLowerCase().includes(searchEmail.toLowerCase()) : true
+                        ).map((user: any) => (
                           <TableRow key={user.id}>
                             <TableCell className="font-medium">{user.name}</TableCell>
                             <TableCell>{user.email}</TableCell>
@@ -608,7 +643,9 @@ export default function AdminPage() {
 
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
-                    {(users as any)?.map((user: any) => (
+                    {(users as any)?.filter((user: any) => 
+                      searchEmail ? user.email.toLowerCase().includes(searchEmail.toLowerCase()) : true
+                    ).map((user: any) => (
                       <Card key={user.id} className="border border-gray-200">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between mb-3">
