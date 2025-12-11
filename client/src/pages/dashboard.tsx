@@ -2344,7 +2344,7 @@ function NetDailyPnLBarChart({ trades, formatCurrency }: { trades: Trade[]; form
 }
 
 // Recent Trades Component
-function RecentTrades({ trades, formatCurrency }: { trades: Trade[]; formatCurrency: (value: number) => string }) {
+function RecentTrades({ trades, formatCurrency, hideData = false }: { trades: Trade[]; formatCurrency: (value: number) => string; hideData?: boolean }) {
   const recentTrades = useMemo(() => {
     return [...trades]
       .sort((a, b) => new Date(b.dataHora).getTime() - new Date(a.dataHora).getTime())
@@ -2388,8 +2388,8 @@ function RecentTrades({ trades, formatCurrency }: { trades: Trade[]; formatCurre
               <div className="text-zinc-300">
                 {parseFloat(trade.quantidade || '0').toFixed(0)}
               </div>
-              <div className={`font-medium ${result >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
-                {result >= 0 ? '+' : ''}{formatCurrency(result)}
+              <div className={`font-medium ${hideData ? 'text-zinc-500' : (result >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]')}`}>
+                {hideData ? '•••••' : `${result >= 0 ? '+' : ''}${formatCurrency(result)}`}
               </div>
             </div>
           );
@@ -2924,6 +2924,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       t={t}
                       onPeriodFilterChange={setPeriodFilteredTrades}
                       formatCurrency={formatCurrency}
+                      hideData={hideData}
                     />
                   </div>
                 </CardContent>
@@ -3099,6 +3100,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <TradingCalendar 
                     trades={filteredTrades} 
                     className="scale-100"
+                    hideData={hideData}
                   />
                 </div>
                 
@@ -3186,7 +3188,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <FileText className="h-4 w-4 text-zinc-400" />
                   </div>
                   <div className="h-48 overflow-hidden">
-                    <RecentTrades trades={periodFilteredTrades} formatCurrency={formatCurrency} />
+                    <RecentTrades trades={periodFilteredTrades} formatCurrency={formatCurrency} hideData={hideData} />
                   </div>
                 </CardContent>
               </Card>
@@ -3236,7 +3238,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   className="flex-1 min-h-[280px]"
                 >
                   <div className="h-full overflow-auto">
-                    <RecentTrades trades={periodFilteredTrades} formatCurrency={formatCurrency} />
+                    <RecentTrades trades={periodFilteredTrades} formatCurrency={formatCurrency} hideData={hideData} />
                   </div>
                 </SquareCard>
               </div>

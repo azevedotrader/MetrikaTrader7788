@@ -62,6 +62,7 @@ interface TradingPerformanceChartProps {
   t: (key: string) => string;
   formatCurrency: (value: number) => string;
   onPeriodFilterChange?: (filteredTrades: Trade[]) => void;
+  hideData?: boolean;
 }
 
 // Função para detectar picos e fundos usando mudanças relativas
@@ -277,7 +278,8 @@ export function TradingPerformanceChart({
   trades, 
   t, 
   formatCurrency, 
-  onPeriodFilterChange 
+  onPeriodFilterChange,
+  hideData = false
 }: TradingPerformanceChartProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom">("1a");
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
@@ -486,18 +488,18 @@ export function TradingPerformanceChart({
             </p>
           )}
           
-          <p style={{ margin: 0, marginBottom: "4px", color: dataPoint.total >= 0 ? "#2FA87A" : "#F06363", fontSize: "14px" }}>
-            {dataPoint.total >= 0 ? "📈" : "📉"} {dataPoint.total >= 0 ? "+" : ""}{formatCurrency(dataPoint.total)}
+          <p style={{ margin: 0, marginBottom: "4px", color: hideData ? "#888" : (dataPoint.total >= 0 ? "#2FA87A" : "#F06363"), fontSize: "14px" }}>
+            {dataPoint.total >= 0 ? "📈" : "📉"} {hideData ? "•••••" : `${dataPoint.total >= 0 ? "+" : ""}${formatCurrency(dataPoint.total)}`}
           </p>
           
-          <p style={{ margin: 0, color: dataPoint.accumulated >= 0 ? "#2FA87A" : "#F06363", fontSize: "12px", opacity: 0.8 }}>
-            💰 Total: {formatCurrency(dataPoint.accumulated)}
+          <p style={{ margin: 0, color: hideData ? "#888" : (dataPoint.accumulated >= 0 ? "#2FA87A" : "#F06363"), fontSize: "12px", opacity: 0.8 }}>
+            💰 Total: {hideData ? "•••••" : formatCurrency(dataPoint.accumulated)}
           </p>
         </div>
       );
     }
     return null;
-  }, [formatCurrency]);
+  }, [formatCurrency, hideData]);
 
   if (chartData.length === 0) {
     return (
@@ -810,7 +812,7 @@ export function TradingPerformanceChart({
             <YAxis 
               stroke="#666"
               fontSize={window.innerWidth < 768 ? 9 : 11}
-              tickFormatter={(value) => formatCurrency(value)}
+              tickFormatter={(value) => hideData ? "•••" : formatCurrency(value)}
               tick={{ fill: '#888' }}
             />
             

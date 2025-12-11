@@ -41,6 +41,7 @@ interface TradingCalendarProps {
   calendarData?: any[];
   className?: string;
   onDateClick?: (date: Date, entry?: DiaryEntry) => void;
+  hideData?: boolean;
 }
 
 export function TradingCalendar({
@@ -48,6 +49,7 @@ export function TradingCalendar({
   calendarData = [],
   className,
   onDateClick,
+  hideData = false,
 }: TradingCalendarProps) {
   const { t, language } = useLanguage();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -333,21 +335,27 @@ export function TradingCalendar({
               className={cn(
                 "font-extrabold tracking-tight tabular-nums leading-none text-center",
                 "text-sm sm:text-lg md:text-2xl",
-                hasData && isBreakEven ? "text-zinc-900" : "text-white"
+                hideData ? "text-zinc-500" : (hasData && isBreakEven ? "text-zinc-900" : "text-white")
               )}
               style={{ 
-                textShadow: hasData && isBreakEven ? 'none' : '0 2px 4px rgba(0,0,0,0.8)'
+                textShadow: hideData ? 'none' : (hasData && isBreakEven ? 'none' : '0 2px 4px rgba(0,0,0,0.8)')
               }}
             >
-              <span className="sm:hidden">
-                {tradeDay.pnl >= 0 ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(0)}k` : tradeDay.pnl.toFixed(0)}
-              </span>
-              <span className="hidden sm:inline md:hidden">
-                {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
-              </span>
-              <span className="hidden md:inline">
-                {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
-              </span>
+              {hideData ? (
+                <span>•••••</span>
+              ) : (
+                <>
+                  <span className="sm:hidden">
+                    {tradeDay.pnl >= 0 ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(0)}k` : tradeDay.pnl.toFixed(0)}
+                  </span>
+                  <span className="hidden sm:inline md:hidden">
+                    {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                  </span>
+                  <span className="hidden md:inline">
+                    {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -405,10 +413,13 @@ export function TradingCalendar({
             {t("calendar.week")} {week.weekNumber}
           </div>
           <div
-            className="text-white font-extrabold text-base md:text-lg tabular-nums mb-1"
-            style={{ textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}
+            className={cn(
+              "font-extrabold text-base md:text-lg tabular-nums mb-1",
+              hideData ? "text-zinc-500" : "text-white"
+            )}
+            style={{ textShadow: hideData ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}
           >
-            {isProfit ? "+" : ""}R$ {Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+            {hideData ? "•••••" : `${isProfit ? "+" : ""}R$ ${Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
           </div>
           <div className="text-[10px] text-white/80">
             {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")} • {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
@@ -568,13 +579,12 @@ export function TradingCalendar({
                 <div
                   className={cn(
                     "text-xl sm:text-2xl font-bold mb-1",
-                    monthlyStats.totalPnl > 0
+                    hideData ? "text-zinc-500" : (monthlyStats.totalPnl > 0
                       ? "text-[#032E23]"
-                      : "text-[#631919]",
+                      : "text-[#631919]"),
                   )}
                 >
-                  {monthlyStats.totalPnl > 0 ? "+" : ""}
-                  R$ {Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+                  {hideData ? "•••••" : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
                 </div>
                 <div className="text-xs sm:text-sm text-zinc-400 font-medium">
                   {t("calendar.pnl_total")}
