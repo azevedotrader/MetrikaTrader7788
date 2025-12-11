@@ -553,8 +553,7 @@ export class DatabaseStorage implements IStorage {
       updateData.whatsappNumber = updates.whatsappNumber;
     }
     if (updates.senha) {
-      // Em uma implementação real, você deveria fazer hash da senha
-      updateData.password = updates.senha;
+      updateData.password = await bcrypt.hash(updates.senha, 10);
     }
     
     updateData.updatedAt = new Date();
