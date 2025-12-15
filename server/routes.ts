@@ -4457,7 +4457,8 @@ Todos os planos pagos incluem:
   });
 
   // Map para armazenar trades pendentes de seleção de moeda (chave: número do telefone)
-  const pendingCurrencyTrades: Map<string, { tradeData: any; messageId: string; userId: string }> = new Map();
+  // Inclui timestamp para expirar trades antigos (máximo 5 minutos)
+  const pendingCurrencyTrades: Map<string, { tradeData: any; messageId: string; userId: string; createdAt: number }> = new Map();
 
   // Função para normalizar números de telefone brasileiros
   function normalizePhoneNumber(phone: string): string[] {
@@ -4700,6 +4701,14 @@ Todos os planos pagos incluem:
             return;
           }
           
+          // Verificar se o pending trade não expirou (máximo 5 minutos)
+          const PENDING_TRADE_EXPIRY = 5 * 60 * 1000; // 5 minutos
+          if (Date.now() - pendingTrade.createdAt > PENDING_TRADE_EXPIRY) {
+            pendingCurrencyTrades.delete(fromNumber);
+            await sendWhatsAppMessage(fromNumber, '❌ Trade expirado. Por favor, envie seu trade novamente.');
+            return;
+          }
+          
           try {
             // Buscar cotação e converter valores
             const usdToBrlRate = await getUsdToBrlRate();
@@ -4803,6 +4812,14 @@ Todos os planos pagos incluem:
           const pendingTrade = pendingCurrencyTrades.get(fromNumber);
           if (!pendingTrade) {
             await sendWhatsAppMessage(fromNumber, '❌ Nenhum trade pendente encontrado. Envie seu trade novamente.');
+            return;
+          }
+          
+          // Verificar se o pending trade não expirou (máximo 5 minutos)
+          const PENDING_TRADE_EXPIRY = 5 * 60 * 1000; // 5 minutos
+          if (Date.now() - pendingTrade.createdAt > PENDING_TRADE_EXPIRY) {
+            pendingCurrencyTrades.delete(fromNumber);
+            await sendWhatsAppMessage(fromNumber, '❌ Trade expirado. Por favor, envie seu trade novamente.');
             return;
           }
           
@@ -5278,7 +5295,46 @@ Todos os planos pagos incluem:
             // Validar dados do trade
             const validatedTrade = insertTradeSchema.parse(tradeData);
             
-            // Criar objeto trade para inserção
+            // Verificar se é Forex ou Crypto - perguntar a moeda
+            const mercado = validatedTrade.mercado?.toLowerCase();
+            if (mercado === 'forex' || mercado === 'crypto') {
+              // Armazenar trade pendente e perguntar a moeda
+              pendingCurrencyTrades.set(fromNumber, {
+                tradeData: validatedTrade,
+                messageId: savedMessage.id,
+                userId: user.id,
+                createdAt: Date.now()
+              });
+              
+              const currencyQuestion = `💱 *Em qual moeda está seu trade?*\n\n` +
+                `📊 *Ativo:* ${validatedTrade.ativo}\n` +
+                `💰 *Capital:* ${validatedTrade.capitalUtilizado}\n` +
+                `📈 *Resultado:* ${validatedTrade.resultado}\n\n` +
+                `━━━━━━━━━━━━━━━━━━━━\n\n` +
+                `Selecione a moeda para converter automaticamente:`;
+              
+              const currencyButtons = [
+                { id: 'btn_currency_usd', title: '💵 Dólar ($)' },
+                { id: 'btn_currency_brl', title: '🇧🇷 Real (R$)' }
+              ];
+              
+              await sendWhatsAppInteractiveMessage(fromNumber, currencyQuestion, currencyButtons);
+              await db
+                .update(whatsappMessages)
+                .set({ 
+                  status: 'waiting_currency_selection',
+                  processedAt: new Date()
+                })
+                .where(eq(whatsappMessages.id, savedMessage.id));
+              
+              console.log('💱 Aguardando seleção de moeda para trade:', {
+                ativo: validatedTrade.ativo,
+                mercado: mercado
+              });
+              return;
+            }
+            
+            // Para B3, salvar diretamente (já está em BRL)
             const insertData = {
               userId: user.id,
               dataHora: new Date(validatedTrade.dataHora!),

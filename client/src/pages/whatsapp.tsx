@@ -273,12 +273,12 @@ export default function WhatsAppPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert className="bg-yellow-900/20 border-yellow-600/30">
-              <InfoIcon className="h-4 w-4 text-yellow-600" />
-              <AlertTitle className="text-yellow-600">⚠️ Importante: Valores em REAIS (R$)</AlertTitle>
+            <Alert className="bg-green-900/20 border-green-600/30">
+              <InfoIcon className="h-4 w-4 text-green-600" />
+              <AlertTitle className="text-green-600">💱 Conversão Automática de Moeda</AlertTitle>
               <AlertDescription className="text-zinc-300">
-                Todos os valores devem ser informados em <strong>R$ (REAIS)</strong>. Nosso sistema não converte automaticamente de dólar para real. 
-                Se você opera em dólar, converta os valores antes de enviar a mensagem.
+                Para trades de <strong>Forex e Crypto</strong>, nosso sistema pergunta se os valores estão em Dólar ou Real.
+                Se você escolher Dólar ($), a conversão para Real (R$) é feita automaticamente usando a cotação atual!
               </AlertDescription>
             </Alert>
 
