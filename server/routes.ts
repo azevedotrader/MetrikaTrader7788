@@ -5671,12 +5671,12 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i,
         // Valor após Stop (ex: "Stop -40usd", "Stop 40", "Stop -50 no EURUSD")
         stop_valor: /stop[:\s]*[-]?([0-9.,]+)/i,
-        // Valor após Take (ex: "Take 100usd", "Take +150 no BTCUSD")  
-        take_valor: /take[:\s]*[+]?([0-9.,]+)/i,
-        // Valor no final da mensagem após "de" (ex: "Stop no EURUSD de 500")
-        valor_de: /\bde\s+([0-9.,]+)\s*$/i,
-        // Qualquer número no final da mensagem (fallback)
-        valor_final: /\b([0-9.,]+)\s*$/i
+        // Valor após Take/Win (ex: "Take 100usd", "Take +150 no BTCUSD", "Win de 500")  
+        take_valor: /(?:take|win)[:\s]*[+]?([0-9.,]+)/i,
+        // Valor após "de" em qualquer posição (ex: "Stop de 500 no EURUSD", "Win de 500 no eurusd")
+        valor_de: /\bde\s+([0-9.,]+)/i,
+        // Qualquer número isolado na mensagem (fallback)
+        valor_isolado: /\b([0-9][0-9.,]*)\b/i
       };
 
       const extracted: any = {};
@@ -5739,7 +5739,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
           const perdaValue = normalizeNumber(extracted.prejuizo, '0');
           const stopValor = normalizeNumber(extracted.stop_valor, '0');
           const valorDe = normalizeNumber(extracted.valor_de, '0');
-          const valorFinal = normalizeNumber(extracted.valor_final, '0');
+          const valorFinal = normalizeNumber(extracted.valor_isolado, '0');
           const arriscadoValue = normalizeNumber(extracted.arriscado, '0');
           
           if (perdaValue && parseFloat(perdaValue) > 0) {
@@ -5786,7 +5786,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       // Determinar capital utilizado com fallbacks
       const capitalValue = normalizeNumber(extracted.arriscado, '') || 
                           normalizeNumber(extracted.valor_de, '') || 
-                          normalizeNumber(extracted.valor_final, '') || 
+                          normalizeNumber(extracted.valor_isolado, '') || 
                           '100';
 
       const tradeData: InsertTrade = {
