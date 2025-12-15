@@ -4795,7 +4795,6 @@ Todos os planos pagos incluem:
               `━━━━━━━━━━━━━━━━━━━━\n\n` +
               `🎯 Ativo: *${newTrade.ativo}*\n` +
               `${emoji} Resultado: *${resultText}*\n` +
-              `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
               `📈 P&L: ${pnlPrefix}R$ ${Math.abs(resultado).toFixed(2)}\n\n` +
               `🚀 *Trade salvo na sua conta Métrika!*`;
             
@@ -4887,7 +4886,6 @@ Todos os planos pagos incluem:
               `📊 *Resumo do Trade:*\n\n` +
               `🎯 Ativo: *${newTrade.ativo}*\n` +
               `${emoji} Resultado: *${resultText}*\n` +
-              `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
               `📈 P&L: ${pnlPrefix}R$ ${Math.abs(resultado).toFixed(2)}\n` +
               `━━━━━━━━━━━━━━━━━━━━\n\n` +
               `🚀 *Trade salvo na sua conta Métrika!*`;
@@ -5411,7 +5409,6 @@ Todos os planos pagos incluem:
               `📊 *Resumo do Trade:*\n\n` +
               `🎯 Ativo: *${newTrade.ativo}*\n` +
               `${emoji} Resultado: *${resultText}*\n` +
-              `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
               `📈 P&L: ${pnlPrefix}R$ ${Math.abs(resultado).toFixed(2)}\n` +
               `━━━━━━━━━━━━━━━━━━━━\n\n` +
               `🚀 *Trade salvo na sua conta Métrika!*\n\n` +
