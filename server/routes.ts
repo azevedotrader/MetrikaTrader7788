@@ -5663,7 +5663,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         ativo: /(?:no|do|em)\s+([A-Z][A-Z0-9]{2,9})/i,
         // Take ou Stop (vitória ou perda)
         resultado_tipo: /(take|stop|vit[oó]ria|ganho|win|gain|lucro|lucrei|ganhei|perda|loss|preju[íi]zo|perdi)/i,
-        // Valor arriscado (capital usado) - AGORA INCLUI comprei/vendi + valor
+        // Valor arriscado (capital usado) - AGORA INCLUI comprei/vendi + valor E "de VALOR"
         arriscado: /(?:arrisquei|arriscado|risco|entrada|capital|usei|investi|valor|comprei|vendi|compra|venda)[:\s]*(?:de[:\s]*)?([0-9.,]+)/i,
         // Lucro (só para takes/vitórias) - procurar número ANTES da palavra ganho/lucro
         lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)|^([0-9.,]+)\s*(?:no|do)/i,
@@ -5672,7 +5672,11 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         // Valor após Stop (ex: "Stop -40usd", "Stop 40", "Stop -50 no EURUSD")
         stop_valor: /stop[:\s]*[-]?([0-9.,]+)/i,
         // Valor após Take (ex: "Take 100usd", "Take +150 no BTCUSD")  
-        take_valor: /take[:\s]*[+]?([0-9.,]+)/i
+        take_valor: /take[:\s]*[+]?([0-9.,]+)/i,
+        // Valor no final da mensagem após "de" (ex: "Stop no EURUSD de 500")
+        valor_de: /\bde\s+([0-9.,]+)\s*$/i,
+        // Qualquer número no final da mensagem (fallback)
+        valor_final: /\b([0-9.,]+)\s*$/i
       };
 
       const extracted: any = {};
@@ -5731,9 +5735,11 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         } 
         // Se mencionou STOP/perda/prejuízo = negativo (SEMPRE É LOSS!)
         else if (['stop', 'perda', 'loss', 'prejuizo', 'prejuízo', 'perdi'].some(w => resultText.includes(w))) {
-          // Prioridade: prejuízo explícito > stop_valor > arriscado
+          // Prioridade: prejuízo explícito > stop_valor > valor_de > valor_final > arriscado
           const perdaValue = normalizeNumber(extracted.prejuizo, '0');
           const stopValor = normalizeNumber(extracted.stop_valor, '0');
+          const valorDe = normalizeNumber(extracted.valor_de, '0');
+          const valorFinal = normalizeNumber(extracted.valor_final, '0');
           const arriscadoValue = normalizeNumber(extracted.arriscado, '0');
           
           if (perdaValue && parseFloat(perdaValue) > 0) {
@@ -5741,6 +5747,12 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
           } else if (stopValor && parseFloat(stopValor) > 0) {
             // Valor após "Stop" = valor da perda
             resultado = '-' + stopValor;
+          } else if (valorDe && parseFloat(valorDe) > 0) {
+            // Valor após "de" no final = valor da perda (ex: "Stop no EURUSD de 500")
+            resultado = '-' + valorDe;
+          } else if (valorFinal && parseFloat(valorFinal) > 0) {
+            // Número no final = valor da perda
+            resultado = '-' + valorFinal;
           } else if (arriscadoValue && parseFloat(arriscadoValue) > 0) {
             resultado = '-' + arriscadoValue;
           } else {
@@ -5771,6 +5783,12 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         corretora = 'b3';
       }
 
+      // Determinar capital utilizado com fallbacks
+      const capitalValue = normalizeNumber(extracted.arriscado, '') || 
+                          normalizeNumber(extracted.valor_de, '') || 
+                          normalizeNumber(extracted.valor_final, '') || 
+                          '100';
+
       const tradeData: InsertTrade = {
         userId,
         ativo,
@@ -5779,7 +5797,7 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         precoEntrada: '0', // Não usa preço de entrada neste formato
         precoSaida: '0', // Não usa preço de saída neste formato
         resultado,
-        capitalUtilizado: normalizeNumber(extracted.arriscado, '100'), // Valor arriscado = capital usado
+        capitalUtilizado: capitalValue, // Valor arriscado = capital usado
         setup: 'WhatsApp',
         mercado,
         corretora,
