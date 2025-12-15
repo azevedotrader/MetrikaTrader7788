@@ -1716,7 +1716,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       
       // Validate wallet ownership if walletId is provided
       if (req.body.walletId) {
-        const wallet = await storage.getWallet(userId, req.body.walletId);
+        const wallet = await storage.getWallet(req.body.walletId, userId);
         if (!wallet) {
           return res.status(400).json({ 
             message: 'Carteira não encontrada ou não pertence ao usuário' 
@@ -1951,7 +1951,7 @@ export async function registerRoutes(app: Express): Promise<void> {
 
       // Validate wallet ownership if walletId is provided
       if (walletId) {
-        const wallet = await storage.getWallet(userId, walletId);
+        const wallet = await storage.getWallet(walletId, userId);
         if (!wallet) {
           fs.unlinkSync(file.path);
           return res.status(400).json({ 
