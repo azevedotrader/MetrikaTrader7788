@@ -5669,10 +5669,10 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
         lucro: /(?:lucro|lucrei|ganho|profit|ganhou|ganhei)[:\s]*([0-9.,]+)|^([0-9.,]+)\s*(?:no|do)/i,
         // Prejuízo explícito (opcional para stops)
         prejuizo: /(?:preju[íi]zo|perda|loss|perdeu|perdi)[:\s]*([0-9.,]+)/i,
-        // Valor após Stop (ex: "Stop -40usd", "Stop 40", "Stop -50 no EURUSD")
-        stop_valor: /stop[:\s]*[-]?([0-9.,]+)/i,
+        // Valor após Stop (ex: "Stop -40usd", "Stop 40", "Stop -50 no EURUSD", "Stop de 700")
+        stop_valor: /stop[:\s]*(?:de[:\s]*)?[-]?([0-9.,]+)/i,
         // Valor após Take/Win (ex: "Take 100usd", "Take +150 no BTCUSD", "Win de 500")  
-        take_valor: /(?:take|win)[:\s]*[+]?([0-9.,]+)/i,
+        take_valor: /(?:take|win)[:\s]*(?:de[:\s]*)?[+]?([0-9.,]+)/i,
         // Valor após "de" em qualquer posição (ex: "Stop de 500 no EURUSD", "Win de 500 no eurusd")
         valor_de: /\bde\s+([0-9.,]+)/i,
         // Qualquer número isolado na mensagem (fallback)
@@ -5784,7 +5784,10 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       }
 
       // Determinar capital utilizado com fallbacks
+      // Para Stop/Take de X, o valor X é tanto o capital quanto o resultado
       const capitalValue = normalizeNumber(extracted.arriscado, '') || 
+                          normalizeNumber(extracted.stop_valor, '') ||
+                          normalizeNumber(extracted.take_valor, '') ||
                           normalizeNumber(extracted.valor_de, '') || 
                           normalizeNumber(extracted.valor_isolado, '') || 
                           '100';
