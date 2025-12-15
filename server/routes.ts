@@ -4456,6 +4456,9 @@ Todos os planos pagos incluem:
     }
   });
 
+  // Map para armazenar trades pendentes de seleção de moeda (chave: número do telefone)
+  const pendingCurrencyTrades: Map<string, { tradeData: any; messageId: string; userId: string }> = new Map();
+
   // Função para normalizar números de telefone brasileiros
   function normalizePhoneNumber(phone: string): string[] {
     // Remove todos os caracteres não numéricos
@@ -4689,6 +4692,197 @@ Todos os planos pagos incluem:
             })
             .where(eq(whatsappMessages.id, savedMessage.id));
           return;
+        } else if (messageTextLower === 'btn_currency_usd') {
+          // Usuário escolheu Dólar - converter para BRL
+          const pendingTrade = pendingCurrencyTrades.get(fromNumber);
+          if (!pendingTrade) {
+            await sendWhatsAppMessage(fromNumber, '❌ Nenhum trade pendente encontrado. Envie seu trade novamente.');
+            return;
+          }
+          
+          try {
+            // Buscar cotação e converter valores
+            const usdToBrlRate = await getUsdToBrlRate();
+            const tradeData = pendingTrade.tradeData;
+            
+            // Converter valores monetários
+            const convertValue = (value: string | undefined): string => {
+              if (!value) return '0';
+              const numValue = parseFloat(value);
+              if (isNaN(numValue)) return value;
+              return (numValue * usdToBrlRate).toFixed(2);
+            };
+            
+            const convertedTrade = {
+              ...tradeData,
+              capitalUtilizado: convertValue(tradeData.capitalUtilizado),
+              resultado: convertValue(tradeData.resultado),
+              precoEntrada: convertValue(tradeData.precoEntrada),
+              precoSaida: convertValue(tradeData.precoSaida),
+              stop: convertValue(tradeData.stop),
+              alvo: convertValue(tradeData.alvo),
+            };
+            
+            // Salvar trade convertido
+            const [newTrade] = await db
+              .insert(trades)
+              .values({
+                userId: pendingTrade.userId,
+                dataHora: new Date(convertedTrade.dataHora),
+                ativo: convertedTrade.ativo,
+                mercado: convertedTrade.mercado,
+                setup: convertedTrade.setup || 'WhatsApp',
+                capitalUtilizado: convertedTrade.capitalUtilizado,
+                quantidade: convertedTrade.quantidade || '1',
+                tipo: convertedTrade.tipo,
+                precoEntrada: convertedTrade.precoEntrada || '0',
+                precoSaida: convertedTrade.precoSaida || '0',
+                resultado: convertedTrade.resultado,
+                corretora: convertedTrade.corretora,
+                origem: 'manual',
+                comentario: `Convertido de USD (taxa: ${usdToBrlRate.toFixed(2)})`
+              })
+              .returning();
+            
+            // Limpar trade pendente
+            pendingCurrencyTrades.delete(fromNumber);
+            
+            // Criar registro de importação
+            const now = new Date();
+            await db
+              .insert(csvImports)
+              .values({
+                userId: pendingTrade.userId,
+                broker: 'whatsapp',
+                fileName: `whatsapp_${now.getTime()}.txt`,
+                displayName: `WhatsApp - ${now.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+                tradesImported: 1,
+                tradesSkipped: 0,
+                status: 'completed'
+              });
+            
+            // Atualizar mensagem
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'processed',
+                tradeId: newTrade.id,
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, pendingTrade.messageId));
+            
+            // Enviar confirmação
+            const resultado = parseFloat(newTrade.resultado || '0');
+            const isLoss = resultado < 0;
+            const isProfit = resultado > 0;
+            const emoji = isLoss ? '❌' : (isProfit ? '✅' : '➡️');
+            const resultText = isLoss ? 'PERDA' : (isProfit ? 'VITÓRIA' : 'EMPATE');
+            const pnlPrefix = isLoss ? '-' : (isProfit ? '+' : '');
+            
+            const successMessage = `${emoji} *TRADE REGISTRADO!*\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n` +
+              `💱 *Convertido de USD para BRL*\n` +
+              `📊 Taxa: 1 USD = R$ ${usdToBrlRate.toFixed(2)}\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `🎯 Ativo: *${newTrade.ativo}*\n` +
+              `${emoji} Resultado: *${resultText}*\n` +
+              `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
+              `📈 P&L: ${pnlPrefix}R$ ${Math.abs(resultado).toFixed(2)}\n\n` +
+              `🚀 *Trade salvo na sua conta Métrika!*`;
+            
+            await sendWhatsAppMessage(fromNumber, successMessage);
+            return;
+          } catch (error) {
+            console.error('❌ Error processing USD trade:', error);
+            pendingCurrencyTrades.delete(fromNumber);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao processar conversão. Tente enviar o trade novamente.');
+            return;
+          }
+        } else if (messageTextLower === 'btn_currency_brl') {
+          // Usuário escolheu Real - salvar sem conversão
+          const pendingTrade = pendingCurrencyTrades.get(fromNumber);
+          if (!pendingTrade) {
+            await sendWhatsAppMessage(fromNumber, '❌ Nenhum trade pendente encontrado. Envie seu trade novamente.');
+            return;
+          }
+          
+          try {
+            const tradeData = pendingTrade.tradeData;
+            
+            // Salvar trade sem conversão
+            const [newTrade] = await db
+              .insert(trades)
+              .values({
+                userId: pendingTrade.userId,
+                dataHora: new Date(tradeData.dataHora),
+                ativo: tradeData.ativo,
+                mercado: tradeData.mercado,
+                setup: tradeData.setup || 'WhatsApp',
+                capitalUtilizado: tradeData.capitalUtilizado || '100',
+                quantidade: tradeData.quantidade || '1',
+                tipo: tradeData.tipo,
+                precoEntrada: tradeData.precoEntrada || '0',
+                precoSaida: tradeData.precoSaida || '0',
+                resultado: tradeData.resultado || '0',
+                corretora: tradeData.corretora,
+                origem: 'manual',
+                comentario: tradeData.comentario || ''
+              })
+              .returning();
+            
+            // Limpar trade pendente
+            pendingCurrencyTrades.delete(fromNumber);
+            
+            // Criar registro de importação
+            const now = new Date();
+            await db
+              .insert(csvImports)
+              .values({
+                userId: pendingTrade.userId,
+                broker: 'whatsapp',
+                fileName: `whatsapp_${now.getTime()}.txt`,
+                displayName: `WhatsApp - ${now.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+                tradesImported: 1,
+                tradesSkipped: 0,
+                status: 'completed'
+              });
+            
+            // Atualizar mensagem
+            await db
+              .update(whatsappMessages)
+              .set({ 
+                status: 'processed',
+                tradeId: newTrade.id,
+                processedAt: new Date()
+              })
+              .where(eq(whatsappMessages.id, pendingTrade.messageId));
+            
+            // Enviar confirmação
+            const resultado = parseFloat(newTrade.resultado || '0');
+            const isLoss = resultado < 0;
+            const isProfit = resultado > 0;
+            const emoji = isLoss ? '❌' : (isProfit ? '✅' : '➡️');
+            const resultText = isLoss ? 'PERDA' : (isProfit ? 'VITÓRIA' : 'EMPATE');
+            const pnlPrefix = isLoss ? '-' : (isProfit ? '+' : '');
+            
+            const successMessage = `${emoji} *TRADE REGISTRADO!*\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n` +
+              `📊 *Resumo do Trade:*\n\n` +
+              `🎯 Ativo: *${newTrade.ativo}*\n` +
+              `${emoji} Resultado: *${resultText}*\n` +
+              `💰 Capital: R$ ${newTrade.capitalUtilizado}\n` +
+              `📈 P&L: ${pnlPrefix}R$ ${Math.abs(resultado).toFixed(2)}\n` +
+              `━━━━━━━━━━━━━━━━━━━━\n\n` +
+              `🚀 *Trade salvo na sua conta Métrika!*`;
+            
+            await sendWhatsAppMessage(fromNumber, successMessage);
+            return;
+          } catch (error) {
+            console.error('❌ Error processing BRL trade:', error);
+            pendingCurrencyTrades.delete(fromNumber);
+            await sendWhatsAppMessage(fromNumber, '❌ Erro ao salvar trade. Tente novamente.');
+            return;
+          }
         }
       }
       
