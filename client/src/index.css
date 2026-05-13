@@ -250,6 +250,20 @@
   filter: brightness(0);
 }
 
+/* ── Metrika sidebar/header logo — light mode darkening ── */
+.metrika-icon-img {
+  transition: filter .25s ease;
+}
+.metrika-text-img {
+  transition: filter .25s ease;
+}
+[data-theme="light"] .metrika-icon-img {
+  filter: brightness(0) opacity(0.82);
+}
+[data-theme="light"] .metrika-text-img {
+  filter: brightness(0) opacity(0.82);
+}
+
 /* ── Light mode: additional text visibility fixes ── */
 /* Texts that use inline white or near-white that CSS classes can't catch */
 [data-theme="light"] .text-slate-100,

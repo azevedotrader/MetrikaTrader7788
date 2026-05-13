@@ -37,18 +37,18 @@ export function Logo({ variant, expanded = false, className }: LogoProps) {
 
   return (
     <div className="flex items-center gap-0" data-testid={`logo-container-${variant}`}>
-      <img 
-        src={metrikaIcon} 
-        alt="Métrika Icon" 
-        className={cn("object-contain transition-all duration-300 flex-shrink-0", getIconSize())}
+      <img
+        src={metrikaIcon}
+        alt="Métrika Icon"
+        className={cn("metrika-icon-img object-contain transition-all duration-300 flex-shrink-0", getIconSize())}
         data-testid={`img-icon-${variant}`}
       />
       {/* Show logo text only when not collapsed (sidebar variant) or always for other variants */}
       {(variant !== "sidebar" || expanded) && (
-        <img 
-          src={metrikaLogo} 
-          alt="METRIKA" 
-          className="object-contain transition-all duration-300 flex-shrink-0 h-32 lg:h-32 md:h-28 sm:h-24 !h-32 lg:!h-32 md:!h-28 sm:!h-24 max-w-fit pt-[0px] pb-[0px] mt-[-33px] mb-[-33px] pl-[0px] pr-[0px] ml-[-24px] mr-[22px]"
+        <img
+          src={metrikaLogo}
+          alt="METRIKA"
+          className="metrika-text-img object-contain transition-all duration-300 flex-shrink-0 h-32 lg:h-32 md:h-28 sm:h-24 !h-32 lg:!h-32 md:!h-28 sm:!h-24 max-w-fit pt-[0px] pb-[0px] mt-[-33px] mb-[-33px] pl-[0px] pr-[0px] ml-[-24px] mr-[22px]"
           data-testid={`img-logo-${variant}`}
         />
       )}
