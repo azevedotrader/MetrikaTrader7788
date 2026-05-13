@@ -33,14 +33,19 @@ export async function runMigrations() {
         user_id VARCHAR NOT NULL REFERENCES users(id),
         name TEXT NOT NULL,
         description TEXT,
-        currency TEXT DEFAULT 'BRL',
-        initial_balance DECIMAL(12,2) DEFAULT 0,
-        color TEXT,
-        icon TEXT,
-        is_active BOOLEAN DEFAULT true,
+        color TEXT DEFAULT '#8B5CF6',
+        icon TEXT DEFAULT 'wallet',
+        is_default BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
+
+      -- Patch: add is_default column if table was created before this migration
+      ALTER TABLE wallets ADD COLUMN IF NOT EXISTS is_default BOOLEAN DEFAULT false;
+      -- Patch: remove old columns that are no longer in the schema (safe - ignore errors)
+      ALTER TABLE wallets DROP COLUMN IF EXISTS currency;
+      ALTER TABLE wallets DROP COLUMN IF EXISTS initial_balance;
+      ALTER TABLE wallets DROP COLUMN IF EXISTS is_active;
 
       CREATE TABLE IF NOT EXISTS csv_imports (
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),

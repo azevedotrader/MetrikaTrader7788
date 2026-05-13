@@ -10,7 +10,15 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
@@ -29,15 +37,19 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CalendarIcon,
   DollarSign,
-  Target,
   TrendingUp,
   TrendingDown,
   Calculator,
   Crown,
   Lock,
   Wallet,
+  Zap,
+  ClipboardList,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -134,13 +146,13 @@ export default function NovoTrade() {
   // Emoção options with translations
   const emocaoOptions = [
     { value: "confiante", label: t('emotions.confident') },
+    { value: "calmo", label: t('emotions.calm') },
+    { value: "neutro", label: t('emotions.neutral') },
     { value: "ansioso", label: t('emotions.anxious') },
     { value: "medo", label: t('emotions.fear') },
-    { value: "ganancioso", label: t('emotions.greedy') },
-    { value: "calmo", label: t('emotions.calm') },
+    { value: "impulsivo", label: "Impulsivo" },
     { value: "eufórico", label: t('emotions.excited') },
     { value: "frustrado", label: t('emotions.frustrated') },
-    { value: "neutro", label: t('emotions.neutral') },
   ];
 
   // State para resultado do trade e cálculos
@@ -192,6 +204,23 @@ export default function NovoTrade() {
     }
   }, [alvoValue, stopValue, tradeResult, form]);
 
+  // ── Estado para o log de trades ──────────────────────────────────────────
+  const { data: allTrades = [] } = useQuery<Trade[]>({
+    queryKey: ['/api/trades'],
+  });
+
+  // ── Estado para edição de trade ──────────────────────────────────────────
+  const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Trade>>({});
+  const [editTradeResult, setEditTradeResult] = useState<'take' | 'loss' | null>(null);
+
+  const openEditDialog = (trade: Trade) => {
+    setEditingTrade(trade);
+    setEditForm({ ...trade });
+    const r = parseFloat(String(trade.resultado));
+    setEditTradeResult(r > 0 ? 'take' : r < 0 ? 'loss' : null);
+  };
+
   const createTradeMutation = useMutation({
     mutationFn: (data: InsertTrade) => apiRequest("POST", "/api/trades", data),
     onSuccess: () => {
@@ -215,6 +244,50 @@ export default function NovoTrade() {
       });
     },
   });
+
+  const updateTradeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Trade> }) => {
+      const res = await apiRequest("PUT", `/api/trades/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Trade atualizado com sucesso!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
+      setEditingTrade(null);
+      setEditForm({});
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteTradeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/trades/${id}`);
+    },
+    onSuccess: () => {
+      toast({ title: "Trade removido." });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao remover", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleSaveEdit = () => {
+    if (!editingTrade) return;
+    const alvo = parseFloat(String(editForm.alvo || 0));
+    const stop = parseFloat(String(editForm.stop || 0));
+    let resultado = parseFloat(String(editForm.resultado || 0));
+    if (editTradeResult === 'take' && alvo > 0) resultado = alvo;
+    if (editTradeResult === 'loss' && stop > 0) resultado = -stop;
+    updateTradeMutation.mutate({
+      id: editingTrade.id,
+      data: { ...editForm, resultado: String(resultado) },
+    });
+  };
 
   const onSubmit = (data: InsertTrade) => {
     if (hasReachedFreeLimit) {
@@ -413,57 +486,21 @@ export default function NovoTrade() {
                         {t('form.market')} *
                       </FormLabel>
                       <Select
-                        onValueChange={(value) => {
-                          // Verificar se é uma carteira customizada
-                          if (value.startsWith("wallet:")) {
-                            const walletId = value.replace("wallet:", "");
-                            const wallet = wallets.find(w => w.id === walletId);
-                            if (wallet) {
-                              setSelectedWalletId(walletId);
-                              field.onChange(wallet.name);
-                              form.setValue("corretora", wallet.name);
-                            }
-                          } else {
-                            // Mercado padrão
-                            setSelectedWalletId(null);
-                            field.onChange(value);
-                            form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
-                          }
+                        onValueChange={(v) => {
+                          field.onChange(v);
+                          form.setValue("corretora", v as any);
                         }}
-                        value={selectedWalletId ? `wallet:${selectedWalletId}` : field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                             <SelectValue placeholder={t('form.select_market')} />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600 max-h-72">
+                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
                           <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
                           <SelectItem value="forex">{t('form.forex')}</SelectItem>
                           <SelectItem value="b3">{t('form.b3')}</SelectItem>
-                          {wallets.length > 0 && (
-                            <>
-                              <div className="border-t border-charcoal-600 my-1" />
-                              <div className="px-2 py-1.5 text-xs text-charcoal-400 font-medium flex items-center gap-1">
-                                <Wallet className="h-3 w-3" />
-                                Carteiras Customizadas
-                              </div>
-                              {wallets.map((wallet) => (
-                                <SelectItem 
-                                  key={wallet.id} 
-                                  value={`wallet:${wallet.id}`}
-                                >
-                                  <span className="flex items-center gap-2">
-                                    <span 
-                                      className="inline-block w-2 h-2 rounded-full"
-                                      style={{ backgroundColor: wallet.color || '#8B5CF6' }}
-                                    />
-                                    {wallet.name}
-                                  </span>
-                                </SelectItem>
-                              ))}
-                            </>
-                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -544,6 +581,37 @@ export default function NovoTrade() {
                   )}
                 />
               </div>
+
+              {/* Linha 2b - Carteira */}
+              {wallets.length > 0 && (
+                <div>
+                  <Label className="text-charcoal-300 text-sm font-medium flex items-center gap-1.5 mb-2">
+                    <Wallet className="h-3.5 w-3.5 text-[var(--b)]" />
+                    Carteira <span className="text-charcoal-400 font-normal">(opcional)</span>
+                  </Label>
+                  <Select
+                    value={selectedWalletId ?? "__default"}
+                    onValueChange={(v) => setSelectedWalletId(v === "__default" ? null : v)}
+                  >
+                    <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                      <SelectValue placeholder="Carteira padrão do mercado" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-charcoal-800 border-charcoal-600">
+                      <SelectItem value="__default">
+                        <span className="text-charcoal-400">— Sem carteira específica —</span>
+                      </SelectItem>
+                      {wallets.map((w) => (
+                        <SelectItem key={w.id} value={w.id}>
+                          <span className="flex items-center gap-2">
+                            <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: w.color || '#6EE000' }} />
+                            {w.name}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Linha 3 - Take/Stop com Resultado */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -750,6 +818,307 @@ export default function NovoTrade() {
           </Form>
         </CardContent>
       </Card>
+
+      {/* ── Log de Trades ──────────────────────────────────────────────────── */}
+      <Card className="bg-graphite/50 border-charcoal-700">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-[var(--text)] flex items-center gap-2 text-base">
+            <ClipboardList className="h-5 w-5 text-[var(--b)]" />
+            Log de Trades
+            <Badge variant="outline" className="ml-auto text-xs border-[var(--brd)] text-[var(--dim)]">
+              {allTrades.length} registros
+            </Badge>
+          </CardTitle>
+          <CardDescription className="text-[var(--dim)] text-xs">
+            Todos os seus trades registrados. Clique em Editar para corrigir dados ou mover para outra carteira.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {allTrades.length === 0 ? (
+            <div className="text-center py-10 text-[var(--dim)] text-sm">
+              Nenhum trade registrado ainda.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--brd)] bg-[var(--surf)]/40">
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">DATA</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">ATIVO</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">TIPO</th>
+                    <th className="text-right px-4 py-2.5 text-[var(--dim)] font-medium text-xs">RESULTADO</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">MERCADO</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs hidden sm:table-cell">SETUP</th>
+                    <th className="px-4 py-2.5" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...allTrades].sort((a, b) => new Date(b.dataHora || b.createdAt || 0).getTime() - new Date(a.dataHora || a.createdAt || 0).getTime()).map((trade) => {
+                    const pnl = parseFloat(String(trade.resultado || 0));
+                    const isProfit = pnl > 0;
+                    const isLoss = pnl < 0;
+                    const walletName = wallets.find(w => w.id === trade.walletId)?.name;
+                    const dateStr = trade.dataHora
+                      ? new Date(trade.dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                      : '–';
+                    return (
+                      <tr key={trade.id} className="border-b border-[var(--brd)]/50 hover:bg-[var(--surf)]/40 transition-colors">
+                        <td className="px-4 py-2.5 text-[var(--dim)] text-xs whitespace-nowrap">{dateStr}</td>
+                        <td className="px-4 py-2.5 font-semibold text-[var(--text)] whitespace-nowrap">
+                          {trade.ativo}
+                          {walletName && (
+                            <span className="ml-1.5 text-[10px] text-[var(--b)] font-normal">[{walletName}]</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            trade.tipo === 'compra' ? 'bg-[#6EE000]/15 text-[#6EE000]' : 'bg-[#FF1F3D]/15 text-[#FF1F3D]'
+                          }`}>
+                            {trade.tipo === 'compra' ? '▲ Long' : '▼ Short'}
+                          </span>
+                        </td>
+                        <td className={`px-4 py-2.5 text-right font-bold tabular-nums whitespace-nowrap ${
+                          isProfit ? 'text-[var(--gold)]' : isLoss ? 'text-[var(--r)]' : 'text-[var(--dim)]'
+                        }`}>
+                          {isProfit ? '+' : ''}{pnl === 0 ? '–' : `R$ ${pnl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--dim)] text-xs capitalize">{trade.mercado || '–'}</td>
+                        <td className="px-4 py-2.5 text-[var(--dim)] text-xs hidden sm:table-cell">{trade.setup || '–'}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1 justify-end">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openEditDialog(trade)}
+                              className="h-7 w-7 p-0 text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--surf)]"
+                              title="Editar trade"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm(`Remover trade ${trade.ativo}?`)) {
+                                  deleteTradeMutation.mutate(trade.id);
+                                }
+                              }}
+                              className="h-7 w-7 p-0 text-[var(--dim)] hover:text-[var(--r)] hover:bg-[var(--r)]/10"
+                              title="Remover trade"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Modal de Edição de Trade ─────────────────────────────────────── */}
+      <Dialog open={!!editingTrade} onOpenChange={(open) => { if (!open) { setEditingTrade(null); setEditForm({}); } }}>
+        <DialogContent className="bg-[var(--card)] border-[var(--brd)] max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-[var(--text)] flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-[var(--b)]" />
+              Editar Trade — <span className="text-[var(--gold)]">{editForm.ativo}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {editForm && (
+            <div className="space-y-4 py-2">
+              {/* Data / Ativo */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Data/Hora</Label>
+                  <Input
+                    type="datetime-local"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.dataHora ? String(editForm.dataHora).slice(0, 16) : ''}
+                    onChange={e => setEditForm(f => ({ ...f, dataHora: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Ativo</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.ativo || ''}
+                    onChange={e => setEditForm(f => ({ ...f, ativo: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Tipo / Mercado */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Tipo</Label>
+                  <Select value={editForm.tipo || 'compra'} onValueChange={v => setEditForm(f => ({ ...f, tipo: v as any }))}>
+                    <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                      <SelectItem value="compra">▲ Compra (Long)</SelectItem>
+                      <SelectItem value="venda">▼ Venda (Short)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Mercado</Label>
+                  <Select value={editForm.mercado || 'crypto'} onValueChange={v => setEditForm(f => ({ ...f, mercado: v as any }))}>
+                    <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                      <SelectItem value="crypto">Crypto</SelectItem>
+                      <SelectItem value="forex">Forex</SelectItem>
+                      <SelectItem value="b3">B3</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Carteira */}
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-1.5 flex items-center gap-1.5">
+                  <Wallet className="w-3.5 h-3.5 text-[var(--b)]" /> Carteira
+                </Label>
+                <Select
+                  value={editForm.walletId ?? "__none"}
+                  onValueChange={v => setEditForm(f => ({ ...f, walletId: v === "__none" ? null : v }))}
+                >
+                  <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
+                    <SelectValue placeholder="— Sem carteira —" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                    <SelectItem value="__none">
+                      <span className="text-[var(--dim)]">— Sem carteira específica —</span>
+                    </SelectItem>
+                    {wallets.map((w) => (
+                      <SelectItem key={w.id} value={w.id}>
+                        <span className="flex items-center gap-2">
+                          <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: w.color || '#6EE000' }} />
+                          {w.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Take / Stop */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Alvo (Take Profit R$)</Label>
+                  <Input
+                    type="number" step="0.01"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.alvo || ''}
+                    onChange={e => setEditForm(f => ({ ...f, alvo: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Stop Loss R$</Label>
+                  <Input
+                    type="number" step="0.01"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.stop || ''}
+                    onChange={e => setEditForm(f => ({ ...f, stop: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Resultado */}
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-2 block">Resultado</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditTradeResult('take')}
+                    className={`flex items-center justify-center gap-2 h-10 rounded-lg border text-sm font-semibold transition-all ${
+                      editTradeResult === 'take'
+                        ? 'bg-[#6EE000]/20 border-[#6EE000] text-[#6EE000]'
+                        : 'border-[var(--brd)] text-[var(--dim)] hover:border-[#6EE000]/50'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" /> Take Profit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditTradeResult('loss')}
+                    className={`flex items-center justify-center gap-2 h-10 rounded-lg border text-sm font-semibold transition-all ${
+                      editTradeResult === 'loss'
+                        ? 'bg-[#FF1F3D]/20 border-[#FF1F3D] text-[#FF1F3D]'
+                        : 'border-[var(--brd)] text-[var(--dim)] hover:border-[#FF1F3D]/50'
+                    }`}
+                  >
+                    <XCircle className="w-4 h-4" /> Stop Loss
+                  </button>
+                </div>
+              </div>
+
+              {/* Setup / Emoção */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Setup</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.setup || ''}
+                    onChange={e => setEditForm(f => ({ ...f, setup: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Emoção</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.emocao || ''}
+                    onChange={e => setEditForm(f => ({ ...f, emocao: e.target.value as any }))}
+                  />
+                </div>
+              </div>
+
+              {/* Comentário */}
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-1.5 block">Comentário</Label>
+                <Textarea
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] min-h-[80px]"
+                  value={editForm.comentario || ''}
+                  onChange={e => setEditForm(f => ({ ...f, comentario: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => { setEditingTrade(null); setEditForm({}); }}
+              className="border-[var(--brd)] text-[var(--dim)]"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={updateTradeMutation.isPending}
+              className="bg-[#6EE000] hover:bg-[#5bc800] text-black font-bold"
+            >
+              {updateTradeMutation.isPending ? 'Salvando…' : 'Salvar Alterações'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <VipUpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        feature="trades"
+      />
     </div>
   );
 }
