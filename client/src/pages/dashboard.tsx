@@ -676,8 +676,8 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
                   dataKey="period"
                   stroke="#6e7191"
                   tick={{ fill: '#6e7191', fontSize: 10 }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                   height={36}
                   angle={-30}
                   textAnchor="end"
@@ -686,8 +686,8 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
                 <YAxis
                   stroke="#6e7191"
                   tick={{ fill: '#6e7191', fontSize: 10 }}
-                  axisLine={false}
-                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                   width={70}
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={yAxisDomain}
@@ -945,8 +945,8 @@ function DrawdownChart({ trades, t, formatCurrency }: { trades: Trade[]; t: (key
                   dataKey="period"
                   stroke="#6e7191"
                   tick={{ fill: '#6e7191', fontSize: 10 }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                   height={36}
                   angle={-30}
                   textAnchor="end"
@@ -955,8 +955,8 @@ function DrawdownChart({ trades, t, formatCurrency }: { trades: Trade[]; t: (key
                 <YAxis
                   stroke="#6e7191"
                   tick={{ fill: '#6e7191', fontSize: 10 }}
-                  axisLine={false}
-                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={['dataMin', 0]}
                   width={65}
@@ -1107,16 +1107,16 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
               stroke="#6e7191"
               tick={false}
               height={20}
-              axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-              tickLine={false}
+              axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+              tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
             />
             <YAxis
               stroke="#6e7191"
               fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
               tickFormatter={(value) => formatCurrency(value)}
               width={window.innerWidth < 640 ? 40 : window.innerWidth < 1024 ? 50 : 60}
-              axisLine={false}
-              tickLine={false}
+              axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+              tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
               tick={{ fill: '#6e7191' }}
             />
             <RechartsTooltip content={<CustomTooltip />} />
@@ -1917,8 +1917,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                   textAnchor="end"
                   height={window.innerWidth < 768 ? 50 : 80}
                   tick={{ fill: '#6e7191' }}
-                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                 />
 
                 <YAxis
@@ -1926,8 +1926,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                   fontSize={window.innerWidth < 768 ? 9 : 12}
                   tickFormatter={(value) => formatCurrency(value)}
                   tick={{ fill: '#6e7191' }}
-                  axisLine={false}
-                  tickLine={false}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                 />
                 
                 <RechartsTooltip content={<CustomTooltip />} />
@@ -2793,7 +2793,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#ffffff]">
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--text)]">
                     {(() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                       const totalTrades = periodFilteredTrades.length;
@@ -2845,7 +2845,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#fafafa]">
+                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--text)]">
                             {(dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)) + '%'}
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">

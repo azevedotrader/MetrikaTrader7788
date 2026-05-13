@@ -771,8 +771,8 @@ export function TradingPerformanceChart({
               textAnchor="end"
               height={window.innerWidth < 768 ? 50 : 70}
               tick={{ fill: '#6e7191' }}
-              axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
-              tickLine={false}
+              axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+              tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
             />
 
             <YAxis
@@ -780,8 +780,8 @@ export function TradingPerformanceChart({
               fontSize={window.innerWidth < 768 ? 9 : 11}
               tickFormatter={(value) => hideData ? "•••" : formatCurrency(value)}
               tick={{ fill: '#6e7191' }}
-              axisLine={false}
-              tickLine={false}
+              axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+              tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
             />
             
             <RechartsTooltip content={renderCustomTooltip} />
