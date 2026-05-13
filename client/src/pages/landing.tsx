@@ -41,6 +41,7 @@ export default function Landing() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [deviceView, setDeviceView] = useState<'desktop' | 'mobile'>('desktop');
 
   const handleSwitchToRegister = () => {
     setShowLogin(false);
@@ -203,89 +204,137 @@ export default function Landing() {
               
             </div>
             
-            {/* Enhanced Dashboard Preview */}
-            <div className="relative">
-              {/* Main Dashboard Card */}
-              <Card className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl border-emerald-600/30 shadow-2xl transform hover:scale-105 transition-all duration-500 animate-glow">
-                <CardHeader className="pb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 gradient-emerald-blue rounded-xl flex items-center justify-center flex-shrink-0">
-                        <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
-                      </div>
-                      <span className="text-sm sm:text-lg md:text-xl font-bold text-white break-words min-w-0">{t('landing.dashboard.main_title')}</span>
+            {/* Device Preview with Toggle */}
+            <div className="relative flex flex-col items-center">
+              {/* Toggle Desktop / Mobile */}
+              <div className="flex items-center bg-slate-800/80 border border-slate-700 rounded-full p-1 mb-6 gap-1">
+                <button
+                  onClick={() => setDeviceView('desktop')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'desktop' ? 'bg-emerald-500 text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                  Desktop
+                </button>
+                <button
+                  onClick={() => setDeviceView('mobile')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'mobile' ? 'bg-emerald-500 text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <Smartphone className="w-4 h-4" />
+                  Mobile
+                </button>
+              </div>
+
+              {/* Desktop Frame */}
+              {deviceView === 'desktop' && (
+                <div className="w-full animate-in fade-in duration-300">
+                  {/* Browser chrome */}
+                  <div className="bg-slate-700 rounded-t-xl px-4 py-2 flex items-center gap-2 border border-slate-600 border-b-0">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
                     </div>
-                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-2 sm:px-3 py-1 text-xs sm:text-sm flex-shrink-0">
-                      {t('landing.dashboard.live')}
-                    </Badge>
+                    <div className="flex-1 bg-slate-800 rounded-md px-3 py-1 text-xs text-slate-400 ml-2">appmetrika.com.br/dashboard</div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Performance Metrics */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card className="bg-gradient-to-br from-emerald-500/25 to-teal-500/25 border-emerald-500/40 hover:border-emerald-400/60 transition-all duration-300">
-                      <CardContent className="p-3 sm:p-4 md:p-5">
-                        <div className="flex items-center justify-between mb-2 sm:mb-3">
-                          <span className="text-xs sm:text-sm font-medium text-slate-200 break-words">{t('landing.dashboard.total_pnl')}</span>
-                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                  {/* Screen */}
+                  <div className="bg-slate-900 border border-slate-600 border-t-0 rounded-b-xl overflow-hidden shadow-2xl">
+                    {/* Mini dashboard */}
+                    <div className="flex h-52">
+                      {/* Sidebar */}
+                      <div className="w-10 bg-slate-800 border-r border-slate-700 flex flex-col items-center py-3 gap-3">
+                        <div className="w-6 h-6 bg-emerald-500 rounded-md"></div>
+                        {[...Array(5)].map((_,i) => <div key={i} className="w-5 h-1.5 bg-slate-600 rounded"></div>)}
+                      </div>
+                      {/* Content */}
+                      <div className="flex-1 p-3 overflow-hidden">
+                        <div className="grid grid-cols-3 gap-2 mb-2">
+                          <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-2">
+                            <div className="text-[9px] text-slate-400 mb-1">P&L Total</div>
+                            <div className="text-xs font-bold text-emerald-400">+R$28.540</div>
+                          </div>
+                          <div className="bg-indigo-500/20 border border-indigo-500/30 rounded-lg p-2">
+                            <div className="text-[9px] text-slate-400 mb-1">Assertividade</div>
+                            <div className="text-xs font-bold text-indigo-400">78.5%</div>
+                          </div>
+                          <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-2">
+                            <div className="text-[9px] text-slate-400 mb-1">Drawdown</div>
+                            <div className="text-xs font-bold text-blue-400">2.5%</div>
+                          </div>
                         </div>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-emerald-400 break-words">{t('landing.dashboard.demo_total_pnl')}</div>
-                        <div className="text-xs sm:text-sm text-emerald-300 break-words">{t('landing.dashboard.monthly_growth')}</div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-gradient-to-br from-indigo-500/25 to-blue-500/25 border-indigo-500/40 hover:border-indigo-400/60 transition-all duration-300">
-                      <CardContent className="p-3 sm:p-4 md:p-5">
-                        <div className="flex items-center justify-between mb-2 sm:mb-3">
-                          <span className="text-xs sm:text-sm font-medium text-slate-200 break-words">{t('landing.dashboard.win_rate')}</span>
-                          <Target className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 flex-shrink-0" />
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          <div className="bg-slate-800 rounded-lg p-2">
+                            <div className="text-[9px] text-slate-400 mb-1">Taxa de Acerto</div>
+                            <div className="text-xs font-bold text-blue-400">65%</div>
+                            <div className="w-full h-1 bg-slate-700 rounded mt-1"><div className="h-1 bg-blue-400 rounded" style={{width:'65%'}}></div></div>
+                          </div>
+                          <div className="bg-slate-800 rounded-lg p-2">
+                            <div className="text-[9px] text-slate-400 mb-1">Risco Retorno</div>
+                            <div className="text-xs font-bold text-emerald-400">1:3.05</div>
+                            <div className="w-full h-1 bg-slate-700 rounded mt-1"><div className="h-1 bg-emerald-400 rounded" style={{width:'75%'}}></div></div>
+                          </div>
                         </div>
-                        <div className="text-xl sm:text-2xl md:text-3xl font-bold text-indigo-400">78.5%</div>
-                        <div className="text-xs sm:text-sm text-indigo-300 break-words">{t('landing.dashboard.trades_count')}</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Chart Visualization */}
-                  <Card className="bg-slate-800/50 border-slate-700">
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex items-center justify-between mb-2 sm:mb-3">
-                        <span className="text-xs sm:text-sm font-medium text-slate-300 break-words min-w-0">{t('landing.dashboard.capital_evolution')}</span>
-                        <div className="flex space-x-1 flex-shrink-0">
-                          <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                        <div className="bg-slate-800 rounded-lg p-2">
+                          <div className="text-[9px] text-slate-400 mb-1">Evolução do Capital</div>
+                          <div className="flex items-end gap-0.5 h-8">
+                            {[15,20,18,30,25,40,35,50,45,60].map((h,i) => (
+                              <div key={i} className="flex-1 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t opacity-80" style={{height:`${h}%`}}></div>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                      <div className="h-24 sm:h-32 bg-gradient-to-r from-slate-900/50 to-slate-800/50 rounded-lg p-2 flex items-end justify-between overflow-hidden">
-                        {[
-                          { height: 15, color: "from-red-600 to-red-600" },
-                          { height: 20, color: "from-yellow-600 to-yellow-600" },
-                          { height: 25, color: "from-green-500 to-green-400" },
-                          { height: 35, color: "from-green-500 to-green-400" },
-                          { height: 40, color: "from-blue-500 to-blue-400" },
-                          { height: 35, color: "from-blue-500 to-blue-400" },
-                          { height: 45, color: "from-purple-600 to-purple-400" },
-                          { height: 50, color: "from-purple-600 to-purple-400" }
-                        ].map((bar, i) => (
-                          <div 
-                            key={i}
-                            className={`flex-1 max-w-[8px] bg-gradient-to-t ${bar.color} rounded-t opacity-80 hover:opacity-100 transition-opacity mx-[1px]`}
-                            style={{ height: `${bar.height}px` }}
-                          />
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-                  
-                </CardContent>
-              </Card>
+              {/* Mobile Frame */}
+              {deviceView === 'mobile' && (
+                <div className="w-52 animate-in fade-in duration-300">
+                  {/* Phone frame */}
+                  <div className="bg-slate-700 rounded-[2rem] border-2 border-slate-600 p-2 shadow-2xl">
+                    {/* Notch */}
+                    <div className="bg-slate-900 rounded-[1.6rem] overflow-hidden">
+                      <div className="flex justify-center pt-2 pb-1">
+                        <div className="w-16 h-1.5 bg-slate-700 rounded-full"></div>
+                      </div>
+                      {/* Screen content */}
+                      <div className="px-2 pb-4">
+                        <div className="text-[9px] font-bold text-white mb-2 text-center">Dashboard</div>
+                        <div className="grid grid-cols-2 gap-1 mb-2">
+                          <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-1.5">
+                            <div className="text-[7px] text-slate-400">P&L Total</div>
+                            <div className="text-[10px] font-bold text-emerald-400">+R$28.5k</div>
+                          </div>
+                          <div className="bg-indigo-500/20 border border-indigo-500/30 rounded-lg p-1.5">
+                            <div className="text-[7px] text-slate-400">Acerto</div>
+                            <div className="text-[10px] font-bold text-indigo-400">78.5%</div>
+                          </div>
+                        </div>
+                        <div className="bg-slate-800 rounded-lg p-2 mb-2">
+                          <div className="text-[7px] text-slate-400 mb-1">Evolução</div>
+                          <div className="flex items-end gap-0.5 h-10">
+                            {[20,35,25,45,38,55,48,65,58,75].map((h,i) => (
+                              <div key={i} className="flex-1 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t opacity-80" style={{height:`${h}%`}}></div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          {['Nova York','Ásia','Londres'].map((s,i) => (
+                            <div key={i} className="flex items-center justify-between bg-slate-800 rounded-md px-2 py-1">
+                              <span className="text-[7px] text-slate-300">{s}</span>
+                              <span className="text-[7px] text-emerald-400">+{(i+1)*1200}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Floating Elements */}
               <div className="absolute -top-6 -right-6 w-20 h-20 gradient-emerald-blue rounded-full opacity-25 animate-float"></div>
               <div className="absolute -bottom-6 -left-6 w-16 h-16 gradient-teal rounded-full opacity-25 animate-float" style={{ animationDelay: '3s' }}></div>
-              <div className="absolute top-1/2 -right-8 w-12 h-12 gradient-gold rounded-full opacity-20 animate-pulse-slow"></div>
             </div>
           </div>
         </div>
