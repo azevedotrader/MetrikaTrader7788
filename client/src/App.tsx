@@ -14,7 +14,7 @@ import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
 import { CsvTipsPopup } from "@/components/ui/csv-tips-popup";
 import { TourOverlay } from "@/components/ui/tour-overlay";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
@@ -66,6 +66,11 @@ function AppContent() {
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('metrika-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+  }, []);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -143,13 +148,6 @@ function AppContent() {
                     />
                     <ImportarCSV />
                   </Route>
-                  <Route path="/whatsapp">
-                    <TopBar 
-                      title={t(pageTitleKeys["/whatsapp"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <WhatsAppPage />
-                  </Route>
                   <Route path="/gestao">
                     <TopBar 
                       title={t(pageTitleKeys["/gestao"])} 
@@ -171,13 +169,6 @@ function AppContent() {
                     />
                     <Analises />
                   </Route>
-                  <Route path="/diario">
-                    <TopBar 
-                      title={t(pageTitleKeys["/diario"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <Diario />
-                  </Route>
                   <Route path="/calendario">
                     <TopBar 
                       title={t(pageTitleKeys["/calendario"])} 
@@ -198,13 +189,6 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Suporte />
-                  </Route>
-                  <Route path="/aprendizado">
-                    <TopBar 
-                      title={t(pageTitleKeys["/aprendizado"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <Aprendizado />
                   </Route>
                   <Route path="/importacoes">
                     <TopBar 

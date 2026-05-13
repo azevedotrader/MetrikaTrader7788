@@ -253,7 +253,7 @@ export function TradingCalendar({
   ) => {
     if (!dayNumber || !isCurrentMonth) {
       return (
-        <div className="p-1 border-r border-b border-zinc-700 h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px]">
+        <div className="p-1 border-r border-b border-[#1e1e2e] h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px]">
         </div>
       );
     }
@@ -276,7 +276,7 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px] p-1 sm:p-2 md:p-2.5",
+          "border-r border-b border-[#1e1e2e] relative transition-all duration-200 overflow-hidden cursor-pointer h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px] p-1 sm:p-2 md:p-2.5",
           "backdrop-blur-[2px] md:backdrop-blur-[3px] bg-black/10 ring-1 ring-white/5 shadow-sm",
           isToday && "ring-zinc-600/50",
           hasData && isProfit && "hover:brightness-105",
@@ -398,7 +398,7 @@ export function TradingCalendar({
             "absolute inset-0 pointer-events-none",
             week.pnl < 0 && "bg-gradient-to-b from-[rgba(99,25,25,0.35)] to-[rgba(90,23,23,0.20)]",
             isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.35)] to-[rgba(2,37,29,0.20)]",
-            week.pnl === 0 && "bg-gradient-to-b from-zinc-700/30 to-zinc-800/15"
+            week.pnl === 0 && "bg-[#1e1e2e]/20"
           )} 
         />
         
@@ -445,7 +445,7 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-[#0a0a0f]/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
+          "bg-[#0a0a0f]/95 border-[#1e1e2e]/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
           className,
         )}
         style={{ marginBottom: "50px" }}
@@ -474,7 +474,7 @@ export function TradingCalendar({
         <CardHeader className="pb-3 sm:pb-4 md:pb-5 relative z-10">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base sm:text-lg md:text-xl text-white flex items-center gap-2 sm:gap-3">
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-600" />
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[#448aff]" />
               <span className="hidden sm:inline">{t("calendar.title")}</span>
               <span className="sm:hidden">{t("calendar.title_short")}</span>
             </CardTitle>
@@ -509,12 +509,12 @@ export function TradingCalendar({
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-[#13131a]/30"
+                className="text-center font-semibold text-[#a0a0c0] border-r border-b border-[#1e1e2e] py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-[#13131a]/30"
               >
                 {day}
               </div>
             ))}
-            <div className="hidden md:block text-center font-semibold text-zinc-300 border-b border-zinc-700 py-3.5 text-sm bg-[#13131a]/30">
+            <div className="hidden md:block text-center font-semibold text-[#a0a0c0] border-b border-[#1e1e2e] py-3.5 text-sm bg-[#13131a]/30">
               {t("calendar.week")}
             </div>
 
@@ -545,7 +545,7 @@ export function TradingCalendar({
                   ) : (
                     <div
                       key={`week-empty-${weekIndex}`}
-                      className="hidden md:block border-l border-zinc-700 min-h-[155px] lg:min-h-[170px]"
+                      className="hidden md:block border-l border-[#1e1e2e] min-h-[155px] lg:min-h-[170px]"
                     ></div>
                   ),
                 ].filter(Boolean),
@@ -554,12 +554,12 @@ export function TradingCalendar({
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
-          <div className="md:hidden border-t border-zinc-700 p-4 bg-[#0a0a0f]/50">
+          <div className="md:hidden border-t border-[#1e1e2e] p-4 bg-[#0a0a0f]/50">
             <div className="text-center text-white font-semibold mb-4 text-base">
               {t("calendar.summary_of")} {monthName}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-[#1e1e2e]/50">
                 <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.tradingDays}
                 </div>
@@ -567,7 +567,7 @@ export function TradingCalendar({
                   {t("calendar.trading_days")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-[#1e1e2e]/50">
                 <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.totalTrades}
                 </div>
@@ -575,7 +575,7 @@ export function TradingCalendar({
                   {t("calendar.total_trades")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-[#1e1e2e]/50">
                 <div
                   className={cn(
                     "text-xl sm:text-2xl font-bold mb-1",
@@ -590,7 +590,7 @@ export function TradingCalendar({
                   {t("calendar.pnl_total")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-[#1e1e2e]/50">
                 <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.winRate}%
                 </div>

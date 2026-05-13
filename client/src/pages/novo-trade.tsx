@@ -138,7 +138,7 @@ export default function NovoTrade() {
     { value: "medo", label: t('emotions.fear') },
     { value: "ganancioso", label: t('emotions.greedy') },
     { value: "calmo", label: t('emotions.calm') },
-    { value: "empolgado", label: t('emotions.excited') },
+    { value: "eufórico", label: t('emotions.excited') },
     { value: "frustrado", label: t('emotions.frustrated') },
     { value: "neutro", label: t('emotions.neutral') },
   ];
@@ -158,7 +158,7 @@ export default function NovoTrade() {
       alvo: "",
       stop: "",
       setup: setupOptions[0] || "",
-      emocao: "",
+      emocao: undefined,
       comentario: "",
       mercado: "crypto",
       corretora: "crypto",

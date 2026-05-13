@@ -1,11 +1,10 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  LayoutDashboard, 
-  PlusCircle, 
-  BarChart, 
-  Book, 
+import {
+  LayoutDashboard,
+  PlusCircle,
+  BarChart,
   Calendar,
   User,
   LogOut,
@@ -14,11 +13,11 @@ import {
   X,
   MessageCircle,
   Calculator,
-  GraduationCap,
   Upload,
-  Wallet
+  Wallet,
+  Sun,
+  Moon
 } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/lib/auth";
 import { useState, useEffect } from "react";
@@ -33,11 +32,8 @@ const navigation = [
   { nameKey: "trades.add_new", href: "/novo-trade", icon: PlusCircle },
   { nameKey: "trade.import_csv", href: "/importar-csv", icon: Upload },
   { nameKey: "nav.wallets", href: "/carteiras", icon: Wallet },
-  { nameKey: "whatsapp.title", href: "/whatsapp", icon: FaWhatsapp },
   { nameKey: "risk_management.title", href: "/gestao", icon: Calculator },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
-  { nameKey: "journal.title", href: "/diario", icon: Book },
-  { nameKey: "nav.learning", href: "/aprendizado", icon: GraduationCap },
   { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
   { nameKey: "profile.title", href: "/perfil", icon: User },
 ];
@@ -57,7 +53,16 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isMobile = useIsMobile();
   const { planType } = useUserPlan();
-  
+
+  const [theme, setTheme] = useState<'dark'|'light'>(() => {
+    return (localStorage.getItem('metrika-theme') as 'dark'|'light') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('metrika-theme', theme);
+  }, [theme]);
+
   // On mobile, sidebar is controlled by isOpen prop
   // On desktop, use hover behavior
   const sidebarExpanded = isMobile ? isOpen : isExpanded;
@@ -115,7 +120,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       <div 
         data-testid="sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 bg-gradient-to-b from-[#0f0f1a] via-[#0f0f1a] to-[#0a0a0f] border-r border-[#1e1e2e]/50 transition-all duration-300 ease-in-out z-50 backdrop-blur-sm",
+          "fixed inset-y-0 left-0 bg-[var(--sidebar-background)] border-r border-[var(--sidebar-border)] transition-all duration-300 ease-in-out z-50 backdrop-blur-sm",
           isMobile 
             ? cn("w-72 transform shadow-2xl", isOpen ? "translate-x-0" : "-translate-x-full")
             : cn(isExpanded ? "w-72 shadow-xl" : "w-16")
@@ -179,6 +184,27 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           
           {/* Action Buttons - Fixed at bottom above footer */}
           <div className="px-2 py-2 border-t border-[#1e1e2e]/30 space-y-1.5 bg-[#0a0a0f]/50 flex-shrink-0">
+            {/* Theme Toggle */}
+            <Button
+              onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+              className={cn(
+                "w-full transition-all duration-200 rounded-lg h-9 border",
+                theme === 'dark'
+                  ? "text-[#ffa000] hover:bg-[#ffa000]/10 bg-transparent border-[#ffa000]/20 hover:border-[#ffa000]/40"
+                  : "text-[#1a6fd4] hover:bg-[#1a6fd4]/10 bg-transparent border-[#1a6fd4]/20 hover:border-[#1a6fd4]/40",
+                sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
+              )}
+              title={!sidebarExpanded ? (theme === 'dark' ? 'Modo Claro' : 'Modo Escuro') : undefined}
+            >
+              {theme === 'dark'
+                ? <Sun className={cn("w-4 h-4 flex-shrink-0", sidebarExpanded && "mr-2")} />
+                : <Moon className={cn("w-4 h-4 flex-shrink-0", sidebarExpanded && "mr-2")} />
+              }
+              <span className={cn("transition-all duration-300 whitespace-nowrap text-sm", sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0")}>
+                {theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}
+              </span>
+            </Button>
+
             {/* Análise CSV com IA */}
             <Button
               onClick={handleAnalyzeCsv}
