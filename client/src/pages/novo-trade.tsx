@@ -10,6 +10,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+
 import {
   Form,
   FormControl,
@@ -67,6 +68,51 @@ export default function NovoTrade() {
 
   // State para carteira selecionada
   const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+
+  // ── Entrada Rápida ──────────────────────────────────────────
+  const [quickText, setQuickText] = useState('');
+  const [quickParsed, setQuickParsed] = useState<Array<{ativo:string,resultado:string,risco:string,hora:string,raw:string}>>([]);
+
+  function parseQuickTrade(line: string) {
+    const l = line.trim().toUpperCase();
+    if (!l) return null;
+
+    // ativo: primeira palavra não numérica
+    const ativoMatch = l.match(/^([A-Z]{3,8}(?:USD|BTC|EUR|GBP|JPY|BRL|USDT)?)/);
+    const ativo = ativoMatch ? ativoMatch[1] : '';
+
+    // resultado: take ou loss
+    const resultado = /\bTAKE\b/.test(l) ? 'take' : /\bLOSS\b|\bSTOP\b/.test(l) ? 'loss' : '';
+
+    // risco: número seguido de X ou R (ex: 3x, 2.5R, 1.5x)
+    const riscoMatch = l.match(/(\d+(?:[.,]\d+)?)\s*[XR]\b/);
+    const risco = riscoMatch ? riscoMatch[1].replace(',','.') : '';
+
+    // hora: padrão HH:MM ou HHhMM ou HHhMM
+    const horaMatch = l.match(/(\d{1,2})[Hh:](\d{2})/);
+    const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
+
+    return { ativo, resultado, risco, hora, raw: line.trim() };
+  }
+
+  function handleQuickParse() {
+    const lines = quickText.split('\n').filter(l => l.trim());
+    const parsed = lines.map(parseQuickTrade).filter(Boolean) as Array<{ativo:string,resultado:string,risco:string,hora:string,raw:string}>;
+    setQuickParsed(parsed);
+  }
+
+  function applyQuickTrade(p: {ativo:string,resultado:string,risco:string,hora:string}) {
+    if (p.ativo) form.setValue('ativo', p.ativo);
+    if (p.hora) {
+      const today = new Date().toISOString().slice(0,10);
+      form.setValue('dataHora', `${today}T${p.hora}`);
+    }
+    if (p.resultado === 'take') { setTradeResult('take'); }
+    if (p.resultado === 'loss') { setTradeResult('loss'); }
+    if (p.risco) form.setValue('alvo', p.risco);
+    setQuickText('');
+    setQuickParsed([]);
+  }
   
   const hasReachedFreeLimit = isFreePlan && (existingTrades?.length || 0) >= 1;
 
@@ -245,6 +291,63 @@ export default function NovoTrade() {
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
+
+      {/* ── Entrada Rápida ── */}
+      <Card className="bg-graphite/50 border-charcoal-700 border-emerald-500/30">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base">
+            <Zap className="h-5 w-5 text-emerald-400" />
+            Entrada Rápida
+            <span className="ml-auto text-xs font-normal text-zinc-500">opcional</span>
+          </CardTitle>
+          <CardDescription className="text-zinc-400 text-xs">
+            Digite como quiser — o app reconhece e preenche o formulário. Ex: <span className="text-emerald-400 font-mono">BTCUSD take 3x 7h48</span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <textarea
+            value={quickText}
+            onChange={e => { setQuickText(e.target.value); setQuickParsed([]); }}
+            placeholder={"BTCUSD take 3x 7h48\nEURUSD loss 9h15\nGOLD take 2.5x 14h30"}
+            className="w-full min-h-[90px] bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 font-mono resize-y focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          <Button
+            type="button"
+            onClick={handleQuickParse}
+            className="bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-sm px-4 py-2 h-auto"
+          >
+            <Zap className="w-4 h-4 mr-2" />
+            Reconhecer trades
+          </Button>
+
+          {quickParsed.length > 0 && (
+            <div className="space-y-2 pt-1">
+              {quickParsed.map((p, i) => (
+                <div key={i} className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 gap-3">
+                  <div className="flex items-center gap-2 flex-wrap text-sm">
+                    <span className="font-bold text-white">{p.ativo || '?'}</span>
+                    {p.resultado && <span className={`px-2 py-0.5 rounded text-xs font-bold ${p.resultado==='take'?'bg-emerald-500/20 text-emerald-400':'bg-red-500/20 text-red-400'}`}>{p.resultado==='take'?'Take':'Loss'}</span>}
+                    {p.risco && <span className="text-zinc-400 text-xs">{p.risco}x risco</span>}
+                    {p.hora && <span className="text-zinc-500 text-xs">{p.hora}</span>}
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => applyQuickTrade(p)}
+                    className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-black border border-emerald-600/40 text-xs h-7 px-3 transition-all"
+                  >
+                    Aplicar
+                  </Button>
+                </div>
+              ))}
+              {quickParsed.length > 1 && (
+                <p className="text-xs text-zinc-500 pt-1">💡 Clique em "Aplicar" em cada trade para preencher o formulário um a um.</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Card className="bg-graphite/50 border-charcoal-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ChartBar, 
-  Link2, 
-  TrendingUp, 
+  ChartBar,
+  Link2,
+  TrendingUp,
   Target,
   Brain,
   DollarSign,
@@ -24,9 +24,7 @@ import {
   Download,
   LineChart,
   Upload,
-  MessageCircle,
   Smartphone,
-  Sparkles,
   Menu,
   X
 } from "lucide-react";
@@ -43,6 +41,15 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [deviceView, setDeviceView] = useState<'desktop' | 'mobile'>('desktop');
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const handleSwitchToRegister = () => {
     setShowLogin(false);
     setShowRegister(true);
@@ -55,6 +62,14 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-white overflow-x-hidden">
+      <style>{`
+        [data-animate] { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        [data-animate].visible { opacity: 1; transform: translateY(0); }
+        [data-animate][data-delay="1"] { transition-delay: 0.1s; }
+        [data-animate][data-delay="2"] { transition-delay: 0.2s; }
+        [data-animate][data-delay="3"] { transition-delay: 0.3s; }
+        [data-animate][data-delay="4"] { transition-delay: 0.4s; }
+      `}</style>
       {/* Header */}
       <header className="relative z-50 bg-slate-900/80 backdrop-blur-sm border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -180,14 +195,6 @@ export default function Landing() {
                   <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
                   <span className="break-words">{t('landing.hero.feature2')}</span>
                 </div>
-              </div>
-
-              {/* WhatsApp Badge Highlight */}
-              <div data-testid="badge-whatsapp-hero" className="mb-8 inline-flex items-center bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-500/40 rounded-full px-6 py-3 animate-glow">
-                <MessageCircle className="w-5 h-5 text-green-400 mr-3" />
-                <span className="text-white font-semibold text-sm sm:text-base">
-                  ✨ Funcionalidade Inovadora: <span className="text-green-400">Salve trades pelo WhatsApp!</span>
-                </span>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-12 md:mb-16 justify-center lg:justify-start">
@@ -349,7 +356,7 @@ export default function Landing() {
       </section>
       {/* Problem Statement Section */}
       <section className="py-24 bg-gradient-to-r from-slate-800/50 to-slate-900/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div data-animate className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 break-words">
               <span className="text-red-500">{t('landing.problem.title1')}</span>
@@ -382,7 +389,7 @@ export default function Landing() {
                 color: "from-yellow-600 to-yellow-600"
               }
             ].map((item, index) => (
-              <Card key={index} className="bg-slate-800/80 border-slate-700 hover:border-slate-600 transition-all">
+              <Card key={index} className="bg-slate-800/80 border-slate-700 hover:border-slate-600 hover:-translate-y-1 hover:shadow-emerald-500/10 transition-all">
                 <CardContent className="p-4 sm:p-6 md:p-8 text-center">
                   <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-gradient-to-r ${item.color} rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 opacity-20`}>
                     <item.icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
@@ -397,7 +404,7 @@ export default function Landing() {
       </section>
       {/* Solution Preview Section */}
       <section className="py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div data-animate className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 text-sm font-medium mb-6">
               {t('landing.solution.badge')}
@@ -551,172 +558,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* WhatsApp Integration - Exclusive Feature Section */}
-      <section data-testid="section-whatsapp-integration" className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-green-900/30 via-slate-900 to-slate-900 relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute top-10 right-10 w-32 sm:w-48 lg:w-64 h-32 sm:h-48 lg:h-64 bg-green-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div className="absolute bottom-10 left-10 w-24 sm:w-32 lg:w-48 h-24 sm:h-32 lg:h-48 bg-emerald-500/10 rounded-full blur-3xl animate-float"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <Badge data-testid="badge-exclusive-feature" className="bg-gradient-to-r from-green-600 to-emerald-500 text-white px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base font-bold mb-4 sm:mb-6 animate-glow">
-              ✨ FUNCIONALIDADE INOVADORA
-            </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6">
-              <span className="text-white">Salve Trades pelo </span>
-              <span className="gradient-text block animate-pulse-slow">WhatsApp!</span>
-            </h2>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-200 max-w-4xl mx-auto mb-6 sm:mb-8 px-2">
-              Uma <span className="text-green-400 font-bold">plataforma pioneira</span> que permite registrar suas operações 
-              e visualizar estatísticas <span className="text-emerald-400 font-bold">direto do seu celular</span>, sem abrir o navegador!
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* WhatsApp Phone Mockup */}
-            <div className="relative">
-              <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-green-500/40 shadow-2xl max-w-md mx-auto">
-                <CardHeader className="bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-b border-green-500/30">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-white">Métrika Bot</CardTitle>
-                      <p className="text-xs text-green-400">online</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  {/* User Message */}
-                  <div className="flex justify-end">
-                    <div className="bg-green-600/80 rounded-lg px-4 py-3 max-w-[80%]">
-                      <p className="text-white text-sm">
-                        Comprei EURUSD 0.5 lotes lucro $250
-                      </p>
-                      <p className="text-xs text-green-200 text-right mt-1">14:32</p>
-                    </div>
-                  </div>
-
-                  {/* Bot Response */}
-                  <div className="flex justify-start">
-                    <div className="bg-slate-700 rounded-lg px-4 py-3 max-w-[80%]">
-                      <p className="text-white text-sm mb-3">
-                        ✅ Trade salvo com sucesso!
-                      </p>
-                      <div className="space-y-1 text-xs text-slate-300">
-                        <p>📊 Ativo: EURUSD</p>
-                        <p>💰 Resultado: +$250</p>
-                        <p>📈 Mercado: Forex</p>
-                      </div>
-                      <p className="text-xs text-slate-400 text-right mt-2">14:32</p>
-                    </div>
-                  </div>
-
-                  {/* Interactive Buttons */}
-                  <div className="space-y-2 pt-4 border-t border-slate-700">
-                    <Button 
-                      data-testid="button-whatsapp-stats"
-                      className="w-full bg-blue-600/80 hover:bg-blue-600 text-white justify-start"
-                      size="sm"
-                    >
-                      <Smartphone className="w-4 h-4 mr-2" />
-                      📊 Ver Estatísticas
-                    </Button>
-                    <Button 
-                      data-testid="button-whatsapp-save-trade"
-                      className="w-full bg-green-600/80 hover:bg-green-600 text-white justify-start"
-                      size="sm"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      💾 Salvar Novo Trade
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Floating badges - hidden on mobile to prevent overflow */}
-              <div className="hidden sm:flex absolute -top-4 sm:-top-6 -left-2 sm:-left-6 bg-green-500/20 backdrop-blur-sm border border-green-500/40 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 items-center space-x-2">
-                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
-                <span className="text-xs sm:text-sm text-green-400 font-bold">IA Integrada</span>
-              </div>
-              <div className="hidden sm:flex absolute -bottom-4 sm:-bottom-6 -right-2 sm:-right-6 bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/40 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 items-center space-x-2">
-                <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
-                <span className="text-xs sm:text-sm text-emerald-400 font-bold">Instantâneo</span>
-              </div>
-            </div>
-
-            {/* Features List */}
-            <div className="mt-8 lg:mt-0">
-              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-6 sm:mb-8 text-center lg:text-left">
-                Máxima <span className="text-green-400">Praticidade</span>
-              </h3>
-              
-              <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
-                {[
-                  {
-                    icon: MessageCircle,
-                    title: "Linguagem Natural",
-                    description: "Escreva como você fala! Não precisa preencher formulários ou seguir formatos rígidos. Nossa IA entende você.",
-                    color: "text-green-500"
-                  },
-                  {
-                    icon: Brain,
-                    title: "Detecção Automática",
-                    description: "Sistema inteligente detecta automaticamente o mercado (Forex, Crypto, B3), ativos e valores da sua operação.",
-                    color: "text-emerald-500"
-                  },
-                  {
-                    icon: Smartphone,
-                    title: "Estatísticas no WhatsApp",
-                    description: "Consulte seu desempenho, win rate e lucros direto pelo WhatsApp. Não precisa nem abrir o navegador!",
-                    color: "text-blue-500"
-                  },
-                  {
-                    icon: Zap,
-                    title: "Registro Instantâneo",
-                    description: "Saiu de um trade? Registre em segundos pelo celular. Acabou o esquecimento de anotar operações!",
-                    color: "text-purple-500"
-                  }
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-start space-x-3 sm:space-x-4 bg-slate-800/40 rounded-lg p-3 sm:p-4 border border-slate-700 hover:border-green-500/40 transition-all">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${feature.color} bg-current/10 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      <feature.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${feature.color}`} />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-1 sm:mb-2">{feature.title}</h4>
-                      <p className="text-sm sm:text-base text-slate-300">{feature.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-green-500/40">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-start space-x-3">
-                    <Star className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0 mt-1" />
-                    <div>
-                      <h4 className="text-base sm:text-lg font-bold text-white mb-2">Funcionalidade Exclusiva!</h4>
-                      <p className="text-sm sm:text-base text-slate-200">
-                        Uma <span className="text-green-400 font-bold">plataforma pioneira</span> com 
-                        integração completa com WhatsApp para gerenciamento de trades. Praticidade incomparável!
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Section */}
       <section id="precos" className="py-16 sm:py-20 lg:py-28 bg-gradient-to-br from-slate-900 via-emerald-900/15 to-slate-900 relative overflow-hidden">
         {/* Background Effects */}
         <div className="absolute top-20 left-10 w-40 h-40 gradient-emerald-blue rounded-full opacity-10 blur-3xl animate-float"></div>
         <div className="absolute bottom-20 right-10 w-32 h-32 gradient-teal rounded-full opacity-10 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
         
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div data-animate className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <Badge className="gradient-emerald-blue text-white px-6 py-3 text-base font-semibold mb-8 animate-glow">
               {t('landing.pricing.badge')}
@@ -861,7 +709,7 @@ export default function Landing() {
       </section>
       {/* Features Grid Section */}
       <section id="recursos" className="py-16 sm:py-20 lg:py-24 bg-gradient-to-r from-slate-800/30 to-slate-900/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div data-animate className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
               <span className="gradient-text">{t('landing.features.title1')}</span>
@@ -923,7 +771,7 @@ export default function Landing() {
                 color: "from-emerald-500 to-teal-500"
               }
             ].map((feature, index) => (
-              <Card key={index} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 transition-all group">
+              <Card key={index} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-700 hover:border-slate-600 hover:-translate-y-1 hover:shadow-emerald-500/10 transition-all group">
                 <CardContent className="p-6 text-center">
                   <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                     <feature.icon className="w-8 h-8 text-white" />
