@@ -1,5 +1,6 @@
 import { db } from './db';
 import { sql } from 'drizzle-orm';
+import bcrypt from 'bcrypt';
 
 export async function runMigrations() {
   console.log('🔄 Running database migrations...');
@@ -218,6 +219,20 @@ export async function runMigrations() {
     console.log('✅ Database migrations completed successfully');
   } catch (error: any) {
     console.error('❌ Migration error:', error.message);
-    // Don't crash the server if migrations fail on re-run (tables already exist)
+  }
+
+  // Seed admin user if not exists
+  try {
+    const existing = await db.execute(sql`SELECT id FROM users WHERE email = 'admin@metrika.com.br' LIMIT 1`);
+    if (!existing.rows.length) {
+      const hashed = await bcrypt.hash('Metrika@2024!', 10);
+      await db.execute(sql`
+        INSERT INTO users (id, name, email, password, role, plan_type, is_active)
+        VALUES (gen_random_uuid(), 'Administrador', 'admin@metrika.com.br', ${hashed}, 'admin', 'free', true)
+      `);
+      console.log('✅ Admin user created: admin@metrika.com.br');
+    }
+  } catch (e: any) {
+    console.error('❌ Admin seed error:', e.message);
   }
 }
