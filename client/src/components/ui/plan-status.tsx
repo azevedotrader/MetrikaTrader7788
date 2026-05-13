@@ -54,19 +54,19 @@ export function PlanStatus({ compact = false }: PlanStatusProps) {
       case 'monthly':
         return {
           name: 'Mensal',
-          color: 'bg-blue-600',
+          color: 'bg-[#448aff]',
           icon: <Crown className="w-3 h-3" />
         };
       case 'quarterly':
         return {
           name: 'Trimestral',
-          color: 'bg-purple-600',
+          color: 'bg-[#5bc800]',
           icon: <Crown className="w-3 h-3" />
         };
       case 'annual':
         return {
           name: 'Anual',
-          color: 'bg-gradient-to-r from-purple-600 to-blue-600',
+          color: 'bg-[#6EE000]',
           icon: <Crown className="w-3 h-3" />
         };
       default:
@@ -104,7 +104,7 @@ export function PlanStatus({ compact = false }: PlanStatusProps) {
         </Badge>
         
         {showDuration && !compact && (
-          <div className="hidden sm:flex items-center space-x-1.5 text-xs text-zinc-400 bg-zinc-800/50 rounded-md px-2 py-1" data-testid="plan-duration">
+          <div className="hidden sm:flex items-center space-x-1.5 text-xs text-zinc-400 bg-[#13131a]/50 rounded-md px-2 py-1" data-testid="plan-duration">
             <Clock className="w-3 h-3 text-zinc-500" />
             <span className="font-medium">
               {planInfo.daysRemaining !== undefined 

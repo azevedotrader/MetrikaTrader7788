@@ -207,7 +207,7 @@ export default function Carteiras() {
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
               data-testid="button-create-wallet"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -277,7 +277,7 @@ export default function Carteiras() {
                         onClick={() => setFormData({ ...formData, icon: iconData.value })}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border ${
                           formData.icon === iconData.value 
-                            ? "border-purple-500 bg-purple-500/20 text-purple-400" 
+                            ? "border-[#6EE000] bg-[#6EE000]/20 text-[#6EE000]" 
                             : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
                         }`}
                         title={t(`wallets.${iconData.key}`)}
@@ -302,7 +302,7 @@ export default function Carteiras() {
               <Button 
                 onClick={handleCreate}
                 disabled={createMutation.isPending}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
                 data-testid="button-confirm-create"
               >
                 {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -354,7 +354,7 @@ export default function Carteiras() {
           
           {isLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#6EE000]" />
             </div>
           ) : wallets.length === 0 ? (
             <Card className="bg-gray-800/50 border-gray-700 border-dashed">
@@ -366,7 +366,7 @@ export default function Carteiras() {
                 </p>
                 <Button 
                   onClick={() => setIsCreateOpen(true)}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   {t("wallets.createFirst")}
@@ -427,7 +427,7 @@ export default function Carteiras() {
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDelete(wallet)}
-                              className="text-red-400 focus:bg-gray-700 focus:text-red-400 cursor-pointer"
+                              className="text-[#FF1F3D] focus:bg-gray-700 focus:text-[#FF1F3D] cursor-pointer"
                               data-testid={`delete-wallet-${wallet.id}`}
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
@@ -508,7 +508,7 @@ export default function Carteiras() {
                       onClick={() => setFormData({ ...formData, icon: iconData.value })}
                       className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border ${
                         formData.icon === iconData.value 
-                          ? "border-purple-500 bg-purple-500/20 text-purple-400" 
+                          ? "border-[#6EE000] bg-[#6EE000]/20 text-[#6EE000]" 
                           : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
                       }`}
                       title={t(`wallets.${iconData.key}`)}
@@ -532,7 +532,7 @@ export default function Carteiras() {
             <Button 
               onClick={handleUpdate}
               disabled={updateMutation.isPending}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
               data-testid="button-confirm-edit"
             >
               {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

@@ -125,9 +125,9 @@ export default function ImportarCSV() {
     return (
       <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
         <Card className="bg-graphite/50 border-charcoal-700 relative overflow-hidden">
-          <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-sm z-10 flex items-center justify-center">
             <div className="text-center p-6 max-w-md">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#6EE000] to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Recurso VIP</h3>
@@ -137,7 +137,7 @@ export default function ImportarCSV() {
               </p>
               <Button 
                 onClick={() => setShowUpgradeModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold"
+                className="bg-gradient-to-r from-[#6EE000] to-yellow-500 hover:from-[#6EE000] hover:to-yellow-600 text-white font-bold"
                 data-testid="button-upgrade-csv"
               >
                 <Crown className="w-4 h-4 mr-2" />

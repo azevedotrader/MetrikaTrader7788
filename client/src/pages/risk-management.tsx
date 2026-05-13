@@ -128,7 +128,7 @@ export default function RiskManagement() {
     return (
       <div className="min-h-screen bg-zinc-950 p-4 md:p-6 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-purple-500 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-[#6EE000] mx-auto mb-4" />
           <p className="text-zinc-400">Carregando gestão de risco...</p>
         </div>
       </div>
@@ -139,9 +139,9 @@ export default function RiskManagement() {
     return (
       <div className="min-h-screen bg-zinc-950 p-4 md:p-6">
         <Card className="max-w-3xl mx-auto bg-graphite/50 border-charcoal-700 relative overflow-hidden">
-          <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-sm z-10 flex items-center justify-center">
             <div className="text-center p-6 max-w-md">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#6EE000] to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Recurso VIP</h3>
@@ -151,7 +151,7 @@ export default function RiskManagement() {
               </p>
               <Button 
                 onClick={() => setShowUpgradeModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold"
+                className="bg-gradient-to-r from-[#6EE000] to-yellow-500 hover:from-[#6EE000] hover:to-yellow-600 text-white font-bold"
                 data-testid="button-upgrade-risk"
               >
                 <Crown className="w-4 h-4 mr-2" />
@@ -199,7 +199,7 @@ export default function RiskManagement() {
         {/* Conteúdo Principal */}
         {!bankroll && !showQuestionnaire && !error ? (
           // Estado inicial - sem gestão
-          <Card className="bg-zinc-900/50 border-zinc-800" data-testid="welcome-card">
+          <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]" data-testid="welcome-card">
             <CardHeader>
               <CardTitle className="text-white text-xl">
                 Bem-vindo ao Sistema de Gestão de Risco
@@ -210,38 +210,38 @@ export default function RiskManagement() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-800/50 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-[#6EE000]/10 to-[#448aff]/10 border border-[#6EE000]/30 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-2">O que você vai receber:</h3>
                   <ul className="space-y-2 text-sm text-zinc-300">
                     <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span className="text-[#6EE000] mt-0.5">✓</span>
                       <span>
                         <strong>Risco por Operação:</strong> O valor exato que você deve arriscar em
                         cada trade
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span className="text-[#6EE000] mt-0.5">✓</span>
                       <span>
                         <strong>Risco Máximo Diário:</strong> Limite de perdas que dispara proteção
                         automática
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span className="text-[#6EE000] mt-0.5">✓</span>
                       <span>
                         <strong>Risco Máximo Semanal:</strong> Controle de perdas em períodos mais
                         longos
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span className="text-[#6EE000] mt-0.5">✓</span>
                       <span>
                         <strong>Relação Risco/Retorno Mínima:</strong> O R:R ideal para seu perfil
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span className="text-[#6EE000] mt-0.5">✓</span>
                       <span>
                         <strong>Regra de Drawdown:</strong> Quantas perdas seguidas antes de reduzir
                         risco
@@ -250,16 +250,16 @@ export default function RiskManagement() {
                   </ul>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-950/40 to-emerald-950/40 border border-green-800/40 rounded-lg p-5">
+                <div className="bg-gradient-to-br from-green-950/40 to-emerald-950/40 border border-[#6EE000]/40 rounded-lg p-5">
                   <div className="flex items-start gap-3 mb-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-green-400" />
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#6EE000]/20 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-[#6EE000]" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-bold text-green-200 mb-1 text-base">
+                      <h3 className="font-bold text-[#6EE000] mb-1 text-base">
                         Prefere criar pelo WhatsApp?
                       </h3>
-                      <p className="text-sm text-green-200/80 leading-relaxed">
+                      <p className="text-sm text-[#6EE000]/80 leading-relaxed">
                         Você tem <strong>duas formas</strong> de criar sua gestão de risco personalizada:
                       </p>
                     </div>
@@ -267,27 +267,27 @@ export default function RiskManagement() {
 
                   <div className="space-y-3 mb-4">
                     <div className="flex items-start gap-2">
-                      <span className="text-green-400 font-bold mt-0.5">1.</span>
+                      <span className="text-[#6EE000] font-bold mt-0.5">1.</span>
                       <div className="flex-1">
-                        <p className="text-sm text-green-100 font-medium">Aqui na Plataforma Web</p>
-                        <p className="text-xs text-green-200/70 mt-0.5">
+                        <p className="text-sm text-[#6EE000] font-medium">Aqui na Plataforma Web</p>
+                        <p className="text-xs text-[#6EE000]/70 mt-0.5">
                           Interface visual completa com o questionário das 7 perguntas
                         </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-green-400 font-bold mt-0.5">2.</span>
+                      <span className="text-[#6EE000] font-bold mt-0.5">2.</span>
                       <div className="flex-1">
-                        <p className="text-sm text-green-100 font-medium">Pelo WhatsApp Bot</p>
-                        <p className="text-xs text-green-200/70 mt-0.5">
+                        <p className="text-sm text-[#6EE000] font-medium">Pelo WhatsApp Bot</p>
+                        <p className="text-xs text-[#6EE000]/70 mt-0.5">
                           Conversação interativa com botões - sem precisar digitar nada!
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-green-900/30 border border-green-700/30 rounded-md p-3 mb-4">
-                    <p className="text-xs text-green-200/90">
+                  <div className="bg-[#6EE000]/30 border border-[#6EE000]/30 rounded-md p-3 mb-4">
+                    <p className="text-xs text-[#6EE000]/90">
                       <strong>✨ Importante:</strong> Não importa qual método você escolher, os parâmetros
                       de risco calculados serão <strong>exatamente os mesmos</strong>. O algoritmo é
                       idêntico em ambos os canais!
@@ -301,7 +301,7 @@ export default function RiskManagement() {
                     className="block"
                   >
                     <Button
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
+                      className="w-full bg-[#6EE000] hover:bg-[#6EE000] text-white font-medium"
                       size="lg"
                       data-testid="button-whatsapp-cta"
                     >
@@ -310,7 +310,7 @@ export default function RiskManagement() {
                     </Button>
                   </a>
 
-                  <p className="text-xs text-green-300/60 text-center mt-2">
+                  <p className="text-xs text-[#6EE000]/60 text-center mt-2">
                     Clique em "🎯 Criar Gestão" no menu e responda 7 perguntas com A/B/C
                   </p>
                 </div>
@@ -318,7 +318,7 @@ export default function RiskManagement() {
 
               <Button
                 onClick={() => setShowQuestionnaire(true)}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="w-full bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
                 size="lg"
                 data-testid="button-start-questionnaire"
               >
@@ -343,9 +343,9 @@ export default function RiskManagement() {
           />
         ) : (
           // Estado de erro
-          <Card className="bg-red-900/20 border-red-800/50">
+          <Card className="bg-[#FF1F3D]/20 border-[#FF1F3D]/50">
             <CardHeader>
-              <CardTitle className="text-red-400 flex items-center gap-2">
+              <CardTitle className="text-[#FF1F3D] flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
                 Erro ao carregar gestão
               </CardTitle>
@@ -370,10 +370,10 @@ export default function RiskManagement() {
         {/* Informações Adicionais */}
         {!showQuestionnaire && !bankroll && (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-[#0a0a0f]/30 border-[#1e1e2e]/50">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#6EE000]/20 flex items-center justify-center">
                     <span className="text-xl">🎯</span>
                   </div>
                   <div>
@@ -386,7 +386,7 @@ export default function RiskManagement() {
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-[#0a0a0f]/30 border-[#1e1e2e]/50">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -402,10 +402,10 @@ export default function RiskManagement() {
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-[#0a0a0f]/30 border-[#1e1e2e]/50">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#6EE000]/20 flex items-center justify-center">
                     <span className="text-xl">📊</span>
                   </div>
                   <div>

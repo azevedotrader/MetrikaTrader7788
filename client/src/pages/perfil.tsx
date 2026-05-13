@@ -125,7 +125,7 @@ export default function Perfil() {
   return (
     <div className="p-6">
       <div className="max-w-2xl mx-auto">
-        <Card className="bg-zinc-900/90 border-zinc-800">
+        <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-white text-xl font-semibold">Editar Dados do Usuário</CardTitle>
           </CardHeader>
@@ -148,7 +148,7 @@ export default function Perfil() {
                   <p className="text-white font-semibold">{user?.name}</p>
                   <p className="text-zinc-400 text-sm">{user?.email}</p>
                   {user?.googleId && (
-                    <p className="text-green-500 text-xs flex items-center gap-1">
+                    <p className="text-[#6EE000] text-xs flex items-center gap-1">
                       <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
@@ -166,7 +166,7 @@ export default function Perfil() {
                     id="nome"
                     value={formData.nome}
                     onChange={(e) => handleInputChange("nome", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -176,7 +176,7 @@ export default function Perfil() {
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
               </div>
@@ -190,7 +190,7 @@ export default function Perfil() {
                     placeholder="(11) 99999-9999"
                     value={formData.telefone}
                     onChange={(e) => handleInputChange("telefone", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
+                    className="bg-[#13131a] border-zinc-700 text-white placeholder:text-zinc-400"
                   />
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function Perfil() {
                     placeholder="Digite uma nova senha"
                     value={formData.senha}
                     onChange={(e) => handleInputChange("senha", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
+                    className="bg-[#13131a] border-zinc-700 text-white placeholder:text-zinc-400"
                   />
                 </div>
                 <div className="space-y-2">
@@ -215,7 +215,7 @@ export default function Perfil() {
                     placeholder="Confirme a nova senha"
                     value={formData.confirmarSenha}
                     onChange={(e) => handleInputChange("confirmarSenha", e.target.value)}
-                    className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400"
+                    className="bg-[#13131a] border-zinc-700 text-white placeholder:text-zinc-400"
                   />
                 </div>
               </div>

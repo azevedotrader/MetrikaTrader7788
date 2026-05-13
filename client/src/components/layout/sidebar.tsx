@@ -115,7 +115,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       <div 
         data-testid="sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 bg-gradient-to-b from-zinc-900 via-zinc-900/98 to-zinc-950 border-r border-zinc-800/50 transition-all duration-300 ease-in-out z-50 backdrop-blur-sm",
+          "fixed inset-y-0 left-0 bg-gradient-to-b from-[#0f0f1a] via-[#0f0f1a] to-[#0a0a0f] border-r border-[#1e1e2e]/50 transition-all duration-300 ease-in-out z-50 backdrop-blur-sm",
           isMobile 
             ? cn("w-72 transform shadow-2xl", isOpen ? "translate-x-0" : "-translate-x-full")
             : cn(isExpanded ? "w-72 shadow-xl" : "w-16")
@@ -125,7 +125,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       >
         <div className="flex flex-col h-full overflow-hidden">
           {/* Logo and Close Button */}
-          <div className="p-3 border-b border-zinc-800/30 flex-shrink-0">
+          <div className="p-3 border-b border-[#1e1e2e]/30 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-center">
                 <Logo variant="sidebar" expanded={sidebarExpanded} />
@@ -137,7 +137,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 lg:hidden rounded-lg"
+                  className="text-zinc-400 hover:text-white hover:bg-[#13131a]/50 lg:hidden rounded-lg"
                 >
                   <X className="w-5 h-5" />
                 </Button>
@@ -154,8 +154,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full text-zinc-400 hover:bg-zinc-800/60 hover:text-white transition-all duration-200 rounded-lg h-10",
-                        location === item.href && "bg-zinc-800/80 text-white border-l-2 border-purple-500",
+                        "w-full text-zinc-400 hover:bg-[#13131a]/60 hover:text-white transition-all duration-200 rounded-lg h-10",
+                        location === item.href && "bg-[#13131a]/80 text-white border-l-2 border-[#6EE000]",
                         sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
                       )}
                       title={!sidebarExpanded ? t(item.nameKey) : undefined}
@@ -178,12 +178,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </nav>
           
           {/* Action Buttons - Fixed at bottom above footer */}
-          <div className="px-2 py-2 border-t border-zinc-800/30 space-y-1.5 bg-zinc-900/50 flex-shrink-0">
+          <div className="px-2 py-2 border-t border-[#1e1e2e]/30 space-y-1.5 bg-[#0a0a0f]/50 flex-shrink-0">
             {/* Análise CSV com IA */}
             <Button
               onClick={handleAnalyzeCsv}
               className={cn(
-                "w-full text-emerald-400 hover:bg-emerald-600/20 hover:text-emerald-300 transition-all duration-200 bg-emerald-600/10 border border-emerald-600/20 rounded-lg h-9",
+                "w-full text-[#6EE000] hover:bg-[#6EE000]/20 hover:text-[#a3ff4d] transition-all duration-200 bg-[#6EE000]/10 border border-[#6EE000]/20 rounded-lg h-9",
                 sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
               )}
               title={!sidebarExpanded ? t('brokers.csv_import') : undefined}
@@ -229,12 +229,12 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           </div>
 
           {/* User Profile Footer */}
-          <div className="p-2 border-t border-zinc-800/30 bg-zinc-950/50 flex-shrink-0">
+          <div className="p-2 border-t border-[#1e1e2e]/30 bg-[#0a0a0f]/50 flex-shrink-0">
             <div className={cn(
               "flex items-center transition-all duration-300 rounded-lg p-2",
-              sidebarExpanded ? "space-x-3 hover:bg-zinc-800/30" : "flex-col gap-2"
+              sidebarExpanded ? "space-x-3 hover:bg-[#13131a]/30" : "flex-col gap-2"
             )}>
-              <div className="w-9 h-9 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+              <div className="w-9 h-9 bg-[#1e1e2e] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
                 <span className="text-white font-semibold text-sm">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
               </div>
               <div 
@@ -275,7 +275,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         
         {/* Modal de Upgrade para Suporte */}
         <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-          <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-[#0a0a0f] border-[#1e1e2e] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
                 🚀 Upgrade para Acessar Recursos Premium
@@ -286,8 +286,8 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               {/* Descrição */}
               <div className="text-center space-y-3">
                 <p className="text-zinc-300 text-sm md:text-base leading-relaxed">
-                  O <strong className="text-purple-600">suporte completo</strong> está disponível para usuários dos 
-                  planos <strong className="text-purple-600">Starter</strong>, <strong className="text-purple-600">Pro</strong> e <strong className="text-purple-600">VIP</strong>.
+                  O <strong className="text-[#6EE000]">suporte completo</strong> está disponível para usuários dos 
+                  planos <strong className="text-[#6EE000]">Starter</strong>, <strong className="text-[#6EE000]">Pro</strong> e <strong className="text-[#6EE000]">VIP</strong>.
                 </p>
                 <p className="text-zinc-400 text-sm">
                   Faça upgrade para ter acesso ao suporte especializado e recursos avançados da Métrika.
@@ -297,33 +297,33 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               {/* Planos */}
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Plano Pro */}
-                <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border border-purple-500/30 rounded-lg p-4 md:p-6">
+                <div className="bg-gradient-to-br from-[#6EE000]/10 to-[#448aff]/10 border border-[#6EE000]/30 rounded-lg p-4 md:p-6">
                   <div className="text-center space-y-3">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-[#5bc800] rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-bold">★</span>
                       </div>
                       <h3 className="text-lg md:text-xl font-bold text-white">Pro</h3>
                     </div>
-                    <p className="text-2xl md:text-3xl font-bold text-purple-600">R$ 49,90</p>
+                    <p className="text-2xl md:text-3xl font-bold text-[#6EE000]">R$ 49,90</p>
                     <p className="text-zinc-400 text-xs md:text-sm">por mês</p>
                   </div>
                   
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Suporte exclusivo prioritário</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Análise com IA ilimitada</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Trades ilimitados</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Relatórios avançados</span>
                     </div>
                   </div>
@@ -349,20 +349,20 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                   </div>
                   
                   <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Suporte VIP 24/7</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Tudo do Pro +</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Consultoria personalizada</span>
                     </div>
-                    <div className="flex items-center gap-2 text-green-600 text-sm">
-                      <span className="text-green-600">✓</span>
+                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
+                      <span className="text-[#6EE000]">✓</span>
                       <span>Acesso antecipado</span>
                     </div>
                   </div>
@@ -374,7 +374,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 <Button
                   variant="outline"
                   onClick={() => setShowUpgradeModal(false)}
-                  className="w-full sm:flex-1 border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm md:text-base py-2 md:py-3"
+                  className="w-full sm:flex-1 border-zinc-600 text-zinc-300 hover:bg-[#13131a] text-sm md:text-base py-2 md:py-3"
                 >
                   Cancelar
                 </Button>
@@ -384,7 +384,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     // Aqui seria redirecionado para a página de planos
                     window.open('/pricing', '_blank');
                   }}
-                  className="w-full sm:flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-sm md:text-base py-2 md:py-3"
+                  className="w-full sm:flex-1 bg-[#6EE000] hover:bg-[#5bc800] text-black font-semibold text-sm md:text-base py-2 md:py-3"
                 >
                   🚀 Fazer Upgrade Agora
                 </Button>

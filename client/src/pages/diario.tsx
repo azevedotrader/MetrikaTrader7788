@@ -183,7 +183,7 @@ export default function Diario() {
         ) : (
           <div data-testid="journal-entries" className="space-y-6">
             {entries.map((entry) => (
-              <Card key={entry.id} className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors">
+              <Card key={entry.id} className="bg-[#0a0a0f] border-[#1e1e2e] hover:border-zinc-700 transition-colors">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -213,8 +213,8 @@ export default function Diario() {
                         variant={isProfitable(entry.pnl) ? "default" : "destructive"}
                         className={
                           isProfitable(entry.pnl)
-                            ? "bg-green-600/20 text-green-600 hover:bg-green-600/30" 
-                            : "bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                            ? "bg-[#6EE000]/20 text-[#6EE000] hover:bg-[#6EE000]/30" 
+                            : "bg-[#FF1F3D]/20 text-[#FF1F3D] hover:bg-[#FF1F3D]/30"
                         }
                         data-testid={`badge-pnl-${entry.id}`}
                       >

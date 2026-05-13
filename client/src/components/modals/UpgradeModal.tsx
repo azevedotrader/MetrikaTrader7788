@@ -50,7 +50,7 @@ export function UpgradeModal({
       name: 'Trimestral',
       price: 'R$ 197',
       period: '/trimestre',
-      color: 'bg-purple-600',
+      color: 'bg-[#5bc800]',
       popular: true,
       savings: 'Economize 32%',
     },
@@ -59,7 +59,7 @@ export function UpgradeModal({
       name: 'Anual',
       price: 'R$ 547',
       period: '/ano',
-      color: 'bg-gradient-to-r from-purple-600 to-blue-600',
+      color: 'bg-gradient-to-r from-[#6EE000] to-[#448aff]',
       popular: false,
       savings: 'Economize 53%',
     },
@@ -112,9 +112,9 @@ export function UpgradeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-zinc-700 text-white" data-testid="modal-upgrade">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-[#0a0a0f] border-zinc-700 text-white" data-testid="modal-upgrade">
         <DialogHeader className="text-center space-y-4">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+          <div className="mx-auto w-12 h-12 bg-gradient-to-r from-[#6EE000] to-[#448aff] rounded-full flex items-center justify-center">
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <DialogTitle className="text-2xl font-bold text-white" data-testid="text-upgrade-title">
@@ -139,7 +139,7 @@ export function UpgradeModal({
         <Separator className="my-6 bg-zinc-700" />
 
         <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-zinc-800 rounded-xl p-6">
+          <div className="bg-[#13131a] rounded-xl p-6">
             <div className="flex items-center gap-2 mb-4">
               <Zap className="w-5 h-5 text-gray-400" />
               <h3 className="text-lg font-semibold text-white">Plano Free</h3>
@@ -149,9 +149,9 @@ export function UpgradeModal({
               {freeFeatures.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2">
                   {feature.included ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-[#6EE000]" />
                   ) : (
-                    <XCircle className="w-4 h-4 text-red-500" />
+                    <XCircle className="w-4 h-4 text-[#FF1F3D]" />
                   )}
                   <span className={`text-sm ${feature.included ? 'text-zinc-300' : 'text-zinc-500'}`}>
                     {feature.text}
@@ -161,17 +161,17 @@ export function UpgradeModal({
             </ul>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 border border-purple-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-[#6EE000]/50 to-[#448aff]/50 border border-[#6EE000]/30 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Crown className="w-5 h-5 text-purple-400" />
+              <Crown className="w-5 h-5 text-[#6EE000]" />
               <h3 className="text-lg font-semibold text-white">Planos Pagos</h3>
-              <Badge className="bg-purple-600 text-white text-xs">Acesso Completo</Badge>
+              <Badge className="bg-[#5bc800] text-white text-xs">Acesso Completo</Badge>
             </div>
             <p className="text-sm text-zinc-400 mb-4">Todos os planos incluem:</p>
             <ul className="space-y-3">
               {paidFeatures.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <CheckCircle className="w-4 h-4 text-[#6EE000]" />
                   <span className="text-sm text-zinc-300">{feature.text}</span>
                 </li>
               ))}
@@ -185,13 +185,13 @@ export function UpgradeModal({
               key={plan.id}
               className={`relative rounded-xl border-2 p-4 transition-all duration-200 ${
                 plan.popular
-                  ? 'border-purple-500 bg-purple-950/30'
+                  ? 'border-[#6EE000] bg-[#6EE000]/30'
                   : 'border-zinc-700 hover:border-zinc-600'
               }`}
             >
               {plan.popular && (
                 <Badge 
-                  className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white"
+                  className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#5bc800] text-white"
                 >
                   Mais Popular
                 </Badge>
@@ -199,12 +199,12 @@ export function UpgradeModal({
               
               <div className="text-center mb-4">
                 <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                <div className="text-2xl font-bold text-purple-400 mt-2">
+                <div className="text-2xl font-bold text-[#6EE000] mt-2">
                   {plan.price}
                   <span className="text-sm font-normal text-zinc-500">{plan.period}</span>
                 </div>
                 {plan.savings && (
-                  <Badge className="mt-2 bg-green-600 text-white text-xs">
+                  <Badge className="mt-2 bg-[#6EE000] text-white text-xs">
                     {plan.savings}
                   </Badge>
                 )}

@@ -30,9 +30,9 @@ interface AITradeAnalysisProps {
 const getSentimentIcon = (sentiment: string) => {
   switch (sentiment) {
     case 'bullish':
-      return <TrendingUp className="h-4 w-4 text-green-600" />;
+      return <TrendingUp className="h-4 w-4 text-[#6EE000]" />;
     case 'bearish':
-      return <TrendingDown className="h-4 w-4 text-red-500" />;
+      return <TrendingDown className="h-4 w-4 text-[#FF1F3D]" />;
     default:
       return <BarChart3 className="h-4 w-4 text-yellow-500" />;
   }
@@ -41,9 +41,9 @@ const getSentimentIcon = (sentiment: string) => {
 const getSentimentColor = (sentiment: string) => {
   switch (sentiment) {
     case 'bullish':
-      return 'bg-green-600';
+      return 'bg-[#6EE000]';
     case 'bearish':
-      return 'bg-red-500';
+      return 'bg-[#FF1F3D]';
     default:
       return 'bg-yellow-500';
   }
@@ -52,11 +52,11 @@ const getSentimentColor = (sentiment: string) => {
 const getRiskColor = (riskLevel: string) => {
   switch (riskLevel) {
     case 'low':
-      return 'bg-green-600';
+      return 'bg-[#6EE000]';
     case 'medium':
       return 'bg-yellow-500';
     case 'high':
-      return 'bg-red-500';
+      return 'bg-[#FF1F3D]';
     default:
       return 'bg-gray-600';
   }
@@ -91,15 +91,15 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
 
   if (!analysis && !analysisMutation.isPending) {
     return (
-      <Card className="bg-slate-900/50 border-slate-700">
+      <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-purple-600" />
+            <BarChart3 className="h-5 w-5 text-[#6EE000]" />
             Análise IA do Trade
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-300 mb-4">
+          <p className="text-[#e0e0e0] mb-4">
             Obtenha uma análise inteligente do seu trade com sugestões personalizadas.
           </p>
           <Button 
@@ -117,15 +117,15 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
 
   if (analysisMutation.isPending) {
     return (
-      <Card className="bg-slate-900/50 border-slate-700">
+      <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <Loader2 className="h-5 w-5 text-purple-600 animate-spin" />
+            <Loader2 className="h-5 w-5 text-[#6EE000] animate-spin" />
             Analisando Trade...
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-300">
+          <p className="text-[#e0e0e0]">
             Nossa IA está analisando seu trade. Aguarde alguns instantes...
           </p>
         </CardContent>
@@ -136,10 +136,10 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
   if (!analysis) return null;
 
   return (
-    <Card className="bg-slate-900/50 border-slate-700">
+    <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-purple-600" />
+          <BarChart3 className="h-5 w-5 text-[#6EE000]" />
           Análise IA do Trade
         </CardTitle>
       </CardHeader>
@@ -158,8 +158,8 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 text-sm">Confiança:</span>
-              <Badge variant="outline" className="text-slate-300">
+              <span className="text-[#6e7191] text-sm">Confiança:</span>
+              <Badge variant="outline" className="text-[#e0e0e0]">
                 {Math.round(analysis.confidence * 100)}%
               </Badge>
             </div>
@@ -174,20 +174,20 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
         </div>
 
         {/* Sugestão */}
-        <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+        <div className="bg-[#0f0f1a]/50 p-4 rounded-lg border border-[#28283a]">
           <h4 className="text-white font-medium mb-2 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-yellow-500" />
             Sugestão
           </h4>
-          <p className="text-slate-300 text-sm leading-relaxed">
+          <p className="text-[#e0e0e0] text-sm leading-relaxed">
             {analysis.suggestion}
           </p>
         </div>
 
         {/* Recomendação */}
-        <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-600">
+        <div className="bg-[#0f0f1a]/50 p-4 rounded-lg border border-[#28283a]">
           <h4 className="text-white font-medium mb-2">Recomendação Final</h4>
-          <p className="text-slate-300 text-sm leading-relaxed">
+          <p className="text-[#e0e0e0] text-sm leading-relaxed">
             {analysis.recommendation}
           </p>
         </div>
@@ -196,7 +196,7 @@ export function AITradeAnalysis({ tradeData, onAnalysisComplete }: AITradeAnalys
           onClick={handleAnalyze}
           variant="outline"
           size="sm"
-          className="border-slate-600 text-slate-300 hover:bg-slate-800"
+          className="border-[#28283a] text-[#e0e0e0] hover:bg-[#0f0f1a]"
           data-testid="button-reanalyze"
         >
           Nova Análise

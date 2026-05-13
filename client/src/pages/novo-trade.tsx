@@ -247,9 +247,9 @@ export default function NovoTrade() {
     return (
       <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
         <Card className="bg-graphite/50 border-charcoal-700 relative overflow-hidden">
-          <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-sm z-10 flex items-center justify-center">
             <div className="text-center p-6 max-w-md">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#6EE000] to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Limite Atingido</h3>
@@ -259,7 +259,7 @@ export default function NovoTrade() {
               </p>
               <Button 
                 onClick={() => setShowUpgradeModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold"
+                className="bg-gradient-to-r from-[#6EE000] to-yellow-500 hover:from-[#6EE000] hover:to-yellow-600 text-white font-bold"
                 data-testid="button-upgrade-trades"
               >
                 <Crown className="w-4 h-4 mr-2" />
@@ -293,15 +293,15 @@ export default function NovoTrade() {
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
 
       {/* ── Entrada Rápida ── */}
-      <Card className="bg-graphite/50 border-charcoal-700 border-emerald-500/30">
+      <Card className="bg-graphite/50 border-charcoal-700 border-[#6EE000]/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-base">
-            <Zap className="h-5 w-5 text-emerald-400" />
+            <Zap className="h-5 w-5 text-[#6EE000]" />
             Entrada Rápida
             <span className="ml-auto text-xs font-normal text-zinc-500">opcional</span>
           </CardTitle>
           <CardDescription className="text-zinc-400 text-xs">
-            Digite como quiser — o app reconhece e preenche o formulário. Ex: <span className="text-emerald-400 font-mono">BTCUSD take 3x 7h48</span>
+            Digite como quiser — o app reconhece e preenche o formulário. Ex: <span className="text-[#6EE000] font-mono">BTCUSD take 3x 7h48</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -309,12 +309,12 @@ export default function NovoTrade() {
             value={quickText}
             onChange={e => { setQuickText(e.target.value); setQuickParsed([]); }}
             placeholder={"BTCUSD take 3x 7h48\nEURUSD loss 9h15\nGOLD take 2.5x 14h30"}
-            className="w-full min-h-[90px] bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 font-mono resize-y focus:outline-none focus:border-emerald-500 transition-colors"
+            className="w-full min-h-[90px] bg-[#0a0a0f] border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 font-mono resize-y focus:outline-none focus:border-[#6EE000] transition-colors"
           />
           <Button
             type="button"
             onClick={handleQuickParse}
-            className="bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-sm px-4 py-2 h-auto"
+            className="bg-[#6EE000] hover:bg-[#6EE000] text-black font-bold text-sm px-4 py-2 h-auto"
           >
             <Zap className="w-4 h-4 mr-2" />
             Reconhecer trades
@@ -323,10 +323,10 @@ export default function NovoTrade() {
           {quickParsed.length > 0 && (
             <div className="space-y-2 pt-1">
               {quickParsed.map((p, i) => (
-                <div key={i} className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 gap-3">
+                <div key={i} className="flex items-center justify-between bg-[#0a0a0f] border border-zinc-700 rounded-lg px-3 py-2 gap-3">
                   <div className="flex items-center gap-2 flex-wrap text-sm">
                     <span className="font-bold text-white">{p.ativo || '?'}</span>
-                    {p.resultado && <span className={`px-2 py-0.5 rounded text-xs font-bold ${p.resultado==='take'?'bg-emerald-500/20 text-emerald-400':'bg-red-500/20 text-red-400'}`}>{p.resultado==='take'?'Take':'Loss'}</span>}
+                    {p.resultado && <span className={`px-2 py-0.5 rounded text-xs font-bold ${p.resultado==='take'?'bg-[#6EE000]/20 text-[#6EE000]':'bg-[#FF1F3D]/20 text-[#FF1F3D]'}`}>{p.resultado==='take'?'Take':'Loss'}</span>}
                     {p.risco && <span className="text-zinc-400 text-xs">{p.risco}x risco</span>}
                     {p.hora && <span className="text-zinc-500 text-xs">{p.hora}</span>}
                   </div>
@@ -334,7 +334,7 @@ export default function NovoTrade() {
                     type="button"
                     size="sm"
                     onClick={() => applyQuickTrade(p)}
-                    className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-black border border-emerald-600/40 text-xs h-7 px-3 transition-all"
+                    className="bg-[#6EE000]/20 hover:bg-[#6EE000] text-[#6EE000] hover:text-black border border-[#6EE000]/40 text-xs h-7 px-3 transition-all"
                   >
                     Aplicar
                   </Button>
@@ -494,13 +494,13 @@ export default function NovoTrade() {
                         <SelectContent className="bg-charcoal-800 border-charcoal-600">
                           <SelectItem value="compra">
                             <span className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-green-600" />
+                              <TrendingUp className="h-4 w-4 text-[#6EE000]" />
                               {t('form.buy')}
                             </span>
                           </SelectItem>
                           <SelectItem value="venda">
                             <span className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-red-500" />
+                              <TrendingDown className="h-4 w-4 text-[#FF1F3D]" />
                               {t('form.sell')}
                             </span>
                           </SelectItem>
@@ -605,7 +605,7 @@ export default function NovoTrade() {
                     {t('form.trade_result')} *
                   </label>
                   {!tradeResult && (
-                    <p className="text-xs text-red-500 mb-2">
+                    <p className="text-xs text-[#FF1F3D] mb-2">
                       {t('form.select_result_warning')}
                     </p>
                   )}
@@ -618,8 +618,8 @@ export default function NovoTrade() {
                       onClick={() => setTradeResult("take")}
                       className={`${
                         tradeResult === "take"
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-green-600/20"
+                          ? "bg-[#6EE000] hover:bg-[#6EE000] text-white"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-[#6EE000]/20"
                       }`}
                     >
                       {t('form.take')}
@@ -632,8 +632,8 @@ export default function NovoTrade() {
                       onClick={() => setTradeResult("loss")}
                       className={`${
                         tradeResult === "loss"
-                          ? "bg-red-500 hover:bg-red-700 text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-red-500/20"
+                          ? "bg-[#FF1F3D] hover:bg-[#FF1F3D] text-white"
+                          : "border-charcoal-600 text-charcoal-300 hover:bg-[#FF1F3D]/20"
                       }`}
                     >
                       {t('form.loss')}
@@ -670,8 +670,8 @@ export default function NovoTrade() {
                             finalResult === null
                               ? "text-charcoal-400"
                               : finalResult >= 0
-                                ? "text-green-600"
-                                : "text-red-500"
+                                ? "text-[#6EE000]"
+                                : "text-[#FF1F3D]"
                           }`}
                         >
                           {finalResult === null
@@ -688,10 +688,10 @@ export default function NovoTrade() {
                         <div
                           className={`text-sm font-medium ${
                             riskRewardRatio >= 3
-                              ? "text-green-600"
+                              ? "text-[#6EE000]"
                               : riskRewardRatio >= 2
                                 ? "text-yellow-500"
-                                : "text-red-500"
+                                : "text-[#FF1F3D]"
                           }`}
                         >
                           {riskRewardRatio >= 3

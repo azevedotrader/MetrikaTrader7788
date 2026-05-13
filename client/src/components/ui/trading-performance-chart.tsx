@@ -456,10 +456,10 @@ export function TradingPerformanceChart({
       
       if (dataPoint.isPeak) {
         specialLabel = "🔺 Topo do ciclo";
-        specialColor = "#FFD700";
+        specialColor = "#6EE000";
       } else if (dataPoint.isValley) {
         specialLabel = "🔻 Fundo do ciclo";
-        specialColor = "#FF6B6B";
+        specialColor = "#FF1F3D";
       } else if (dataPoint.isConsolidation) {
         specialLabel = "📊 Zona de consolidação";
         specialColor = "#888";
@@ -488,11 +488,11 @@ export function TradingPerformanceChart({
             </p>
           )}
           
-          <p style={{ margin: 0, marginBottom: "4px", color: hideData ? "#888" : (dataPoint.total >= 0 ? "#2FA87A" : "#F06363"), fontSize: "14px" }}>
+          <p style={{ margin: 0, marginBottom: "4px", color: hideData ? "#888" : (dataPoint.total >= 0 ? "#6EE000" : "#FF1F3D"), fontSize: "14px" }}>
             {dataPoint.total >= 0 ? "📈" : "📉"} {hideData ? "•••••" : `${dataPoint.total >= 0 ? "+" : ""}${formatCurrency(dataPoint.total)}`}
           </p>
           
-          <p style={{ margin: 0, color: hideData ? "#888" : (dataPoint.accumulated >= 0 ? "#2FA87A" : "#F06363"), fontSize: "12px", opacity: 0.8 }}>
+          <p style={{ margin: 0, color: hideData ? "#888" : (dataPoint.accumulated >= 0 ? "#6EE000" : "#FF1F3D"), fontSize: "12px", opacity: 0.8 }}>
             💰 Total: {hideData ? "•••••" : formatCurrency(dataPoint.accumulated)}
           </p>
         </div>
@@ -523,7 +523,7 @@ export function TradingPerformanceChart({
               }}
               className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
                 selectedPeriod === filter.key
-                  ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                  ? "bg-[#6EE000]/20 text-white border border-[#6EE000]"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
@@ -537,14 +537,14 @@ export function TradingPerformanceChart({
               <button
                 className={`p-1.5 rounded transition-all ${
                   selectedPeriod === "custom"
-                    ? "text-[#3b82f6]"
+                    ? "text-[#6EE000]"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
                 <Filter className="w-5 h-5" />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="center">
+            <PopoverContent className="w-72 bg-[#0a0a0f] border-zinc-700 p-4" align="center">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium text-white flex items-center gap-2">
@@ -566,7 +566,7 @@ export function TradingPerformanceChart({
                       type="date"
                       value={customStartDate}
                       onChange={(e) => setCustomStartDate(e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                      className="w-full bg-[#13131a] border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6EE000]"
                     />
                   </div>
                   
@@ -576,7 +576,7 @@ export function TradingPerformanceChart({
                       type="date"
                       value={customEndDate}
                       onChange={(e) => setCustomEndDate(e.target.value)}
-                      className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                      className="w-full bg-[#13131a] border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6EE000]"
                     />
                   </div>
                 </div>
@@ -591,7 +591,7 @@ export function TradingPerformanceChart({
                       setSelectedPeriod("1m");
                       setIsFilterOpen(false);
                     }}
-                    className="flex-1 bg-transparent border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                    className="flex-1 bg-transparent border-zinc-700 text-zinc-400 hover:bg-[#13131a] hover:text-white"
                   >
                     Limpar
                   </Button>
@@ -604,7 +604,7 @@ export function TradingPerformanceChart({
                       }
                     }}
                     disabled={!customStartDate || !customEndDate}
-                    className="flex-1 bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+                    className="flex-1 bg-[#6EE000] hover:bg-[#5bc800] text-black"
                   >
                     Aplicar
                   </Button>
@@ -645,7 +645,7 @@ export function TradingPerformanceChart({
             }}
             className={`px-3 py-1.5 text-sm font-medium rounded transition-all ${
               selectedPeriod === filter.key
-                ? "bg-[#1e3a5f] text-white border border-[#3b82f6]"
+                ? "bg-[#6EE000]/20 text-white border border-[#6EE000]"
                 : "text-zinc-400 hover:text-white"
             }`}
             data-testid={`btn-period-${filter.key}`}
@@ -660,7 +660,7 @@ export function TradingPerformanceChart({
             <button
               className={`p-1.5 rounded transition-all ${
                 selectedPeriod === "custom"
-                  ? "text-[#3b82f6]"
+                  ? "text-[#6EE000]"
                   : "text-zinc-400 hover:text-white"
               }`}
               data-testid="btn-custom-filter"
@@ -668,7 +668,7 @@ export function TradingPerformanceChart({
               <Filter className="w-5 h-5" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-72 bg-zinc-900 border-zinc-700 p-4" align="center">
+          <PopoverContent className="w-72 bg-[#0a0a0f] border-zinc-700 p-4" align="center">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-medium text-white flex items-center gap-2">
@@ -690,7 +690,7 @@ export function TradingPerformanceChart({
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                    className="w-full bg-[#13131a] border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6EE000]"
                     data-testid="input-start-date"
                   />
                 </div>
@@ -701,7 +701,7 @@ export function TradingPerformanceChart({
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3b82f6]"
+                    className="w-full bg-[#13131a] border border-zinc-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6EE000]"
                     data-testid="input-end-date"
                   />
                 </div>
@@ -717,7 +717,7 @@ export function TradingPerformanceChart({
                     setSelectedPeriod("1m");
                     setIsFilterOpen(false);
                   }}
-                  className="flex-1 bg-transparent border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  className="flex-1 bg-transparent border-zinc-700 text-zinc-400 hover:bg-[#13131a] hover:text-white"
                 >
                   Limpar
                 </Button>
@@ -730,7 +730,7 @@ export function TradingPerformanceChart({
                     }
                   }}
                   disabled={!customStartDate || !customEndDate}
-                  className="flex-1 bg-[#3b82f6] hover:bg-[#2563eb] text-white"
+                  className="flex-1 bg-[#6EE000] hover:bg-[#5bc800] text-black"
                 >
                   Aplicar
                 </Button>
@@ -750,11 +750,11 @@ export function TradingPerformanceChart({
       {peaks.length > 0 && (
         <div className="flex justify-center gap-4 mb-4 text-xs">
           <div className="flex items-center gap-1">
-            <TrendingUp className="w-3 h-3 text-[#FFD700]" />
+            <TrendingUp className="w-3 h-3 text-[#6EE000]" />
             <span className="text-zinc-400">Topos: {peaks.filter(p => p.type === "peak").length}</span>
           </div>
           <div className="flex items-center gap-1">
-            <TrendingDown className="w-3 h-3 text-[#FF6B6B]" />
+            <TrendingDown className="w-3 h-3 text-[#FF1F3D]" />
             <span className="text-zinc-400">Fundos: {peaks.filter(p => p.type === "valley").length}</span>
           </div>
           {consolidationZones.length > 0 && (
@@ -782,18 +782,18 @@ export function TradingPerformanceChart({
             {/* Gradiente dinâmico */}
             <defs>
               <linearGradient id="tradingGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2FA87A" />
-                <stop offset={`${zeroPosition}%`} stopColor="#2FA87A" />
-                <stop offset={`${zeroPosition}%`} stopColor="#F06363" />
-                <stop offset="100%" stopColor="#F06363" />
+                <stop offset="0%" stopColor="#6EE000" />
+                <stop offset={`${zeroPosition}%`} stopColor="#6EE000" />
+                <stop offset={`${zeroPosition}%`} stopColor="#FF1F3D" />
+                <stop offset="100%" stopColor="#FF1F3D" />
               </linearGradient>
               <linearGradient id="areaGradientPositive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2FA87A" stopOpacity={0.4} />
-                <stop offset="100%" stopColor="#2FA87A" stopOpacity={0.05} />
+                <stop offset="0%" stopColor="#6EE000" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#6EE000" stopOpacity={0.05} />
               </linearGradient>
               <linearGradient id="areaGradientNegative" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F06363" stopOpacity={0.05} />
-                <stop offset="100%" stopColor="#F06363" stopOpacity={0.4} />
+                <stop offset="0%" stopColor="#FF1F3D" stopOpacity={0.05} />
+                <stop offset="100%" stopColor="#FF1F3D" stopOpacity={0.4} />
               </linearGradient>
             </defs>
 
@@ -854,7 +854,7 @@ export function TradingPerformanceChart({
               activeDot={{
                 r: 6,
                 fill: "#fff",
-                stroke: "#2FA87A",
+                stroke: "#6EE000",
                 strokeWidth: 2,
               }}
               isAnimationActive={false}
@@ -867,7 +867,7 @@ export function TradingPerformanceChart({
                 x={chartData[peak.index]?.period}
                 y={peak.value}
                 r={6}
-                fill="#FFD700"
+                fill="#6EE000"
                 stroke="#fff"
                 strokeWidth={2}
               />
@@ -880,7 +880,7 @@ export function TradingPerformanceChart({
                 x={chartData[valley.index]?.period}
                 y={valley.value}
                 r={6}
-                fill="#FF6B6B"
+                fill="#FF1F3D"
                 stroke="#fff"
                 strokeWidth={2}
               />

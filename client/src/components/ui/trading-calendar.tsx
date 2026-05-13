@@ -282,7 +282,7 @@ export function TradingCalendar({
           hasData && isProfit && "hover:brightness-105",
           hasData && isLoss && "hover:brightness-105",
           hasData && isBreakEven && "hover:brightness-105",
-          !hasData && "hover:bg-zinc-800/30",
+          !hasData && "hover:bg-[#13131a]/30",
         )}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
@@ -445,7 +445,7 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
+          "bg-[#0a0a0f]/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
           className,
         )}
         style={{ marginBottom: "50px" }}
@@ -483,7 +483,7 @@ export function TradingCalendar({
                 variant="ghost"
                 size="sm"
                 onClick={() => navigateMonth("prev")}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 p-1.5 sm:p-2 rounded-md transition-all"
+                className="text-zinc-400 hover:text-white hover:bg-[#13131a]/50 p-1.5 sm:p-2 rounded-md transition-all"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
@@ -494,7 +494,7 @@ export function TradingCalendar({
                 variant="ghost"
                 size="sm"
                 onClick={() => navigateMonth("next")}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 p-1.5 sm:p-2 rounded-md transition-all"
+                className="text-zinc-400 hover:text-white hover:bg-[#13131a]/50 p-1.5 sm:p-2 rounded-md transition-all"
               >
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
@@ -509,12 +509,12 @@ export function TradingCalendar({
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-zinc-800/30"
+                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-[#13131a]/30"
               >
                 {day}
               </div>
             ))}
-            <div className="hidden md:block text-center font-semibold text-zinc-300 border-b border-zinc-700 py-3.5 text-sm bg-zinc-800/30">
+            <div className="hidden md:block text-center font-semibold text-zinc-300 border-b border-zinc-700 py-3.5 text-sm bg-[#13131a]/30">
               {t("calendar.week")}
             </div>
 
@@ -554,12 +554,12 @@ export function TradingCalendar({
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
-          <div className="md:hidden border-t border-zinc-700 p-4 bg-zinc-900/50">
+          <div className="md:hidden border-t border-zinc-700 p-4 bg-[#0a0a0f]/50">
             <div className="text-center text-white font-semibold mb-4 text-base">
               {t("calendar.summary_of")} {monthName}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
                 <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.tradingDays}
                 </div>
@@ -567,7 +567,7 @@ export function TradingCalendar({
                   {t("calendar.trading_days")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
                 <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.totalTrades}
                 </div>
@@ -575,7 +575,7 @@ export function TradingCalendar({
                   {t("calendar.total_trades")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
                 <div
                   className={cn(
                     "text-xl sm:text-2xl font-bold mb-1",
@@ -590,7 +590,7 @@ export function TradingCalendar({
                   {t("calendar.pnl_total")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[#13131a]/50 border border-zinc-700/50">
                 <div className="text-xl sm:text-2xl font-bold text-white mb-1">
                   {monthlyStats.winRate}%
                 </div>

@@ -27,8 +27,8 @@ export default function CalendarioPage() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-green-600/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+              <div className="w-8 h-8 bg-[#6EE000]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-[#6EE000] rounded-full"></div>
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.profitable_days')}</div>
@@ -37,8 +37,8 @@ export default function CalendarioPage() {
             </div>
             
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div className="w-8 h-8 bg-[#FF1F3D]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-2 h-2 bg-[#FF1F3D] rounded-full"></div>
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.loss_days')}</div>
@@ -71,7 +71,7 @@ export default function CalendarioPage() {
       <Card className="bg-[#070b12] border-slate-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-purple-600" />
+            <BarChart3 className="w-5 h-5 text-[#6EE000]" />
             {t('calendar.analysis_tips')}
           </CardTitle>
         </CardHeader>
