@@ -356,7 +356,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-[#13131a] border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Índice de Qualidade de Trading</p>
                   <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando taxa de acerto, fator de lucro e risco/retorno. Quanto maior, melhor sua estratégia.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 70 | ⚠️ Mediano: 30-70 | ❌ Precisa melhorar: &lt; 30</p>
@@ -384,7 +384,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-[#13131a] border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Eficiência de Risco</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você ganha em relação ao risco assumido. Quanto maior, mais eficiente está sendo sua gestão de risco.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 3.5 | ⚠️ Mediano: 1.5-3.5 | ❌ Precisa melhorar: &lt; 1.5</p>
@@ -412,7 +412,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-[#13131a] border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Score de Consistência</p>
                   <p className="text-sm text-zinc-300">Avalia a estabilidade dos seus resultados ao longo do tempo. Alta consistência indica disciplina e controle emocional.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 0.9 | ⚠️ Mediano: 0.5-0.9 | ❌ Precisa melhorar: &lt; 0.5</p>
@@ -443,7 +443,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-[#13131a] border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Retorno Ajustado por Precisão</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você lucra em relação à sua taxa de acerto. Útil para avaliar se você está maximizando seus ganhos mesmo com assertividade moderada.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 70 | ⚠️ Mediano: 30-70 | ❌ Precisa melhorar: &lt; 30</p>
@@ -471,7 +471,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-[#13131a] border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Índice de Performance Integrado</p>
                   <p className="text-sm text-zinc-300">Métrica avançada que combina rentabilidade, lucro, estabilidade e drawdown. Resume a performance completa da sua estratégia.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1.4 | ⚠️ Mediano: 0.6-1.4 | ❌ Precisa melhorar: &lt; 0.6</p>
@@ -499,7 +499,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-[#13131a] border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Expectancy (Van Tharp)</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você espera ganhar (ou perder) em média por trade. Métrica fundamental para saber se sua estratégia é lucrativa a longo prazo.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ {getCurrencySymbol()}20 | ⚠️ Mediano: {getCurrencySymbol()}0-20 | ❌ Negativo: &lt; {getCurrencySymbol()}0</p>
@@ -1140,7 +1140,7 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
       </div>
       
       {timeData.length > 0 && (
-        <div className="mt-4 md:mt-5 lg:mt-6 pt-4 md:pt-5 lg:pt-6 border-t border-slate-700">
+        <div className="mt-4 md:mt-5 lg:mt-6 pt-4 md:pt-5 lg:pt-6 border-t border-[var(--brd)]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div className="text-center">
               <div className="text-zinc-400 mb-2 text-xs md:text-sm">Melhor Horário</div>
@@ -1272,7 +1272,7 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
 
   return (
     <div className="w-full">
-      <CardContent className="p-4 bg-[#0f0f1a]">
+      <CardContent className="p-4 bg-[var(--card)]">
         {/* Pontuação */}
         <div className="text-center mb-4">
           
@@ -1287,7 +1287,7 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
               </div>
               
               {/* Barra de Progresso Colorida */}
-              <div className="relative w-full h-1.5 bg-slate-700 rounded-full overflow-hidden mb-4">
+              <div className="relative w-full h-1.5 bg-[var(--brd)] rounded-full overflow-hidden mb-4">
                 <div 
                   className="h-full transition-all duration-1000 ease-out"
                   data-testid="metrika-progress-bar"
@@ -1384,7 +1384,7 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
         
         {/* Distribuição por Mercado */}
         {metricsData.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-slate-700">
+          <div className="mt-4 pt-4 border-t border-[var(--brd)]">
             <h4 className="text-sm font-medium text-slate-300 mb-3 text-center">
               {t('dashboard.market_distribution')}
             </h4>
@@ -1578,7 +1578,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
     container.innerHTML = `
       <div class="flex gap-1">
         <!-- Total de Lucros -->
-        <div class="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card tr-accent-green p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
           <div class="text-xs font-bold text-[#6EE000] truncate">
             ${formatCurrency(totalPositive)}
@@ -1589,7 +1589,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         </div>
 
         <!-- Total de Perdas -->
-        <div class="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card tr-accent-red p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
           <div class="text-xs font-bold text-[#FF1F3D] truncate">
             ${formatCurrency(totalNegative)}
@@ -1600,7 +1600,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         </div>
 
         <!-- Resultado do Período -->
-        <div class="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
           <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]'}">
             ${formatCurrency(finalAccumulated)}
@@ -1611,7 +1611,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         </div>
 
         <!-- Média por Período -->
-        <div class="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card tr-accent-blue p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
           <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-[#448aff]' : 'text-orange-400'}">
             ${formatCurrency(avgPerPeriod)}
@@ -1702,7 +1702,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
             className={`text-xs md:text-sm ${
               selectedPeriod === filter.key
                 ? "bg-[#6EE000] hover:bg-[#5bc800] text-white"
-                : "border-zinc-700 text-zinc-300 hover:bg-[#13131a] hover:text-white"
+                : "border-[var(--brd)] text-[var(--dim)] hover:bg-[var(--surf)] hover:text-[var(--text)]"
             }`}
           >
             {filter.label}
@@ -1719,10 +1719,10 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
           setSelectedStartDay(1);
           setSelectedEndDay(lastDay);
         }}>
-          <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white w-32 md:w-40 text-xs md:text-sm">
+          <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] w-32 md:w-40 text-xs md:text-sm">
             <SelectValue placeholder="Mês Específico" />
           </SelectTrigger>
-          <SelectContent className="bg-[#13131a] border-zinc-700">
+          <SelectContent className="bg-[var(--surf)] border-[var(--brd)]">
             {(() => {
               const months = [];
               const now = new Date();
@@ -1766,10 +1766,10 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 }
               }}
             >
-              <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
+              <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] w-12 md:w-16 text-xs md:text-sm">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#13131a] border-zinc-700 max-h-40">
+              <SelectContent className="bg-[var(--surf)] border-[var(--brd)] max-h-40">
                 {(() => {
                   const [year, month] = selectedMonth.split('-');
                   const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
@@ -1798,10 +1798,10 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 }
               }}
             >
-              <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
+              <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] w-12 md:w-16 text-xs md:text-sm">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-[#13131a] border-zinc-700 max-h-40">
+              <SelectContent className="bg-[var(--surf)] border-[var(--brd)] max-h-40">
                 {(() => {
                   const [year, month] = selectedMonth.split('-');
                   const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
@@ -2331,7 +2331,7 @@ function NetDailyPnLBarChart({ trades, formatCurrency }: { trades: Trade[]; form
               const isPositive = value >= 0;
               
               return (
-                <div className="bg-[#0a0a0f]/95 backdrop-blur-sm border border-zinc-700 rounded-lg p-3 shadow-xl">
+                <div style={{ backgroundColor: '#0f0f1a', border: '1.5px solid #1e1e2e', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
                   <div className="text-xs text-zinc-400 mb-1">
                     {label}
                   </div>
@@ -2400,7 +2400,7 @@ function RecentTrades({ trades, formatCurrency, hideData = false }: { trades: Tr
           return (
             <div 
               key={trade.id} 
-              className="grid grid-cols-4 gap-2 text-xs px-1 py-1 hover:bg-[#13131a]/50 rounded transition-colors"
+              className="grid grid-cols-4 gap-2 text-xs px-1 py-1 hover:bg-[var(--surf)]/40 rounded transition-colors"
               data-testid={`recent-trade-${index}`}
             >
               <div className="text-zinc-300 truncate">
@@ -3301,7 +3301,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
 
       {/* Dialog de Edição de Trade Manual */}
       <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
-        <DialogContent className="bg-[#0a0a0f] border-[#1e1e2e] text-white max-w-md">
+        <DialogContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-md">
           <DialogHeader className="relative">
             <button
               onClick={() => {
@@ -3327,13 +3327,13 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   id="edit-ativo"
                   value={editingTrade.ativo || ''}
                   onChange={(e) => setEditingTrade({...editingTrade, ativo: e.target.value})}
-                  className="bg-[#13131a] border-zinc-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label>Mercado</Label>
-                <div className="px-3 py-2 bg-[#13131a]/50 border border-zinc-700 rounded-md text-sm text-zinc-400">
+                <div className="px-3 py-2 bg-[var(--surf)]/50 border border-[var(--brd)] rounded-md text-sm text-zinc-400">
                   {editingTrade.mercado === 'crypto' ? '🪙 Crypto' : 
                    editingTrade.mercado === 'forex' ? '💱 Forex' : 
                    '📊 B3 (Brasil)'}
@@ -3354,7 +3354,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   onChange={(e) => {
                     setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()});
                   }}
-                  className="bg-[#13131a] border-zinc-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                 />
               </div>
               
@@ -3364,10 +3364,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   value={editingTrade.tipo || ''} 
                   onValueChange={(value) => setEditingTrade({...editingTrade, tipo: value})}
                 >
-                  <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white">
+                  <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#13131a] border-zinc-700">
+                  <SelectContent className="bg-[var(--surf)] border-[var(--brd)]">
                     <SelectItem value="compra" className="text-white">Compra</SelectItem>
                     <SelectItem value="venda" className="text-white">Venda</SelectItem>
                   </SelectContent>
@@ -3383,7 +3383,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.01"
                     value={editingTrade.capitalUtilizado || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, capitalUtilizado: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3395,7 +3395,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.01"
                     value={editingTrade.resultado || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3409,7 +3409,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.01"
                     value={editingTrade.quantidade || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3421,7 +3421,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.precoEntrada || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, precoEntrada: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3435,7 +3435,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.precoSaida || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, precoSaida: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3447,7 +3447,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.stop || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, stop: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3461,7 +3461,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.alvo || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, alvo: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3471,7 +3471,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     id="edit-setup"
                     value={editingTrade.setup || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, setup: e.target.value})}
-                    className="bg-[#13131a] border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3482,7 +3482,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   id="edit-comentario"
                   value={editingTrade.comentario || ''}
                   onChange={(e) => setEditingTrade({...editingTrade, comentario: e.target.value})}
-                  className="bg-[#13131a] border-zinc-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   placeholder="Observações sobre o trade..."
                 />
               </div>
@@ -3495,7 +3495,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 setShowEditTradeDialog(false);
                 setEditingTrade(null);
               }}
-              className="border-zinc-600 text-zinc-300 hover:bg-[#13131a]"
+              className="border-[var(--brd)] text-[var(--dim)] hover:bg-[var(--surf)]"
             >
               {t('common.cancel')}
             </Button>
