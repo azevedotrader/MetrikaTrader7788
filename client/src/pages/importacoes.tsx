@@ -70,7 +70,7 @@ export default function Importacoes() {
 
   // Broker info for display
   const brokerInfo = {
-    crypto: { name: "Gate.io", color: "bg-purple-600" },
+    crypto: { name: "Gate.io", color: "bg-[#5bc800]" },
     forex: { name: "Tickmill", color: "bg-blue-600" },
     b3: { name: "Clear", color: "bg-green-600" },
   };
@@ -192,17 +192,17 @@ export default function Importacoes() {
 
       {/* Tabs Content */}
       <Tabs defaultValue="csv-imports" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-zinc-900/90 border border-zinc-800 rounded-lg p-1 gap-1">
+        <TabsList className="grid w-full grid-cols-2 bg-[#0a0a0f]/90 border border-[#1e1e2e] rounded-lg p-1 gap-1">
           <TabsTrigger 
             value="csv-imports" 
-            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50 text-sm font-medium flex items-center justify-center"
+            className="data-[state=active]:bg-[#13131a] data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-[#13131a]/50 text-sm font-medium flex items-center justify-center"
           >
             <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="truncate">{t('imports.csv_imported')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="manual-trades" 
-            className="data-[state=active]:bg-zinc-800 data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-zinc-800/50 text-sm font-medium flex items-center justify-center"
+            className="data-[state=active]:bg-[#13131a] data-[state=active]:border data-[state=active]:border-zinc-700 text-zinc-400 data-[state=active]:text-white py-3 px-3 rounded-md transition-all duration-200 hover:text-white hover:bg-[#13131a]/50 text-sm font-medium flex items-center justify-center"
           >
             <Edit3 className="w-4 h-4 mr-2 flex-shrink-0" />
             <span className="truncate">{t('imports.manual_trades')}</span>
@@ -211,7 +211,7 @@ export default function Importacoes() {
 
         {/* CSV Imports Tab */}
         <TabsContent value="csv-imports" className="space-y-4 mt-6">
-          <Card className="bg-zinc-900/90 border-zinc-800">
+          <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
             <CardHeader>
               <CardTitle className="text-white">{t('imports.csv_imported')}</CardTitle>
               <CardDescription>
@@ -230,7 +230,7 @@ export default function Importacoes() {
                   {(csvImports as any[]).map((importItem: any) => (
                     <div
                       key={importItem.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-zinc-800/50 rounded-lg space-y-3 sm:space-y-0"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-[#13131a]/50 rounded-lg space-y-3 sm:space-y-0"
                     >
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
@@ -243,7 +243,7 @@ export default function Importacoes() {
                                 type="text"
                                 value={newCsvName}
                                 onChange={(e) => setNewCsvName(e.target.value)}
-                                className="bg-zinc-800 border border-zinc-600 text-white px-2 py-1 rounded text-sm w-full sm:w-auto min-w-0"
+                                className="bg-[#13131a] border border-zinc-600 text-white px-2 py-1 rounded text-sm w-full sm:w-auto min-w-0"
                                 placeholder="Nome do arquivo"
                                 data-testid={`input-csv-name-${importItem.id}`}
                               />
@@ -349,7 +349,7 @@ export default function Importacoes() {
 
         {/* Manual Trades Tab */}
         <TabsContent value="manual-trades" className="space-y-4 mt-6">
-          <Card className="bg-zinc-900/90 border-zinc-800">
+          <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
             <CardHeader>
               <CardTitle className="text-white">{t('imports.manual_trades')}</CardTitle>
               <CardDescription>
@@ -375,7 +375,7 @@ export default function Importacoes() {
                   {manualTrades.map((trade: any) => (
                     <div
                       key={trade.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-zinc-800/50 rounded-lg space-y-3 sm:space-y-0"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-[#13131a]/50 rounded-lg space-y-3 sm:space-y-0"
                     >
                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                         <div
@@ -447,7 +447,7 @@ export default function Importacoes() {
 
       {/* Edit Trade Dialog */}
       <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[#0a0a0f] border-[#1e1e2e] text-white max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader className="relative">
             <button
               onClick={() => {
@@ -473,13 +473,13 @@ export default function Importacoes() {
                   id="edit-ativo"
                   value={editingTrade.ativo || ''}
                   onChange={(e) => setEditingTrade({...editingTrade, ativo: e.target.value})}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[#13131a] border-zinc-700 text-white"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label>Mercado</Label>
-                <div className="px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-md text-sm text-zinc-400">
+                <div className="px-3 py-2 bg-[#13131a]/50 border border-zinc-700 rounded-md text-sm text-zinc-400">
                   {editingTrade.mercado === 'crypto' ? '🪙 Crypto' : 
                    editingTrade.mercado === 'forex' ? '💱 Forex' : 
                    '📊 B3 (Brasil)'}
@@ -500,7 +500,7 @@ export default function Importacoes() {
                   onChange={(e) => {
                     setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()});
                   }}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[#13131a] border-zinc-700 text-white"
                 />
               </div>
               
@@ -510,10 +510,10 @@ export default function Importacoes() {
                   value={editingTrade.tipo || ''} 
                   onValueChange={(value) => setEditingTrade({...editingTrade, tipo: value})}
                 >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectContent className="bg-[#13131a] border-zinc-700">
                     <SelectItem value="compra" className="text-white">Compra</SelectItem>
                     <SelectItem value="venda" className="text-white">Venda</SelectItem>
                   </SelectContent>
@@ -529,7 +529,7 @@ export default function Importacoes() {
                     step="0.01"
                     value={editingTrade.capitalUtilizado || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, capitalUtilizado: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
 
@@ -541,7 +541,7 @@ export default function Importacoes() {
                     step="0.01"
                     value={editingTrade.resultado || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
               </div>
@@ -555,7 +555,7 @@ export default function Importacoes() {
                     step="0.01"
                     value={editingTrade.quantidade || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
 
@@ -567,7 +567,7 @@ export default function Importacoes() {
                     step="0.0001"
                     value={editingTrade.precoEntrada || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, precoEntrada: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
               </div>
@@ -581,7 +581,7 @@ export default function Importacoes() {
                     step="0.0001"
                     value={editingTrade.precoSaida || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, precoSaida: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
 
@@ -593,7 +593,7 @@ export default function Importacoes() {
                     step="0.0001"
                     value={editingTrade.stop || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, stop: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
               </div>
@@ -607,7 +607,7 @@ export default function Importacoes() {
                     step="0.0001"
                     value={editingTrade.alvo || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, alvo: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
 
@@ -617,7 +617,7 @@ export default function Importacoes() {
                     id="edit-setup"
                     value={editingTrade.setup || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, setup: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[#13131a] border-zinc-700 text-white"
                   />
                 </div>
               </div>
@@ -628,7 +628,7 @@ export default function Importacoes() {
                   id="edit-comentario"
                   value={editingTrade.comentario || ''}
                   onChange={(e) => setEditingTrade({...editingTrade, comentario: e.target.value})}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[#13131a] border-zinc-700 text-white"
                   placeholder="Observações sobre o trade..."
                 />
               </div>
@@ -641,7 +641,7 @@ export default function Importacoes() {
                 setShowEditTradeDialog(false);
                 setEditingTrade(null);
               }}
-              className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+              className="border-zinc-600 text-zinc-300 hover:bg-[#13131a]"
             >
               Cancelar
             </Button>

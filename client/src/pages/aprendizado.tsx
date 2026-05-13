@@ -128,7 +128,7 @@ export default function Aprendizado() {
           
           <div className="grid gap-6">
             {videoSections.map((section, sectionIndex) => (
-              <Card key={sectionIndex} className="bg-zinc-900/90 border-zinc-800">
+              <Card key={sectionIndex} className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-purple-600" />
@@ -141,7 +141,7 @@ export default function Aprendizado() {
                     {section.videos.map((video, videoIndex) => (
                       <div 
                         key={videoIndex}
-                        className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-lg hover:bg-zinc-800/70 transition-colors cursor-pointer group"
+                        className="flex items-center justify-between p-3 bg-[#13131a]/50 rounded-lg hover:bg-[#13131a]/70 transition-colors cursor-pointer group"
                       >
                         <div className="flex items-center gap-3">
                           {video.completed ? (

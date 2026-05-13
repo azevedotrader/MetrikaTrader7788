@@ -185,7 +185,7 @@ export function RiskParametersDisplay({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-lg">
+        <div className="bg-[#0a0a0f] border border-zinc-700 rounded-lg p-3 shadow-lg">
           <p className="text-white font-semibold mb-1">{data.date}</p>
           <p className="text-zinc-400 text-xs mb-2">{data.formattedDate}</p>
           <p className="text-white font-bold">{formatCurrency(data.saldo)}</p>
@@ -241,7 +241,7 @@ export function RiskParametersDisplay({
       </Card>
 
       {/* Capital Total */}
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
         <CardHeader>
           <CardTitle className="text-white text-lg">Capital Total</CardTitle>
         </CardHeader>
@@ -286,7 +286,7 @@ export function RiskParametersDisplay({
           value={formatCurrency(bankrollValue * maxWeeklyRisk)}
           description="Limite semanal - reavalie sua estratégia se atingir"
           color="from-purple-500/20 to-pink-500/20"
-          borderColor="border-purple-500/50"
+          borderColor="border-[#6EE000]/50"
           testId="param-max-weekly-risk"
         />
 
@@ -343,7 +343,7 @@ export function RiskParametersDisplay({
 
       {/* Gráfico de Performance */}
       {trades && trades.length > 0 ? (
-        <Card className="bg-zinc-900/50 border-zinc-800" data-testid="performance-chart">
+        <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]" data-testid="performance-chart">
           <CardHeader>
             <div className="flex flex-col gap-4">
               <div className="flex items-start justify-between">
@@ -394,7 +394,7 @@ export function RiskParametersDisplay({
                       Período
                     </label>
                     <Select value={periodFilter} onValueChange={setPeriodFilter}>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -412,7 +412,7 @@ export function RiskParametersDisplay({
                       Mercado
                     </label>
                     <Select value={marketFilter} onValueChange={setMarketFilter}>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                      <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -470,13 +470,13 @@ export function RiskParametersDisplay({
 
             {/* Estatísticas Detalhadas */}
             {statistics && (
-              <div className="mt-6 pt-6 border-t border-zinc-800">
+              <div className="mt-6 pt-6 border-t border-[#1e1e2e]">
                 <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                   📊 Estatísticas do Período
                 </h4>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  <div className="bg-zinc-800/50 rounded-lg p-3 text-center">
+                  <div className="bg-[#13131a]/50 rounded-lg p-3 text-center">
                     <p className="text-xs text-zinc-500 mb-1">Total de Trades</p>
                     <p className="text-lg font-bold text-white">{statistics.totalTrades}</p>
                   </div>
@@ -498,17 +498,17 @@ export function RiskParametersDisplay({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                  <div className="bg-[#13131a]/30 rounded-lg p-3">
                     <p className="text-xs text-zinc-400 mb-2">Lucro Médio por Win</p>
                     <p className="text-base font-semibold text-green-400">{formatCurrency(statistics.avgWin)}</p>
                   </div>
                   
-                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                  <div className="bg-[#13131a]/30 rounded-lg p-3">
                     <p className="text-xs text-zinc-400 mb-2">Perda Média por Loss</p>
                     <p className="text-base font-semibold text-red-400">{formatCurrency(statistics.avgLoss)}</p>
                   </div>
                   
-                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                  <div className="bg-[#13131a]/30 rounded-lg p-3">
                     <p className="text-xs text-zinc-400 mb-2">Melhor Trade</p>
                     <p className="text-base font-semibold text-green-400">
                       {formatCurrency(parseFloat(statistics.bestTrade.resultado || "0"))}
@@ -516,7 +516,7 @@ export function RiskParametersDisplay({
                     <p className="text-xs text-zinc-500 mt-1">{statistics.bestTrade.ativo}</p>
                   </div>
                   
-                  <div className="bg-zinc-800/30 rounded-lg p-3">
+                  <div className="bg-[#13131a]/30 rounded-lg p-3">
                     <p className="text-xs text-zinc-400 mb-2">Pior Trade</p>
                     <p className="text-base font-semibold text-red-400">
                       {formatCurrency(parseFloat(statistics.worstTrade.resultado || "0"))}
@@ -528,7 +528,7 @@ export function RiskParametersDisplay({
                 <div className="mt-3 bg-purple-950/30 border border-purple-800/30 rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs text-purple-400 mb-1">Profit Factor</p>
+                      <p className="text-xs text-[#6EE000] mb-1">Profit Factor</p>
                       <p className="text-xs text-zinc-400">Lucro Total ÷ Perda Total</p>
                     </div>
                     <p className={`text-2xl font-bold ${statistics.profitFactor >= 1.5 ? "text-green-400" : statistics.profitFactor >= 1 ? "text-yellow-400" : "text-red-400"}`}>
@@ -547,9 +547,9 @@ export function RiskParametersDisplay({
           </CardContent>
         </Card>
       ) : isLoadingTrades ? (
-        <Card className="bg-zinc-900/50 border-zinc-800">
+        <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
           <CardContent className="p-6 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#6EE000]" />
           </CardContent>
         </Card>
       ) : null}

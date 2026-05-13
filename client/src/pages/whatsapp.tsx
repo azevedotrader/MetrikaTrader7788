@@ -114,17 +114,17 @@ export default function WhatsAppPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="bg-zinc-900/50 p-4 rounded-lg border border-green-600/20">
+            <div className="bg-[#0a0a0f]/50 p-4 rounded-lg border border-green-600/20">
               <p className="text-zinc-300 mb-2">📱 Número do Bot Métrika:</p>
               <div className="flex items-center gap-3 flex-wrap">
-                <div className="bg-zinc-800 px-4 py-2 rounded-md border border-zinc-700">
+                <div className="bg-[#13131a] px-4 py-2 rounded-md border border-zinc-700">
                   <p className="text-2xl font-bold text-green-500">+55 22 97405-1621</p>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => copyToClipboard("+55 22 97405-1621")}
-                  className="border-zinc-700 hover:bg-zinc-800"
+                  className="border-zinc-700 hover:bg-[#13131a]"
                   data-testid="button-copy-bot-number"
                 >
                   <FaCopy className="w-4 h-4 mr-2" />
@@ -171,7 +171,7 @@ export default function WhatsAppPage() {
         </Card>
 
         {/* Configuração do Número */}
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[#0a0a0f] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <PhoneIcon className="w-5 h-5 text-green-600" />
@@ -189,7 +189,7 @@ export default function WhatsAppPage() {
                   placeholder="+55 11 99999-9999"
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[#13131a] border-zinc-700 text-white"
                   data-testid="input-whatsapp-number"
                 />
                 <p className="text-xs text-zinc-500 mt-2">
@@ -219,7 +219,7 @@ export default function WhatsAppPage() {
         </Card>
 
         {/* Como Funciona */}
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[#0a0a0f] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <InfoIcon className="w-5 h-5 text-blue-600" />
@@ -228,7 +228,7 @@ export default function WhatsAppPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700">
+              <div className="bg-[#13131a] p-4 rounded-lg border border-zinc-700">
                 <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mb-3">
                   <span className="text-white font-bold">1</span>
                 </div>
@@ -238,7 +238,7 @@ export default function WhatsAppPage() {
                 </p>
               </div>
 
-              <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700">
+              <div className="bg-[#13131a] p-4 rounded-lg border border-zinc-700">
                 <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mb-3">
                   <span className="text-white font-bold">2</span>
                 </div>
@@ -248,7 +248,7 @@ export default function WhatsAppPage() {
                 </p>
               </div>
 
-              <div className="bg-zinc-800 p-4 rounded-lg border border-zinc-700">
+              <div className="bg-[#13131a] p-4 rounded-lg border border-zinc-700">
                 <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mb-3">
                   <span className="text-white font-bold">3</span>
                 </div>
@@ -262,7 +262,7 @@ export default function WhatsAppPage() {
         </Card>
 
         {/* Formato das Mensagens */}
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[#0a0a0f] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-purple-600" />
@@ -332,7 +332,7 @@ export default function WhatsAppPage() {
         </Card>
 
         {/* Exemplos de Mensagens */}
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className="bg-[#0a0a0f] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
@@ -346,7 +346,7 @@ export default function WhatsAppPage() {
             {exampleMessages.map((example, index) => (
               <div
                 key={index}
-                className="bg-zinc-800 p-4 rounded-lg border border-zinc-700 space-y-3"
+                className="bg-[#13131a] p-4 rounded-lg border border-zinc-700 space-y-3"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="text-white font-semibold">{example.title}</h4>

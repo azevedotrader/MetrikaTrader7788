@@ -29,7 +29,7 @@ export function ImageModal({ isOpen, onClose, imageId, imageName }: ImageModalPr
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden" data-testid="image-modal">
         {/* Header com controles */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-700 bg-zinc-900">
+        <div className="flex items-center justify-between p-4 border-b border-zinc-700 bg-[#0a0a0f]">
           <h3 className="text-lg font-medium text-white truncate pr-4" title={imageName}>
             {imageName}
           </h3>
@@ -78,7 +78,7 @@ export function ImageModal({ isOpen, onClose, imageId, imageName }: ImageModalPr
         </div>
 
         {/* Footer com informações */}
-        <div className="p-4 border-t border-zinc-700 bg-zinc-900 text-center">
+        <div className="p-4 border-t border-zinc-700 bg-[#0a0a0f] text-center">
           <p className="text-sm text-zinc-400">
             Clique e arraste para mover • Scroll para zoom • ESC para fechar
           </p>

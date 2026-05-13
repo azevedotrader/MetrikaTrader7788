@@ -452,7 +452,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-purple-600 rounded" 
+                        className="h-full bg-[#5bc800] rounded" 
                         style={{ 
                           width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.quarterlyUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}

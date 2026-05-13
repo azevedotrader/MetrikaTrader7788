@@ -92,7 +92,7 @@ export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp,
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-3 shadow-lg">
+        <div className="bg-[#0a0a0f] border border-zinc-700 rounded-lg p-3 shadow-lg">
           <p className="text-white font-semibold mb-1">{data.date}</p>
           <p className="text-zinc-400 text-xs mb-2">{data.formattedDate}</p>
           <p className="text-white font-bold">{formatCurrency(data.saldo)}</p>
@@ -117,9 +117,9 @@ export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp,
 
   if (isLoading) {
     return (
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
         <CardContent className="p-6 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#6EE000]" />
         </CardContent>
       </Card>
     );
@@ -127,7 +127,7 @@ export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp,
 
   if (!trades || trades.length === 0) {
     return (
-      <Card className="bg-zinc-900/50 border-zinc-800">
+      <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
@@ -136,7 +136,7 @@ export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp,
           <CardDescription>Gráfico de performance ao longo do tempo</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-zinc-800/50 rounded-lg p-8 text-center">
+          <div className="bg-[#13131a]/50 rounded-lg p-8 text-center">
             <p className="text-zinc-400">
               Nenhum trade registrado ainda. Comece a adicionar trades para ver sua evolução!
             </p>
@@ -152,7 +152,7 @@ export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp,
   const isProfit = profitLoss >= 0;
 
   return (
-    <Card className="bg-zinc-900/50 border-zinc-800" data-testid="performance-chart">
+    <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]" data-testid="performance-chart">
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
@@ -221,7 +221,7 @@ export function PerformanceChart({ bankroll, formatCurrency: formatCurrencyProp,
         </div>
 
         {/* Estatísticas rápidas */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-zinc-800">
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-[#1e1e2e]">
           <div className="text-center">
             <p className="text-xs text-zinc-500 mb-1">Capital Inicial</p>
             <p className="text-sm font-semibold text-white">{formatCurrency(initialBankroll)}</p>

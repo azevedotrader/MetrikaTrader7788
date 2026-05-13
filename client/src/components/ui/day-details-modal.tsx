@@ -511,7 +511,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                         {/* Imagem do trade */}
                         {tradeImage && (
                           <div className="px-3 pb-3">
-                            <div className="relative group w-32 h-32 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700">
+                            <div className="relative group w-32 h-32 rounded-lg overflow-hidden bg-[#13131a] border border-zinc-700">
                               <img
                                 src={`/api/images/${tradeImage.id}`}
                                 alt={tradeImage.originalName}

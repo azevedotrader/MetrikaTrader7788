@@ -52,7 +52,7 @@ const brokerInfo = {
   "crypto": {
     name: "Crypto",
     type: "Criptomoedas",
-    color: "bg-purple-600",
+    color: "bg-[#5bc800]",
     icon: Activity,
     description: "Trading de criptomoedas com importação CSV"
   },
@@ -190,7 +190,7 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
               size="sm"
               onClick={() => setTimeFilter(filter.key as any)}
               className={timeFilter === filter.key ? 
-                "bg-purple-600 hover:bg-purple-700" : 
+                "bg-[#5bc800] hover:bg-purple-700" : 
                 "border-slate-600 text-slate-300 hover:bg-slate-800"
               }
             >
@@ -257,7 +257,7 @@ function ProfitabilityTimeChart({ trades }: { trades: Trade[] }) {
         {/* Legenda */}
         <div className="flex justify-center gap-6 mt-4 text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-purple-600"></div>
+            <div className="w-3 h-0.5 bg-[#5bc800]"></div>
             <span className="text-slate-300">Rentabilidade Acumulada</span>
           </div>
           <div className="flex items-center gap-2">
@@ -650,7 +650,7 @@ export default function Dashboard() {
           {/* Consolidated Data Button */}
           <Button 
             className={`gradient-purple-blue hover:opacity-90 transition-opacity ${
-              selectedBrokerFilter === null ? 'ring-2 ring-purple-400' : ''
+              selectedBrokerFilter === null ? 'ring-2 ring-[#6EE000]-400' : ''
             }`}
             onClick={() => {
               setSelectedBrokerFilter(null);

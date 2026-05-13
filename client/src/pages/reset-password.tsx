@@ -153,7 +153,7 @@ export default function ResetPassword() {
               
               {isValidatingToken ? (
                 <div className="text-center text-slate-400 space-y-2">
-                  <div className="animate-spin w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full mx-auto"></div>
+                  <div className="animate-spin w-6 h-6 border-2 border-[#6EE000] border-t-transparent rounded-full mx-auto"></div>
                   <p>Validando link de recuperação...</p>
                 </div>
               ) : (token && !error) ? (
