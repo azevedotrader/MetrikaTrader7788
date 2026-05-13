@@ -241,6 +241,58 @@
 [data-theme="light"] .hover\:bg-\[\#13131a\]\/50:hover { background-color: rgba(208,209,219,0.5) !important; }
 [data-theme="light"] .hover\:text-white:hover           { color: #1a1a2e !important; }
 
+/* ── Metrika watermark logo ── */
+.metrika-wm {
+  opacity: 0.06;
+}
+[data-theme="light"] .metrika-wm {
+  opacity: 0.08;
+  filter: brightness(0);
+}
+
+/* ── Light mode: additional text visibility fixes ── */
+/* Texts that use inline white or near-white that CSS classes can't catch */
+[data-theme="light"] .text-slate-100,
+[data-theme="light"] .text-slate-200 { color: #1a1a2e !important; }
+[data-theme="light"] .text-gray-100,
+[data-theme="light"] .text-gray-200 { color: #1a1a2e !important; }
+[data-theme="light"] .text-zinc-100,
+[data-theme="light"] .text-zinc-200 { color: #1a1a2e !important; }
+[data-theme="light"] .text-neutral-100,
+[data-theme="light"] .text-neutral-200 { color: #1a1a2e !important; }
+
+/* Text shadow on white-on-white elements for outline effect */
+[data-theme="light"] .text-white {
+  color: #1a1a2e !important;
+  text-shadow: none !important;
+}
+
+/* Recharts SVG text that uses fill="white" — not patchable via class, but handle via parent */
+[data-theme="light"] .recharts-text { fill: #4a4b64 !important; }
+[data-theme="light"] .recharts-cartesian-axis-tick-value { fill: #6e6f88 !important; }
+[data-theme="light"] .recharts-legend-item-text { color: #1a1a2e !important; }
+
+/* Circular progress track in light mode — stroke was #374151 (dark), fine in dark, visible in light */
+[data-theme="light"] circle[stroke="#374151"] { stroke: #c0c1d0 !important; }
+
+/* Active dot on chart: white fill becomes visible on light bg */
+[data-theme="light"] .recharts-active-dot circle { fill: #1a1a2e !important; }
+
+/* TopBar / header area white text */
+[data-theme="light"] .text-white\/90 { color: rgba(26,26,46,0.85) !important; }
+[data-theme="light"] .text-white\/75 { color: rgba(26,26,46,0.70) !important; }
+
+/* Tooltip popover backgrounds */
+[data-theme="light"] .bg-\[\#0a0a0f\] { background-color: #f0f1f4 !important; }
+
+/* Input/select placeholder text */
+[data-theme="light"] input::placeholder  { color: #8a8ba8 !important; }
+[data-theme="light"] textarea::placeholder { color: #8a8ba8 !important; }
+
+/* SelectItem hover */
+[data-theme="light"] .hover\:bg-zinc-700:hover { background-color: #d8d9e4 !important; }
+[data-theme="light"] [class*="hover:bg-zinc-700"]:hover { background-color: #d8d9e4 !important; }
+
 /* ═══════════════════════════════════════════════════
    BASE RESET
    ═══════════════════════════════════════════════════ */

@@ -763,8 +763,6 @@ export function TradingPerformanceChart({
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
-
             <XAxis
               dataKey="period"
               stroke="#6e7191"
@@ -822,10 +820,10 @@ export function TradingPerformanceChart({
 
         {/* Logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <img 
-            src={metrikaLogo} 
-            alt="" 
-            className="w-40 sm:w-56 md:w-72 opacity-[0.06] select-none"
+          <img
+            src={metrikaLogo}
+            alt=""
+            className="metrika-wm w-40 sm:w-56 md:w-72 select-none"
             draggable={false}
           />
         </div>

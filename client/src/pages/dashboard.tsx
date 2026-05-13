@@ -1862,12 +1862,14 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 const data = payload[0].payload;
                 return (
                   <div style={{
-                    backgroundColor: "#000000",
-                    border: "1px solid #444",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    color: "#fff",
-                    minWidth: "140px"
+                    backgroundColor: "#0f0f1a",
+                    border: "1.5px solid #1e1e2e",
+                    borderRadius: "12px",
+                    padding: "10px 14px",
+                    color: "#e0e0e0",
+                    minWidth: "150px",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                    fontFamily: "'Nunito', sans-serif",
                   }}>
                     <p style={{ margin: 0, fontWeight: "bold", marginBottom: "6px", fontSize: "12px" }}>
                       📅 {label} {data.tradeIndex ? `• Trade #${data.tradeIndex}` : ''}
@@ -1906,23 +1908,26 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                   </linearGradient>
                 </defs>
 
-                {/* Grid */}
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                
                 {/* Eixos */}
-                <XAxis 
-                  dataKey="period" 
-                  stroke="#aaa"
+                <XAxis
+                  dataKey="period"
+                  stroke="#6e7191"
                   fontSize={window.innerWidth < 768 ? 8 : 11}
                   angle={-45}
                   textAnchor="end"
                   height={window.innerWidth < 768 ? 50 : 80}
+                  tick={{ fill: '#6e7191' }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+                  tickLine={false}
                 />
-                
-                <YAxis 
-                  stroke="#aaa"
+
+                <YAxis
+                  stroke="#6e7191"
                   fontSize={window.innerWidth < 768 ? 9 : 12}
                   tickFormatter={(value) => formatCurrency(value)}
+                  tick={{ fill: '#6e7191' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 
                 <RechartsTooltip content={<CustomTooltip />} />
