@@ -345,7 +345,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
         {/* Primeira linha: 3 métricas */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {/* IQT */}
-          <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               IQT
               <InfoTooltip>
@@ -373,7 +373,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* Eficiência de Risco */}
-          <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               Eficiência
               <InfoTooltip>
@@ -401,7 +401,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* Score de Consistência */}
-          <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               Consistência
               <InfoTooltip>
@@ -432,7 +432,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
         {/* Segunda linha: 3 métricas */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {/* RAP */}
-          <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               RAP
               <InfoTooltip>
@@ -460,7 +460,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* IPI */}
-          <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               IPI
               <InfoTooltip>
@@ -488,7 +488,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* Expectancy - Van Tharp */}
-          <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               Expectancy
               <InfoTooltip>
@@ -639,47 +639,55 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
     <div className="w-full">
       <CardContent className="p-3 sm:p-4 md:p-6">
         {/* Filtros de Tempo */}
-        <div className="flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2 mb-4">
+        <div className="flex flex-wrap justify-center sm:justify-end gap-1.5 sm:gap-2 mb-4">
           {[
             { key: "dia", label: t('time.day') },
             { key: "semana", label: t('time.week') },
             { key: "mes", label: t('time.month') },
             { key: "ano", label: t('time.year') },
           ].map((filter) => (
-            <Button
+            <button
               key={filter.key}
-              variant={timeFilter === filter.key ? "default" : "outline"}
-              size="sm"
               onClick={() => setTimeFilter(filter.key as any)}
-              className={
+              className={`text-xs font-bold px-3 py-1.5 rounded-md border transition-all duration-150 ${
                 timeFilter === filter.key
-                  ? "bg-neutral-primary hover:bg-neutral-secondary"
-                  : "border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
-              }
+                  ? "bg-[#6EE000]/15 border-[#6EE000]/60 text-[#6EE000]"
+                  : "bg-transparent border-[var(--brd2)] text-[var(--dim)] hover:border-[#6EE000]/40 hover:text-[#6EE000]"
+              }`}
             >
               {filter.label}
-            </Button>
+            </button>
           ))}
         </div>
 
         {/* Gráfico */}
-        <div className="h-60 sm:h-72 md:h-80 w-full">
+        <div className="h-60 sm:h-72 md:h-80 w-full tr-chart-bg rounded-lg">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="period" 
-                  stroke="#9CA3AF" 
-                  fontSize={10}
-                  height={40}
-                  angle={-45}
+              <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6EE000" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#6EE000" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="period"
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+                  tickLine={false}
+                  height={36}
+                  angle={-30}
                   textAnchor="end"
                   interval={Math.max(Math.floor(chartData.length / 6), 1)}
                 />
                 <YAxis
-                  stroke="#9CA3AF"
-                  fontSize={10}
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={false}
+                  tickLine={false}
                   width={70}
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={yAxisDomain}
@@ -687,69 +695,63 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
                 />
                 <RechartsTooltip
                   contentStyle={{
-                    backgroundColor: "#1E293B",
-                    border: "1px solid #475569",
-                    borderRadius: "8px",
-                    color: "#F1F5F9",
+                    backgroundColor: "#0f0f1a",
+                    border: "1.5px solid #1e1e2e",
+                    borderRadius: "12px",
+                    color: "#e0e0e0",
+                    padding: "10px 14px",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                    fontSize: "13px",
+                    fontFamily: "'Nunito', system-ui, sans-serif",
+                    fontWeight: 600,
                   }}
                   formatter={formatTooltipValue}
-                  labelStyle={{ color: "#CBD5E1" }}
+                  labelStyle={{ color: '#6e7191', fontSize: '11px', letterSpacing: '0.5px', marginBottom: '4px' }}
+                  cursor={{ stroke: 'rgba(110,224,0,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 {/* Linha de referência em zero */}
-                <ReferenceLine 
-                  y={0} 
-                  stroke="#FFF" 
-                  strokeWidth={2} 
-                  strokeDasharray="5 5"
-                  label={{ 
-                    value: 'ZERO', 
-                    fill: '#FFF', 
-                    fontSize: 12, 
-                    position: 'insideTopRight',
-                    fontWeight: 'bold'
-                  }}
+                <ReferenceLine
+                  y={0}
+                  stroke="rgba(255,255,255,0.15)"
+                  strokeWidth={1}
+                  strokeDasharray="6 4"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="cumulativeProfit"
+                  stroke="none"
+                  fill="url(#profitGradient)"
+                  fillOpacity={1}
                 />
                 <Line
                   type="monotone"
                   dataKey="cumulativeProfit"
                   stroke="#6EE000"
-                  strokeWidth={3}
-                  dot={(props) => {
+                  strokeWidth={2.5}
+                  dot={(props: any) => {
                     const { cx, cy, payload } = props;
                     const isNegative = payload.cumulativeProfit < 0;
                     return (
                       <circle
-                        cx={cx}
-                        cy={cy}
-                        r={4}
-                        fill={isNegative ? "#FF1F3D" : "#6EE000"}
-                        stroke={isNegative ? "#FF1F3D" : "#6EE000"}
-                        strokeWidth={2}
-                      />
-                    );
-                  }}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="profit"
-                  stroke="#6B7280"
-                  strokeWidth={2}
-                  dot={(props) => {
-                    const { cx, cy, payload } = props;
-                    const isNegative = payload.profit < 0;
-                    return (
-                      <circle
+                        key={`dot-${cx}-${cy}`}
                         cx={cx}
                         cy={cy}
                         r={3}
                         fill={isNegative ? "#FF1F3D" : "#6EE000"}
                         stroke={isNegative ? "#FF1F3D" : "#6EE000"}
-                        strokeWidth={2}
+                        strokeWidth={1.5}
                       />
                     );
                   }}
-                  strokeDasharray="5 5"
+                  activeDot={{ r: 5, fill: '#6EE000', stroke: '#6EE000', strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="profit"
+                  stroke="rgba(110,224,0,0.35)"
+                  strokeWidth={1.5}
+                  dot={false}
+                  strokeDasharray="4 4"
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -928,60 +930,77 @@ function DrawdownChart({ trades, t, formatCurrency }: { trades: Trade[]; t: (key
         </div>
 
         {/* Gráfico */}
-        <div className="h-60 sm:h-72 md:h-80 w-full">
+        <div className="h-60 sm:h-72 md:h-80 w-full tr-chart-bg rounded-lg">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <RechartsLineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="period" 
-                  stroke="#9CA3AF"
-                  fontSize={10}
-                  height={50}
-                  angle={-45}
+              <RechartsLineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="ddGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="5%" stopColor="#FF1F3D" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="#FF1F3D" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="period"
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+                  tickLine={false}
+                  height={36}
+                  angle={-30}
                   textAnchor="end"
                   interval={Math.max(Math.floor(chartData.length / 6), 1)}
                 />
-                <YAxis 
-                  stroke="#9CA3AF"
-                  fontSize={10}
+                <YAxis
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={false}
+                  tickLine={false}
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={['dataMin', 0]}
                   width={65}
                 />
                 <RechartsTooltip
                   contentStyle={{
-                    backgroundColor: "#1E293B",
-                    border: "1px solid #475569",
-                    borderRadius: "8px",
-                    color: "#F1F5F9",
+                    backgroundColor: "#0f0f1a",
+                    border: "1.5px solid #1e1e2e",
+                    borderRadius: "12px",
+                    color: "#e0e0e0",
+                    padding: "10px 14px",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                    fontSize: "13px",
+                    fontFamily: "'Nunito', system-ui, sans-serif",
+                    fontWeight: 600,
                   }}
                   formatter={formatTooltipValue}
-                  labelStyle={{ color: "#CBD5E1" }}
+                  labelStyle={{ color: '#6e7191', fontSize: '11px' }}
+                  cursor={{ stroke: 'rgba(255,31,61,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
+                <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
                 <Line
                   type="monotone"
                   dataKey="drawdown"
                   stroke="#FF1F3D"
-                  strokeWidth={3}
-                  dot={{ fill: "#FF1F3D", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#FF1F3D", strokeWidth: 2 }}
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 5, fill: '#FF1F3D', stroke: '#FF1F3D', strokeWidth: 2 }}
                   connectNulls={false}
                 />
               </RechartsLineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full text-slate-400">
-              Sem dados de trades para exibir
+            <div className="flex items-center justify-center h-full text-[var(--dim)]">
+              Sem dados para exibir
             </div>
           )}
         </div>
-        
+
         {/* Legenda */}
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs">
           <div className="flex items-center gap-2">
             <div className="w-3 h-0.5 bg-[#FF1F3D]"></div>
-            <span className="text-slate-300">Drawdown %</span>
+            <span className="text-[var(--dim)]">Drawdown máximo (R$)</span>
           </div>
         </div>
       </CardContent>
@@ -1057,8 +1076,8 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-black border border-zinc-700 rounded-lg p-3 text-white">
-          <p className="font-medium mb-1">⏰ {label}</p>
+        <div style={{ backgroundColor: '#0f0f1a', border: '1.5px solid #1e1e2e', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', fontFamily: "'Nunito', sans-serif" }}>
+          <p className="font-medium mb-1 text-white">⏰ {label}</p>
           <p className={`${data.value >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]'}`}>
             💰 Total: {formatCurrency(data.value)}
           </p>
@@ -1082,18 +1101,23 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
             bottom: 25, 
             left: window.innerWidth < 640 ? 15 : window.innerWidth < 1024 ? 20 : 30 
           }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.6} />
+            <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
             <XAxis
               dataKey="time"
-              stroke="#aaa"
+              stroke="#6e7191"
               tick={false}
               height={20}
+              axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+              tickLine={false}
             />
             <YAxis
-              stroke="#aaa"
+              stroke="#6e7191"
               fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
               tickFormatter={(value) => formatCurrency(value)}
               width={window.innerWidth < 640 ? 40 : window.innerWidth < 1024 ? 50 : 60}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#6e7191' }}
             />
             <RechartsTooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} strokeDasharray="2 2" />
@@ -2174,15 +2198,15 @@ function SquareCard({
   children,
 }: SquareCardProps) {
   return (
-    <Card className={`bg-[#0a0a0f]/90 border-[#1e1e2e] hover:bg-[#0a0a0f]/95 transition-colors ${className.includes('h-') ? '' : 'aspect-square'} ${className}`}>
-      <CardContent className="p-4 h-full flex flex-col justify-between">
+    <div className={`tr-premium-card ${className.includes('h-') ? '' : 'aspect-square'} ${className}`}>
+      <div className="p-4 h-full flex flex-col justify-between">
         <div className="flex items-start justify-between mb-2">
-          <div className="text-xs text-zinc-400 font-medium truncate pr-2">
+          <div className="tr-stat-label truncate pr-2">
             {title}
           </div>
           <Icon className={`h-4 w-4 flex-shrink-0 ${color || "text-zinc-400"}`} />
         </div>
-        
+
         <div className="flex-1 flex flex-col justify-center">
           {children ? (
             children
@@ -2197,8 +2221,8 @@ function SquareCard({
             </>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -2727,10 +2751,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
           <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6">
             {/* Net PnL */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e] hover:bg-[#0a0a0f]/95 transition-colors" data-testid="card-net-pnl">
+            <Card className="tr-premium-card tr-accent-green" data-testid="card-net-pnl">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
+                  <div className="tr-stat-label">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
                 {(() => {
@@ -2755,10 +2779,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
 
             {/* Trade Win % - SEMPRE VISÍVEL (não é valor monetário) */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e] hover:bg-[#0a0a0f]/95 transition-colors" data-testid="card-trade-win">
+            <Card className="tr-premium-card tr-accent-blue" data-testid="card-trade-win">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('dashboard.win_rate')}</div>
+                  <div className="tr-stat-label">{t('dashboard.win_rate')}</div>
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -2793,10 +2817,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             
 
             {/* Day Win % - SEMPRE VISÍVEL (não é valor monetário) */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e] hover:bg-[#0a0a0f]/95 transition-colors" data-testid="card-day-win">
+            <Card className="tr-premium-card tr-accent-blue" data-testid="card-day-win">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.day_win_rate')}</div>
+                  <div className="tr-stat-label">{t('metrics.day_win_rate')}</div>
                   <Calendar className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -2836,10 +2860,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
 
             {/* RR Médio - SEMPRE VISÍVEL (não é valor monetário) */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e] hover:bg-[#0a0a0f]/95 transition-colors" data-testid="card-avg-rr">
+            <Card className="tr-premium-card tr-accent-orange" data-testid="card-avg-rr">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
+                  <div className="tr-stat-label">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="text-xl md:text-2xl lg:text-3xl font-bold text-white break-words">
@@ -2852,10 +2876,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
 
             {/* Average Win/Loss */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e] hover:bg-[#0a0a0f]/95 transition-colors" data-testid="card-avg-win-loss">
+            <Card className="tr-premium-card tr-accent-green" data-testid="card-avg-win-loss">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.avg_win_loss')}</div>
+                  <div className="tr-stat-label">{t('metrics.avg_win_loss')}</div>
                   <Activity className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between">
@@ -2910,32 +2934,27 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Performance por Período - Gráfico (3/4 da largura) */}
             <div className="lg:col-span-3">
-              <Card className="border-[#1e1e2e] h-full bg-[#0f0f1a]">
-                <CardHeader>
-                  <CardTitle className="text-white">
-                    {t('dashboard.performance_chart')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {/* Gráfico - Área Principal */}
-                  <div className="w-full">
-                    <TradingPerformanceChart 
-                      trades={filteredTrades} 
-                      t={t}
-                      onPeriodFilterChange={setPeriodFilteredTrades}
-                      formatCurrency={formatCurrency}
-                      hideData={hideData}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="tr-premium-card tr-accent-blue h-full flex flex-col">
+                <div className="px-5 pt-5 pb-3 border-b border-[var(--brd)]/40">
+                  <p className="tr-section-label">{t('dashboard.performance_chart')}</p>
+                </div>
+                <div className="p-4 flex-1">
+                  <TradingPerformanceChart
+                    trades={filteredTrades}
+                    t={t}
+                    onPeriodFilterChange={setPeriodFilteredTrades}
+                    formatCurrency={formatCurrency}
+                    hideData={hideData}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* 4 Metric Blocks - À direita (1/4 da largura) */}
             <div className="lg:col-span-1">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 h-full">
                 {/* Lucros - valor monetário ocultável, percentual e contagem sempre visíveis */}
-                <div className="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.profits_short')}</div>
                   <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#6EE000]'} mb-2`}>
                     {hideData ? '•••••' : (() => {
@@ -2970,7 +2989,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
 
                 {/* Perdas - valor monetário ocultável, percentual e contagem sempre visíveis */}
-                <div className="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.losses_short')}</div>
                   <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#FF1F3D]'} mb-2`}>
                     {hideData ? '•••••' : (() => {
@@ -3005,7 +3024,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
 
                 {/* Resultado - valor monetário ocultável, percentual e contagem sempre visíveis */}
-                <div className="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.result')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -3043,7 +3062,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
 
                 {/* Média - valor monetário ocultável, percentual sempre visível */}
-                <div className="bg-[#13131a]/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.average')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -3105,9 +3124,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 
                 {/* Métricas adicionais no espaço vazio */}
-                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-zinc-700">
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-[var(--brd)]">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-full">
-                    <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
+                    <div className="tr-premium-card tr-accent-green p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
@@ -3119,7 +3138,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       </div>
                     </div>
 
-                    <div className="bg-[#13131a]/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
+                    <div className="tr-premium-card p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.frequent_emotion')}</p>
@@ -3153,7 +3172,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 
                 {/* Seção 2: Métrika Score */}
-                <div className="border-t border-zinc-700 pt-3 sm:pt-4">
+                <div className="border-t border-[var(--brd)] pt-3 sm:pt-4">
                   <div className="text-sm font-semibold text-zinc-300 mb-2 sm:mb-3 flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
                     {t('metrics.metrika_score')}
@@ -3168,30 +3187,30 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             {/* Mobile: Cards PnL e Trades em layout responsivo */}
             <div className="md:hidden grid grid-cols-1 gap-3">
               {/* PnL Chart Mobile - Card separado */}
-              <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
-                <CardContent className="p-3">
+              <div className="tr-premium-card tr-accent-green">
+                <div className="p-3">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-zinc-400">{t('metrics.daily_net_pnl')}</h3>
+                    <span className="tr-stat-label">{t('metrics.daily_net_pnl')}</span>
                     <BarChart3 className="h-4 w-4 text-[#6EE000]" />
                   </div>
                   <div className="h-48 overflow-hidden">
                     <NetDailyPnLBarChart trades={periodFilteredTrades} formatCurrency={formatCurrency} />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Recent Trades Mobile - Card separado */}
-              <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
-                <CardContent className="p-3">
+              <div className="tr-premium-card">
+                <div className="p-3">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-zinc-400">{t('dashboard.recent_trades')}</h3>
+                    <span className="tr-stat-label">{t('dashboard.recent_trades')}</span>
                     <FileText className="h-4 w-4 text-zinc-400" />
                   </div>
                   <div className="h-48 overflow-hidden">
                     <RecentTrades trades={periodFilteredTrades} formatCurrency={formatCurrency} hideData={hideData} />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -3200,15 +3219,13 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Trade Time Performance - 2 colunas */}
             <div className="lg:col-span-2">
-              <Card className="border-[#1e1e2e] bg-[#0f0f1a] h-full">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-zinc-400" />
-                    {t('metrics.trade_time_performance')}
-                  </CardTitle>
-                </CardHeader>
+              <div className="tr-premium-card tr-accent-blue h-full flex flex-col">
+                <div className="px-5 pt-5 pb-3 flex items-center gap-2 border-b border-[var(--brd)]/40">
+                  <Activity className="h-5 w-5 text-[#448aff] opacity-70" />
+                  <p className="tr-section-label" style={{ color: '#448aff', marginBottom: 0 }}>{t('metrics.trade_time_performance')}</p>
+                </div>
                 <TradeTimePerformance trades={periodFilteredTrades} t={t} formatCurrency={formatCurrency} />
-              </Card>
+              </div>
             </div>
 
             {/* PnL e Trades Recentes - 1 coluna à direita */}
@@ -3248,26 +3265,37 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Curva de Capital */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <LineChart className="h-5 w-5 text-zinc-400" />
-                  {t('dashboard.capital_curve')}
-                </CardTitle>
-              </CardHeader>
+            <div className="tr-premium-card tr-accent-green">
+              <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-[var(--brd)]/40">
+                <div>
+                  <p className="tr-section-label">{t('dashboard.capital_curve')}</p>
+                  <span className="text-[var(--text)] font-black text-xl tracking-tight leading-none">
+                    {formatCurrency(periodFilteredTrades.reduce((s, tr) => s + parseFloat(tr.resultado || '0'), 0))}
+                  </span>
+                </div>
+                <LineChart className="h-5 w-5 text-[#6EE000] opacity-70" />
+              </div>
               <CapitalCurveChart trades={periodFilteredTrades} t={t} formatCurrency={formatCurrency} />
-            </Card>
+            </div>
 
             {/* Gráfico de Drawdown */}
-            <Card className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-zinc-400" />
-                  {t('metrics.drawdown')}
-                </CardTitle>
-              </CardHeader>
+            <div className="tr-premium-card tr-accent-red">
+              <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-[var(--brd)]/40">
+                <div>
+                  <p className="tr-section-label">{t('metrics.drawdown')}</p>
+                  <span className="text-[var(--r)] font-black text-xl tracking-tight leading-none">
+                    {(() => {
+                      let peak = 0, cum = 0, maxDD = 0;
+                      [...periodFilteredTrades].sort((a,b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
+                        .forEach(tr => { cum += parseFloat(tr.resultado||'0'); if(cum>peak)peak=cum; const dd=peak-cum; if(dd>maxDD)maxDD=dd; });
+                      return maxDD > 0 ? `−${formatCurrency(maxDD)}` : '—';
+                    })()}
+                  </span>
+                </div>
+                <TrendingDown className="h-5 w-5 text-[#FF1F3D] opacity-70" />
+              </div>
               <DrawdownChart trades={periodFilteredTrades} t={t} formatCurrency={formatCurrency} />
-            </Card>
+            </div>
           </div>
       </div>
 

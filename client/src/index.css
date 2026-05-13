@@ -324,6 +324,102 @@
     border-radius: 14px;
   }
 
+  /* ════════════════════════════════════
+     TR PREMIUM CARD — with top accent strip
+     ════════════════════════════════════ */
+
+  /* Base TR card — sharp edges, clean border */
+  .tr-premium-card {
+    background: var(--card);
+    border: 1.5px solid var(--brd);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+    position: relative;
+  }
+  .tr-premium-card:hover {
+    border-color: var(--brd2);
+    box-shadow: 0 4px 28px rgba(0,0,0,.45);
+  }
+
+  /* Colored accent strip at top — 3 px gradient fade */
+  .tr-premium-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold) 0%, transparent 100%);
+    border-radius: 16px 16px 0 0;
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .tr-premium-card:hover::before { opacity: 1; }
+
+  /* Forced strip variants (not hover-only) */
+  .tr-accent-green::before  { background: linear-gradient(90deg, #6EE000 0%, transparent 70%); opacity: 1 !important; }
+  .tr-accent-red::before    { background: linear-gradient(90deg, #FF1F3D 0%, transparent 70%); opacity: 1 !important; }
+  .tr-accent-blue::before   { background: linear-gradient(90deg, #448aff 0%, transparent 70%); opacity: 1 !important; }
+  .tr-accent-orange::before { background: linear-gradient(90deg, #ffa000 0%, transparent 70%); opacity: 1 !important; }
+
+  /* ── Stat block (TR-style: uppercase label + bold value) ── */
+  .tr-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+  .tr-stat-value {
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .tr-stat-sub {
+    font-size: 11px;
+    color: var(--dim);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* ── Chart container ── */
+  .tr-chart-wrap {
+    background: var(--card);
+    border: 1.5px solid var(--brd);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    transition: border-color .2s;
+  }
+  .tr-chart-wrap:hover { border-color: var(--brd2); }
+
+  /* Subtle inner grid overlay on chart area */
+  .tr-chart-bg {
+    position: relative;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  [data-theme="light"] .tr-chart-bg {
+    background-image:
+      linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+  }
+
+  /* ── Section label (TR style) ── */
+  .tr-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+
   /* ── Badges ── */
   .badge-take {
     background: var(--gold2);
