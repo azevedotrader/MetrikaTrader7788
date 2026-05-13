@@ -6,6 +6,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import { runMigrations } from "./migrate";
 
 const app = express();
 
@@ -175,6 +176,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Run database migrations first
+  await runMigrations();
+
   // Register routes (no server creation here)
   await registerRoutes(app);
 
