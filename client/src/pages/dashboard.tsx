@@ -2936,7 +2936,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             <div className="lg:col-span-3">
               <div className="tr-premium-card tr-accent-blue h-full flex flex-col">
                 <div className="px-5 pt-5 pb-3 border-b border-[var(--brd)]/40">
-                  <p className="tr-section-label">{t('dashboard.performance_chart')}</p>
+                  <p className="text-sm font-bold text-[var(--text)] tracking-widest uppercase">{t('dashboard.performance_chart')}</p>
                 </div>
                 <div className="p-4 flex-1">
                   <TradingPerformanceChart

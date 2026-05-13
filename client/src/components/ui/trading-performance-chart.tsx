@@ -9,12 +9,10 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
   ReferenceLine,
-  ReferenceDot,
-  ReferenceArea,
 } from "recharts";
 import { format, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BarChart3, TrendingUp, TrendingDown, Minus, Filter, X, Calendar } from "lucide-react";
+import { BarChart3, Filter, X, Calendar } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import type { Trade } from "@shared/schema";
@@ -206,8 +204,8 @@ function detectConsolidationZones(data: ChartDataPoint[], minLength: number = 3,
 }
 
 // Formatar data baseado no período
-function formatDate(date: Date, period: "1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom"): string {
-  if (period === "1a" || period === "ytd" || period === "6m" || period === "custom") {
+function formatDate(date: Date, period: "1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "all" | "custom"): string {
+  if (period === "1a" || period === "ytd" || period === "6m" || period === "all" || period === "custom") {
     return format(date, "dd/MM/yy", { locale: ptBR });
   }
   return format(date, "dd/MM", { locale: ptBR });
@@ -281,7 +279,7 @@ export function TradingPerformanceChart({
   onPeriodFilterChange,
   hideData = false
 }: TradingPerformanceChartProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "custom">("1a");
+  const [selectedPeriod, setSelectedPeriod] = useState<"1d" | "1s" | "1m" | "3m" | "6m" | "ytd" | "1a" | "all" | "custom">("1a");
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
@@ -291,6 +289,7 @@ export function TradingPerformanceChart({
   // Gerar dados do gráfico
   const { chartData, peaks, consolidationZones, periodFilteredTrades, lineSegments } = useMemo(() => {
     if (!trades.length) return { chartData: [], peaks: [], consolidationZones: [], periodFilteredTrades: [] as Trade[], lineSegments: [] as LineSegment[] };
+
 
     let periodFilteredTrades = trades;
     const now = new Date();
@@ -326,6 +325,11 @@ export function TradingPerformanceChart({
       case "1a":
         startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
         endDate = now;
+        break;
+      case "all":
+        // Mostrar todo o histórico — sem filtro de data
+        startDate = null;
+        endDate = null;
         break;
       case "custom":
         if (customStartDate && customEndDate) {
@@ -450,50 +454,30 @@ export function TradingPerformanceChart({
   const renderCustomTooltip = useCallback(({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const dataPoint = payload[0].payload as ChartDataPoint;
-      
-      let specialLabel = "";
-      let specialColor = "";
-      
-      if (dataPoint.isPeak) {
-        specialLabel = "🔺 Topo do ciclo";
-        specialColor = "#6EE000";
-      } else if (dataPoint.isValley) {
-        specialLabel = "🔻 Fundo do ciclo";
-        specialColor = "#FF1F3D";
-      } else if (dataPoint.isConsolidation) {
-        specialLabel = "📊 Zona de consolidação";
-        specialColor = "#888";
-      }
-      
+
       return (
-        <div 
+        <div
           style={{
-            backgroundColor: "#000000",
-            border: "1px solid #444",
-            borderRadius: "8px",
-            padding: "12px",
-            color: "#fff",
+            backgroundColor: "#0f0f1a",
+            border: "1.5px solid #1e1e2e",
+            borderRadius: "12px",
+            padding: "10px 14px",
+            color: "#e0e0e0",
             minWidth: "160px",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-            animation: "fadeIn 0.2s ease-out"
+            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+            fontFamily: "'Nunito', sans-serif",
           }}
         >
-          <p style={{ margin: 0, fontWeight: "bold", marginBottom: "8px", fontSize: "13px" }}>
-            📅 {label} • Trade #{dataPoint.tradeIndex}
+          <p style={{ margin: 0, fontWeight: 700, marginBottom: "6px", fontSize: "12px", color: "#6e7191", letterSpacing: "0.05em" }}>
+            {label} · Trade #{dataPoint.tradeIndex}
           </p>
-          
-          {specialLabel && (
-            <p style={{ margin: 0, marginBottom: "6px", color: specialColor, fontSize: "12px", fontWeight: "bold" }}>
-              {specialLabel}
-            </p>
-          )}
-          
-          <p style={{ margin: 0, marginBottom: "4px", color: hideData ? "#888" : (dataPoint.total >= 0 ? "#6EE000" : "#FF1F3D"), fontSize: "14px" }}>
-            {dataPoint.total >= 0 ? "📈" : "📉"} {hideData ? "•••••" : `${dataPoint.total >= 0 ? "+" : ""}${formatCurrency(dataPoint.total)}`}
+
+          <p style={{ margin: 0, marginBottom: "4px", color: hideData ? "#555" : (dataPoint.total >= 0 ? "#6EE000" : "#FF1F3D"), fontSize: "15px", fontWeight: 800 }}>
+            {hideData ? "•••••" : `${dataPoint.total >= 0 ? "+" : ""}${formatCurrency(dataPoint.total)}`}
           </p>
-          
-          <p style={{ margin: 0, color: hideData ? "#888" : (dataPoint.accumulated >= 0 ? "#6EE000" : "#FF1F3D"), fontSize: "12px", opacity: 0.8 }}>
-            💰 Total: {hideData ? "•••••" : formatCurrency(dataPoint.accumulated)}
+
+          <p style={{ margin: 0, color: hideData ? "#555" : (dataPoint.accumulated >= 0 ? "#6EE000" : "#FF1F3D"), fontSize: "11px", opacity: 0.75 }}>
+            Acumulado: {hideData ? "•••••" : formatCurrency(dataPoint.accumulated)}
           </p>
         </div>
       );
@@ -513,6 +497,7 @@ export function TradingPerformanceChart({
             { key: "6m", label: "6M" },
             { key: "ytd", label: currentYear.toString() },
             { key: "1a", label: "1A" },
+            { key: "all", label: "Tudo" },
           ].map((filter) => (
             <button
               key={filter.key}
@@ -635,6 +620,7 @@ export function TradingPerformanceChart({
           { key: "6m", label: "6M" },
           { key: "ytd", label: currentYear.toString() },
           { key: "1a", label: "1A" },
+          { key: "all", label: "Tudo" },
         ].map((filter) => (
           <button
             key={filter.key}
@@ -746,26 +732,6 @@ export function TradingPerformanceChart({
         </Popover>
       </div>
 
-      {/* Indicadores de Picos e Fundos */}
-      {peaks.length > 0 && (
-        <div className="flex justify-center gap-4 mb-4 text-xs">
-          <div className="flex items-center gap-1">
-            <TrendingUp className="w-3 h-3 text-[#6EE000]" />
-            <span className="text-zinc-400">Topos: {peaks.filter(p => p.type === "peak").length}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <TrendingDown className="w-3 h-3 text-[#FF1F3D]" />
-            <span className="text-zinc-400">Fundos: {peaks.filter(p => p.type === "valley").length}</span>
-          </div>
-          {consolidationZones.length > 0 && (
-            <div className="flex items-center gap-1">
-              <Minus className="w-3 h-3 text-zinc-500" />
-              <span className="text-zinc-400">Consolidações: {consolidationZones.length}</span>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Gráfico */}
       <div className="relative h-[350px] sm:h-[450px] md:h-[550px]">
         <ResponsiveContainer width="100%" height="100%">
@@ -797,42 +763,33 @@ export function TradingPerformanceChart({
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-            
-            <XAxis 
-              dataKey="period" 
-              stroke="#666"
+            <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
+
+            <XAxis
+              dataKey="period"
+              stroke="#6e7191"
               fontSize={window.innerWidth < 768 ? 8 : 10}
               angle={-45}
               textAnchor="end"
               height={window.innerWidth < 768 ? 50 : 70}
-              tick={{ fill: '#888' }}
+              tick={{ fill: '#6e7191' }}
+              axisLine={{ stroke: 'rgba(255,255,255,0.06)' }}
+              tickLine={false}
             />
-            
-            <YAxis 
-              stroke="#666"
+
+            <YAxis
+              stroke="#6e7191"
               fontSize={window.innerWidth < 768 ? 9 : 11}
               tickFormatter={(value) => hideData ? "•••" : formatCurrency(value)}
-              tick={{ fill: '#888' }}
+              tick={{ fill: '#6e7191' }}
+              axisLine={false}
+              tickLine={false}
             />
             
             <RechartsTooltip content={renderCustomTooltip} />
 
             {/* Linha do zero */}
             <ReferenceLine y={0} stroke="#555" strokeWidth={1} strokeDasharray="5 5" />
-
-            {/* Zonas de consolidação */}
-            {consolidationZones.map((zone, index) => (
-              <ReferenceArea
-                key={`zone-${index}`}
-                x1={chartData[zone.startIndex]?.period}
-                x2={chartData[zone.endIndex]?.period}
-                fill="#666"
-                fillOpacity={0.1}
-                stroke="#888"
-                strokeDasharray="3 3"
-              />
-            ))}
 
             {/* Área preenchida com curva suave */}
             <Area
@@ -860,31 +817,6 @@ export function TradingPerformanceChart({
               isAnimationActive={false}
             />
 
-            {/* Marcar picos com pontos especiais */}
-            {peaks.filter(p => p.type === "peak").map((peak, index) => (
-              <ReferenceDot
-                key={`peak-${index}`}
-                x={chartData[peak.index]?.period}
-                y={peak.value}
-                r={6}
-                fill="#6EE000"
-                stroke="#fff"
-                strokeWidth={2}
-              />
-            ))}
-
-            {/* Marcar fundos com pontos especiais */}
-            {peaks.filter(p => p.type === "valley").map((valley, index) => (
-              <ReferenceDot
-                key={`valley-${index}`}
-                x={chartData[valley.index]?.period}
-                y={valley.value}
-                r={6}
-                fill="#FF1F3D"
-                stroke="#fff"
-                strokeWidth={2}
-              />
-            ))}
           </ComposedChart>
         </ResponsiveContainer>
 
