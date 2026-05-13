@@ -178,52 +178,57 @@ export default function ImportarCSV() {
         </CardHeader>
         <CardContent data-testid="csv-import-section" className="space-y-6">
           <div className="space-y-4">
-            {/* Linha 1: Mercado e Método de Análise lado a lado */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Linha 1: Mercado + Carteira + Método de Análise */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Mercado */}
               <div>
                 <label className="block text-sm font-medium mb-2 text-charcoal-300">
                   {t('form.select_market_label')}
                 </label>
                 <Select
-                  value={selectedWalletId ? `wallet:${selectedWalletId}` : selectedBroker}
+                  value={selectedBroker}
                   onValueChange={(value) => {
-                    // Verificar se é uma carteira customizada
-                    if (value.startsWith("wallet:")) {
-                      const walletId = value.replace("wallet:", "");
-                      const wallet = wallets.find(w => w.id === walletId);
-                      if (wallet) {
-                        setSelectedWalletId(walletId);
-                        setSelectedBroker(wallet.name);
-                      }
-                    } else {
-                      // Mercado padrão
-                      setSelectedWalletId(null);
-                      setSelectedBroker(value);
-                    }
+                    setSelectedBroker(value);
                   }}
                 >
                   <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
                     <SelectValue placeholder={t('form.crypto_b3_forex')} />
                   </SelectTrigger>
-                  <SelectContent className="bg-charcoal-800 border-charcoal-600 max-h-72">
+                  <SelectContent className="bg-charcoal-800 border-charcoal-600">
                     <SelectItem value="crypto">{t('form.crypto_icon')}</SelectItem>
                     <SelectItem value="b3">{t('form.b3_icon')}</SelectItem>
                     <SelectItem value="forex">{t('form.forex_icon')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Carteira */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-charcoal-300 flex items-center gap-1.5">
+                  <Wallet className="h-3.5 w-3.5" />
+                  Carteira <span className="text-charcoal-500 font-normal">(opcional)</span>
+                </label>
+                <Select
+                  value={selectedWalletId || "none"}
+                  onValueChange={(value) => {
+                    setSelectedWalletId(value === "none" ? null : value);
+                  }}
+                >
+                  <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
+                    <SelectValue placeholder="Nenhuma carteira" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-charcoal-800 border-charcoal-600 max-h-64">
+                    <SelectItem value="none">
+                      <span className="text-charcoal-400">— Sem carteira específica</span>
+                    </SelectItem>
                     {wallets.length > 0 && (
                       <>
                         <div className="border-t border-charcoal-600 my-1" />
-                        <div className="px-2 py-1.5 text-xs text-charcoal-400 font-medium flex items-center gap-1">
-                          <Wallet className="h-3 w-3" />
-                          Carteiras Customizadas
-                        </div>
                         {wallets.map((wallet) => (
-                          <SelectItem 
-                            key={wallet.id} 
-                            value={`wallet:${wallet.id}`}
-                          >
+                          <SelectItem key={wallet.id} value={wallet.id}>
                             <span className="flex items-center gap-2">
-                              <span 
-                                className="inline-block w-2 h-2 rounded-full"
+                              <span
+                                className="inline-block w-2 h-2 rounded-full flex-shrink-0"
                                 style={{ backgroundColor: wallet.color || '#8B5CF6' }}
                               />
                               {wallet.name}
@@ -236,6 +241,7 @@ export default function ImportarCSV() {
                 </Select>
               </div>
 
+              {/* Método de Análise */}
               <div>
                 <label className="block text-sm font-medium mb-2 text-charcoal-300">
                   Método de Análise

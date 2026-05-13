@@ -28,8 +28,8 @@ interface TopBarProps {
   title: string;
   onMenuClick?: () => void;
   // Props for dashboard filter
-  viewMode?: "all" | "broker" | "csv";
-  onViewModeChange?: (mode: "all" | "broker" | "csv") => void;
+  viewMode?: "all" | "broker" | "csv" | "wallet";
+  onViewModeChange?: (mode: "all" | "broker" | "csv" | "wallet") => void;
   selectedBrokerFilter?: string | null;
   onSelectedBrokerFilterChange?: (broker: string | null) => void;
   selectedCsvIds?: string[];
@@ -45,8 +45,8 @@ interface TopBarProps {
   onHideDataChange?: (hide: boolean) => void;
 }
 
-export function TopBar({ 
-  title, 
+export function TopBar({
+  title,
   onMenuClick,
   viewMode = "all",
   onViewModeChange,
@@ -89,68 +89,87 @@ export function TopBar({
             <div className="hidden md:flex items-center space-x-2 lg:space-x-3">
               <Select
                 value={viewMode}
-                onValueChange={(value: "all" | "broker" | "csv") => {
+                onValueChange={(value: "all" | "broker" | "csv" | "wallet") => {
                   onViewModeChange?.(value);
-                  if (value !== "broker") onSelectedBrokerFilterChange?.(null);
+                  if (value !== "broker" && value !== "wallet") onSelectedBrokerFilterChange?.(null);
                   if (value !== "csv") onSelectedCsvIdsChange?.([]);
                 }}
               >
-                <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white h-8 text-sm w-40 lg:w-44">
+                <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] h-8 text-sm w-44 lg:w-48">
                   <SelectValue placeholder="Filtrar visualização" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#13131a] border-zinc-700">
-                  <SelectItem value="all" className="text-white hover:bg-zinc-700">
+                <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                  <SelectItem value="all" className="text-[var(--text)] hover:bg-[var(--surf)]">
                     {t ? t('filter.consolidate_all_data') : 'Consolidar Todos os Dados'}
                   </SelectItem>
-                  <SelectItem value="broker" className="text-white hover:bg-zinc-700">
+                  <SelectItem value="broker" className="text-[var(--text)] hover:bg-[var(--surf)]">
                     {t ? t('filter.filter_by_market') : 'Filtrar por Mercado'}
                   </SelectItem>
-                  <SelectItem value="csv" className="text-white hover:bg-zinc-700">
+                  <SelectItem value="wallet" className="text-[var(--text)] hover:bg-[var(--surf)]">
+                    <span className="flex items-center gap-1.5">
+                      <Wallet className="h-3.5 w-3.5" />
+                      Filtrar por Carteira
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="csv" className="text-[var(--text)] hover:bg-[var(--surf)]">
                     {t ? t('filter.filter_by_csv') : 'Filtrar por CSV'}
                   </SelectItem>
                 </SelectContent>
               </Select>
-              
-              {/* Broker Filter */}
+
+              {/* Broker/Market Filter */}
               {viewMode === "broker" && (
                 <Select
                   value={selectedBrokerFilter || ""}
                   onValueChange={onSelectedBrokerFilterChange}
                 >
-                  <SelectTrigger className="bg-[#13131a] border-zinc-700 text-white h-8 text-sm w-36 lg:w-40">
+                  <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] h-8 text-sm w-36 lg:w-40">
                     <SelectValue placeholder="Selecionar mercado" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#13131a] border-zinc-700 max-h-80">
-                    <SelectItem value="b3" className="text-white hover:bg-zinc-700">
+                  <SelectContent className="bg-[var(--card)] border-[var(--brd)] max-h-80">
+                    <SelectItem value="b3" className="text-[var(--text)] hover:bg-[var(--surf)]">
                       B3 - Ações Brasileiras
                     </SelectItem>
-                    <SelectItem value="crypto" className="text-white hover:bg-zinc-700">
+                    <SelectItem value="crypto" className="text-[var(--text)] hover:bg-[var(--surf)]">
                       Crypto - Criptomoedas
                     </SelectItem>
-                    <SelectItem value="forex" className="text-white hover:bg-zinc-700">
+                    <SelectItem value="forex" className="text-[var(--text)] hover:bg-[var(--surf)]">
                       Forex - Câmbio
                     </SelectItem>
-                    {wallets.length > 0 && (
-                      <>
-                        <Separator className="my-1 bg-zinc-700" />
-                        <div className="px-2 py-1 text-xs text-zinc-500 font-medium flex items-center gap-1">
-                          <Wallet className="h-3 w-3" />
-                          Carteiras Customizadas
-                        </div>
-                        {wallets.map((wallet) => (
-                          <SelectItem 
-                            key={wallet.id} 
-                            value={`wallet:${wallet.id}`} 
-                            className="text-white hover:bg-zinc-700"
-                          >
-                            <span 
-                              className="inline-block w-2 h-2 rounded-full mr-2"
+                  </SelectContent>
+                </Select>
+              )}
+
+              {/* Wallet Filter */}
+              {viewMode === "wallet" && (
+                <Select
+                  value={selectedBrokerFilter || ""}
+                  onValueChange={onSelectedBrokerFilterChange}
+                >
+                  <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] h-8 text-sm w-36 lg:w-44">
+                    <SelectValue placeholder="Selecionar carteira" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[var(--card)] border-[var(--brd)] max-h-80">
+                    {wallets.length === 0 ? (
+                      <div className="px-3 py-4 text-center text-xs text-[var(--dim)]">
+                        Nenhuma carteira criada ainda
+                      </div>
+                    ) : (
+                      wallets.map((wallet) => (
+                        <SelectItem
+                          key={wallet.id}
+                          value={`wallet:${wallet.id}`}
+                          className="text-[var(--text)] hover:bg-[var(--surf)]"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="inline-block w-2 h-2 rounded-full flex-shrink-0"
                               style={{ backgroundColor: wallet.color || '#8B5CF6' }}
                             />
                             {wallet.name}
-                          </SelectItem>
-                        ))}
-                      </>
+                          </span>
+                        </SelectItem>
+                      ))
                     )}
                   </SelectContent>
                 </Select>

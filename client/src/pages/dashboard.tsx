@@ -2485,7 +2485,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     string | null
   >(null);
   const [selectedCsvIds, setSelectedCsvIds] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<"all" | "broker" | "csv">("all");
+  const [viewMode, setViewMode] = useState<"all" | "broker" | "csv" | "wallet">("all");
   const [editingCsv, setEditingCsv] = useState<{
     id: string;
     currentName: string;
@@ -2604,16 +2604,18 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     let filtered = [...trades];
 
     if (viewMode === "broker" && selectedBrokerFilter) {
-      // Verificar se é uma carteira customizada (formato: wallet:id)
+      // Filtro por mercado/corretora
+      filtered = filtered.filter(
+        (trade) => trade.corretora === selectedBrokerFilter || trade.mercado === selectedBrokerFilter,
+      );
+    }
+
+    if (viewMode === "wallet" && selectedBrokerFilter) {
+      // Filtro por carteira (formato: wallet:id)
       if (selectedBrokerFilter.startsWith("wallet:")) {
         const walletId = selectedBrokerFilter.replace("wallet:", "");
         filtered = filtered.filter(
           (trade) => trade.walletId === walletId,
-        );
-      } else {
-        // Filtro tradicional por corretora/mercado
-        filtered = filtered.filter(
-          (trade) => trade.corretora === selectedBrokerFilter,
         );
       }
     }
@@ -2718,7 +2720,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
         viewMode={viewMode}
         onViewModeChange={(mode) => {
           setViewMode(mode);
-          if (mode !== "broker") setSelectedBrokerFilter(null);
+          if (mode !== "broker" && mode !== "wallet") setSelectedBrokerFilter(null);
           if (mode !== "csv") setSelectedCsvIds([]);
         }}
         selectedBrokerFilter={selectedBrokerFilter}
