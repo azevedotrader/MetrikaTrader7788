@@ -83,7 +83,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
       case 'info':
         return <Info className="h-5 w-5 text-blue-600" />;
       default:
-        return <FileSpreadsheet className="h-5 w-5 text-purple-600" />;
+        return <FileSpreadsheet className="h-5 w-5 text-[#6EE000]" />;
     }
   };
 
@@ -107,7 +107,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
       case 'info':
         return 'border-blue-600';
       default:
-        return 'border-purple-600';
+        return 'border-[#6EE000]';
     }
   };
 
@@ -119,15 +119,15 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
   if (csvTipsMutation.isPending) {
     return (
       <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-        <Card className="bg-slate-900 border-slate-700 shadow-2xl">
+        <Card className="bg-[#0a0a0f] border-[#1e1e2e] shadow-2xl">
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
               <div className="animate-spin">
-                <FileSpreadsheet className="h-5 w-5 text-purple-600" />
+                <FileSpreadsheet className="h-5 w-5 text-[#6EE000]" />
               </div>
               <div>
                 <p className="text-white font-medium">Analisando dados CSV...</p>
-                <p className="text-slate-400 text-sm">Nossa IA está estudando seus trades</p>
+                <p className="text-[#6e7191] text-sm">Nossa IA está estudando seus trades</p>
               </div>
             </div>
           </CardContent>
@@ -140,7 +140,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-      <Card className={`bg-slate-900 ${getTypeColor(currentTip.type)} border-2 shadow-2xl animate-in slide-in-from-bottom-5`}>
+      <Card className={`bg-[#0a0a0f] ${getTypeColor(currentTip.type)} border-2 shadow-2xl animate-in slide-in-from-bottom-5`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
               variant="ghost"
               size="sm"
               onClick={handleClose}
-              className="h-6 w-6 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
+              className="h-6 w-6 p-0 text-[#6e7191] hover:text-white hover:bg-[#0f0f1a]"
               data-testid="close-csv-tip"
             >
               <X className="h-4 w-4" />
@@ -170,25 +170,25 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
           <h3 className="text-white font-medium mb-2 text-sm">
             {currentTip.title}
           </h3>
-          <p className="text-slate-300 text-sm leading-relaxed mb-3">
+          <p className="text-[#a0a0c0] text-sm leading-relaxed mb-3">
             {currentTip.message}
           </p>
           
-          <div className="bg-slate-800/50 p-3 rounded mb-3">
-            <h4 className="text-slate-300 font-medium text-xs mb-1">Baseado em:</h4>
-            <p className="text-slate-400 text-xs">{currentTip.basedOn}</p>
+          <div className="bg-[#0f0f1a]/50 p-3 rounded mb-3">
+            <h4 className="text-[#a0a0c0] font-medium text-xs mb-1">Baseado em:</h4>
+            <p className="text-[#6e7191] text-xs">{currentTip.basedOn}</p>
           </div>
           
-          <div className="bg-purple-900/20 p-3 rounded mb-4">
-            <h4 className="text-purple-600 font-medium text-xs mb-1">Ação sugerida:</h4>
-            <p className="text-purple-200 text-xs">{currentTip.action}</p>
+          <div className="bg-[#6EE000]/10 p-3 rounded mb-4">
+            <h4 className="text-[#6EE000] font-medium text-xs mb-1">Ação sugerida:</h4>
+            <p className="text-[#a3ff4d] text-xs">{currentTip.action}</p>
           </div>
           
           <div className="flex gap-2">
             <Button
               size="sm"
               onClick={handleClose}
-              className="bg-slate-700 hover:bg-slate-600 text-white text-xs"
+              className="bg-[#13131a] hover:bg-[#28283a] text-white text-xs"
               data-testid="ok-csv-tip"
             >
               Entendi
@@ -197,7 +197,7 @@ export function CsvTipsPopup({ onClose }: CsvTipsPopupProps) {
               size="sm"
               onClick={handleAnalyzeCsv}
               variant="outline"
-              className="border-purple-600 text-purple-600 hover:bg-purple-900/20 text-xs"
+              className="border-[#6EE000] text-[#6EE000] hover:bg-[#6EE000]/10 text-xs"
               data-testid="reanalyze-csv"
             >
               Nova Análise

@@ -134,6 +134,15 @@
    ═══════════════════════════════════════════════════ */
 @layer components {
 
+  /* ── gradient-purple-blue alias → TR green gradient (backward compat) ── */
+  .gradient-purple-blue {
+    background: linear-gradient(135deg, #6EE000, #448aff);
+    color: #000;
+  }
+  .gradient-purple-blue:hover {
+    background: linear-gradient(135deg, #5bc800, #3a7ae0);
+  }
+
   /* ── Cards ── */
   .tr-card {
     background: var(--card);

@@ -137,7 +137,7 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
                 Voltar para o login
               </Button>
               
-              <p className="text-xs text-slate-500 text-center">
+              <p className="text-xs text-[#6e7191] text-center">
                 Não recebeu o email? Verifique sua caixa de spam ou tente novamente em alguns minutos.
               </p>
             </div>

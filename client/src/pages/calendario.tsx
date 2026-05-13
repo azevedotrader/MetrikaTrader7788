@@ -17,7 +17,7 @@ export default function CalendarioPage() {
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6 pb-6 md:pb-8">
 
       {/* Instrucoes */}
-      <Card className="rounded-lg border text-card-foreground shadow-sm border-slate-700 bg-[#141313c4]">
+      <Card className="rounded-lg border text-card-foreground shadow-sm border-[#1e1e2e] bg-[#141313c4]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-blue-600" />
@@ -32,7 +32,7 @@ export default function CalendarioPage() {
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.profitable_days')}</div>
-                <div className="text-slate-400">{t('calendar.profitable_days_desc')}</div>
+                <div className="text-[#6e7191]">{t('calendar.profitable_days_desc')}</div>
               </div>
             </div>
             
@@ -42,17 +42,17 @@ export default function CalendarioPage() {
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.loss_days')}</div>
-                <div className="text-slate-400">{t('calendar.loss_days_desc')}</div>
+                <div className="text-[#6e7191]">{t('calendar.loss_days_desc')}</div>
               </div>
             </div>
             
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-slate-600/50 rounded-full flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-4 h-4 text-slate-400" />
+              <div className="w-8 h-8 bg-[#28283a]/50 rounded-full flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-4 h-4 text-[#6e7191]" />
               </div>
               <div>
                 <div className="text-white font-medium mb-1">{t('calendar.weekly_summary')}</div>
-                <div className="text-slate-400">{t('calendar.weekly_summary_desc')}</div>
+                <div className="text-[#6e7191]">{t('calendar.weekly_summary_desc')}</div>
               </div>
             </div>
           </div>
@@ -68,7 +68,7 @@ export default function CalendarioPage() {
       </div>
 
       {/* Dicas de Análise */}
-      <Card className="bg-[#070b12] border-slate-700">
+      <Card className="bg-[#070b12] border-[#1e1e2e]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-[#6EE000]" />
@@ -79,7 +79,7 @@ export default function CalendarioPage() {
           <div className="grid md:grid-cols-2 gap-6 text-sm">
             <div>
               <h4 className="text-white font-medium mb-3">{t('calendar.temporal_patterns')}</h4>
-              <ul className="space-y-2 text-slate-400">
+              <ul className="space-y-2 text-[#6e7191]">
                 <li>• {t('calendar.tip1')}</li>
                 <li>• {t('calendar.tip2')}</li>
                 <li>• {t('calendar.tip3')}</li>
@@ -89,7 +89,7 @@ export default function CalendarioPage() {
             
             <div>
               <h4 className="text-white font-medium mb-3">{t('calendar.improvement_strategies')}</h4>
-              <ul className="space-y-2 text-slate-400">
+              <ul className="space-y-2 text-[#6e7191]">
                 <li>• {t('calendar.strategy1')}</li>
                 <li>• {t('calendar.strategy2')}</li>
                 <li>• {t('calendar.strategy3')}</li>

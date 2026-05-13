@@ -265,7 +265,7 @@ export default function WhatsAppPage() {
         <Card className="bg-[#0a0a0f] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-purple-600" />
+              <MessageSquare className="w-5 h-5 text-[#6EE000]" />
               Formato das Mensagens
             </CardTitle>
             <CardDescription className="text-zinc-400">

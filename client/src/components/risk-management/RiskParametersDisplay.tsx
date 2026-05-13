@@ -246,7 +246,7 @@ export function RiskParametersDisplay({
           <CardTitle className="text-white text-lg">Capital Total</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+          <div className="text-4xl font-bold bg-gradient-to-r from-[#6EE000] to-[#448aff] bg-clip-text text-transparent">
             {formatCurrency(bankrollValue)}
           </div>
         </CardContent>
@@ -525,7 +525,7 @@ export function RiskParametersDisplay({
                   </div>
                 </div>
 
-                <div className="mt-3 bg-purple-950/30 border border-purple-800/30 rounded-lg p-3">
+                <div className="mt-3 bg-[#6EE000]/08 border border-[#6EE000]/20 rounded-lg p-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs text-[#6EE000] mb-1">Profit Factor</p>
@@ -599,9 +599,9 @@ export function RiskParametersDisplay({
       </Card>
 
       {/* Mensagem de Disciplina */}
-      <Card className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 border-purple-800/50">
+      <Card className="bg-gradient-to-br from-[#6EE000]/10 to-[#448aff]/10 border-[#6EE000]/30">
         <CardContent className="p-6">
-          <p className="text-center text-lg font-semibold text-transparent bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text">
+          <p className="text-center text-lg font-semibold text-transparent bg-gradient-to-r from-[#6EE000] to-[#448aff] bg-clip-text">
             💡 Lembre-se: A disciplina é o único caminho para a consistência.
           </p>
         </CardContent>

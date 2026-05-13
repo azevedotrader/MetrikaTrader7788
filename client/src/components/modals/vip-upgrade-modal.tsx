@@ -134,7 +134,7 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-lg bg-gradient-to-br from-zinc-900 via-zinc-900 to-purple-900/20 border-[#6EE000]/30 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-lg bg-gradient-to-br from-[#0f0f1a] via-[#0f0f1a] to-[#6EE000]/05 border-[#6EE000]/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-gradient-to-br from-[#6EE000] to-yellow-500 rounded-full flex items-center justify-center animate-pulse">

@@ -163,7 +163,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
           </div>
           <div className="h-2 bg-[#13131a] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-[#6EE000] to-[#448aff] transition-all duration-300"
               style={{ width: `${((currentStep + 1) / QUESTIONS.length) * 100}%` }}
             />
           </div>
@@ -313,7 +313,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
           <Button
             onClick={handleNext}
             disabled={!canProceed() || isSubmitting}
-            className="bg-gradient-to-r from-purple-600 to-blue-600"
+            className="bg-gradient-to-r from-[#6EE000] to-[#448aff]"
             data-testid="button-next"
           >
             {currentStep === QUESTIONS.length - 1 ? (

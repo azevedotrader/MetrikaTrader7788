@@ -59,14 +59,14 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg flex items-center justify-center mb-4">
+          <div className="mx-auto h-12 w-12 bg-gradient-to-r from-[#6EE000] to-[#448aff] rounded-lg flex items-center justify-center mb-4">
             <Shield className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#6EE000] to-[#448aff] bg-clip-text text-transparent">
             Painel Administrativo
           </h1>
           <p className="text-gray-400 mt-2">
@@ -75,7 +75,7 @@ export default function AdminLogin() {
         </div>
 
         {/* Login Form */}
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-[#0f0f1a] border-[#1e1e2e]">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl text-center text-white">Login</CardTitle>
             <CardDescription className="text-center text-gray-400">
@@ -92,7 +92,7 @@ export default function AdminLogin() {
                   placeholder="admin@metrika.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400"
+                  className="bg-[#13131a] border-[#28283a] text-white placeholder:text-gray-400"
                   data-testid="input-admin-email"
                 />
               </div>
@@ -106,7 +106,7 @@ export default function AdminLogin() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-400 pr-10"
+                    className="bg-[#13131a] border-[#28283a] text-white placeholder:text-gray-400 pr-10"
                     data-testid="input-admin-password"
                   />
                   <Button
@@ -128,7 +128,7 @@ export default function AdminLogin() {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
+                className="w-full bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#5bc800] hover:to-[#3a7ae0]"
                 disabled={isLoading}
                 data-testid="button-admin-login"
               >

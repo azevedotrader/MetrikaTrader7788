@@ -26,10 +26,10 @@ export function PlatformTour({ t }: PlatformTourProps) {
   const { startTour } = useTour();
 
   return (
-    <Card className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-600/30">
+    <Card className="bg-gradient-to-r from-[#6EE000]/15 to-[#448aff]/15 border-[#6EE000]/30">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
-          <Route className="h-5 w-5 text-blue-600" />
+          <Route className="h-5 w-5 text-[#448aff]" />
           {t('learning.tour_interactive')}
         </CardTitle>
       </CardHeader>
@@ -56,7 +56,7 @@ export function PlatformTour({ t }: PlatformTourProps) {
               <span>{t('learning.tour_features.steps')}</span>
             </div>
           </div>
-          <Button onClick={startTour} className="bg-blue-600 hover:bg-blue-700 w-full">
+          <Button onClick={startTour} className="bg-[#448aff] hover:bg-[#3a7ae0] w-full">
             <Play className="h-4 w-4 mr-2" />
             {t('learning.tour_start')}
           </Button>
@@ -101,12 +101,12 @@ export default function Aprendizado() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f0f1a] via-[#0a0a0f] to-[#0f0f1a] p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
-            <GraduationCap className="h-8 w-8 text-blue-600" />
+            <GraduationCap className="h-8 w-8 text-[#448aff]" />
             <h1 className="text-3xl md:text-4xl font-bold text-white">
               {t('learning.title')}
             </h1>
@@ -122,7 +122,7 @@ export default function Aprendizado() {
         {/* Videoaulas */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Video className="h-6 w-6 text-purple-600" />
+            <Video className="h-6 w-6 text-[#6EE000]" />
             {t('learning.videos')}
           </h2>
           
@@ -131,7 +131,7 @@ export default function Aprendizado() {
               <Card key={sectionIndex} className="bg-[#0a0a0f]/90 border-[#1e1e2e]">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-purple-600" />
+                    <BookOpen className="h-5 w-5 text-[#6EE000]" />
                     {section.title}
                   </CardTitle>
                   <p className="text-zinc-400">{section.description}</p>
@@ -150,7 +150,7 @@ export default function Aprendizado() {
                             <Circle className="h-5 w-5 text-zinc-500 group-hover:text-zinc-300" />
                           )}
                           <div>
-                            <h4 className="text-white font-medium group-hover:text-blue-600 transition-colors">
+                            <h4 className="text-white font-medium group-hover:text-[#448aff] transition-colors">
                               {video.title}
                             </h4>
                             <span className="text-sm text-zinc-500">{video.duration}</span>

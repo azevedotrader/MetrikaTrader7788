@@ -15,7 +15,7 @@ export default function Analises() {
       <div>
         <div className="flex flex-wrap gap-4">
           <Select>
-            <SelectTrigger className="w-48 bg-slate-700 border-slate-600 text-white">
+            <SelectTrigger className="w-48 bg-[#13131a] border-[#28283a] text-white">
               <SelectValue placeholder="Todos os ativos" />
             </SelectTrigger>
             <SelectContent>
@@ -26,7 +26,7 @@ export default function Analises() {
           </Select>
           
           <Select>
-            <SelectTrigger className="w-48 bg-slate-700 border-slate-600 text-white">
+            <SelectTrigger className="w-48 bg-[#13131a] border-[#28283a] text-white">
               <SelectValue placeholder="Todos os setups" />
             </SelectTrigger>
             <SelectContent>
@@ -38,53 +38,53 @@ export default function Analises() {
           
           <Input 
             type="date" 
-            className="w-48 bg-slate-700 border-slate-600 text-white"
+            className="w-48 bg-[#13131a] border-[#28283a] text-white"
           />
         </div>
       </div>
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-[#0f0f1a] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-white">
               Desempenho por Horário
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-slate-700/50 rounded-lg flex items-center justify-center">
-              <p className="text-slate-400">Heatmap será implementado aqui</p>
+            <div className="h-64 bg-[#1e1e2e]/50 rounded-lg flex items-center justify-center">
+              <p className="text-[#6e7191]">Heatmap será implementado aqui</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-[#0f0f1a] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-white">
               Lucro por Dia da Semana
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-slate-700/50 rounded-lg flex items-center justify-center">
-              <p className="text-slate-400">Gráfico de barras será implementado aqui</p>
+            <div className="h-64 bg-[#1e1e2e]/50 rounded-lg flex items-center justify-center">
+              <p className="text-[#6e7191]">Gráfico de barras será implementado aqui</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-[#0f0f1a] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-white">
               Drawdown
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 bg-slate-700/50 rounded-lg flex items-center justify-center">
-              <p className="text-slate-400">Gráfico de drawdown será implementado aqui</p>
+            <div className="h-64 bg-[#1e1e2e]/50 rounded-lg flex items-center justify-center">
+              <p className="text-[#6e7191]">Gráfico de drawdown será implementado aqui</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800 border-slate-700">
+        <Card className="bg-[#0f0f1a] border-[#1e1e2e]">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-white">
               Setups Mais Lucrativos
@@ -95,7 +95,7 @@ export default function Analises() {
               {setupsData.map((setup, index) => (
                 <div 
                   key={index}
-                  className="flex items-center justify-between p-3 bg-slate-700/50 rounded"
+                  className="flex items-center justify-between p-3 bg-[#1e1e2e]/50 rounded"
                 >
                   <span className="text-white">{setup.name}</span>
                   <span className={setup.trend === "positive" ? "text-green-600" : "text-red-500"}>
