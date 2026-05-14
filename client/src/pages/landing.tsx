@@ -193,26 +193,27 @@ export default function Landing() {
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-animate>
           {/* Badge pill */}
           <div className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-500/10 rounded-full px-4 py-1.5 mb-8">
-            <span className="text-emerald-400 text-xs font-semibold tracking-wide">✦ Análise Inteligente de Trading</span>
+            <span className="text-emerald-400 text-xs font-semibold tracking-wide">✦ Controle total da sua operação</span>
           </div>
 
           {/* H1 */}
-          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight mb-6">
-            <span className="text-white block">O Diário de Trading</span>
-            <span className="gradient-text block animate-pulse-slow">Mais Inteligente</span>
-            <span className="text-white block">do Brasil</span>
+          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold leading-tight mb-6">
+            <span className="text-white block">O FIM DAS</span>
+            <span className="gradient-text block animate-pulse-slow">PLANILHAS DE TRADE</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-slate-300 text-base sm:text-xl md:text-2xl max-w-2xl mx-auto mb-8 leading-relaxed">
-            Com o Metrika, você <span className="text-white font-bold">TRANSFORMA</span> seus resultados, opera com <span className="text-white font-bold">CLAREZA</span>, entende seus pontos fortes e constrói suas operações como um verdadeiro profissional do mercado.
+          <p className="text-slate-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed uppercase tracking-wide font-medium">
+            O Metrika te permite enxergar sua evolução com clareza,{" "}
+            <span className="text-[#6EE000] font-bold">mostrando os pontos de melhoria</span>{" "}
+            para ter resultados cada vez melhores.
           </p>
 
           {/* 3 checkmarks */}
           <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mb-10 text-slate-300 text-sm sm:text-base">
-            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Sem planilhas desatualizadas</span>
-            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Análise em tempo real</span>
-            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Multi-mercado</span>
+            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> B3, Forex e Cripto</span>
+            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Importação automática por CSV</span>
+            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Dashboard com IA</span>
           </div>
 
           {/* CTA buttons */}
@@ -222,7 +223,7 @@ export default function Landing() {
               onClick={() => setShowRegister(true)}
               className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-10 py-5 text-lg font-bold animate-glow"
             >
-              Comece Agora
+              Quero Evoluir Agora
               <ArrowRight className="w-5 h-5 ml-2 flex-shrink-0" />
             </Button>
             <Button
@@ -231,12 +232,12 @@ export default function Landing() {
               onClick={() => setShowLogin(true)}
               className="border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white px-10 py-5 text-lg"
             >
-              Entrar
+              Já tenho conta
             </Button>
           </div>
 
           {/* Below buttons note */}
-          <p className="text-slate-500 text-sm mb-16">✓ Cancele quando quiser &nbsp;•&nbsp; Sem contrato</p>
+          <p className="text-slate-500 text-sm mb-16">✓ Acesso imediato &nbsp;•&nbsp; Sem fidelidade &nbsp;•&nbsp; Cancele quando quiser</p>
 
           {/* Device Preview — full width */}
           <div className="relative flex flex-col items-center w-full mt-4">
@@ -388,10 +389,10 @@ export default function Landing() {
       <section id="recursos" className="py-20 sm:py-28 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" data-animate>
           <div className="text-center mb-14">
-            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">RECURSOS</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">O que o Metrika Entrega</h2>
+            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">TUDO QUE VOCÊ PRECISA</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">Chega de operar no achismo</h2>
             <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto">
-              Pare de operar no escuro. Centralize suas métricas e encontre seus padrões táticos.
+              Cada ferramenta foi pensada para revelar o que seus números escondem — e transformar isso em decisões mais assertivas.
             </p>
           </div>
 
@@ -400,56 +401,56 @@ export default function Landing() {
               {
                 icon: ChartBar,
                 color: "bg-emerald-500/20 text-emerald-400",
-                title: "Visão completa dos seus contratos",
-                desc: "Acompanhe ativos, metas, carteira, alertas e notas de qualquer ativo em operação."
+                title: "Dashboard completo por carteira",
+                desc: "Visualize P&L, assertividade, drawdown e dezenas de métricas separadas por mercado, carteira ou período — em tempo real."
               },
               {
                 icon: TrendingUp,
                 color: "bg-blue-500/20 text-blue-400",
-                title: "Análise Real do Seu Estilo",
-                desc: "Dados reais, mais páginas, resultados liquidez e resultado por período. Tudo calculado e atualizado a cada operação."
+                title: "Curva de capital real",
+                desc: "Acompanhe exatamente como seu capital evoluiu ao longo do tempo. Identifique sequências de ganhos, quedas e pontos de virada."
               },
               {
                 icon: Target,
                 color: "bg-purple-500/20 text-purple-400",
-                title: "Estatísticas que importam de verdade",
-                desc: "Taxa de acerto, Ganho médio e ganho médio. Drawdown. Sessões de destaque e o acumulado de sua performance."
+                title: "Métricas que revelam padrões",
+                desc: "Taxa de acerto, fator de lucro, RR médio e drawdown máximo calculados automaticamente a cada novo trade importado."
               },
               {
                 icon: Brain,
                 color: "bg-pink-500/20 text-pink-400",
-                title: "Análise de Sentimentos",
-                desc: "Registre como você se sentia ao fazer o trade, descubra o que realmente impacta e aprende a partir dele. (Disponível em breve)"
+                title: "Análise emocional do trade",
+                desc: "Registre seu estado emocional em cada operação e descubra se o medo, a ganância ou a confiança estão impactando seus resultados."
               },
               {
                 icon: Clock,
                 color: "bg-yellow-500/20 text-yellow-400",
-                title: "Melhores Horários para Operar",
-                desc: "Veja os horários em que você vai muito melhor no mercado. Use isso a seu favor para operar no período de maior performance."
+                title: "Seu horário de ouro",
+                desc: "Descubra em quais janelas de horário você opera melhor e ajuste sua rotina para só operar quando as probabilidades estão a seu favor."
               },
               {
                 icon: Shield,
                 color: "bg-teal-500/20 text-teal-400",
-                title: "Disciplina do Plano",
-                desc: "Determine disciplinas: forca de disciplina no loss e ganho diário. O KTrader avisa quando você não vai seguir o plano, não deixando o seu plano ser sabotado."
+                title: "Guardião do seu plano",
+                desc: "Defina limites de perda diária e ganho máximo. O Metrika te alerta antes de você quebrar o seu próprio plano de gerenciamento."
               },
               {
                 icon: Activity,
                 color: "bg-orange-500/20 text-orange-400",
-                title: "Risco Médio (RR)",
-                desc: "Quanto você deve arriscar e o resultado retorno. Quanto pode perder (RR), faixa do dia. Todos os riscos."
+                title: "Gestão de risco integrada",
+                desc: "Calcule o RR de cada operação, entenda quanto você arrisca por trade e veja se o seu risco médio justifica os retornos que você busca."
               },
               {
                 icon: LineChart,
                 color: "bg-indigo-500/20 text-indigo-400",
-                title: "Evolução da Curva de Capital",
-                desc: "Acompanhe sua curva de capital em tempo real. Veja a evolução real ao longo dos meses de toda sua jornada."
+                title: "Performance por ativo e setup",
+                desc: "Filtre seus resultados por ativo, tipo de operação ou setup. Saiba quais estratégias realmente funcionam para o seu perfil."
               },
               {
                 icon: Zap,
                 color: "bg-green-500/20 text-green-400",
-                title: "Painéis de Gatilhos",
-                desc: "Veja quais gatilhos te dão mais resultados, e quais gatilhos precisam de atenção especial, de forma automática."
+                title: "Importação rápida de qualquer corretora",
+                desc: "Suba seu histórico via CSV de B3, Forex ou Cripto em segundos. O MetrikAI processa tudo e já entrega os insights prontos."
               }
             ].map((feature, i) => (
               <div key={i} className="bg-[#0f0f1a] border border-[#1e1e2e] rounded-xl p-6 hover:-translate-y-1 transition-transform duration-200">
@@ -467,28 +468,31 @@ export default function Landing() {
       {/* ─── 3. TESTIMONIALS SECTION ─────────────────────────────────────────── */}
       <section className="py-20 sm:py-28 bg-gradient-to-r from-slate-800/50 to-slate-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" data-animate>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-12">
-            Traders que confiam na nossa plataforma
-          </h2>
+          <div className="text-center mb-12">
+            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">RESULTADOS REAIS</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              Quem usa o Metrika opera diferente
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                quote: "Registro todas as minhas operações de diferentes corretoras em um só lugar. A assertividade consolidada das minhas análises ficou bem melhor. Recomendo a qualquer trader sério.",
+                quote: "Antes eu usava planilha e ficava horas tentando entender onde estava errando. Com o Metrika vi em 10 minutos que perdia dinheiro toda sexta-feira. Mudei minha rotina e o resultado veio.",
                 name: "Guilherme Reis",
                 sub: "Day Trader · Forex & B3",
                 initials: "GR",
                 gradient: "from-emerald-500 to-teal-500"
               },
               {
-                quote: "Poder registrar notas e análises em cada operação é fundamental. Mostrar meu histórico para meus alunos nunca foi tão fácil. Clareza total nos números.",
+                quote: "Como mentor, precisava mostrar evolução real para os alunos. O dashboard do Metrika virou parte das minhas aulas — os dados não mentem e a curva de capital fala por si só.",
                 name: "José Alcede",
                 sub: "Trader & Mentor",
                 initials: "JA",
                 gradient: "from-blue-500 to-indigo-500"
               },
               {
-                quote: "O diário de trading mudou minha abordagem. Agora tenho muito mais disciplina e consigo identificar exatamente onde estava errando. Evolução real.",
+                quote: "Opero cripto há 3 anos e nunca tive clareza de verdade sobre o meu RR médio. O Metrika me mostrou que eu fechava ganhos cedo e deixava perdas correrem. Simples assim.",
                 name: "Douglas Silva",
                 sub: "Swing Trader · Cripto",
                 initials: "DS",
@@ -516,10 +520,13 @@ export default function Landing() {
       <section id="precos" className="py-20 sm:py-28 bg-gradient-to-br from-slate-900 via-emerald-900/10 to-slate-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8" data-animate>
           <div className="text-center mb-12">
-            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">PLANOS E PREÇOS</p>
+            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">INVISTA NA SUA EVOLUÇÃO</p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-              Acesse 100% das funcionalidades, escolha o ciclo que melhor se adapta a você.
+              Um plano único. Acesso total.
             </h2>
+            <p className="text-slate-400 text-base max-w-xl mx-auto">
+              Sem tier básico. Sem funcionalidade travada. Escolha o ciclo e tenha tudo que o Metrika oferece desde o primeiro dia.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
@@ -564,16 +571,17 @@ export default function Landing() {
 
           {/* Todos os planos incluem */}
           <div className="max-w-3xl mx-auto bg-[#0f0f1a] border border-[#1e1e2e] rounded-2xl p-8">
-            <h4 className="text-white font-semibold mb-6 text-center">Todos os planos incluem:</h4>
+            <h4 className="text-white font-semibold mb-6 text-center">O que está incluso em qualquer plano:</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                "Diário de trading completo. Registre cada trade com detalhes e notas",
-                "Acesso ao histórico de operações. Sem limites para seu trading",
-                "Análise de desempenho avançada. Entenda o que está funcionando e o que pode melhorar",
-                "Atualizações gratuitas. Fique sempre atualizado com novas funcionalidades",
-                "Pagamento seguro",
-                "Sem contrato de fidelidade",
-                "Cancele quando quiser"
+                "Dashboard completo com todas as métricas de performance",
+                "Importação de CSV para B3, Forex e Cripto",
+                "Histórico ilimitado de operações",
+                "Análise por horário, ativo, setup e carteira",
+                "Gestão de risco e alertas de plano",
+                "Atualizações gratuitas sem custo extra",
+                "Pagamento seguro via cartão ou PIX",
+                "Cancele a qualquer momento, sem burocracia"
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-2 text-slate-300 text-sm">
                   <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
@@ -589,37 +597,38 @@ export default function Landing() {
       <section className="py-20 sm:py-28 bg-slate-900">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8" data-animate>
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Perguntas Frequentes</h2>
+            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">DÚVIDAS COMUNS</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Antes de começar</h2>
             <p className="text-slate-400 text-base">
-              Tire suas dúvidas sobre a plataforma e como ela pode ajudar no seu trading.
+              As respostas para o que você provavelmente quer saber antes de assinar.
             </p>
           </div>
 
           <div className="divide-y divide-slate-800">
             {[
               {
-                q: "O Metrika executa operações automaticamente?",
-                a: "Não. O Metrika é um diário de trading e ferramenta de análise. Você registra suas operações e a plataforma gera os insights. As decisões de compra e venda são sempre suas."
+                q: "O Metrika vai operar no meu lugar?",
+                a: "Não. O Metrika é uma plataforma de análise e diário de trading — ele te dá clareza sobre o que você já fez. A decisão de compra e venda continua sendo 100% sua."
               },
               {
-                q: "Posso usar o Metrika de qualquer lugar?",
-                a: "Sim. O Metrika é uma plataforma web responsiva que funciona em qualquer dispositivo com internet: computador, tablet ou celular."
+                q: "Preciso instalar alguma coisa?",
+                a: "Não. O Metrika roda direto no navegador, em qualquer dispositivo. Acesse do computador, celular ou tablet sem precisar instalar nada."
               },
               {
-                q: "Preciso ter experiência em trading para usar?",
-                a: "Não é necessária experiência avançada. O Metrika foi criado para ser simples e intuitivo, tanto para quem está começando quanto para traders experientes que querem mais organização."
+                q: "Funciona para qualquer mercado?",
+                a: "Sim. O Metrika suporta B3 (ações, mini índice, mini dólar), Forex e Criptomoedas. Você pode importar de múltiplas corretoras e consolidar tudo em um único painel."
               },
               {
-                q: "Como funciona o suporte?",
-                a: "Oferecemos suporte via e-mail em suporte@appmetrika.com.br. Nossa equipe responde em até 24 horas úteis."
+                q: "E se eu já tiver histórico de trades em planilha?",
+                a: "Você pode importar via CSV no formato padrão de cada mercado. O MetrikAI processa o arquivo e já entrega os dados organizados e analisados automaticamente."
               },
               {
-                q: "Quais são as formas de pagamento?",
-                a: "Aceitamos cartão de crédito, débito e PIX. O pagamento é processado de forma segura pela plataforma Hotmart."
+                q: "Quais formas de pagamento são aceitas?",
+                a: "Aceitamos cartão de crédito, débito e PIX. O processamento é feito de forma segura e você recebe acesso imediato após a confirmação."
               },
               {
-                q: "Posso cancelar minha assinatura a qualquer momento?",
-                a: "Sim. Não há fidelidade. Você pode cancelar sua assinatura quando quiser diretamente pelo painel do cliente, sem burocracias."
+                q: "Posso cancelar quando quiser?",
+                a: "Sim, sem multa e sem burocracia. Acesse sua conta, cancele com um clique e pronto. Não enviamos cobranças surpresas."
               }
             ].map((faq, i) => (
               <div key={i} className="py-5">
@@ -637,29 +646,6 @@ export default function Landing() {
                 )}
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 6. FINAL CTA SECTION ────────────────────────────────────────────── */}
-      <section className="py-20 sm:py-28 bg-gradient-to-br from-emerald-900/40 via-slate-900 to-indigo-900/40">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-animate>
-          <div className="bg-slate-900/80 backdrop-blur border border-emerald-600/40 rounded-3xl p-10 sm:p-16 shadow-2xl animate-glow">
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-              <span className="text-white">Eleve seu trading para</span>
-              <span className="gradient-text block animate-pulse-slow">padrão profissional</span>
-            </h2>
-            <p className="text-slate-300 text-base sm:text-lg mb-10 max-w-xl mx-auto">
-              Pare de operar no achismo. Centralize, analise e decole com o Metrika.
-            </p>
-            <Button
-              size="lg"
-              onClick={() => setShowRegister(true)}
-              className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-12 py-5 text-lg font-bold animate-glow"
-            >
-              Comece a Evoluir Agora
-              <ArrowRight className="w-5 h-5 ml-3 flex-shrink-0" />
-            </Button>
           </div>
         </div>
       </section>
