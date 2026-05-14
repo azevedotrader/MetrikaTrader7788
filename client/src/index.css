@@ -612,7 +612,7 @@
   /* ── Dashboard preview scroll (landing page) ── */
   @keyframes dashboard-scroll {
     0%,  4%  { transform: translateY(0); }
-    78%, 88%  { transform: translateY(calc(-100% + 360px)); }
+    78%, 88%  { transform: translateY(calc(-100% + 340px)); }
     100%      { transform: translateY(0); }
   }
   @keyframes dashboard-scroll-mobile {

@@ -46,6 +46,8 @@ export default function Landing() {
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
   const [isHoveringDevice, setIsHoveringDevice] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [desktopImgReady, setDesktopImgReady] = useState(false);
+  const [mobileImgReady, setMobileImgReady] = useState(false);
 
   const handleDeviceMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -315,10 +317,11 @@ export default function Landing() {
                         <img
                           src={dashboardPreview}
                           alt="Metrika Dashboard"
-                          className="w-full animate-dashboard-scroll"
+                          className={`w-full${desktopImgReady ? ' animate-dashboard-scroll' : ''}`}
                           style={{ display: 'block' }}
                           decoding="async"
                           fetchPriority="high"
+                          onLoad={() => setDesktopImgReady(true)}
                         />
                         <div
                           className="absolute inset-0 pointer-events-none"
@@ -356,10 +359,11 @@ export default function Landing() {
                             <img
                               src={dashboardPreviewMobile}
                               alt="Metrika Dashboard Mobile"
-                              className="w-full animate-dashboard-scroll-mobile"
+                              className={`w-full${mobileImgReady ? ' animate-dashboard-scroll-mobile' : ''}`}
                               style={{ display: 'block' }}
                               decoding="async"
                               loading="lazy"
+                              onLoad={() => setMobileImgReady(true)}
                             />
                             <div
                               className="absolute inset-0 pointer-events-none"
