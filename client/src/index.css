@@ -611,29 +611,41 @@
 
   /* ── Dashboard preview scroll (landing page) ── */
   @keyframes dashboard-scroll {
-    0%,  5%  { transform: translateY(0); }
-    80%, 90%  { transform: translateY(calc(-100% + 360px)); }
+    0%,  4%  { transform: translateY(0); }
+    78%, 88%  { transform: translateY(calc(-100% + 360px)); }
     100%      { transform: translateY(0); }
   }
   @keyframes dashboard-scroll-mobile {
-    0%,  5%  { transform: translateY(0); }
-    80%, 90%  { transform: translateY(calc(-100% + 520px)); }
+    0%,  4%  { transform: translateY(0); }
+    78%, 88%  { transform: translateY(calc(-100% + 520px)); }
     100%      { transform: translateY(0); }
   }
 
+  /* idle gentle float for the 3D device frame */
+  @keyframes device-idle {
+    0%,100% { transform: rotateX(1.5deg) rotateY(-1.5deg) translateY(0px); }
+    25%     { transform: rotateX(-1deg)  rotateY(2deg)    translateY(-4px); }
+    50%     { transform: rotateX(2deg)   rotateY(1deg)    translateY(-2px); }
+    75%     { transform: rotateX(-1.5deg) rotateY(-2deg)  translateY(-5px); }
+  }
+
   .animate-dashboard-scroll {
-    animation: dashboard-scroll 22s ease-in-out infinite;
+    animation: dashboard-scroll 13s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     will-change: transform;
   }
   .animate-dashboard-scroll:hover {
     animation-play-state: paused;
   }
   .animate-dashboard-scroll-mobile {
-    animation: dashboard-scroll-mobile 22s ease-in-out infinite;
+    animation: dashboard-scroll-mobile 13s cubic-bezier(0.45, 0, 0.55, 1) infinite;
     will-change: transform;
   }
   .animate-dashboard-scroll-mobile:hover {
     animation-play-state: paused;
+  }
+  .animate-device-idle {
+    animation: device-idle 7s ease-in-out infinite;
+    will-change: transform;
   }
 
   @keyframes tourHighlight {

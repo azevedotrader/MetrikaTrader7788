@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import dashboardPreview from "@assets/dashboard-preview.png";
+import dashboardPreviewMobile from "@assets/dashboard-preview-mobile.png";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
 import { LanguageSelector } from "@/components/ui/language-selector";
@@ -41,6 +42,24 @@ export default function Landing() {
   const [showRegister, setShowRegister] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [deviceView, setDeviceView] = useState<'desktop' | 'mobile'>('desktop');
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+  const [isHoveringDevice, setIsHoveringDevice] = useState(false);
+
+  const handleDeviceMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setTilt({ x: (y - 0.5) * -18, y: (x - 0.5) * 22 });
+    setGlare({ x: x * 100, y: y * 100, opacity: 0.13 });
+    setIsHoveringDevice(true);
+  };
+
+  const handleDeviceMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+    setGlare(g => ({ ...g, opacity: 0 }));
+    setIsHoveringDevice(false);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -215,77 +234,154 @@ export default function Landing() {
             {/* Device Preview with Toggle */}
             <div className="relative flex flex-col items-center">
               {/* Toggle Desktop / Mobile */}
-              <div className="flex items-center bg-slate-800/80 border border-slate-700 rounded-full p-1 mb-6 gap-1">
+              <div className="flex items-center bg-slate-800/80 border border-slate-700 rounded-full p-1 mb-8 gap-1 relative z-10">
                 <button
                   onClick={() => setDeviceView('desktop')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'desktop' ? 'bg-emerald-500 text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'desktop' ? 'bg-emerald-500 text-slate-900 shadow-[0_0_16px_rgba(52,211,153,0.5)]' : 'text-slate-400 hover:text-white'}`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
                   Desktop
                 </button>
                 <button
                   onClick={() => setDeviceView('mobile')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'mobile' ? 'bg-emerald-500 text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'mobile' ? 'bg-emerald-500 text-slate-900 shadow-[0_0_16px_rgba(52,211,153,0.5)]' : 'text-slate-400 hover:text-white'}`}
                 >
                   <Smartphone className="w-4 h-4" />
                   Mobile
                 </button>
               </div>
 
-              {/* Desktop Frame */}
-              {deviceView === 'desktop' && (
-                <div className="w-full animate-in fade-in duration-300">
-                  {/* Browser chrome */}
-                  <div className="bg-slate-700 rounded-t-xl px-4 py-3 flex items-center gap-2 border border-slate-600 border-b-0">
-                    <div className="flex gap-1.5">
-                      <div className="w-3.5 h-3.5 rounded-full bg-red-500/80"></div>
-                      <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/80"></div>
-                      <div className="w-3.5 h-3.5 rounded-full bg-green-500/80"></div>
-                    </div>
-                    <div className="flex-1 bg-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-400 ml-2">appmetrika.com.br/dashboard</div>
-                  </div>
-                  {/* Screen — real dashboard screenshot scrolling */}
-                  <div
-                    className="border border-slate-600 border-t-0 rounded-b-xl overflow-hidden shadow-2xl"
-                    style={{ height: '360px' }}
-                  >
-                    <img
-                      src={dashboardPreview}
-                      alt="Metrika Dashboard"
-                      className="w-full animate-dashboard-scroll"
-                      style={{ display: 'block', minHeight: '100%' }}
-                    />
-                  </div>
-                </div>
-              )}
+              {/* Ambient glow orbs behind the device */}
+              <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(110,224,0,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+              <div className="absolute top-1/2 left-1/4 w-64 h-64 rounded-full pointer-events-none animate-float"
+                style={{ background: 'radial-gradient(circle, rgba(68,138,255,0.08) 0%, transparent 70%)', filter: 'blur(30px)', animationDelay: '1s' }} />
+              <div className="absolute top-1/2 right-1/4 w-48 h-48 rounded-full pointer-events-none animate-float"
+                style={{ background: 'radial-gradient(circle, rgba(110,224,0,0.06) 0%, transparent 70%)', filter: 'blur(25px)', animationDelay: '2.5s' }} />
 
-              {/* Mobile Frame */}
-              {deviceView === 'mobile' && (
-                <div className="w-72 animate-in fade-in duration-300 mx-auto">
-                  {/* Phone frame */}
-                  <div className="bg-slate-700 rounded-[2.5rem] border-[3px] border-slate-500 p-2.5 shadow-2xl">
-                    <div className="bg-slate-900 rounded-[2rem] overflow-hidden">
-                      {/* Dynamic island / notch */}
-                      <div className="flex justify-center pt-3 pb-1">
-                        <div className="w-20 h-2 bg-slate-800 rounded-full"></div>
+              {/* 3D tilt wrapper */}
+              <div
+                className="w-full"
+                style={{ perspective: '1400px' }}
+                onMouseMove={handleDeviceMouseMove}
+                onMouseLeave={handleDeviceMouseLeave}
+              >
+                <div
+                  className={`w-full ${isHoveringDevice ? '' : 'animate-device-idle'}`}
+                  style={{
+                    transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${isHoveringDevice ? 1.025 : 1})`,
+                    transition: !isHoveringDevice
+                      ? 'transform 0.9s cubic-bezier(0.23, 1, 0.32, 1)'
+                      : 'transform 0.08s linear',
+                    transformStyle: 'preserve-3d',
+                    position: 'relative',
+                  }}
+                >
+                  {/* Desktop Frame */}
+                  {deviceView === 'desktop' && (
+                    <div className="w-full animate-in fade-in duration-300">
+                      {/* Browser chrome */}
+                      <div className="bg-slate-700 rounded-t-xl px-4 py-3 flex items-center gap-2 border border-slate-600 border-b-0"
+                        style={{ boxShadow: isHoveringDevice ? '0 -4px 30px rgba(110,224,0,0.12)' : 'none', transition: 'box-shadow 0.3s ease' }}>
+                        <div className="flex gap-1.5">
+                          <div className="w-3.5 h-3.5 rounded-full bg-red-500/80"></div>
+                          <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/80"></div>
+                          <div className="w-3.5 h-3.5 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <div className="flex-1 bg-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-400 ml-2">appmetrika.com.br/dashboard</div>
                       </div>
-                      {/* Screen — real dashboard screenshot scrolling */}
-                      <div className="overflow-hidden" style={{ height: '520px' }}>
+                      {/* Screen */}
+                      <div
+                        className="border border-slate-600 border-t-0 rounded-b-xl overflow-hidden relative"
+                        style={{
+                          height: '360px',
+                          boxShadow: isHoveringDevice
+                            ? '0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(110,224,0,0.15), 0 8px 40px rgba(110,224,0,0.08)'
+                            : '0 20px 60px rgba(0,0,0,0.5)',
+                          transition: 'box-shadow 0.3s ease',
+                        }}
+                      >
                         <img
                           src={dashboardPreview}
-                          alt="Metrika Dashboard Mobile"
-                          className="w-full animate-dashboard-scroll-mobile"
-                          style={{ display: 'block', minHeight: '100%' }}
+                          alt="Metrika Dashboard"
+                          className="w-full animate-dashboard-scroll"
+                          style={{ display: 'block' }}
                         />
+                        {/* Glare overlay */}
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 55%)`,
+                            transition: 'background 0.05s linear',
+                          }}
+                        />
+                        {/* Bottom fade */}
+                        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+                          style={{ background: 'linear-gradient(to top, rgba(15,15,26,0.6) 0%, transparent 100%)' }} />
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {/* Floating Elements */}
-              <div className="absolute -top-6 -right-6 w-20 h-20 gradient-emerald-blue rounded-full opacity-25 animate-float"></div>
-              <div className="absolute -bottom-6 -left-6 w-16 h-16 gradient-teal rounded-full opacity-25 animate-float" style={{ animationDelay: '3s' }}></div>
+                  {/* Mobile Frame */}
+                  {deviceView === 'mobile' && (
+                    <div className="w-72 animate-in fade-in duration-300 mx-auto">
+                      <div
+                        className="bg-gradient-to-b from-slate-600 to-slate-700 rounded-[2.5rem] border-[3px] border-slate-500/80 p-2.5 relative"
+                        style={{
+                          boxShadow: isHoveringDevice
+                            ? '0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(110,224,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                            : '0 25px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          transition: 'box-shadow 0.3s ease',
+                        }}
+                      >
+                        {/* Side buttons (decorative) */}
+                        <div className="absolute -right-[5px] top-20 w-[4px] h-10 bg-slate-500 rounded-r-sm" />
+                        <div className="absolute -left-[5px] top-16 w-[4px] h-7 bg-slate-500 rounded-l-sm" />
+                        <div className="absolute -left-[5px] top-28 w-[4px] h-7 bg-slate-500 rounded-l-sm" />
+
+                        <div className="bg-slate-900 rounded-[2rem] overflow-hidden relative">
+                          {/* Dynamic island */}
+                          <div className="flex justify-center pt-3 pb-1">
+                            <div className="w-20 h-2 bg-slate-800 rounded-full" />
+                          </div>
+                          {/* Screen */}
+                          <div className="overflow-hidden relative" style={{ height: '520px' }}>
+                            <img
+                              src={dashboardPreviewMobile}
+                              alt="Metrika Dashboard Mobile"
+                              className="w-full animate-dashboard-scroll-mobile"
+                              style={{ display: 'block' }}
+                            />
+                            {/* Glare overlay */}
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 55%)`,
+                                transition: 'background 0.05s linear',
+                              }}
+                            />
+                            {/* Bottom fade */}
+                            <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+                              style={{ background: 'linear-gradient(to top, rgba(15,15,26,0.5) 0%, transparent 100%)' }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Floating badge chips */}
+              <div className="absolute -top-2 -right-4 hidden lg:flex items-center gap-1.5 bg-slate-800/90 border border-emerald-500/30 rounded-full px-3 py-1.5 animate-float shadow-lg"
+                style={{ animationDelay: '0.5s', backdropFilter: 'blur(8px)' }}>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-semibold text-emerald-300">Live</span>
+              </div>
+              <div className="absolute -bottom-2 -left-4 hidden lg:flex items-center gap-1.5 bg-slate-800/90 border border-blue-500/30 rounded-full px-3 py-1.5 animate-float shadow-lg"
+                style={{ animationDelay: '2s', backdropFilter: 'blur(8px)' }}>
+                <Activity className="w-3 h-3 text-blue-400" />
+                <span className="text-xs font-semibold text-blue-300">+78.5% precisão</span>
+              </div>
             </div>
           </div>
         </div>
