@@ -184,203 +184,209 @@ export default function Landing() {
       </header>
 
       {/* ─── 1. HERO SECTION ─────────────────────────────────────────────────── */}
-      <section className="relative py-20 sm:py-28 lg:py-36 overflow-hidden bg-slate-900">
-        {/* Radial glow */}
+      <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden bg-slate-900 min-h-[calc(100vh-64px)] flex items-center">
+        {/* Radial glow background */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(16,185,129,0.13)_0%,rgba(99,102,241,0.08)_50%,transparent_80%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_30%_50%,rgba(16,185,129,0.11)_0%,rgba(99,102,241,0.07)_50%,transparent_80%)]" />
+          <div className="absolute top-1/2 right-0 w-96 h-96 -translate-y-1/2 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(110,224,0,0.06) 0%, transparent 70%)', filter: 'blur(50px)' }} />
         </div>
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-animate>
-          {/* Badge pill */}
-          <div className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-500/10 rounded-full px-4 py-1.5 mb-8">
-            <span className="text-emerald-400 text-xs font-semibold tracking-wide">✦ Controle total da sua operação</span>
-          </div>
+        <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-          {/* H1 */}
-          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-bold leading-tight mb-6">
-            <span className="text-white block">O FIM DAS</span>
-            <span className="gradient-text block animate-pulse-slow">PLANILHAS DE TRADE</span>
-          </h1>
+            {/* ── LEFT: copy ── */}
+            <div className="text-left" data-animate>
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 border border-emerald-500/40 bg-emerald-500/10 rounded-full px-4 py-1.5 mb-6">
+                <span className="text-emerald-400 text-xs font-semibold tracking-wide">✦ Controle total da sua operação</span>
+              </div>
 
-          {/* Subtitle */}
-          <p className="text-slate-300 text-base sm:text-lg md:text-xl max-w-2xl mx-auto mb-8 leading-relaxed uppercase tracking-wide font-medium">
-            O Metrika te permite enxergar sua evolução com clareza,{" "}
-            <span className="text-[#6EE000] font-bold">mostrando os pontos de melhoria</span>{" "}
-            para ter resultados cada vez melhores.
-          </p>
+              {/* H1 */}
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.05] mb-5">
+                <span className="text-white block">O FIM DAS</span>
+                <span className="gradient-text block animate-pulse-slow">PLANILHAS</span>
+                <span className="text-white block">DE TRADE</span>
+              </h1>
 
-          {/* 3 checkmarks */}
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mb-10 text-slate-300 text-sm sm:text-base">
-            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> B3, Forex e Cripto</span>
-            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Importação automática por CSV</span>
-            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Dashboard com IA</span>
-          </div>
+              {/* Subtitle */}
+              <p className="text-slate-300 text-base sm:text-lg leading-relaxed mb-7 max-w-lg font-medium">
+                O Metrika te permite enxergar sua evolução com clareza,{" "}
+                <span className="text-[#6EE000] font-bold">mostrando os pontos de melhoria</span>{" "}
+                para ter resultados cada vez melhores.
+              </p>
 
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-4">
-            <Button
-              size="lg"
-              onClick={() => setShowRegister(true)}
-              className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-10 py-5 text-lg font-bold animate-glow"
-            >
-              Quero Evoluir Agora
-              <ArrowRight className="w-5 h-5 ml-2 flex-shrink-0" />
-            </Button>
-            <Button
-              size="lg"
-              variant="ghost"
-              onClick={() => setShowLogin(true)}
-              className="border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white px-10 py-5 text-lg"
-            >
-              Já tenho conta
-            </Button>
-          </div>
+              {/* Checkmarks */}
+              <div className="flex flex-col gap-2.5 mb-8 text-slate-300 text-sm">
+                <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> B3, Forex e Cripto em um único painel</span>
+                <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Importação automática de CSV por corretora</span>
+                <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" /> Relatórios e análises gerados com IA</span>
+              </div>
 
-          {/* Below buttons note */}
-          <p className="text-slate-500 text-sm mb-16">✓ Acesso imediato &nbsp;•&nbsp; Sem fidelidade &nbsp;•&nbsp; Cancele quando quiser</p>
+              {/* CTA buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <Button
+                  size="lg"
+                  onClick={() => setShowRegister(true)}
+                  className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-8 py-4 text-base font-bold animate-glow"
+                >
+                  Quero Evoluir Agora
+                  <ArrowRight className="w-5 h-5 ml-2 flex-shrink-0" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  onClick={() => setShowLogin(true)}
+                  className="border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white px-8 py-4 text-base"
+                >
+                  Já tenho conta
+                </Button>
+              </div>
 
-          {/* Device Preview — full width */}
-          <div className="relative flex flex-col items-center w-full mt-4">
-            {/* Toggle Desktop / Mobile */}
-            <div className="flex items-center bg-slate-800/80 border border-slate-700 rounded-full p-1 mb-8 gap-1 relative z-10">
-              <button
-                onClick={() => setDeviceView('desktop')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'desktop' ? 'bg-emerald-500 text-slate-900 shadow-[0_0_16px_rgba(52,211,153,0.5)]' : 'text-slate-400 hover:text-white'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-                Desktop
-              </button>
-              <button
-                onClick={() => setDeviceView('mobile')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'mobile' ? 'bg-emerald-500 text-slate-900 shadow-[0_0_16px_rgba(52,211,153,0.5)]' : 'text-slate-400 hover:text-white'}`}
-              >
-                <Smartphone className="w-4 h-4" />
-                Mobile
-              </button>
+              <p className="text-slate-500 text-xs">✓ Acesso imediato &nbsp;•&nbsp; Sem fidelidade &nbsp;•&nbsp; Cancele quando quiser</p>
             </div>
 
-            {/* Ambient glow orbs */}
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(110,224,0,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-            <div className="absolute top-1/2 left-1/4 w-64 h-64 rounded-full pointer-events-none animate-float"
-              style={{ background: 'radial-gradient(circle, rgba(68,138,255,0.08) 0%, transparent 70%)', filter: 'blur(30px)', animationDelay: '1s' }} />
-            <div className="absolute top-1/2 right-1/4 w-48 h-48 rounded-full pointer-events-none animate-float"
-              style={{ background: 'radial-gradient(circle, rgba(110,224,0,0.06) 0%, transparent 70%)', filter: 'blur(25px)', animationDelay: '2.5s' }} />
+            {/* ── RIGHT: device preview ── */}
+            <div className="relative flex flex-col items-center" data-animate data-delay="2">
+              {/* Toggle */}
+              <div className="flex items-center bg-slate-800/80 border border-slate-700 rounded-full p-1 mb-5 gap-1 relative z-10">
+                <button
+                  onClick={() => setDeviceView('desktop')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'desktop' ? 'bg-emerald-500 text-slate-900 shadow-[0_0_16px_rgba(52,211,153,0.5)]' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                  Desktop
+                </button>
+                <button
+                  onClick={() => setDeviceView('mobile')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${deviceView === 'mobile' ? 'bg-emerald-500 text-slate-900 shadow-[0_0_16px_rgba(52,211,153,0.5)]' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <Smartphone className="w-4 h-4" />
+                  Mobile
+                </button>
+              </div>
 
-            {/* 3D tilt wrapper */}
-            <div
-              className="w-full max-w-5xl"
-              style={{ perspective: '1400px' }}
-              onMouseMove={handleDeviceMouseMove}
-              onMouseLeave={handleDeviceMouseLeave}
-            >
+              {/* Ambient glow orbs */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(110,224,0,0.08) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+              <div className="absolute top-1/4 right-0 w-48 h-48 rounded-full pointer-events-none animate-float"
+                style={{ background: 'radial-gradient(circle, rgba(68,138,255,0.07) 0%, transparent 70%)', filter: 'blur(30px)', animationDelay: '1.5s' }} />
+
+              {/* 3D tilt wrapper */}
               <div
-                className={`w-full ${isHoveringDevice ? '' : 'animate-device-idle'}`}
-                style={{
-                  transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${isHoveringDevice ? 1.025 : 1})`,
-                  transition: !isHoveringDevice
-                    ? 'transform 0.9s cubic-bezier(0.23, 1, 0.32, 1)'
-                    : 'transform 0.08s linear',
-                  transformStyle: 'preserve-3d',
-                  position: 'relative',
-                }}
+                className="w-full"
+                style={{ perspective: '1400px' }}
+                onMouseMove={handleDeviceMouseMove}
+                onMouseLeave={handleDeviceMouseLeave}
               >
-                {/* Desktop Frame */}
-                {deviceView === 'desktop' && (
-                  <div className="w-full animate-in fade-in duration-300">
-                    <div className="bg-slate-700 rounded-t-xl px-4 py-3 flex items-center gap-2 border border-slate-600 border-b-0"
-                      style={{ boxShadow: isHoveringDevice ? '0 -4px 30px rgba(110,224,0,0.12)' : 'none', transition: 'box-shadow 0.3s ease' }}>
-                      <div className="flex gap-1.5">
-                        <div className="w-3.5 h-3.5 rounded-full bg-red-500/80"></div>
-                        <div className="w-3.5 h-3.5 rounded-full bg-yellow-500/80"></div>
-                        <div className="w-3.5 h-3.5 rounded-full bg-green-500/80"></div>
+                <div
+                  className={`w-full ${isHoveringDevice ? '' : 'animate-device-idle'}`}
+                  style={{
+                    transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${isHoveringDevice ? 1.025 : 1})`,
+                    transition: !isHoveringDevice
+                      ? 'transform 0.9s cubic-bezier(0.23, 1, 0.32, 1)'
+                      : 'transform 0.08s linear',
+                    transformStyle: 'preserve-3d',
+                    position: 'relative',
+                  }}
+                >
+                  {/* Desktop Frame */}
+                  {deviceView === 'desktop' && (
+                    <div className="w-full animate-in fade-in duration-300">
+                      <div className="bg-slate-700 rounded-t-xl px-4 py-2.5 flex items-center gap-2 border border-slate-600 border-b-0"
+                        style={{ boxShadow: isHoveringDevice ? '0 -4px 30px rgba(110,224,0,0.12)' : 'none', transition: 'box-shadow 0.3s ease' }}>
+                        <div className="flex gap-1.5">
+                          <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                          <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                          <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                        </div>
+                        <div className="flex-1 bg-slate-800 rounded-md px-3 py-1 text-xs text-slate-400 ml-2">appmetrika.com.br/dashboard</div>
                       </div>
-                      <div className="flex-1 bg-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-400 ml-2">appmetrika.com.br/dashboard</div>
-                    </div>
-                    <div
-                      className="border border-slate-600 border-t-0 rounded-b-xl overflow-hidden relative"
-                      style={{
-                        height: '360px',
-                        boxShadow: isHoveringDevice
-                          ? '0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(110,224,0,0.15), 0 8px 40px rgba(110,224,0,0.08)'
-                          : '0 20px 60px rgba(0,0,0,0.5)',
-                        transition: 'box-shadow 0.3s ease',
-                      }}
-                    >
-                      <img
-                        src={dashboardPreview}
-                        alt="Metrika Dashboard"
-                        className="w-full animate-dashboard-scroll"
-                        style={{ display: 'block' }}
-                      />
                       <div
-                        className="absolute inset-0 pointer-events-none"
+                        className="border border-slate-600 border-t-0 rounded-b-xl overflow-hidden relative"
                         style={{
-                          background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 55%)`,
-                          transition: 'background 0.05s linear',
+                          height: '340px',
+                          boxShadow: isHoveringDevice
+                            ? '0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(110,224,0,0.15), 0 8px 40px rgba(110,224,0,0.08)'
+                            : '0 20px 60px rgba(0,0,0,0.5)',
+                          transition: 'box-shadow 0.3s ease',
                         }}
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-                        style={{ background: 'linear-gradient(to top, rgba(15,15,26,0.6) 0%, transparent 100%)' }} />
+                      >
+                        <img
+                          src={dashboardPreview}
+                          alt="Metrika Dashboard"
+                          className="w-full animate-dashboard-scroll"
+                          style={{ display: 'block' }}
+                        />
+                        <div
+                          className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 55%)`,
+                            transition: 'background 0.05s linear',
+                          }}
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
+                          style={{ background: 'linear-gradient(to top, rgba(15,15,26,0.7) 0%, transparent 100%)' }} />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Mobile Frame */}
-                {deviceView === 'mobile' && (
-                  <div className="w-72 animate-in fade-in duration-300 mx-auto">
-                    <div
-                      className="bg-gradient-to-b from-slate-600 to-slate-700 rounded-[2.5rem] border-[3px] border-slate-500/80 p-2.5 relative"
-                      style={{
-                        boxShadow: isHoveringDevice
-                          ? '0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(110,224,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
-                          : '0 25px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
-                        transition: 'box-shadow 0.3s ease',
-                      }}
-                    >
-                      <div className="absolute -right-[5px] top-20 w-[4px] h-10 bg-slate-500 rounded-r-sm" />
-                      <div className="absolute -left-[5px] top-16 w-[4px] h-7 bg-slate-500 rounded-l-sm" />
-                      <div className="absolute -left-[5px] top-28 w-[4px] h-7 bg-slate-500 rounded-l-sm" />
-
-                      <div className="bg-slate-900 rounded-[2rem] overflow-hidden relative">
-                        <div className="flex justify-center pt-3 pb-1">
-                          <div className="w-20 h-2 bg-slate-800 rounded-full" />
-                        </div>
-                        <div className="overflow-hidden relative" style={{ height: '520px' }}>
-                          <img
-                            src={dashboardPreviewMobile}
-                            alt="Metrika Dashboard Mobile"
-                            className="w-full animate-dashboard-scroll-mobile"
-                            style={{ display: 'block' }}
-                          />
-                          <div
-                            className="absolute inset-0 pointer-events-none"
-                            style={{
-                              background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 55%)`,
-                              transition: 'background 0.05s linear',
-                            }}
-                          />
-                          <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none"
-                            style={{ background: 'linear-gradient(to top, rgba(15,15,26,0.5) 0%, transparent 100%)' }} />
+                  {/* Mobile Frame */}
+                  {deviceView === 'mobile' && (
+                    <div className="w-56 animate-in fade-in duration-300 mx-auto">
+                      <div
+                        className="bg-gradient-to-b from-slate-600 to-slate-700 rounded-[2.5rem] border-[3px] border-slate-500/80 p-2 relative"
+                        style={{
+                          boxShadow: isHoveringDevice
+                            ? '0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(110,224,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                            : '0 25px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          transition: 'box-shadow 0.3s ease',
+                        }}
+                      >
+                        <div className="absolute -right-[4px] top-16 w-[3px] h-8 bg-slate-500 rounded-r-sm" />
+                        <div className="absolute -left-[4px] top-12 w-[3px] h-6 bg-slate-500 rounded-l-sm" />
+                        <div className="absolute -left-[4px] top-22 w-[3px] h-6 bg-slate-500 rounded-l-sm" />
+                        <div className="bg-slate-900 rounded-[2rem] overflow-hidden relative">
+                          <div className="flex justify-center pt-2.5 pb-1">
+                            <div className="w-16 h-1.5 bg-slate-800 rounded-full" />
+                          </div>
+                          <div className="overflow-hidden relative" style={{ height: '420px' }}>
+                            <img
+                              src={dashboardPreviewMobile}
+                              alt="Metrika Dashboard Mobile"
+                              className="w-full animate-dashboard-scroll-mobile"
+                              style={{ display: 'block' }}
+                            />
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 55%)`,
+                                transition: 'background 0.05s linear',
+                              }}
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
+                              style={{ background: 'linear-gradient(to top, rgba(15,15,26,0.6) 0%, transparent 100%)' }} />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+              </div>
+
+              {/* Floating badge chips */}
+              <div className="absolute top-0 -right-2 hidden lg:flex items-center gap-1.5 bg-slate-800/90 border border-emerald-500/30 rounded-full px-3 py-1.5 animate-float shadow-lg z-20"
+                style={{ animationDelay: '0.5s', backdropFilter: 'blur(8px)' }}>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-semibold text-emerald-300">Live</span>
+              </div>
+              <div className="absolute bottom-4 -left-2 hidden lg:flex items-center gap-1.5 bg-slate-800/90 border border-blue-500/30 rounded-full px-3 py-1.5 animate-float shadow-lg z-20"
+                style={{ animationDelay: '2s', backdropFilter: 'blur(8px)' }}>
+                <Activity className="w-3 h-3 text-blue-400" />
+                <span className="text-xs font-semibold text-blue-300">+78.5% precisão</span>
               </div>
             </div>
 
-            {/* Floating badge chips */}
-            <div className="absolute -top-2 -right-4 hidden lg:flex items-center gap-1.5 bg-slate-800/90 border border-emerald-500/30 rounded-full px-3 py-1.5 animate-float shadow-lg"
-              style={{ animationDelay: '0.5s', backdropFilter: 'blur(8px)' }}>
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-semibold text-emerald-300">Live</span>
-            </div>
-            <div className="absolute -bottom-2 -left-4 hidden lg:flex items-center gap-1.5 bg-slate-800/90 border border-blue-500/30 rounded-full px-3 py-1.5 animate-float shadow-lg"
-              style={{ animationDelay: '2s', backdropFilter: 'blur(8px)' }}>
-              <Activity className="w-3 h-3 text-blue-400" />
-              <span className="text-xs font-semibold text-blue-300">+78.5% precisão</span>
-            </div>
           </div>
         </div>
       </section>
@@ -549,7 +555,7 @@ export default function Landing() {
             {/* Plano Anual — highlighted */}
             <div className="relative bg-gradient-to-br from-emerald-900/30 to-slate-900 border-2 border-emerald-500 rounded-2xl p-8 flex flex-col">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-emerald-500 text-slate-900 text-xs font-bold px-4 py-1 rounded-full">ECONOMIZE 21%</span>
+                <span className="bg-emerald-500 text-slate-900 text-xs font-bold px-4 py-1 rounded-full">ECONOMIZE 40%</span>
               </div>
               <h3 className="text-white font-bold text-xl mb-6 tracking-wide">PLANO ANUAL</h3>
               <div className="mb-1">

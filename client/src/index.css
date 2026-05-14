@@ -617,7 +617,7 @@
   }
   @keyframes dashboard-scroll-mobile {
     0%,  4%  { transform: translateY(0); }
-    78%, 88%  { transform: translateY(calc(-100% + 520px)); }
+    78%, 88%  { transform: translateY(calc(-100% + 420px)); }
     100%      { transform: translateY(0); }
   }
 
