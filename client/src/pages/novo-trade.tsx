@@ -41,8 +41,6 @@ import {
   TrendingUp,
   TrendingDown,
   Calculator,
-  Crown,
-  Lock,
   Wallet,
   Zap,
   ClipboardList,
@@ -54,25 +52,13 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useUserPlan } from "@/hooks/useUserPlan";
-import { VipUpgradeModal } from "@/components/modals/vip-upgrade-modal";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Wallet as WalletType } from "@shared/schema";
 
 export default function NovoTrade() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { planType, isLoading: planLoading } = useUserPlan();
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  
-  const isFreePlan = planType === 'free';
-  
-  const { data: existingTrades } = useQuery<Trade[]>({
-    queryKey: ['/api/trades'],
-    enabled: isFreePlan,
-  });
-
   // Fetch user's custom wallets
   const { data: wallets = [] } = useQuery<WalletType[]>({
     queryKey: ['/api/wallets'],
@@ -126,8 +112,6 @@ export default function NovoTrade() {
     setQuickParsed([]);
   }
   
-  const hasReachedFreeLimit = isFreePlan && (existingTrades?.length || 0) >= 1;
-
   // Setup options with translations
   const setupOptions = [
     t('setup.breakout'),
@@ -290,11 +274,6 @@ export default function NovoTrade() {
   };
 
   const onSubmit = (data: InsertTrade) => {
-    if (hasReachedFreeLimit) {
-      setShowUpgradeModal(true);
-      return;
-    }
-    
     if (!tradeResult) {
       toast({
         title: t('form.select_result'),
@@ -315,52 +294,6 @@ export default function NovoTrade() {
 
     createTradeMutation.mutate(tradeData);
   };
-
-  if (hasReachedFreeLimit) {
-    return (
-      <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
-        <Card className="bg-graphite/50 border-charcoal-700 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-sm z-10 flex items-center justify-center">
-            <div className="text-center p-6 max-w-md">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#6EE000] to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Limite Atingido</h3>
-              <p className="text-zinc-400 mb-4">
-                Você já registrou 1 trade no plano Free. 
-                Faça upgrade para VIP e registre trades ilimitados!
-              </p>
-              <Button 
-                onClick={() => setShowUpgradeModal(true)}
-                className="bg-gradient-to-r from-[#6EE000] to-yellow-500 hover:from-[#6EE000] hover:to-yellow-600 text-white font-bold"
-                data-testid="button-upgrade-trades"
-              >
-                <Crown className="w-4 h-4 mr-2" />
-                Desbloquear Trades Ilimitados
-              </Button>
-            </div>
-          </div>
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-neutral-400" />
-              {t('form.trade_data')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 opacity-30 pointer-events-none">
-            <div className="h-48 flex items-center justify-center text-zinc-500">
-              Você atingiu o limite do plano Free
-            </div>
-          </CardContent>
-        </Card>
-        
-        <VipUpgradeModal 
-          open={showUpgradeModal} 
-          onOpenChange={setShowUpgradeModal}
-          feature="trades"
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
@@ -1114,11 +1047,6 @@ export default function NovoTrade() {
         </DialogContent>
       </Dialog>
 
-      <VipUpgradeModal
-        open={showUpgradeModal}
-        onOpenChange={setShowUpgradeModal}
-        feature="trades"
-      />
     </div>
   );
 }

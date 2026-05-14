@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Crown, Zap } from "lucide-react";
+import { Crown, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { PlanDetailsModal } from "./plan-details-modal";
 
@@ -79,17 +79,6 @@ export function PlanStatus({ compact = false }: PlanStatusProps) {
   };
 
   const planDetails = getPlanInfo();
-  const showDuration = planInfo.planType !== 'free' && planInfo.daysRemaining !== undefined;
-
-  const formatDaysRemaining = (days: number) => {
-    if (days > 0) {
-      return `${days} dias restantes`;
-    } else if (days === 0) {
-      return 'Expira hoje';
-    } else {
-      return 'Expirado';
-    }
-  };
 
   return (
     <>
@@ -103,17 +92,6 @@ export function PlanStatus({ compact = false }: PlanStatusProps) {
           <span>{planDetails.name}</span>
         </Badge>
         
-        {showDuration && !compact && (
-          <div className="hidden sm:flex items-center space-x-1.5 text-xs text-zinc-400 bg-[#13131a]/50 rounded-md px-2 py-1" data-testid="plan-duration">
-            <Clock className="w-3 h-3 text-zinc-500" />
-            <span className="font-medium">
-              {planInfo.daysRemaining !== undefined 
-                ? formatDaysRemaining(planInfo.daysRemaining)
-                : ''
-              }
-            </span>
-          </div>
-        )}
       </div>
 
       <PlanDetailsModal

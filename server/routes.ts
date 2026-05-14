@@ -1,4 +1,4 @@
-import { Express } from "express";
+import express, { Express } from "express";
 import { Server, createServer } from "http";
 import { z } from "zod";
 import { insertTradeSchema, insertUserSchema, InsertTrade, updateUserByAdminSchema, insertSubscriptionPlanSchema, updateCsvImportSchema, csvImports, insertDiaryEntrySchema, updateProfileSchema, supportConversations, supportMessages, insertSupportConversationSchema, insertSupportMessageSchema, users, whatsappMessages, InsertWhatsappMessage, trades, diaryImages, insertBankrollManagementSchema, BankrollSummaryDTO } from "@shared/schema";
@@ -373,6 +373,43 @@ async function requireAuth(req: any, res: any, next: any) {
       message: "Autenticação obrigatória - cada usuário só pode acessar seus próprios dados",
       details: error instanceof Error ? error.message : "Erro de autenticação"
     });
+  }
+}
+
+// Middleware que exige plano pago ativo (usa depois de requireAuth)
+async function requireActivePlan(req: any, res: any, next: any) {
+  try {
+    const user = await storage.getUserById(req.userId);
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não encontrado" });
+    }
+
+    const planType = user.planType || 'free';
+    const isPaid = planType === 'monthly' || planType === 'quarterly' || planType === 'annual';
+
+    // Verificar expiração
+    if (isPaid && user.planExpiresAt) {
+      const expired = new Date(user.planExpiresAt) < new Date();
+      if (expired) {
+        await storage.updateUser(user.id, { planType: 'free', planExpiresAt: null } as any);
+        return res.status(403).json({
+          error: "PLAN_EXPIRED",
+          message: "Seu plano expirou. Renove para continuar usando o Metrika."
+        });
+      }
+    }
+
+    if (!isPaid) {
+      return res.status(403).json({
+        error: "NO_ACTIVE_PLAN",
+        message: "Seu e-mail não conta com um plano ativo. Adquira um plano para continuar."
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error("requireActivePlan error:", error);
+    res.status(500).json({ error: "Erro ao verificar plano" });
   }
 }
 
@@ -1260,6 +1297,60 @@ function parseTradeFromCSVRow(row: any, fieldMap: any, userId: string): InsertTr
 export async function registerRoutes(app: Express): Promise<void> {
   // Import getCallbackURL for dynamic resolution
   const { getCallbackURL } = await import('./index.js');
+
+  // ── Proteção global de plano ──────────────────────────────────────────────
+  // Todas as rotas /api/* exigem plano ativo, EXCETO as da whitelist abaixo.
+  // O middleware só age após requireAuth ter populado req.userId.
+  const PLAN_EXEMPT_PREFIXES = [
+    '/api/auth/',          // login, registro, reset de senha
+    '/api/admin',          // painel admin tem proteção própria
+    '/api/webhooks/',      // webhooks externos (Hubla, WhatsApp)
+    '/api/user/plan',      // o frontend precisa consultar o plano sem ter plano
+    '/api/bankroll/whatsapp', // integração WhatsApp pública
+    '/api/test-whatsapp',  // rota de teste
+  ];
+
+  app.use('/api', async (req: any, res: any, next: any) => {
+    // Só age se o usuário já foi autenticado pelo requireAuth
+    if (!req.userId) return next();
+
+    const path = req.path; // Ex: "/trades", "/ai/chat"
+
+    // Verificar whitelist
+    const isExempt = PLAN_EXEMPT_PREFIXES.some(prefix =>
+      ('/' + path.replace(/^\//, '')).startsWith(prefix.replace('/api', ''))
+    );
+    if (isExempt) return next();
+
+    // Verificar plano
+    try {
+      const user = await storage.getUserById(req.userId);
+      if (!user) return next(); // requireAuth já trata isso
+
+      let planType = user.planType || 'free';
+
+      // Auto-downgrade se expirado
+      if (planType !== 'free' && user.planExpiresAt) {
+        if (new Date(user.planExpiresAt) < new Date()) {
+          await storage.updateUser(user.id, { planType: 'free', planExpiresAt: null } as any);
+          planType = 'free';
+        }
+      }
+
+      const isPaid = planType === 'monthly' || planType === 'quarterly' || planType === 'annual';
+      if (!isPaid) {
+        return res.status(403).json({
+          error: "NO_ACTIVE_PLAN",
+          message: "Seu e-mail não conta com um plano ativo. Adquira um plano para continuar."
+        });
+      }
+    } catch (err) {
+      console.error("Plan gate middleware error:", err);
+    }
+
+    next();
+  });
+  // ─────────────────────────────────────────────────────────────────────────
   
   // Google OAuth Routes
   app.get("/auth/google", (req, res, next) => {
@@ -6391,6 +6482,151 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       res.status(500).json({ error: 'Erro ao deletar carteira' });
     }
   });
+
+  // ─────────────────────────────────────────────────────────
+  // HUBLA WEBHOOK — atualização automática de planos
+  // ─────────────────────────────────────────────────────────
+  // Variáveis de ambiente necessárias:
+  //   HUBLA_WEBHOOK_SECRET  → segredo gerado no painel Hubla (Configurações → Webhooks)
+  //   HUBLA_PRODUCT_MONTHLY  → ID do produto mensal na Hubla   (ex: "prod_abc123")
+  //   HUBLA_PRODUCT_QUARTERLY → ID do produto trimestral       (ex: "prod_def456")
+  //   HUBLA_PRODUCT_ANNUAL   → ID do produto anual             (ex: "prod_ghi789")
+
+  const HUBLA_WEBHOOK_SECRET = process.env.HUBLA_WEBHOOK_SECRET || '';
+
+  // Mapeia product_id da Hubla → planType interno
+  function hublaProductToPlanType(productId: string): 'monthly' | 'quarterly' | 'annual' | null {
+    const map: Record<string, 'monthly' | 'quarterly' | 'annual'> = {
+      [process.env.HUBLA_PRODUCT_MONTHLY  || '__monthly__']:  'monthly',
+      [process.env.HUBLA_PRODUCT_QUARTERLY || '__quarterly__']: 'quarterly',
+      [process.env.HUBLA_PRODUCT_ANNUAL   || '__annual__']:   'annual',
+    };
+    return map[productId] ?? null;
+  }
+
+  // Verifica assinatura HMAC-SHA256 que a Hubla envia no header x-hubla-signature
+  function verifyHublaSignature(rawBody: Buffer, signature: string): boolean {
+    if (!HUBLA_WEBHOOK_SECRET) return true; // em dev sem secret, aceitar tudo
+    try {
+      const expected = crypto
+        .createHmac('sha256', HUBLA_WEBHOOK_SECRET)
+        .update(rawBody)
+        .digest('hex');
+      return crypto.timingSafeEqual(
+        Buffer.from(signature.replace(/^sha256=/, '')),
+        Buffer.from(expected)
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  // O endpoint precisa do body bruto para verificar a assinatura
+  app.post(
+    '/api/webhooks/hubla',
+    express.raw({ type: 'application/json' }),
+    async (req: any, res: any) => {
+      const rawBody: Buffer = req.body;
+      const signature = req.headers['x-hubla-signature'] as string || '';
+
+      // 1. Verificar assinatura
+      if (!verifyHublaSignature(rawBody, signature)) {
+        console.warn('🔒 Hubla webhook: assinatura inválida');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+
+      let payload: any;
+      try {
+        payload = JSON.parse(rawBody.toString('utf8'));
+      } catch {
+        return res.status(400).json({ error: 'Invalid JSON' });
+      }
+
+      // Responde 200 imediatamente para evitar retry da Hubla
+      res.status(200).json({ received: true });
+
+      // 2. Processar evento de forma assíncrona
+      const event: string = (payload.event || payload.type || '').toLowerCase();
+      const data = payload.data || payload;
+
+      // Extrair e-mail do assinante
+      const subscriberEmail: string =
+        data?.subscriber?.email ||
+        data?.customer?.email ||
+        data?.buyer?.email ||
+        '';
+
+      // Extrair ID do produto
+      const productId: string =
+        data?.product?.id ||
+        data?.offer?.product_id ||
+        '';
+
+      console.log(`📦 Hubla webhook recebido: event="${event}" email="${subscriberEmail}" product="${productId}"`);
+
+      if (!subscriberEmail) {
+        console.warn('⚠️ Hubla webhook: e-mail do assinante não encontrado no payload');
+        return;
+      }
+
+      try {
+        const user = await storage.getUserByEmail(subscriberEmail);
+
+        // ── Eventos que ATIVAM o plano ──────────────────────────────────
+        const isActivation =
+          event.includes('purchase.approved') ||
+          event.includes('sale.approved') ||
+          event.includes('subscription.active') ||
+          event.includes('subscription.reactivated') ||
+          event.includes('invoice.paid');
+
+        if (isActivation) {
+          const planType = hublaProductToPlanType(productId);
+
+          if (!planType) {
+            console.warn(`⚠️ Hubla webhook: produto "${productId}" não mapeado para nenhum plano.`);
+            return;
+          }
+
+          if (!user) {
+            // Usuário ainda não se cadastrou no Metrika — guardar para quando ele se cadastrar?
+            // Por enquanto apenas logar. Pode-se criar conta automaticamente se quiser.
+            console.warn(`⚠️ Hubla webhook: usuário "${subscriberEmail}" não encontrado. Comprou mas não tem conta ainda.`);
+            return;
+          }
+
+          await storage.updateUserByAdmin(user.id, { planType });
+          console.log(`✅ Hubla: plano "${planType}" ativado para ${subscriberEmail} (userId=${user.id})`);
+          return;
+        }
+
+        // ── Eventos que REMOVEM o plano ─────────────────────────────────
+        const isDeactivation =
+          event.includes('purchase.refunded') ||
+          event.includes('sale.refunded') ||
+          event.includes('purchase.chargeback') ||
+          event.includes('subscription.canceled') ||
+          event.includes('subscription.expired') ||
+          event.includes('subscription.overdue');
+
+        if (isDeactivation) {
+          if (!user) {
+            console.warn(`⚠️ Hubla webhook: usuário "${subscriberEmail}" não encontrado para rebaixar plano.`);
+            return;
+          }
+
+          await storage.updateUserByAdmin(user.id, { planType: 'free' });
+          console.log(`🔄 Hubla: plano rebaixado para FREE de ${subscriberEmail} (evento: ${event})`);
+          return;
+        }
+
+        console.log(`ℹ️ Hubla webhook: evento "${event}" ignorado (não mapeado).`);
+      } catch (err) {
+        console.error('❌ Hubla webhook: erro ao processar:', err);
+      }
+    }
+  );
+  // ─────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);
 }

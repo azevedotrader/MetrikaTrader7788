@@ -13,7 +13,9 @@ import { AIChat } from "@/components/ui/ai-chat";
 import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
 import { CsvTipsPopup } from "@/components/ui/csv-tips-popup";
 import { TourOverlay } from "@/components/ui/tour-overlay";
+import { NoPlanScreen } from "@/components/ui/no-plan-screen";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserPlan, isPaidPlan } from "@/hooks/useUserPlan";
 import { useState, useEffect } from "react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -65,6 +67,7 @@ const pageTitleKeys: Record<string, string> = {
 function AppContent() {
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
+  const { planType, isLoading: planLoading } = useUserPlan();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
@@ -120,6 +123,13 @@ function AppContent() {
         <Route>
           {!isAuthenticated ? (
             <Landing />
+          ) : planLoading ? (
+            /* Aguarda verificação do plano antes de renderizar qualquer coisa */
+            <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-[#6EE000] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : !isPaidPlan(planType) ? (
+            <NoPlanScreen />
           ) : (
             <>
               <Sidebar 

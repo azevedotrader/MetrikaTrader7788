@@ -24,8 +24,6 @@ import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CsvSelectionModal } from "@/components/modals/csv-selection-modal";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useUserPlan } from "@/hooks/useUserPlan";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const navigation = [
   { nameKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -50,9 +48,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [showImportsModal, setShowImportsModal] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const isMobile = useIsMobile();
-  const { planType } = useUserPlan();
 
   const [theme, setTheme] = useState<'dark'|'light'>(() => {
     return (localStorage.getItem('metrika-theme') as 'dark'|'light') || 'dark';
@@ -80,15 +76,6 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   };
 
   const handleLinkClick = (href: string, e?: React.MouseEvent) => {
-    // Verificar se é suporte e se o usuário tem acesso
-    if (href === '/suporte') {
-      if (planType === 'free') {
-        e?.preventDefault();
-        setShowUpgradeModal(true);
-        return;
-      }
-    }
-    
     if (isMobile && onClose) {
       onClose();
     }
@@ -299,125 +286,6 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           onOpenChange={setShowCsvModal}
         />
         
-        {/* Modal de Upgrade para Suporte */}
-        <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-          <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-[#0a0a0f] border-[#1e1e2e] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
-                🚀 Upgrade para Acessar Recursos Premium
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-6 p-4">
-              {/* Descrição */}
-              <div className="text-center space-y-3">
-                <p className="text-zinc-300 text-sm md:text-base leading-relaxed">
-                  O <strong className="text-[#6EE000]">suporte completo</strong> está disponível para usuários dos 
-                  planos <strong className="text-[#6EE000]">Starter</strong>, <strong className="text-[#6EE000]">Pro</strong> e <strong className="text-[#6EE000]">VIP</strong>.
-                </p>
-                <p className="text-zinc-400 text-sm">
-                  Faça upgrade para ter acesso ao suporte especializado e recursos avançados da Métrika.
-                </p>
-              </div>
-
-              {/* Planos */}
-              <div className="grid md:grid-cols-2 gap-4">
-                {/* Plano Pro */}
-                <div className="bg-gradient-to-br from-[#6EE000]/10 to-[#448aff]/10 border border-[#6EE000]/30 rounded-lg p-4 md:p-6">
-                  <div className="text-center space-y-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-8 h-8 bg-[#5bc800] rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">★</span>
-                      </div>
-                      <h3 className="text-lg md:text-xl font-bold text-white">Pro</h3>
-                    </div>
-                    <p className="text-2xl md:text-3xl font-bold text-[#6EE000]">R$ 49,90</p>
-                    <p className="text-zinc-400 text-xs md:text-sm">por mês</p>
-                  </div>
-                  
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Suporte exclusivo prioritário</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Análise com IA ilimitada</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Trades ilimitados</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Relatórios avançados</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Plano VIP */}
-                <div className="bg-gradient-to-br from-black/40 to-zinc-900/40 border border-yellow-500/50 rounded-lg p-4 md:p-6 relative">
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
-                      MAIS POPULAR
-                    </span>
-                  </div>
-                  
-                  <div className="text-center space-y-3 mt-2">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-8 h-8 bg-black border border-yellow-500 rounded-full flex items-center justify-center">
-                        <span className="text-yellow-500 text-sm font-bold">♥</span>
-                      </div>
-                      <h3 className="text-lg md:text-xl font-bold text-white">VIP</h3>
-                    </div>
-                    <p className="text-2xl md:text-3xl font-bold text-yellow-500">R$ 97,00</p>
-                    <p className="text-zinc-400 text-xs md:text-sm">por mês</p>
-                  </div>
-                  
-                  <div className="mt-4 space-y-2">
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Suporte VIP 24/7</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Tudo do Pro +</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Consultoria personalizada</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[#6EE000] text-sm">
-                      <span className="text-[#6EE000]">✓</span>
-                      <span>Acesso antecipado</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Botões */}
-              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowUpgradeModal(false)}
-                  className="w-full sm:flex-1 border-zinc-600 text-zinc-300 hover:bg-[#13131a] text-sm md:text-base py-2 md:py-3"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowUpgradeModal(false);
-                    // Aqui seria redirecionado para a página de planos
-                    window.open('/pricing', '_blank');
-                  }}
-                  className="w-full sm:flex-1 bg-[#6EE000] hover:bg-[#5bc800] text-black font-semibold text-sm md:text-base py-2 md:py-3"
-                >
-                  🚀 Fazer Upgrade Agora
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </>
   );
