@@ -389,72 +389,72 @@ export default function Landing() {
       <section id="recursos" className="py-20 sm:py-28 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" data-animate>
           <div className="text-center mb-14">
-            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">TUDO QUE VOCÊ PRECISA</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">Chega de operar no achismo</h2>
+            <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-3">FUNCIONALIDADES</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">Por que o Metrika vai te ajudar</h2>
             <p className="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto">
-              Cada ferramenta foi pensada para revelar o que seus números escondem — e transformar isso em decisões mais assertivas.
+              Não é só um dashboard de números. O Metrika foi construído para acompanhar o seu processo — do registro ao relatório de evolução.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: ChartBar,
+                icon: FileText,
                 color: "bg-emerald-500/20 text-emerald-400",
-                title: "Dashboard completo por carteira",
-                desc: "Visualize P&L, assertividade, drawdown e dezenas de métricas separadas por mercado, carteira ou período — em tempo real."
-              },
-              {
-                icon: TrendingUp,
-                color: "bg-blue-500/20 text-blue-400",
-                title: "Curva de capital real",
-                desc: "Acompanhe exatamente como seu capital evoluiu ao longo do tempo. Identifique sequências de ganhos, quedas e pontos de virada."
-              },
-              {
-                icon: Target,
-                color: "bg-purple-500/20 text-purple-400",
-                title: "Métricas que revelam padrões",
-                desc: "Taxa de acerto, fator de lucro, RR médio e drawdown máximo calculados automaticamente a cada novo trade importado."
+                title: "Registre trades com imagem",
+                desc: "Anexe o print do gráfico no momento da entrada, saída ou revisão. Volte nele depois e entenda exatamente o contexto que te levou àquela decisão."
               },
               {
                 icon: Brain,
+                color: "bg-blue-500/20 text-blue-400",
+                title: "Descreva o trade em texto livre",
+                desc: "Escreva como você quiser — o Metrika organiza as informações automaticamente, estruturando ativo, direção, resultado e notas de forma padronizada."
+              },
+              {
+                icon: ChartBar,
+                color: "bg-purple-500/20 text-purple-400",
+                title: "Relatório de análise com IA",
+                desc: "Receba um relatório completo alinhando seus pontos fortes e o que precisa ser melhorado — gerado com base no seu histórico real de operações."
+              },
+              {
+                icon: Target,
                 color: "bg-pink-500/20 text-pink-400",
-                title: "Análise emocional do trade",
-                desc: "Registre seu estado emocional em cada operação e descubra se o medo, a ganância ou a confiança estão impactando seus resultados."
+                title: "Métricas que revelam seu padrão",
+                desc: "Taxa de acerto, RR médio, drawdown, sequências de ganhos e perdas — calculados automaticamente para você enxergar o que seus olhos não veem nas planilhas."
               },
               {
                 icon: Clock,
                 color: "bg-yellow-500/20 text-yellow-400",
-                title: "Seu horário de ouro",
-                desc: "Descubra em quais janelas de horário você opera melhor e ajuste sua rotina para só operar quando as probabilidades estão a seu favor."
-              },
-              {
-                icon: Shield,
-                color: "bg-teal-500/20 text-teal-400",
-                title: "Guardião do seu plano",
-                desc: "Defina limites de perda diária e ganho máximo. O Metrika te alerta antes de você quebrar o seu próprio plano de gerenciamento."
+                title: "Descubra seu horário de ouro",
+                desc: "O Metrika mapeia em quais sessões e horários você tem melhor performance. Opere menos e melhor — no seu pico, não no horário do costume."
               },
               {
                 icon: Activity,
+                color: "bg-teal-500/20 text-teal-400",
+                title: "Curva de capital em tempo real",
+                desc: "Visualize a evolução do seu capital mês a mês. Identifique viradas, sequências negativas e períodos de consistência com clareza total."
+              },
+              {
+                icon: Shield,
                 color: "bg-orange-500/20 text-orange-400",
-                title: "Gestão de risco integrada",
-                desc: "Calcule o RR de cada operação, entenda quanto você arrisca por trade e veja se o seu risco médio justifica os retornos que você busca."
+                title: "Guardião do seu plano",
+                desc: "Configure limites de perda diária e ganho máximo. Quando você estiver perto de quebrar seu próprio plano, o Metrika avisa antes que aconteça."
+              },
+              {
+                icon: Upload,
+                color: "bg-indigo-500/20 text-indigo-400",
+                title: "Importação de qualquer corretora",
+                desc: "Suba seu CSV de B3, Forex ou Cripto em segundos. O MetrikAI processa e organiza tudo automaticamente — sem configuração manual, sem dor de cabeça."
               },
               {
                 icon: LineChart,
-                color: "bg-indigo-500/20 text-indigo-400",
-                title: "Performance por ativo e setup",
-                desc: "Filtre seus resultados por ativo, tipo de operação ou setup. Saiba quais estratégias realmente funcionam para o seu perfil."
-              },
-              {
-                icon: Zap,
                 color: "bg-green-500/20 text-green-400",
-                title: "Importação rápida de qualquer corretora",
-                desc: "Suba seu histórico via CSV de B3, Forex ou Cripto em segundos. O MetrikAI processa tudo e já entrega os insights prontos."
+                title: "Performance por setup e ativo",
+                desc: "Filtre seus resultados por ativo, mercado ou tipo de operação. Saiba quais setups realmente funcionam — e quais estão destruindo sua média silenciosamente."
               }
             ].map((feature, i) => (
-              <div key={i} className="bg-[#0f0f1a] border border-[#1e1e2e] rounded-xl p-6 hover:-translate-y-1 transition-transform duration-200">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${feature.color}`}>
+              <div key={i} className="bg-[#0f0f1a] border border-[#1e1e2e] rounded-xl p-6 hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-200 group">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${feature.color} group-hover:scale-110 transition-transform duration-200`}>
                   <feature.icon className="w-6 h-6" />
                 </div>
                 <h3 className="text-white font-bold mb-2">{feature.title}</h3>
