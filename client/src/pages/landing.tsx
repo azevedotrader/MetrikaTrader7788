@@ -686,9 +686,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div className="sm:col-span-2 md:col-span-2">
               <div className="flex items-center space-x-2 mb-3 sm:mb-4 justify-center sm:justify-start">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 md:w-20 md:h-20 gradient-purple-blue rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Logo variant="header" className="w-12 h-9 sm:w-14 sm:h-10 md:w-16 md:h-12" />
-                </div>
+                <Logo variant="header" />
               </div>
               <p className="text-slate-400 max-w-md text-sm sm:text-base break-words text-center sm:text-left">
                 {t('landing.footer.description')}

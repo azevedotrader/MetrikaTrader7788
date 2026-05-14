@@ -76,7 +76,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-[#0f0f1a] border-[#1e1e2e]">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-36 h-36 md:w-32 md:h-32 sm:w-24 sm:h-24 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
+          <div className="flex justify-center">
             <Logo variant="modal" />
           </div>
           <div>
