@@ -29,6 +29,7 @@ import {
   X
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
+import dashboardPreview from "@assets/dashboard-preview.png";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
 import { LanguageSelector } from "@/components/ui/language-selector";
@@ -243,104 +244,39 @@ export default function Landing() {
                     </div>
                     <div className="flex-1 bg-slate-800 rounded-md px-3 py-1.5 text-xs text-slate-400 ml-2">appmetrika.com.br/dashboard</div>
                   </div>
-                  {/* Screen */}
-                  <div className="bg-slate-900 border border-slate-600 border-t-0 rounded-b-xl overflow-hidden shadow-2xl">
-                    <div className="flex h-80">
-                      {/* Sidebar */}
-                      <div className="w-14 bg-slate-800 border-r border-slate-700 flex flex-col items-center py-4 gap-4">
-                        <div className="w-7 h-7 bg-emerald-500 rounded-md"></div>
-                        {[...Array(6)].map((_,i) => <div key={i} className="w-6 h-2 bg-slate-600 rounded"></div>)}
-                      </div>
-                      {/* Content */}
-                      <div className="flex-1 p-4 overflow-hidden">
-                        <div className="text-[11px] font-semibold text-slate-300 mb-3">Dashboard</div>
-                        <div className="grid grid-cols-3 gap-2 mb-3">
-                          <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-lg p-3">
-                            <div className="text-[10px] text-slate-400 mb-1">P&L Total</div>
-                            <div className="text-sm font-bold text-emerald-400">+R$28.540</div>
-                          </div>
-                          <div className="bg-indigo-500/20 border border-indigo-500/30 rounded-lg p-3">
-                            <div className="text-[10px] text-slate-400 mb-1">Assertividade</div>
-                            <div className="text-sm font-bold text-indigo-400">78.5%</div>
-                          </div>
-                          <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3">
-                            <div className="text-[10px] text-slate-400 mb-1">Drawdown</div>
-                            <div className="text-sm font-bold text-blue-400">2.5%</div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                          <div className="bg-slate-800 rounded-lg p-3">
-                            <div className="text-[10px] text-slate-400 mb-1">Taxa de Acerto</div>
-                            <div className="text-sm font-bold text-blue-400">65%</div>
-                            <div className="w-full h-1.5 bg-slate-700 rounded mt-1.5"><div className="h-1.5 bg-blue-400 rounded" style={{width:'65%'}}></div></div>
-                          </div>
-                          <div className="bg-slate-800 rounded-lg p-3">
-                            <div className="text-[10px] text-slate-400 mb-1">Risco Retorno</div>
-                            <div className="text-sm font-bold text-emerald-400">1:3.05</div>
-                            <div className="w-full h-1.5 bg-slate-700 rounded mt-1.5"><div className="h-1.5 bg-emerald-400 rounded" style={{width:'75%'}}></div></div>
-                          </div>
-                        </div>
-                        <div className="bg-slate-800 rounded-lg p-3">
-                          <div className="text-[10px] text-slate-400 mb-2">Evolução do Capital</div>
-                          <div className="flex items-end gap-1 h-16">
-                            {[15,20,18,30,25,40,35,50,45,60,55,70].map((h,i) => (
-                              <div key={i} className="flex-1 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t opacity-80" style={{height:`${h}%`}}></div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  {/* Screen — real dashboard screenshot scrolling */}
+                  <div
+                    className="border border-slate-600 border-t-0 rounded-b-xl overflow-hidden shadow-2xl"
+                    style={{ height: '360px' }}
+                  >
+                    <img
+                      src={dashboardPreview}
+                      alt="Metrika Dashboard"
+                      className="w-full animate-dashboard-scroll"
+                      style={{ display: 'block', minHeight: '100%' }}
+                    />
                   </div>
                 </div>
               )}
 
               {/* Mobile Frame */}
               {deviceView === 'mobile' && (
-                <div className="w-64 animate-in fade-in duration-300 mx-auto">
+                <div className="w-72 animate-in fade-in duration-300 mx-auto">
                   {/* Phone frame */}
                   <div className="bg-slate-700 rounded-[2.5rem] border-[3px] border-slate-500 p-2.5 shadow-2xl">
                     <div className="bg-slate-900 rounded-[2rem] overflow-hidden">
                       {/* Dynamic island / notch */}
-                      <div className="flex justify-center pt-3 pb-2">
+                      <div className="flex justify-center pt-3 pb-1">
                         <div className="w-20 h-2 bg-slate-800 rounded-full"></div>
                       </div>
-                      {/* Screen content */}
-                      <div className="px-3 pb-6">
-                        <div className="text-xs font-bold text-white mb-3 text-center">Dashboard</div>
-                        <div className="grid grid-cols-2 gap-2 mb-3">
-                          <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl p-2.5">
-                            <div className="text-[9px] text-slate-400 mb-0.5">P&L Total</div>
-                            <div className="text-sm font-bold text-emerald-400">+R$28.5k</div>
-                          </div>
-                          <div className="bg-indigo-500/20 border border-indigo-500/30 rounded-xl p-2.5">
-                            <div className="text-[9px] text-slate-400 mb-0.5">Assertividade</div>
-                            <div className="text-sm font-bold text-indigo-400">78.5%</div>
-                          </div>
-                          <div className="bg-blue-500/20 border border-blue-500/30 rounded-xl p-2.5">
-                            <div className="text-[9px] text-slate-400 mb-0.5">Drawdown</div>
-                            <div className="text-sm font-bold text-blue-400">2.5%</div>
-                          </div>
-                          <div className="bg-slate-800 rounded-xl p-2.5">
-                            <div className="text-[9px] text-slate-400 mb-0.5">Taxa Acerto</div>
-                            <div className="text-sm font-bold text-blue-300">65%</div>
-                          </div>
-                        </div>
-                        <div className="bg-slate-800 rounded-xl p-3 mb-3">
-                          <div className="text-[9px] text-slate-400 mb-2">Evolução do Capital</div>
-                          <div className="flex items-end gap-0.5 h-16">
-                            {[20,35,25,45,38,55,48,65,58,75,68,80].map((h,i) => (
-                              <div key={i} className="flex-1 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t opacity-80" style={{height:`${h}%`}}></div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="space-y-1.5">
-                          {[['Nova York','+R$1.200','take'],['Ásia','+R$2.400','take'],['Londres','-R$800','stop']].map(([s,v,r],i) => (
-                            <div key={i} className="flex items-center justify-between bg-slate-800 rounded-lg px-3 py-2">
-                              <span className="text-[10px] text-slate-300 font-medium">{s}</span>
-                              <span className={`text-[10px] font-bold ${r==='take'?'text-emerald-400':'text-red-400'}`}>{v}</span>
-                            </div>
-                          ))}
-                        </div>
+                      {/* Screen — real dashboard screenshot scrolling */}
+                      <div className="overflow-hidden" style={{ height: '520px' }}>
+                        <img
+                          src={dashboardPreview}
+                          alt="Metrika Dashboard Mobile"
+                          className="w-full animate-dashboard-scroll-mobile"
+                          style={{ display: 'block', minHeight: '100%' }}
+                        />
                       </div>
                     </div>
                   </div>

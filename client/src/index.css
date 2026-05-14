@@ -609,6 +609,33 @@
     50%      { opacity:.3; }
   }
 
+  /* ── Dashboard preview scroll (landing page) ── */
+  @keyframes dashboard-scroll {
+    0%,  5%  { transform: translateY(0); }
+    80%, 90%  { transform: translateY(calc(-100% + 360px)); }
+    100%      { transform: translateY(0); }
+  }
+  @keyframes dashboard-scroll-mobile {
+    0%,  5%  { transform: translateY(0); }
+    80%, 90%  { transform: translateY(calc(-100% + 520px)); }
+    100%      { transform: translateY(0); }
+  }
+
+  .animate-dashboard-scroll {
+    animation: dashboard-scroll 22s ease-in-out infinite;
+    will-change: transform;
+  }
+  .animate-dashboard-scroll:hover {
+    animation-play-state: paused;
+  }
+  .animate-dashboard-scroll-mobile {
+    animation: dashboard-scroll-mobile 22s ease-in-out infinite;
+    will-change: transform;
+  }
+  .animate-dashboard-scroll-mobile:hover {
+    animation-play-state: paused;
+  }
+
   @keyframes tourHighlight {
     0%,100% { transform:scale(1);     box-shadow:0 0 20px rgba(110,224,0,.4); border-color:#6EE000; }
     50%      { transform:scale(1.015); box-shadow:0 0 35px rgba(110,224,0,.7); border-color:#6EE000; }
