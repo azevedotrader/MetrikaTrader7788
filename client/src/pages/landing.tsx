@@ -317,6 +317,8 @@ export default function Landing() {
                           alt="Metrika Dashboard"
                           className="w-full animate-dashboard-scroll"
                           style={{ display: 'block' }}
+                          decoding="async"
+                          fetchPriority="high"
                         />
                         <div
                           className="absolute inset-0 pointer-events-none"
@@ -356,6 +358,8 @@ export default function Landing() {
                               alt="Metrika Dashboard Mobile"
                               className="w-full animate-dashboard-scroll-mobile"
                               style={{ display: 'block' }}
+                              decoding="async"
+                              loading="lazy"
                             />
                             <div
                               className="absolute inset-0 pointer-events-none"
@@ -538,17 +542,24 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12 items-stretch">
             {/* Plano Mensal */}
             <div className="bg-[#0f0f1a] border border-[#1e1e2e] rounded-2xl p-8 flex flex-col">
-              <h3 className="text-white font-bold text-xl mb-6 tracking-wide">PLANO MENSAL</h3>
-              <div className="mb-1">
-                <span className="text-4xl font-bold text-white">R$ 97,00</span>
-                <span className="text-slate-400 text-sm ml-1">/mês</span>
+              <p className="text-slate-400 text-xs font-semibold tracking-widest uppercase mb-4">PLANO MENSAL</p>
+
+              {/* price block — same visual height as annual */}
+              <div className="flex-1 flex flex-col justify-center mb-6">
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-5xl font-bold text-white">R$ 97</span>
+                  <span className="text-slate-400 text-base">,00<span className="ml-1">/mês</span></span>
+                </div>
+                <p className="text-slate-500 text-sm">Cobrado mensalmente</p>
+                {/* spacer to align button with annual card */}
+                <div className="h-6" />
               </div>
-              <p className="text-slate-500 text-sm mb-8">Cobrado mensalmente</p>
+
               <Button
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold mt-auto"
+                className="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold"
                 onClick={() => window.open('https://hub.la/g/CGRfvH9XIZzkXUFTkesn', '_blank')}
               >
                 Assinar Mensal
@@ -557,20 +568,26 @@ export default function Landing() {
 
             {/* Plano Anual — highlighted */}
             <div className="relative bg-gradient-to-br from-emerald-900/30 to-slate-900 border-2 border-emerald-500 rounded-2xl p-8 flex flex-col">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-emerald-500 text-slate-900 text-xs font-bold px-4 py-1 rounded-full">ECONOMIZE 40%</span>
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                <span className="bg-emerald-500 text-slate-900 text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+                  🔥 ECONOMIZE 53%
+                </span>
               </div>
-              <h3 className="text-white font-bold text-xl mb-6 tracking-wide">PLANO ANUAL</h3>
-              <div className="mb-1">
-                <span className="text-slate-500 line-through text-sm mr-2">R$ 1.164,00</span>
+
+              <p className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-4">PLANO ANUAL</p>
+
+              {/* price block — aligned with mensal */}
+              <div className="flex-1 flex flex-col justify-center mb-6">
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-5xl font-bold text-white">R$ 57</span>
+                  <span className="text-slate-400 text-base">,38<span className="ml-1">/mês</span></span>
+                </div>
+                <p className="text-slate-500 text-sm line-through">R$ 97,00/mês no mensal</p>
+                <p className="text-emerald-400 text-sm font-medium mt-1">12x R$ 57,38 — cobrado anualmente</p>
               </div>
-              <div className="mb-1">
-                <span className="text-4xl font-bold text-white">R$ 697,00</span>
-                <span className="text-slate-400 text-sm ml-1">/ano</span>
-              </div>
-              <p className="text-emerald-400 text-sm mb-8">Equivale a R$ 58,08/mês</p>
+
               <Button
-                className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 font-bold animate-glow mt-auto"
+                className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 font-bold animate-glow"
                 onClick={() => window.open('https://hub.la/g/kUCz3mE6Gon3TeOz1h40', '_blank')}
               >
                 Garantir Desconto

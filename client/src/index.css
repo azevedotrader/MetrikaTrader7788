@@ -642,6 +642,90 @@
     will-change: transform;
   }
 
+  /* ── Feature cards 3D ── */
+  .feature-card-3d {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition:
+      transform 0.45s cubic-bezier(0.23, 1, 0.32, 1),
+      box-shadow 0.45s ease,
+      border-color 0.3s ease;
+  }
+  .feature-card-3d:hover {
+    transform: perspective(700px) rotateX(-6deg) rotateY(7deg) translateY(-6px) scale(1.02);
+    box-shadow:
+      18px 28px 56px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(110,224,0,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    border-color: rgba(110,224,0,0.25) !important;
+  }
+  /* alternate tilt direction for right-column cards */
+  .feature-card-3d:nth-child(3n+3):hover {
+    transform: perspective(700px) rotateX(-6deg) rotateY(-5deg) translateY(-6px) scale(1.02);
+    box-shadow:
+      -18px 28px 56px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(110,224,0,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .feature-card-3d:nth-child(3n+2):hover {
+    transform: perspective(700px) rotateX(-7deg) rotateY(0deg) translateY(-6px) scale(1.02);
+    box-shadow:
+      0 32px 60px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(110,224,0,0.22),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* shimmer sweep on hover */
+  .feature-card-shimmer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: linear-gradient(
+      120deg,
+      transparent 20%,
+      rgba(255,255,255,0.07) 50%,
+      transparent 80%
+    );
+    transform: translateX(-110%);
+    transition: transform 0s;
+  }
+  .feature-card-3d:hover .feature-card-shimmer {
+    transform: translateX(110%);
+    transition: transform 0.55s ease;
+  }
+
+  /* icon floats forward in 3D */
+  .feature-card-icon {
+    transition: transform 0.45s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.45s ease;
+    transform: translateZ(0);
+  }
+  .feature-card-3d:hover .feature-card-icon {
+    transform: translateZ(28px) scale(1.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  /* ── Performance: disable heavy effects on low-end / slow connections ── */
+  /* Blur orbs: GPU-expensive, hide on mobile to save battery */
+  @media (max-width: 768px) {
+    .animate-float { animation: none; }
+    .animate-device-idle { animation: none; }
+    .blur-3xl, .blur-xl { filter: none !important; }
+  }
+  /* Reduce motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-dashboard-scroll,
+    .animate-dashboard-scroll-mobile,
+    .animate-device-idle,
+    .animate-glow,
+    .animate-float,
+    .animate-pulse-slow { animation: none !important; }
+    .feature-card-3d:hover { transform: translateY(-4px) !important; }
+  }
+  /* Below-fold sections: defer paint */
+  section + section { content-visibility: auto; contain-intrinsic-size: 0 600px; }
+
   @keyframes tourHighlight {
     0%,100% { transform:scale(1);     box-shadow:0 0 20px rgba(110,224,0,.4); border-color:#6EE000; }
     50%      { transform:scale(1.015); box-shadow:0 0 35px rgba(110,224,0,.7); border-color:#6EE000; }
