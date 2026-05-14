@@ -29,8 +29,8 @@ import {
   X
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
-import dashboardPreview from "@assets/dashboard-preview.png";
-import dashboardPreviewMobile from "@assets/dashboard-preview-mobile.png";
+import dashboardPreview from "@assets/dashboard-preview.jpg";
+import dashboardPreviewMobile from "@assets/dashboard-preview-mobile.jpg";
 import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
 import { LanguageSelector } from "@/components/ui/language-selector";
@@ -459,12 +459,15 @@ export default function Landing() {
                 desc: "Filtre seus resultados por ativo, mercado ou tipo de operação. Saiba quais setups realmente funcionam — e quais estão destruindo sua média silenciosamente."
               }
             ].map((feature, i) => (
-              <div key={i} className="bg-[#0f0f1a] border border-[#1e1e2e] rounded-xl p-6 hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-200 group">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${feature.color} group-hover:scale-110 transition-transform duration-200`}>
+              <div key={i} className="feature-card-3d bg-[#0f0f1a] border border-[#1e1e2e] rounded-xl p-6 group">
+                {/* shimmer sweep */}
+                <div className="feature-card-shimmer" />
+                {/* icon */}
+                <div className={`feature-card-icon w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${feature.color}`}>
                   <feature.icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-white font-bold mb-2">{feature.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feature.desc}</p>
+                <h3 className="text-white font-bold mb-2 relative z-10">{feature.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed relative z-10">{feature.desc}</p>
               </div>
             ))}
           </div>
