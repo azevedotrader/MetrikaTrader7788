@@ -52,7 +52,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Wallet as WalletType } from "@shared/schema";
 
 export default function NovoTrade() {
