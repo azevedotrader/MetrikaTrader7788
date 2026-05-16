@@ -564,7 +564,7 @@ export default function Landing() {
 
               <Button
                 className="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold"
-                onClick={() => window.open('https://hub.la/g/CGRfvH9XIZzkXUFTkesn', '_blank')}
+                onClick={() => window.open('https://pay.hub.la/CGRfvH9XIZzkXUFTkesn', '_blank')}
               >
                 Assinar Mensal
               </Button>
@@ -592,7 +592,7 @@ export default function Landing() {
 
               <Button
                 className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 font-bold animate-glow"
-                onClick={() => window.open('https://hub.la/g/kUCz3mE6Gon3TeOz1h40', '_blank')}
+                onClick={() => window.open('https://pay.hub.la/kUCz3mE6Gon3TeOz1h40', '_blank')}
               >
                 Garantir Desconto
               </Button>
