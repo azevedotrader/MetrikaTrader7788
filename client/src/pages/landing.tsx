@@ -35,6 +35,7 @@ import { LoginModal } from "@/components/ui/login-modal";
 import { RegisterModal } from "@/components/ui/register-modal";
 import { LanguageSelector } from "@/components/ui/language-selector";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { trackViewContent, trackLead, trackInitiateCheckout } from "@/hooks/useMetaPixel";
 
 export default function Landing() {
   const { t } = useLanguage();
@@ -71,6 +72,11 @@ export default function Landing() {
     );
     document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
     return () => observer.disconnect();
+  }, []);
+
+  // Meta Pixel: registra visita à landing
+  useEffect(() => {
+    trackViewContent('Landing MetrikaTrader');
   }, []);
 
   const handleSwitchToRegister = () => {
@@ -122,7 +128,7 @@ export default function Landing() {
                 {t('landing.header.login')}
               </Button>
               <Button
-                onClick={() => setShowRegister(true)}
+                onClick={() => { trackLead({ content_name: 'Cadastro Landing' }); setShowRegister(true); }}
                 className="hidden sm:flex gradient-purple-blue hover:opacity-90 transition-opacity text-sm md:text-base px-2 md:px-4 py-2"
               >
                 {t('landing.header.start')}
@@ -229,7 +235,7 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <Button
                   size="lg"
-                  onClick={() => setShowRegister(true)}
+                  onClick={() => { trackLead({ content_name: 'Cadastro Landing' }); setShowRegister(true); }}
                   className="gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 px-8 py-4 text-base font-bold animate-glow"
                 >
                   Quero Evoluir Agora
@@ -564,7 +570,10 @@ export default function Landing() {
 
               <Button
                 className="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold"
-                onClick={() => window.open('https://pay.hub.la/CGRfvH9XIZzkXUFTkesn', '_blank')}
+                onClick={() => {
+                  trackInitiateCheckout({ value: 97, currency: 'BRL', content_name: 'Plano Mensal' });
+                  window.open('https://pay.hub.la/CGRfvH9XIZzkXUFTkesn', '_blank');
+                }}
               >
                 Assinar Mensal
               </Button>
@@ -592,7 +601,10 @@ export default function Landing() {
 
               <Button
                 className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 font-bold animate-glow"
-                onClick={() => window.open('https://pay.hub.la/kUCz3mE6Gon3TeOz1h40', '_blank')}
+                onClick={() => {
+                  trackInitiateCheckout({ value: 688.56, currency: 'BRL', content_name: 'Plano Anual' });
+                  window.open('https://pay.hub.la/kUCz3mE6Gon3TeOz1h40', '_blank');
+                }}
               >
                 Garantir Desconto
               </Button>

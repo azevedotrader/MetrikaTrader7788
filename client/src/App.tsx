@@ -17,6 +17,8 @@ import { NoPlanScreen } from "@/components/ui/no-plan-screen";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserPlan, isPaidPlan } from "@/hooks/useUserPlan";
 import { useState, useEffect } from "react";
+import { CookieConsent } from "@/components/ui/cookie-consent";
+import { initPixelIfConsented } from "@/hooks/useMetaPixel";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
@@ -73,6 +75,8 @@ function AppContent() {
   useEffect(() => {
     const saved = localStorage.getItem('metrika-theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
+    // Inicializa Meta Pixel se o usuário já tinha aceitado anteriormente
+    initPixelIfConsented();
   }, []);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -80,6 +84,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Banner de consentimento LGPD + Meta Pixel */}
+      <CookieConsent />
       <Switch>
         {/* Public test page - accessible without authentication */}
         <Route path="/teste-gateio">
