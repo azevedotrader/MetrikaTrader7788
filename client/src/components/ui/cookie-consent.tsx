@@ -39,7 +39,7 @@ export function CookieConsent() {
         {/* Texto */}
         <div className="flex-1 min-w-0">
           <p className="text-sm text-slate-200 font-medium leading-snug">
-            Usamos cookies para melhorar sua experiência e personalizar anúncios.
+            Usamos cookies para melhorar sua experiência.
           </p>
           <p className="text-xs text-slate-400 mt-0.5">
             Ao aceitar, você concorda com nossa{' '}

@@ -11,7 +11,6 @@ import {
   FileSpreadsheet,
   TrendingUp,
   X,
-  MessageCircle,
   Calculator,
   Upload,
   Wallet,
@@ -32,7 +31,6 @@ const navigation = [
   { nameKey: "nav.wallets", href: "/carteiras", icon: Wallet },
   { nameKey: "risk_management.title", href: "/gestao", icon: Calculator },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
-  { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
   { nameKey: "profile.title", href: "/perfil", icon: User },
 ];
 
@@ -192,53 +190,6 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
               </span>
             </Button>
 
-            {/* Análise CSV com IA */}
-            <Button
-              onClick={handleAnalyzeCsv}
-              className={cn(
-                "w-full text-[#6EE000] hover:bg-[#6EE000]/20 hover:text-[#a3ff4d] transition-all duration-200 bg-[#6EE000]/10 border border-[#6EE000]/20 rounded-lg h-9",
-                sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
-              )}
-              title={!sidebarExpanded ? t('brokers.csv_import') : undefined}
-              data-testid="analyze-csv-sidebar-button"
-            >
-              <FileSpreadsheet className={cn(
-                "w-4 h-4 flex-shrink-0",
-                sidebarExpanded && "mr-2"
-              )} />
-              <span 
-                className={cn(
-                  "transition-all duration-300 whitespace-nowrap text-sm",
-                  sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
-                )}
-              >
-                {t('brokers.csv_import')}
-              </span>
-            </Button>
-
-            {/* Gerenciar Importações */}
-            <Button
-              onClick={handleManageImports}
-              className={cn(
-                "w-full text-blue-400 hover:bg-blue-600/20 hover:text-blue-300 transition-all duration-200 bg-blue-600/10 border border-blue-600/20 rounded-lg h-9",
-                sidebarExpanded ? "justify-start px-3" : "justify-center px-0"
-              )}
-              title={!sidebarExpanded ? t('imports.manage_description') : undefined}
-              data-testid="manage-imports-sidebar-button"
-            >
-              <Upload className={cn(
-                "w-4 h-4 flex-shrink-0",
-                sidebarExpanded && "mr-2"
-              )} />
-              <span 
-                className={cn(
-                  "transition-all duration-300 whitespace-nowrap text-sm",
-                  sidebarExpanded ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 w-0"
-                )}
-              >
-                {t('tabs.imports')}
-              </span>
-            </Button>
           </div>
 
           {/* User Profile Footer */}
