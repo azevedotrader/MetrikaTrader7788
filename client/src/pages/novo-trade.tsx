@@ -273,7 +273,7 @@ export default function NovoTrade() {
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
 
       {/* ── Registrar Trade por Texto ── */}
-      <Card className="bg-[#0d0d18] border-[#6EE000]/25">
+      <Card className="bg-[#0d0d18] border-[#6EE000]/25" data-testid="quick-entry-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-base">
             <Zap className="h-5 w-5 text-[#6EE000]" />
