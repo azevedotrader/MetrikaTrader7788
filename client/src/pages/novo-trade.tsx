@@ -1,7 +1,5 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { insertTradeSchema, type InsertTrade, type Trade } from "@shared/schema";
+import { type InsertTrade, type Trade } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,14 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -37,10 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  DollarSign,
   TrendingUp,
   TrendingDown,
-  Calculator,
   Wallet,
   Zap,
   ClipboardList,
@@ -48,145 +36,149 @@ import {
   Trash2,
   CheckCircle2,
   XCircle,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Wallet as WalletType } from "@shared/schema";
+
+// ── tipos internos ───────────────────────────────────────────────────────────
+interface ParsedTrade {
+  ativo: string;
+  mercado: string;
+  tipo: 'compra' | 'venda';
+  resultado: 'take' | 'loss' | 'be' | '';
+  valor: number | null;   // valor financeiro do resultado
+  alvo: string;
+  stop: string;
+  hora: string;
+  raw: string;
+  missing: string[];
+}
+
+// ── inferir mercado pelo nome do ativo ───────────────────────────────────────
+function inferMercado(ativo: string): string {
+  const a = ativo.toUpperCase();
+  const cryptos = ['BTC','ETH','SOL','BNB','XRP','ADA','DOGE','AVAX','DOT','LINK','LTC','MATIC','UNI'];
+  if (cryptos.some(c => a.includes(c))) return 'crypto';
+  const fxBase = ['EUR','GBP','AUD','NZD','CAD','CHF','JPY','USD','NOK','SEK'];
+  const isFx = fxBase.some(c => a.startsWith(c)) && a.length === 6;
+  if (isFx || ['XAUUSD','XAGUSD','DE40','US30','UK100','USTEC','NAS','SPX'].some(s => a.includes(s))) return 'forex';
+  return 'b3';
+}
+
+// ── parser de linha ───────────────────────────────────────────────────────────
+function parseQuickLine(line: string): ParsedTrade | null {
+  const raw = line.trim();
+  if (!raw) return null;
+  const l = raw.toUpperCase();
+  const missing: string[] = [];
+
+  // ativo
+  const ativoMatch = l.match(/\b([A-Z]{3,8}(?:USD|BTC|EUR|GBP|JPY|BRL|USDT|NZD|CAD|CHF|AUD)?)\b/);
+  const ativo = ativoMatch ? ativoMatch[1] : '';
+  if (!ativo) missing.push('ativo');
+
+  // tipo: long/compra ou short/venda
+  const tipo: 'compra'|'venda' = /\bSHORT\b|\bVENDA\b|\bSELL\b/.test(l) ? 'venda' : 'compra';
+
+  // resultado: take / loss / stop / be
+  const res = /\bTAKE\b|\bTP\b/.test(l) ? 'take'
+    : /\bLOSS\b|\bSTOP\b/.test(l) ? 'loss'
+    : /\bBE\b/.test(l) ? 'be'
+    : '';
+  if (!res) missing.push('resultado (take, loss, be)');
+
+  // valor financeiro: R$150, +150, -150
+  const valMatch = l.match(/[R$]\s*(\d+(?:[.,]\d+)?)|([+-]?\s*\d+(?:[.,]\d+)?)\s*(?:REAIS|R\b)/);
+  const valor = valMatch
+    ? parseFloat((valMatch[1] || valMatch[2]).replace(',','.').replace(/\s/,''))
+    : null;
+
+  // alvo / stop como valores separados  "alvo 500 stop 200"
+  const alvoMatch = l.match(/(?:ALVO|TAKE|TP)\s+(\d+(?:[.,]\d+)?)/);
+  const stopMatch = l.match(/(?:STOP|SL|LOSS)\s+(\d+(?:[.,]\d+)?)/);
+  const alvo = alvoMatch ? alvoMatch[1].replace(',','.') : '';
+  const stop = stopMatch ? stopMatch[1].replace(',','.') : '';
+
+  // hora
+  const horaMatch = l.match(/(\d{1,2})[Hh:](\d{2})/);
+  const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
+
+  // resultado financeiro: se take → +alvo, loss → -stop, ou valor explícito
+  let resultadoFinal: number | null = valor;
+  if (resultadoFinal === null) {
+    if (res === 'take' && alvo) resultadoFinal = parseFloat(alvo);
+    if (res === 'loss' && stop) resultadoFinal = -parseFloat(stop);
+    if (res === 'be') resultadoFinal = 0;
+  } else {
+    resultadoFinal = res === 'loss' ? -Math.abs(resultadoFinal) : Math.abs(resultadoFinal);
+  }
+
+  return { ativo, mercado: inferMercado(ativo), tipo, resultado: res as any, valor: resultadoFinal, alvo, stop, hora, raw, missing };
+}
 
 export default function NovoTrade() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  // Fetch user's custom wallets
-  const { data: wallets = [] } = useQuery<WalletType[]>({
-    queryKey: ['/api/wallets'],
-  });
 
-  // State para carteira selecionada
-  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
+  const { data: wallets = [] } = useQuery<WalletType[]>({ queryKey: ['/api/wallets'] });
 
   // ── Entrada Rápida ──────────────────────────────────────────
-  const [quickText, setQuickText] = useState('');
-  const [quickParsed, setQuickParsed] = useState<Array<{ativo:string,resultado:string,risco:string,hora:string,raw:string}>>([]);
+  const [quickText, setQuickText]     = useState('');
+  const [parsed, setParsed]           = useState<ParsedTrade[]>([]);
+  const [savedIds, setSavedIds]       = useState<Set<number>>(new Set());
+  const [quickWallet, setQuickWallet] = useState<string | null>(null);
 
-  function parseQuickTrade(line: string) {
-    const l = line.trim().toUpperCase();
-    if (!l) return null;
-
-    // ativo: primeira palavra não numérica
-    const ativoMatch = l.match(/^([A-Z]{3,8}(?:USD|BTC|EUR|GBP|JPY|BRL|USDT)?)/);
-    const ativo = ativoMatch ? ativoMatch[1] : '';
-
-    // resultado: take ou loss
-    const resultado = /\bTAKE\b/.test(l) ? 'take' : /\bLOSS\b|\bSTOP\b/.test(l) ? 'loss' : '';
-
-    // risco: número seguido de X ou R (ex: 3x, 2.5R, 1.5x)
-    const riscoMatch = l.match(/(\d+(?:[.,]\d+)?)\s*[XR]\b/);
-    const risco = riscoMatch ? riscoMatch[1].replace(',','.') : '';
-
-    // hora: padrão HH:MM ou HHhMM ou HHhMM
-    const horaMatch = l.match(/(\d{1,2})[Hh:](\d{2})/);
-    const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
-
-    return { ativo, resultado, risco, hora, raw: line.trim() };
-  }
-
-  function handleQuickParse() {
+  function handleParse() {
     const lines = quickText.split('\n').filter(l => l.trim());
-    const parsed = lines.map(parseQuickTrade).filter(Boolean) as Array<{ativo:string,resultado:string,risco:string,hora:string,raw:string}>;
-    setQuickParsed(parsed);
+    const result = lines.map(parseQuickLine).filter(Boolean) as ParsedTrade[];
+    setParsed(result);
+    setSavedIds(new Set());
   }
 
-  function applyQuickTrade(p: {ativo:string,resultado:string,risco:string,hora:string}) {
-    if (p.ativo) form.setValue('ativo', p.ativo);
-    if (p.hora) {
-      const today = new Date().toISOString().slice(0,10);
-      form.setValue('dataHora', `${today}T${p.hora}`);
-    }
-    if (p.resultado === 'take') { setTradeResult('take'); }
-    if (p.resultado === 'loss') { setTradeResult('loss'); }
-    if (p.risco) form.setValue('alvo', p.risco);
-    setQuickText('');
-    setQuickParsed([]);
-  }
-  
-  // Setup options with translations
-  const setupOptions = [
-    t('setup.breakout'),
-    t('setup.pullback'),
-    t('setup.reversao'),
-    t('setup.tendencia'),
-    t('setup.support_resistance'),
-    t('setup.fibonacci'),
-    t('setup.candlestick'),
-    t('setup.divergencia'),
-    t('setup.scalping'),
-    t('setup.swing'),
-    t('setup.outros'),
-  ];
-
-  // Emoção options with translations
-  const emocaoOptions = [
-    { value: "confiante", label: t('emotions.confident') },
-    { value: "calmo", label: t('emotions.calm') },
-    { value: "neutro", label: t('emotions.neutral') },
-    { value: "ansioso", label: t('emotions.anxious') },
-    { value: "medo", label: t('emotions.fear') },
-    { value: "impulsivo", label: "Impulsivo" },
-    { value: "eufórico", label: t('emotions.excited') },
-    { value: "frustrado", label: t('emotions.frustrated') },
-  ];
-
-  // State para resultado do trade e cálculos
-  const [tradeResult, setTradeResult] = useState<"take" | "loss" | null>(null);
-  const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
-  const [finalResult, setFinalResult] = useState<number | null>(null);
-
-  const form = useForm<InsertTrade>({
-    resolver: zodResolver(insertTradeSchema),
-    defaultValues: {
-      dataHora: new Date().toISOString().slice(0, 16),
-      ativo: "",
-      tipo: "compra",
-      resultado: "",
-      alvo: "",
-      stop: "",
-      setup: setupOptions[0] || "",
+  function buildInsertTrade(p: ParsedTrade, walletId: string | null): InsertTrade {
+    const today = new Date().toISOString().slice(0, 10);
+    const dataHora = p.hora ? `${today}T${p.hora}` : new Date().toISOString().slice(0, 16);
+    return {
+      dataHora,
+      ativo: p.ativo,
+      mercado: p.mercado,
+      tipo: p.tipo,
+      resultado: p.valor !== null ? String(p.valor) : '0',
+      alvo: p.alvo || '',
+      stop: p.stop || '',
+      setup: '',
       emocao: undefined,
-      comentario: "",
-      mercado: "crypto",
-      corretora: "crypto",
-    },
-  });
+      comentario: '',
+      corretora: p.mercado,
+      walletId: walletId || undefined,
+    } as any;
+  }
 
-  // Watch values for calculations
-  const alvoValue = form.watch("alvo");
-  const stopValue = form.watch("stop");
+  async function saveSingle(idx: number) {
+    const p = parsed[idx];
+    if (!p || p.missing.length > 0) return;
+    await createTradeMutation.mutateAsync(buildInsertTrade(p, quickWallet));
+    setSavedIds(prev => new Set([...prev, idx]));
+  }
 
-  // Calcular Risk/Reward e resultado final
-  useEffect(() => {
-    const alvo = parseFloat(alvoValue || "0");
-    const stop = parseFloat(stopValue || "0");
-
-    if (alvo > 0 && stop > 0) {
-      const ratio = alvo / stop;
-      setRiskRewardRatio(ratio);
-
-      // Calcular resultado baseado na seleção
-      if (tradeResult === "take") {
-        setFinalResult(alvo);
-        form.setValue("resultado", alvo.toString());
-      } else if (tradeResult === "loss") {
-        setFinalResult(-stop);
-        form.setValue("resultado", (-stop).toString());
-      }
-    } else {
-      setRiskRewardRatio(null);
-      setFinalResult(null);
+  async function saveAll() {
+    const toSave = parsed.filter((p, i) => p.missing.length === 0 && !savedIds.has(i));
+    for (const [i, p] of toSave.map((p, ri) => [parsed.indexOf(p), p] as [number, ParsedTrade])) {
+      await createTradeMutation.mutateAsync(buildInsertTrade(p, quickWallet));
+      setSavedIds(prev => new Set([...prev, i]));
     }
-  }, [alvoValue, stopValue, tradeResult, form]);
+    if (toSave.length > 0) {
+      setQuickText('');
+      setParsed([]);
+      setSavedIds(new Set());
+    }
+  }
 
   // ── Estado para o log de trades ──────────────────────────────────────────
   const { data: allTrades = [] } = useQuery<Trade[]>({
@@ -208,24 +200,11 @@ export default function NovoTrade() {
   const createTradeMutation = useMutation({
     mutationFn: (data: InsertTrade) => apiRequest("POST", "/api/trades", data),
     onSuccess: () => {
-      toast({
-        title: t('form.trade_saved'),
-        description: t('form.trade_saved_desc'),
-      });
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
       queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
-      form.reset();
-      setTradeResult(null);
-      setRiskRewardRatio(null);
-      setFinalResult(null);
-      setSelectedWalletId(null);
     },
     onError: (error: any) => {
-      toast({
-        title: t('form.error_saving'),
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao salvar trade", description: error.message, variant: "destructive" });
     },
   });
 
@@ -267,488 +246,130 @@ export default function NovoTrade() {
     let resultado = parseFloat(String(editForm.resultado || 0));
     if (editTradeResult === 'take' && alvo > 0) resultado = alvo;
     if (editTradeResult === 'loss' && stop > 0) resultado = -stop;
-    updateTradeMutation.mutate({
-      id: editingTrade.id,
-      data: { ...editForm, resultado: String(resultado) },
-    });
+    updateTradeMutation.mutate({ id: editingTrade.id, data: { ...editForm, resultado: String(resultado) } });
   };
 
-  const onSubmit = (data: InsertTrade) => {
-    if (!tradeResult) {
-      toast({
-        title: t('form.select_result'),
-        description: t('form.select_result_desc'),
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Ensure resultado is set correctly
-    data.resultado = finalResult?.toString() || "0";
-    
-    // Include walletId if a custom wallet is selected
-    const tradeData = {
-      ...data,
-      walletId: selectedWalletId || undefined,
-    };
-
-    createTradeMutation.mutate(tradeData);
-  };
+  const validCount = parsed.filter((p, i) => p.missing.length === 0 && !savedIds.has(i)).length;
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
 
-      {/* ── Entrada Rápida ── */}
-      <Card className="bg-graphite/50 border-charcoal-700 border-[#6EE000]/30">
+      {/* ── Registrar Trade por Texto ── */}
+      <Card className="bg-[#0d0d18] border-[#6EE000]/25">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-base">
             <Zap className="h-5 w-5 text-[#6EE000]" />
-            Entrada Rápida
-            <span className="ml-auto text-xs font-normal text-zinc-500">opcional</span>
+            Registrar Trade
           </CardTitle>
-          <CardDescription className="text-zinc-400 text-xs">
-            Digite como quiser — o app reconhece e preenche o formulário. Ex: <span className="text-[#6EE000] font-mono">BTCUSD take 3x 7h48</span>
+          <CardDescription className="text-zinc-500 text-xs">
+            Digite um trade por linha — o app reconhece e registra direto.
+            Ex: <span className="text-[#6EE000] font-mono">EURUSD take R$500 9h15</span> &nbsp;·&nbsp;
+            <span className="text-zinc-400 font-mono">BTCUSD loss 7h48</span> &nbsp;·&nbsp;
+            <span className="text-zinc-400 font-mono">PETR4 take alvo 300 stop 100 14h30</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <textarea
-            value={quickText}
-            onChange={e => { setQuickText(e.target.value); setQuickParsed([]); }}
-            placeholder={"BTCUSD take 3x 7h48\nEURUSD loss 9h15\nGOLD take 2.5x 14h30"}
-            className="w-full min-h-[90px] bg-[#0a0a0f] border border-zinc-700 rounded-lg p-3 text-sm text-white placeholder:text-zinc-600 font-mono resize-y focus:outline-none focus:border-[#6EE000] transition-colors"
-          />
-          <Button
-            type="button"
-            onClick={handleQuickParse}
-            className="bg-[#6EE000] hover:bg-[#6EE000] text-black font-bold text-sm px-4 py-2 h-auto"
-          >
-            <Zap className="w-4 h-4 mr-2" />
-            Reconhecer trades
-          </Button>
-
-          {quickParsed.length > 0 && (
-            <div className="space-y-2 pt-1">
-              {quickParsed.map((p, i) => (
-                <div key={i} className="flex items-center justify-between bg-[#0a0a0f] border border-zinc-700 rounded-lg px-3 py-2 gap-3">
-                  <div className="flex items-center gap-2 flex-wrap text-sm">
-                    <span className="font-bold text-white">{p.ativo || '?'}</span>
-                    {p.resultado && <span className={`px-2 py-0.5 rounded text-xs font-bold ${p.resultado==='take'?'bg-[#6EE000]/20 text-[#6EE000]':'bg-[#FF1F3D]/20 text-[#FF1F3D]'}`}>{p.resultado==='take'?'Take':'Loss'}</span>}
-                    {p.risco && <span className="text-zinc-400 text-xs">{p.risco}x risco</span>}
-                    {p.hora && <span className="text-zinc-500 text-xs">{p.hora}</span>}
-                  </div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => applyQuickTrade(p)}
-                    className="bg-[#6EE000]/20 hover:bg-[#6EE000] text-[#6EE000] hover:text-black border border-[#6EE000]/40 text-xs h-7 px-3 transition-all"
-                  >
-                    Aplicar
-                  </Button>
-                </div>
-              ))}
-              {quickParsed.length > 1 && (
-                <p className="text-xs text-zinc-500 pt-1">💡 Clique em "Aplicar" em cada trade para preencher o formulário um a um.</p>
-              )}
+          {/* Carteira (opcional) */}
+          {wallets.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Wallet className="w-3.5 h-3.5 text-[var(--b)] shrink-0" />
+              <Select value={quickWallet ?? '__none'} onValueChange={v => setQuickWallet(v === '__none' ? null : v)}>
+                <SelectTrigger className="h-8 text-xs bg-[#13131a] border-[#28283a] text-white w-48">
+                  <SelectValue placeholder="Sem carteira" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#13131a] border-[#28283a]">
+                  <SelectItem value="__none"><span className="text-zinc-500">— Sem carteira —</span></SelectItem>
+                  {wallets.map(w => (
+                    <SelectItem key={w.id} value={w.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: w.color || '#6EE000' }} />
+                        {w.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
-        </CardContent>
-      </Card>
 
-      <Card className="bg-graphite/50 border-charcoal-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-neutral-400" />
-            {t('form.trade_data')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              data-testid="trade-form"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              {/* Linha 1 - Data/Hora, Ativo, Mercado */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
-                <FormField
-                  control={form.control}
-                  name="dataHora"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.date_time')} *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="datetime-local"
-                          className="bg-charcoal-800 border-charcoal-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <textarea
+            value={quickText}
+            onChange={e => { setQuickText(e.target.value); setParsed([]); setSavedIds(new Set()); }}
+            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleParse(); }}
+            placeholder={"EURUSD take R$500 9h15\nBTCUSD loss 7h48\nPETR4 take alvo 300 stop 100 14h30"}
+            rows={3}
+            className="w-full bg-[#080810] border border-[#1e1e2e] rounded-xl p-3 text-sm text-white placeholder:text-zinc-700 font-mono resize-y focus:outline-none focus:border-[#6EE000]/60 transition-colors"
+          />
 
-                <FormField
-                  control={form.control}
-                  name="ativo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.asset')} *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: BTCUSDT, EURUSD, PETR4"
-                          className="bg-charcoal-800 border-charcoal-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <div className="flex items-center gap-3">
+            <Button type="button" onClick={handleParse}
+              className="bg-[#6EE000] hover:bg-[#5bc800] text-black font-bold text-sm px-5 h-9">
+              <Zap className="w-4 h-4 mr-1.5" /> Reconhecer
+            </Button>
+            {parsed.length > 0 && validCount > 0 && (
+              <Button type="button" onClick={saveAll} disabled={createTradeMutation.isPending}
+                className="bg-white/10 hover:bg-white/15 text-white border border-white/20 text-sm h-9 px-4">
+                <Check className="w-4 h-4 mr-1.5" />
+                Registrar {validCount > 1 ? `todos (${validCount})` : 'trade'}
+              </Button>
+            )}
+            <span className="text-[10px] text-zinc-600 ml-auto">Ctrl+Enter para reconhecer</span>
+          </div>
 
-                <FormField
-                  control={form.control}
-                  name="mercado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.market')} *
-                      </FormLabel>
-                      <Select
-                        onValueChange={(v) => {
-                          field.onChange(v);
-                          form.setValue("corretora", v as any);
-                        }}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                            <SelectValue placeholder={t('form.select_market')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                          <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
-                          <SelectItem value="forex">{t('form.forex')}</SelectItem>
-                          <SelectItem value="b3">{t('form.b3')}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Linha 2 - Tipo e Emoção */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
-                <FormField
-                  control={form.control}
-                  name="tipo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.type')} *
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                            <SelectValue placeholder={t('form.buy_or_sell')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                          <SelectItem value="compra">
-                            <span className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-[#6EE000]" />
-                              {t('form.buy')}
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="venda">
-                            <span className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-[#FF1F3D]" />
-                              {t('form.sell')}
-                            </span>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="emocao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.emotion')}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                            <SelectValue placeholder={t('form.how_felt')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                          {emocaoOptions.map((emocao) => (
-                            <SelectItem
-                              key={emocao.value}
-                              value={emocao.value}
-                            >
-                              {emocao.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Linha 2b - Carteira */}
-              {wallets.length > 0 && (
-                <div>
-                  <Label className="text-charcoal-300 text-sm font-medium flex items-center gap-1.5 mb-2">
-                    <Wallet className="h-3.5 w-3.5 text-[var(--b)]" />
-                    Carteira <span className="text-charcoal-400 font-normal">(opcional)</span>
-                  </Label>
-                  <Select
-                    value={selectedWalletId ?? "__default"}
-                    onValueChange={(v) => setSelectedWalletId(v === "__default" ? null : v)}
-                  >
-                    <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                      <SelectValue placeholder="Carteira padrão do mercado" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                      <SelectItem value="__default">
-                        <span className="text-charcoal-400">— Sem carteira específica —</span>
-                      </SelectItem>
-                      {wallets.map((w) => (
-                        <SelectItem key={w.id} value={w.id}>
-                          <span className="flex items-center gap-2">
-                            <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: w.color || '#6EE000' }} />
-                            {w.name}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Linha 3 - Take/Stop com Resultado */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="alvo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.take_profit')} *
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="1000.00"
-                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="stop"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.stop_loss')} *
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="200.00"
-                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Resultado da Operação e Cálculos */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-charcoal-300">
-                    {t('form.trade_result')} *
-                  </label>
-                  {!tradeResult && (
-                    <p className="text-xs text-[#FF1F3D] mb-2">
-                      {t('form.select_result_warning')}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      type="button"
-                      variant={
-                        tradeResult === "take" ? "default" : "outline"
-                      }
-                      onClick={() => setTradeResult("take")}
-                      className={`${
-                        tradeResult === "take"
-                          ? "bg-[#6EE000] hover:bg-[#6EE000] text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-[#6EE000]/20"
-                      }`}
-                    >
-                      {t('form.take')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={
-                        tradeResult === "loss" ? "default" : "outline"
-                      }
-                      onClick={() => setTradeResult("loss")}
-                      className={`${
-                        tradeResult === "loss"
-                          ? "bg-[#FF1F3D] hover:bg-[#FF1F3D] text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-[#FF1F3D]/20"
-                      }`}
-                    >
-                      {t('form.loss')}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Calculations Display */}
-                {(riskRewardRatio || finalResult !== null) && (
-                  <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
-                    <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                      <Calculator className="w-4 h-4 text-neutral-400" />
-                      {t('form.auto_calculations')}
-                    </h4>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-charcoal-300 text-sm mb-1">
-                          {t('form.risk_reward_ratio')}
-                        </div>
-                        <div className="text-neutral-400 font-semibold text-lg">
-                          {riskRewardRatio
-                            ? `1:${riskRewardRatio.toFixed(2)}`
-                            : "--"}
-                        </div>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="text-charcoal-300 text-sm mb-1">
-                          {t('form.financial_result')}
-                        </div>
-                        <div
-                          className={`font-semibold text-lg ${
-                            finalResult === null
-                              ? "text-charcoal-400"
-                              : finalResult >= 0
-                                ? "text-[#6EE000]"
-                                : "text-[#FF1F3D]"
-                          }`}
-                        >
-                          {finalResult === null
-                            ? "--"
-                            : finalResult >= 0
-                              ? `+R$ ${finalResult.toFixed(2)}`
-                              : `R$ ${finalResult.toFixed(2)}`}
-                        </div>
-                      </div>
+          {/* Trades reconhecidos */}
+          {parsed.length > 0 && (
+            <div className="space-y-2 pt-1">
+              {parsed.map((p, i) => {
+                const isSaved = savedIds.has(i);
+                const hasError = p.missing.length > 0;
+                return (
+                  <div key={i} className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 transition-all ${
+                    isSaved ? 'bg-[#6EE000]/5 border-[#6EE000]/30 opacity-60'
+                    : hasError ? 'bg-[#FF1F3D]/5 border-[#FF1F3D]/20'
+                    : 'bg-[#0d0d18] border-[#1e1e2e]'
+                  }`}>
+                    {/* ativo + mercado */}
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="font-bold text-white text-sm">{p.ativo || '?'}</span>
+                      <span className="text-[10px] text-zinc-600 uppercase">{p.mercado}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${p.tipo==='compra'?'text-[#6EE000] bg-[#6EE000]/10':'text-[#FF1F3D] bg-[#FF1F3D]/10'}`}>
+                        {p.tipo === 'compra' ? '▲ Long' : '▼ Short'}
+                      </span>
+                      {p.resultado && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                          p.resultado==='take'?'bg-[#6EE000]/15 text-[#6EE000]'
+                          :p.resultado==='be'?'bg-amber-500/15 text-amber-400'
+                          :'bg-[#FF1F3D]/15 text-[#FF1F3D]'}`}>
+                          {p.resultado.toUpperCase()}
+                        </span>
+                      )}
+                      {p.valor !== null && (
+                        <span className={`text-sm font-bold tabular-nums ${p.valor>=0?'text-[#6EE000]':'text-[#FF1F3D]'}`}>
+                          {p.valor>=0?'+':''}R${Math.abs(p.valor).toLocaleString('pt-BR',{maximumFractionDigits:2})}
+                        </span>
+                      )}
+                      {p.hora && <span className="text-[10px] text-zinc-500">{p.hora}</span>}
+                      {hasError && (
+                        <span className="text-[10px] text-[#FF1F3D] flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> falta: {p.missing.join(', ')}
+                        </span>
+                      )}
                     </div>
-
-                    {riskRewardRatio && (
-                      <div className="mt-3 p-2 bg-charcoal-700/50 rounded text-center">
-                        <div
-                          className={`text-sm font-medium ${
-                            riskRewardRatio >= 3
-                              ? "text-[#6EE000]"
-                              : riskRewardRatio >= 2
-                                ? "text-yellow-500"
-                                : "text-[#FF1F3D]"
-                          }`}
-                        >
-                          {riskRewardRatio >= 3
-                            ? t('form.excellent_ratio')
-                            : riskRewardRatio >= 2
-                              ? t('form.good_ratio')
-                              : t('form.risky_ratio')}
-                        </div>
-                      </div>
-                    )}
+                    {/* ação */}
+                    {isSaved ? (
+                      <span className="text-[#6EE000] text-xs flex items-center gap-1 shrink-0"><CheckCircle2 className="w-4 h-4" /> Salvo</span>
+                    ) : !hasError ? (
+                      <Button type="button" size="sm" onClick={() => saveSingle(i)}
+                        disabled={createTradeMutation.isPending}
+                        className="bg-[#6EE000]/15 hover:bg-[#6EE000] text-[#6EE000] hover:text-black border border-[#6EE000]/30 text-xs h-7 px-3 shrink-0 transition-all">
+                        Salvar
+                      </Button>
+                    ) : null}
                   </div>
-                )}
-              </div>
-
-              {/* Comentário */}
-              <FormField
-                control={form.control}
-                name="comentario"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-charcoal-300">
-                      {t('form.trade_comment')}
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t('form.comment_placeholder')}
-                        className="bg-charcoal-800 border-charcoal-600 text-white min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={createTradeMutation.isPending}
-                  className="gradient-purple-blue hover:opacity-90 transition-opacity"
-                >
-                  {createTradeMutation.isPending
-                    ? t('form.saving')
-                    : t('form.save_trade')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => form.reset()}
-                  className="border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
-                >
-                  {t('form.clear')}
-                </Button>
-              </div>
-            </form>
-          </Form>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
