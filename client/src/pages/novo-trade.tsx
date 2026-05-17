@@ -52,6 +52,7 @@ interface ParsedTrade {
   tipo: 'compra' | 'venda';
   resultado: 'take' | 'loss' | 'be' | '';
   valor: number | null;   // valor financeiro do resultado
+  multiplier: number | null; // 3x / 3R = múltiplo do risco
   alvo: string;
   stop: string;
   hora: string;
@@ -92,13 +93,18 @@ function parseQuickLine(line: string): ParsedTrade | null {
     : '';
   if (!res) missing.push('resultado (take, loss, be)');
 
-  // valor financeiro: R$150, +150, -150
-  const valMatch = l.match(/[R$]\s*(\d+(?:[.,]\d+)?)|([+-]?\s*\d+(?:[.,]\d+)?)\s*(?:REAIS|R\b)/);
-  const valor = valMatch
-    ? parseFloat((valMatch[1] || valMatch[2]).replace(',','.').replace(/\s/,''))
+  // múltiplo do risco: 3x, 2.5x, 3R, 2R  (3x == 3R == ganhou/perdeu 3× o risco)
+  // Deve vir ANTES do match de valor financeiro para não confundir "3R" com "R$3"
+  const multMatch = l.match(/\b(\d+(?:[.,]\d+)?)\s*[Xx]\b|\b(\d+(?:[.,]\d+)?)\s*R\b(?!\$)/);
+  const multiplier = multMatch
+    ? parseFloat((multMatch[1] || multMatch[2]).replace(',','.'))
     : null;
 
-  // alvo / stop como valores separados  "alvo 500 stop 200"
+  // valor financeiro explícito: R$150, R$ 500  (cifrão após R)
+  const valMatch = l.match(/R\$\s*(\d+(?:[.,]\d+)?)/);
+  const valor = valMatch ? parseFloat(valMatch[1].replace(',','.')) : null;
+
+  // alvo / stop como valores separados "alvo 500 stop 200"
   const alvoMatch = l.match(/(?:ALVO|TAKE|TP)\s+(\d+(?:[.,]\d+)?)/);
   const stopMatch = l.match(/(?:STOP|SL|LOSS)\s+(\d+(?:[.,]\d+)?)/);
   const alvo = alvoMatch ? alvoMatch[1].replace(',','.') : '';
@@ -108,17 +114,27 @@ function parseQuickLine(line: string): ParsedTrade | null {
   const horaMatch = l.match(/(\d{1,2})[Hh:](\d{2})/);
   const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
 
-  // resultado financeiro: se take → +alvo, loss → -stop, ou valor explícito
-  let resultadoFinal: number | null = valor;
-  if (resultadoFinal === null) {
-    if (res === 'take' && alvo) resultadoFinal = parseFloat(alvo);
-    if (res === 'loss' && stop) resultadoFinal = -parseFloat(stop);
-    if (res === 'be') resultadoFinal = 0;
-  } else {
-    resultadoFinal = res === 'loss' ? -Math.abs(resultadoFinal) : Math.abs(resultadoFinal);
+  // valor financeiro final (hierarquia):
+  // 1. valor explícito (R$500)
+  // 2. multiplier × stop  (3x com stop 200 → R$600)
+  // 3. alvo/stop direto
+  // 4. be → 0
+  let resultadoFinal: number | null = null;
+  if (valor !== null) {
+    resultadoFinal = res === 'loss' ? -Math.abs(valor) : Math.abs(valor);
+  } else if (multiplier !== null && stop) {
+    const stopVal = parseFloat(stop);
+    resultadoFinal = res === 'loss' ? -(multiplier * stopVal) : multiplier * stopVal;
+  } else if (res === 'take' && alvo) {
+    resultadoFinal = parseFloat(alvo);
+  } else if (res === 'loss' && stop) {
+    resultadoFinal = -parseFloat(stop);
+  } else if (res === 'be') {
+    resultadoFinal = 0;
   }
+  // multiplier sem stop: valor fica null mas o múltiplo é mostrado na UI
 
-  return { ativo, mercado: inferMercado(ativo), tipo, resultado: res as any, valor: resultadoFinal, alvo, stop, hora, raw, missing };
+  return { ativo, mercado: inferMercado(ativo), tipo, resultado: res as any, valor: resultadoFinal, multiplier, alvo, stop, hora, raw, missing };
 }
 
 export default function NovoTrade() {
@@ -152,6 +168,8 @@ export default function NovoTrade() {
       resultado: p.valor !== null ? String(p.valor) : '0',
       alvo: p.alvo || '',
       stop: p.stop || '',
+      // multiplier salvo em risco: 3x → risco = "3.00" (vezes o risco base)
+      risco: p.multiplier !== null ? String(p.multiplier) : undefined,
       setup: '',
       emocao: undefined,
       comentario: '',
@@ -261,11 +279,21 @@ export default function NovoTrade() {
             <Zap className="h-5 w-5 text-[#6EE000]" />
             Registrar Trade
           </CardTitle>
-          <CardDescription className="text-zinc-500 text-xs">
-            Digite um trade por linha — o app reconhece e registra direto.
-            Ex: <span className="text-[#6EE000] font-mono">EURUSD take R$500 9h15</span> &nbsp;·&nbsp;
-            <span className="text-zinc-400 font-mono">BTCUSD loss 7h48</span> &nbsp;·&nbsp;
-            <span className="text-zinc-400 font-mono">PETR4 take alvo 300 stop 100 14h30</span>
+          <CardDescription className="text-zinc-500 text-xs space-y-1">
+            <span className="block">Digite um trade por linha — o app reconhece e registra direto.</span>
+            <span className="block">
+              <span className="text-zinc-400">Exemplos: </span>
+              <span className="text-[#6EE000] font-mono">EURUSD take R$500 9h15</span>
+              <span className="text-zinc-600"> · </span>
+              <span className="text-zinc-400 font-mono">BTCUSD loss 7h48</span>
+              <span className="text-zinc-600"> · </span>
+              <span className="text-zinc-400 font-mono">PETR4 take alvo 300 stop 100 14h30</span>
+            </span>
+            <span className="block text-amber-500/80">
+              💡 <strong className="font-semibold">3x = 3R</strong> — ambos significam 3× o risco.
+              Se usar apenas o múltiplo (ex: <span className="font-mono">EURUSD take 3x 9h15</span>),
+              adicione também o valor do stop (ex: <span className="font-mono">stop 200</span>) para calcular o resultado em R$.
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -329,7 +357,7 @@ export default function NovoTrade() {
                     : 'bg-[#0d0d18] border-[#1e1e2e]'
                   }`}>
                     {/* ativo + mercado */}
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
                       <span className="font-bold text-white text-sm">{p.ativo || '?'}</span>
                       <span className="text-[10px] text-zinc-600 uppercase">{p.mercado}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${p.tipo==='compra'?'text-[#6EE000] bg-[#6EE000]/10':'text-[#FF1F3D] bg-[#FF1F3D]/10'}`}>
@@ -343,9 +371,20 @@ export default function NovoTrade() {
                           {p.resultado.toUpperCase()}
                         </span>
                       )}
-                      {p.valor !== null && (
+                      {/* múltiplo do risco */}
+                      {p.multiplier !== null && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 font-bold">
+                          {p.multiplier}R
+                        </span>
+                      )}
+                      {/* valor financeiro */}
+                      {p.valor !== null ? (
                         <span className={`text-sm font-bold tabular-nums ${p.valor>=0?'text-[#6EE000]':'text-[#FF1F3D]'}`}>
                           {p.valor>=0?'+':''}R${Math.abs(p.valor).toLocaleString('pt-BR',{maximumFractionDigits:2})}
+                        </span>
+                      ) : p.multiplier !== null && p.resultado !== 'be' && (
+                        <span className="text-[10px] text-amber-400/80 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> adicione o stop para calcular R$
                         </span>
                       )}
                       {p.hora && <span className="text-[10px] text-zinc-500">{p.hora}</span>}
