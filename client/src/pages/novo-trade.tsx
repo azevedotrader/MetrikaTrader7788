@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { TradeImageUpload } from "@/components/ui/trade-image-upload";
 import {
   TrendingUp,
   TrendingDown,
@@ -656,24 +657,14 @@ export default function NovoTrade() {
                 </div>
               </div>
 
-              {/* Setup / Emoção */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Setup</Label>
-                  <Input
-                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
-                    value={editForm.setup || ''}
-                    onChange={e => setEditForm(f => ({ ...f, setup: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Emoção</Label>
-                  <Input
-                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
-                    value={editForm.emocao || ''}
-                    onChange={e => setEditForm(f => ({ ...f, emocao: e.target.value as any }))}
-                  />
-                </div>
+              {/* Setup */}
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-1.5 block">Setup</Label>
+                <Input
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                  value={editForm.setup || ''}
+                  onChange={e => setEditForm(f => ({ ...f, setup: e.target.value }))}
+                />
               </div>
 
               {/* Comentário */}
@@ -685,6 +676,9 @@ export default function NovoTrade() {
                   onChange={e => setEditForm(f => ({ ...f, comentario: e.target.value }))}
                 />
               </div>
+
+              {/* Print do Trade */}
+              <TradeImageUpload tradeId={editingTrade?.id} />
             </div>
           )}
 
