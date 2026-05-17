@@ -27,11 +27,13 @@ interface TradeDay {
   avgRR?: number;
   maxLoss?: number;
   maxWin?: number;
+  rawTrades?: any[];
 }
 
 interface WeekSummary {
   weekNumber: number;
   pnl: number;
+  rTotal: number;
   days: number;
   trades: number;
 }
@@ -53,6 +55,7 @@ export function TradingCalendar({
 }: TradingCalendarProps) {
   const { t, language } = useLanguage();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showMode, setShowMode] = useState<"money" | "r">("money");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isDayDetailsModalOpen, setIsDayDetailsModalOpen] = useState(false);
   const [isDiaryModalOpen, setIsDiaryModalOpen] = useState(false);
@@ -190,6 +193,7 @@ export function TradingCalendar({
         avgRR: avgRR,
         maxWin: maxWin,
         maxLoss: maxLoss,
+        rawTrades: dayTrades,
       });
     });
 
@@ -218,10 +222,19 @@ export function TradingCalendar({
         const totalPnl = weekTrades.reduce((sum, day) => sum + day.pnl, 0);
         const totalTrades = weekTrades.reduce((sum, day) => sum + day.trades, 0);
         const tradingDays = weekTrades.length;
+        const rTotal = weekTrades.reduce((sum, day) => {
+          const dayR = (day.rawTrades || []).reduce((s: number, t: any) => {
+            const risco = parseFloat(t.risco || "0");
+            const res = parseFloat(t.resultado || "0");
+            return risco > 0 ? s + res / risco : s;
+          }, 0);
+          return sum + dayR;
+        }, 0);
 
         weeks.push({
           weekNumber: index + 1,
           pnl: totalPnl,
+          rTotal,
           days: tradingDays,
           trades: totalTrades,
         });
@@ -328,6 +341,19 @@ export function TradingCalendar({
             >
               {hideData ? (
                 <span>•••••</span>
+              ) : showMode === "r" ? (
+                (() => {
+                  const rTotal = (tradeDay.rawTrades || []).reduce((sum: number, t: any) => {
+                    const risco = parseFloat(t.risco || "0");
+                    const res = parseFloat(t.resultado || "0");
+                    return risco > 0 ? sum + res / risco : sum;
+                  }, 0);
+                  return (
+                    <span>
+                      {rTotal >= 0 ? "+" : ""}{rTotal.toFixed(1)}R
+                    </span>
+                  );
+                })()
               ) : (
                 <>
                   <span className="sm:hidden">
@@ -405,7 +431,11 @@ export function TradingCalendar({
             )}
             style={{ textShadow: hideData ? "none" : "0 1px 3px rgba(0,0,0,0.3)" }}
           >
-            {hideData ? "•••••" : `${isProfit ? "+" : ""}R$ ${Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
+            {hideData
+              ? "•••••"
+              : showMode === "r"
+              ? `${week.rTotal >= 0 ? "+" : ""}${week.rTotal.toFixed(1)}R`
+              : `${isProfit ? "+" : ""}R$ ${Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
           </div>
           <div className="text-[10px] text-[var(--dim)]">
             {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")} • {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
@@ -465,6 +495,21 @@ export function TradingCalendar({
               <span className="sm:hidden">{t("calendar.title_short")}</span>
             </CardTitle>
             <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="flex items-center gap-1 mr-2">
+                {(["money", "r"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setShowMode(m)}
+                    className={`text-[10px] px-2.5 py-1 rounded-full font-bold border transition-all ${
+                      showMode === m
+                        ? "bg-[#6EE000]/20 border-[#6EE000]/50 text-[#6EE000]"
+                        : "border-[var(--brd)] text-[var(--dim)] hover:border-[var(--brd2)]"
+                    }`}
+                  >
+                    {m === "money" ? "R$" : "R"}
+                  </button>
+                ))}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -574,7 +619,20 @@ export function TradingCalendar({
                       : "text-[var(--text)]",
                   )}
                 >
-                  {hideData ? "•••••" : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
+                  {hideData
+                    ? "•••••"
+                    : showMode === "r"
+                    ? (() => {
+                        const rTotal = tradeDays.reduce((sum, day) => {
+                          return sum + (day.rawTrades || []).reduce((s: number, t: any) => {
+                            const risco = parseFloat(t.risco || "0");
+                            const res = parseFloat(t.resultado || "0");
+                            return risco > 0 ? s + res / risco : s;
+                          }, 0);
+                        }, 0);
+                        return `${rTotal >= 0 ? "+" : ""}${rTotal.toFixed(1)}R`;
+                      })()
+                    : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
                 </div>
                 <div className="text-xs sm:text-sm text-[var(--dim)] font-medium">
                   {t("calendar.pnl_total")}
