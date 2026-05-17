@@ -243,10 +243,10 @@
 
 /* ── Metrika watermark logo ── */
 .metrika-wm {
-  opacity: 0.06;
+  opacity: 0.12;
 }
 [data-theme="light"] .metrika-wm {
-  opacity: 0.08;
+  opacity: 0.14;
   filter: brightness(0);
 }
 
