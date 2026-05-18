@@ -159,6 +159,26 @@ function parseQuickLine(line: string): ParsedTrade | null {
   return { ativo, mercado: inferMercado(ativo), tipo, resultado: res as any, valor: resultadoFinal, multiplier, alvo, stop, hora, raw, missing };
 }
 
+// Helper: formata resultado para exibição — suporta "2R"/"-1R" e valores financeiros
+function fmtResultado(resultado: string | null | undefined) {
+  const r = String(resultado ?? '0').trim();
+  const rMatch = r.match(/^([+-]?\d+(?:\.\d+)?)R$/i);
+  if (rMatch) {
+    const v = parseFloat(rMatch[1]);
+    const isProfit = v > 0;
+    const isLoss   = v < 0;
+    const display  = (isProfit ? '+' : '') + v + 'R';
+    return { display, isProfit, isLoss, isBRL: false };
+  }
+  const pnl = parseFloat(r) || 0;
+  const isProfit = pnl > 0;
+  const isLoss   = pnl < 0;
+  const display  = pnl === 0
+    ? '–'
+    : (isProfit ? '+' : '') + `R$ ${Math.abs(pnl).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return { display: isLoss ? `-R$ ${Math.abs(pnl).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : display, isProfit, isLoss, isBRL: true, pnl };
+}
+
 export default function NovoTrade() {
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -182,15 +202,20 @@ export default function NovoTrade() {
   function buildInsertTrade(p: ParsedTrade, walletId: string | null): InsertTrade {
     const today = new Date().toISOString().slice(0, 10);
     const dataHora = p.hora ? `${today}T${p.hora}` : new Date().toISOString().slice(0, 16);
+    // Se só tem múltiplo R (sem valor financeiro), armazena como "2R" / "-1R"
+    const resultadoStr = p.valor !== null
+      ? String(p.valor)
+      : p.multiplier !== null
+        ? (p.resultado === 'loss' ? '-' : '+') + String(p.multiplier) + 'R'
+        : '0';
     return {
       dataHora,
       ativo: p.ativo,
       mercado: p.mercado,
       tipo: p.tipo,
-      resultado: p.valor !== null ? String(p.valor) : '0',
+      resultado: resultadoStr,
       alvo: p.alvo || '',
       stop: p.stop || '',
-      // multiplier salvo em risco: 3x → risco = "3.00" (vezes o risco base)
       risco: p.multiplier !== null ? String(p.multiplier) : undefined,
       setup: '',
       emocao: undefined,
@@ -469,9 +494,7 @@ export default function NovoTrade() {
                 </thead>
                 <tbody>
                   {[...allTrades].sort((a, b) => new Date(b.dataHora || b.createdAt || 0).getTime() - new Date(a.dataHora || a.createdAt || 0).getTime()).map((trade) => {
-                    const pnl = parseFloat(String(trade.resultado || 0));
-                    const isProfit = pnl > 0;
-                    const isLoss = pnl < 0;
+                    const fmt = fmtResultado(trade.resultado);
                     const walletName = wallets.find(w => w.id === trade.walletId)?.name;
                     const dateStr = trade.dataHora
                       ? new Date(trade.dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
@@ -493,9 +516,9 @@ export default function NovoTrade() {
                           </span>
                         </td>
                         <td className={`px-4 py-2.5 text-right font-bold tabular-nums whitespace-nowrap ${
-                          isProfit ? 'text-[var(--gold)]' : isLoss ? 'text-[var(--r)]' : 'text-[var(--dim)]'
+                          fmt.isProfit ? 'text-[var(--gold)]' : fmt.isLoss ? 'text-[var(--r)]' : 'text-[var(--dim)]'
                         }`}>
-                          {isProfit ? '+' : ''}{pnl === 0 ? '–' : `R$ ${pnl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          {fmt.display}
                         </td>
                         <td className="px-4 py-2.5 text-[var(--dim)] text-xs capitalize">{trade.mercado || '–'}</td>
                         <td className="px-4 py-2.5 text-[var(--dim)] text-xs hidden sm:table-cell">{trade.setup || '–'}</td>
