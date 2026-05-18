@@ -1,7 +1,5 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { insertTradeSchema, type InsertTrade, type Trade } from "@shared/schema";
+import { type InsertTrade, type Trade } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,13 +9,14 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -28,625 +27,695 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CalendarIcon,
-  DollarSign,
-  Target,
   TrendingUp,
   TrendingDown,
-  Calculator,
-  Crown,
-  Lock,
   Wallet,
+  Zap,
+  ClipboardList,
+  Pencil,
+  Trash2,
+  CheckCircle2,
+  XCircle,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useUserPlan } from "@/hooks/useUserPlan";
-import { VipUpgradeModal } from "@/components/modals/vip-upgrade-modal";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Wallet as WalletType } from "@shared/schema";
+
+// ── tipos internos ───────────────────────────────────────────────────────────
+interface ParsedTrade {
+  ativo: string;
+  mercado: string;
+  tipo: 'compra' | 'venda';
+  resultado: 'take' | 'loss' | 'be' | '';
+  valor: number | null;   // valor financeiro do resultado
+  multiplier: number | null; // 3x / 3R = múltiplo do risco
+  alvo: string;
+  stop: string;
+  hora: string;
+  raw: string;
+  missing: string[];
+}
+
+// ── inferir mercado pelo nome do ativo ───────────────────────────────────────
+function inferMercado(ativo: string): string {
+  const a = ativo.toUpperCase();
+  const cryptos = ['BTC','ETH','SOL','BNB','XRP','ADA','DOGE','AVAX','DOT','LINK','LTC','MATIC','UNI'];
+  if (cryptos.some(c => a.includes(c))) return 'crypto';
+  const fxBase = ['EUR','GBP','AUD','NZD','CAD','CHF','JPY','USD','NOK','SEK'];
+  const isFx = fxBase.some(c => a.startsWith(c)) && a.length === 6;
+  if (isFx || ['XAUUSD','XAGUSD','DE40','US30','UK100','USTEC','NAS','SPX'].some(s => a.includes(s))) return 'forex';
+  return 'b3';
+}
+
+// ── parser de linha ───────────────────────────────────────────────────────────
+function parseQuickLine(line: string): ParsedTrade | null {
+  const raw = line.trim();
+  if (!raw) return null;
+  const l = raw.toUpperCase();
+  const missing: string[] = [];
+
+  // ativo
+  const ativoMatch = l.match(/\b([A-Z]{3,8}(?:USD|BTC|EUR|GBP|JPY|BRL|USDT|NZD|CAD|CHF|AUD)?)\b/);
+  const ativo = ativoMatch ? ativoMatch[1] : '';
+  if (!ativo) missing.push('ativo');
+
+  // tipo: long/compra ou short/venda
+  const tipo: 'compra'|'venda' = /\bSHORT\b|\bVENDA\b|\bSELL\b/.test(l) ? 'venda' : 'compra';
+
+  // resultado: take / loss / stop / be
+  const res = /\bTAKE\b|\bTP\b/.test(l) ? 'take'
+    : /\bLOSS\b|\bSTOP\b/.test(l) ? 'loss'
+    : /\bBE\b/.test(l) ? 'be'
+    : '';
+  if (!res) missing.push('resultado (take, loss, be)');
+
+  // múltiplo do risco: 3x, 2.5x, 3R, 2R  (3x == 3R == ganhou/perdeu 3× o risco)
+  // Deve vir ANTES do match de valor financeiro para não confundir "3R" com "R$3"
+  const multMatch = l.match(/\b(\d+(?:[.,]\d+)?)\s*[Xx]\b|\b(\d+(?:[.,]\d+)?)\s*R\b(?!\$)/);
+  const multiplier = multMatch
+    ? parseFloat((multMatch[1] || multMatch[2]).replace(',','.'))
+    : null;
+
+  // valor financeiro explícito: R$150, R$ 500  (cifrão após R)
+  const valMatch = l.match(/R\$\s*(\d+(?:[.,]\d+)?)/);
+  // fallback: número puro (positivo ou negativo) sem sufixo R ou R$ — ex: -100, +250, 1500
+  const plainNumMatch = !valMatch && !multMatch ? l.match(/(?<![A-Z\d])([+-]?\d+(?:[.,]\d+)?)(?![A-Z\d])/) : null;
+  const valor = valMatch
+    ? parseFloat(valMatch[1].replace(',','.'))
+    : plainNumMatch
+      ? parseFloat(plainNumMatch[1].replace(',','.'))
+      : null;
+
+  // alvo / stop como valores separados "alvo 500 stop 200"
+  const alvoMatch = l.match(/(?:ALVO|TAKE|TP)\s+(\d+(?:[.,]\d+)?)/);
+  const stopMatch = l.match(/(?:STOP|SL|LOSS)\s+(\d+(?:[.,]\d+)?)/);
+  const alvo = alvoMatch ? alvoMatch[1].replace(',','.') : '';
+  const stop = stopMatch ? stopMatch[1].replace(',','.') : '';
+
+  // hora
+  const horaMatch = l.match(/(\d{1,2})[Hh:](\d{2})/);
+  const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
+
+  // valor financeiro final (hierarquia):
+  // 1. valor explícito (R$500)
+  // 2. multiplier × stop  (3x com stop 200 → R$600)
+  // 3. alvo/stop direto
+  // 4. be → 0
+  let resultadoFinal: number | null = null;
+  if (valor !== null) {
+    resultadoFinal = res === 'loss' ? -Math.abs(valor) : Math.abs(valor);
+  } else if (multiplier !== null && stop) {
+    const stopVal = parseFloat(stop);
+    resultadoFinal = res === 'loss' ? -(multiplier * stopVal) : multiplier * stopVal;
+  } else if (multiplier !== null) {
+    // Ex: "2R" ou "100R" sem stop → usa o múltiplo diretamente como R
+    resultadoFinal = res === 'loss' ? -multiplier : multiplier;
+  } else if (res === 'take' && alvo) {
+    resultadoFinal = parseFloat(alvo);
+  } else if (res === 'loss' && stop) {
+    resultadoFinal = -parseFloat(stop);
+  } else if (res === 'be') {
+    resultadoFinal = 0;
+  }
+  // multiplier sem stop: valor fica null mas o múltiplo é mostrado na UI
+
+  return { ativo, mercado: inferMercado(ativo), tipo, resultado: res as any, valor: resultadoFinal, multiplier, alvo, stop, hora, raw, missing };
+}
 
 export default function NovoTrade() {
   const { toast } = useToast();
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { planType, isLoading: planLoading } = useUserPlan();
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  
-  const isFreePlan = planType === 'free';
-  
-  const { data: existingTrades } = useQuery<Trade[]>({
-    queryKey: ['/api/trades'],
-    enabled: isFreePlan,
-  });
 
-  // Fetch user's custom wallets
-  const { data: wallets = [] } = useQuery<WalletType[]>({
-    queryKey: ['/api/wallets'],
-  });
+  const { data: wallets = [] } = useQuery<WalletType[]>({ queryKey: ['/api/wallets'] });
 
-  // State para carteira selecionada
-  const [selectedWalletId, setSelectedWalletId] = useState<string | null>(null);
-  
-  const hasReachedFreeLimit = isFreePlan && (existingTrades?.length || 0) >= 1;
+  // ── Entrada Rápida ──────────────────────────────────────────
+  const [quickText, setQuickText]     = useState('');
+  const [parsed, setParsed]           = useState<ParsedTrade[]>([]);
+  const [savedIds, setSavedIds]       = useState<Set<number>>(new Set());
+  const [quickWallet, setQuickWallet] = useState<string | null>(null);
 
-  // Setup options with translations
-  const setupOptions = [
-    t('setup.breakout'),
-    t('setup.pullback'),
-    t('setup.reversao'),
-    t('setup.tendencia'),
-    t('setup.support_resistance'),
-    t('setup.fibonacci'),
-    t('setup.candlestick'),
-    t('setup.divergencia'),
-    t('setup.scalping'),
-    t('setup.swing'),
-    t('setup.outros'),
-  ];
+  function handleParse() {
+    const lines = quickText.split('\n').filter(l => l.trim());
+    const result = lines.map(parseQuickLine).filter(Boolean) as ParsedTrade[];
+    setParsed(result);
+    setSavedIds(new Set());
+  }
 
-  // Emoção options with translations
-  const emocaoOptions = [
-    { value: "confiante", label: t('emotions.confident') },
-    { value: "ansioso", label: t('emotions.anxious') },
-    { value: "medo", label: t('emotions.fear') },
-    { value: "ganancioso", label: t('emotions.greedy') },
-    { value: "calmo", label: t('emotions.calm') },
-    { value: "empolgado", label: t('emotions.excited') },
-    { value: "frustrado", label: t('emotions.frustrated') },
-    { value: "neutro", label: t('emotions.neutral') },
-  ];
+  function buildInsertTrade(p: ParsedTrade, walletId: string | null): InsertTrade {
+    const today = new Date().toISOString().slice(0, 10);
+    const dataHora = p.hora ? `${today}T${p.hora}` : new Date().toISOString().slice(0, 16);
+    return {
+      dataHora,
+      ativo: p.ativo,
+      mercado: p.mercado,
+      tipo: p.tipo,
+      resultado: p.valor !== null ? String(p.valor) : '0',
+      alvo: p.alvo || '',
+      stop: p.stop || '',
+      // multiplier salvo em risco: 3x → risco = "3.00" (vezes o risco base)
+      risco: p.multiplier !== null ? String(p.multiplier) : undefined,
+      setup: '',
+      emocao: undefined,
+      comentario: '',
+      corretora: p.mercado,
+      walletId: walletId || undefined,
+    } as any;
+  }
 
-  // State para resultado do trade e cálculos
-  const [tradeResult, setTradeResult] = useState<"take" | "loss" | null>(null);
-  const [riskRewardRatio, setRiskRewardRatio] = useState<number | null>(null);
-  const [finalResult, setFinalResult] = useState<number | null>(null);
+  async function saveSingle(idx: number) {
+    const p = parsed[idx];
+    if (!p || p.missing.length > 0) return;
+    await createTradeMutation.mutateAsync(buildInsertTrade(p, quickWallet));
+    setSavedIds(prev => new Set([...prev, idx]));
+  }
 
-  const form = useForm<InsertTrade>({
-    resolver: zodResolver(insertTradeSchema),
-    defaultValues: {
-      dataHora: new Date().toISOString().slice(0, 16),
-      ativo: "",
-      tipo: "compra",
-      resultado: "",
-      alvo: "",
-      stop: "",
-      setup: setupOptions[0] || "",
-      emocao: "",
-      comentario: "",
-      mercado: "crypto",
-      corretora: "crypto",
-    },
-  });
-
-  // Watch values for calculations
-  const alvoValue = form.watch("alvo");
-  const stopValue = form.watch("stop");
-
-  // Calcular Risk/Reward e resultado final
-  useEffect(() => {
-    const alvo = parseFloat(alvoValue || "0");
-    const stop = parseFloat(stopValue || "0");
-
-    if (alvo > 0 && stop > 0) {
-      const ratio = alvo / stop;
-      setRiskRewardRatio(ratio);
-
-      // Calcular resultado baseado na seleção
-      if (tradeResult === "take") {
-        setFinalResult(alvo);
-        form.setValue("resultado", alvo.toString());
-      } else if (tradeResult === "loss") {
-        setFinalResult(-stop);
-        form.setValue("resultado", (-stop).toString());
-      }
-    } else {
-      setRiskRewardRatio(null);
-      setFinalResult(null);
+  async function saveAll() {
+    const toSave = parsed.filter((p, i) => p.missing.length === 0 && !savedIds.has(i));
+    for (const [i, p] of toSave.map((p, ri) => [parsed.indexOf(p), p] as [number, ParsedTrade])) {
+      await createTradeMutation.mutateAsync(buildInsertTrade(p, quickWallet));
+      setSavedIds(prev => new Set([...prev, i]));
     }
-  }, [alvoValue, stopValue, tradeResult, form]);
+    if (toSave.length > 0) {
+      setQuickText('');
+      setParsed([]);
+      setSavedIds(new Set());
+    }
+  }
+
+  // ── Estado para o log de trades ──────────────────────────────────────────
+  const { data: allTrades = [] } = useQuery<Trade[]>({
+    queryKey: ['/api/trades'],
+  });
+
+  // ── Estado para edição de trade ──────────────────────────────────────────
+  const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Trade>>({});
+  const [editTradeResult, setEditTradeResult] = useState<'take' | 'loss' | null>(null);
+
+  const openEditDialog = (trade: Trade) => {
+    setEditingTrade(trade);
+    setEditForm({ ...trade });
+    const r = parseFloat(String(trade.resultado));
+    setEditTradeResult(r > 0 ? 'take' : r < 0 ? 'loss' : null);
+  };
 
   const createTradeMutation = useMutation({
     mutationFn: (data: InsertTrade) => apiRequest("POST", "/api/trades", data),
     onSuccess: () => {
-      toast({
-        title: t('form.trade_saved'),
-        description: t('form.trade_saved_desc'),
-      });
       queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
       queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
-      form.reset();
-      setTradeResult(null);
-      setRiskRewardRatio(null);
-      setFinalResult(null);
-      setSelectedWalletId(null);
     },
     onError: (error: any) => {
-      toast({
-        title: t('form.error_saving'),
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao salvar trade", description: error.message, variant: "destructive" });
     },
   });
 
-  const onSubmit = (data: InsertTrade) => {
-    if (hasReachedFreeLimit) {
-      setShowUpgradeModal(true);
-      return;
-    }
-    
-    if (!tradeResult) {
-      toast({
-        title: t('form.select_result'),
-        description: t('form.select_result_desc'),
-        variant: "destructive",
-      });
-      return;
-    }
+  const updateTradeMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Trade> }) => {
+      const res = await apiRequest("PUT", `/api/trades/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Trade atualizado com sucesso!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
+      setEditingTrade(null);
+      setEditForm({});
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
+    },
+  });
 
-    // Ensure resultado is set correctly
-    data.resultado = finalResult?.toString() || "0";
-    
-    // Include walletId if a custom wallet is selected
-    const tradeData = {
-      ...data,
-      walletId: selectedWalletId || undefined,
-    };
+  const deleteTradeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/trades/${id}`);
+    },
+    onSuccess: () => {
+      toast({ title: "Trade removido." });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/trades/by-broker"] });
+    },
+    onError: (error: any) => {
+      toast({ title: "Erro ao remover", description: error.message, variant: "destructive" });
+    },
+  });
 
-    createTradeMutation.mutate(tradeData);
+  const handleSaveEdit = () => {
+    if (!editingTrade) return;
+    const alvo = parseFloat(String(editForm.alvo || 0));
+    const stop = parseFloat(String(editForm.stop || 0));
+    let resultado = parseFloat(String(editForm.resultado || 0));
+    if (editTradeResult === 'take' && alvo > 0) resultado = alvo;
+    if (editTradeResult === 'loss' && stop > 0) resultado = -stop;
+    updateTradeMutation.mutate({ id: editingTrade.id, data: { ...editForm, resultado: String(resultado) } });
   };
 
-  if (hasReachedFreeLimit) {
-    return (
-      <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
-        <Card className="bg-graphite/50 border-charcoal-700 relative overflow-hidden">
-          <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
-            <div className="text-center p-6 max-w-md">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Limite Atingido</h3>
-              <p className="text-zinc-400 mb-4">
-                Você já registrou 1 trade no plano Free. 
-                Faça upgrade para VIP e registre trades ilimitados!
-              </p>
-              <Button 
-                onClick={() => setShowUpgradeModal(true)}
-                className="bg-gradient-to-r from-purple-600 to-yellow-500 hover:from-purple-700 hover:to-yellow-600 text-white font-bold"
-                data-testid="button-upgrade-trades"
-              >
-                <Crown className="w-4 h-4 mr-2" />
-                Desbloquear Trades Ilimitados
-              </Button>
-            </div>
-          </div>
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-neutral-400" />
-              {t('form.trade_data')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 opacity-30 pointer-events-none">
-            <div className="h-48 flex items-center justify-center text-zinc-500">
-              Você atingiu o limite do plano Free
-            </div>
-          </CardContent>
-        </Card>
-        
-        <VipUpgradeModal 
-          open={showUpgradeModal} 
-          onOpenChange={setShowUpgradeModal}
-          feature="trades"
-        />
-      </div>
-    );
-  }
+  const validCount = parsed.filter((p, i) => p.missing.length === 0 && !savedIds.has(i)).length;
 
   return (
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
-      <Card className="bg-graphite/50 border-charcoal-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-neutral-400" />
-            {t('form.trade_data')}
+
+      {/* ── Registrar Trade por Texto ── */}
+      <Card className="bg-[#0d0d18] border-[#6EE000]/25">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base">
+            <Zap className="h-5 w-5 text-[#6EE000]" />
+            Registrar Trade
           </CardTitle>
+          <CardDescription className="text-zinc-500 text-xs space-y-1">
+            <span className="block">Digite um trade por linha — o app reconhece e registra direto.</span>
+            <span className="block">
+              <span className="text-zinc-400">Exemplos: </span>
+              <span className="text-[#6EE000] font-mono">EURUSD take R$500 9h15</span>
+              <span className="text-zinc-600"> · </span>
+              <span className="text-zinc-400 font-mono">BTCUSD loss 7h48</span>
+              <span className="text-zinc-600"> · </span>
+              <span className="text-zinc-400 font-mono">PETR4 take alvo 300 stop 100 14h30</span>
+            </span>
+            <span className="block text-amber-500/80">
+              💡 <strong className="font-semibold">3x = 3R</strong> — ambos significam 3× o risco.
+              Se usar apenas o múltiplo (ex: <span className="font-mono">EURUSD take 3x 9h15</span>),
+              adicione também o valor do stop (ex: <span className="font-mono">stop 200</span>) para calcular o resultado em R$.
+            </span>
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              data-testid="trade-form"
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-6"
-            >
-              {/* Linha 1 - Data/Hora, Ativo, Mercado */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
-                <FormField
-                  control={form.control}
-                  name="dataHora"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.date_time')} *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="datetime-local"
-                          className="bg-charcoal-800 border-charcoal-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <CardContent className="space-y-3">
+          {/* Carteira (opcional) */}
+          {wallets.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Wallet className="w-3.5 h-3.5 text-[var(--b)] shrink-0" />
+              <Select value={quickWallet ?? '__none'} onValueChange={v => setQuickWallet(v === '__none' ? null : v)}>
+                <SelectTrigger className="h-8 text-xs bg-[#13131a] border-[#28283a] text-white w-48">
+                  <SelectValue placeholder="Sem carteira" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#13131a] border-[#28283a]">
+                  <SelectItem value="__none"><span className="text-zinc-500">— Sem carteira —</span></SelectItem>
+                  {wallets.map(w => (
+                    <SelectItem key={w.id} value={w.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: w.color || '#6EE000' }} />
+                        {w.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-                <FormField
-                  control={form.control}
-                  name="ativo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.asset')} *
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: BTCUSDT, EURUSD, PETR4"
-                          className="bg-charcoal-800 border-charcoal-600 text-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <textarea
+            value={quickText}
+            onChange={e => { setQuickText(e.target.value); setParsed([]); setSavedIds(new Set()); }}
+            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleParse(); }}
+            placeholder={"EURUSD take R$500 9h15\nBTCUSD loss 7h48\nPETR4 take alvo 300 stop 100 14h30"}
+            rows={3}
+            className="w-full bg-[#080810] border border-[#1e1e2e] rounded-xl p-3 text-sm text-white placeholder:text-zinc-700 font-mono resize-y focus:outline-none focus:border-[#6EE000]/60 transition-colors"
+          />
 
-                <FormField
-                  control={form.control}
-                  name="mercado"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.market')} *
-                      </FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          // Verificar se é uma carteira customizada
-                          if (value.startsWith("wallet:")) {
-                            const walletId = value.replace("wallet:", "");
-                            const wallet = wallets.find(w => w.id === walletId);
-                            if (wallet) {
-                              setSelectedWalletId(walletId);
-                              field.onChange(wallet.name);
-                              form.setValue("corretora", wallet.name);
-                            }
-                          } else {
-                            // Mercado padrão
-                            setSelectedWalletId(null);
-                            field.onChange(value);
-                            form.setValue("corretora", value as "crypto" | "forex" | "b3" | "auto");
-                          }
-                        }}
-                        value={selectedWalletId ? `wallet:${selectedWalletId}` : field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                            <SelectValue placeholder={t('form.select_market')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600 max-h-72">
-                          <SelectItem value="crypto">{t('form.crypto')}</SelectItem>
-                          <SelectItem value="forex">{t('form.forex')}</SelectItem>
-                          <SelectItem value="b3">{t('form.b3')}</SelectItem>
-                          {wallets.length > 0 && (
-                            <>
-                              <div className="border-t border-charcoal-600 my-1" />
-                              <div className="px-2 py-1.5 text-xs text-charcoal-400 font-medium flex items-center gap-1">
-                                <Wallet className="h-3 w-3" />
-                                Carteiras Customizadas
-                              </div>
-                              {wallets.map((wallet) => (
-                                <SelectItem 
-                                  key={wallet.id} 
-                                  value={`wallet:${wallet.id}`}
-                                >
-                                  <span className="flex items-center gap-2">
-                                    <span 
-                                      className="inline-block w-2 h-2 rounded-full"
-                                      style={{ backgroundColor: wallet.color || '#8B5CF6' }}
-                                    />
-                                    {wallet.name}
-                                  </span>
-                                </SelectItem>
-                              ))}
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+          <div className="flex items-center gap-3">
+            <Button type="button" onClick={handleParse}
+              className="bg-[#6EE000] hover:bg-[#5bc800] text-black font-bold text-sm px-5 h-9">
+              <Zap className="w-4 h-4 mr-1.5" /> Reconhecer
+            </Button>
+            {parsed.length > 0 && validCount > 0 && (
+              <Button type="button" onClick={saveAll} disabled={createTradeMutation.isPending}
+                className="bg-white/10 hover:bg-white/15 text-white border border-white/20 text-sm h-9 px-4">
+                <Check className="w-4 h-4 mr-1.5" />
+                Registrar {validCount > 1 ? `todos (${validCount})` : 'trade'}
+              </Button>
+            )}
+            <span className="text-[10px] text-zinc-600 ml-auto">Ctrl+Enter para reconhecer</span>
+          </div>
 
-              {/* Linha 2 - Tipo e Emoção */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
-                <FormField
-                  control={form.control}
-                  name="tipo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.type')} *
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                            <SelectValue placeholder={t('form.buy_or_sell')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                          <SelectItem value="compra">
-                            <span className="flex items-center gap-2">
-                              <TrendingUp className="h-4 w-4 text-green-600" />
-                              {t('form.buy')}
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="venda">
-                            <span className="flex items-center gap-2">
-                              <TrendingDown className="h-4 w-4 text-red-500" />
-                              {t('form.sell')}
-                            </span>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="emocao"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.emotion')}
-                      </FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-charcoal-800 border-charcoal-600 text-white">
-                            <SelectValue placeholder={t('form.how_felt')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-charcoal-800 border-charcoal-600">
-                          {emocaoOptions.map((emocao) => (
-                            <SelectItem
-                              key={emocao.value}
-                              value={emocao.value}
-                            >
-                              {emocao.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Linha 3 - Take/Stop com Resultado */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="alvo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.take_profit')} *
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="1000.00"
-                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="stop"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-charcoal-300">
-                        {t('form.stop_loss')} *
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-charcoal-400" />
-                          <Input
-                            type="number"
-                            step="0.01"
-                            placeholder="200.00"
-                            className="bg-charcoal-800 border-charcoal-600 text-white pl-10"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Resultado da Operação e Cálculos */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-charcoal-300">
-                    {t('form.trade_result')} *
-                  </label>
-                  {!tradeResult && (
-                    <p className="text-xs text-red-500 mb-2">
-                      {t('form.select_result_warning')}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      type="button"
-                      variant={
-                        tradeResult === "take" ? "default" : "outline"
-                      }
-                      onClick={() => setTradeResult("take")}
-                      className={`${
-                        tradeResult === "take"
-                          ? "bg-green-600 hover:bg-green-700 text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-green-600/20"
-                      }`}
-                    >
-                      {t('form.take')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={
-                        tradeResult === "loss" ? "default" : "outline"
-                      }
-                      onClick={() => setTradeResult("loss")}
-                      className={`${
-                        tradeResult === "loss"
-                          ? "bg-red-500 hover:bg-red-700 text-white"
-                          : "border-charcoal-600 text-charcoal-300 hover:bg-red-500/20"
-                      }`}
-                    >
-                      {t('form.loss')}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Calculations Display */}
-                {(riskRewardRatio || finalResult !== null) && (
-                  <div className="bg-charcoal-800/50 p-4 rounded-lg border border-charcoal-600">
-                    <h4 className="text-white font-medium mb-3 flex items-center gap-2">
-                      <Calculator className="w-4 h-4 text-neutral-400" />
-                      {t('form.auto_calculations')}
-                    </h4>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-charcoal-300 text-sm mb-1">
-                          {t('form.risk_reward_ratio')}
-                        </div>
-                        <div className="text-neutral-400 font-semibold text-lg">
-                          {riskRewardRatio
-                            ? `1:${riskRewardRatio.toFixed(2)}`
-                            : "--"}
-                        </div>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="text-charcoal-300 text-sm mb-1">
-                          {t('form.financial_result')}
-                        </div>
-                        <div
-                          className={`font-semibold text-lg ${
-                            finalResult === null
-                              ? "text-charcoal-400"
-                              : finalResult >= 0
-                                ? "text-green-600"
-                                : "text-red-500"
-                          }`}
-                        >
-                          {finalResult === null
-                            ? "--"
-                            : finalResult >= 0
-                              ? `+R$ ${finalResult.toFixed(2)}`
-                              : `R$ ${finalResult.toFixed(2)}`}
-                        </div>
-                      </div>
+          {/* Trades reconhecidos */}
+          {parsed.length > 0 && (
+            <div className="space-y-2 pt-1">
+              {parsed.map((p, i) => {
+                const isSaved = savedIds.has(i);
+                const hasError = p.missing.length > 0;
+                return (
+                  <div key={i} className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 transition-all ${
+                    isSaved ? 'bg-[#6EE000]/5 border-[#6EE000]/30 opacity-60'
+                    : hasError ? 'bg-[#FF1F3D]/5 border-[#FF1F3D]/20'
+                    : 'bg-[#0d0d18] border-[#1e1e2e]'
+                  }`}>
+                    {/* ativo + mercado */}
+                    <div className="flex items-center gap-2 min-w-0 flex-1 flex-wrap">
+                      <span className="font-bold text-white text-sm">{p.ativo || '?'}</span>
+                      <span className="text-[10px] text-zinc-600 uppercase">{p.mercado}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${p.tipo==='compra'?'text-[#6EE000] bg-[#6EE000]/10':'text-[#FF1F3D] bg-[#FF1F3D]/10'}`}>
+                        {p.tipo === 'compra' ? '▲ Long' : '▼ Short'}
+                      </span>
+                      {p.resultado && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                          p.resultado==='take'?'bg-[#6EE000]/15 text-[#6EE000]'
+                          :p.resultado==='be'?'bg-amber-500/15 text-amber-400'
+                          :'bg-[#FF1F3D]/15 text-[#FF1F3D]'}`}>
+                          {p.resultado.toUpperCase()}
+                        </span>
+                      )}
+                      {/* múltiplo do risco */}
+                      {p.multiplier !== null && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 font-bold">
+                          {p.multiplier}R
+                        </span>
+                      )}
+                      {/* valor financeiro */}
+                      {p.valor !== null ? (
+                        <span className={`text-sm font-bold tabular-nums ${p.valor>=0?'text-[#6EE000]':'text-[#FF1F3D]'}`}>
+                          {p.valor>=0?'+':''}R${Math.abs(p.valor).toLocaleString('pt-BR',{maximumFractionDigits:2})}
+                        </span>
+                      ) : p.multiplier !== null && p.resultado !== 'be' && (
+                        <span className="text-[10px] text-amber-400/80 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> adicione o stop para calcular R$
+                        </span>
+                      )}
+                      {p.hora && <span className="text-[10px] text-zinc-500">{p.hora}</span>}
+                      {hasError && (
+                        <span className="text-[10px] text-[#FF1F3D] flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> falta: {p.missing.join(', ')}
+                        </span>
+                      )}
                     </div>
-
-                    {riskRewardRatio && (
-                      <div className="mt-3 p-2 bg-charcoal-700/50 rounded text-center">
-                        <div
-                          className={`text-sm font-medium ${
-                            riskRewardRatio >= 3
-                              ? "text-green-600"
-                              : riskRewardRatio >= 2
-                                ? "text-yellow-500"
-                                : "text-red-500"
-                          }`}
-                        >
-                          {riskRewardRatio >= 3
-                            ? t('form.excellent_ratio')
-                            : riskRewardRatio >= 2
-                              ? t('form.good_ratio')
-                              : t('form.risky_ratio')}
-                        </div>
-                      </div>
-                    )}
+                    {/* ação */}
+                    {isSaved ? (
+                      <span className="text-[#6EE000] text-xs flex items-center gap-1 shrink-0"><CheckCircle2 className="w-4 h-4" /> Salvo</span>
+                    ) : !hasError ? (
+                      <Button type="button" size="sm" onClick={() => saveSingle(i)}
+                        disabled={createTradeMutation.isPending}
+                        className="bg-[#6EE000]/15 hover:bg-[#6EE000] text-[#6EE000] hover:text-black border border-[#6EE000]/30 text-xs h-7 px-3 shrink-0 transition-all">
+                        Salvar
+                      </Button>
+                    ) : null}
                   </div>
-                )}
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Log de Trades ──────────────────────────────────────────────────── */}
+      <Card className="bg-graphite/50 border-charcoal-700">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-[var(--text)] flex items-center gap-2 text-base">
+            <ClipboardList className="h-5 w-5 text-[var(--b)]" />
+            Log de Trades
+            <Badge variant="outline" className="ml-auto text-xs border-[var(--brd)] text-[var(--dim)]">
+              {allTrades.length} registros
+            </Badge>
+          </CardTitle>
+          <CardDescription className="text-[var(--dim)] text-xs">
+            Todos os seus trades registrados. Clique em Editar para corrigir dados ou mover para outra carteira.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {allTrades.length === 0 ? (
+            <div className="text-center py-10 text-[var(--dim)] text-sm">
+              Nenhum trade registrado ainda.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--brd)] bg-[var(--surf)]/40">
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">DATA</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">ATIVO</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">TIPO</th>
+                    <th className="text-right px-4 py-2.5 text-[var(--dim)] font-medium text-xs">RESULTADO</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs">MERCADO</th>
+                    <th className="text-left px-4 py-2.5 text-[var(--dim)] font-medium text-xs hidden sm:table-cell">SETUP</th>
+                    <th className="px-4 py-2.5" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...allTrades].sort((a, b) => new Date(b.dataHora || b.createdAt || 0).getTime() - new Date(a.dataHora || a.createdAt || 0).getTime()).map((trade) => {
+                    const pnl = parseFloat(String(trade.resultado || 0));
+                    const isProfit = pnl > 0;
+                    const isLoss = pnl < 0;
+                    const walletName = wallets.find(w => w.id === trade.walletId)?.name;
+                    const dateStr = trade.dataHora
+                      ? new Date(trade.dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                      : '–';
+                    return (
+                      <tr key={trade.id} className="border-b border-[var(--brd)]/50 hover:bg-[var(--surf)]/40 transition-colors">
+                        <td className="px-4 py-2.5 text-[var(--dim)] text-xs whitespace-nowrap">{dateStr}</td>
+                        <td className="px-4 py-2.5 font-semibold text-[var(--text)] whitespace-nowrap">
+                          {trade.ativo}
+                          {walletName && (
+                            <span className="ml-1.5 text-[10px] text-[var(--b)] font-normal">[{walletName}]</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            trade.tipo === 'compra' ? 'bg-[#6EE000]/15 text-[#6EE000]' : 'bg-[#FF1F3D]/15 text-[#FF1F3D]'
+                          }`}>
+                            {trade.tipo === 'compra' ? '▲ Long' : '▼ Short'}
+                          </span>
+                        </td>
+                        <td className={`px-4 py-2.5 text-right font-bold tabular-nums whitespace-nowrap ${
+                          isProfit ? 'text-[var(--gold)]' : isLoss ? 'text-[var(--r)]' : 'text-[var(--dim)]'
+                        }`}>
+                          {isProfit ? '+' : ''}{pnl === 0 ? '–' : `R$ ${pnl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                        </td>
+                        <td className="px-4 py-2.5 text-[var(--dim)] text-xs capitalize">{trade.mercado || '–'}</td>
+                        <td className="px-4 py-2.5 text-[var(--dim)] text-xs hidden sm:table-cell">{trade.setup || '–'}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1 justify-end">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openEditDialog(trade)}
+                              className="h-7 w-7 p-0 text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--surf)]"
+                              title="Editar trade"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm(`Remover trade ${trade.ativo}?`)) {
+                                  deleteTradeMutation.mutate(trade.id);
+                                }
+                              }}
+                              className="h-7 w-7 p-0 text-[var(--dim)] hover:text-[var(--r)] hover:bg-[var(--r)]/10"
+                              title="Remover trade"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ── Modal de Edição de Trade ─────────────────────────────────────── */}
+      <Dialog open={!!editingTrade} onOpenChange={(open) => { if (!open) { setEditingTrade(null); setEditForm({}); } }}>
+        <DialogContent className="bg-[var(--card)] border-[var(--brd)] max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-[var(--text)] flex items-center gap-2">
+              <Pencil className="w-4 h-4 text-[var(--b)]" />
+              Editar Trade — <span className="text-[var(--gold)]">{editForm.ativo}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {editForm && (
+            <div className="space-y-4 py-2">
+              {/* Data / Ativo */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Data/Hora</Label>
+                  <Input
+                    type="datetime-local"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.dataHora ? String(editForm.dataHora).slice(0, 16) : ''}
+                    onChange={e => setEditForm(f => ({ ...f, dataHora: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Ativo</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.ativo || ''}
+                    onChange={e => setEditForm(f => ({ ...f, ativo: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Tipo / Mercado */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Tipo</Label>
+                  <Select value={editForm.tipo || 'compra'} onValueChange={v => setEditForm(f => ({ ...f, tipo: v as any }))}>
+                    <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                      <SelectItem value="compra">▲ Compra (Long)</SelectItem>
+                      <SelectItem value="venda">▼ Venda (Short)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Mercado</Label>
+                  <Select value={editForm.mercado || 'crypto'} onValueChange={v => setEditForm(f => ({ ...f, mercado: v as any }))}>
+                    <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                      <SelectItem value="crypto">Crypto</SelectItem>
+                      <SelectItem value="forex">Forex</SelectItem>
+                      <SelectItem value="b3">B3</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Carteira */}
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-1.5 flex items-center gap-1.5">
+                  <Wallet className="w-3.5 h-3.5 text-[var(--b)]" /> Carteira
+                </Label>
+                <Select
+                  value={editForm.walletId ?? "__none"}
+                  onValueChange={v => setEditForm(f => ({ ...f, walletId: v === "__none" ? null : v }))}
+                >
+                  <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
+                    <SelectValue placeholder="— Sem carteira —" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[var(--card)] border-[var(--brd)]">
+                    <SelectItem value="__none">
+                      <span className="text-[var(--dim)]">— Sem carteira específica —</span>
+                    </SelectItem>
+                    {wallets.map((w) => (
+                      <SelectItem key={w.id} value={w.id}>
+                        <span className="flex items-center gap-2">
+                          <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: w.color || '#6EE000' }} />
+                          {w.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Take / Stop */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Alvo (Take Profit R$)</Label>
+                  <Input
+                    type="number" step="0.01"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.alvo || ''}
+                    onChange={e => setEditForm(f => ({ ...f, alvo: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Stop Loss R$</Label>
+                  <Input
+                    type="number" step="0.01"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.stop || ''}
+                    onChange={e => setEditForm(f => ({ ...f, stop: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Resultado */}
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-2 block">Resultado</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditTradeResult('take')}
+                    className={`flex items-center justify-center gap-2 h-10 rounded-lg border text-sm font-semibold transition-all ${
+                      editTradeResult === 'take'
+                        ? 'bg-[#6EE000]/20 border-[#6EE000] text-[#6EE000]'
+                        : 'border-[var(--brd)] text-[var(--dim)] hover:border-[#6EE000]/50'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" /> Take Profit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditTradeResult('loss')}
+                    className={`flex items-center justify-center gap-2 h-10 rounded-lg border text-sm font-semibold transition-all ${
+                      editTradeResult === 'loss'
+                        ? 'bg-[#FF1F3D]/20 border-[#FF1F3D] text-[#FF1F3D]'
+                        : 'border-[var(--brd)] text-[var(--dim)] hover:border-[#FF1F3D]/50'
+                    }`}
+                  >
+                    <XCircle className="w-4 h-4" /> Stop Loss
+                  </button>
+                </div>
+              </div>
+
+              {/* Setup / Emoção */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Setup</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.setup || ''}
+                    onChange={e => setEditForm(f => ({ ...f, setup: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Emoção</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.emocao || ''}
+                    onChange={e => setEditForm(f => ({ ...f, emocao: e.target.value as any }))}
+                  />
+                </div>
               </div>
 
               {/* Comentário */}
-              <FormField
-                control={form.control}
-                name="comentario"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-charcoal-300">
-                      {t('form.trade_comment')}
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t('form.comment_placeholder')}
-                        className="bg-charcoal-800 border-charcoal-600 text-white min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={createTradeMutation.isPending}
-                  className="gradient-purple-blue hover:opacity-90 transition-opacity"
-                >
-                  {createTradeMutation.isPending
-                    ? t('form.saving')
-                    : t('form.save_trade')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => form.reset()}
-                  className="border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
-                >
-                  {t('form.clear')}
-                </Button>
+              <div>
+                <Label className="text-[var(--dim)] text-xs mb-1.5 block">Comentário</Label>
+                <Textarea
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] min-h-[80px]"
+                  value={editForm.comentario || ''}
+                  onChange={e => setEditForm(f => ({ ...f, comentario: e.target.value }))}
+                />
               </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </div>
+          )}
+
+          <DialogFooter className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              onClick={() => { setEditingTrade(null); setEditForm({}); }}
+              className="border-[var(--brd)] text-[var(--dim)]"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={updateTradeMutation.isPending}
+              className="bg-[#6EE000] hover:bg-[#5bc800] text-black font-bold"
+            >
+              {updateTradeMutation.isPending ? 'Salvando…' : 'Salvar Alterações'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
