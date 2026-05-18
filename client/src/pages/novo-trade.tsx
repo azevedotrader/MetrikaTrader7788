@@ -86,29 +86,36 @@ function parseQuickLine(line: string): ParsedTrade | null {
   // tipo: long/compra ou short/venda
   const tipo: 'compra'|'venda' = /\bSHORT\b|\bVENDA\b|\bSELL\b/.test(l) ? 'venda' : 'compra';
 
-  // resultado: take / loss / stop / be
-  const res = /\bTAKE\b|\bTP\b/.test(l) ? 'take'
-    : /\bLOSS\b|\bSTOP\b/.test(l) ? 'loss'
-    : /\bBE\b/.test(l) ? 'be'
-    : '';
-  if (!res) missing.push('resultado (take, loss, be)');
-
-  // múltiplo do risco: 3x, 2.5x, 3R, 2R  (3x == 3R == ganhou/perdeu 3× o risco)
-  // Deve vir ANTES do match de valor financeiro para não confundir "3R" com "R$3"
+  // múltiplo do risco: 3x, 2.5x, 3R, 2R — detectar ANTES para não confundir com valor puro
   const multMatch = l.match(/\b(\d+(?:[.,]\d+)?)\s*[Xx]\b|\b(\d+(?:[.,]\d+)?)\s*R\b(?!\$)/);
   const multiplier = multMatch
     ? parseFloat((multMatch[1] || multMatch[2]).replace(',','.'))
     : null;
 
-  // valor financeiro explícito: R$150, R$ 500  (cifrão após R)
+  // valor financeiro explícito: R$150, R$ 500
   const valMatch = l.match(/R\$\s*(\d+(?:[.,]\d+)?)/);
-  // fallback: número puro (positivo ou negativo) sem sufixo R ou R$ — ex: -100, +250, 1500
-  const plainNumMatch = !valMatch && !multMatch ? l.match(/(?<![A-Z\d])([+-]?\d+(?:[.,]\d+)?)(?![A-Z\d])/) : null;
-  const valor = valMatch
+  // fallback: número puro (com sinal opcional) sem R$ ou sufixo R/x — ex: -100, +250, 1500
+  const plainNumMatch = !valMatch && !multMatch
+    ? l.match(/(?<![A-Z\d,./])([+-]?\d+(?:[.,]\d+)?)(?![A-Z\d])/)
+    : null;
+  const rawValor = valMatch
     ? parseFloat(valMatch[1].replace(',','.'))
     : plainNumMatch
       ? parseFloat(plainNumMatch[1].replace(',','.'))
       : null;
+
+  // resultado: palavras-chave explícitas têm prioridade; senão infere pelo sinal do número
+  const resKeyword =
+    /\bTAKE\b|\bTP\b|\bGANHEI\b|\bACERTEI\b|\bWIN\b|\bGANHOU\b/.test(l) ? 'take'
+    : /\bLOSS\b|\bSTOP\b|\bSL\b|\bPERDI\b|\bERREI\b|\bLOST\b/.test(l)   ? 'loss'
+    : /\bBE\b/.test(l) ? 'be'
+    : null;
+  // Se não teve palavra-chave, infere pelo sinal do número raw
+  const resFromSign = rawValor !== null
+    ? (rawValor < 0 ? 'loss' : rawValor > 0 ? 'take' : 'be')
+    : null;
+  const res = resKeyword || resFromSign || '';
+  if (!res) missing.push('resultado (take/loss/be ou valor com sinal)');
 
   // alvo / stop como valores separados "alvo 500 stop 200"
   const alvoMatch = l.match(/(?:ALVO|TAKE|TP)\s+(\d+(?:[.,]\d+)?)/);
@@ -121,18 +128,24 @@ function parseQuickLine(line: string): ParsedTrade | null {
   const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
 
   // valor financeiro final (hierarquia):
-  // 1. valor explícito (R$500)
-  // 2. multiplier × stop  (3x com stop 200 → R$600)
-  // 3. alvo/stop direto
-  // 4. be → 0
+  // 1. valor explícito (R$500 ou número puro)  → sinal determinado por res
+  // 2. multiplier × stop
+  // 3. multiplier direto (ex: 2R sem stop)
+  // 4. alvo/stop direto
+  // 5. be → 0
+  const valor = rawValor;
   let resultadoFinal: number | null = null;
   if (valor !== null) {
-    resultadoFinal = res === 'loss' ? -Math.abs(valor) : Math.abs(valor);
+    // Se o valor já tem sinal negativo, respeita; senão aplica pelo resultado
+    if (valor < 0) {
+      resultadoFinal = -Math.abs(valor); // já é negativo
+    } else {
+      resultadoFinal = res === 'loss' ? -Math.abs(valor) : Math.abs(valor);
+    }
   } else if (multiplier !== null && stop) {
     const stopVal = parseFloat(stop);
     resultadoFinal = res === 'loss' ? -(multiplier * stopVal) : multiplier * stopVal;
   } else if (multiplier !== null) {
-    // Ex: "2R" ou "100R" sem stop → usa o múltiplo diretamente como R
     resultadoFinal = res === 'loss' ? -multiplier : multiplier;
   } else if (res === 'take' && alvo) {
     resultadoFinal = parseFloat(alvo);
