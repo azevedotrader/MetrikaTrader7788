@@ -49,7 +49,7 @@ import type { Wallet as WalletType } from "@shared/schema";
 interface ParsedTrade {
   ativo: string;
   mercado: string;
-  tipo: 'compra' | 'venda';
+  tipo: 'compra' | 'venda' | null;
   resultado: 'take' | 'loss' | 'be' | '';
   valor: number | null;   // valor financeiro do resultado
   multiplier: number | null; // 3x / 3R = múltiplo do risco
@@ -83,8 +83,12 @@ function parseQuickLine(line: string): ParsedTrade | null {
   const ativo = ativoMatch ? ativoMatch[1] : '';
   if (!ativo) missing.push('ativo');
 
-  // tipo: long/compra ou short/venda
-  const tipo: 'compra'|'venda' = /\bSHORT\b|\bVENDA\b|\bSELL\b/.test(l) ? 'venda' : 'compra';
+  // tipo: só preenche se explicitamente informado
+  const tipo: 'compra'|'venda'|null =
+    /\bSHORT\b|\bVENDA\b|\bSELL\b/.test(l) ? 'venda'
+    : /\bLONG\b|\bCOMPRA\b|\bBUY\b/.test(l) ? 'compra'
+    : null;
+  if (!tipo) missing.push('direção (long/short ou compra/venda)');
 
   // múltiplo do risco: 3x, 2.5x, 3R, 2R — detectar ANTES para não confundir com valor puro
   const multMatch = l.match(/\b(\d+(?:[.,]\d+)?)\s*[Xx]\b|\b(\d+(?:[.,]\d+)?)\s*R\b(?!\$)/);
@@ -212,7 +216,7 @@ export default function NovoTrade() {
       dataHora,
       ativo: p.ativo,
       mercado: p.mercado,
-      tipo: p.tipo,
+      tipo: p.tipo ?? 'compra', // fallback só chega aqui se missing foi ignorado
       resultado: resultadoStr,
       alvo: p.alvo || '',
       stop: p.stop || '',
