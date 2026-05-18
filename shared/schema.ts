@@ -218,9 +218,9 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   precoEntrada: z.string().optional(),
   precoSaida: z.string().optional(),
   corretora: z.string().min(1, "Corretora é obrigatória"), // Agora aceita qualquer string para carteiras customizadas
-  emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro", "medo"], { 
-    message: "Emoção deve ser uma das opções disponíveis" 
-  }).optional(),
+  emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro", "medo"], {
+    message: "Emoção deve ser uma das opções disponíveis"
+  }).optional().nullable(),
   walletId: z.string().optional(), // ID da carteira customizada
 });
 

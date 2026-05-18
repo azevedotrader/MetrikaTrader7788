@@ -26,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { TradeImageUpload } from "@/components/ui/trade-image-upload";
 import {
   TrendingUp,
   TrendingDown,
@@ -87,23 +86,36 @@ function parseQuickLine(line: string): ParsedTrade | null {
   // tipo: long/compra ou short/venda
   const tipo: 'compra'|'venda' = /\bSHORT\b|\bVENDA\b|\bSELL\b/.test(l) ? 'venda' : 'compra';
 
-  // resultado: take / loss / stop / be
-  const res = /\bTAKE\b|\bTP\b/.test(l) ? 'take'
-    : /\bLOSS\b|\bSTOP\b/.test(l) ? 'loss'
-    : /\bBE\b/.test(l) ? 'be'
-    : '';
-  if (!res) missing.push('resultado (take, loss, be)');
-
-  // múltiplo do risco: 3x, 2.5x, 3R, 2R  (3x == 3R == ganhou/perdeu 3× o risco)
-  // Deve vir ANTES do match de valor financeiro para não confundir "3R" com "R$3"
+  // múltiplo do risco: 3x, 2.5x, 3R, 2R — detectar ANTES para não confundir com valor puro
   const multMatch = l.match(/\b(\d+(?:[.,]\d+)?)\s*[Xx]\b|\b(\d+(?:[.,]\d+)?)\s*R\b(?!\$)/);
   const multiplier = multMatch
     ? parseFloat((multMatch[1] || multMatch[2]).replace(',','.'))
     : null;
 
-  // valor financeiro explícito: R$150, R$ 500  (cifrão após R)
+  // valor financeiro explícito: R$150, R$ 500
   const valMatch = l.match(/R\$\s*(\d+(?:[.,]\d+)?)/);
-  const valor = valMatch ? parseFloat(valMatch[1].replace(',','.')) : null;
+  // fallback: número puro (com sinal opcional) sem R$ ou sufixo R/x — ex: -100, +250, 1500
+  const plainNumMatch = !valMatch && !multMatch
+    ? l.match(/(?<![A-Z\d,./])([+-]?\d+(?:[.,]\d+)?)(?![A-Z\d])/)
+    : null;
+  const rawValor = valMatch
+    ? parseFloat(valMatch[1].replace(',','.'))
+    : plainNumMatch
+      ? parseFloat(plainNumMatch[1].replace(',','.'))
+      : null;
+
+  // resultado: palavras-chave explícitas têm prioridade; senão infere pelo sinal do número
+  const resKeyword =
+    /\bTAKE\b|\bTP\b|\bGANHEI\b|\bACERTEI\b|\bWIN\b|\bGANHOU\b/.test(l) ? 'take'
+    : /\bLOSS\b|\bSTOP\b|\bSL\b|\bPERDI\b|\bERREI\b|\bLOST\b/.test(l)   ? 'loss'
+    : /\bBE\b/.test(l) ? 'be'
+    : null;
+  // Se não teve palavra-chave, infere pelo sinal do número raw
+  const resFromSign = rawValor !== null
+    ? (rawValor < 0 ? 'loss' : rawValor > 0 ? 'take' : 'be')
+    : null;
+  const res = resKeyword || resFromSign || '';
+  if (!res) missing.push('resultado (take/loss/be ou valor com sinal)');
 
   // alvo / stop como valores separados "alvo 500 stop 200"
   const alvoMatch = l.match(/(?:ALVO|TAKE|TP)\s+(\d+(?:[.,]\d+)?)/);
@@ -116,16 +128,25 @@ function parseQuickLine(line: string): ParsedTrade | null {
   const hora = horaMatch ? `${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}` : '';
 
   // valor financeiro final (hierarquia):
-  // 1. valor explícito (R$500)
-  // 2. multiplier × stop  (3x com stop 200 → R$600)
-  // 3. alvo/stop direto
-  // 4. be → 0
+  // 1. valor explícito (R$500 ou número puro)  → sinal determinado por res
+  // 2. multiplier × stop
+  // 3. multiplier direto (ex: 2R sem stop)
+  // 4. alvo/stop direto
+  // 5. be → 0
+  const valor = rawValor;
   let resultadoFinal: number | null = null;
   if (valor !== null) {
-    resultadoFinal = res === 'loss' ? -Math.abs(valor) : Math.abs(valor);
+    // Se o valor já tem sinal negativo, respeita; senão aplica pelo resultado
+    if (valor < 0) {
+      resultadoFinal = -Math.abs(valor); // já é negativo
+    } else {
+      resultadoFinal = res === 'loss' ? -Math.abs(valor) : Math.abs(valor);
+    }
   } else if (multiplier !== null && stop) {
     const stopVal = parseFloat(stop);
     resultadoFinal = res === 'loss' ? -(multiplier * stopVal) : multiplier * stopVal;
+  } else if (multiplier !== null) {
+    resultadoFinal = res === 'loss' ? -multiplier : multiplier;
   } else if (res === 'take' && alvo) {
     resultadoFinal = parseFloat(alvo);
   } else if (res === 'loss' && stop) {
@@ -136,6 +157,26 @@ function parseQuickLine(line: string): ParsedTrade | null {
   // multiplier sem stop: valor fica null mas o múltiplo é mostrado na UI
 
   return { ativo, mercado: inferMercado(ativo), tipo, resultado: res as any, valor: resultadoFinal, multiplier, alvo, stop, hora, raw, missing };
+}
+
+// Helper: formata resultado para exibição — suporta "2R"/"-1R" e valores financeiros
+function fmtResultado(resultado: string | null | undefined) {
+  const r = String(resultado ?? '0').trim();
+  const rMatch = r.match(/^([+-]?\d+(?:\.\d+)?)R$/i);
+  if (rMatch) {
+    const v = parseFloat(rMatch[1]);
+    const isProfit = v > 0;
+    const isLoss   = v < 0;
+    const display  = (isProfit ? '+' : '') + v + 'R';
+    return { display, isProfit, isLoss, isBRL: false };
+  }
+  const pnl = parseFloat(r) || 0;
+  const isProfit = pnl > 0;
+  const isLoss   = pnl < 0;
+  const display  = pnl === 0
+    ? '–'
+    : (isProfit ? '+' : '') + `R$ ${Math.abs(pnl).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return { display: isLoss ? `-R$ ${Math.abs(pnl).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : display, isProfit, isLoss, isBRL: true, pnl };
 }
 
 export default function NovoTrade() {
@@ -161,15 +202,20 @@ export default function NovoTrade() {
   function buildInsertTrade(p: ParsedTrade, walletId: string | null): InsertTrade {
     const today = new Date().toISOString().slice(0, 10);
     const dataHora = p.hora ? `${today}T${p.hora}` : new Date().toISOString().slice(0, 16);
+    // Se só tem múltiplo R (sem valor financeiro), armazena como "2R" / "-1R"
+    const resultadoStr = p.valor !== null
+      ? String(p.valor)
+      : p.multiplier !== null
+        ? (p.resultado === 'loss' ? '-' : '+') + String(p.multiplier) + 'R'
+        : '0';
     return {
       dataHora,
       ativo: p.ativo,
       mercado: p.mercado,
       tipo: p.tipo,
-      resultado: p.valor !== null ? String(p.valor) : '0',
+      resultado: resultadoStr,
       alvo: p.alvo || '',
       stop: p.stop || '',
-      // multiplier salvo em risco: 3x → risco = "3.00" (vezes o risco base)
       risco: p.multiplier !== null ? String(p.multiplier) : undefined,
       setup: '',
       emocao: undefined,
@@ -274,7 +320,7 @@ export default function NovoTrade() {
     <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 pb-8">
 
       {/* ── Registrar Trade por Texto ── */}
-      <Card className="bg-[#0d0d18] border-[#6EE000]/25" data-testid="quick-entry-card">
+      <Card className="bg-[#0d0d18] border-[#6EE000]/25">
         <CardHeader className="pb-3">
           <CardTitle className="text-white flex items-center gap-2 text-base">
             <Zap className="h-5 w-5 text-[#6EE000]" />
@@ -448,9 +494,7 @@ export default function NovoTrade() {
                 </thead>
                 <tbody>
                   {[...allTrades].sort((a, b) => new Date(b.dataHora || b.createdAt || 0).getTime() - new Date(a.dataHora || a.createdAt || 0).getTime()).map((trade) => {
-                    const pnl = parseFloat(String(trade.resultado || 0));
-                    const isProfit = pnl > 0;
-                    const isLoss = pnl < 0;
+                    const fmt = fmtResultado(trade.resultado);
                     const walletName = wallets.find(w => w.id === trade.walletId)?.name;
                     const dateStr = trade.dataHora
                       ? new Date(trade.dataHora).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
@@ -472,9 +516,9 @@ export default function NovoTrade() {
                           </span>
                         </td>
                         <td className={`px-4 py-2.5 text-right font-bold tabular-nums whitespace-nowrap ${
-                          isProfit ? 'text-[var(--gold)]' : isLoss ? 'text-[var(--r)]' : 'text-[var(--dim)]'
+                          fmt.isProfit ? 'text-[var(--gold)]' : fmt.isLoss ? 'text-[var(--r)]' : 'text-[var(--dim)]'
                         }`}>
-                          {isProfit ? '+' : ''}{pnl === 0 ? '–' : `R$ ${pnl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          {fmt.display}
                         </td>
                         <td className="px-4 py-2.5 text-[var(--dim)] text-xs capitalize">{trade.mercado || '–'}</td>
                         <td className="px-4 py-2.5 text-[var(--dim)] text-xs hidden sm:table-cell">{trade.setup || '–'}</td>
@@ -657,14 +701,24 @@ export default function NovoTrade() {
                 </div>
               </div>
 
-              {/* Setup */}
-              <div>
-                <Label className="text-[var(--dim)] text-xs mb-1.5 block">Setup</Label>
-                <Input
-                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
-                  value={editForm.setup || ''}
-                  onChange={e => setEditForm(f => ({ ...f, setup: e.target.value }))}
-                />
+              {/* Setup / Emoção */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Setup</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.setup || ''}
+                    onChange={e => setEditForm(f => ({ ...f, setup: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-[var(--dim)] text-xs mb-1.5 block">Emoção</Label>
+                  <Input
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
+                    value={editForm.emocao || ''}
+                    onChange={e => setEditForm(f => ({ ...f, emocao: e.target.value as any }))}
+                  />
+                </div>
               </div>
 
               {/* Comentário */}
@@ -676,9 +730,6 @@ export default function NovoTrade() {
                   onChange={e => setEditForm(f => ({ ...f, comentario: e.target.value }))}
                 />
               </div>
-
-              {/* Print do Trade */}
-              <TradeImageUpload tradeId={editingTrade?.id} />
             </div>
           )}
 

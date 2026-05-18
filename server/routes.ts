@@ -1930,7 +1930,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.put("/api/trades/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const validatedData = insertTradeSchema.partial().parse(req.body);
+      // Sanitiza campos enum que podem chegar null do frontend
+      const rawBody = { ...req.body };
+      if (rawBody.emocao === null || rawBody.emocao === '') delete rawBody.emocao;
+      const validatedData = insertTradeSchema.partial().parse(rawBody);
 
       const trade = await storage.updateTrade(id, validatedData);
       res.json(trade);
