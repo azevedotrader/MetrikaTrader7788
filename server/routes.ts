@@ -2753,7 +2753,10 @@ export async function registerRoutes(app: Express): Promise<void> {
         const user = await storage.getUser(userId);
         
         // Check if user has a free plan (all paid plans have full access)
-        const isPaidPlan = (plan: string) => plan === 'monthly' || plan === 'quarterly' || plan === 'annual';
+        const isPaidPlan = (plan: string) => {
+          const normalized = String(plan || 'free').trim().toLowerCase();
+          return normalized === 'monthly' || normalized === 'quarterly' || normalized === 'annual';
+        };
         if (user && !isPaidPlan(user.planType || 'free')) {
           const upgradeMessage = language === 'en' 
             ? `🤖 **AI Assistant Available for Premium Members Only**
@@ -2930,7 +2933,10 @@ Todos os planos pagos incluem:
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
 
-      let planType = user.planType || 'free';
+      // Normalize planType: trim whitespace and convert to lowercase for safe comparison
+      let planType = String(user.planType || 'free').trim().toLowerCase();
+      const validPlans = ['monthly', 'quarterly', 'annual'];
+      if (!validPlans.includes(planType)) planType = 'free';
       let daysRemaining;
       let expiresAt;
 
@@ -2982,7 +2988,10 @@ Todos os planos pagos incluem:
       }
       
       // Helper function to check if plan is paid (monthly, quarterly, annual)
-      const isPaidPlan = (plan: string) => plan === 'monthly' || plan === 'quarterly' || plan === 'annual';
+      const isPaidPlan = (plan: string) => {
+        const normalized = String(plan || 'free').trim().toLowerCase();
+        return normalized === 'monthly' || normalized === 'quarterly' || normalized === 'annual';
+      };
       
       res.json({
         planType,
