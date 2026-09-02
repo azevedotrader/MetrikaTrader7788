@@ -1633,6 +1633,60 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Clube do Gráfico - public read-only report (all authenticated users can access)
+  app.get("/api/clube-do-grafico", requireAuth, async (req, res) => {
+    try {
+      const clubeEmail = "analistasdoclubecg@gmail.com";
+      const clubeUser = await storage.getUserByEmail(clubeEmail);
+
+      if (!clubeUser) {
+        return res.json({ trades: [], metrics: null, userName: "Clube do Gráfico" });
+      }
+
+      const trades = await storage.getAllTrades(clubeUser.id);
+
+      const totalTrades = trades.length;
+      const winners = trades.filter((t: any) => t.resultado === 'take' || (t.valorFinanceiro && parseFloat(String(t.valorFinanceiro)) > 0));
+      const losers = trades.filter((t: any) => t.resultado === 'loss' || (t.valorFinanceiro && parseFloat(String(t.valorFinanceiro)) < 0));
+      const breakEvens = trades.filter((t: any) => t.resultado === 'be');
+
+      const winRate = totalTrades > 0 ? (winners.length / totalTrades) * 100 : 0;
+
+      const totalPnl = trades.reduce((sum: number, t: any) => {
+        return sum + (parseFloat(String(t.valorFinanceiro || 0)));
+      }, 0);
+
+      const avgWin = winners.length > 0
+        ? winners.reduce((sum: number, t: any) => sum + parseFloat(String(t.valorFinanceiro || 0)), 0) / winners.length
+        : 0;
+
+      const avgLoss = losers.length > 0
+        ? losers.reduce((sum: number, t: any) => sum + parseFloat(String(t.valorFinanceiro || 0)), 0) / losers.length
+        : 0;
+
+      const rrRatio = avgLoss !== 0 ? Math.abs(avgWin / avgLoss) : 0;
+
+      res.json({
+        userName: clubeUser.name || "Clube do Gráfico",
+        trades: trades.sort((a: any, b: any) => new Date(b.dataHora || b.createdAt).getTime() - new Date(a.dataHora || a.createdAt).getTime()),
+        metrics: {
+          totalTrades,
+          winners: winners.length,
+          losers: losers.length,
+          breakEvens: breakEvens.length,
+          winRate: Math.round(winRate * 10) / 10,
+          totalPnl: Math.round(totalPnl * 100) / 100,
+          avgWin: Math.round(avgWin * 100) / 100,
+          avgLoss: Math.round(avgLoss * 100) / 100,
+          rrRatio: Math.round(rrRatio * 100) / 100,
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching clube do grafico data:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Get trades by broker - ISOLADO POR USUÁRIO
   app.get("/api/trades/:corretora", requireAuth, async (req, res) => {
     try {

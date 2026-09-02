@@ -38,6 +38,7 @@ import PoliticaPrivacidade from "@/pages/politica-privacidade";
 import TermosServico from "@/pages/termos-servico";
 import ExclusaoDados from "@/pages/exclusao-dados";
 import NotFound from "@/pages/not-found";
+import ClubeDoGrafico from "@/pages/clube-do-grafico";
 
 // Títulos das páginas agora são chaves de tradução
 const pageTitleKeys: Record<string, string> = {
@@ -59,7 +60,8 @@ const pageTitleKeys: Record<string, string> = {
   "/termos-servico": "Termos de Serviço",
   "/exclusao-dados": "Exclusão de Dados",
   "/admin": "nav.admin",
-  "/teste-gateio": "Teste Gate.io API"
+  "/teste-gateio": "Teste Gate.io API",
+  "/clube-do-grafico": "Relatório Clube do Gráfico"
 };
 
 function AppContent() {
@@ -214,11 +216,18 @@ function AppContent() {
                     <Importacoes />
                   </Route>
                   <Route path="/carteiras">
-                    <TopBar 
-                      title={pageTitleKeys["/carteiras"]} 
+                    <TopBar
+                      title={pageTitleKeys["/carteiras"]}
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Carteiras />
+                  </Route>
+                  <Route path="/clube-do-grafico">
+                    <TopBar
+                      title={pageTitleKeys["/clube-do-grafico"]}
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <ClubeDoGrafico />
                   </Route>
                   {/* Legal pages are handled by public routes above with conditional onMenuClick */}
                   {/* Admin route moved to standalone section */}

@@ -38,6 +38,7 @@ const navigation = [
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
   { nameKey: "journal.title", href: "/diario", icon: Book },
   { nameKey: "nav.learning", href: "/aprendizado", icon: GraduationCap },
+  { nameKey: "Clube do Gráfico", href: "/clube-do-grafico", icon: TrendingUp },
   { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
   { nameKey: "profile.title", href: "/perfil", icon: User },
 ];

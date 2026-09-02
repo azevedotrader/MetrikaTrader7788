@@ -27,11 +27,13 @@ interface TradeDay {
   avgRR?: number;
   maxLoss?: number;
   maxWin?: number;
+  rawTrades?: any[];
 }
 
 interface WeekSummary {
   weekNumber: number;
   pnl: number;
+  rTotal: number;
   days: number;
   trades: number;
 }
@@ -53,13 +55,13 @@ export function TradingCalendar({
 }: TradingCalendarProps) {
   const { t, language } = useLanguage();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [showMode, setShowMode] = useState<"money" | "r">("money");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isDayDetailsModalOpen, setIsDayDetailsModalOpen] = useState(false);
   const [isDiaryModalOpen, setIsDiaryModalOpen] = useState(false);
   const [selectedDiaryEntry, setSelectedDiaryEntry] = useState<
     DiaryEntry | undefined
   >(undefined);
-  // Remover detecção JS de mobile - usar breakpoints Tailwind CSS
   const queryClient = useQueryClient();
 
   // Buscar entradas do diário
@@ -81,7 +83,6 @@ export function TradingCalendar({
 
   // Funções para o diário
   const handleDateClick = (date: Date) => {
-    // Abrir modal de detalhes do dia
     setSelectedDate(date);
     setIsDayDetailsModalOpen(true);
   };
@@ -89,8 +90,6 @@ export function TradingCalendar({
   const handleEditDiary = () => {
     if (!selectedDate) return;
     const existingEntry = getDiaryEntryForDate(selectedDate);
-
-    // Fechar modal de detalhes e abrir modal de edição
     setIsDayDetailsModalOpen(false);
     setSelectedDiaryEntry(existingEntry);
     setIsDiaryModalOpen(true);
@@ -136,15 +135,12 @@ export function TradingCalendar({
   const processRealTradeData = (): TradeDay[] => {
     const tradeDays: TradeDay[] = [];
 
-    // Agrupar trades por dia do mês atual
     const monthTrades = trades.filter((trade) => {
-      // Usar dataHora se disponível, senão date
       const dateStr = trade.dataHora || trade.date;
       const tradeDate = new Date(dateStr);
       return tradeDate.getFullYear() === year && tradeDate.getMonth() === month;
     });
 
-    // Criar mapa de trades por dia
     const tradesByDay = new Map<number, any[]>();
     monthTrades.forEach((trade) => {
       const dateStr = trade.dataHora || trade.date;
@@ -157,7 +153,6 @@ export function TradingCalendar({
       tradesByDay.get(day)!.push(trade);
     });
 
-    // Calcular estatísticas por dia
     tradesByDay.forEach((dayTrades, day) => {
       const totalPnl = dayTrades.reduce(
         (sum, trade) => sum + (parseFloat(trade.resultado) || trade.pnl || 0),
@@ -169,7 +164,6 @@ export function TradingCalendar({
       const winRate =
         dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
 
-      // Calcular R/R médio do dia
       const tradesComRR = dayTrades.filter((trade) => {
         const alvo = parseFloat(trade.alvo) || 0;
         const stop = parseFloat(trade.stop) || 0;
@@ -185,7 +179,6 @@ export function TradingCalendar({
             }, 0) / tradesComRR.length
           : 0;
 
-      // Maior perda e maior ganho do dia
       const results = dayTrades.map(
         (trade) => parseFloat(trade.resultado) || trade.pnl || 0,
       );
@@ -200,6 +193,7 @@ export function TradingCalendar({
         avgRR: avgRR,
         maxWin: maxWin,
         maxLoss: maxLoss,
+        rawTrades: dayTrades,
       });
     });
 
@@ -208,21 +202,18 @@ export function TradingCalendar({
 
   const tradeDays = processRealTradeData();
 
-  // Calcular resumos semanais baseado nas semanas lógicas do mês
-  // Semana 1 = dias 1-7, Semana 2 = dias 8-14, Semana 3 = dias 15-21, Semana 4 = dias 22-28/29/30/31
+  // Calcular resumos semanais
   const calculateWeekSummaries = (): WeekSummary[] => {
     const weeks: WeekSummary[] = [];
-    
-    // Definir as 4 semanas do mês
+
     const weekRanges = [
-      { start: 1, end: 7 },   // Semana 1
-      { start: 8, end: 14 },  // Semana 2
-      { start: 15, end: 21 }, // Semana 3
-      { start: 22, end: daysInMonth }, // Semana 4 (inclui todos os dias restantes)
+      { start: 1, end: 7 },
+      { start: 8, end: 14 },
+      { start: 15, end: 21 },
+      { start: 22, end: daysInMonth },
     ];
 
     weekRanges.forEach((range, index) => {
-      // Filtrar trades desta semana
       const weekTrades = tradeDays.filter(
         (td) => td.date >= range.start && td.date <= range.end
       );
@@ -231,10 +222,19 @@ export function TradingCalendar({
         const totalPnl = weekTrades.reduce((sum, day) => sum + day.pnl, 0);
         const totalTrades = weekTrades.reduce((sum, day) => sum + day.trades, 0);
         const tradingDays = weekTrades.length;
+        const rTotal = weekTrades.reduce((sum, day) => {
+          const dayR = (day.rawTrades || []).reduce((s: number, t: any) => {
+            const risco = parseFloat(t.risco || "0");
+            const res = parseFloat(t.resultado || "0");
+            return risco > 0 ? s + res / risco : s;
+          }, 0);
+          return sum + dayR;
+        }, 0);
 
         weeks.push({
           weekNumber: index + 1,
           pnl: totalPnl,
+          rTotal,
           days: tradingDays,
           trades: totalTrades,
         });
@@ -246,14 +246,14 @@ export function TradingCalendar({
 
   const weekSummaries = calculateWeekSummaries();
 
-  // Renderizar célula do dia - versão responsiva otimizada
+  // Renderizar célula do dia
   const renderDayCell = (
     dayNumber: number | null,
     isCurrentMonth: boolean = true,
   ) => {
     if (!dayNumber || !isCurrentMonth) {
       return (
-        <div className="p-1 border-r border-b border-zinc-700 h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px]">
+        <div className="p-1 border-r border-b border-[var(--brd)] h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px]">
         </div>
       );
     }
@@ -268,7 +268,6 @@ export function TradingCalendar({
       new Date().getMonth() === month &&
       new Date().getFullYear() === year;
 
-    // Verificar se há entrada do diário para este dia
     const dayDate = new Date(year, month, dayNumber);
     const diaryEntry = getDiaryEntryForDate(dayDate);
     const hasDiary = !!diaryEntry;
@@ -276,52 +275,45 @@ export function TradingCalendar({
     return (
       <div
         className={cn(
-          "border-r border-b border-zinc-700 relative transition-all duration-200 overflow-hidden cursor-pointer h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px] p-1 sm:p-2 md:p-2.5",
-          "backdrop-blur-[2px] md:backdrop-blur-[3px] bg-black/10 ring-1 ring-white/5 shadow-sm",
-          isToday && "ring-zinc-600/50",
-          hasData && isProfit && "hover:brightness-105",
-          hasData && isLoss && "hover:brightness-105",
-          hasData && isBreakEven && "hover:brightness-105",
-          !hasData && "hover:bg-zinc-800/30",
+          "border-r border-b border-[var(--brd)] relative transition-all duration-200 overflow-hidden cursor-pointer",
+          "h-[80px] sm:h-[120px] md:h-[155px] lg:h-[170px] p-1 sm:p-2 md:p-2.5",
+          "bg-[var(--card)]/60 shadow-sm",
+          isToday && "ring-1 ring-inset ring-[var(--brd2)]",
+          !hasData && "hover:bg-[var(--surf)]/80",
         )}
         onClick={() => handleDateClick(dayDate)}
         data-testid={`calendar-day-${dayNumber}`}
       >
-        {/* Overlay de cor translúcido para efeito fosco */}
+        {/* Overlay de cor para dias com resultado */}
         {hasData && (
-          <div 
-            aria-hidden="true" 
+          <div
+            aria-hidden="true"
             className={cn(
               "absolute inset-0 pointer-events-none",
-              isLoss && "bg-gradient-to-b from-[rgba(99,25,25,0.35)] to-[rgba(90,23,23,0.20)]",
-              isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.35)] to-[rgba(2,37,29,0.20)]",
-              isBreakEven && "bg-gradient-to-b from-amber-500/30 to-amber-600/15"
-            )} 
+              isLoss     && "bg-gradient-to-b from-[#FF1F3D]/20 to-[#FF1F3D]/8",
+              isProfit   && "bg-gradient-to-b from-[#6EE000]/20 to-[#6EE000]/8",
+              isBreakEven && "bg-gradient-to-b from-amber-500/25 to-amber-600/10"
+            )}
           />
         )}
-        
-        {/* Efeito de brilho fosco sutil */}
-        <div 
-          aria-hidden="true" 
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/12 via-white/8 to-transparent" 
-        />
-        {/* Número do dia - canto superior esquerdo */}
+
+        {/* Número do dia */}
         <div
           className={cn(
             "absolute top-1 left-1 sm:top-1.5 sm:left-1.5 text-[10px] sm:text-[11px] md:text-xs font-semibold",
-            hasData && isBreakEven ? "text-zinc-900/90" : "text-white/80",
+            isBreakEven ? "text-amber-900" : "text-[var(--text)]/80",
           )}
         >
           {dayNumber}
         </div>
-        
-        {/* Ícone do diário - canto superior direito */}
+
+        {/* Ícone do diário */}
         {hasDiary && (
           <div title={t("calendar.diary_entry_available")} className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5">
             <BookOpen
               className={cn(
                 "w-3 h-3 sm:w-4 sm:h-4",
-                hasData && isBreakEven ? "text-zinc-900/80" : "text-white/80"
+                isBreakEven ? "text-amber-900/70" : "text-[var(--text)]/70"
               )}
               data-testid={`diary-indicator-${dayNumber}`}
             />
@@ -335,14 +327,33 @@ export function TradingCalendar({
               className={cn(
                 "font-extrabold tracking-tight tabular-nums leading-none text-center",
                 "text-sm sm:text-lg md:text-2xl",
-                hideData ? "text-zinc-500" : (hasData && isBreakEven ? "text-zinc-900" : "text-white")
+                hideData
+                  ? "text-[var(--dim)]"
+                  : isBreakEven
+                  ? "text-amber-900"
+                  : isProfit
+                  ? "text-[var(--gold)]"
+                  : "text-[var(--r)]"
               )}
-              style={{ 
-                textShadow: hideData ? 'none' : (hasData && isBreakEven ? 'none' : '0 2px 4px rgba(0,0,0,0.8)')
+              style={{
+                textShadow: hideData ? "none" : "0 1px 3px rgba(0,0,0,0.3)",
               }}
             >
               {hideData ? (
                 <span>•••••</span>
+              ) : showMode === "r" ? (
+                (() => {
+                  const rTotal = (tradeDay.rawTrades || []).reduce((sum: number, t: any) => {
+                    const risco = parseFloat(t.risco || "0");
+                    const res = parseFloat(t.resultado || "0");
+                    return risco > 0 ? sum + res / risco : sum;
+                  }, 0);
+                  return (
+                    <span>
+                      {rTotal >= 0 ? "+" : ""}{rTotal.toFixed(1)}R
+                    </span>
+                  );
+                })()
               ) : (
                 <>
                   <span className="sm:hidden">
@@ -360,11 +371,11 @@ export function TradingCalendar({
           </div>
         )}
 
-        {/* Métricas secundárias - parte inferior */}
+        {/* Métricas secundárias */}
         {hasData && tradeDay && (
           <div className={cn(
             "absolute bottom-0.5 sm:bottom-1.5 left-0.5 right-0.5 sm:left-2 sm:right-2 flex items-center justify-center gap-1 sm:gap-2 text-[8px] sm:text-[10px] md:text-xs",
-            hasData && isBreakEven ? "text-zinc-900/90" : "text-white/85"
+            isBreakEven ? "text-amber-900/80" : "text-[var(--text)]/75"
           )}>
             <span>{tradeDay.trades} <span className="hidden sm:inline">{tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}</span><span className="sm:hidden">t</span></span>
             {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
@@ -379,49 +390,54 @@ export function TradingCalendar({
     );
   };
 
-  // Renderizar resumo semanal - apenas desktop
+  // Renderizar resumo semanal
   const renderWeekSummary = (week: WeekSummary) => {
     const isProfit = week.pnl > 0;
+    const isLoss   = week.pnl < 0;
 
     return (
-      <div 
+      <div
         className={cn(
           "min-h-[155px] lg:min-h-[170px] grid place-items-center transition-colors relative",
-          "backdrop-blur-[2px] md:backdrop-blur-[3px] bg-black/10 ring-1 ring-white/5 shadow-sm",
+          "bg-[var(--card)]/60 shadow-sm",
           "hover:brightness-105"
         )}
       >
-        {/* Overlay de cor translúcido para resumo semanal */}
-        <div 
-          aria-hidden="true" 
+        {/* Overlay de cor */}
+        <div
+          aria-hidden="true"
           className={cn(
             "absolute inset-0 pointer-events-none",
-            week.pnl < 0 && "bg-gradient-to-b from-[rgba(99,25,25,0.35)] to-[rgba(90,23,23,0.20)]",
-            isProfit && "bg-gradient-to-b from-[rgba(3,46,35,0.35)] to-[rgba(2,37,29,0.20)]",
-            week.pnl === 0 && "bg-gradient-to-b from-zinc-700/30 to-zinc-800/15"
-          )} 
+            isLoss   && "bg-gradient-to-b from-[#FF1F3D]/20 to-[#FF1F3D]/8",
+            isProfit && "bg-gradient-to-b from-[#6EE000]/20 to-[#6EE000]/8",
+            week.pnl === 0 && "bg-[var(--brd)]/20"
+          )}
         />
-        
-        {/* Efeito de brilho fosco sutil */}
-        <div 
-          aria-hidden="true" 
-          className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/12 via-white/8 to-transparent" 
-        />
-        
-        <div className="text-center relative z-10">
-          <div className="text-xs text-white/80 mb-1">
+
+        <div className="text-center relative z-10 px-1">
+          <div className="text-xs text-[var(--dim)] mb-1">
             {t("calendar.week")} {week.weekNumber}
           </div>
           <div
             className={cn(
               "font-extrabold text-base md:text-lg tabular-nums mb-1",
-              hideData ? "text-zinc-500" : "text-white"
+              hideData
+                ? "text-[var(--dim)]"
+                : isProfit
+                ? "text-[var(--gold)]"
+                : isLoss
+                ? "text-[var(--r)]"
+                : "text-[var(--text)]"
             )}
-            style={{ textShadow: hideData ? 'none' : '0 2px 4px rgba(0,0,0,0.8)' }}
+            style={{ textShadow: hideData ? "none" : "0 1px 3px rgba(0,0,0,0.3)" }}
           >
-            {hideData ? "•••••" : `${isProfit ? "+" : ""}R$ ${Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
+            {hideData
+              ? "•••••"
+              : showMode === "r"
+              ? `${week.rTotal >= 0 ? "+" : ""}${week.rTotal.toFixed(1)}R`
+              : `${isProfit ? "+" : ""}R$ ${Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
           </div>
-          <div className="text-[10px] text-white/80">
+          <div className="text-[10px] text-[var(--dim)]">
             {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")} • {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
           </div>
         </div>
@@ -445,56 +461,71 @@ export function TradingCalendar({
     <>
       <Card
         className={cn(
-          "bg-zinc-900/95 border-zinc-700/70 relative mb-8 md:mb-10 shadow-xl backdrop-blur-sm",
+          "bg-[var(--card)] border-[var(--brd)] relative mb-8 md:mb-10 shadow-xl",
           className,
         )}
         style={{ marginBottom: "50px" }}
       >
-        {/* Logo watermark - mais visível, atrás do conteúdo */}
+        {/* Logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="opacity-[0.10] sm:opacity-[0.12] md:opacity-[0.15] lg:opacity-[0.18] flex items-center justify-center w-full h-full">
-            <img 
-              src={metrikaLogo} 
-              alt="METRIKA" 
+          <div className="opacity-[0.07] sm:opacity-[0.09] md:opacity-[0.12] flex items-center justify-center w-full h-full">
+            <img
+              src={metrikaLogo}
+              alt="METRIKA"
               style={{
-                height: '450px',
-                width: 'auto',
-                objectFit: 'contain',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                filter: 'brightness(1.2) contrast(1.1)',
+                height: "450px",
+                width: "auto",
+                objectFit: "contain",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                filter: "brightness(1.1) contrast(1.0)",
               }}
               className="block"
             />
           </div>
         </div>
 
-        <CardHeader className="pb-3 sm:pb-4 md:pb-5 relative z-10">
+        <CardHeader className="pb-3 sm:pb-4 md:pb-5 relative z-10 border-b border-[var(--brd)]">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base sm:text-lg md:text-xl text-white flex items-center gap-2 sm:gap-3">
-              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-600" />
+            <CardTitle className="text-base sm:text-lg md:text-xl text-[var(--text)] flex items-center gap-2 sm:gap-3">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-[var(--b)]" />
               <span className="hidden sm:inline">{t("calendar.title")}</span>
               <span className="sm:hidden">{t("calendar.title_short")}</span>
             </CardTitle>
             <div className="flex items-center space-x-1 sm:space-x-2">
+              <div className="flex items-center gap-1 mr-2">
+                {(["money", "r"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setShowMode(m)}
+                    className={`text-[10px] px-2.5 py-1 rounded-full font-bold border transition-all ${
+                      showMode === m
+                        ? "bg-[#6EE000]/20 border-[#6EE000]/50 text-[#6EE000]"
+                        : "border-[var(--brd)] text-[var(--dim)] hover:border-[var(--brd2)]"
+                    }`}
+                  >
+                    {m === "money" ? "R$" : "R"}
+                  </button>
+                ))}
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigateMonth("prev")}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 p-1.5 sm:p-2 rounded-md transition-all"
+                className="text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--surf)] p-1.5 sm:p-2 rounded-md transition-all"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
-              <span className="text-sm sm:text-base md:text-lg text-white font-semibold capitalize text-center min-w-[120px] sm:min-w-[140px] md:min-w-[180px] px-2">
+              <span className="text-sm sm:text-base md:text-lg text-[var(--text)] font-semibold capitalize text-center min-w-[120px] sm:min-w-[140px] md:min-w-[180px] px-2">
                 {monthName} {year}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigateMonth("next")}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 p-1.5 sm:p-2 rounded-md transition-all"
+                className="text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--surf)] p-1.5 sm:p-2 rounded-md transition-all"
               >
                 <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
@@ -509,12 +540,12 @@ export function TradingCalendar({
             {weekDays.map((day) => (
               <div
                 key={day}
-                className="text-center font-semibold text-zinc-300 border-r border-b border-zinc-700 py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-zinc-800/30"
+                className="text-center font-semibold text-[var(--dim)] border-r border-b border-[var(--brd)] py-1.5 sm:py-2.5 md:py-3.5 text-[10px] sm:text-xs md:text-sm bg-[var(--surf)]/60"
               >
                 {day}
               </div>
             ))}
-            <div className="hidden md:block text-center font-semibold text-zinc-300 border-b border-zinc-700 py-3.5 text-sm bg-zinc-800/30">
+            <div className="hidden md:block text-center font-semibold text-[var(--dim)] border-b border-[var(--brd)] py-3.5 text-sm bg-[var(--surf)]/60">
               {t("calendar.week")}
             </div>
 
@@ -539,13 +570,13 @@ export function TradingCalendar({
                   }),
                   // Resumo semanal - apenas desktop
                   weekSummaries[weekIndex] ? (
-                    <div key={`week-summary-${weekIndex}`} className="hidden md:block">
+                    <div key={`week-summary-${weekIndex}`} className="hidden md:block border-l border-[var(--brd)]">
                       {renderWeekSummary(weekSummaries[weekIndex])}
                     </div>
                   ) : (
                     <div
                       key={`week-empty-${weekIndex}`}
-                      className="hidden md:block border-l border-zinc-700 min-h-[155px] lg:min-h-[170px]"
+                      className="hidden md:block border-l border-[var(--brd)] min-h-[155px] lg:min-h-[170px]"
                     ></div>
                   ),
                 ].filter(Boolean),
@@ -554,47 +585,64 @@ export function TradingCalendar({
           </div>
 
           {/* Estatísticas mensais - apenas mobile */}
-          <div className="md:hidden border-t border-zinc-700 p-4 bg-zinc-900/50">
-            <div className="text-center text-white font-semibold mb-4 text-base">
+          <div className="md:hidden border-t border-[var(--brd)] p-4 bg-[var(--surf)]/40">
+            <div className="text-center text-[var(--text)] font-semibold mb-4 text-base">
               {t("calendar.summary_of")} {monthName}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <div className="text-xl sm:text-2xl font-bold text-white mb-1">
+              <div className="text-center p-3 rounded-lg bg-[var(--card)] border border-[var(--brd)]">
+                <div className="text-xl sm:text-2xl font-bold text-[var(--text)] mb-1">
                   {monthlyStats.tradingDays}
                 </div>
-                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
+                <div className="text-xs sm:text-sm text-[var(--dim)] font-medium">
                   {t("calendar.trading_days")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <div className="text-xl sm:text-2xl font-bold text-white mb-1">
+              <div className="text-center p-3 rounded-lg bg-[var(--card)] border border-[var(--brd)]">
+                <div className="text-xl sm:text-2xl font-bold text-[var(--text)] mb-1">
                   {monthlyStats.totalTrades}
                 </div>
-                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
+                <div className="text-xs sm:text-sm text-[var(--dim)] font-medium">
                   {t("calendar.total_trades")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+              <div className="text-center p-3 rounded-lg bg-[var(--card)] border border-[var(--brd)]">
                 <div
                   className={cn(
                     "text-xl sm:text-2xl font-bold mb-1",
-                    hideData ? "text-zinc-500" : (monthlyStats.totalPnl > 0
-                      ? "text-[#032E23]"
-                      : "text-[#631919]"),
+                    hideData
+                      ? "text-[var(--dim)]"
+                      : monthlyStats.totalPnl > 0
+                      ? "text-[var(--gold)]"
+                      : monthlyStats.totalPnl < 0
+                      ? "text-[var(--r)]"
+                      : "text-[var(--text)]",
                   )}
                 >
-                  {hideData ? "•••••" : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
+                  {hideData
+                    ? "•••••"
+                    : showMode === "r"
+                    ? (() => {
+                        const rTotal = tradeDays.reduce((sum, day) => {
+                          return sum + (day.rawTrades || []).reduce((s: number, t: any) => {
+                            const risco = parseFloat(t.risco || "0");
+                            const res = parseFloat(t.resultado || "0");
+                            return risco > 0 ? s + res / risco : s;
+                          }, 0);
+                        }, 0);
+                        return `${rTotal >= 0 ? "+" : ""}${rTotal.toFixed(1)}R`;
+                      })()
+                    : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
                 </div>
-                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
+                <div className="text-xs sm:text-sm text-[var(--dim)] font-medium">
                   {t("calendar.pnl_total")}
                 </div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-                <div className="text-xl sm:text-2xl font-bold text-white mb-1">
+              <div className="text-center p-3 rounded-lg bg-[var(--card)] border border-[var(--brd)]">
+                <div className="text-xl sm:text-2xl font-bold text-[var(--text)] mb-1">
                   {monthlyStats.winRate}%
                 </div>
-                <div className="text-xs sm:text-sm text-zinc-400 font-medium">
+                <div className="text-xs sm:text-sm text-[var(--dim)] font-medium">
                   {t("calendar.win_rate")}
                 </div>
               </div>

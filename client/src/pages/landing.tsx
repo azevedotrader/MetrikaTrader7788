@@ -756,7 +756,7 @@ export default function Landing() {
 
                 <Button 
                   className="w-full gradient-emerald-blue hover:scale-105 hover:shadow-2xl transition-all duration-300 text-base sm:text-lg md:text-xl font-bold py-3 sm:py-4 animate-glow"
-                  onClick={() => window.open('https://hub.la/g/CGRfvH9XIZzkXUFTkesn', '_blank')}
+                  onClick={() => window.open('https://pay.hub.la/CGRfvH9XIZzkXUFTkesn', '_blank')}
                 >
                   {t('landing.pricing.monthly_button')}
                   <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 ml-2 sm:ml-3" />
@@ -840,7 +840,7 @@ export default function Landing() {
 
                 <Button 
                   className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold"
-                  onClick={() => window.open('https://hub.la/g/kUCz3mE6Gon3TeOz1h40', '_blank')}
+                  onClick={() => window.open('https://pay.hub.la/kUCz3mE6Gon3TeOz1h40', '_blank')}
                 >
                   {t('landing.pricing.annual_button')}
                 </Button>
