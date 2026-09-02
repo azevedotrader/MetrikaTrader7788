@@ -308,34 +308,34 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
     switch (type) {
       case 'iqt':
         // IQT - Objetivo: 100 | Verde ≥70 | Amarelo 30-70 | Vermelho <30
-        if (value >= 70) return 'text-[#2FA87A]'; // Verde - Bom
+        if (value >= 70) return 'text-[#6EE000]'; // Verde - Bom
         if (value >= 30) return 'text-yellow-500'; // Amarelo - Mediano
-        return 'text-[#F06363]'; // Vermelho - Precisa melhorar
+        return 'text-[#FF1F3D]'; // Vermelho - Precisa melhorar
       case 'eficiencia':
         // Eficiência - Objetivo: 5 | Verde ≥3.5 | Amarelo 1.5-3.5 | Vermelho <1.5
-        if (value >= 3.5) return 'text-[#2FA87A]';
+        if (value >= 3.5) return 'text-[#6EE000]';
         if (value >= 1.5) return 'text-yellow-500';
-        return 'text-[#F06363]';
+        return 'text-[#FF1F3D]';
       case 'consistencia':
         // Consistência - Objetivo: 1.2 | Verde ≥0.9 | Amarelo 0.5-0.9 | Vermelho <0.5
-        if (value >= 0.9) return 'text-[#2FA87A]';
+        if (value >= 0.9) return 'text-[#6EE000]';
         if (value >= 0.5) return 'text-yellow-500';
-        return 'text-[#F06363]';
+        return 'text-[#FF1F3D]';
       case 'rap':
         // RAP - Objetivo: 100 | Verde ≥70 | Amarelo 30-70 | Vermelho <30
-        if (value >= 70) return 'text-[#2FA87A]';
+        if (value >= 70) return 'text-[#6EE000]';
         if (value >= 30) return 'text-yellow-500';
-        return 'text-[#F06363]';
+        return 'text-[#FF1F3D]';
       case 'ipi':
         // IPI - Objetivo: 2.0 | Verde ≥1.4 | Amarelo 0.6-1.4 | Vermelho <0.6
-        if (value >= 1.4) return 'text-[#2FA87A]';
+        if (value >= 1.4) return 'text-[#6EE000]';
         if (value >= 0.6) return 'text-yellow-500';
-        return 'text-[#F06363]';
+        return 'text-[#FF1F3D]';
       case 'expectancy':
         // Expectancy - Objetivo: 50 | Verde ≥20 | Amarelo 0-20 | Vermelho <0
-        if (value >= 20) return 'text-[#2FA87A]';
+        if (value >= 20) return 'text-[#6EE000]';
         if (value >= 0) return 'text-yellow-500';
-        return 'text-[#F06363]';
+        return 'text-[#FF1F3D]';
     }
   };
 
@@ -345,7 +345,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
         {/* Primeira linha: 3 métricas */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {/* IQT */}
-          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               IQT
               <InfoTooltip>
@@ -356,7 +356,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Índice de Qualidade de Trading</p>
                   <p className="text-sm text-zinc-300">Mede a qualidade geral da sua estratégia combinando taxa de acerto, fator de lucro e risco/retorno. Quanto maior, melhor sua estratégia.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 70 | ⚠️ Mediano: 30-70 | ❌ Precisa melhorar: &lt; 30</p>
@@ -373,7 +373,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* Eficiência de Risco */}
-          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               Eficiência
               <InfoTooltip>
@@ -384,7 +384,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Eficiência de Risco</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você ganha em relação ao risco assumido. Quanto maior, mais eficiente está sendo sua gestão de risco.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 3.5 | ⚠️ Mediano: 1.5-3.5 | ❌ Precisa melhorar: &lt; 1.5</p>
@@ -401,7 +401,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* Score de Consistência */}
-          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               Consistência
               <InfoTooltip>
@@ -412,7 +412,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Score de Consistência</p>
                   <p className="text-sm text-zinc-300">Avalia a estabilidade dos seus resultados ao longo do tempo. Alta consistência indica disciplina e controle emocional.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 0.9 | ⚠️ Mediano: 0.5-0.9 | ❌ Precisa melhorar: &lt; 0.5</p>
@@ -432,7 +432,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
         {/* Segunda linha: 3 métricas */}
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {/* RAP */}
-          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               RAP
               <InfoTooltip>
@@ -443,7 +443,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Retorno Ajustado por Precisão</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você lucra em relação à sua taxa de acerto. Útil para avaliar se você está maximizando seus ganhos mesmo com assertividade moderada.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 70 | ⚠️ Mediano: 30-70 | ❌ Precisa melhorar: &lt; 30</p>
@@ -460,7 +460,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* IPI */}
-          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               IPI
               <InfoTooltip>
@@ -471,7 +471,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Índice de Performance Integrado</p>
                   <p className="text-sm text-zinc-300">Métrica avançada que combina rentabilidade, lucro, estabilidade e drawdown. Resume a performance completa da sua estratégia.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ 1.4 | ⚠️ Mediano: 0.6-1.4 | ❌ Precisa melhorar: &lt; 0.6</p>
@@ -488,7 +488,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
           </div>
 
           {/* Expectancy - Van Tharp */}
-          <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 flex flex-col">
+          <div className="tr-premium-card p-2 sm:p-3 flex flex-col">
             <div className="text-xs text-zinc-400 mb-1 sm:mb-2 flex items-center gap-1">
               Expectancy
               <InfoTooltip>
@@ -499,7 +499,7 @@ function AdvancedMetrics({ trades, t, formatCurrency, getCurrencySymbol }: { tra
                     </svg>
                   </button>
                 </InfoTooltipTrigger>
-                <InfoTooltipContent className="bg-zinc-800 border-zinc-700 text-white max-w-xs">
+                <InfoTooltipContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-xs">
                   <p className="font-semibold mb-1">Expectancy (Van Tharp)</p>
                   <p className="text-sm text-zinc-300">Mostra quanto você espera ganhar (ou perder) em média por trade. Métrica fundamental para saber se sua estratégia é lucrativa a longo prazo.</p>
                   <p className="text-xs text-zinc-400 mt-2">✅ Bom: ≥ {getCurrencySymbol()}20 | ⚠️ Mediano: {getCurrencySymbol()}0-20 | ❌ Negativo: &lt; {getCurrencySymbol()}0</p>
@@ -639,47 +639,55 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
     <div className="w-full">
       <CardContent className="p-3 sm:p-4 md:p-6">
         {/* Filtros de Tempo */}
-        <div className="flex flex-wrap justify-center sm:justify-end gap-1 sm:gap-2 mb-4">
+        <div className="flex flex-wrap justify-center sm:justify-end gap-1.5 sm:gap-2 mb-4">
           {[
             { key: "dia", label: t('time.day') },
             { key: "semana", label: t('time.week') },
             { key: "mes", label: t('time.month') },
             { key: "ano", label: t('time.year') },
           ].map((filter) => (
-            <Button
+            <button
               key={filter.key}
-              variant={timeFilter === filter.key ? "default" : "outline"}
-              size="sm"
               onClick={() => setTimeFilter(filter.key as any)}
-              className={
+              className={`text-xs font-bold px-3 py-1.5 rounded-md border transition-all duration-150 ${
                 timeFilter === filter.key
-                  ? "bg-neutral-primary hover:bg-neutral-secondary"
-                  : "border-charcoal-600 text-charcoal-300 hover:bg-charcoal-800"
-              }
+                  ? "bg-[#6EE000]/15 border-[#6EE000]/60 text-[#6EE000]"
+                  : "bg-transparent border-[var(--brd2)] text-[var(--dim)] hover:border-[#6EE000]/40 hover:text-[#6EE000]"
+              }`}
             >
               {filter.label}
-            </Button>
+            </button>
           ))}
         </div>
 
         {/* Gráfico */}
-        <div className="h-60 sm:h-72 md:h-80 w-full">
+        <div className="h-60 sm:h-72 md:h-80 w-full tr-chart-bg rounded-lg">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="period" 
-                  stroke="#9CA3AF" 
-                  fontSize={10}
-                  height={40}
-                  angle={-45}
+              <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6EE000" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#6EE000" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="period"
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
+                  height={36}
+                  angle={-30}
                   textAnchor="end"
                   interval={Math.max(Math.floor(chartData.length / 6), 1)}
                 />
                 <YAxis
-                  stroke="#9CA3AF"
-                  fontSize={10}
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                   width={70}
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={yAxisDomain}
@@ -687,69 +695,63 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
                 />
                 <RechartsTooltip
                   contentStyle={{
-                    backgroundColor: "#1E293B",
-                    border: "1px solid #475569",
-                    borderRadius: "8px",
-                    color: "#F1F5F9",
+                    backgroundColor: "#0f0f1a",
+                    border: "1.5px solid #1e1e2e",
+                    borderRadius: "12px",
+                    color: "#e0e0e0",
+                    padding: "10px 14px",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                    fontSize: "13px",
+                    fontFamily: "'Nunito', system-ui, sans-serif",
+                    fontWeight: 600,
                   }}
                   formatter={formatTooltipValue}
-                  labelStyle={{ color: "#CBD5E1" }}
+                  labelStyle={{ color: '#6e7191', fontSize: '11px', letterSpacing: '0.5px', marginBottom: '4px' }}
+                  cursor={{ stroke: 'rgba(110,224,0,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 {/* Linha de referência em zero */}
-                <ReferenceLine 
-                  y={0} 
-                  stroke="#FFF" 
-                  strokeWidth={2} 
-                  strokeDasharray="5 5"
-                  label={{ 
-                    value: 'ZERO', 
-                    fill: '#FFF', 
-                    fontSize: 12, 
-                    position: 'insideTopRight',
-                    fontWeight: 'bold'
-                  }}
+                <ReferenceLine
+                  y={0}
+                  stroke="rgba(255,255,255,0.15)"
+                  strokeWidth={1}
+                  strokeDasharray="6 4"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="cumulativeProfit"
+                  stroke="none"
+                  fill="url(#profitGradient)"
+                  fillOpacity={1}
                 />
                 <Line
                   type="monotone"
                   dataKey="cumulativeProfit"
-                  stroke="#2FA87A"
-                  strokeWidth={3}
-                  dot={(props) => {
+                  stroke="#6EE000"
+                  strokeWidth={2.5}
+                  dot={(props: any) => {
                     const { cx, cy, payload } = props;
                     const isNegative = payload.cumulativeProfit < 0;
                     return (
                       <circle
+                        key={`dot-${cx}-${cy}`}
                         cx={cx}
                         cy={cy}
-                        r={4}
-                        fill={isNegative ? "#F06363" : "#2FA87A"}
-                        stroke={isNegative ? "#F06363" : "#2FA87A"}
-                        strokeWidth={2}
+                        r={3}
+                        fill={isNegative ? "#FF1F3D" : "#6EE000"}
+                        stroke={isNegative ? "#FF1F3D" : "#6EE000"}
+                        strokeWidth={1.5}
                       />
                     );
                   }}
-                  activeDot={{ r: 6 }}
+                  activeDot={{ r: 5, fill: '#6EE000', stroke: '#6EE000', strokeWidth: 2 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="profit"
-                  stroke="#6B7280"
-                  strokeWidth={2}
-                  dot={(props) => {
-                    const { cx, cy, payload } = props;
-                    const isNegative = payload.profit < 0;
-                    return (
-                      <circle
-                        cx={cx}
-                        cy={cy}
-                        r={3}
-                        fill={isNegative ? "#F06363" : "#2FA87A"}
-                        stroke={isNegative ? "#F06363" : "#2FA87A"}
-                        strokeWidth={2}
-                      />
-                    );
-                  }}
-                  strokeDasharray="5 5"
+                  stroke="rgba(110,224,0,0.35)"
+                  strokeWidth={1.5}
+                  dot={false}
+                  strokeDasharray="4 4"
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -769,11 +771,11 @@ function CapitalCurveChart({ trades, t, formatCurrency }: { trades: Trade[]; t: 
         {/* Legenda */}
         <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-[#2FA87A]"></div>
+            <div className="w-3 h-0.5 bg-[#6EE000]"></div>
             <span className="text-slate-300">{t('metrics.accumulated_profitability')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-[#2FA87A] border-dashed"></div>
+            <div className="w-3 h-0.5 bg-[#6EE000] border-dashed"></div>
             <span className="text-slate-300">{t('metrics.period_result')}</span>
           </div>
         </div>
@@ -921,67 +923,84 @@ function DrawdownChart({ trades, t, formatCurrency }: { trades: Trade[]; t: (key
         <div className="flex justify-center mb-4 text-xs sm:text-sm">
           <div className="text-slate-400 text-center">
             <div>Max Drawdown:</div>
-            <div className="text-[#F06363] font-semibold text-base sm:text-lg">
+            <div className="text-[#FF1F3D] font-semibold text-base sm:text-lg">
               {formatCurrency(maxDrawdown)}
             </div>
           </div>
         </div>
 
         {/* Gráfico */}
-        <div className="h-60 sm:h-72 md:h-80 w-full">
+        <div className="h-60 sm:h-72 md:h-80 w-full tr-chart-bg rounded-lg">
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <RechartsLineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="period" 
-                  stroke="#9CA3AF"
-                  fontSize={10}
-                  height={50}
-                  angle={-45}
+              <RechartsLineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="ddGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="5%" stopColor="#FF1F3D" stopOpacity={0.25}/>
+                    <stop offset="95%" stopColor="#FF1F3D" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="period"
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
+                  height={36}
+                  angle={-30}
                   textAnchor="end"
                   interval={Math.max(Math.floor(chartData.length / 6), 1)}
                 />
-                <YAxis 
-                  stroke="#9CA3AF"
-                  fontSize={10}
+                <YAxis
+                  stroke="#6e7191"
+                  tick={{ fill: '#6e7191', fontSize: 10 }}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                   tickFormatter={(value) => formatCurrency(value)}
                   domain={['dataMin', 0]}
                   width={65}
                 />
                 <RechartsTooltip
                   contentStyle={{
-                    backgroundColor: "#1E293B",
-                    border: "1px solid #475569",
-                    borderRadius: "8px",
-                    color: "#F1F5F9",
+                    backgroundColor: "#0f0f1a",
+                    border: "1.5px solid #1e1e2e",
+                    borderRadius: "12px",
+                    color: "#e0e0e0",
+                    padding: "10px 14px",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                    fontSize: "13px",
+                    fontFamily: "'Nunito', system-ui, sans-serif",
+                    fontWeight: 600,
                   }}
                   formatter={formatTooltipValue}
-                  labelStyle={{ color: "#CBD5E1" }}
+                  labelStyle={{ color: '#6e7191', fontSize: '11px' }}
+                  cursor={{ stroke: 'rgba(255,31,61,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
+                <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
                 <Line
                   type="monotone"
                   dataKey="drawdown"
-                  stroke="#F06363"
-                  strokeWidth={3}
-                  dot={{ fill: "#F06363", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#F06363", strokeWidth: 2 }}
+                  stroke="#FF1F3D"
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 5, fill: '#FF1F3D', stroke: '#FF1F3D', strokeWidth: 2 }}
                   connectNulls={false}
                 />
               </RechartsLineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-full text-slate-400">
-              Sem dados de trades para exibir
+            <div className="flex items-center justify-center h-full text-[var(--dim)]">
+              Sem dados para exibir
             </div>
           )}
         </div>
-        
+
         {/* Legenda */}
-        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs sm:text-sm">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 bg-[#F06363]"></div>
-            <span className="text-slate-300">Drawdown %</span>
+            <div className="w-3 h-0.5 bg-[#FF1F3D]"></div>
+            <span className="text-[var(--dim)]">Drawdown máximo (R$)</span>
           </div>
         </div>
       </CardContent>
@@ -1018,7 +1037,7 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
         value: total,
         average: avg,
         count: results.length,
-        color: total >= 0 ? '#2FA87A' : '#F06363'
+        color: total >= 0 ? '#6EE000' : '#FF1F3D'
       };
     }).sort((a, b) => a.time.localeCompare(b.time));
 
@@ -1057,12 +1076,12 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-black border border-zinc-700 rounded-lg p-3 text-white">
-          <p className="font-medium mb-1">⏰ {label}</p>
-          <p className={`${data.value >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
+        <div style={{ backgroundColor: '#0f0f1a', border: '1.5px solid #1e1e2e', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)', fontFamily: "'Nunito', sans-serif" }}>
+          <p className="font-medium mb-1 text-white">⏰ {label}</p>
+          <p className={`${data.value >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]'}`}>
             💰 Total: {formatCurrency(data.value)}
           </p>
-          <p className={`${data.average >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
+          <p className={`${data.average >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]'}`}>
             📊 Média: {formatCurrency(data.average)}
           </p>
           <p className="text-zinc-300">📈 Trades: {data.count}</p>
@@ -1082,18 +1101,23 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
             bottom: 25, 
             left: window.innerWidth < 640 ? 15 : window.innerWidth < 1024 ? 20 : 30 
           }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.6} />
+            <CartesianGrid strokeDasharray="0" stroke="rgba(255,255,255,0.04)" vertical={false} />
             <XAxis
               dataKey="time"
-              stroke="#aaa"
+              stroke="#6e7191"
               tick={false}
               height={20}
+              axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+              tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
             />
             <YAxis
-              stroke="#aaa"
+              stroke="#6e7191"
               fontSize={window.innerWidth < 640 ? 9 : window.innerWidth < 1024 ? 10 : 11}
               tickFormatter={(value) => formatCurrency(value)}
               width={window.innerWidth < 640 ? 40 : window.innerWidth < 1024 ? 50 : 60}
+              axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+              tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
+              tick={{ fill: '#6e7191' }}
             />
             <RechartsTooltip content={<CustomTooltip />} />
             <ReferenceLine y={0} stroke="gray" strokeWidth={1} strokeDasharray="2 2" />
@@ -1116,11 +1140,11 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
       </div>
       
       {timeData.length > 0 && (
-        <div className="mt-4 md:mt-5 lg:mt-6 pt-4 md:pt-5 lg:pt-6 border-t border-slate-700">
+        <div className="mt-4 md:mt-5 lg:mt-6 pt-4 md:pt-5 lg:pt-6 border-t border-[var(--brd)]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 lg:gap-6">
             <div className="text-center">
               <div className="text-zinc-400 mb-2 text-xs md:text-sm">Melhor Horário</div>
-              <div className="text-[#2FA87A] font-medium text-sm md:text-base lg:text-lg">
+              <div className="text-[#6EE000] font-medium text-sm md:text-base lg:text-lg">
                 {(() => {
                   const best = timeData.reduce((prev, current) => 
                     prev.value > current.value ? prev : current
@@ -1131,7 +1155,7 @@ function TradeTimePerformance({ trades, t, formatCurrency }: { trades: Trade[]; 
             </div>
             <div className="text-center">
               <div className="text-zinc-400 mb-2 text-xs md:text-sm">Pior Horário</div>
-              <div className="text-[#F06363] font-medium text-sm md:text-base lg:text-lg">
+              <div className="text-[#FF1F3D] font-medium text-sm md:text-base lg:text-lg">
                 {(() => {
                   const worst = timeData.reduce((prev, current) => 
                     prev.value < current.value ? prev : current
@@ -1233,10 +1257,10 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
   }, [metricsData]);
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "#2FA87A"; // Verde
+    if (score >= 80) return "#6EE000"; // Verde
     if (score >= 60) return "#eab308"; // Amarelo
     if (score >= 40) return "#f97316"; // Laranja
-    return "#F06363"; // Vermelho
+    return "#FF1F3D"; // Vermelho
   };
 
   const getGradientId = (score: number) => {
@@ -1248,7 +1272,7 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
 
   return (
     <div className="w-full">
-      <CardContent className="p-4 bg-[#171719]">
+      <CardContent className="p-4 bg-[var(--card)]">
         {/* Pontuação */}
         <div className="text-center mb-4">
           
@@ -1263,18 +1287,18 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
               </div>
               
               {/* Barra de Progresso Colorida */}
-              <div className="relative w-full h-1.5 bg-slate-700 rounded-full overflow-hidden mb-4">
+              <div className="relative w-full h-1.5 bg-[var(--brd)] rounded-full overflow-hidden mb-4">
                 <div 
                   className="h-full transition-all duration-1000 ease-out"
                   data-testid="metrika-progress-bar"
                   style={{
                     width: `${overallScore}%`,
                     background: `linear-gradient(90deg, 
-                      #F06363 0%, 
+                      #FF1F3D 0%, 
                       #f97316 25%, 
                       #eab308 50%, 
-                      #2FA87A 75%, 
-                      #2FA87A 100%
+                      #6EE000 75%, 
+                      #6EE000 100%
                     )`,
                     backgroundSize: '400% 100%',
                     backgroundPosition: `${100 - (overallScore / 100) * 100}% 0`
@@ -1296,8 +1320,8 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
               <RadarChart data={metricsData}>
                 <defs>
                   <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#2FA87A" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#2FA87A" stopOpacity={0.1} />
+                    <stop offset="0%" stopColor="#6EE000" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#6EE000" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <PolarGrid 
@@ -1324,11 +1348,11 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
                 />
                 <Radar
                   dataKey="value"
-                  stroke="#2FA87A"
+                  stroke="#6EE000"
                   fill="url(#radarGradient)"
                   strokeWidth={2}
                   dot={{ 
-                    fill: "#2FA87A", 
+                    fill: "#6EE000", 
                     strokeWidth: 2, 
                     r: 4 
                   }}
@@ -1360,7 +1384,7 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
         
         {/* Distribuição por Mercado */}
         {metricsData.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-slate-700">
+          <div className="mt-4 pt-4 border-t border-[var(--brd)]">
             <h4 className="text-sm font-medium text-slate-300 mb-3 text-center">
               {t('dashboard.market_distribution')}
             </h4>
@@ -1392,7 +1416,7 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
                       <span className="text-slate-300 font-medium">{data.displayName}</span>
                       <div className="text-right">
                         <div className={`font-bold ${
-                          data.total >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'
+                          data.total >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]'
                         }`}>
                           {formatCurrency(data.total)}
                         </div>
@@ -1535,7 +1559,7 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
   // Cor da linha baseada no valor acumulado final
   const finalAccumulated = chartData.length > 0 ? chartData[chartData.length - 1].accumulated : 0;
   const isNegative = finalAccumulated < 0;
-  const lineColor = isNegative ? "#F06363" : "#2FA87A"; // Vermelho se negativo, verde se positivo
+  const lineColor = isNegative ? "#FF1F3D" : "#6EE000"; // Vermelho se negativo, verde se positivo
   const fillGradient = isNegative ? "url(#negativeGradient)" : "url(#positiveGradient)";
 
   // Função para renderizar métricas no container
@@ -1554,9 +1578,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
     container.innerHTML = `
       <div class="flex gap-1">
         <!-- Total de Lucros -->
-        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card tr-accent-green p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Lucros</div>
-          <div class="text-xs font-bold text-[#2FA87A] truncate">
+          <div class="text-xs font-bold text-[#6EE000] truncate">
             ${formatCurrency(totalPositive)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -1565,9 +1589,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         </div>
 
         <!-- Total de Perdas -->
-        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card tr-accent-red p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Perdas</div>
-          <div class="text-xs font-bold text-[#F06363] truncate">
+          <div class="text-xs font-bold text-[#FF1F3D] truncate">
             ${formatCurrency(totalNegative)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -1576,9 +1600,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         </div>
 
         <!-- Resultado do Período -->
-        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Resultado</div>
-          <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]'}">
+          <div class="text-xs font-bold truncate ${finalAccumulated >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]'}">
             ${formatCurrency(finalAccumulated)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -1587,9 +1611,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
         </div>
 
         <!-- Média por Período -->
-        <div class="bg-zinc-800/90 rounded-lg border border-zinc-700 p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
+        <div class="tr-premium-card tr-accent-blue p-1.5 w-20 h-16 flex flex-col justify-center items-center text-center">
           <div class="text-xs text-zinc-400 mb-0.5 leading-tight">Média</div>
-          <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-blue-600' : 'text-orange-400'}">
+          <div class="text-xs font-bold truncate ${avgPerPeriod >= 0 ? 'text-[#448aff]' : 'text-orange-400'}">
             ${formatCurrency(avgPerPeriod)}
           </div>
           <div class="text-xs text-zinc-500 leading-tight">
@@ -1677,8 +1701,8 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
             }
             className={`text-xs md:text-sm ${
               selectedPeriod === filter.key
-                ? "bg-[#2FA87A] hover:bg-[#279169] text-white"
-                : "border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                ? "bg-[#6EE000] hover:bg-[#5bc800] text-white"
+                : "border-[var(--brd)] text-[var(--dim)] hover:bg-[var(--surf)] hover:text-[var(--text)]"
             }`}
           >
             {filter.label}
@@ -1695,10 +1719,10 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
           setSelectedStartDay(1);
           setSelectedEndDay(lastDay);
         }}>
-          <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-32 md:w-40 text-xs md:text-sm">
+          <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] w-32 md:w-40 text-xs md:text-sm">
             <SelectValue placeholder="Mês Específico" />
           </SelectTrigger>
-          <SelectContent className="bg-zinc-800 border-zinc-700">
+          <SelectContent className="bg-[var(--surf)] border-[var(--brd)]">
             {(() => {
               const months = [];
               const now = new Date();
@@ -1742,10 +1766,10 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 }
               }}
             >
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
+              <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] w-12 md:w-16 text-xs md:text-sm">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
+              <SelectContent className="bg-[var(--surf)] border-[var(--brd)] max-h-40">
                 {(() => {
                   const [year, month] = selectedMonth.split('-');
                   const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
@@ -1774,10 +1798,10 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 }
               }}
             >
-              <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white w-12 md:w-16 text-xs md:text-sm">
+              <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] w-12 md:w-16 text-xs md:text-sm">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-800 border-zinc-700 max-h-40">
+              <SelectContent className="bg-[var(--surf)] border-[var(--brd)] max-h-40">
                 {(() => {
                   const [year, month] = selectedMonth.split('-');
                   const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
@@ -1838,20 +1862,22 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 const data = payload[0].payload;
                 return (
                   <div style={{
-                    backgroundColor: "#000000",
-                    border: "1px solid #444",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    color: "#fff",
-                    minWidth: "140px"
+                    backgroundColor: "#0f0f1a",
+                    border: "1.5px solid #1e1e2e",
+                    borderRadius: "12px",
+                    padding: "10px 14px",
+                    color: "#e0e0e0",
+                    minWidth: "150px",
+                    boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+                    fontFamily: "'Nunito', sans-serif",
                   }}>
                     <p style={{ margin: 0, fontWeight: "bold", marginBottom: "6px", fontSize: "12px" }}>
                       📅 {label} {data.tradeIndex ? `• Trade #${data.tradeIndex}` : ''}
                     </p>
-                    <p style={{ margin: 0, marginBottom: "4px", color: data.total >= 0 ? "#2FA87A" : "#F06363", fontSize: "13px" }}>
+                    <p style={{ margin: 0, marginBottom: "4px", color: data.total >= 0 ? "#6EE000" : "#FF1F3D", fontSize: "13px" }}>
                       {data.total >= 0 ? "📈" : "📉"} {data.total >= 0 ? "+" : ""}{formatCurrency(data.total)}
                     </p>
-                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#2FA87A" : "#F06363", fontSize: "12px", opacity: 0.8 }}>
+                    <p style={{ margin: 0, color: data.accumulated >= 0 ? "#6EE000" : "#FF1F3D", fontSize: "12px", opacity: 0.8 }}>
                       💰 Total: {formatCurrency(data.accumulated)}
                     </p>
                   </div>
@@ -1874,31 +1900,34 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
                 <defs>
                   <linearGradient id="dynamicGradient" x1="0" y1="0" x2="0" y2="1">
                     {/* Verde acima de 0 */}
-                    <stop offset="0%" stopColor="#2FA87A" />
-                    <stop offset={`${zeroPosition}%`} stopColor="#2FA87A" />
+                    <stop offset="0%" stopColor="#6EE000" />
+                    <stop offset={`${zeroPosition}%`} stopColor="#6EE000" />
                     {/* Vermelho abaixo de 0 */}
-                    <stop offset={`${zeroPosition}%`} stopColor="#F06363" />
-                    <stop offset="100%" stopColor="#F06363" />
+                    <stop offset={`${zeroPosition}%`} stopColor="#FF1F3D" />
+                    <stop offset="100%" stopColor="#FF1F3D" />
                   </linearGradient>
                 </defs>
 
-                {/* Grid */}
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                
                 {/* Eixos */}
-                <XAxis 
-                  dataKey="period" 
-                  stroke="#aaa"
+                <XAxis
+                  dataKey="period"
+                  stroke="#6e7191"
                   fontSize={window.innerWidth < 768 ? 8 : 11}
                   angle={-45}
                   textAnchor="end"
                   height={window.innerWidth < 768 ? 50 : 80}
+                  tick={{ fill: '#6e7191' }}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                 />
-                
-                <YAxis 
-                  stroke="#aaa"
+
+                <YAxis
+                  stroke="#6e7191"
                   fontSize={window.innerWidth < 768 ? 9 : 12}
                   tickFormatter={(value) => formatCurrency(value)}
+                  tick={{ fill: '#6e7191' }}
+                  axisLine={{ stroke: 'rgba(110,113,145,0.3)' }}
+                  tickLine={{ stroke: '#6e7191', strokeWidth: 1 }}
                 />
                 
                 <RechartsTooltip content={<CustomTooltip />} />
@@ -2174,15 +2203,15 @@ function SquareCard({
   children,
 }: SquareCardProps) {
   return (
-    <Card className={`bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors ${className.includes('h-') ? '' : 'aspect-square'} ${className}`}>
-      <CardContent className="p-4 h-full flex flex-col justify-between">
+    <div className={`tr-premium-card ${className.includes('h-') ? '' : 'aspect-square'} ${className}`}>
+      <div className="p-4 h-full flex flex-col justify-between">
         <div className="flex items-start justify-between mb-2">
-          <div className="text-xs text-zinc-400 font-medium truncate pr-2">
+          <div className="tr-stat-label truncate pr-2">
             {title}
           </div>
           <Icon className={`h-4 w-4 flex-shrink-0 ${color || "text-zinc-400"}`} />
         </div>
-        
+
         <div className="flex-1 flex flex-col justify-center">
           {children ? (
             children
@@ -2197,8 +2226,8 @@ function SquareCard({
             </>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -2210,7 +2239,7 @@ interface CircularProgressProps {
   color?: string;
 }
 
-function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#2FA87A" }: CircularProgressProps) {
+function CircularProgress({ percentage, size = 60, strokeWidth = 4, color = "#6EE000" }: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -2307,11 +2336,11 @@ function NetDailyPnLBarChart({ trades, formatCurrency }: { trades: Trade[]; form
               const isPositive = value >= 0;
               
               return (
-                <div className="bg-zinc-900/95 backdrop-blur-sm border border-zinc-700 rounded-lg p-3 shadow-xl">
+                <div style={{ backgroundColor: '#0f0f1a', border: '1.5px solid #1e1e2e', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}>
                   <div className="text-xs text-zinc-400 mb-1">
                     {label}
                   </div>
-                  <div className={`text-sm font-semibold ${isPositive ? 'text-[#2FA87A]' : 'text-[#F06363]'}`}>
+                  <div className={`text-sm font-semibold ${isPositive ? 'text-[#6EE000]' : 'text-[#FF1F3D]'}`}>
                     {isPositive ? '+' : ''}{formatCurrency(Math.abs(value))}
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">
@@ -2333,7 +2362,7 @@ function NetDailyPnLBarChart({ trades, formatCurrency }: { trades: Trade[]; form
             {dailyData.map((entry, index) => (
               <Cell 
                 key={index} 
-                fill={entry.pnl >= 0 ? '#2FA87A' : '#F06363'} 
+                fill={entry.pnl >= 0 ? '#6EE000' : '#FF1F3D'} 
               />
             ))}
           </Bar>
@@ -2376,7 +2405,7 @@ function RecentTrades({ trades, formatCurrency, hideData = false }: { trades: Tr
           return (
             <div 
               key={trade.id} 
-              className="grid grid-cols-4 gap-2 text-xs px-1 py-1 hover:bg-zinc-800/50 rounded transition-colors"
+              className="grid grid-cols-4 gap-2 text-xs px-1 py-1 hover:bg-[var(--surf)]/40 rounded transition-colors"
               data-testid={`recent-trade-${index}`}
             >
               <div className="text-zinc-300 truncate">
@@ -2388,7 +2417,7 @@ function RecentTrades({ trades, formatCurrency, hideData = false }: { trades: Tr
               <div className="text-zinc-300">
                 {parseFloat(trade.quantidade || '0').toFixed(0)}
               </div>
-              <div className={`font-medium ${hideData ? 'text-zinc-500' : (result >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]')}`}>
+              <div className={`font-medium ${hideData ? 'text-zinc-500' : (result >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]')}`}>
                 {hideData ? '•••••' : `${result >= 0 ? '+' : ''}${formatCurrency(result)}`}
               </div>
             </div>
@@ -2428,21 +2457,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     forex: {
       name: t('broker.forex.name'),
       type: t('broker.forex.type'),
-      color: "bg-blue-600",
+      color: "bg-[#448aff]",
       icon: TrendingUp,
       description: t('broker.forex.description'),
     },
     b3: {
       name: t('broker.b3.name'),
       type: t('broker.b3.type'),
-      color: "bg-[#2FA87A]",
+      color: "bg-[#6EE000]",
       icon: BarChart3,
       description: t('broker.b3.description'),
     },
     crypto: {
       name: t('broker.crypto.name'),
       type: t('broker.crypto.type'),
-      color: "bg-[#2FA87A]",
+      color: "bg-[#6EE000]",
       icon: Activity,
       description: t('broker.crypto.description'),
     },
@@ -2456,7 +2485,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     string | null
   >(null);
   const [selectedCsvIds, setSelectedCsvIds] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<"all" | "broker" | "csv">("all");
+  const [viewMode, setViewMode] = useState<"all" | "broker" | "csv" | "wallet">("all");
   const [editingCsv, setEditingCsv] = useState<{
     id: string;
     currentName: string;
@@ -2575,16 +2604,18 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     let filtered = [...trades];
 
     if (viewMode === "broker" && selectedBrokerFilter) {
-      // Verificar se é uma carteira customizada (formato: wallet:id)
+      // Filtro por mercado/corretora
+      filtered = filtered.filter(
+        (trade) => trade.corretora === selectedBrokerFilter || trade.mercado === selectedBrokerFilter,
+      );
+    }
+
+    if (viewMode === "wallet" && selectedBrokerFilter) {
+      // Filtro por carteira (formato: wallet:id)
       if (selectedBrokerFilter.startsWith("wallet:")) {
         const walletId = selectedBrokerFilter.replace("wallet:", "");
         filtered = filtered.filter(
           (trade) => trade.walletId === walletId,
-        );
-      } else {
-        // Filtro tradicional por corretora/mercado
-        filtered = filtered.filter(
-          (trade) => trade.corretora === selectedBrokerFilter,
         );
       }
     }
@@ -2652,7 +2683,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6EE000] mx-auto mb-4"></div>
           <p className="text-zinc-400">Carregando dados...</p>
         </div>
       </div>
@@ -2689,7 +2720,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
         viewMode={viewMode}
         onViewModeChange={(mode) => {
           setViewMode(mode);
-          if (mode !== "broker") setSelectedBrokerFilter(null);
+          if (mode !== "broker" && mode !== "wallet") setSelectedBrokerFilter(null);
           if (mode !== "csv") setSelectedCsvIds([]);
         }}
         selectedBrokerFilter={selectedBrokerFilter}
@@ -2727,10 +2758,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           {/* TradeZella-Style Dashboard - Top Row (Rectangular Cards) */}
           <div data-testid="metrics-cards" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-6">
             {/* Net PnL */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-net-pnl">
+            <Card className="tr-premium-card tr-accent-green" data-testid="card-net-pnl">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.net_pnl')}</div>
+                  <div className="tr-stat-label">{t('metrics.net_pnl')}</div>
                   <DollarSign className="h-4 w-4 text-zinc-400" />
                 </div>
                 {(() => {
@@ -2741,7 +2772,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                                    valueLength > 11 ? 'text-base md:text-lg lg:text-xl' : 
                                    valueLength > 8 ? 'text-lg md:text-xl lg:text-2xl' : 
                                    'text-xl md:text-2xl lg:text-3xl';
-                  const colorClass = totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
+                  const colorClass = totalResult >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]';
                   return (
                     <div className={`${fontSize} font-bold ${hideData ? 'text-zinc-500' : colorClass} whitespace-nowrap overflow-hidden`}>
                       {hideData ? '•••••' : formattedValue}
@@ -2755,14 +2786,14 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
 
             {/* Trade Win % - SEMPRE VISÍVEL (não é valor monetário) */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-trade-win">
+            <Card className="tr-premium-card tr-accent-blue" data-testid="card-trade-win">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('dashboard.win_rate')}</div>
+                  <div className="tr-stat-label">{t('dashboard.win_rate')}</div>
                   <Target className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
-                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#ffffff]">
+                  <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--text)]">
                     {(() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                       const totalTrades = periodFilteredTrades.length;
@@ -2782,7 +2813,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
                         const totalTrades = periodFilteredTrades.length;
                         const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
-                        return winRate >= 60 ? "#2FA87A" : winRate >= 40 ? "#eab308" : "#F06363";
+                        return winRate >= 60 ? "#6EE000" : winRate >= 40 ? "#eab308" : "#FF1F3D";
                       })()}
                     />
                   </div>
@@ -2793,10 +2824,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             
 
             {/* Day Win % - SEMPRE VISÍVEL (não é valor monetário) */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-day-win">
+            <Card className="tr-premium-card tr-accent-blue" data-testid="card-day-win">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.day_win_rate')}</div>
+                  <div className="tr-stat-label">{t('metrics.day_win_rate')}</div>
                   <Calendar className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between gap-2 sm:gap-3">
@@ -2814,7 +2845,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     return (
                       <>
                         <div className="flex flex-col">
-                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[#fafafa]">
+                          <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--text)]">
                             {(dayWinRate % 1 === 0 ? dayWinRate.toFixed(0) : dayWinRate.toFixed(1)) + '%'}
                           </div>
                           <div className="text-xs text-zinc-500 mt-1 leading-tight">
@@ -2825,7 +2856,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={dayWinRate} 
                             size={35}
-                            color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#eab308" : "#F06363"}
+                            color={dayWinRate >= 60 ? "#2563eb" : dayWinRate >= 40 ? "#eab308" : "#FF1F3D"}
                           />
                         </div>
                       </>
@@ -2836,10 +2867,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
 
             {/* RR Médio - SEMPRE VISÍVEL (não é valor monetário) */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-rr">
+            <Card className="tr-premium-card tr-accent-orange" data-testid="card-avg-rr">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('dashboard.avg_rr')}</div>
+                  <div className="tr-stat-label">{t('dashboard.avg_rr')}</div>
                   <TrendingUp className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="text-xl md:text-2xl lg:text-3xl font-bold text-white break-words">
@@ -2852,22 +2883,22 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             </Card>
 
             {/* Average Win/Loss */}
-            <Card className="bg-zinc-900/90 border-zinc-800 hover:bg-zinc-900/95 transition-colors" data-testid="card-avg-win-loss">
+            <Card className="tr-premium-card tr-accent-green" data-testid="card-avg-win-loss">
               <CardContent className="p-3 md:p-4 lg:p-5">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="text-xs text-zinc-400 font-medium">{t('metrics.avg_win_loss')}</div>
+                  <div className="tr-stat-label">{t('metrics.avg_win_loss')}</div>
                   <Activity className="h-4 w-4 text-zinc-400" />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <div className={`text-base md:text-lg lg:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} break-words`}>
+                    <div className={`text-base md:text-lg lg:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#6EE000]'} break-words`}>
                       {hideData ? '+•••' : '+' + (() => {
                         const avgWin = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0);
                         return formatCurrency(avgWin);
                       })()}
                     </div>
-                    <div className={`text-sm md:text-base font-semibold ${hideData ? 'text-zinc-500' : 'text-[#F06363]'} break-words`}>
+                    <div className={`text-sm md:text-base font-semibold ${hideData ? 'text-zinc-500' : 'text-[#FF1F3D]'} break-words`}>
                       {hideData ? '-•••' : (() => {
                         const avgLoss = Math.abs(periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0)
                           .reduce((sum, t, _, arr) => sum + parseFloat(t.resultado || '0') / arr.length, 0));
@@ -2889,11 +2920,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                         return (
                           <div className="flex items-end gap-1 h-10">
                             <div 
-                              className="bg-[#2FA87A] rounded-sm w-2 transition-all duration-300"
+                              className="bg-[#6EE000] rounded-sm w-2 transition-all duration-300"
                               style={{ height: `${winHeight}px` }}
                             />
                             <div 
-                              className="bg-[#F06363] rounded-sm w-2 transition-all duration-300"
+                              className="bg-[#FF1F3D] rounded-sm w-2 transition-all duration-300"
                               style={{ height: `${lossHeight}px` }}
                             />
                           </div>
@@ -2910,34 +2941,29 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Performance por Período - Gráfico (3/4 da largura) */}
             <div className="lg:col-span-3">
-              <Card className="border-zinc-800 h-full bg-[#171719]">
-                <CardHeader>
-                  <CardTitle className="text-white">
-                    {t('dashboard.performance_chart')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {/* Gráfico - Área Principal */}
-                  <div className="w-full">
-                    <TradingPerformanceChart 
-                      trades={filteredTrades} 
-                      t={t}
-                      onPeriodFilterChange={setPeriodFilteredTrades}
-                      formatCurrency={formatCurrency}
-                      hideData={hideData}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="tr-premium-card tr-accent-blue h-full flex flex-col">
+                <div className="px-5 pt-5 pb-3 border-b border-[var(--brd)]/40">
+                  <p className="text-sm font-bold text-[var(--text)] tracking-widest uppercase">{t('dashboard.performance_chart')}</p>
+                </div>
+                <div className="p-4 flex-1">
+                  <TradingPerformanceChart
+                    trades={filteredTrades}
+                    t={t}
+                    onPeriodFilterChange={setPeriodFilteredTrades}
+                    formatCurrency={formatCurrency}
+                    hideData={hideData}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* 4 Metric Blocks - À direita (1/4 da largura) */}
             <div className="lg:col-span-1">
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 h-full">
                 {/* Lucros - valor monetário ocultável, percentual e contagem sempre visíveis */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.profits_short')}</div>
-                  <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} mb-2`}>
+                  <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#6EE000]'} mb-2`}>
                     {hideData ? '•••••' : (() => {
                       const totalPositive = periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') > 0)
@@ -2955,7 +2981,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={winPercentage} 
                             size={35}
-                            color="#2FA87A"
+                            color="#6EE000"
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {winPercentage.toFixed(1)}%
@@ -2970,9 +2996,9 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
 
                 {/* Perdas - valor monetário ocultável, percentual e contagem sempre visíveis */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.losses_short')}</div>
-                  <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#F06363]'} mb-2`}>
+                  <div className={`text-lg md:text-xl font-bold ${hideData ? 'text-zinc-500' : 'text-[#FF1F3D]'} mb-2`}>
                     {hideData ? '•••••' : (() => {
                       const totalNegative = Math.abs(periodFilteredTrades
                         .filter(t => parseFloat(t.resultado || '0') < 0)
@@ -2990,7 +3016,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={lossPercentage} 
                             size={35}
-                            color="#F06363"
+                            color="#FF1F3D"
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {lossPercentage.toFixed(1)}%
@@ -3005,11 +3031,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
 
                 {/* Resultado - valor monetário ocultável, percentual e contagem sempre visíveis */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.result')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
-                    return totalResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
+                    return totalResult >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]';
                   })()}`}>
                     {hideData ? '•••••' : (() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -3028,7 +3054,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={winRate} 
                             size={35}
-                            color={isPositive ? "#2FA87A" : "#F06363"}
+                            color={isPositive ? "#6EE000" : "#FF1F3D"}
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {winRate.toFixed(1)}%
@@ -3043,12 +3069,12 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
 
                 {/* Média - valor monetário ocultável, percentual sempre visível */}
-                <div className="bg-zinc-800/90 rounded-lg border border-zinc-700 p-3 flex flex-col items-center text-center">
+                <div className="tr-premium-card p-3 flex flex-col items-center text-center relative">
                   <div className="text-xs text-zinc-400 mb-2">{t('metrics.average')}</div>
                   <div className={`text-lg md:text-xl font-bold mb-2 ${hideData ? 'text-zinc-500' : (() => {
                     const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                     const avgResult = periodFilteredTrades.length > 0 ? totalResult / periodFilteredTrades.length : 0;
-                    return avgResult >= 0 ? 'text-[#2FA87A]' : 'text-[#F06363]';
+                    return avgResult >= 0 ? 'text-[#6EE000]' : 'text-[#FF1F3D]';
                   })()}`}>
                     {hideData ? '•••••' : (() => {
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
@@ -3067,7 +3093,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                           <CircularProgress 
                             percentage={normalizedPercentage} 
                             size={35}
-                            color={isPositive ? "#2FA87A" : "#F06363"}
+                            color={isPositive ? "#6EE000" : "#FF1F3D"}
                           />
                           <div className="text-xs text-zinc-500 mt-1">
                             {normalizedPercentage.toFixed(1)}%
@@ -3091,7 +3117,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               title={t('metrics.progress_tracker')}
               value=""
               icon={Calendar}
-              color="text-blue-600"
+              color="text-[#448aff]"
               className="md:col-span-2 lg:col-span-2 min-h-[500px] lg:min-h-[600px]"
               data-testid="card-progress-tracker"
             >
@@ -3105,21 +3131,21 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 
                 {/* Métricas adicionais no espaço vazio */}
-                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-zinc-700">
+                <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-[var(--brd)]">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 max-w-full">
-                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
+                    <div className="tr-premium-card tr-accent-green p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.best_trade')}</p>
-                          <p className={`text-sm sm:text-lg font-bold ${hideData ? 'text-zinc-500' : 'text-[#2FA87A]'} truncate`}>
+                          <p className={`text-sm sm:text-lg font-bold ${hideData ? 'text-zinc-500' : 'text-[#6EE000]'} truncate`}>
                             {hideData ? '•••••' : formatCurrency(metrics.melhorTrade)}
                           </p>
                         </div>
-                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#2FA87A] flex-shrink-0 ml-2" />
+                        <TrendingUp className="h-4 w-4 sm:h-6 sm:w-6 text-[#6EE000] flex-shrink-0 ml-2" />
                       </div>
                     </div>
 
-                    <div className="bg-zinc-800/50 rounded-lg p-2 sm:p-3 min-h-0 overflow-hidden">
+                    <div className="tr-premium-card p-2 sm:p-3 min-h-0 overflow-hidden">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-zinc-400 text-xs truncate">{t('dashboard.frequent_emotion')}</p>
@@ -3142,7 +3168,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
               title={t('metrics.advanced_metrics')}
               value=""
               icon={BarChart3}
-              color="text-[#2FA87A]"
+              color="text-[#6EE000]"
               data-testid="card-advanced-metrics"
               className="md:col-span-2 lg:col-span-1 min-h-[500px] lg:min-h-[600px]"
             >
@@ -3153,7 +3179,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
                 
                 {/* Seção 2: Métrika Score */}
-                <div className="border-t border-zinc-700 pt-3 sm:pt-4">
+                <div className="border-t border-[var(--brd)] pt-3 sm:pt-4">
                   <div className="text-sm font-semibold text-zinc-300 mb-2 sm:mb-3 flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
                     {t('metrics.metrika_score')}
@@ -3168,30 +3194,30 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
             {/* Mobile: Cards PnL e Trades em layout responsivo */}
             <div className="md:hidden grid grid-cols-1 gap-3">
               {/* PnL Chart Mobile - Card separado */}
-              <Card className="bg-zinc-900/90 border-zinc-800">
-                <CardContent className="p-3">
+              <div className="tr-premium-card tr-accent-green">
+                <div className="p-3">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-zinc-400">{t('metrics.daily_net_pnl')}</h3>
-                    <BarChart3 className="h-4 w-4 text-[#2FA87A]" />
+                    <span className="tr-stat-label">{t('metrics.daily_net_pnl')}</span>
+                    <BarChart3 className="h-4 w-4 text-[#6EE000]" />
                   </div>
                   <div className="h-48 overflow-hidden">
                     <NetDailyPnLBarChart trades={periodFilteredTrades} formatCurrency={formatCurrency} />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Recent Trades Mobile - Card separado */}
-              <Card className="bg-zinc-900/90 border-zinc-800">
-                <CardContent className="p-3">
+              <div className="tr-premium-card">
+                <div className="p-3">
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-zinc-400">{t('dashboard.recent_trades')}</h3>
+                    <span className="tr-stat-label">{t('dashboard.recent_trades')}</span>
                     <FileText className="h-4 w-4 text-zinc-400" />
                   </div>
                   <div className="h-48 overflow-hidden">
                     <RecentTrades trades={periodFilteredTrades} formatCurrency={formatCurrency} hideData={hideData} />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -3200,15 +3226,13 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Trade Time Performance - 2 colunas */}
             <div className="lg:col-span-2">
-              <Card className="border-zinc-800 bg-[#171719] h-full">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-zinc-400" />
-                    {t('metrics.trade_time_performance')}
-                  </CardTitle>
-                </CardHeader>
+              <div className="tr-premium-card tr-accent-blue h-full flex flex-col">
+                <div className="px-5 pt-5 pb-3 flex items-center gap-2 border-b border-[var(--brd)]/40">
+                  <Activity className="h-5 w-5 text-[#448aff] opacity-70" />
+                  <p className="tr-section-label" style={{ color: '#448aff', marginBottom: 0 }}>{t('metrics.trade_time_performance')}</p>
+                </div>
                 <TradeTimePerformance trades={periodFilteredTrades} t={t} formatCurrency={formatCurrency} />
-              </Card>
+              </div>
             </div>
 
             {/* PnL e Trades Recentes - 1 coluna à direita */}
@@ -3219,7 +3243,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   title={t('metrics.daily_net_pnl')}
                   value=""
                   icon={BarChart3}
-                  color="text-[#2FA87A]"
+                  color="text-[#6EE000]"
                   data-testid="card-daily-pnl-chart"
                   className="h-[280px] flex-shrink-0"
                 >
@@ -3248,32 +3272,43 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
           {/* Gráfico de Rentabilidade e Análise de Volume */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Curva de Capital */}
-            <Card className="bg-zinc-900/90 border-zinc-800">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <LineChart className="h-5 w-5 text-zinc-400" />
-                  {t('dashboard.capital_curve')}
-                </CardTitle>
-              </CardHeader>
+            <div className="tr-premium-card tr-accent-green">
+              <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-[var(--brd)]/40">
+                <div>
+                  <p className="tr-section-label">{t('dashboard.capital_curve')}</p>
+                  <span className="text-[var(--text)] font-black text-xl tracking-tight leading-none">
+                    {formatCurrency(periodFilteredTrades.reduce((s, tr) => s + parseFloat(tr.resultado || '0'), 0))}
+                  </span>
+                </div>
+                <LineChart className="h-5 w-5 text-[#6EE000] opacity-70" />
+              </div>
               <CapitalCurveChart trades={periodFilteredTrades} t={t} formatCurrency={formatCurrency} />
-            </Card>
+            </div>
 
             {/* Gráfico de Drawdown */}
-            <Card className="bg-zinc-900/90 border-zinc-800">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-zinc-400" />
-                  {t('metrics.drawdown')}
-                </CardTitle>
-              </CardHeader>
+            <div className="tr-premium-card tr-accent-red">
+              <div className="px-5 pt-5 pb-3 flex items-center justify-between border-b border-[var(--brd)]/40">
+                <div>
+                  <p className="tr-section-label">{t('metrics.drawdown')}</p>
+                  <span className="text-[var(--r)] font-black text-xl tracking-tight leading-none">
+                    {(() => {
+                      let peak = 0, cum = 0, maxDD = 0;
+                      [...periodFilteredTrades].sort((a,b) => new Date(a.dataHora).getTime() - new Date(b.dataHora).getTime())
+                        .forEach(tr => { cum += parseFloat(tr.resultado||'0'); if(cum>peak)peak=cum; const dd=peak-cum; if(dd>maxDD)maxDD=dd; });
+                      return maxDD > 0 ? `−${formatCurrency(maxDD)}` : '—';
+                    })()}
+                  </span>
+                </div>
+                <TrendingDown className="h-5 w-5 text-[#FF1F3D] opacity-70" />
+              </div>
               <DrawdownChart trades={periodFilteredTrades} t={t} formatCurrency={formatCurrency} />
-            </Card>
+            </div>
           </div>
       </div>
 
       {/* Dialog de Edição de Trade Manual */}
       <Dialog open={showEditTradeDialog} onOpenChange={setShowEditTradeDialog}>
-        <DialogContent className="bg-zinc-900 border-zinc-800 text-white max-w-md">
+        <DialogContent className="bg-[var(--card)] border-[var(--brd)] text-[var(--text)] max-w-md">
           <DialogHeader className="relative">
             <button
               onClick={() => {
@@ -3299,13 +3334,13 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   id="edit-ativo"
                   value={editingTrade.ativo || ''}
                   onChange={(e) => setEditingTrade({...editingTrade, ativo: e.target.value})}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label>Mercado</Label>
-                <div className="px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded-md text-sm text-zinc-400">
+                <div className="px-3 py-2 bg-[var(--surf)]/50 border border-[var(--brd)] rounded-md text-sm text-zinc-400">
                   {editingTrade.mercado === 'crypto' ? '🪙 Crypto' : 
                    editingTrade.mercado === 'forex' ? '💱 Forex' : 
                    '📊 B3 (Brasil)'}
@@ -3326,7 +3361,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   onChange={(e) => {
                     setEditingTrade({...editingTrade, dataHora: new Date(e.target.value).toISOString()});
                   }}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                 />
               </div>
               
@@ -3336,10 +3371,10 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   value={editingTrade.tipo || ''} 
                   onValueChange={(value) => setEditingTrade({...editingTrade, tipo: value})}
                 >
-                  <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                  <SelectTrigger className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
+                  <SelectContent className="bg-[var(--surf)] border-[var(--brd)]">
                     <SelectItem value="compra" className="text-white">Compra</SelectItem>
                     <SelectItem value="venda" className="text-white">Venda</SelectItem>
                   </SelectContent>
@@ -3355,7 +3390,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.01"
                     value={editingTrade.capitalUtilizado || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, capitalUtilizado: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3367,7 +3402,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.01"
                     value={editingTrade.resultado || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, resultado: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3381,7 +3416,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.01"
                     value={editingTrade.quantidade || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, quantidade: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3393,7 +3428,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.precoEntrada || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, precoEntrada: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3407,7 +3442,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.precoSaida || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, precoSaida: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3419,7 +3454,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.stop || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, stop: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3433,7 +3468,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     step="0.0001"
                     value={editingTrade.alvo || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, alvo: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
 
@@ -3443,7 +3478,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     id="edit-setup"
                     value={editingTrade.setup || ''}
                     onChange={(e) => setEditingTrade({...editingTrade, setup: e.target.value})}
-                    className="bg-zinc-800 border-zinc-700 text-white"
+                    className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   />
                 </div>
               </div>
@@ -3454,7 +3489,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   id="edit-comentario"
                   value={editingTrade.comentario || ''}
                   onChange={(e) => setEditingTrade({...editingTrade, comentario: e.target.value})}
-                  className="bg-zinc-800 border-zinc-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   placeholder="Observações sobre o trade..."
                 />
               </div>
@@ -3467,7 +3502,7 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 setShowEditTradeDialog(false);
                 setEditingTrade(null);
               }}
-              className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+              className="border-[var(--brd)] text-[var(--dim)] hover:bg-[var(--surf)]"
             >
               {t('common.cancel')}
             </Button>

@@ -55,16 +55,16 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
+      <DialogContent className="sm:max-w-md bg-[#0f0f1a] border-[#1e1e2e]">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-16 h-16 bg-purple-600/20 rounded-xl flex items-center justify-center mx-auto">
-            <Mail className="w-8 h-8 text-purple-600" />
+          <div className="w-16 h-16 bg-[#5bc800]/20 rounded-xl flex items-center justify-center mx-auto">
+            <Mail className="w-8 h-8 text-[#6EE000]" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">
               {isSuccess ? "Email Enviado!" : "Recuperar Senha"}
             </DialogTitle>
-            <p className="text-slate-400 mt-2">
+            <p className="text-[#6e7191] mt-2">
               {isSuccess 
                 ? "Verifique seu email para redefinir sua senha"
                 : "Digite seu email para receber as instruções"}
@@ -75,20 +75,20 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
         {!isSuccess ? (
           <form onSubmit={handleSubmit} className="space-y-6 mt-6">
             {error && (
-              <div className="text-red-500 text-sm text-center bg-red-500/10 p-3 rounded">
+              <div className="text-[#FF1F3D] text-sm text-center bg-[#FF1F3D]/10 p-3 rounded">
                 {error}
               </div>
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="forgot-email" className="text-slate-300">Email cadastrado</Label>
+              <Label htmlFor="forgot-email" className="text-[#e0e0e0]">Email cadastrado</Label>
               <Input
                 id="forgot-email"
                 type="email"
                 placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
                 required
                 disabled={isLoading}
               />
@@ -106,7 +106,7 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
               <Button
                 type="button"
                 variant="ghost"
-                className="w-full text-slate-400 hover:text-white"
+                className="w-full text-[#6e7191] hover:text-white"
                 onClick={() => {
                   handleClose();
                   onBackToLogin();
@@ -119,8 +119,8 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
           </form>
         ) : (
           <div className="space-y-6 mt-6">
-            <div className="bg-green-600/10 border border-green-600/20 p-4 rounded-lg">
-              <p className="text-green-600 text-sm">
+            <div className="bg-[#6EE000]/10 border border-[#6EE000]/20 p-4 rounded-lg">
+              <p className="text-[#6EE000] text-sm">
                 Se o email estiver cadastrado, você receberá as instruções de recuperação em alguns minutos.
               </p>
             </div>
@@ -128,7 +128,7 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
             <div className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
+                className="w-full border-[#28283a] text-[#e0e0e0] hover:bg-[#13131a]"
                 onClick={() => {
                   handleClose();
                   onBackToLogin();
@@ -137,7 +137,7 @@ export function ForgotPasswordModal({ open, onOpenChange, onBackToLogin }: Forgo
                 Voltar para o login
               </Button>
               
-              <p className="text-xs text-slate-500 text-center">
+              <p className="text-xs text-[#6e7191] text-center">
                 Não recebeu o email? Verifique sua caixa de spam ou tente novamente em alguns minutos.
               </p>
             </div>

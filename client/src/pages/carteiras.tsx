@@ -198,8 +198,8 @@ export default function Carteiras() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">{t("wallets.title")}</h1>
-          <p className="text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-[var(--text)]">{t("wallets.title")}</h1>
+          <p className="text-[var(--dim)] mt-1">
             {t("wallets.subtitle")}
           </p>
         </div>
@@ -207,56 +207,56 @@ export default function Carteiras() {
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
               data-testid="button-create-wallet"
             >
               <Plus className="w-4 h-4 mr-2" />
               {t("wallets.newWallet")}
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700">
+          <DialogContent className="bg-[var(--card)] border-[var(--brd)]">
             <DialogHeader>
-              <DialogTitle className="text-white">{t("wallets.createTitle")}</DialogTitle>
-              <DialogDescription className="text-gray-400">
+              <DialogTitle className="text-[var(--text)]">{t("wallets.createTitle")}</DialogTitle>
+              <DialogDescription className="text-[var(--dim)]">
                 {t("wallets.createDescription")}
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-gray-300">{t("wallets.name")}</Label>
+                <Label htmlFor="name" className="text-[var(--text)]">{t("wallets.name")}</Label>
                 <Input
                   id="name"
                   placeholder={t("wallets.namePlaceholder")}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                   data-testid="input-wallet-name"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-gray-300">{t("wallets.description")}</Label>
+                <Label htmlFor="description" className="text-[var(--text)]">{t("wallets.description")}</Label>
                 <Textarea
                   id="description"
                   placeholder={t("wallets.descriptionPlaceholder")}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-gray-800 border-gray-700 text-white resize-none"
+                  className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] resize-none"
                   rows={3}
                   data-testid="input-wallet-description"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label className="text-gray-300">{t("wallets.color")}</Label>
+                <Label className="text-[var(--text)]">{t("wallets.color")}</Label>
                 <div className="flex gap-2 flex-wrap">
                   {WALLET_COLORS.map((color) => (
                     <button
                       key={color.value}
                       onClick={() => setFormData({ ...formData, color: color.value })}
                       className={`w-8 h-8 rounded-full transition-all ${
-                        formData.color === color.value ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110" : ""
+                        formData.color === color.value ? "ring-2 ring-white ring-offset-2 ring-offset-[var(--card)] scale-110" : ""
                       }`}
                       style={{ backgroundColor: color.value }}
                       title={t(`wallets.${color.key}`)}
@@ -267,7 +267,7 @@ export default function Carteiras() {
               </div>
               
               <div className="space-y-2">
-                <Label className="text-gray-300">{t("wallets.icon")}</Label>
+                <Label className="text-[var(--text)]">{t("wallets.icon")}</Label>
                 <div className="flex gap-2 flex-wrap">
                   {WALLET_ICONS.map((iconData) => {
                     const IconComponent = iconData.icon;
@@ -277,8 +277,8 @@ export default function Carteiras() {
                         onClick={() => setFormData({ ...formData, icon: iconData.value })}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border ${
                           formData.icon === iconData.value 
-                            ? "border-purple-500 bg-purple-500/20 text-purple-400" 
-                            : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
+                            ? "border-[#6EE000] bg-[#6EE000]/20 text-[#6EE000]" 
+                            : "border-[var(--brd)] bg-[var(--surf)] text-[var(--dim)] hover:border-[var(--brd2)]"
                         }`}
                         title={t(`wallets.${iconData.key}`)}
                         data-testid={`icon-${iconData.value}`}
@@ -295,14 +295,14 @@ export default function Carteiras() {
               <Button 
                 variant="outline" 
                 onClick={() => { setIsCreateOpen(false); resetForm(); }}
-                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                className="border-[var(--brd)] text-[var(--dim)] hover:bg-[var(--surf)]"
               >
                 {t("wallets.cancel")}
               </Button>
               <Button 
                 onClick={handleCreate}
                 disabled={createMutation.isPending}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
                 data-testid="button-confirm-create"
               >
                 {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -315,14 +315,14 @@ export default function Carteiras() {
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white mb-4">{t("wallets.defaultMarkets")}</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)] mb-4">{t("wallets.defaultMarkets")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {defaultMarkets.map((market) => {
               const IconComponent = getIconComponent(market.icon);
               return (
                 <Card 
                   key={market.name} 
-                  className="bg-gray-800/50 border-gray-700 hover:border-gray-600 transition-colors"
+                  className="bg-[var(--surf)]/60 border-[var(--brd)] hover:border-[var(--brd2)] transition-colors"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
@@ -336,8 +336,8 @@ export default function Carteiras() {
                         />
                       </div>
                       <div>
-                        <CardTitle className="text-white text-lg">{market.name}</CardTitle>
-                        <CardDescription className="text-gray-400 text-sm">
+                        <CardTitle className="text-[var(--text)] text-lg">{market.name}</CardTitle>
+                        <CardDescription className="text-[var(--dim)] text-sm">
                           {t(market.descKey)}
                         </CardDescription>
                       </div>
@@ -350,23 +350,23 @@ export default function Carteiras() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-white mb-4">{t("wallets.customWallets")}</h2>
+          <h2 className="text-lg font-semibold text-[var(--text)] mb-4">{t("wallets.customWallets")}</h2>
           
           {isLoading ? (
             <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#6EE000]" />
             </div>
           ) : wallets.length === 0 ? (
-            <Card className="bg-gray-800/50 border-gray-700 border-dashed">
+            <Card className="bg-[var(--surf)]/60 border-[var(--brd)] border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Wallet className="w-12 h-12 text-gray-500 mb-4" />
-                <h3 className="text-lg font-medium text-gray-300 mb-2">{t("wallets.noWallets")}</h3>
-                <p className="text-gray-400 text-center mb-4">
+                <Wallet className="w-12 h-12 text-[var(--dim)] mb-4" />
+                <h3 className="text-lg font-medium text-[var(--text)] mb-2">{t("wallets.noWallets")}</h3>
+                <p className="text-[var(--dim)] text-center mb-4">
                   {t("wallets.noWalletsDescription")}
                 </p>
                 <Button 
                   onClick={() => setIsCreateOpen(true)}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   {t("wallets.createFirst")}
@@ -380,7 +380,7 @@ export default function Carteiras() {
                 return (
                   <Card 
                     key={wallet.id} 
-                    className="bg-gray-800/50 border-gray-700 hover:border-gray-600 transition-colors"
+                    className="bg-[var(--surf)]/60 border-[var(--brd)] hover:border-[var(--brd2)] transition-colors"
                     data-testid={`card-wallet-${wallet.id}`}
                   >
                     <CardHeader className="pb-3">
@@ -396,9 +396,9 @@ export default function Carteiras() {
                             />
                           </div>
                           <div>
-                            <CardTitle className="text-white text-lg">{wallet.name}</CardTitle>
+                            <CardTitle className="text-[var(--text)] text-lg">{wallet.name}</CardTitle>
                             {wallet.description && (
-                              <CardDescription className="text-gray-400 text-sm line-clamp-2">
+                              <CardDescription className="text-[var(--dim)] text-sm line-clamp-2">
                                 {wallet.description}
                               </CardDescription>
                             )}
@@ -410,16 +410,16 @@ export default function Carteiras() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="text-gray-400 hover:text-white"
+                              className="text-[var(--dim)] hover:text-[var(--text)]"
                               data-testid={`menu-wallet-${wallet.id}`}
                             >
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+                          <DropdownMenuContent align="end" className="bg-[var(--surf)] border-[var(--brd)]">
                             <DropdownMenuItem 
                               onClick={() => handleEdit(wallet)}
-                              className="text-gray-300 focus:bg-gray-700 cursor-pointer"
+                              className="text-[var(--dim)] focus:bg-[var(--surf)] cursor-pointer"
                               data-testid={`edit-wallet-${wallet.id}`}
                             >
                               <Pencil className="w-4 h-4 mr-2" />
@@ -427,7 +427,7 @@ export default function Carteiras() {
                             </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDelete(wallet)}
-                              className="text-red-400 focus:bg-gray-700 focus:text-red-400 cursor-pointer"
+                              className="text-[#FF1F3D] focus:bg-[var(--surf)] focus:text-[#FF1F3D] cursor-pointer"
                               data-testid={`delete-wallet-${wallet.id}`}
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
@@ -446,49 +446,49 @@ export default function Carteiras() {
       </div>
 
       <Dialog open={isEditOpen} onOpenChange={(open) => { setIsEditOpen(open); if (!open) { setEditingWallet(null); resetForm(); }}}>
-        <DialogContent className="bg-gray-900 border-gray-700">
+        <DialogContent className="bg-[var(--card)] border-[var(--brd)]">
           <DialogHeader>
-            <DialogTitle className="text-white">{t("wallets.editTitle")}</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogTitle className="text-[var(--text)]">{t("wallets.editTitle")}</DialogTitle>
+            <DialogDescription className="text-[var(--dim)]">
               {t("wallets.editDescription")}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name" className="text-gray-300">{t("wallets.name")}</Label>
+              <Label htmlFor="edit-name" className="text-[var(--text)]">{t("wallets.name")}</Label>
               <Input
                 id="edit-name"
                 placeholder={t("wallets.namePlaceholder")}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-gray-800 border-gray-700 text-white"
+                className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)]"
                 data-testid="input-edit-wallet-name"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-description" className="text-gray-300">{t("wallets.description")}</Label>
+              <Label htmlFor="edit-description" className="text-[var(--text)]">{t("wallets.description")}</Label>
               <Textarea
                 id="edit-description"
                 placeholder={t("wallets.descriptionPlaceholder")}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-gray-800 border-gray-700 text-white resize-none"
+                className="bg-[var(--surf)] border-[var(--brd)] text-[var(--text)] resize-none"
                 rows={3}
                 data-testid="input-edit-wallet-description"
               />
             </div>
             
             <div className="space-y-2">
-              <Label className="text-gray-300">{t("wallets.color")}</Label>
+              <Label className="text-[var(--text)]">{t("wallets.color")}</Label>
               <div className="flex gap-2 flex-wrap">
                 {WALLET_COLORS.map((color) => (
                   <button
                     key={color.value}
                     onClick={() => setFormData({ ...formData, color: color.value })}
                     className={`w-8 h-8 rounded-full transition-all ${
-                      formData.color === color.value ? "ring-2 ring-white ring-offset-2 ring-offset-gray-900 scale-110" : ""
+                      formData.color === color.value ? "ring-2 ring-white ring-offset-2 ring-offset-[var(--card)] scale-110" : ""
                     }`}
                     style={{ backgroundColor: color.value }}
                     title={t(`wallets.${color.key}`)}
@@ -498,7 +498,7 @@ export default function Carteiras() {
             </div>
             
             <div className="space-y-2">
-              <Label className="text-gray-300">{t("wallets.icon")}</Label>
+              <Label className="text-[var(--text)]">{t("wallets.icon")}</Label>
               <div className="flex gap-2 flex-wrap">
                 {WALLET_ICONS.map((iconData) => {
                   const IconComponent = iconData.icon;
@@ -508,8 +508,8 @@ export default function Carteiras() {
                       onClick={() => setFormData({ ...formData, icon: iconData.value })}
                       className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all border ${
                         formData.icon === iconData.value 
-                          ? "border-purple-500 bg-purple-500/20 text-purple-400" 
-                          : "border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600"
+                          ? "border-[#6EE000] bg-[#6EE000]/20 text-[#6EE000]" 
+                          : "border-[var(--brd)] bg-[var(--surf)] text-[var(--dim)] hover:border-[var(--brd2)]"
                       }`}
                       title={t(`wallets.${iconData.key}`)}
                     >
@@ -525,14 +525,14 @@ export default function Carteiras() {
             <Button 
               variant="outline" 
               onClick={() => { setIsEditOpen(false); setEditingWallet(null); resetForm(); }}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800"
+              className="border-[var(--brd)] text-[var(--dim)] hover:bg-[var(--surf)]"
             >
               {t("wallets.cancel")}
             </Button>
             <Button 
               onClick={handleUpdate}
               disabled={updateMutation.isPending}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#3a7aff]"
               data-testid="button-confirm-edit"
             >
               {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

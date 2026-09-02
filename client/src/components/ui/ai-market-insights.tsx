@@ -48,9 +48,9 @@ export function AIMarketInsights() {
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'bg-green-600';
+    if (confidence >= 0.8) return 'bg-[#6EE000]';
     if (confidence >= 0.6) return 'bg-yellow-500';
-    return 'bg-red-500';
+    return 'bg-[#FF1F3D]';
   };
 
   const formatConfidence = (confidence: number) => {
@@ -59,10 +59,10 @@ export function AIMarketInsights() {
 
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-900/50 border-slate-700">
+      <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-purple-600" />
+            <TrendingUp className="h-5 w-5 text-[#6EE000]" />
             Insights de Mercado IA
           </CardTitle>
         </CardHeader>
@@ -73,7 +73,7 @@ export function AIMarketInsights() {
               onChange={(e) => setSearchAsset(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Digite o ativo (ex: BTCUSD, PETR4, EURUSD)"
-              className="bg-slate-800 border-slate-600 text-white"
+              className="bg-[#0f0f1a] border-[#28283a] text-white"
               data-testid="input-search-asset"
             />
             <Button
@@ -93,7 +93,7 @@ export function AIMarketInsights() {
           {insights.length === 0 && !insightMutation.isPending && (
             <div className="text-center py-8">
               <TrendingUp className="h-12 w-12 text-slate-600 mx-auto mb-2" />
-              <p className="text-slate-400">
+              <p className="text-[#6e7191]">
                 Pesquise por um ativo para obter insights de mercado
               </p>
             </div>
@@ -103,13 +103,13 @@ export function AIMarketInsights() {
             {insights.map((insight, index) => (
               <Card 
                 key={`${insight.asset}-${index}`}
-                className="bg-slate-800/50 border-slate-600"
+                className="bg-[#0f0f1a]/50 border-[#28283a]"
                 data-testid={`insight-card-${insight.asset}`}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg text-white flex items-center gap-2">
-                      <Target className="h-4 w-4 text-purple-600" />
+                      <Target className="h-4 w-4 text-[#6EE000]" />
                       {insight.asset}
                     </CardTitle>
                     <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export function AIMarketInsights() {
                       >
                         {formatConfidence(insight.confidence)}
                       </Badge>
-                      <Badge variant="outline" className="text-slate-300 flex items-center gap-1">
+                      <Badge variant="outline" className="text-[#e0e0e0] flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {insight.timeframe}
                       </Badge>
@@ -132,17 +132,17 @@ export function AIMarketInsights() {
                       <AlertCircle className="h-4 w-4 text-blue-600" />
                       Análise
                     </h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-[#e0e0e0] text-sm leading-relaxed">
                       {insight.analysis}
                     </p>
                   </div>
                   
-                  <div className="bg-slate-700/50 p-3 rounded-lg border border-slate-600">
+                  <div className="bg-[#13131a]/50 p-3 rounded-lg border border-[#28283a]">
                     <h4 className="text-white font-medium mb-2 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendingUp className="h-4 w-4 text-[#6EE000]" />
                       Sugestão
                     </h4>
-                    <p className="text-slate-300 text-sm leading-relaxed">
+                    <p className="text-[#e0e0e0] text-sm leading-relaxed">
                       {insight.suggestion}
                     </p>
                   </div>

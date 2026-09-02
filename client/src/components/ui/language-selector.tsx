@@ -29,19 +29,19 @@ export function LanguageSelector() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-md transition-all duration-200"
+          className="text-zinc-400 hover:text-white hover:bg-[#13131a]/50 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-md transition-all duration-200"
           data-testid="language-selector"
         >
           <span className="text-sm sm:text-base">{languageFlags[language]}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-700">
+      <DropdownMenuContent align="end" className="bg-[#0a0a0f] border-zinc-700">
         {Object.entries(languageNames).map(([code, name]) => (
           <DropdownMenuItem
             key={code}
             onClick={() => setLanguage(code as Language)}
-            className={`text-zinc-300 hover:text-white hover:bg-zinc-800 cursor-pointer ${
-              language === code ? 'bg-zinc-800 text-white' : ''
+            className={`text-zinc-300 hover:text-white hover:bg-[#13131a] cursor-pointer ${
+              language === code ? 'bg-[#13131a] text-white' : ''
             }`}
             data-testid={`language-option-${code}`}
           >

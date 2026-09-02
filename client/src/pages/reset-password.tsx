@@ -102,8 +102,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center px-4">
-      <Card className="w-full max-w-md bg-slate-800 border-slate-700">
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+      <Card className="w-full max-w-md bg-[#0f0f1a] border-[#1e1e2e]">
         <CardHeader className="text-center space-y-4">
           <div className="w-16 h-16 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
             <BarChart3 className="w-8 h-8 text-white" />
@@ -112,7 +112,7 @@ export default function ResetPassword() {
             <CardTitle className="text-2xl font-bold text-white">
               {success ? "Senha Redefinida!" : "Redefinir Senha"}
             </CardTitle>
-            <CardDescription className="text-slate-400 mt-2">
+            <CardDescription className="text-[#6e7191] mt-2">
               {success 
                 ? "Sua senha foi alterada com sucesso"
                 : "Digite sua nova senha abaixo"}
@@ -130,7 +130,7 @@ export default function ResetPassword() {
               </div>
               
               <div className="text-center">
-                <p className="text-slate-300">
+                <p className="text-[#a0a0c0]">
                   Você será redirecionado para a página inicial em alguns segundos...
                 </p>
               </div>
@@ -152,14 +152,14 @@ export default function ResetPassword() {
               )}
               
               {isValidatingToken ? (
-                <div className="text-center text-slate-400 space-y-2">
-                  <div className="animate-spin w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full mx-auto"></div>
+                <div className="text-center text-[#6e7191] space-y-2">
+                  <div className="animate-spin w-6 h-6 border-2 border-[#6EE000] border-t-transparent rounded-full mx-auto"></div>
                   <p>Validando link de recuperação...</p>
                 </div>
               ) : (token && !error) ? (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="new-password" className="text-slate-300">
+                    <Label htmlFor="new-password" className="text-[#a0a0c0]">
                       Nova Senha
                     </Label>
                     <Input
@@ -168,7 +168,7 @@ export default function ResetPassword() {
                       placeholder="••••••••"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                      className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
                       required
                       disabled={isLoading}
                       minLength={6}
@@ -176,7 +176,7 @@ export default function ResetPassword() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className="text-slate-300">
+                    <Label htmlFor="confirm-password" className="text-[#a0a0c0]">
                       Confirmar Nova Senha
                     </Label>
                     <Input
@@ -185,7 +185,7 @@ export default function ResetPassword() {
                       placeholder="••••••••"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                      className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
                       required
                       disabled={isLoading}
                       minLength={6}
@@ -206,7 +206,7 @@ export default function ResetPassword() {
                 <Button
                   type="button"
                   variant="link"
-                  className="text-purple-600 hover:text-purple-600"
+                  className="text-[#6EE000] hover:text-[#6EE000]"
                   onClick={() => navigate("/")}
                 >
                   Voltar para o Login

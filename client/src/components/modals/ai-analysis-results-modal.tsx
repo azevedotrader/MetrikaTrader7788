@@ -50,11 +50,11 @@ export function AiAnalysisResultsModal({
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'critical':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
+        return 'bg-[#FF1F3D]/20 text-[#FF1F3D] border-red-500/30';
       case 'warning':
         return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
       case 'opportunity':
-        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+        return 'bg-[#6EE000]/20 text-[#6EE000] border-[#6EE000]/30';
       case 'suggestion':
         return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       default:
@@ -65,11 +65,11 @@ export function AiAnalysisResultsModal({
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-600 text-white';
+        return 'bg-[#FF1F3D] text-white';
       case 'medium':
         return 'bg-amber-600 text-white';
       case 'low':
-        return 'bg-emerald-600 text-white';
+        return 'bg-[#6EE000] text-white';
       default:
         return 'bg-zinc-600 text-white';
     }
@@ -94,7 +94,7 @@ export function AiAnalysisResultsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-7xl h-[95vh] max-h-[95vh] md:w-[90vw] lg:w-[85vw] bg-zinc-900 border-zinc-700 overflow-hidden flex flex-col">
+      <DialogContent className="w-[95vw] max-w-7xl h-[95vh] max-h-[95vh] md:w-[90vw] lg:w-[85vw] bg-[#0a0a0f] border-zinc-700 overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0 pb-4 border-b border-zinc-700">
           <div className="flex-1 min-w-0">
             <DialogTitle className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
@@ -111,23 +111,23 @@ export function AiAnalysisResultsModal({
 
         <div className="flex-1 flex flex-col gap-4 min-h-0">
           {/* Resumo Geral */}
-          <div className="bg-zinc-800/50 rounded-lg p-3 sm:p-4 flex-shrink-0 border border-zinc-700">
+          <div className="bg-[#13131a]/50 rounded-lg p-3 sm:p-4 flex-shrink-0 border border-zinc-700">
             <h3 className="text-base sm:text-lg font-semibold text-white mb-3">
               📊 Resumo da Análise
             </h3>
             <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
-              <div className="p-2 bg-zinc-800 rounded-lg">
+              <div className="p-2 bg-[#13131a] rounded-lg">
                 <p className="text-xl sm:text-2xl font-bold text-white">{tips.length}</p>
                 <p className="text-xs sm:text-sm text-zinc-400">Insights Gerados</p>
               </div>
-              <div className="p-2 bg-zinc-800 rounded-lg">
-                <p className="text-xl sm:text-2xl font-bold text-red-400">
+              <div className="p-2 bg-[#13131a] rounded-lg">
+                <p className="text-xl sm:text-2xl font-bold text-[#FF1F3D]">
                   {tips.filter(t => t.priority === 'high').length}
                 </p>
                 <p className="text-xs sm:text-sm text-zinc-400">Alta Prioridade</p>
               </div>
-              <div className="p-2 bg-zinc-800 rounded-lg">
-                <p className="text-xl sm:text-2xl font-bold text-emerald-400">
+              <div className="p-2 bg-[#13131a] rounded-lg">
+                <p className="text-xl sm:text-2xl font-bold text-[#6EE000]">
                   {tips.filter(t => t.type === 'opportunity').length}
                 </p>
                 <p className="text-xs sm:text-sm text-zinc-400">Oportunidades</p>
@@ -142,7 +142,7 @@ export function AiAnalysisResultsModal({
                 {sortedTips.map((tip, index) => (
                 <div
                   key={tip.id}
-                  className="bg-zinc-800/50 rounded-lg p-3 sm:p-4 md:p-6 border border-zinc-700 hover:border-zinc-600 transition-colors mb-4"
+                  className="bg-[#13131a]/50 rounded-lg p-3 sm:p-4 md:p-6 border border-zinc-700 hover:border-zinc-600 transition-colors mb-4"
                   data-testid={`ai-tip-${tip.id}`}
                 >
                   {/* Header da Dica */}
@@ -208,7 +208,7 @@ export function AiAnalysisResultsModal({
 
                     {/* Ação Recomendada */}
                     <div>
-                      <h5 className="text-sm font-semibold text-emerald-400 mb-2">
+                      <h5 className="text-sm font-semibold text-[#6EE000] mb-2">
                         🎯 Ação Recomendada
                       </h5>
                       <p className="text-zinc-400 text-sm whitespace-pre-wrap break-words">
@@ -242,14 +242,14 @@ export function AiAnalysisResultsModal({
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="flex-1 border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm sm:text-base"
+              className="flex-1 border-zinc-600 text-zinc-300 hover:bg-[#13131a] text-sm sm:text-base"
               data-testid="close-analysis-modal"
             >
               Fechar
             </Button>
             <Button
               onClick={handleCopyAnalysis}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm sm:text-base"
+              className="flex-1 bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#6EE000] hover:to-[#448aff] text-white text-sm sm:text-base"
               data-testid="copy-analysis"
             >
               <Copy className="w-4 h-4 mr-2" />

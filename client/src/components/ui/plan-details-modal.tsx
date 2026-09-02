@@ -43,14 +43,14 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
       case 'quarterly':
         return {
           name: 'Trimestral',
-          color: 'bg-purple-600',
+          color: 'bg-[#5bc800]',
           icon: <Crown className="w-5 h-5" />,
           description: 'Acesso completo por 3 meses'
         };
       case 'annual':
         return {
           name: 'Anual',
-          color: 'bg-gradient-to-r from-purple-600 to-blue-600',
+          color: 'bg-gradient-to-r from-[#6EE000] to-[#448aff]',
           icon: <Crown className="w-5 h-5" />,
           description: 'Acesso completo por 1 ano - Melhor custo-benefício'
         };
@@ -125,7 +125,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-zinc-900 border-zinc-700 text-white">
+      <DialogContent className="sm:max-w-lg bg-[#0a0a0f] border-zinc-700 text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-white">
             <span>Detalhes do Plano</span>
@@ -154,7 +154,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
           </div>
 
           {isPaidPlan && planInfo.expiresAt && (
-            <div className="bg-zinc-800 rounded-lg p-4 space-y-3">
+            <div className="bg-[#13131a] rounded-lg p-4 space-y-3">
               <div className="flex items-center space-x-2 text-zinc-300">
                 <Calendar className="w-4 h-4" />
                 <span className="text-sm font-medium">Data de Expiração</span>
@@ -179,7 +179,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
             </div>
           )}
 
-          <div className="bg-zinc-800 rounded-lg p-4 space-y-3">
+          <div className="bg-[#13131a] rounded-lg p-4 space-y-3">
             <h3 className="text-sm font-medium text-zinc-300 mb-3">Recursos do seu Plano</h3>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
@@ -226,7 +226,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
           </div>
 
           {planInfo.planType === 'free' && (
-            <div className="bg-zinc-800/50 rounded-lg p-4 space-y-4">
+            <div className="bg-[#13131a]/50 rounded-lg p-4 space-y-4">
               <h3 className="text-sm font-medium text-center text-zinc-300">Escolha seu plano</h3>
               <div className="grid grid-cols-3 gap-2">
                 <Button 
@@ -239,7 +239,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
                 </Button>
                 <Button 
                   onClick={() => handleUpgradeClick('quarterly')}
-                  className="flex flex-col items-center py-4 bg-purple-600 hover:bg-purple-700"
+                  className="flex flex-col items-center py-4 bg-[#5bc800] hover:bg-[#5bc800]"
                   data-testid="button-upgrade-quarterly"
                 >
                   <span className="text-xs font-medium">Trimestral</span>
@@ -247,7 +247,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
                 </Button>
                 <Button 
                   onClick={() => handleUpgradeClick('annual')}
-                  className="flex flex-col items-center py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="flex flex-col items-center py-4 bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#5bc800] hover:to-[#3a7ae0]"
                   data-testid="button-upgrade-annual"
                 >
                   <span className="text-xs font-medium">Anual</span>
@@ -267,13 +267,13 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
               </Button>
               <Button 
                 onClick={() => handleUpgradeClick('quarterly')}
-                className="flex flex-col items-center py-3 bg-purple-600 hover:bg-purple-700"
+                className="flex flex-col items-center py-3 bg-[#5bc800] hover:bg-[#5bc800]"
               >
                 <span className="text-xs">Renovar Trimestral</span>
               </Button>
               <Button 
                 onClick={() => handleUpgradeClick('annual')}
-                className="flex flex-col items-center py-3 bg-gradient-to-r from-purple-600 to-blue-600"
+                className="flex flex-col items-center py-3 bg-gradient-to-r from-[#6EE000] to-[#448aff]"
               >
                 <span className="text-xs">Renovar Anual</span>
               </Button>
@@ -283,7 +283,7 @@ export function PlanDetailsModal({ isOpen, onClose, planInfo }: PlanDetailsModal
           <Button 
             variant="outline" 
             onClick={onClose} 
-            className="w-full border-zinc-600 text-white hover:bg-zinc-800"
+            className="w-full border-zinc-600 text-white hover:bg-[#13131a]"
             data-testid="button-close-modal"
           >
             Fechar

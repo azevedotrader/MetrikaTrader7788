@@ -125,7 +125,7 @@ export default function Diario() {
           </div>
           <div className="space-y-4 sm:space-y-6">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-slate-800 border-slate-700">
+              <Card key={i} className="bg-[#0f0f1a] border-[#1e1e2e]">
                 <CardHeader>
                   <Skeleton className="h-6 w-48" />
                   <Skeleton className="h-4 w-24" />
@@ -161,13 +161,13 @@ export default function Diario() {
         </div>
 
         {entries.length === 0 ? (
-          <Card className="bg-[#141414] border-slate-700 text-center py-12">
+          <Card className="bg-[#141414] border-[#1e1e2e] text-center py-12">
             <CardContent>
-              <Calendar className="h-16 w-16 mx-auto mb-4 text-slate-500" />
+              <Calendar className="h-16 w-16 mx-auto mb-4 text-[#6e7191]" />
               <h3 className="text-xl font-semibold text-white mb-2">
                 {t('journal.no_entries')}
               </h3>
-              <p className="text-slate-400 mb-6">
+              <p className="text-[#6e7191] mb-6">
                 {t('journal.start_recording')}
               </p>
               <Button
@@ -183,14 +183,14 @@ export default function Diario() {
         ) : (
           <div data-testid="journal-entries" className="space-y-6">
             {entries.map((entry) => (
-              <Card key={entry.id} className="bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors">
+              <Card key={entry.id} className="bg-[#0a0a0f] border-[#1e1e2e] hover:border-zinc-700 transition-colors">
                 <CardHeader>
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold text-white" data-testid={`entry-title-${entry.id}`}>
                         {entry.title}
                       </h3>
-                      <p className="text-sm text-slate-400" data-testid={`entry-date-${entry.id}`}>
+                      <p className="text-sm text-[#6e7191]" data-testid={`entry-date-${entry.id}`}>
                         {format(new Date(entry.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                       </p>
                     </div>
@@ -199,7 +199,7 @@ export default function Diario() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEditEntry(entry)}
-                        className="text-slate-400 hover:text-white"
+                        className="text-[#6e7191] hover:text-white"
                         data-testid={`button-edit-${entry.id}`}
                       >
                         <Edit2 className="h-4 w-4" />
@@ -213,8 +213,8 @@ export default function Diario() {
                         variant={isProfitable(entry.pnl) ? "default" : "destructive"}
                         className={
                           isProfitable(entry.pnl)
-                            ? "bg-green-600/20 text-green-600 hover:bg-green-600/30" 
-                            : "bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                            ? "bg-[#6EE000]/20 text-[#6EE000] hover:bg-[#6EE000]/30" 
+                            : "bg-[#FF1F3D]/20 text-[#FF1F3D] hover:bg-[#FF1F3D]/30"
                         }
                         data-testid={`badge-pnl-${entry.id}`}
                       >
@@ -230,11 +230,11 @@ export default function Diario() {
                 </CardHeader>
                 
                 <CardContent>
-                  <p className="text-slate-300 leading-relaxed mb-4" data-testid={`entry-content-${entry.id}`}>
+                  <p className="text-[#a0a0c0] leading-relaxed mb-4" data-testid={`entry-content-${entry.id}`}>
                     {entry.content}
                   </p>
                   
-                  <div className="flex items-center space-x-4 text-sm text-slate-400">
+                  <div className="flex items-center space-x-4 text-sm text-[#6e7191]">
                     {entry.trades !== undefined && entry.trades !== null && entry.trades > 0 && (
                       <span data-testid={`trades-count-${entry.id}`}>
                         💡 {entry.trades} {t('journal.trades_performed')}
@@ -253,19 +253,19 @@ export default function Diario() {
                   </div>
                   
                   {(entry.lessons || entry.improvements) && (
-                    <div className="mt-4 pt-4 border-t border-slate-700 space-y-2">
+                    <div className="mt-4 pt-4 border-t border-[#1e1e2e] space-y-2">
                       {entry.lessons && (
                         <div>
-                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">{t('journal.lessons_label')}</span>
-                          <p className="text-sm text-slate-300 mt-1" data-testid={`lessons-${entry.id}`}>
+                          <span className="text-xs font-medium text-[#6e7191] uppercase tracking-wide">{t('journal.lessons_label')}</span>
+                          <p className="text-sm text-[#a0a0c0] mt-1" data-testid={`lessons-${entry.id}`}>
                             {entry.lessons}
                           </p>
                         </div>
                       )}
                       {entry.improvements && (
                         <div>
-                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">{t('journal.improvements_label')}</span>
-                          <p className="text-sm text-slate-300 mt-1" data-testid={`improvements-${entry.id}`}>
+                          <span className="text-xs font-medium text-[#6e7191] uppercase tracking-wide">{t('journal.improvements_label')}</span>
+                          <p className="text-sm text-[#a0a0c0] mt-1" data-testid={`improvements-${entry.id}`}>
                             {entry.improvements}
                           </p>
                         </div>
@@ -275,16 +275,16 @@ export default function Diario() {
 
                   {/* Seção de imagens */}
                   {entryImages[entry.id] && entryImages[entry.id].length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-slate-700">
+                    <div className="mt-4 pt-4 border-t border-[#1e1e2e]">
                       <div className="flex items-center gap-2 mb-3">
-                        <ImageIcon className="h-4 w-4 text-slate-400" />
-                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                        <ImageIcon className="h-4 w-4 text-[#6e7191]" />
+                        <span className="text-xs font-medium text-[#6e7191] uppercase tracking-wide">
                           {entryImages[entry.id].length === 1 ? 'Imagem' : 'Imagens'} ({entryImages[entry.id].length})
                         </span>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {entryImages[entry.id].slice(0, 6).map((image) => (
-                          <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-slate-800 border border-slate-700 hover:border-slate-500 transition-all hover:shadow-lg">
+                          <div key={image.id} className="aspect-square rounded-lg overflow-hidden bg-[#0f0f1a] border border-[#1e1e2e] hover:border-slate-500 transition-all hover:shadow-lg">
                             <img
                               src={`/api/images/${image.id}`}
                               alt={image.originalName}
@@ -299,8 +299,8 @@ export default function Diario() {
                           </div>
                         ))}
                         {entryImages[entry.id].length > 6 && (
-                          <div className="aspect-square rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
-                            <span className="text-sm text-slate-400">
+                          <div className="aspect-square rounded-lg bg-[#0f0f1a] border border-[#1e1e2e] flex items-center justify-center">
+                            <span className="text-sm text-[#6e7191]">
                               +{entryImages[entry.id].length - 6}
                             </span>
                           </div>

@@ -69,14 +69,14 @@ const getTourSteps = (t: (key: string) => string): TourStep[] => [
     title: t('tour.new_trade.title'),
     description: t('tour.new_trade.description'),
     page: '/novo-trade',
-    targetSelector: '[data-testid="trade-form"]',
+    targetSelector: '[data-testid="quick-entry-card"]',
     position: 'right'
   },
   {
     id: 'csv-analysis',
     title: t('tour.csv_analysis.title'),
     description: t('tour.csv_analysis.description'),
-    page: '/novo-trade',
+    page: '/importar-csv',
     targetSelector: '[data-testid="csv-import-section"]',
     position: 'left'
   },
@@ -85,7 +85,7 @@ const getTourSteps = (t: (key: string) => string): TourStep[] => [
     title: t('tour.risk_management.title'),
     description: t('tour.risk_management.description'),
     page: '/gestao',
-    targetSelector: '[data-testid="risk-calculator"]',
+    targetSelector: '[data-testid="button-start-questionnaire"]',
     position: 'top'
   },
   {
@@ -109,15 +109,14 @@ const getTourSteps = (t: (key: string) => string): TourStep[] => [
     title: t('tour.ai_chat.title'),
     description: t('tour.ai_chat.description'),
     page: '/dashboard',
-    targetSelector: '[data-testid="ai-chat-button"]',
-    position: 'left'
+    position: 'center'
   },
   {
     id: 'support',
     title: t('tour.support.title'),
     description: t('tour.support.description'),
     page: '/suporte',
-    targetSelector: '[data-testid="support-content"]',
+    targetSelector: '[data-testid="button-new-conversation"]',
     position: 'top'
   },
   {

@@ -44,7 +44,7 @@ const getColorForType = (type: string) => {
     case 'opportunity':
       return 'bg-green-900/50';
     case 'analysis':
-      return 'bg-purple-900/50';
+      return 'bg-[#6EE000]/15';
     default:
       return 'bg-zinc-700';
   }

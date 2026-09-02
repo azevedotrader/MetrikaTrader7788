@@ -228,7 +228,7 @@ export default function AdminPage() {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
         <div className="text-white">Verificando autenticação...</div>
       </div>
     );
@@ -299,7 +299,7 @@ export default function AdminPage() {
       case 'monthly':
         return 'bg-blue-100 text-blue-800';
       case 'quarterly':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-[#6EE000]';
       case 'annual':
         return 'bg-gradient-to-r from-purple-500 to-blue-500 text-white';
       default:
@@ -311,7 +311,7 @@ export default function AdminPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent truncate">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-[#6EE000] to-[#448aff] bg-clip-text text-transparent truncate">
             Painel Administrativo
           </h1>
           <p className="text-gray-600 mt-2 text-sm sm:text-base">
@@ -331,7 +331,7 @@ export default function AdminPage() {
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Logout</span>
           </Button>
-          <Shield className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-purple-600 flex-shrink-0" />
+          <Shield className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-[#6EE000] flex-shrink-0" />
         </div>
       </div>
 
@@ -452,7 +452,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-purple-600 rounded" 
+                        className="h-full bg-[#5bc800] rounded" 
                         style={{ 
                           width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.quarterlyUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}
@@ -466,7 +466,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 rounded">
                       <div 
-                        className="h-full bg-gradient-to-r from-purple-600 to-blue-600 rounded" 
+                        className="h-full bg-gradient-to-r from-[#6EE000] to-[#448aff] rounded" 
                         style={{ 
                           width: `${(stats as any)?.totalUsers > 0 ? ((stats as any)?.annualUsers / (stats as any)?.totalUsers) * 100 : 0}%` 
                         }}

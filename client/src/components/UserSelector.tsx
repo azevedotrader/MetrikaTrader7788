@@ -25,7 +25,7 @@ export default function UserSelector() {
   const quickUsers = [
     { id: 'usuario-a', name: 'Usuário A', color: 'bg-blue-600' },
     { id: 'usuario-b', name: 'Usuário B', color: 'bg-green-600' },
-    { id: 'usuario-c', name: 'Usuário C', color: 'bg-purple-600' },
+    { id: 'usuario-c', name: 'Usuário C', color: 'bg-[#5bc800]' },
   ];
 
   return (

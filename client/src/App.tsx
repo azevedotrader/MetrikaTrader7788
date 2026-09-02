@@ -13,8 +13,12 @@ import { AIChat } from "@/components/ui/ai-chat";
 import { AISuggestionsPopup } from "@/components/ui/ai-suggestions";
 import { CsvTipsPopup } from "@/components/ui/csv-tips-popup";
 import { TourOverlay } from "@/components/ui/tour-overlay";
+import { NoPlanScreen } from "@/components/ui/no-plan-screen";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
+import { useUserPlan, isPaidPlan } from "@/hooks/useUserPlan";
+import { useState, useEffect } from "react";
+import { CookieConsent } from "@/components/ui/cookie-consent";
+import { initPixelIfConsented } from "@/hooks/useMetaPixel";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import NovoTrade from "@/pages/novo-trade";
@@ -67,13 +71,23 @@ const pageTitleKeys: Record<string, string> = {
 function AppContent() {
   const { isAuthenticated } = useAuth();
   const { t } = useLanguage();
+  const { planType, isLoading: planLoading } = useUserPlan();
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('metrika-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    // Inicializa Meta Pixel se o usuário já tinha aceitado anteriormente
+    initPixelIfConsented();
+  }, []);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Banner de consentimento LGPD + Meta Pixel */}
+      <CookieConsent />
       <Switch>
         {/* Public test page - accessible without authentication */}
         <Route path="/teste-gateio">
@@ -117,6 +131,13 @@ function AppContent() {
         <Route>
           {!isAuthenticated ? (
             <Landing />
+          ) : planLoading ? (
+            /* Aguarda verificação do plano antes de renderizar qualquer coisa */
+            <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-[#6EE000] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : !isPaidPlan(planType) ? (
+            <NoPlanScreen />
           ) : (
             <>
               <Sidebar 
@@ -145,13 +166,6 @@ function AppContent() {
                     />
                     <ImportarCSV />
                   </Route>
-                  <Route path="/whatsapp">
-                    <TopBar 
-                      title={t(pageTitleKeys["/whatsapp"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <WhatsAppPage />
-                  </Route>
                   <Route path="/gestao">
                     <TopBar 
                       title={t(pageTitleKeys["/gestao"])} 
@@ -173,13 +187,6 @@ function AppContent() {
                     />
                     <Analises />
                   </Route>
-                  <Route path="/diario">
-                    <TopBar 
-                      title={t(pageTitleKeys["/diario"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <Diario />
-                  </Route>
                   <Route path="/calendario">
                     <TopBar 
                       title={t(pageTitleKeys["/calendario"])} 
@@ -200,13 +207,6 @@ function AppContent() {
                       onMenuClick={() => setIsSidebarOpen(true)}
                     />
                     <Suporte />
-                  </Route>
-                  <Route path="/aprendizado">
-                    <TopBar 
-                      title={t(pageTitleKeys["/aprendizado"])} 
-                      onMenuClick={() => setIsSidebarOpen(true)}
-                    />
-                    <Aprendizado />
                   </Route>
                   <Route path="/importacoes">
                     <TopBar 

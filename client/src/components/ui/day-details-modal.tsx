@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, BookOpen, TrendingUp, TrendingDown, Clock, Edit, Image as ImageIcon, Upload, X } from "lucide-react";
+import { Calendar, BookOpen, TrendingUp, TrendingDown, Clock, Edit, Image as ImageIcon, Upload, X, Clipboard } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -37,6 +37,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   const [uploadingImage, setUploadingImage] = useState(false);
   const [tradeImages, setTradeImages] = useState<{ [tradeId: string]: DiaryImage[] }>({});
   const [uploadingTradeId, setUploadingTradeId] = useState<string | null>(null);
+  const [pasteTargetTradeId, setPasteTargetTradeId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -169,7 +170,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   }, [isOpen, selectedDate, dayTrades.length]);
 
   // Handle upload de imagem para um trade específico
-  const handleTradeImageUpload = async (tradeId: string, file: File) => {
+  const handleTradeImageUpload = useCallback(async (tradeId: string, file: File) => {
     // Validação do arquivo
     if (!file.type.startsWith('image/')) {
       toast({
@@ -233,7 +234,25 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
     } finally {
       setUploadingTradeId(null);
     }
-  };
+  }, [toast]);
+
+  // Paste listener — ativo quando pasteTargetTradeId está definido
+  useEffect(() => {
+    if (!pasteTargetTradeId) return;
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = Array.from(e.clipboardData?.items || []);
+      const imageItem = items.find(item => item.type.startsWith('image/'));
+      if (!imageItem) return;
+      e.preventDefault();
+      const file = imageItem.getAsFile();
+      if (file) {
+        handleTradeImageUpload(pasteTargetTradeId, file);
+        setPasteTargetTradeId(null);
+      }
+    };
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [pasteTargetTradeId, handleTradeImageUpload]);
 
   // Handle deletar imagem de um trade
   const handleTradeImageDelete = async (tradeId: string, imageId: string) => {
@@ -470,27 +489,46 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                                 accept="image/*"
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
-                                  if (file) {
-                                    handleTradeImageUpload(trade.id, file);
-                                  }
+                                  if (file) handleTradeImageUpload(trade.id, file);
                                   e.target.value = '';
                                 }}
-                                disabled={isUploadingThisTrade || !!tradeImage}
+                                disabled={isUploadingThisTrade}
                                 className="hidden"
                                 id={`trade-image-upload-${trade.id}`}
                               />
+                              {/* Botão arquivo */}
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => document.getElementById(`trade-image-upload-${trade.id}`)?.click()}
-                                disabled={isUploadingThisTrade || !!tradeImage}
-                                className="flex items-center gap-1 h-7 px-2"
+                                disabled={isUploadingThisTrade}
+                                className="flex items-center gap-1 h-7 px-2 text-zinc-400 hover:text-white"
+                                title="Escolher arquivo"
                                 data-testid={`button-upload-trade-image-${index}`}
                               >
-                                <ImageIcon className="h-3 w-3" />
-                                {isUploadingThisTrade ? "..." : tradeImage ? "✓" : "+"}
+                                <Upload className="h-3 w-3" />
                               </Button>
+                              {/* Botão colar */}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setPasteTargetTradeId(prev => prev === trade.id ? null : trade.id)}
+                                disabled={isUploadingThisTrade}
+                                className={cn(
+                                  "flex items-center gap-1 h-7 px-2 transition-colors",
+                                  pasteTargetTradeId === trade.id
+                                    ? "text-[#6EE000] bg-[#6EE000]/10"
+                                    : "text-zinc-400 hover:text-white"
+                                )}
+                                title={pasteTargetTradeId === trade.id ? "Aguardando Ctrl+V..." : "Colar print (Ctrl+V)"}
+                                data-testid={`button-paste-trade-image-${index}`}
+                              >
+                                <Clipboard className="h-3 w-3" />
+                              </Button>
+                              {isUploadingThisTrade && <span className="text-xs text-zinc-400">...</span>}
+                              {tradeImage && !isUploadingThisTrade && <span className="text-xs text-green-500">✓</span>}
                             </div>
 
                             {/* Resultado */}
@@ -511,7 +549,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                         {/* Imagem do trade */}
                         {tradeImage && (
                           <div className="px-3 pb-3">
-                            <div className="relative group w-32 h-32 rounded-lg overflow-hidden bg-zinc-800 border border-zinc-700">
+                            <div className="relative group w-32 h-32 rounded-lg overflow-hidden bg-[#13131a] border border-zinc-700">
                               <img
                                 src={`/api/images/${tradeImage.id}`}
                                 alt={tradeImage.originalName}

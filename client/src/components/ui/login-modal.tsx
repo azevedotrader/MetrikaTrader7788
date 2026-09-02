@@ -45,48 +45,48 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
+      <DialogContent className="sm:max-w-md bg-[#0f0f1a] border-[#1e1e2e]">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-36 h-36 md:w-32 md:h-32 sm:w-24 sm:h-24 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
+          <div className="flex justify-center">
             <Logo variant="modal" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">
               {t('login.title')}
             </DialogTitle>
-            <p className="text-slate-400 mt-2">{t('login.subtitle')}</p>
+            <p className="text-[#6e7191] mt-2">{t('login.subtitle')}</p>
           </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           {error && (
-            <div className="text-red-500 text-sm text-center bg-red-500/10 p-3 rounded">
+            <div className="text-[#FF1F3D] text-sm text-center bg-[#FF1F3D]/10 p-3 rounded">
               {error}
             </div>
           )}
           
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-slate-300">{t('login.email_label')}</Label>
+            <Label htmlFor="email" className="text-[#e0e0e0]">{t('login.email_label')}</Label>
             <Input
               id="email"
               type="email"
               placeholder={t('login.email_placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-slate-300">{t('login.password_label')}</Label>
+            <Label htmlFor="password" className="text-[#e0e0e0]">{t('login.password_label')}</Label>
             <Input
               id="password"
               type="password"
               placeholder={t('login.password_placeholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
               required
             />
           </div>
@@ -98,14 +98,14 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                 checked={rememberMe}
                 onCheckedChange={(checked) => setRememberMe(!!checked)}
               />
-              <Label htmlFor="remember" className="text-sm text-slate-300">
+              <Label htmlFor="remember" className="text-sm text-[#e0e0e0]">
                 {t('login.remember_me')}
               </Label>
             </div>
             <Button 
               type="button"
               variant="link" 
-              className="text-purple-600 hover:text-purple-600 p-0"
+              className="text-[#6EE000] hover:text-[#6EE000] p-0"
               onClick={() => {
                 onOpenChange(false);
                 setShowForgotPassword(true);
@@ -126,10 +126,10 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-600" />
+              <span className="w-full border-t border-[#28283a]" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-slate-800 px-2 text-slate-400">Ou continue com</span>
+              <span className="bg-[#0f0f1a] px-2 text-[#6e7191]">Ou continue com</span>
             </div>
           </div>
 
@@ -215,11 +215,11 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-slate-400">
+          <p className="text-[#6e7191]">
             {t('login.no_account')}{" "}
             <Button 
               variant="link" 
-              className="text-purple-600 hover:text-purple-600 p-0"
+              className="text-[#6EE000] hover:text-[#6EE000] p-0"
               onClick={onSwitchToRegister}
             >
               {t('login.create_account')}

@@ -130,7 +130,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
   const getBrokerColor = (broker: string) => {
     switch (broker) {
-      case 'forex': return 'bg-green-600/20 text-green-600 border-green-600/30';
+      case 'forex': return 'bg-[#6EE000]/20 text-[#6EE000] border-[#6EE000]/30';
       case 'crypto': return 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30';
       case 'b3': return 'bg-blue-600/20 text-blue-600 border-blue-600/30';
       default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
@@ -140,7 +140,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl bg-[#0a0a0f] border-[#1e1e2e] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <FileSpreadsheet className="w-5 h-5" />
@@ -151,7 +151,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
           <div className="space-y-4">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="animate-spin w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full"></div>
+                <div className="animate-spin w-6 h-6 border-2 border-[#6EE000] border-t-transparent rounded-full"></div>
                 <span className="ml-2 text-slate-400">Carregando CSVs...</span>
               </div>
             ) : csvImports.length === 0 ? (
@@ -171,8 +171,8 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                         key={csvImport.id}
                         className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                           selectedCsvId === csvImport.id
-                            ? 'border-green-600 bg-green-600/10'
-                            : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                            ? 'border-[#6EE000] bg-[#6EE000]/10'
+                            : 'border-zinc-700 bg-[#13131a]/50 hover:border-zinc-600'
                         }`}
                         onClick={() => setSelectedCsvId(csvImport.id)}
                         data-testid={`csv-item-${csvImport.id}`}
@@ -185,7 +185,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                                 {getBrokerLabel(csvImport.broker)}
                               </Badge>
                               {csvImport.status === 'completed' ? (
-                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <CheckCircle className="w-4 h-4 text-[#6EE000]" />
                               ) : (
                                 <AlertCircle className="w-4 h-4 text-yellow-500" />
                               )}
@@ -194,7 +194,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                             <div className="text-sm">
                               <div>
                                 <span className="text-slate-400">Trades importados:</span>
-                                <span className="ml-2 text-green-600 font-medium">
+                                <span className="ml-2 text-[#6EE000] font-medium">
                                   {csvImport.tradesImported}
                                 </span>
                               </div>
@@ -223,7 +223,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                   <Button
                     onClick={handleAnalyze}
                     disabled={!selectedCsvId || csvAnalysisMutation.isPending}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    className="flex-1 bg-[#6EE000] hover:bg-[#6EE000] text-white"
                     data-testid="analyze-selected-csv"
                   >
                     {csvAnalysisMutation.isPending ? (
@@ -254,7 +254,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
       {/* Modal de Upgrade */}
       <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
-        <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-zinc-900 border-zinc-800 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-[95vw] md:max-w-4xl bg-[#0a0a0f] border-[#1e1e2e] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2 text-lg md:text-xl">
               <Zap className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
@@ -274,7 +274,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
             <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-3">
               {/* Plano Starter */}
-              <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+              <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-[#13131a]/50 hover:bg-[#13131a] transition-colors">
                 <div className="text-center mb-3 md:mb-4">
                   <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-blue-600/20 rounded-lg mb-2 md:mb-3">
                     <Star className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
@@ -290,19 +290,19 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
 
                 <ul className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-zinc-300 mb-4 md:mb-6">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Análise IA de CSV</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Chat com Assistente IA</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Analytics avançados</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Suporte prioritário</span>
                   </li>
                 </ul>
@@ -313,85 +313,85 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
               </div>
 
               {/* Plano Pro */}
-              <div className="border-2 border-green-600 rounded-lg p-4 md:p-6 bg-green-600/10 hover:bg-green-600/15 transition-colors relative">
+              <div className="border-2 border-[#6EE000] rounded-lg p-4 md:p-6 bg-[#6EE000]/10 hover:bg-[#6EE000]/15 transition-colors relative">
                 <div className="absolute -top-2 md:-top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-600 text-white px-2 py-0.5 md:px-3 md:py-1 text-xs md:text-sm">
+                  <Badge className="bg-[#6EE000] text-white px-2 py-0.5 md:px-3 md:py-1 text-xs md:text-sm">
                     MAIS POPULAR
                   </Badge>
                 </div>
                 
                 <div className="text-center mb-3 md:mb-4 mt-3 md:mt-0">
-                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-green-600/20 rounded-lg mb-2 md:mb-3">
-                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-[#6EE000]/20 rounded-lg mb-2 md:mb-3">
+                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-[#6EE000]" />
                   </div>
                   <h3 className="text-base md:text-lg font-bold text-white">Pro</h3>
                   <p className="text-xs md:text-sm text-zinc-400">Escolha mais popular</p>
                 </div>
                 
                 <div className="text-center mb-3 md:mb-4">
-                  <div className="text-xl md:text-2xl font-bold text-green-600">R$ 49,90</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#6EE000]">R$ 49,90</div>
                   <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
                 <ul className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-zinc-300 mb-4 md:mb-6">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Tudo do Starter</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Gestão de risco avançada</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Estratégias personalizadas</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Alertas em tempo real</span>
                   </li>
                 </ul>
 
-                <Button className="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base py-2 md:py-3">
+                <Button className="w-full bg-[#6EE000] hover:bg-[#6EE000] text-white text-sm md:text-base py-2 md:py-3">
                   Escolher Pro
                 </Button>
               </div>
 
               {/* Plano VIP */}
-              <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-zinc-800/50 hover:bg-zinc-800 transition-colors">
+              <div className="border border-zinc-700 rounded-lg p-4 md:p-6 bg-[#13131a]/50 hover:bg-[#13131a] transition-colors">
                 <div className="text-center mb-3 md:mb-4">
-                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-purple-600/20 rounded-lg mb-2 md:mb-3">
-                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
+                  <div className="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-[#5bc800]/20 rounded-lg mb-2 md:mb-3">
+                    <Crown className="w-5 h-5 md:w-6 md:h-6 text-[#6EE000]" />
                   </div>
                   <h3 className="text-base md:text-lg font-bold text-white">VIP</h3>
                   <p className="text-xs md:text-sm text-zinc-400">Para traders sérios</p>
                 </div>
                 
                 <div className="text-center mb-3 md:mb-4">
-                  <div className="text-xl md:text-2xl font-bold text-purple-600">R$ 97,00</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#6EE000]">R$ 97,00</div>
                   <div className="text-xs md:text-sm text-zinc-400">/mês</div>
                 </div>
 
                 <ul className="space-y-1.5 md:space-y-2 text-xs md:text-sm text-zinc-300 mb-4 md:mb-6">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Tudo do Pro</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Sessões 1-on-1</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Suporte VIP</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-[#6EE000] flex-shrink-0" />
                     <span>Sinais exclusivos</span>
                   </li>
                 </ul>
 
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm md:text-base py-2 md:py-3">
+                <Button className="w-full bg-[#5bc800] hover:bg-[#6EE000] text-white text-sm md:text-base py-2 md:py-3">
                   Escolher VIP
                 </Button>
               </div>
@@ -406,7 +406,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                 <Button
                   variant="outline"
                   onClick={() => setShowUpgradeModal(false)}
-                  className="w-full sm:flex-1 border-zinc-600 text-zinc-300 hover:bg-zinc-800 text-sm md:text-base py-2 md:py-3"
+                  className="w-full sm:flex-1 border-zinc-600 text-zinc-300 hover:bg-[#13131a] text-sm md:text-base py-2 md:py-3"
                 >
                   Cancelar
                 </Button>
@@ -416,7 +416,7 @@ export function CsvSelectionModal({ open, onOpenChange }: CsvSelectionModalProps
                     // Aqui seria redirecionado para a página de planos
                     window.open('/pricing', '_blank');
                   }}
-                  className="w-full sm:flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white text-sm md:text-base py-2 md:py-3"
+                  className="w-full sm:flex-1 bg-gradient-to-r from-[#6EE000] to-[#448aff] hover:from-[#5bc800] hover:to-[#3a7aff] text-white text-sm md:text-base py-2 md:py-3"
                 >
                   Ver Todos os Planos
                 </Button>

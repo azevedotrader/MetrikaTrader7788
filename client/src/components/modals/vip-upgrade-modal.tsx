@@ -134,15 +134,15 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-lg bg-gradient-to-br from-zinc-900 via-zinc-900 to-purple-900/20 border-purple-500/30 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-lg bg-gradient-to-br from-[#0f0f1a] via-[#0f0f1a] to-[#6EE000]/05 border-[#6EE000]/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-yellow-500 rounded-full flex items-center justify-center animate-pulse">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#6EE000] to-yellow-500 rounded-full flex items-center justify-center animate-pulse">
               <Crown className="w-8 h-8 text-white" />
             </div>
           </div>
           <DialogTitle className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-            <span className="bg-gradient-to-r from-purple-400 to-yellow-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#6EE000] to-yellow-400 bg-clip-text text-transparent">
               {currentTexts.unlock}
             </span>
           </DialogTitle>
@@ -152,13 +152,13 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
         </DialogHeader>
         
         <div className="space-y-6 py-4">
-          <div className="bg-zinc-800/50 rounded-xl p-4 border border-purple-500/20">
+          <div className="bg-[#13131a]/50 rounded-xl p-4 border border-[#6EE000]/20">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center">
-                {feature === "csv" && <Zap className="w-5 h-5 text-purple-400" />}
-                {feature === "trades" && <BarChart3 className="w-5 h-5 text-purple-400" />}
-                {feature === "risk" && <Shield className="w-5 h-5 text-purple-400" />}
-                {feature === "general" && <Sparkles className="w-5 h-5 text-purple-400" />}
+              <div className="w-10 h-10 bg-[#5bc800]/20 rounded-lg flex items-center justify-center">
+                {feature === "csv" && <Zap className="w-5 h-5 text-[#6EE000]" />}
+                {feature === "trades" && <BarChart3 className="w-5 h-5 text-[#6EE000]" />}
+                {feature === "risk" && <Shield className="w-5 h-5 text-[#6EE000]" />}
+                {feature === "general" && <Sparkles className="w-5 h-5 text-[#6EE000]" />}
               </div>
               <div>
                 <h3 className="font-semibold text-white">{currentFeature.title}</h3>
@@ -175,8 +175,8 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
             <div className="space-y-2">
               {currentBenefits.map((benefit, index) => (
                 <div key={index} className="flex items-center gap-3 text-sm">
-                  <div className="w-6 h-6 bg-green-600/20 rounded-full flex items-center justify-center flex-shrink-0">
-                    <benefit.icon className="w-3.5 h-3.5 text-green-500" />
+                  <div className="w-6 h-6 bg-[#6EE000]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <benefit.icon className="w-3.5 h-3.5 text-[#6EE000]" />
                   </div>
                   <span className="text-zinc-300">{benefit.text}</span>
                 </div>
@@ -186,7 +186,7 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
 
           <div className="space-y-3">
             <div 
-              className="bg-gradient-to-r from-purple-600/20 to-yellow-600/20 rounded-xl p-4 border border-yellow-500/30 cursor-pointer hover:border-yellow-500/60 transition-all"
+              className="bg-gradient-to-r from-[#6EE000]/20 to-yellow-600/20 rounded-xl p-4 border border-yellow-500/30 cursor-pointer hover:border-yellow-500/60 transition-all"
               onClick={() => window.open('https://hub.la/g/kUCz3mE6Gon3TeOz1h40', '_blank')}
               data-testid="plan-annual"
             >
@@ -197,10 +197,10 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
                     <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 547' : '$547'}</span>
                     <span className="text-zinc-400">/{lang === 'pt' ? 'ano' : lang === 'es' ? 'año' : 'year'}</span>
                   </div>
-                  <p className="text-xs text-green-400">{lang === 'pt' ? 'Economize 53%' : lang === 'es' ? 'Ahorra 53%' : 'Save 53%'}</p>
+                  <p className="text-xs text-[#6EE000]">{lang === 'pt' ? 'Economize 53%' : lang === 'es' ? 'Ahorra 53%' : 'Save 53%'}</p>
                 </div>
                 <div className="text-right">
-                  <span className="bg-green-500 text-black text-xs font-bold px-2 py-1 rounded-full">
+                  <span className="bg-[#6EE000] text-black text-xs font-bold px-2 py-1 rounded-full">
                     {lang === 'pt' ? 'MELHOR VALOR' : lang === 'es' ? 'MEJOR VALOR' : 'BEST VALUE'}
                   </span>
                 </div>
@@ -208,7 +208,7 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
             </div>
 
             <div 
-              className="bg-zinc-800/50 rounded-xl p-4 border border-purple-500/30 cursor-pointer hover:border-purple-500/60 transition-all"
+              className="bg-[#13131a]/50 rounded-xl p-4 border border-[#6EE000]/30 cursor-pointer hover:border-[#6EE000]/60 transition-all"
               onClick={() => window.open('https://hub.la/g/lUlRpoibiOjhnJF47H43', '_blank')}
               data-testid="plan-quarterly"
             >
@@ -219,7 +219,7 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
                     <span className="text-2xl font-bold text-white">{lang === 'pt' ? 'R$ 197' : '$197'}</span>
                     <span className="text-zinc-400">/{lang === 'pt' ? 'trimestre' : lang === 'es' ? 'trimestre' : 'quarter'}</span>
                   </div>
-                  <p className="text-xs text-purple-400">{lang === 'pt' ? 'Economize 32%' : lang === 'es' ? 'Ahorra 32%' : 'Save 32%'}</p>
+                  <p className="text-xs text-[#6EE000]">{lang === 'pt' ? 'Economize 32%' : lang === 'es' ? 'Ahorra 32%' : 'Save 32%'}</p>
                 </div>
                 <div className="text-right">
                   <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
@@ -230,7 +230,7 @@ export function VipUpgradeModal({ open, onOpenChange, feature = "general" }: Vip
             </div>
 
             <div 
-              className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700 cursor-pointer hover:border-zinc-500 transition-all"
+              className="bg-[#13131a]/50 rounded-xl p-4 border border-zinc-700 cursor-pointer hover:border-zinc-500 transition-all"
               onClick={() => window.open('https://hub.la/g/CGRfvH9XIZzkXUFTkesn', '_blank')}
               data-testid="plan-monthly"
             >

@@ -468,7 +468,7 @@ export function TradingCalendar({
       >
         {/* Logo watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="opacity-[0.07] sm:opacity-[0.09] md:opacity-[0.12] flex items-center justify-center w-full h-full">
+          <div className="opacity-[0.12] sm:opacity-[0.15] md:opacity-[0.18] flex items-center justify-center w-full h-full">
             <img
               src={metrikaLogo}
               alt="METRIKA"

@@ -74,86 +74,86 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700">
+      <DialogContent className="sm:max-w-md bg-[#0f0f1a] border-[#1e1e2e]">
         <DialogHeader className="text-center space-y-4">
-          <div className="w-36 h-36 md:w-32 md:h-32 sm:w-24 sm:h-24 gradient-purple-blue rounded-xl flex items-center justify-center mx-auto">
+          <div className="flex justify-center">
             <Logo variant="modal" />
           </div>
           <div>
             <DialogTitle className="text-2xl font-bold text-white">
               {t('register.title')}
             </DialogTitle>
-            <p className="text-slate-400 mt-2">{t('register.subtitle')}</p>
+            <p className="text-[#6e7191] mt-2">{t('register.subtitle')}</p>
           </div>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-6">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-slate-300">{t('register.name_label')}</Label>
+            <Label htmlFor="name" className="text-[#e0e0e0]">{t('register.name_label')}</Label>
             <Input
               id="name"
               placeholder={t('register.name_placeholder')}
               {...form.register("name")}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
             />
             {form.formState.errors.name && (
-              <p className="text-red-500 text-sm">{form.formState.errors.name.message}</p>
+              <p className="text-[#FF1F3D] text-sm">{form.formState.errors.name.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-slate-300">{t('register.email_label')}</Label>
+            <Label htmlFor="email" className="text-[#e0e0e0]">{t('register.email_label')}</Label>
             <Input
               id="email"
               type="email"
               placeholder={t('register.email_placeholder')}
               {...form.register("email")}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
             />
             {form.formState.errors.email && (
-              <p className="text-red-500 text-sm">{form.formState.errors.email.message}</p>
+              <p className="text-[#FF1F3D] text-sm">{form.formState.errors.email.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-slate-300">{t('register.phone_label')}</Label>
+            <Label htmlFor="phone" className="text-[#e0e0e0]">{t('register.phone_label')}</Label>
             <Input
               id="phone"
               type="tel"
               placeholder={t('register.phone_placeholder')}
               {...form.register("phone")}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
             />
             {form.formState.errors.phone && (
-              <p className="text-red-500 text-sm">{form.formState.errors.phone.message}</p>
+              <p className="text-[#FF1F3D] text-sm">{form.formState.errors.phone.message}</p>
             )}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-slate-300">{t('register.password_label')}</Label>
+            <Label htmlFor="password" className="text-[#e0e0e0]">{t('register.password_label')}</Label>
             <Input
               id="password"
               type="password"
               placeholder={t('register.password_placeholder')}
               {...form.register("password")}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
             />
             {form.formState.errors.password && (
-              <p className="text-red-500 text-sm">{form.formState.errors.password.message}</p>
+              <p className="text-[#FF1F3D] text-sm">{form.formState.errors.password.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-slate-300">{t('register.confirm_password_label')}</Label>
+            <Label htmlFor="confirmPassword" className="text-[#e0e0e0]">{t('register.confirm_password_label')}</Label>
             <Input
               id="confirmPassword"
               type="password"
               placeholder={t('register.confirm_password_placeholder')}
               {...form.register("confirmPassword")}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+              className="bg-[#13131a] border-[#28283a] text-white placeholder:text-[#6e7191]"
             />
             {form.formState.errors.confirmPassword && (
-              <p className="text-red-500 text-sm">{form.formState.errors.confirmPassword.message}</p>
+              <p className="text-[#FF1F3D] text-sm">{form.formState.errors.confirmPassword.message}</p>
             )}
           </div>
 
@@ -167,11 +167,11 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-slate-400">
+          <p className="text-[#6e7191]">
             {t('register.already_have_account')}{" "}
             <Button 
               variant="link" 
-              className="text-purple-600 hover:text-purple-600 p-0"
+              className="text-[#6EE000] hover:text-[#6EE000] p-0"
               onClick={onSwitchToLogin}
             >
               {t('register.login_link')}

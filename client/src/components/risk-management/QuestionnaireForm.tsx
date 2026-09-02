@@ -148,7 +148,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
   };
 
   return (
-    <Card className="bg-zinc-900/50 border-zinc-800" data-testid="questionnaire-form">
+    <Card className="bg-[#0a0a0f]/50 border-[#1e1e2e]" data-testid="questionnaire-form">
       <CardHeader>
         <CardTitle className="text-white">
           Configure sua Gestão de Risco Personalizada
@@ -161,9 +161,9 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
             <span>Pergunta {currentStep + 1} de {QUESTIONS.length}</span>
             <span>{Math.round(((currentStep + 1) / QUESTIONS.length) * 100)}%</span>
           </div>
-          <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-2 bg-[#13131a] rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-[#6EE000] to-[#448aff] transition-all duration-300"
               style={{ width: `${((currentStep + 1) / QUESTIONS.length) * 100}%` }}
             />
           </div>
@@ -187,7 +187,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
                 value={bankrollValue}
                 onChange={(e) => setBankrollValue(e.target.value)}
                 placeholder="Ex: 1000.00"
-                className="bg-zinc-800 border-zinc-700 text-white mt-2"
+                className="bg-[#13131a] border-zinc-700 text-white mt-2"
                 data-testid="input-bankroll-value"
               />
             </div>
@@ -242,7 +242,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
                     setAnswers({ ...answers, q5_winRate: parseFloat(e.target.value) })
                   }
                   placeholder="Ex: 55"
-                  className="bg-zinc-800 border-zinc-700 text-white mt-2"
+                  className="bg-[#13131a] border-zinc-700 text-white mt-2"
                   data-testid="input-win-rate"
                 />
               </div>
@@ -260,7 +260,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
                     setAnswers({ ...answers, q5_riskReward: parseFloat(e.target.value) })
                   }
                   placeholder="Ex: 2.0"
-                  className="bg-zinc-800 border-zinc-700 text-white mt-2"
+                  className="bg-[#13131a] border-zinc-700 text-white mt-2"
                   data-testid="input-risk-reward"
                 />
               </div>
@@ -299,7 +299,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
           </div>
         )}
 
-        <div className="flex justify-between pt-4 border-t border-zinc-800">
+        <div className="flex justify-between pt-4 border-t border-[#1e1e2e]">
           <Button
             variant="outline"
             onClick={handleBack}
@@ -313,7 +313,7 @@ export function QuestionnaireForm({ onComplete, isSubmitting }: QuestionnaireFor
           <Button
             onClick={handleNext}
             disabled={!canProceed() || isSubmitting}
-            className="bg-gradient-to-r from-purple-600 to-blue-600"
+            className="bg-gradient-to-r from-[#6EE000] to-[#448aff]"
             data-testid="button-next"
           >
             {currentStep === QUESTIONS.length - 1 ? (
