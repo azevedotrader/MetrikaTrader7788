@@ -15,7 +15,10 @@ import {
   Upload,
   Wallet,
   Sun,
-  Moon
+  Moon,
+  Book,
+  GraduationCap,
+  MessageCircle
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/lib/auth";
