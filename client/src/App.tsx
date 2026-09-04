@@ -17,7 +17,6 @@ import { NoPlanScreen } from "@/components/ui/no-plan-screen";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUserPlan, isPaidPlan } from "@/hooks/useUserPlan";
 import { useState, useEffect } from "react";
-import { CookieConsent } from "@/components/ui/cookie-consent";
 import { initPixelIfConsented } from "@/hooks/useMetaPixel";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
@@ -86,8 +85,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Banner de consentimento LGPD + Meta Pixel */}
-      <CookieConsent />
+
       <Switch>
         {/* Public test page - accessible without authentication */}
         <Route path="/teste-gateio">
