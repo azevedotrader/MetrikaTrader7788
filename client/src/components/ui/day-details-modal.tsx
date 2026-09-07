@@ -96,10 +96,13 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
     acc.totalPnl += resultado;
     acc.totalTrades += 1;
     if (resultado > 0) acc.winningTrades += 1;
+    else if (resultado < 0) acc.losingTrades += 1;
     return acc;
-  }, { totalPnl: 0, totalTrades: 0, winningTrades: 0 });
+  }, { totalPnl: 0, totalTrades: 0, winningTrades: 0, losingTrades: 0 });
 
-  const winRate = dayStats.totalTrades > 0 ? (dayStats.winningTrades / dayStats.totalTrades) * 100 : 0;
+  // Breakeven (0x0) não conta nem como acerto nem como erro
+  const decidedTrades = dayStats.winningTrades + dayStats.losingTrades;
+  const winRate = decidedTrades > 0 ? (dayStats.winningTrades / decidedTrades) * 100 : 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

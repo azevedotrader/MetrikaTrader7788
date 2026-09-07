@@ -1183,8 +1183,9 @@ function MetrikaScore({ trades, t, formatCurrency }: { trades: Trade[]; t: (key:
     const totalLosses = losingTrades.length;
     const totalTrades = trades.length;
     
-    // 1. Win % (0-100)
-    const winRate = totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
+    // 1. Win % (0-100) - breakeven (0x0) não conta nem como acerto nem como erro
+    const decidedTrades = totalWins + totalLosses;
+    const winRate = decidedTrades > 0 ? (totalWins / decidedTrades) * 100 : 0;
     
     // 2. Profit Factor (0-10, normalizado para 0-100)
     const totalProfits = winningTrades.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
@@ -1572,7 +1573,9 @@ function PerformancePeriodChart({ trades, t, onPeriodFilterChange, formatCurrenc
     const totalPositiveCount = chartData.reduce((sum, d) => sum + d.positiveCount, 0);
     const totalNegativeCount = chartData.reduce((sum, d) => sum + d.negativeCount, 0);
     const totalTrades = chartData.reduce((sum, d) => sum + d.totalCount, 0);
-    const winRate = totalTrades > 0 ? (totalPositiveCount / totalTrades * 100) : 0;
+    // Breakeven (0x0) não conta nem como acerto nem como erro
+    const decidedCount = totalPositiveCount + totalNegativeCount;
+    const winRate = decidedCount > 0 ? (totalPositiveCount / decidedCount * 100) : 0;
     const avgPerPeriod = chartData.length > 0 ? finalAccumulated / chartData.length : 0;
 
     container.innerHTML = `
@@ -2177,7 +2180,12 @@ function calculateBrokerStats(trades: Trade[]): BrokerStats {
   const winningTrades = trades.filter(
     (trade) => parseFloat(trade.resultado || "0") > 0,
   ).length;
-  const winRate = (winningTrades / totalTrades) * 100;
+  const losingTrades = trades.filter(
+    (trade) => parseFloat(trade.resultado || "0") < 0,
+  ).length;
+  // Breakeven (0x0) não conta nem como acerto nem como erro
+  const decidedTrades = winningTrades + losingTrades;
+  const winRate = decidedTrades > 0 ? (winningTrades / decidedTrades) * 100 : 0;
 
   return { totalTrades, totalProfit, winRate };
 }
@@ -2796,7 +2804,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="text-xl md:text-2xl lg:text-3xl font-bold text-[var(--text)]">
                     {(() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = periodFilteredTrades.length;
+                      const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                      const totalTrades = winTrades + lossTrades; // breakeven (0x0) é neutro
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       return (winRate % 1 === 0 ? winRate.toFixed(0) : winRate.toFixed(1)) + '%';
                     })()}
@@ -2805,13 +2814,15 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                     <CircularProgress 
                       percentage={(() => {
                         const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = periodFilteredTrades.length;
+                        const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                        const totalTrades = winTrades + lossTrades; // breakeven (0x0) é neutro
                         return totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       })()} 
                       size={35}
                       color={(() => {
                         const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                        const totalTrades = periodFilteredTrades.length;
+                        const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                        const totalTrades = winTrades + lossTrades; // breakeven (0x0) é neutro
                         const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                         return winRate >= 60 ? "#6EE000" : winRate >= 40 ? "#eab308" : "#FF1F3D";
                       })()}
@@ -2974,7 +2985,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="flex flex-col items-center">
                     {(() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = periodFilteredTrades.length;
+                      const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                      const totalTrades = winTrades + lossTrades; // breakeven (0x0) é neutro
                       const winPercentage = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       return (
                         <>
@@ -3045,7 +3057,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                   <div className="flex flex-col items-center">
                     {(() => {
                       const winTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
-                      const totalTrades = periodFilteredTrades.length;
+                      const lossTrades = periodFilteredTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
+                      const totalTrades = winTrades + lossTrades; // breakeven (0x0) é neutro
                       const winRate = totalTrades > 0 ? (winTrades / totalTrades) * 100 : 0;
                       const totalResult = periodFilteredTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
                       const isPositive = totalResult >= 0;

@@ -17,7 +17,6 @@ import {
   Sun,
   Moon,
   Book,
-  GraduationCap,
   MessageCircle
 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
@@ -35,7 +34,6 @@ const navigation = [
   { nameKey: "risk_management.title", href: "/gestao", icon: Calculator },
   { nameKey: "calendar.title", href: "/calendario", icon: Calendar },
   { nameKey: "journal.title", href: "/diario", icon: Book },
-  { nameKey: "nav.learning", href: "/aprendizado", icon: GraduationCap },
   { nameKey: "Clube do Gráfico", href: "/clube-do-grafico", icon: TrendingUp },
   { nameKey: "support.title", href: "/suporte", icon: MessageCircle },
   { nameKey: "profile.title", href: "/perfil", icon: User },

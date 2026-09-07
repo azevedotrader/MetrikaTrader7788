@@ -161,8 +161,13 @@ export function TradingCalendar({
       const winningTrades = dayTrades.filter(
         (trade) => (parseFloat(trade.resultado) || trade.pnl || 0) > 0,
       ).length;
+      const losingTrades = dayTrades.filter(
+        (trade) => (parseFloat(trade.resultado) || trade.pnl || 0) < 0,
+      ).length;
+      // Breakeven (0x0) não conta nem como acerto nem como erro
+      const decidedTrades = winningTrades + losingTrades;
       const winRate =
-        dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
+        decidedTrades > 0 ? (winningTrades / decidedTrades) * 100 : 0;
 
       const tradesComRR = dayTrades.filter((trade) => {
         const alvo = parseFloat(trade.alvo) || 0;
@@ -449,9 +454,11 @@ export function TradingCalendar({
   const monthlyStats = {
     totalPnl: tradeDays.reduce((sum, day) => sum + day.pnl, 0),
     totalTrades: tradeDays.reduce((sum, day) => sum + day.trades, 0),
+    // Dias com pnl exatamente 0 (breakeven) são neutros
     winRate:
       Math.round(
-        (tradeDays.filter((day) => day.pnl > 0).length / tradeDays.length) *
+        (tradeDays.filter((day) => day.pnl > 0).length /
+          Math.max(1, tradeDays.filter((day) => day.pnl !== 0).length)) *
           100,
       ) || 0,
     tradingDays: tradeDays.length,

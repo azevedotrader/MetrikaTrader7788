@@ -30,7 +30,6 @@ import Diario from "@/pages/diario";
 import Perfil from "@/pages/perfil";
 import Calendario from "@/pages/calendario";
 import Suporte from "@/pages/suporte";
-import Aprendizado from "@/pages/aprendizado";
 import Importacoes from "@/pages/importacoes";
 import Carteiras from "@/pages/carteiras";
 import TesteGateIO from "@/pages/teste-gateio";
@@ -54,7 +53,6 @@ const pageTitleKeys: Record<string, string> = {
   "/gestao": "risk_management.title",
   "/diario": "journal.title",
   "/calendario": "calendar.title",
-  "/aprendizado": "learning.title",
   "/importacoes": "dashboard.imports_and_trades",
   "/carteiras": "Carteiras",
   "/perfil": "profile.title",

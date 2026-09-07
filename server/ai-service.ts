@@ -306,7 +306,10 @@ export class AITradingService {
       const totalTrades = trades.length;
       const recentTrades = trades.slice(-5); // Últimos 5 trades
       const totalProfit = trades.reduce((acc, t) => acc + (t.resultadoNum || 0), 0);
-      const winRate = totalTrades > 0 ? (trades.filter(t => (t.resultadoNum || 0) > 0).length / totalTrades) * 100 : 0;
+      // Breakeven (0x0) não conta nem como acerto nem como erro
+      const winCount = trades.filter(t => (t.resultadoNum || 0) > 0).length;
+      const lossCount = trades.filter(t => (t.resultadoNum || 0) < 0).length;
+      const winRate = (winCount + lossCount) > 0 ? (winCount / (winCount + lossCount)) * 100 : 0;
       
       const prompt = `
         Como especialista em trading, analise estes dados e forneça UM conselho prático:
@@ -570,7 +573,8 @@ export class AITradingService {
     
     const performance = {
       totalTrades: trades.length,
-      winRate: profits.length / trades.length,
+      // Breakeven (0x0) não conta nem como acerto nem como erro
+      winRate: (profits.length + losses.length) > 0 ? profits.length / (profits.length + losses.length) : 0,
       avgWin: profits.length > 0 ? profits.reduce((a, b) => a + b, 0) / profits.length : 0,
       avgLoss: losses.length > 0 ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0,
       totalProfit: allResults.reduce((a, b) => a + b, 0),
@@ -882,7 +886,8 @@ export class AITradingService {
     const losses = trades.map(t => parseFloat(t.resultado)).filter(r => r < 0);
     const allResults = trades.map(t => parseFloat(t.resultado));
     
-    const winRate = profits.length / trades.length;
+    // Breakeven (0x0) não conta nem como acerto nem como erro
+    const winRate = (profits.length + losses.length) > 0 ? profits.length / (profits.length + losses.length) : 0;
     const avgWin = profits.length > 0 ? profits.reduce((a, b) => a + b, 0) / profits.length : 0;
     const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0;
     const profitFactor = avgLoss > 0 ? (avgWin * profits.length) / (avgLoss * losses.length) : 0;

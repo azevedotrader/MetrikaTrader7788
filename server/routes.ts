@@ -1737,22 +1737,24 @@ export async function registerRoutes(app: Express): Promise<void> {
       const trades = await storage.getAllTrades(clubeUser.id);
 
       const totalTrades = trades.length;
-      const winners = trades.filter((t: any) => t.resultado === 'take' || (t.valorFinanceiro && parseFloat(String(t.valorFinanceiro)) > 0));
-      const losers = trades.filter((t: any) => t.resultado === 'loss' || (t.valorFinanceiro && parseFloat(String(t.valorFinanceiro)) < 0));
-      const breakEvens = trades.filter((t: any) => t.resultado === 'be');
+      const pnlOf = (t: any) => parseFloat(String(t.resultado ?? 0)) || 0;
 
-      const winRate = totalTrades > 0 ? (winners.length / totalTrades) * 100 : 0;
+      const winners = trades.filter((t: any) => pnlOf(t) > 0);
+      const losers = trades.filter((t: any) => pnlOf(t) < 0);
+      const breakEvens = trades.filter((t: any) => pnlOf(t) === 0);
 
-      const totalPnl = trades.reduce((sum: number, t: any) => {
-        return sum + (parseFloat(String(t.valorFinanceiro || 0)));
-      }, 0);
+      // Breakeven (0x0) não conta nem como acerto nem como erro
+      const decidedTrades = winners.length + losers.length;
+      const winRate = decidedTrades > 0 ? (winners.length / decidedTrades) * 100 : 0;
+
+      const totalPnl = trades.reduce((sum: number, t: any) => sum + pnlOf(t), 0);
 
       const avgWin = winners.length > 0
-        ? winners.reduce((sum: number, t: any) => sum + parseFloat(String(t.valorFinanceiro || 0)), 0) / winners.length
+        ? winners.reduce((sum: number, t: any) => sum + pnlOf(t), 0) / winners.length
         : 0;
 
       const avgLoss = losers.length > 0
-        ? losers.reduce((sum: number, t: any) => sum + parseFloat(String(t.valorFinanceiro || 0)), 0) / losers.length
+        ? losers.reduce((sum: number, t: any) => sum + pnlOf(t), 0) / losers.length
         : 0;
 
       const rrRatio = avgLoss !== 0 ? Math.abs(avgWin / avgLoss) : 0;
@@ -2709,7 +2711,9 @@ export async function registerRoutes(app: Express): Promise<void> {
       
       // Calculate metrics
       const totalProfit = results.reduce((sum, trade) => sum + trade.resultadoNum, 0);
-      const winRate = trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
+      // Breakeven (0x0) não conta nem como acerto nem como erro
+      const decidedTrades = winningTrades.length + losingTrades.length;
+      const winRate = decidedTrades > 0 ? (winningTrades.length / decidedTrades) * 100 : 0;
       
       const avgWin = winningTrades.length > 0 
         ? winningTrades.reduce((sum, trade) => sum + trade.resultadoNum, 0) / winningTrades.length 
@@ -4820,7 +4824,9 @@ Todos os planos pagos incluem:
           const totalProfit = userTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
           const wins = userTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
           const losses = userTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
-          const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0';
+          // Breakeven (0x0) não conta nem como acerto nem como erro
+          const decidedTrades = wins + losses;
+          const winRate = decidedTrades > 0 ? ((wins / decidedTrades) * 100).toFixed(1) : '0';
           
           const statsMessage = `📊 *Suas Estatísticas*\n\n` +
             `📈 Total de Trades: ${totalTrades}\n` +
@@ -5096,7 +5102,9 @@ Todos os planos pagos incluem:
           const totalProfit = userTrades.reduce((sum, t) => sum + parseFloat(t.resultado || '0'), 0);
           const wins = userTrades.filter(t => parseFloat(t.resultado || '0') > 0).length;
           const losses = userTrades.filter(t => parseFloat(t.resultado || '0') < 0).length;
-          const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0';
+          // Breakeven (0x0) não conta nem como acerto nem como erro
+          const decidedTrades = wins + losses;
+          const winRate = decidedTrades > 0 ? ((wins / decidedTrades) * 100).toFixed(1) : '0';
           
           const statsMessage = `📊 *Suas Estatísticas*\n\n` +
             `📈 Total de Trades: ${totalTrades}\n` +
