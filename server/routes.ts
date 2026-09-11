@@ -2029,7 +2029,10 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Update trade
-  app.put("/api/trades/:id", requireAuth, async (req: any, res) => {
+  // PUT e PATCH compartilham o handler: o dashboard edita com PATCH e as
+  // páginas de trade com PUT. Sem a rota PATCH, a edição pelo dashboard caía
+  // no catch-all do SPA e a alteração era silenciosamente perdida.
+  const updateTradeHandler = async (req: any, res: any) => {
     try {
       const { id } = req.params;
       const userId = req.userId;
@@ -2060,7 +2063,10 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       res.status(500).json({ message: "Erro interno do servidor" });
     }
-  });
+  };
+
+  app.put("/api/trades/:id", requireAuth, updateTradeHandler);
+  app.patch("/api/trades/:id", requireAuth, updateTradeHandler);
 
   // Delete trade - ISOLADO POR USUÁRIO
   app.delete("/api/trades/:id", requireAuth, async (req, res) => {
