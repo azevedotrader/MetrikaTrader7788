@@ -2,14 +2,15 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { tradeR } from "@/lib/utils";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const pnl = (t: any) => parseFloat(t.resultado || "0");
 
-const rVal = (t: any): number | null => {
-  const r = parseFloat(t.risco || "0");
-  return r > 0 ? parseFloat(t.resultado || "0") / r : null;
-};
+// `resultado` já é o múltiplo R (ver tradeR em lib/utils). O cálculo anterior
+// dividia por `risco`, o que achatava todo trade com múltiplo explícito para
+// 1R e descartava os que não tinham `risco` preenchido.
+const rVal = (t: any): number | null => tradeR(t);
 
 const fmt = (money: number, r: number | null, mode: "money" | "r"): string => {
   if (mode === "r") {

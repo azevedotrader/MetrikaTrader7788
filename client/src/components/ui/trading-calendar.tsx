@@ -10,7 +10,7 @@ import {
   Plus,
   BookOpen,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, somaR } from "@/lib/utils";
 import { DiaryModal } from "@/components/ui/diary-modal";
 import { DayDetailsModal } from "@/components/ui/day-details-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -227,14 +227,10 @@ export function TradingCalendar({
         const totalPnl = weekTrades.reduce((sum, day) => sum + day.pnl, 0);
         const totalTrades = weekTrades.reduce((sum, day) => sum + day.trades, 0);
         const tradingDays = weekTrades.length;
-        const rTotal = weekTrades.reduce((sum, day) => {
-          const dayR = (day.rawTrades || []).reduce((s: number, t: any) => {
-            const risco = parseFloat(t.risco || "0");
-            const res = parseFloat(t.resultado || "0");
-            return risco > 0 ? s + res / risco : s;
-          }, 0);
-          return sum + dayR;
-        }, 0);
+        const rTotal = weekTrades.reduce(
+          (sum, day) => sum + somaR(day.rawTrades),
+          0
+        );
 
         weeks.push({
           weekNumber: index + 1,
@@ -348,11 +344,7 @@ export function TradingCalendar({
                 <span>•••••</span>
               ) : showMode === "r" ? (
                 (() => {
-                  const rTotal = (tradeDay.rawTrades || []).reduce((sum: number, t: any) => {
-                    const risco = parseFloat(t.risco || "0");
-                    const res = parseFloat(t.resultado || "0");
-                    return risco > 0 ? sum + res / risco : sum;
-                  }, 0);
+                  const rTotal = somaR(tradeDay.rawTrades);
                   return (
                     <span>
                       {rTotal >= 0 ? "+" : ""}{rTotal.toFixed(1)}R
@@ -630,13 +622,10 @@ export function TradingCalendar({
                     ? "•••••"
                     : showMode === "r"
                     ? (() => {
-                        const rTotal = tradeDays.reduce((sum, day) => {
-                          return sum + (day.rawTrades || []).reduce((s: number, t: any) => {
-                            const risco = parseFloat(t.risco || "0");
-                            const res = parseFloat(t.resultado || "0");
-                            return risco > 0 ? s + res / risco : s;
-                          }, 0);
-                        }, 0);
+                        const rTotal = tradeDays.reduce(
+                          (sum, day) => sum + somaR(day.rawTrades),
+                          0
+                        );
                         return `${rTotal >= 0 ? "+" : ""}${rTotal.toFixed(1)}R`;
                       })()
                     : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
