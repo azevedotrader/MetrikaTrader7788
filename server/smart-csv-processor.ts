@@ -67,8 +67,57 @@ function isValidTradeRow(row: any, index: number): boolean {
 const TRADING_SYMBOL_PATTERNS = {
   b3: /^(WIN|WDO|IND|DOL|BGI|ISP|ICF|SFI|CCM|OZ1|OZ2|OZ3|PETR[34]?|VALE[35]?|ITUB[34]?|BBDC[34]?|ABEV|BBAS|BEEF|BPAC|BRDT|BRKM|CCRO|CMIG|CPFE|CSAN|CSNA|ELET|EMBR|ENBR|EQTL|FLRY|GGBR|GOAU|HAPV|HYPE|IGTI|ITSA|JBSS|KLBN|LAME|LREN|MGLU|MRFG|MRVE|MULT|NTCO|PCAR|QUAL|RADL|RAIL|RENT|SANB|SBSP|SUZB|TAEE|TIMS|TOTS|UGPA|USIM|VIVT|VVAR|WEGE|YDUQ)[A-Z0-9]*$/i,
   crypto: /^(BTC|ETH|BNB|ADA|SOL|DOT|MATIC|LINK|UNI|AAVE|ATOM|XRP|LTC|BCH|EOS|TRX|XLM|XMR|DASH|ZEC|ETC)[\/\-]?(USDT|BUSD|BRL|USD)?$/i,
-  forex: /^(EUR|GBP|USD|JPY|CAD|AUD|CHF|NZD|SEK|NOK|DKK|PLN|CZK|HUF|TRY|ZAR|MXN|BRL)[\/\-]?(USD|EUR|GBP|JPY|CAD|AUD|CHF|BRL)$/i
+  forex: /^(EUR|GBP|USD|JPY|CAD|AUD|CHF|NZD|SEK|NOK|DKK|PLN|CZK|HUF|TRY|ZAR|MXN|BRL)[\/\-]?(USD|EUR|GBP|JPY|CAD|AUD|CHF|BRL)$/i,
+  // Índices e commodities. Sem isto, "DE40" só era pego pelo padrão genérico,
+  // que corre depois e pode ter casado antes com a coluna de direção.
+  indices: /^(US30|US100|US500|US2000|USTEC|NAS100|NASDAQ|SPX500|SP500|SPX|DJ30|DJI|DOW|GER30|GER40|DE30|DE40|DAX40|DAX|UK100|FTSE100|FTSE|FRA40|CAC40|EU50|EUSTX50|STOXX50|JP225|NIKKEI|AUS200|HK50|CHINA50|ESP35|IBEX35|IT40|SUI20|NL25|VIX)$/i,
+  commodities: /^(XAUUSD|XAGUSD|XAU|XAG|GOLD|SILVER|WTI|BRENT|USOIL|UKOIL|NGAS|COPPER)$/i
 };
+
+/**
+ * Valores que nunca são nome de ativo. Sem esta lista, os padrões genéricos
+ * de símbolo (ex: /^[A-Z]{2,8}\d*$/) casam com "SHORT" e "LONG", e o ativo
+ * acabava gravado com o lado da operação quando a coluna de direção aparecia
+ * antes da coluna do ativo no CSV.
+ */
+const NON_SYMBOL_VALUES = new Set([
+  // Direção / lado
+  'SHORT', 'LONG', 'BUY', 'SELL', 'COMPRA', 'VENDA', 'CALL', 'PUT',
+  'BID', 'ASK', 'SIDE', 'LADO', 'TIPO', 'TYPE', 'DIRECTION', 'DIRECAO', 'DIREÇÃO',
+  // Abertura / fechamento
+  'OPEN', 'CLOSE', 'CLOSED', 'ABERTURA', 'FECHAMENTO', 'ENTRADA', 'SAIDA', 'SAÍDA',
+  'ENTRY', 'EXIT', 'IN', 'OUT',
+  // Resultado
+  'GAIN', 'LOSS', 'WIN', 'TAKE', 'STOP', 'BREAKEVEN', 'RESULTADO', 'RESULT',
+  'LUCRO', 'PREJUIZO', 'PREJUÍZO', 'PROFIT', 'TOTAL', 'SALDO', 'BALANCE',
+  // Modalidade / status
+  'DAYTRADE', 'DAY', 'SWING', 'POSITION', 'SCALP', 'STATUS', 'PENDING',
+  'EXECUTED', 'CANCELED', 'CANCELLED', 'CANCELADO', 'EXECUTADO',
+  // Genéricos
+  'TRUE', 'FALSE', 'SIM', 'NAO', 'NÃO', 'YES', 'NO', 'NULL', 'NONE',
+  'NA', 'N/A', 'UNDEFINED', 'TRADE', 'ORDER', 'ORDEM', 'CONTA', 'ACCOUNT',
+  'QTD', 'QTDE', 'QUANTIDADE', 'QUANTITY', 'VOLUME', 'LOTE', 'LOTS',
+  'DATA', 'DATE', 'HORA', 'TIME', 'ID', 'TICKET', 'COMMENT', 'COMENTARIO',
+]);
+
+export function isNonSymbolValue(value: string): boolean {
+  return NON_SYMBOL_VALUES.has(value.toUpperCase().trim());
+}
+
+/**
+ * Nomes de coluna que identificam o ativo. Procurar por eles antes de varrer
+ * a linha inteira evita pegar o valor de outra coluna por acidente.
+ */
+const SYMBOL_COLUMN_HINTS = [
+  'ativo', 'simbolo', 'símbolo', 'symbol', 'ticker', 'instrumento',
+  'instrument', 'papel', 'par', 'pair', 'contrato', 'contract',
+  'produto', 'product', 'asset', 'acao', 'ação', 'ativos',
+];
+
+export function isSymbolColumn(key: string): boolean {
+  const k = key.toLowerCase().trim();
+  return SYMBOL_COLUMN_HINTS.some(hint => k === hint || k.includes(hint));
+}
 
 /**
  * Padrões para identificar tipos de operação
@@ -925,38 +974,48 @@ function extractAndValidateDate(row: any): Date | null {
  * Extrai e valida símbolo do ativo
  */
 function extractAndValidateSymbol(row: any): string | null {
-  // Primeiro tenta encontrar símbolos conhecidos
+  const genericPatterns = [
+    { pattern: /^[A-Z]{2,8}\d*$/i, name: 'alfanumérico' },
+    { pattern: /^[A-Z]{3,6}[0-9]{1,4}$/i, name: 'ticker+números' },
+    { pattern: /^[A-Z]+[\/\-][A-Z]+$/i, name: 'par de moedas' }
+  ];
+
+  // 1) Coluna cujo nome identifica o ativo: é a fonte confiável. Aceita o
+  //    valor como está, mesmo que não case com nenhum padrão conhecido —
+  //    assim um índice como "DE40" entra com o nome correto.
+  for (const [key, value] of Object.entries(row)) {
+    if (!value || !isSymbolColumn(key)) continue;
+    const original = String(value).trim();
+    if (!original || isNonSymbolValue(original)) continue;
+    if (/^[A-Za-z]/.test(original) && original.length <= 20) {
+      console.log(`    🎯 Ativo: coluna "${key}" → símbolo: ${original.toUpperCase()}`);
+      return original.toUpperCase();
+    }
+  }
+
+  // 2) Símbolos conhecidos em qualquer coluna
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;
     const original = String(value);
     const valueStr = original.toUpperCase().trim();
-    
-    // Procurar padrões de símbolos conhecidos
+    if (isNonSymbolValue(valueStr)) continue;
+
     for (const [market, pattern] of Object.entries(TRADING_SYMBOL_PATTERNS)) {
-      if (pattern.test(valueStr)) {
-        // Extrair apenas o símbolo, não a linha toda
-        const match = valueStr.match(pattern);
-        if (match) {
-          console.log(`    🎯 Ativo: "${original}" → mercado: ${market} → símbolo: ${match[0]}`);
-          return match[0];
-        }
+      const match = valueStr.match(pattern);
+      if (match) {
+        console.log(`    🎯 Ativo: "${original}" → mercado: ${market} → símbolo: ${match[0]}`);
+        return match[0];
       }
     }
   }
-  
-  // Procurar por padrões genéricos de símbolos
+
+  // 3) Padrões genéricos, já sem os valores que nunca são ativo
   for (const [key, value] of Object.entries(row)) {
     if (!value) continue;
     const original = String(value);
     const valueStr = original.trim();
-    
-    // Padrões genéricos de símbolos
-    const genericPatterns = [
-      { pattern: /^[A-Z]{2,8}\d*$/i, name: 'alfanumérico' },
-      { pattern: /^[A-Z]{3,6}[0-9]{1,4}$/i, name: 'ticker+números' },
-      { pattern: /^[A-Z]+[\/\-][A-Z]+$/i, name: 'par de moedas' }
-    ];
-    
+    if (isNonSymbolValue(valueStr)) continue;
+
     for (const { pattern, name } of genericPatterns) {
       const match = valueStr.match(pattern);
       if (match) {
@@ -965,7 +1024,7 @@ function extractAndValidateSymbol(row: any): string | null {
       }
     }
   }
-  
+
   console.log(`    🎯 Ativo: nenhum símbolo válido encontrado`);
   return null;
 }
@@ -1311,9 +1370,21 @@ function extractDate(row: any): Date | null {
 function extractSymbol(row: any, market: string): string | null {
   console.log(`🔍 Extraindo símbolo de:`, Object.values(row));
   
+  // Coluna cujo nome identifica o ativo: fonte confiável, vem primeiro.
+  for (const [key, value] of Object.entries(row)) {
+    if (!value || !isSymbolColumn(key)) continue;
+    const valueStr = String(value).toUpperCase().trim();
+    if (!valueStr || isNonSymbolValue(valueStr)) continue;
+    if (/^[A-Z]/.test(valueStr) && valueStr.length <= 20) {
+      console.log(`🎯 Símbolo da coluna "${key}": ${valueStr}`);
+      return valueStr;
+    }
+  }
+
   for (const [key, value] of Object.entries(row)) {
     const valueStr = String(value).toUpperCase().trim();
-    
+    if (isNonSymbolValue(valueStr)) continue;
+
     // Procurar padrões de símbolos conhecidos primeiro
     const pattern = TRADING_SYMBOL_PATTERNS[market as keyof typeof TRADING_SYMBOL_PATTERNS];
     if (pattern && pattern.test(valueStr)) {
@@ -1321,13 +1392,25 @@ function extractSymbol(row: any, market: string): string | null {
       return valueStr;
     }
   }
-  
+
+  // Índices e commodities independem do mercado detectado
+  for (const [key, value] of Object.entries(row)) {
+    const valueStr = String(value).toUpperCase().trim();
+    if (isNonSymbolValue(valueStr)) continue;
+    if (TRADING_SYMBOL_PATTERNS.indices.test(valueStr) ||
+        TRADING_SYMBOL_PATTERNS.commodities.test(valueStr)) {
+      console.log(`🎯 Índice/commodity encontrado: ${valueStr}`);
+      return valueStr;
+    }
+  }
+
   // Fallback muito amplo - qualquer texto que pareça um símbolo
   for (const [key, value] of Object.entries(row)) {
     const valueStr = String(value).toUpperCase().trim();
-    
+    if (isNonSymbolValue(valueStr)) continue;
+
     // Símbolos genéricos amplos
-    if (/^[A-Z]{2,8}\d*$/.test(valueStr) || 
+    if (/^[A-Z]{2,8}\d*$/.test(valueStr) ||
         /^[A-Z]{3,6}[0-9]{1,4}$/.test(valueStr) ||
         /^[A-Z]+[\/\-][A-Z]+$/.test(valueStr) ||
         /^[A-Z]+ \d+$/.test(valueStr) ||  // US 100, US 500
@@ -1338,10 +1421,10 @@ function extractSymbol(row: any, market: string): string | null {
       return valueStr;
     }
   }
-  
+
   // Se não encontrar símbolo, criar um genérico baseado no conteúdo
   const firstValue = Object.values(row)[0];
-  if (firstValue && String(firstValue).trim()) {
+  if (firstValue && String(firstValue).trim() && !isNonSymbolValue(String(firstValue))) {
     const genericSymbol = String(firstValue).toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8) || 'TRADE';
     console.log(`🔄 Usando símbolo genérico: ${genericSymbol}`);
     return genericSymbol;

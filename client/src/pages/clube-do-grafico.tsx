@@ -2,10 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, BarChart2, Activity } from "lucide-react";
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
+import { useCurrency } from "@/hooks/useCurrency";
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '-';
@@ -13,13 +10,15 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-function ResultBadge({ resultado }: { resultado: string }) {
-  if (resultado === 'take') return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Take</Badge>;
-  if (resultado === 'loss') return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Loss</Badge>;
+// 'resultado' é o P&L do trade em decimal; 0 significa breakeven.
+function ResultBadge({ pnl }: { pnl: number }) {
+  if (pnl > 0) return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Take</Badge>;
+  if (pnl < 0) return <Badge className="bg-red-500/20 text-red-400 border-red-500/30">Loss</Badge>;
   return <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">BE</Badge>;
 }
 
 export default function ClubeDoGrafico() {
+  const { formatCurrency } = useCurrency();
   const { data, isLoading } = useQuery<any>({
     queryKey: ["/api/clube-do-grafico"],
     refetchInterval: 30000,
@@ -158,12 +157,12 @@ export default function ClubeDoGrafico() {
                         </span>
                       </td>
                       <td className="p-3">
-                        <ResultBadge resultado={trade.resultado || ''} />
+                        <ResultBadge pnl={parseFloat(String(trade.resultado ?? 0)) || 0} />
                       </td>
                       <td className={`p-3 text-right font-mono font-semibold ${
-                        parseFloat(trade.valorFinanceiro || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                        (parseFloat(String(trade.resultado ?? 0)) || 0) >= 0 ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {trade.valorFinanceiro ? formatCurrency(parseFloat(String(trade.valorFinanceiro))) : '-'}
+                        {trade.resultado != null ? formatCurrency(parseFloat(String(trade.resultado)) || 0) : '-'}
                       </td>
                     </tr>
                   ))

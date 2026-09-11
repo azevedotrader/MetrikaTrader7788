@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, Settings, Menu, ChevronDown, Eye, EyeOff, Wallet, LogOut, User } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { LanguageSelector } from "@/components/ui/language-selector";
+import { CurrencySelector } from "@/components/ui/currency-selector";
 import { PlanStatus } from "@/components/ui/plan-status";
 import {
   Select,
@@ -262,6 +263,7 @@ export function TopBar({
         {/* Right Section - Plan + Language + User Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <PlanStatus compact={isMobile} />
+          <CurrencySelector />
           <LanguageSelector />
           
           {/* User Menu with Logout - Always visible */}

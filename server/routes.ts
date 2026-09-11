@@ -14,6 +14,7 @@ import bcrypt from "bcrypt";
 import passport from "passport";
 import XLSX from 'xlsx';
 // import { lerCSVSimples } from "./simple-csv-reader"; // Removido - usando smart-csv-processor
+import { isNonSymbolValue, isSymbolColumn } from "./smart-csv-processor";
 import { db } from "./db";
 import { eq, and, ne, desc } from "drizzle-orm";
 import { validateAndParseCSV } from "./csvValidator";
@@ -77,7 +78,7 @@ async function convertTradesToBRL(trades: InsertTrade[]): Promise<InsertTrade[]>
       console.log(`💱 Convertendo trade ${trade.ativo}: mercado=${trade.mercado}`);
       
       // Função auxiliar para converter string para número, multiplicar e retornar como string
-      const convertValue = (value: string | undefined): string | undefined => {
+      const convertValue = (value: string | null | undefined): string | null | undefined => {
         if (!value) return value;
         const numValue = parseFloat(value);
         if (isNaN(numValue)) return value;
@@ -291,6 +292,19 @@ const upload = multer({
 });
 
 // Configure multer for image uploads with memory storage (for Object Storage)
+// Extensão do arquivo a partir do nome original ou, quando ele não tem extensão
+// (ex.: imagem colada da área de transferência, que chega como "blob"), do MIME type.
+function extensionFor(file: { originalname?: string; mimetype: string }): string {
+  const fromName = (file.originalname || '').split('.').pop()?.toLowerCase();
+  if (fromName && /^[a-z0-9]{2,5}$/.test(fromName) && fromName !== 'blob') {
+    return fromName;
+  }
+  const fromMime = file.mimetype.split('/')[1]?.toLowerCase();
+  if (fromMime === 'jpeg') return 'jpg';
+  if (fromMime && /^[a-z0-9+.-]{2,10}$/.test(fromMime)) return fromMime.replace(/[+.].*$/, '');
+  return 'png';
+}
+
 const uploadImage = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -715,11 +729,7 @@ function processIntelligentCsvRow(row: any, broker: string, userId: string): Ins
     }
 
     // Smart symbol detection
-    const symbol = findBestMatch(row, [
-      /^[A-Z]{3,8}(\d{2,4})?$/, // WDOQ25, BTCUSDT, EURUSD, etc.
-      /^[A-Z]+[\/\-][A-Z]+$/, // BTC/USDT, EUR/USD, etc.
-      /^[A-Z]{2,6}$/ // Simple symbols
-    ]) || 'UNKNOWN';
+    const symbol = findSymbolInRow(row) || 'UNKNOWN';
 
     // Smart type detection (buy/sell)
     const typeValue = findBestMatch(row, [
@@ -816,6 +826,42 @@ function processIntelligentCsvRow(row: any, broker: string, userId: string): Ins
 }
 
 // Helper function to find best matching value using patterns
+/**
+ * Encontra o ativo de uma linha de CSV.
+ *
+ * Buscar só por padrão de valor não funciona: "SHORT" e "LONG" casam com os
+ * padrões de ticker e, quando a coluna de direção vem antes da coluna do
+ * ativo, o lado da operação acabava gravado como nome do ativo. Além disso,
+ * índices como "DE40" não casavam com padrão nenhum. Por isso a coluna
+ * identificada pelo nome tem prioridade e os valores de direção são excluídos.
+ */
+function findSymbolInRow(row: any): string | null {
+  // 1) Coluna cujo nome diz que é o ativo
+  for (const [key, value] of Object.entries(row)) {
+    if (value === null || value === undefined || !isSymbolColumn(key)) continue;
+    const str = String(value).trim().toUpperCase();
+    if (!str || isNonSymbolValue(str)) continue;
+    if (/^[A-Z]/.test(str) && str.length <= 20) return str;
+  }
+
+  // 2) Padrões de ticker em qualquer coluna, ignorando direção e afins
+  const patterns = [
+    /^[A-Z]{2,8}\d{0,4}$/,        // DE40, US30, WDOQ25, BTCUSDT, EURUSD
+    /^[A-Z]+[\/\-][A-Z]+$/,       // BTC/USDT, EUR/USD
+    /^[A-Z]+ ?\d{2,4}$/,          // US 100, GER 40
+  ];
+  for (const pattern of patterns) {
+    for (const value of Object.values(row)) {
+      if (value === null || value === undefined) continue;
+      const str = String(value).trim().toUpperCase();
+      if (!str || isNonSymbolValue(str)) continue;
+      if (pattern.test(str)) return str;
+    }
+  }
+
+  return null;
+}
+
 function findBestMatch(row: any, patterns: RegExp[]): any {
   const values = Object.values(row);
   
@@ -1115,7 +1161,7 @@ function processCsvRow(row: any, broker: string, userId: string, fieldMap?: Reco
     }
     
     // Symbol detection
-    let symbol = rowValues.find(val => /^[A-Z]{3,6}$|^[A-Z]+\d*$/.test(val?.toString() || '')) || 'UNKNOWN';
+    let symbol = findSymbolInRow(row) || 'UNKNOWN';
     
     // Type detection
     let type = rowValues.find(val => /^(buy|sell|compra|venda|C|V)$/i.test(val?.toString() || '')) || 'buy';
@@ -1983,23 +2029,34 @@ export async function registerRoutes(app: Express): Promise<void> {
   });
 
   // Update trade
-  app.put("/api/trades/:id", async (req, res) => {
+  app.put("/api/trades/:id", requireAuth, async (req: any, res) => {
     try {
       const { id } = req.params;
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+      }
+
       // Sanitiza campos enum que podem chegar null do frontend
       const rawBody = { ...req.body };
       if (rawBody.emocao === null || rawBody.emocao === '') delete rawBody.emocao;
       const validatedData = insertTradeSchema.partial().parse(rawBody);
 
-      const trade = await storage.updateTrade(id, validatedData);
+      // userId vem do token, nunca do corpo: garante que o usuário só altera
+      // os próprios trades.
+      const trade = await storage.updateTrade(id, { ...validatedData, userId });
       res.json(trade);
     } catch (error) {
       console.error("Error updating trade:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: "Dados inválidos", 
-          errors: error.errors 
+        return res.status(400).json({
+          message: "Dados inválidos",
+          errors: error.errors
         });
+      }
+      // updateTrade lança quando o trade não existe ou é de outro usuário
+      if (error instanceof Error && error.message.includes("não encontrado")) {
+        return res.status(404).json({ message: "Trade não encontrado" });
       }
       res.status(500).json({ message: "Erro interno do servidor" });
     }
@@ -3743,41 +3800,16 @@ Todos os planos pagos incluem:
       }
       
       const imageId = crypto.randomUUID();
-      const extension = req.file.originalname.split('.').pop() || 'jpg';
-      let storedPath: string;
-      let fileName: string;
-      
-      // Verificar se Object Storage está configurado
-      const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
-      if (privateObjectDir) {
-        // Upload para Object Storage
-        const objectStorageService = new ObjectStorageService();
-        const objectPath = `/diary-images/${userId}/${imageId}.${extension}`;
-        
-        storedPath = await objectStorageService.uploadBuffer(
-          req.file.buffer,
-          objectPath,
-          req.file.mimetype
-        );
-        fileName = `${imageId}.${extension}`;
-      } else {
-        // Fallback: salvar localmente (para dev sem Object Storage configurado)
-        const uploadsDir = 'uploads/images';
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        fileName = `${imageId}.${extension}`;
-        storedPath = `${uploadsDir}/${fileName}`;
-        fs.writeFileSync(storedPath, req.file.buffer);
-        console.warn('⚠️ Object Storage não configurado, usando armazenamento local');
-      }
-      
-      // Criar registro da imagem no banco
+      const extension = extensionFor(req.file);
+      const fileName = `${imageId}.${extension}`;
+
+      // Armazenamento no Postgres (ver comentário na rota de imagens de trade)
       const imageData = {
         diaryEntryId,
         fileName,
-        originalName: req.file.originalname,
-        filePath: storedPath,
+        originalName: req.file.originalname || fileName,
+        filePath: `db://${imageId}`,
+        fileData: req.file.buffer.toString('base64'),
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
         caption: caption || null
@@ -3846,7 +3878,16 @@ Todos os planos pagos incluem:
       if (!image) {
         return res.status(404).json({ error: "Imagem não encontrada" });
       }
-      
+
+      // Imagem armazenada no próprio Postgres (padrão atual)
+      if (image.fileData) {
+        const buffer = Buffer.from(image.fileData, 'base64');
+        res.setHeader('Content-Type', image.mimeType);
+        res.setHeader('Content-Length', buffer.length);
+        res.setHeader('Cache-Control', 'private, max-age=31536000, immutable');
+        return res.end(buffer);
+      }
+
       // Verificar se é um caminho do Object Storage
       if (image.filePath.startsWith('/objects/')) {
         // Buscar do Object Storage
@@ -3959,52 +4000,26 @@ Todos os planos pagos incluem:
       console.log(`✅ Trade encontrado: ${trade.id}`);
       
       const imageId = crypto.randomUUID();
-      const extension = req.file.originalname.split('.').pop() || 'jpg';
-      let storedPath: string;
-      let fileName: string;
-      
-      // Verificar se Object Storage está configurado
-      const privateObjectDir = process.env.PRIVATE_OBJECT_DIR;
-      if (privateObjectDir) {
-        // Upload para Object Storage
-        console.log(`☁️ Fazendo upload para Object Storage...`);
-        const objectStorageService = new ObjectStorageService();
-        const objectPath = `/trade-images/${userId}/${imageId}.${extension}`;
-        
-        storedPath = await objectStorageService.uploadBuffer(
-          req.file.buffer,
-          objectPath,
-          req.file.mimetype
-        );
-        fileName = `${imageId}.${extension}`;
-        console.log(`✅ Upload Object Storage concluído: ${storedPath}`);
-      } else {
-        // Fallback: salvar localmente (para dev sem Object Storage configurado)
-        const uploadsDir = 'uploads/images';
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        fileName = `${imageId}.${extension}`;
-        storedPath = `${uploadsDir}/${fileName}`;
-        fs.writeFileSync(storedPath, req.file.buffer);
-        console.warn('⚠️ Object Storage não configurado, usando armazenamento local');
-        console.log(`💾 Arquivo salvo localmente: ${storedPath}`);
-      }
-      
-      // Criar registro da imagem no banco
+      const extension = extensionFor(req.file);
+      const fileName = `${imageId}.${extension}`;
+
+      // Armazenamento no Postgres: único storage persistente disponível.
+      // O Object Storage antigo dependia do sidecar do Replit, que não existe
+      // em produção, e o disco local é apagado a cada deploy.
       const imageData = {
         tradeId,
         diaryEntryId: null,
         fileName,
-        originalName: req.file.originalname,
-        filePath: storedPath,
+        originalName: req.file.originalname || fileName,
+        filePath: `db://${imageId}`,
+        fileData: req.file.buffer.toString('base64'),
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
         caption: caption || null
       };
       
-      console.log(`💾 Salvando registro no banco:`, JSON.stringify(imageData));
-      
+      console.log(`💾 Salvando imagem ${fileName} (${req.file.size} bytes) no banco`);
+
       const [image] = await db
         .insert(diaryImages)
         .values(imageData)
@@ -4051,11 +4066,20 @@ Todos os planos pagos incluem:
         return res.status(404).json({ error: "Trade não encontrado" });
       }
       
+      // Sem fileData: o binário é servido por /api/images/:id sob demanda.
       const images = await db
-        .select()
+        .select({
+          id: diaryImages.id,
+          fileName: diaryImages.fileName,
+          originalName: diaryImages.originalName,
+          caption: diaryImages.caption,
+          fileSize: diaryImages.fileSize,
+          mimeType: diaryImages.mimeType,
+          createdAt: diaryImages.createdAt,
+        })
         .from(diaryImages)
         .where(eq(diaryImages.tradeId, tradeId));
-      
+
       res.json({
         images: images.map(img => ({
           id: img.id,
@@ -4094,21 +4118,24 @@ Todos os planos pagos incluem:
         return res.status(404).json({ error: "Trade não encontrado" });
       }
       
-      // Buscar a imagem para obter o caminho do arquivo
+      // Buscar a imagem para obter o caminho do arquivo (sem carregar o binário)
       const image = await db
-        .select()
+        .select({ id: diaryImages.id, filePath: diaryImages.filePath })
         .from(diaryImages)
         .where(and(eq(diaryImages.id, imageId), eq(diaryImages.tradeId, tradeId)))
         .limit(1)
         .then(rows => rows[0]);
-      
+
       if (!image) {
         return res.status(404).json({ error: "Imagem não encontrada" });
       }
-      
-      // Deletar do storage (Object Storage ou local)
+
+      // Deletar do storage externo apenas para imagens legadas; as novas
+      // ficam no Postgres e somem junto com o registro.
       try {
-        if (image.filePath.startsWith('/objects/')) {
+        if (image.filePath.startsWith('db://')) {
+          // Nada a fazer: o binário está na própria linha da tabela.
+        } else if (image.filePath.startsWith('/objects/')) {
           // Deletar do Object Storage
           const objectStorageService = new ObjectStorageService();
           await objectStorageService.deleteObject(image.filePath);
@@ -6341,8 +6368,9 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       const { bankrollValue, answers } = req.body;
 
       // Validar inputs
-      if (!bankrollValue || !answers) {
-        return res.status(400).json({ error: 'bankrollValue e answers são obrigatórios' });
+      const bankroll = Number(bankrollValue);
+      if (!Number.isFinite(bankroll) || bankroll <= 0 || !answers) {
+        return res.status(400).json({ error: 'bankrollValue (número positivo) e answers são obrigatórios' });
       }
 
       // Importar função de cálculo
@@ -6351,24 +6379,38 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       // Calcular parâmetros baseado nas respostas
       const params = calculateRiskManagementParameters(answers);
 
+      // As colunas de percentual são decimal(5,4): arredondar aqui evita que o
+      // Postgres rejeite valores com mais casas do que a coluna comporta.
+      const pct = (n: number) => Math.min(9.9999, Math.max(0, n)).toFixed(4);
+
       // Criar gestão no banco
       const bankrollData = {
         userId,
         profile: (answers.q2 === 'A' ? 'conservador' : answers.q2 === 'B' ? 'moderado' : 'agressivo') as 'conservador' | 'moderado' | 'agressivo',
         timeHorizon: 'longo' as 'longo', // padrão
-        bankrollValue: bankrollValue.toFixed(2),
-        riskPerTrade: params.risk_per_operation.toFixed(6),
+        bankrollValue: bankroll.toFixed(2),
+        riskPerTrade: pct(params.risk_per_operation),
         dailyProfitTarget: '0', // não usado no novo sistema
         horizonDays: 90, // padrão
-        targetBalance: bankrollValue.toFixed(2), // não usado no novo sistema
+        targetBalance: bankroll.toFixed(2), // não usado no novo sistema
         projectedGrowth: [],
         consecutiveWins: 0,
         consecutiveLosses: 0,
+        // Respostas do questionário (antes eram descartadas)
+        experienceLevel: answers.q1,
+        tradingObjective: answers.q2,
+        tradingMarkets: Array.isArray(answers.q3) ? answers.q3 : [],
+        tradingTimeframe: answers.q4,
+        customWinRate: answers.q5_winRate != null ? String(answers.q5_winRate) : null,
+        customRiskReward: answers.q5_riskReward != null ? String(answers.q5_riskReward) : null,
+        psychologicalProfile: answers.q6,
+        lossReactionProfile: answers.q7,
+        questionnaireAnswers: answers,
         // Novos campos do questionário (camelCase para corresponder ao schema)
-        riskPerOperation: params.risk_per_operation.toString(),
-        maxDailyRisk: params.max_daily_risk.toString(),
-        maxWeeklyRisk: params.max_weekly_risk.toString(),
-        minRiskRewardRatio: params.min_risk_reward_ratio.toString(),
+        riskPerOperation: pct(params.risk_per_operation),
+        maxDailyRisk: pct(params.max_daily_risk),
+        maxWeeklyRisk: pct(params.max_weekly_risk),
+        minRiskRewardRatio: params.min_risk_reward_ratio.toFixed(2),
         drawdownTriggerLosses: params.drawdown_trigger_losses,
       };
 
@@ -6377,7 +6419,10 @@ Todos os valores devem ser em *R$ (REAIS)*. Nosso sistema não converte de dóla
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating bankroll management:', error);
-      res.status(500).json({ error: 'Erro ao criar gestão de risco' });
+      res.status(500).json({
+        error: 'Erro ao criar gestão de risco',
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
+      });
     }
   });
 

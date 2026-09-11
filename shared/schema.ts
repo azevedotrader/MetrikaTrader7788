@@ -165,7 +165,8 @@ export const diaryImages = pgTable("diary_images", {
   tradeId: varchar("trade_id").references(() => trades.id, { onDelete: "cascade" }),
   fileName: text("file_name").notNull(),
   originalName: text("original_name").notNull(),
-  filePath: text("file_path").notNull(), // Caminho no object storage
+  filePath: text("file_path").notNull(), // "db://<id>" (Postgres), "/objects/..." (Object Storage) ou caminho local legado
+  fileData: text("file_data"), // Conteúdo da imagem em base64 (armazenamento no Postgres)
   fileSize: integer("file_size").notNull(), // Tamanho do arquivo em bytes
   mimeType: text("mime_type").notNull(), // tipo MIME (image/jpeg, image/png, etc)
   caption: text("caption"), // legenda da imagem
@@ -205,23 +206,26 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   dataHora: z.string().min(1, "Data e hora são obrigatórias"),
   ativo: z.string().min(1, "Ativo é obrigatório"),
   mercado: z.string().min(1, "Mercado é obrigatório"), // Agora aceita qualquer string para carteiras customizadas
-  setup: z.string().optional(),
+  // Campos que correspondem a colunas nullable aceitam null: ao editar um
+  // registro a API devolve null nos campos vazios e o cliente reenvia esse
+  // null. Só .optional() rejeitaria com "expected string, received null".
+  setup: z.string().nullable().optional(),
   // Simplified fields - removed required validations for removed fields
   capitalUtilizado: z.string().optional(),
-  quantidade: z.string().optional(), 
+  quantidade: z.string().optional(),
   tipo: z.enum(["compra", "venda"], { message: "Tipo deve ser compra ou venda" }),
-  stop: z.string().optional(), // Stop Loss (valor de perda)
-  alvo: z.string().optional(), // Take Profit
-  resultado: z.string().optional(), // Result
-  risco: z.string().optional(),
-  comentario: z.string().optional(),
-  precoEntrada: z.string().optional(),
-  precoSaida: z.string().optional(),
+  stop: z.string().nullable().optional(), // Stop Loss (valor de perda)
+  alvo: z.string().nullable().optional(), // Take Profit
+  resultado: z.string().nullable().optional(), // Result
+  risco: z.string().nullable().optional(),
+  comentario: z.string().nullable().optional(),
+  precoEntrada: z.string().nullable().optional(),
+  precoSaida: z.string().nullable().optional(),
   corretora: z.string().min(1, "Corretora é obrigatória"), // Agora aceita qualquer string para carteiras customizadas
   emocao: z.enum(["confiante", "ansioso", "impulsivo", "calmo", "eufórico", "frustrado", "neutro", "medo"], {
     message: "Emoção deve ser uma das opções disponíveis"
   }).optional().nullable(),
-  walletId: z.string().optional(), // ID da carteira customizada
+  walletId: z.string().nullable().optional(), // ID da carteira customizada
 });
 
 // Schema para configuração de API

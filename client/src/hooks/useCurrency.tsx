@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  CURRENCY_OPTIONS,
+  useCurrencyPreference,
+  type CurrencyCode,
+} from "@/contexts/CurrencyContext";
 
 interface ExchangeRate {
   rate: number;
@@ -9,72 +14,74 @@ interface ExchangeRate {
 }
 
 interface CurrencyConfig {
-  code: string;
+  code: CurrencyCode;
   symbol: string;
   locale: string;
 }
 
+// Moeda usada quando o usuário não escolheu nenhuma explicitamente.
 const currencyByLanguage: Record<string, CurrencyConfig> = {
-  pt: { code: 'BRL', symbol: 'R$', locale: 'pt-BR' },
-  en: { code: 'USD', symbol: '$', locale: 'en-US' },
-  es: { code: 'USD', symbol: '$', locale: 'es-ES' },
+  pt: { code: "BRL", symbol: "R$", locale: "pt-BR" },
+  en: { code: "USD", symbol: "$", locale: "en-US" },
+  es: { code: "USD", symbol: "$", locale: "es-ES" },
 };
+
+// Cotações relativas ao dólar, usadas só como fallback quando a API de câmbio
+// não responde. A API devolve BRL por USD.
+const EUR_PER_USD = 0.92;
 
 export function useCurrency() {
   const { language } = useLanguage();
-  
+  const { currency: preferred } = useCurrencyPreference();
+
   const { data: exchangeRate, isLoading: isLoadingRate } = useQuery<ExchangeRate>({
-    queryKey: ['/api/exchange-rate'],
+    queryKey: ["/api/exchange-rate"],
     staleTime: 5 * 60 * 1000, // Cache por 5 minutos
     refetchInterval: 10 * 60 * 1000, // Atualiza a cada 10 minutos
   });
 
-  const currencyConfig = currencyByLanguage[language] || currencyByLanguage.pt;
-  const rate = exchangeRate?.rate || 5.80; // Fallback rate
+  const fromLanguage = currencyByLanguage[language] || currencyByLanguage.pt;
+  const option = preferred
+    ? CURRENCY_OPTIONS.find((o) => o.code === preferred)
+    : undefined;
+  const currencyConfig: CurrencyConfig = option
+    ? { code: option.code, symbol: option.symbol, locale: option.locale }
+    : fromLanguage;
 
-  const formatCurrency = (valueInBRL: number): string => {
-    if (currencyConfig.code === 'BRL') {
-      return new Intl.NumberFormat(currencyConfig.locale, {
-        style: 'currency',
-        currency: currencyConfig.code,
-        minimumFractionDigits: 2,
-      }).format(valueInBRL);
+  const brlPerUsd = exchangeRate?.rate || 5.8; // Fallback
+
+  // Valores são armazenados em BRL; converte para a moeda de exibição.
+  const convertFromBRL = (valueInBRL: number): number => {
+    switch (currencyConfig.code) {
+      case "BRL":
+        return valueInBRL;
+      case "USD":
+        return valueInBRL / brlPerUsd;
+      case "EUR":
+        return (valueInBRL / brlPerUsd) * EUR_PER_USD;
+      default:
+        return valueInBRL;
     }
-    
-    // Converter de BRL para USD
-    const valueInUSD = valueInBRL / rate;
-    return new Intl.NumberFormat(currencyConfig.locale, {
-      style: 'currency',
+  };
+
+  const formatCurrency = (valueInBRL: number): string =>
+    new Intl.NumberFormat(currencyConfig.locale, {
+      style: "currency",
       currency: currencyConfig.code,
       minimumFractionDigits: 2,
-    }).format(valueInUSD);
-  };
+    }).format(convertFromBRL(valueInBRL));
 
   const formatCurrencyCompact = (valueInBRL: number): string => {
-    if (currencyConfig.code === 'BRL') {
-      if (Math.abs(valueInBRL) >= 1000) {
-        return `R$ ${(valueInBRL / 1000).toFixed(1)}k`;
-      }
-      return `R$ ${valueInBRL.toFixed(0)}`;
+    const value = convertFromBRL(valueInBRL);
+    const symbol = currencyConfig.symbol;
+    const sep = currencyConfig.code === "BRL" ? " " : "";
+    if (Math.abs(value) >= 1000) {
+      return `${symbol}${sep}${(value / 1000).toFixed(1)}k`;
     }
-    
-    const valueInUSD = valueInBRL / rate;
-    if (Math.abs(valueInUSD) >= 1000) {
-      return `$${(valueInUSD / 1000).toFixed(1)}k`;
-    }
-    return `$${valueInUSD.toFixed(0)}`;
+    return `${symbol}${sep}${value.toFixed(0)}`;
   };
 
-  const getCurrencySymbol = (): string => {
-    return currencyConfig.symbol;
-  };
-
-  const convertFromBRL = (valueInBRL: number): number => {
-    if (currencyConfig.code === 'BRL') {
-      return valueInBRL;
-    }
-    return valueInBRL / rate;
-  };
+  const getCurrencySymbol = (): string => currencyConfig.symbol;
 
   return {
     formatCurrency,
@@ -83,7 +90,7 @@ export function useCurrency() {
     convertFromBRL,
     currencyCode: currencyConfig.code,
     currencySymbol: currencyConfig.symbol,
-    exchangeRate: rate,
+    exchangeRate: brlPerUsd,
     isLoadingRate,
     language,
   };

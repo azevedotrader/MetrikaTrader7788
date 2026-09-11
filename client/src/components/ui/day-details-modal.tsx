@@ -12,6 +12,7 @@ import type { DiaryEntry } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { ImageModal } from "./image-modal";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface DiaryImage {
   id: string;
@@ -104,12 +105,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
   const decidedTrades = dayStats.winningTrades + dayStats.losingTrades;
   const winRate = decidedTrades > 0 ? (dayStats.winningTrades / decidedTrades) * 100 : 0;
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
+  const { formatCurrency } = useCurrency();
 
   const formatTime = (dateStr: string) => {
     try {

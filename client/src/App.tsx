@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { TourProvider } from "@/contexts/TourContext";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
@@ -260,14 +261,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <LanguageProvider>
-          <AuthProvider>
-            <AdminAuthProvider>
-              <TourProvider>
-                <Toaster />
-                <AppContent />
-              </TourProvider>
-            </AdminAuthProvider>
-          </AuthProvider>
+          <CurrencyProvider>
+            <AuthProvider>
+              <AdminAuthProvider>
+                <TourProvider>
+                  <Toaster />
+                  <AppContent />
+                </TourProvider>
+              </AdminAuthProvider>
+            </AuthProvider>
+          </CurrencyProvider>
         </LanguageProvider>
       </TooltipProvider>
     </QueryClientProvider>

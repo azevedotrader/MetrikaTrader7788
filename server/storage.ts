@@ -235,7 +235,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     // Validar e limitar valores numéricos
-    const validateDecimal = (value: string | undefined, max: number, defaultValue: string = "0"): string => {
+    const validateDecimal = (value: string | null | undefined, max: number, defaultValue: string = "0"): string => {
       if (!value) return defaultValue;
       const num = parseFloat(value);
       if (isNaN(num)) return defaultValue;
@@ -275,7 +275,7 @@ export class DatabaseStorage implements IStorage {
     
     const processedTrades = tradesData.map(trade => {
       // Validar e limitar valores numéricos para evitar erros de precisão no banco
-      const validateDecimal = (value: string | undefined, max: number, defaultValue: string = "0"): string => {
+      const validateDecimal = (value: string | null | undefined, max: number, defaultValue: string = "0"): string => {
         if (!value) return defaultValue;
         const num = parseFloat(value);
         if (isNaN(num)) return defaultValue;
@@ -749,9 +749,23 @@ export class DatabaseStorage implements IStorage {
 
   // Diary images operations
   async getDiaryImages(diaryEntryId: string): Promise<DiaryImage[]> {
-    return await db.select().from(diaryImages)
+    // Não carrega fileData: o binário é servido por /api/images/:id sob demanda.
+    const rows = await db.select({
+      id: diaryImages.id,
+      diaryEntryId: diaryImages.diaryEntryId,
+      tradeId: diaryImages.tradeId,
+      fileName: diaryImages.fileName,
+      originalName: diaryImages.originalName,
+      filePath: diaryImages.filePath,
+      fileSize: diaryImages.fileSize,
+      mimeType: diaryImages.mimeType,
+      caption: diaryImages.caption,
+      createdAt: diaryImages.createdAt,
+    }).from(diaryImages)
       .where(eq(diaryImages.diaryEntryId, diaryEntryId))
       .orderBy(diaryImages.createdAt);
+
+    return rows.map((row) => ({ ...row, fileData: null }));
   }
 
   async createDiaryImage(image: InsertDiaryImage): Promise<DiaryImage> {
