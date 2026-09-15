@@ -328,7 +328,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                   <div className="text-center">
                     <div className={cn(
                       "text-2xl font-bold",
-                      dayStats.totalPnl > 0 ? "text-green-600" : "text-red-500"
+                      dayStats.totalPnl > 0 ? "text-green-600" : dayStats.totalPnl < 0 ? "text-red-500" : "text-zinc-400"
                     )}>
                       {formatCurrency(dayStats.totalPnl)}
                     </div>
@@ -446,6 +446,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                   {dayTrades.map((trade, index) => {
                     const resultado = parseFloat(trade.resultado) || 0;
                     const isProfit = resultado > 0;
+                    const isLoss = resultado < 0; // 0 (breakeven) é neutro
                     const tradeImage = tradeImages[trade.id]?.[0];
                     const isUploadingThisTrade = uploadingTradeId === trade.id;
                     
@@ -454,9 +455,11 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                         key={trade.id || index}
                         className={cn(
                           "rounded-lg border",
-                          isProfit 
-                            ? "bg-green-950/20 border-green-800/30" 
-                            : "bg-red-950/20 border-red-800/30"
+                          isProfit
+                            ? "bg-green-950/20 border-green-800/30"
+                            : isLoss
+                            ? "bg-red-950/20 border-red-800/30"
+                            : "bg-zinc-800/30 border-zinc-600/40"
                         )}
                         data-testid={`trade-item-${index}`}
                       >
@@ -534,7 +537,7 @@ export function DayDetailsModal({ isOpen, onClose, selectedDate, onEditDiary }: 
                             <div className="text-right">
                               <div className={cn(
                                 "font-bold text-lg",
-                                isProfit ? "text-green-600" : "text-red-500"
+                                isProfit ? "text-green-600" : isLoss ? "text-red-500" : "text-zinc-400"
                               )}>
                                 {formatCurrency(resultado)}
                               </div>

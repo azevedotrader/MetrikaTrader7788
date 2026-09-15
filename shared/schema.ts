@@ -35,9 +35,9 @@ export const trades = pgTable("trades", {
   capitalUtilizado: decimal("capital_utilizado", { precision: 12, scale: 2 }).notNull(),
   stop: decimal("stop", { precision: 12, scale: 4 }),
   alvo: decimal("alvo", { precision: 12, scale: 4 }),
-  resultado: decimal("resultado", { precision: 12, scale: 2 }),
+  resultado: decimal("resultado", { precision: 16, scale: 4 }), // 4 casas: guarda o múltiplo R exato (0.25, 0.125)
   quantidade: decimal("quantidade", { precision: 12, scale: 4 }).notNull(),
-  risco: decimal("risco", { precision: 5, scale: 2 }), // % do capital
+  risco: decimal("risco", { precision: 12, scale: 4 }),
   tipo: text("tipo").notNull(), // "compra" ou "venda"
   comentario: text("comentario"),
   emocao: text("emocao"), // "confiante", "ansioso", "impulsivo", etc.

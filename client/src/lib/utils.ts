@@ -26,6 +26,24 @@ export function tradeR(trade: { resultado?: string | number | null }): number {
   return Number.isFinite(r) ? r : 0;
 }
 
+/**
+ * Formata um número exatamente como foi registrado, sem arredondar para
+ * inteiro: 3.8 → "3,8", 0.25 → "0,25", 4 → "4". Até 4 casas, que é a
+ * precisão do banco. Somas em ponto flutuante (25.499999…) saem certas.
+ */
+export function formatExato(valor: number, locale = "pt-BR", minCasas = 0): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: minCasas,
+    maximumFractionDigits: 4,
+  }).format(Number.isFinite(valor) ? valor : 0);
+}
+
+/** "+3,8R", "-0,25R", "0R" */
+export function formatR(valor: number, locale = "pt-BR"): string {
+  const v = Number.isFinite(valor) ? Math.round(valor * 10000) / 10000 : 0;
+  return `${v > 0 ? "+" : ""}${formatExato(v, locale)}R`;
+}
+
 export function somaR(trades: Array<{ resultado?: string | number | null }> | null | undefined): number {
   return (trades || []).reduce((soma, t) => soma + tradeR(t), 0);
 }

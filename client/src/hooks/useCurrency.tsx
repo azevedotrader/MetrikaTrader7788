@@ -69,16 +69,19 @@ export function useCurrency() {
       style: "currency",
       currency: currencyConfig.code,
       minimumFractionDigits: 2,
+      maximumFractionDigits: 4, // não arredonda 0,125 para 0,13
     }).format(convertFromBRL(valueInBRL));
 
   const formatCurrencyCompact = (valueInBRL: number): string => {
     const value = convertFromBRL(valueInBRL);
     const symbol = currencyConfig.symbol;
     const sep = currencyConfig.code === "BRL" ? " " : "";
+    const fmt = (n: number) =>
+      new Intl.NumberFormat(currencyConfig.locale, { maximumFractionDigits: 4 }).format(n);
     if (Math.abs(value) >= 1000) {
-      return `${symbol}${sep}${(value / 1000).toFixed(1)}k`;
+      return `${symbol}${sep}${fmt(value / 1000)}k`;
     }
-    return `${symbol}${sep}${value.toFixed(0)}`;
+    return `${symbol}${sep}${fmt(value)}`;
   };
 
   const getCurrencySymbol = (): string => currencyConfig.symbol;

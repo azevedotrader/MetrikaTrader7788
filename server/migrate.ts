@@ -158,8 +158,15 @@ export async function runMigrations() {
 
       CREATE TABLE IF NOT EXISTS diary_images (
         id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-        diary_entry_id VARCHAR NOT NULL REFERENCES diary_entries(id),
-        url TEXT NOT NULL,
+        diary_entry_id VARCHAR,
+        trade_id VARCHAR,
+        file_name TEXT,
+        original_name TEXT,
+        file_path TEXT,
+        file_data TEXT,
+        file_size INTEGER,
+        mime_type TEXT,
+        caption TEXT,
         created_at TIMESTAMP DEFAULT NOW()
       );
 
@@ -209,21 +216,109 @@ export async function runMigrations() {
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
-      CREATE TABLE IF NOT EXISTS bankroll_managements (
-        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
-        user_id VARCHAR NOT NULL REFERENCES users(id),
-        capital DECIMAL(12,2),
-        risco_por_trade DECIMAL(5,2),
-        meta_diaria DECIMAL(5,2),
-        meta_mensal DECIMAL(5,2),
-        max_drawdown DECIMAL(5,2),
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      );
     `);
     console.log('✅ Database migrations completed successfully');
   } catch (error: any) {
     console.error('❌ Migration error:', error.message);
+  }
+
+  // Alinhamento com o schema atual do código (shared/schema.ts).
+  //
+  // As definições acima eram de uma geração antiga do app: diary_images tinha
+  // só "url" (NOT NULL) e bankroll_managements tinha colunas em português.
+  // Como tudo usa CREATE TABLE IF NOT EXISTS, bancos já criados nunca eram
+  // atualizados — o upload de imagem e a gestão de risco quebravam com
+  // "column ... does not exist". Cada passo é idempotente e isolado, para
+  // que uma falha não impeça os demais.
+  const alinhamentos: Array<[string, ReturnType<typeof sql>]> = [
+    ['diary_images: colunas atuais', sql`
+      ALTER TABLE diary_images
+        ADD COLUMN IF NOT EXISTS diary_entry_id VARCHAR,
+        ADD COLUMN IF NOT EXISTS trade_id       VARCHAR,
+        ADD COLUMN IF NOT EXISTS file_name      TEXT,
+        ADD COLUMN IF NOT EXISTS original_name  TEXT,
+        ADD COLUMN IF NOT EXISTS file_path      TEXT,
+        ADD COLUMN IF NOT EXISTS file_data      TEXT,
+        ADD COLUMN IF NOT EXISTS file_size      INTEGER,
+        ADD COLUMN IF NOT EXISTS mime_type      TEXT,
+        ADD COLUMN IF NOT EXISTS caption        TEXT,
+        ADD COLUMN IF NOT EXISTS created_at     TIMESTAMP DEFAULT NOW()
+    `],
+    // Imagem de trade não tem entrada de diário; "url" não é mais usada.
+    ['diary_images: diary_entry_id opcional', sql`
+      ALTER TABLE diary_images ALTER COLUMN diary_entry_id DROP NOT NULL
+    `],
+    ['diary_images: url opcional', sql`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'diary_images' AND column_name = 'url') THEN
+          ALTER TABLE diary_images ALTER COLUMN url DROP NOT NULL;
+        END IF;
+      END $$
+    `],
+    // Resultado e risco guardam o múltiplo R exatamente como digitado
+    // (0.25, 0.125). Com 2 casas o banco arredondava.
+    ['trades: resultado com 4 casas', sql`
+      ALTER TABLE trades ALTER COLUMN resultado TYPE NUMERIC(16,4)
+    `],
+    ['trades: risco com 4 casas', sql`
+      ALTER TABLE trades ALTER COLUMN risco TYPE NUMERIC(12,4)
+    `],
+    ['bankroll_managements: preservar versão antiga', sql`
+      DO $$ BEGIN
+        IF EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'bankroll_managements' AND column_name = 'capital')
+           AND NOT EXISTS (SELECT 1 FROM information_schema.columns
+                   WHERE table_name = 'bankroll_managements' AND column_name = 'bankroll_value') THEN
+          DROP TABLE IF EXISTS bankroll_managements_legacy;
+          ALTER TABLE bankroll_managements RENAME TO bankroll_managements_legacy;
+        END IF;
+      END $$
+    `],
+    ['bankroll_managements: tabela atual', sql`
+      CREATE TABLE IF NOT EXISTS bankroll_managements (
+        id                      VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id                 VARCHAR NOT NULL UNIQUE REFERENCES users(id),
+        bankroll_value          NUMERIC(12,2) NOT NULL,
+        experience_level        TEXT,
+        trading_objective       TEXT,
+        trading_markets         TEXT[],
+        trading_timeframe       TEXT,
+        custom_win_rate         NUMERIC(5,2),
+        custom_risk_reward      NUMERIC(5,2),
+        psychological_profile   TEXT,
+        loss_reaction_profile   TEXT,
+        questionnaire_answers   JSONB,
+        profile                 TEXT NOT NULL,
+        time_horizon            TEXT NOT NULL,
+        horizon_days            INTEGER NOT NULL,
+        risk_per_trade          NUMERIC(5,4) NOT NULL,
+        daily_profit_target     NUMERIC(5,4) NOT NULL,
+        risk_per_operation      NUMERIC(5,4) NOT NULL,
+        max_daily_risk          NUMERIC(5,4) NOT NULL,
+        max_weekly_risk         NUMERIC(5,4) NOT NULL,
+        min_risk_reward_ratio   NUMERIC(5,2) NOT NULL,
+        drawdown_trigger_losses INTEGER NOT NULL,
+        projected_growth        JSONB NOT NULL,
+        target_balance          NUMERIC(12,2) NOT NULL,
+        auto_adjust             BOOLEAN DEFAULT true,
+        consecutive_wins        INTEGER DEFAULT 0,
+        consecutive_losses      INTEGER DEFAULT 0,
+        last_adjustment_at      TIMESTAMP,
+        last_reset_at           TIMESTAMP DEFAULT NOW(),
+        created_at              TIMESTAMP DEFAULT NOW(),
+        updated_at              TIMESTAMP DEFAULT NOW()
+      )
+    `],
+  ];
+
+  for (const [nome, comando] of alinhamentos) {
+    try {
+      await db.execute(comando);
+      console.log(`✅ Alinhamento: ${nome}`);
+    } catch (error: any) {
+      console.error(`❌ Alinhamento "${nome}" falhou:`, error.message);
+    }
   }
 
   // Seed admin user if not exists

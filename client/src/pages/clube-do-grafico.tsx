@@ -160,7 +160,7 @@ export default function ClubeDoGrafico() {
                         <ResultBadge pnl={parseFloat(String(trade.resultado ?? 0)) || 0} />
                       </td>
                       <td className={`p-3 text-right font-mono font-semibold ${
-                        (parseFloat(String(trade.resultado ?? 0)) || 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                        (parseFloat(String(trade.resultado ?? 0)) || 0) > 0 ? 'text-green-400' : (parseFloat(String(trade.resultado ?? 0)) || 0) < 0 ? 'text-red-400' : 'text-zinc-400'
                       }`}>
                         {trade.resultado != null ? formatCurrency(parseFloat(String(trade.resultado)) || 0) : '-'}
                       </td>

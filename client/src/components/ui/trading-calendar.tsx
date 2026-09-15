@@ -10,7 +10,7 @@ import {
   Plus,
   BookOpen,
 } from "lucide-react";
-import { cn, somaR } from "@/lib/utils";
+import { cn, somaR, formatR, formatExato } from "@/lib/utils";
 import { DiaryModal } from "@/components/ui/diary-modal";
 import { DayDetailsModal } from "@/components/ui/day-details-modal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -293,7 +293,7 @@ export function TradingCalendar({
               "absolute inset-0 pointer-events-none",
               isLoss     && "bg-gradient-to-b from-[#FF1F3D]/20 to-[#FF1F3D]/8",
               isProfit   && "bg-gradient-to-b from-[#6EE000]/20 to-[#6EE000]/8",
-              isBreakEven && "bg-gradient-to-b from-amber-500/25 to-amber-600/10"
+              isBreakEven && "bg-gradient-to-b from-zinc-400/15 to-zinc-500/5"
             )}
           />
         )}
@@ -302,7 +302,7 @@ export function TradingCalendar({
         <div
           className={cn(
             "absolute top-1 left-1 sm:top-1.5 sm:left-1.5 text-[10px] sm:text-[11px] md:text-xs font-semibold",
-            isBreakEven ? "text-amber-900" : "text-[var(--text)]/80",
+            isBreakEven ? "text-[var(--dim)]" : "text-[var(--text)]/80",
           )}
         >
           {dayNumber}
@@ -314,7 +314,7 @@ export function TradingCalendar({
             <BookOpen
               className={cn(
                 "w-3 h-3 sm:w-4 sm:h-4",
-                isBreakEven ? "text-amber-900/70" : "text-[var(--text)]/70"
+                isBreakEven ? "text-[var(--dim)]" : "text-[var(--text)]/70"
               )}
               data-testid={`diary-indicator-${dayNumber}`}
             />
@@ -331,7 +331,7 @@ export function TradingCalendar({
                 hideData
                   ? "text-[var(--dim)]"
                   : isBreakEven
-                  ? "text-amber-900"
+                  ? "text-[var(--dim)]"
                   : isProfit
                   ? "text-[var(--gold)]"
                   : "text-[var(--r)]"
@@ -347,20 +347,20 @@ export function TradingCalendar({
                   const rTotal = somaR(tradeDay.rawTrades);
                   return (
                     <span>
-                      {rTotal >= 0 ? "+" : ""}{rTotal.toFixed(1)}R
+                      {formatR(rTotal, locale)}
                     </span>
                   );
                 })()
               ) : (
                 <>
                   <span className="sm:hidden">
-                    {tradeDay.pnl >= 0 ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(0)}k` : tradeDay.pnl.toFixed(0)}
+                    {tradeDay.pnl > 0 ? "+" : ""}{Math.abs(tradeDay.pnl) >= 1000 ? `${formatExato(tradeDay.pnl / 1000, locale)}k` : formatExato(tradeDay.pnl, locale)}
                   </span>
                   <span className="hidden sm:inline md:hidden">
-                    {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${(tradeDay.pnl / 1000).toFixed(1)}k` : tradeDay.pnl.toFixed(0)}
+                    {tradeDay.pnl > 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl) >= 1000 ? `${formatExato(tradeDay.pnl / 1000, locale)}k` : formatExato(tradeDay.pnl, locale)}
                   </span>
                   <span className="hidden md:inline">
-                    {tradeDay.pnl >= 0 ? "+" : ""}R$ {Math.abs(tradeDay.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}
+                    {tradeDay.pnl > 0 ? "+" : tradeDay.pnl < 0 ? "-" : ""}R$ {formatExato(Math.abs(tradeDay.pnl), locale)}
                   </span>
                 </>
               )}
@@ -372,7 +372,7 @@ export function TradingCalendar({
         {hasData && tradeDay && (
           <div className={cn(
             "absolute bottom-0.5 sm:bottom-1.5 left-0.5 right-0.5 sm:left-2 sm:right-2 flex items-center justify-center gap-1 sm:gap-2 text-[8px] sm:text-[10px] md:text-xs",
-            isBreakEven ? "text-amber-900/80" : "text-[var(--text)]/75"
+            isBreakEven ? "text-[var(--dim)]" : "text-[var(--text)]/75"
           )}>
             <span>{tradeDay.trades} <span className="hidden sm:inline">{tradeDay.trades === 1 ? t("calendar.trade") : t("calendar.trades")}</span><span className="sm:hidden">t</span></span>
             {tradeDay.trades > 1 && tradeDay.winRate !== undefined && (
@@ -431,8 +431,8 @@ export function TradingCalendar({
             {hideData
               ? "•••••"
               : showMode === "r"
-              ? `${week.rTotal >= 0 ? "+" : ""}${week.rTotal.toFixed(1)}R`
-              : `${isProfit ? "+" : ""}R$ ${Math.abs(week.pnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
+              ? formatR(week.rTotal, locale)
+              : `${isProfit ? "+" : isLoss ? "-" : ""}R$ ${formatExato(Math.abs(week.pnl), locale)}`}
           </div>
           <div className="text-[10px] text-[var(--dim)]">
             {week.days} {week.days !== 1 ? t("calendar.days") : t("calendar.day")} • {week.trades} {week.trades === 1 ? t("calendar.trade") : t("calendar.trades")}
@@ -626,9 +626,9 @@ export function TradingCalendar({
                           (sum, day) => sum + somaR(day.rawTrades),
                           0
                         );
-                        return `${rTotal >= 0 ? "+" : ""}${rTotal.toFixed(1)}R`;
+                        return formatR(rTotal, locale);
                       })()
-                    : `${monthlyStats.totalPnl > 0 ? "+" : ""}R$ ${Math.abs(monthlyStats.totalPnl).toLocaleString(locale, { maximumFractionDigits: 0 })}`}
+                    : `${monthlyStats.totalPnl > 0 ? "+" : monthlyStats.totalPnl < 0 ? "-" : ""}R$ ${formatExato(Math.abs(monthlyStats.totalPnl), locale)}`}
                 </div>
                 <div className="text-xs sm:text-sm text-[var(--dim)] font-medium">
                   {t("calendar.pnl_total")}

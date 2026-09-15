@@ -239,7 +239,7 @@ export class DatabaseStorage implements IStorage {
       if (!value) return defaultValue;
       const num = parseFloat(value);
       if (isNaN(num)) return defaultValue;
-      return Math.max(Math.min(num, max), -max).toFixed(num > 1000 ? 2 : 4);
+      return Math.max(Math.min(num, max), -max).toFixed(4);
     };
     
     const tradeData: any = {
@@ -254,7 +254,7 @@ export class DatabaseStorage implements IStorage {
       precoSaida: validateDecimal(insertTrade.precoSaida, 99999999.9999, "0"),
       stop: validateDecimal(insertTrade.stop, 99999999.9999, "0"),
       alvo: validateDecimal(insertTrade.alvo, 99999999.9999, "0"),
-      risco: validateDecimal(insertTrade.risco, 99.99, "0")
+      risco: validateDecimal(insertTrade.risco, 99999999.9999, "0")
     };
     
     console.log(`💾 [${insertTrade.userId}] Criando trade individual: ${insertTrade.ativo}`);
@@ -279,7 +279,7 @@ export class DatabaseStorage implements IStorage {
         if (!value) return defaultValue;
         const num = parseFloat(value);
         if (isNaN(num)) return defaultValue;
-        return Math.max(Math.min(num, max), -max).toFixed(num > 1000 ? 2 : 4);
+        return Math.max(Math.min(num, max), -max).toFixed(4);
       };
       
       return {
@@ -295,7 +295,7 @@ export class DatabaseStorage implements IStorage {
         precoSaida: validateDecimal(trade.precoSaida, 99999999.9999, "0"),
         stop: validateDecimal(trade.stop, 99999999.9999, "0"),
         alvo: validateDecimal(trade.alvo, 99999999.9999, "0"),
-        risco: validateDecimal(trade.risco, 99.99, "0")
+        risco: validateDecimal(trade.risco, 99999999.9999, "0")
       };
     });
     

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { tradeR } from "@/lib/utils";
+import { tradeR, formatR, formatExato } from "@/lib/utils";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const pnl = (t: any) => parseFloat(t.resultado || "0");
@@ -12,15 +12,11 @@ const pnl = (t: any) => parseFloat(t.resultado || "0");
 // 1R e descartava os que não tinham `risco` preenchido.
 const rVal = (t: any): number | null => tradeR(t);
 
+// Sem arredondamento: mostra o valor exatamente como registrado (até 4 casas).
 const fmt = (money: number, r: number | null, mode: "money" | "r"): string => {
-  if (mode === "r") {
-    return r !== null
-      ? `${r >= 0 ? "+" : ""}${r.toFixed(1)}R`
-      : `${money >= 0 ? "+" : ""}R$${Math.abs(money).toFixed(0)}`;
-  }
-  return `${money >= 0 ? "+R$" : "-R$"}${Math.abs(money).toLocaleString("pt-BR", {
-    maximumFractionDigits: 0,
-  })}`;
+  if (mode === "r" && r !== null) return formatR(r);
+  const sinal = money > 0 ? "+" : money < 0 ? "-" : "";
+  return `${sinal}R$${formatExato(Math.abs(money))}`;
 };
 
 // ─── types ───────────────────────────────────────────────────────────────────
