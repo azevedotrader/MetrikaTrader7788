@@ -158,7 +158,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    // Comparação sem diferenciar maiúsculas de minúsculas: e-mail não é
+    // sensível a caixa, e quem se cadastrou como "Fulano@gmail.com" não
+    // conseguia entrar digitando "fulano@gmail.com".
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(sql`lower(${users.email}) = lower(${email})`);
     return user || undefined;
   }
 
@@ -170,7 +176,9 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: Omit<InsertUser, 'confirmPassword'>): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(insertUser)
+      // Guarda sempre em minúsculas, para não criar duas contas com o mesmo
+      // e-mail escrito de formas diferentes.
+      .values({ ...insertUser, email: insertUser.email.trim().toLowerCase() })
       .returning();
     return user;
   }

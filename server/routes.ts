@@ -1555,7 +1555,32 @@ export async function registerRoutes(app: Express): Promise<void> {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {
-        return res.status(400).json({ message: "Email já está em uso" });
+        // Conta liberada por nós (plano concedido por SQL) nunca teve senha:
+        // o cadastro era recusado com "email já está em uso" e a pessoa
+        // ficava sem forma de entrar. Aqui ela define a senha e assume a
+        // conta, preservando o plano.
+        //
+        // Só vale para conta sem senha E sem Google: conta criada pelo login
+        // do Google também não tem senha, e deixar qualquer um definir uma
+        // seria invasão de conta.
+        const podeAssumir = !existingUser.password && !existingUser.googleId;
+        if (!podeAssumir) {
+          return res.status(400).json({ message: "Email já está em uso" });
+        }
+
+        if (!validatedData.password) {
+          return res.status(400).json({ message: "Senha é obrigatória" });
+        }
+
+        await storage.updateUserPassword(existingUser.id, validatedData.password);
+        if (validatedData.name && validatedData.name !== existingUser.name) {
+          await storage.updateUser(existingUser.id, { name: validatedData.name });
+        }
+
+        const atualizado = await storage.getUser(existingUser.id);
+        const { password: _senha, ...resposta } = (atualizado ?? existingUser);
+        console.log(`🔑 Conta sem senha assumida no cadastro: ${existingUser.email}`);
+        return res.status(201).json(resposta);
       }
       
       // Hash password before storing (only if password provided)
