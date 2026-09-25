@@ -219,6 +219,13 @@ function AppContent() {
                     />
                     <Carteiras />
                   </Route>
+                  <Route path="/diario">
+                    <TopBar
+                      title={t(pageTitleKeys["/diario"])}
+                      onMenuClick={() => setIsSidebarOpen(true)}
+                    />
+                    <Diario />
+                  </Route>
                   <Route path="/clube-do-grafico">
                     <TopBar
                       title={pageTitleKeys["/clube-do-grafico"]}

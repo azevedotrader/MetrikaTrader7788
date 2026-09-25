@@ -119,6 +119,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { taxaAcertoDe, taxaAcerto as taxaAcertoUtil } from "@/lib/utils";
+import { TradeInsights } from "@/components/ui/trade-insights";
 
 interface BrokerStats {
   totalTrades: number;
@@ -3207,6 +3208,11 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                 </div>
               </div>
             </SquareCard>
+
+            {/* Recomendações calculadas a partir dos trades do usuário */}
+            <div className="col-span-full">
+              <TradeInsights trades={periodFilteredTrades} />
+            </div>
 
             {/* Mobile: Cards PnL e Trades em layout responsivo */}
             <div className="md:hidden grid grid-cols-1 gap-3">
