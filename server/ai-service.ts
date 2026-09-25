@@ -1016,7 +1016,8 @@ export class AITradingService {
     Object.keys(groups).forEach(key => {
       const group = groups[key];
       group.avgResult = group.totalResult / group.count;
-      group.winRate = group.wins / group.count;
+      // Breakeven (0x0) é nulo: não conta como acerto nem como erro
+      group.winRate = (group.wins + group.losses) > 0 ? group.wins / (group.wins + group.losses) : 0;
       group.profitability = group.totalResult;
     });
     

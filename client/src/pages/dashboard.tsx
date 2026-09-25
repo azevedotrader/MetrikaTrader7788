@@ -118,6 +118,7 @@ import {
   startOfYear,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { taxaAcertoDe, taxaAcerto as taxaAcertoUtil } from "@/lib/utils";
 
 interface BrokerStats {
   totalTrades: number;
@@ -184,8 +185,9 @@ function calculateAdvancedMetrics(trades: Trade[]): AdvancedMetricsData {
   const tradesLucrativos = trades.filter(trade => parseFloat(trade.resultado || "0") > 0);
   const tradesNegativo = trades.filter(trade => parseFloat(trade.resultado || "0") < 0);
   
-  // Assertividade (Taxa de Acerto) - valor entre 0 e 1
-  const assertividade = trades.length > 0 ? (tradesLucrativos.length / trades.length) : 0;
+  // Assertividade (Taxa de Acerto) - valor entre 0 e 1.
+  // Breakeven (0x0) é nulo: fora do numerador e do denominador.
+  const assertividade = taxaAcertoDe(tradesLucrativos.length, tradesNegativo.length) / 100;
   
   // Fator de Lucro (Profit Factor)
   const totalLucros = tradesLucrativos.reduce((acc, trade) => acc + parseFloat(trade.resultado || "0"), 0);
@@ -2032,7 +2034,8 @@ function calculateMetrics(trades: Trade[], t: (key: string) => string): TradeMet
   const tradesLucrativos = trades.filter(
     (trade) => parseFloat(trade.resultado || "0") > 0,
   );
-  const taxaAcerto = (tradesLucrativos.length / trades.length) * 100;
+  // Breakeven (0x0) não conta nem como acerto nem como erro
+  const taxaAcerto = taxaAcertoUtil(trades);
 
   // R/R médio baseado nos valores de Take e Stop dos trades
   const tradesComTakeStop = trades.filter(
@@ -2849,7 +2852,8 @@ export default function Dashboard({ onMenuClick }: DashboardProps) {
                       const result = parseFloat(trade.resultado || '0');
                       dailyMap.set(date, (dailyMap.get(date) || 0) + result);
                     });
-                    const totalDays = dailyMap.size;
+                    // Dia fechado em 0 (só breakeven) é neutro: fora da conta
+                    const totalDays = Array.from(dailyMap.values()).filter(pnl => pnl !== 0).length;
                     const winningDays = Array.from(dailyMap.values()).filter(pnl => pnl > 0).length;
                     const dayWinRate = totalDays > 0 ? (winningDays / totalDays) * 100 : 0;
                     

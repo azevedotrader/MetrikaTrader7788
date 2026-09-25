@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { tradeR, formatR, formatExato } from "@/lib/utils";
+import { tradeR, formatR, formatExato, taxaAcertoDe } from "@/lib/utils";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 const pnl = (t: any) => parseFloat(t.resultado || "0");
@@ -105,17 +105,17 @@ export default function Analises() {
   });
 
   // ── Section A: hours ───────────────────────────────────────────────────────
-  const hourMap = new Map<number, { money: number; rPos: number; rNeg: number; count: number; rSum: number; rCount: number }>();
+  const hourMap = new Map<number, { money: number; rPos: number; rNeg: number; count: number; rSum: number; rCount: number; wins: number; losses: number }>();
   trades.forEach((t) => {
     const h = new Date(t.dataHora).getHours();
-    if (!hourMap.has(h)) hourMap.set(h, { money: 0, rPos: 0, rNeg: 0, count: 0, rSum: 0, rCount: 0 });
+    if (!hourMap.has(h)) hourMap.set(h, { money: 0, rPos: 0, rNeg: 0, count: 0, rSum: 0, rCount: 0, wins: 0, losses: 0 });
     const g = hourMap.get(h)!;
     const money = pnl(t);
     const rv = rVal(t);
     g.money += money;
     g.count++;
-    if (money > 0) g.rPos += money;
-    if (money < 0) g.rNeg += Math.abs(money);
+    if (money > 0) { g.rPos += money; g.wins++; }
+    if (money < 0) { g.rNeg += Math.abs(money); g.losses++; }
     if (rv !== null) { g.rSum += rv; g.rCount++; }
   });
 
@@ -127,7 +127,7 @@ export default function Analises() {
       rPos: g.rPos,
       rNeg: g.rNeg,
       count: g.count,
-      wr: g.rPos + g.rNeg > 0 ? (g.rPos / (g.rPos + g.rNeg)) * 100 : 0,
+      wr: taxaAcertoDe(g.wins, g.losses),
     }))
     .sort((a, b) => b.totalMoney - a.totalMoney);
 
@@ -135,18 +135,18 @@ export default function Analises() {
 
   // ── Section B: day of week ─────────────────────────────────────────────────
   const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-  const dowMap = new Map<number, { money: number; rPos: number; rNeg: number; count: number; rSum: number; rCount: number }>();
+  const dowMap = new Map<number, { money: number; rPos: number; rNeg: number; count: number; rSum: number; rCount: number; wins: number; losses: number }>();
   trades.forEach((t) => {
     const d = new Date(t.dataHora);
     const dow = d.getDay();
-    if (!dowMap.has(dow)) dowMap.set(dow, { money: 0, rPos: 0, rNeg: 0, count: 0, rSum: 0, rCount: 0 });
+    if (!dowMap.has(dow)) dowMap.set(dow, { money: 0, rPos: 0, rNeg: 0, count: 0, rSum: 0, rCount: 0, wins: 0, losses: 0 });
     const g = dowMap.get(dow)!;
     const money = pnl(t);
     const rv = rVal(t);
     g.money += money;
     g.count++;
-    if (money > 0) g.rPos += money;
-    if (money < 0) g.rNeg += Math.abs(money);
+    if (money > 0) { g.rPos += money; g.wins++; }
+    if (money < 0) { g.rNeg += Math.abs(money); g.losses++; }
     if (rv !== null) { g.rSum += rv; g.rCount++; }
   });
 
@@ -158,7 +158,7 @@ export default function Analises() {
       rPos: g.rPos,
       rNeg: g.rNeg,
       count: g.count,
-      wr: g.rPos + g.rNeg > 0 ? (g.rPos / (g.rPos + g.rNeg)) * 100 : 0,
+      wr: taxaAcertoDe(g.wins, g.losses),
     }))
     .sort((a, b) => b.totalMoney - a.totalMoney);
 
@@ -189,7 +189,7 @@ export default function Analises() {
       wins: g.wins,
       losses: g.losses,
       count: g.count,
-      wr: g.rPos + g.rNeg > 0 ? (g.rPos / (g.rPos + g.rNeg)) * 100 : 0,
+      wr: taxaAcertoDe(g.wins, g.losses),
     }))
     .sort((a, b) => b.totalMoney - a.totalMoney)
     .slice(0, 12);

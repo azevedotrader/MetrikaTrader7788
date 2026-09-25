@@ -27,6 +27,33 @@ export function tradeR(trade: { resultado?: string | number | null }): number {
 }
 
 /**
+ * Taxa de acerto (assertividade) em porcentagem.
+ *
+ * Breakeven (0x0) é nulo: não conta como acerto nem como erro, e também não
+ * entra no total. Com 3 takes, 3 losses e 3 breakevens a taxa é 50%, não 33%.
+ * Dividir pelo total de trades fazia o 0x0 derrubar a taxa sem que tivesse
+ * havido prejuízo nenhum.
+ */
+export function taxaAcerto(trades: Array<{ resultado?: string | number | null }> | null | undefined): number {
+  let acertos = 0;
+  let erros = 0;
+  for (const t of trades || []) {
+    const r = parseFloat(String(t?.resultado ?? 0));
+    if (!Number.isFinite(r)) continue;
+    if (r > 0) acertos++;
+    else if (r < 0) erros++;
+  }
+  const decididos = acertos + erros;
+  return decididos > 0 ? (acertos / decididos) * 100 : 0;
+}
+
+/** Mesma regra, para quem já tem as contagens separadas. */
+export function taxaAcertoDe(acertos: number, erros: number): number {
+  const decididos = acertos + erros;
+  return decididos > 0 ? (acertos / decididos) * 100 : 0;
+}
+
+/**
  * Formata um número exatamente como foi registrado, sem arredondar para
  * inteiro: 3.8 → "3,8", 0.25 → "0,25", 4 → "4". Até 4 casas, que é a
  * precisão do banco. Somas em ponto flutuante (25.499999…) saem certas.

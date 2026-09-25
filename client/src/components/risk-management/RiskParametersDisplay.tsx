@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, TrendingUp, AlertTriangle, Target, Trash2, CheckCircle2, MessageSquare, Loader2, Filter, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, taxaAcertoDe } from "@/lib/utils";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -147,7 +147,8 @@ export function RiskParametersDisplay({
     const totalProfit = wins.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0);
     const totalLoss = Math.abs(losses.reduce((sum, t) => sum + parseFloat(t.resultado || "0"), 0));
     
-    const winRate = filteredTrades.length > 0 ? (wins.length / filteredTrades.length) * 100 : 0;
+    // Breakeven (0x0) é nulo: não entra como acerto, erro, nem no total
+    const winRate = taxaAcertoDe(wins.length, losses.length);
     const avgWin = wins.length > 0 ? totalProfit / wins.length : 0;
     const avgLoss = losses.length > 0 ? totalLoss / losses.length : 0;
     const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : 0;
